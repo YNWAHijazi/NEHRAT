@@ -11,17 +11,23 @@
   },
   "gate": {
     "organizationPending": "تسجيل مؤسستكم قيد الاستكمال لدى الوزارة. يمكنكم تحضير كل شيء، ويُفتح التقديم بمجرد تسجيلها.",
-    "postEventNotYetOpen": "يُتاح بعد انتهاء الفعالية، {date}",
+    "postEventNotYetOpen": "يُتاح بعد انتهاء الفعالية، ⁦{date}⁩",
     "materialChangeBeforeFiling": "يُتاح بعد تقديم الطلب",
-    "venueReassessmentNotYetOpen": "يُفتح في {date}، أي قبل 60 يوماً من انتهاء الصلاحية",
+    "venueReassessmentNotYetOpen": "يُفتح في ⁦{date}⁩، أي قبل 60 يوماً من انتهاء الصلاحية",
     "declarationItemsOutstanding": "{count} من {total} بنود ما زالت بحاجة إلى تأكيد",
     "nominationNotConfirmed": "الترشيح ليس تأكيداً",
-    "awaitingMinistryValue": "لا شيء نافذ بموجب هذه القاعدة إلى أن تحدد الوزارة القيمة وتنشرها. ويُبلَّغ المشغّلون عند حصول ذلك."
+    "awaitingMinistryValue": "لا شيء نافذ بموجب هذه القاعدة إلى أن تحدد الوزارة القيمة وتنشرها. ويُبلَّغ المشغّلون عند حصول ذلك.",
+    "postEventNeedsEventDate": "يُتاح بعد انتهاء الفعالية. لم يُسجَّل تاريخ الفعالية.",
+    "assessmentIncomplete": "يُستنتج المستوى بعد الإجابة عن جميع المجالات وإدخال جميع الأرقام المطلوبة.",
+    "courseDistanceRequired": "مسافة المسار مطلوبة لفعالية الجري المنظمة.",
+    "attendanceRequired": "الحد الأقصى المتوقع للحضور المتزامن مطلوب، رقماً."
   },
   "level": {
     "governedByScore": "يحكمه مجموع نقاط التقييم",
     "governedByMinimumCondition": "يحكمه حد أدنى إلزامي",
     "governedByBoth": "يعطي المجموع والحد الأدنى المستوى نفسه"
   },
-  "fee": { "none": "الرسم: لا يوجد." }
+  "fee": {
+    "none": "الرسم: لا يوجد."
+  }
 }

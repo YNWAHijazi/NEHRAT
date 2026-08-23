@@ -20,6 +20,8 @@ export interface VisualMapping {
   referenceTab: string;
   /** The built route, or null while the screen does not exist yet. */
   builtRoute: string | null;
+  /** Demo login whose session the built screen needs, if any. */
+  signInAs?: string;
   /**
    * Pixel-difference ratio (0..1) above which the comparison fails.
    * The default in the spec applies when absent.
@@ -53,7 +55,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'organizer-dashboard',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Dashboard',
-    builtRoute: null,
+    builtRoute: '/dashboard',
+    signInAs: 'test_organizer',
   },
   {
     id: 'organizer-assessment',
@@ -65,7 +68,16 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'organizer-event-record',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Event record',
-    builtRoute: null,
+    builtRoute: '/events/EV-0418',
+    signInAs: 'test_organizer',
+    // Slice 1 deliberately diverges from the reference record: it ADDS the derivation
+    // panel (both results and which governed -- a stated requirement), OMITS the
+    // requirements counters band (its data is Slice 2 and will not be faked), and shows
+    // rail stage 1 as pending because the demonstration organization is pending -- the
+    // prototype shows it recorded while also showing the pending banner, which cannot
+    // both hold. Measured 17-18% against the pinned reference. RATCHET THIS DOWN when
+    // Slice 2 fills in the counters.
+    threshold: 0.19,
   },
   {
     id: 'organizer-notifications',

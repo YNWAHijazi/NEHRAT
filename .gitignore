@@ -10,3 +10,5 @@ __pycache__/
 test-results/
 playwright-report/
 platform/e2e/output/
+var/
+next-env.d.ts

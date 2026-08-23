@@ -13,3 +13,4 @@ export * from './derive';
 export * from './deadlines';
 export * from './scope';
 export * from './public-lookup';
+export * from './gates';

@@ -38,7 +38,8 @@ function regulatoryFigures(): number[] {
  */
 function stripStyleContexts(source: string): string {
   return source
-    .replace(/style=\{\{[^}]*\}\}/gs, 'style={{}}')
+    .replace(/style=\{\{[\s\S]*?\}\}/g, 'style={{}}')
+    .replace(/:\s*React\.CSSProperties\s*=\s*\{[\s\S]*?\};/g, ': React.CSSProperties = {};')
     .replace(/\bstyle:\s*\{[^}]*\}/gs, 'style: {}')
     .replace(/className\s*=\s*(["'`])[^"'`]*\1/g, 'className=""')
     .replace(/`[^`]*`/gs, '``');
@@ -52,9 +53,10 @@ function appearsInLogic(source: string, figure: number): boolean {
   const n = String(figure).replace('.', '\\.');
   const grouped = figure.toLocaleString('en-US').replace(/,/g, '[,_]?');
   const num = `(?:${n}|${grouped})`;
-  const comparison = new RegExp(`(?:[<>]=?|===?|!==?)\\s*${num}(?![\\d.])`);
-  const reverseComparison = new RegExp(`(?<![\\d.])${num}\\s*(?:[<>]=?|===?|!==?)`);
-  const assignment = new RegExp(`\\b[A-Za-z_$][\\w$]*\\s*[:=]\\s*${num}(?![\\d.])`);
+  const comparison = new RegExp(`(?:[<>]=?|===?|!==?)\\s*${num}(?![\\d._])`);
+  // `<` must not be the start of a closing JSX tag: `18</span>` is text, not `18 <`.
+  const reverseComparison = new RegExp(`(?<![\\d.])${num}\\s*(?:===?|!==?|>=?|<=|<(?!\\/))`);
+  const assignment = new RegExp(`\\b[A-Za-z_$][\\w$]*\\s*[:=]\\s*${num}(?![\\d._])`);
   return (
     comparison.test(source) || reverseComparison.test(source) || assignment.test(source)
   );
@@ -120,6 +122,11 @@ describe('the narrowing itself', () => {
 
   it('does not fire on a mere occurrence in text', () => {
     expect(appearsInLogic('// the 14-day rule is described in SPEC', 14)).toBe(false);
+  });
+
+  it('does not fire on a figure followed by a closing JSX tag', () => {
+    expect(appearsInLogic('<span>of 18</span>', 18)).toBe(false);
+    expect(appearsInLogic('score < 18', 18)).toBe(true);
   });
 });
 

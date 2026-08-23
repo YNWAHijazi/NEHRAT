@@ -1,0 +1,46 @@
+/*
+ * Adopted from the reference prototypes' helmet, which extends tokens.css with the
+ * soft level variants, hero tokens, language visibility and responsive rules.
+ * tokens.css says adopt verbatim -- this is that adoption. Do not re-derive values.
+ */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand);text-decoration:none}
+a:hover{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+button,a,input,textarea,select{transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,box-shadow 150ms ease-out,transform 120ms ease-out}
+button:not(:disabled):active,a:active{transform:translateY(1px)}
+button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(0,0,0,.035)}
+html[data-theme="dark"] button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.05)}
+button:disabled{cursor:not-allowed;opacity:.75;box-shadow:none;transform:none}
+input:hover:not(:disabled),textarea:hover:not(:disabled){border-color:var(--muted)}
+section#top :focus-visible,footer :focus-visible{outline-color:var(--hero-ink)}
+:root,html[data-palette="petrol"][data-theme="light"]{--bg:#F4F2ED;--surface:#FBFAF7;--surface2:#EAE7E0;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#15515D;--brand-soft:rgba(21,81,93,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14);--l1:#15515D;--l1s:rgba(21,81,93,.14);--l2:#E9B44C;--l2s:rgba(233,180,76,.20);--l3:#A8482A;--l3s:rgba(168,72,42,.16)}
+html[data-palette="petrol"][data-theme="dark"]{--bg:#08171B;--surface:#0D2026;--surface2:#12292F;--ink:#E6EDEC;--muted:#9BAFB2;--line:rgba(255,255,255,.13);--brand:#6BA3AE;--brand-soft:rgba(107,163,174,.14);--accent:#E9B44C;--accent-ink:#E9B44C;--accent-soft:rgba(233,180,76,.18);--bad:#D2724B;--bad-soft:rgba(210,114,75,.18);--l1:#6BA3AE;--l1s:rgba(107,163,174,.18);--l2:#E9B44C;--l2s:rgba(233,180,76,.20);--l3:#D2724B;--l3s:rgba(210,114,75,.20)}
+:root,html[data-palette="petrol"]{--hero-bg:#08171B;--hero-ink:#F4F2ED;--hero-muted:#9DB2B6;--hero-line:rgba(244,242,237,.11)}
+html[data-palette="cedar"][data-theme="light"]{--bg:#F1F1EC;--surface:#FAFAF6;--surface2:#E7E8E0;--ink:#12160F;--muted:#525A4C;--line:rgba(18,22,15,.14);--brand:#2E4A34;--brand-soft:rgba(46,74,52,.09);--accent:#C2452C;--accent-ink:#A3341E;--accent-soft:rgba(194,69,44,.14);--bad:#7E1F12;--bad-soft:rgba(126,31,18,.14);--l1:#2E4A34;--l1s:rgba(46,74,52,.13);--l2:#C2452C;--l2s:rgba(194,69,44,.16);--l3:#7E1F12;--l3s:rgba(126,31,18,.16)}
+html[data-palette="cedar"][data-theme="dark"]{--bg:#0E140F;--surface:#141C15;--surface2:#1B241C;--ink:#E9EDE6;--muted:#9FAC9C;--line:rgba(255,255,255,.13);--brand:#8CB292;--brand-soft:rgba(140,178,146,.14);--accent:#E0674B;--accent-ink:#E0674B;--accent-soft:rgba(224,103,75,.18);--bad:#E8846A;--bad-soft:rgba(232,132,106,.16);--l1:#8CB292;--l1s:rgba(140,178,146,.18);--l2:#E0674B;--l2s:rgba(224,103,75,.20);--l3:#B33A22;--l3s:rgba(179,58,34,.24)}
+html[data-palette="cedar"]{--hero-bg:#0E140F;--hero-ink:#F1F1EC;--hero-muted:#A6B2A3;--hero-line:rgba(241,241,236,.11)}
+html[data-palette="petrol"][data-theme="dark"]{--hero-bg:#143440}
+html[data-palette="cedar"][data-theme="dark"]{--hero-bg:#1E2E20}
+[data-l="ar"]{display:none !important}
+html[lang="ar"] [data-l="ar"]{display:revert !important}
+html[lang="ar"] [data-l="en"]{display:none !important}
+html[lang="ar"] [data-flip]{transform:scaleX(-1)}
+[data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
+h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+@media (max-width:900px){[data-dock]{display:none}}
+@media (max-width:700px){[data-rail]{grid-template-columns:1fr 1fr !important}[data-sec-h1]{font-size:30px !important}[data-pad]{padding-inline:20px !important}[data-wide],[data-stack]{grid-template-columns:1fr !important}[data-stack] [data-due]{min-width:0 !important;text-align:start !important}[data-th]{display:none !important}}
+@media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:-100% 0}}
+[data-sk]{border-radius:4px;background:linear-gradient(90deg,var(--surface2) 25%,var(--line) 50%,var(--surface2) 75%);background-size:200% 100%;animation:sk 1400ms linear infinite}
+@media print{
+[data-noprint],[data-prototype-nav],[data-seq]{display:none !important}
+body *{visibility:hidden}
+[data-wallcard],[data-wallcard] *{visibility:visible}
+[data-wallcard]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;border:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}[data-sk]{background:var(--surface2) !important}button:not(:disabled):active,a:active{transform:none !important}}

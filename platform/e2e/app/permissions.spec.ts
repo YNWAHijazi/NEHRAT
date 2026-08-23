@@ -24,11 +24,15 @@ const LOGINS = {
   admin: 'test_moph_admin',
 } as const;
 
+/**
+ * Signs in through the demonstration-login buttons on /signin. Roles whose surfaces are
+ * not yet built are bounced back to /signin with a build notice -- their session still
+ * exists, which is exactly what these refusal tests need: a signed-in wrong role.
+ */
 async function signInAs(page: Page, login: string): Promise<void> {
   await page.goto('/signin');
-  await page.getByLabel(/username|اسم المستخدم/i).fill(login);
-  await page.getByRole('button', { name: /sign in|تسجيل الدخول/i }).click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin'));
+  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
+  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
 }
 
 /**

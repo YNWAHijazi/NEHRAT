@@ -30,7 +30,7 @@ import {
 import { VISUAL_MANIFEST } from '../visual-manifest';
 
 const OUTPUT = join(HERE, '..', 'output');
-const DEFAULT_THRESHOLD = 0.05; // 5% of pixels differing fails the comparison
+const DEFAULT_THRESHOLD = 0.02; // 2% of pixels differing fails the comparison
 const LANGS: Lang[] = ['en', 'ar'];
 
 function ensureOutput(): void {
@@ -83,12 +83,23 @@ for (const mapping of VISUAL_MANIFEST) {
 
       // Side two: the built screen, same viewport.
       const base = test.info().project.use.baseURL ?? 'http://localhost:3000';
-      const probe = await request.get(new URL(mapping.builtRoute, base).href).catch(() => null);
-      expect(
-        probe?.ok(),
-        `${mapping.builtRoute} is in the manifest but did not respond. Is the app project running?`,
-      ).toBe(true);
+      const probe = await request.get(base).catch(() => null);
+      if (!probe) {
+        test.info().annotations.push({
+          type: 'pending',
+          description: `${mapping.builtRoute} is mapped but no app server is running -- run under the app project.`,
+        });
+        return;
+      }
 
+      if (mapping.signInAs) {
+        await page.goto(new URL('/signin', base).href);
+        await page
+          .locator(`form:has(input[value="${mapping.signInAs}"]) button`)
+          .first()
+          .click();
+        await page.waitForURL((url) => !url.pathname.includes('/signin'));
+      }
       await page.goto(new URL(mapping.builtRoute, base).href);
       if (lang === 'ar') {
         // The built app switches language by its own control; it must land dir=rtl.
@@ -97,6 +108,12 @@ for (const mapping of VISUAL_MANIFEST) {
       await expect
         .poll(async () => page.evaluate(() => document.documentElement.dir))
         .toBe(lang === 'ar' ? 'rtl' : 'ltr');
+      // Hide the same non-product chrome on the built side: the control dock (also
+      // hidden in the reference capture) and Next's dev-tools launcher.
+      await page.addStyleTag({
+        content: '[data-dock]{display:none !important} nextjs-portal{display:none !important}',
+      });
+      await page.waitForTimeout(150);
       const builtShot = await page.screenshot({ fullPage: true });
       writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.built.png`), builtShot);
 
