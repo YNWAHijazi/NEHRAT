@@ -1,0 +1,217 @@
+{
+  "$comment": "The ten minimum conditions. Text and level mirror the reference prototype. `derivation` is the build's own -- the prototype used manual checkboxes for seven of these, which is non-negotiable #0.",
+  "requiredInputs": {
+    "expectedMaxSimultaneousAttendance": {
+      "type": "integer",
+      "required": true,
+      "noteEn": "Captured as a number. Domain 1's top option is '10,000 or more', which spans both the Level 2 and the Level 3 floor -- the floor resolves from this number, never from the domain answer."
+    },
+    "eventDisciplines": {
+      "type": "string[]",
+      "required": true,
+      "noteEn": "Structured list. Domain 2's top option bundles six disciplines carrying different floors; the floor resolves from this list, never from the domain answer."
+    },
+    "courseDistanceKm": {
+      "type": "number",
+      "required": "when eventDisciplines includes running",
+      "noteEn": "Required field on organized running events. An optional field left blank on a marathon returns Level 2."
+    },
+    "venueLicensedCapacity": {
+      "type": "integer",
+      "required": false
+    },
+    "venueIsNightclubOrDanceVenue": {
+      "type": "boolean",
+      "required": false
+    },
+    "venueRegularlyHostsOrganizedEvents": {
+      "type": "boolean",
+      "required": false
+    }
+  },
+  "conditions": [
+    {
+      "key": "att2",
+      "level": 2,
+      "en": "10,000–19,999 present at the same time",
+      "ar": "10,000–19,999 حاضراً في الوقت نفسه",
+      "derivation": {
+        "all": [
+          {
+            "input": "expectedMaxSimultaneousAttendance",
+            "op": "gte",
+            "value": 10000
+          },
+          {
+            "input": "expectedMaxSimultaneousAttendance",
+            "op": "lte",
+            "value": 19999
+          }
+        ]
+      }
+    },
+    {
+      "key": "att3",
+      "level": 3,
+      "en": "20,000 or more present at the same time",
+      "ar": "20,000 أو أكثر في الوقت نفسه",
+      "derivation": {
+        "all": [
+          {
+            "input": "expectedMaxSimultaneousAttendance",
+            "op": "gte",
+            "value": 20000
+          }
+        ]
+      }
+    },
+    {
+      "key": "club",
+      "level": 2,
+      "en": "Nightclub or dance venue licensed for 1,000 or more",
+      "ar": "ملهى ليلي أو صالة رقص مرخصة لـ 1,000 أو أكثر",
+      "derivation": {
+        "all": [
+          {
+            "input": "venueIsNightclubOrDanceVenue",
+            "op": "isTrue"
+          },
+          {
+            "input": "venueLicensedCapacity",
+            "op": "gte",
+            "value": 1000
+          }
+        ]
+      }
+    },
+    {
+      "key": "recur",
+      "level": 2,
+      "en": "Venue regularly hosting organized events, licensed for 1,000 or more",
+      "ar": "موقع يستضيف بانتظام فعاليات منظمة ومرخص لـ 1,000 أو أكثر",
+      "derivation": {
+        "all": [
+          {
+            "input": "venueRegularlyHostsOrganizedEvents",
+            "op": "isTrue"
+          },
+          {
+            "input": "venueLicensedCapacity",
+            "op": "gte",
+            "value": 1000
+          }
+        ]
+      }
+    },
+    {
+      "key": "run",
+      "level": 2,
+      "en": "Any organized running event",
+      "ar": "أي فعالية جري منظمة",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "running"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "run21",
+      "level": 3,
+      "en": "Organized running event with a course of 21.1 km or more",
+      "ar": "فعالية جري منظمة بمسار 21.1 كلم أو أكثر",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "running"
+            ]
+          },
+          {
+            "input": "courseDistanceKm",
+            "op": "gte",
+            "value": 21.1
+          }
+        ]
+      }
+    },
+    {
+      "key": "tri",
+      "level": 3,
+      "en": "Triathlon",
+      "ar": "ترياتلون",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "triathlon"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "open",
+      "level": 3,
+      "en": "Organized open-water swimming event",
+      "ar": "فعالية سباحة منظمة في المياه المفتوحة",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "open_water_swimming"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "combat",
+      "level": 3,
+      "en": "Boxing, kickboxing, Muay Thai or mixed martial arts competition",
+      "ar": "منافسة ملاكمة أو كيك بوكسينغ أو مواي تاي أو فنون قتالية مختلطة",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "boxing",
+              "kickboxing",
+              "muay_thai",
+              "mixed_martial_arts"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "motor",
+      "level": 3,
+      "en": "Competitive motor-vehicle racing event",
+      "ar": "سباق سيارات تنافسي",
+      "derivation": {
+        "all": [
+          {
+            "input": "eventDisciplines",
+            "op": "includesAny",
+            "value": [
+              "motor_racing"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

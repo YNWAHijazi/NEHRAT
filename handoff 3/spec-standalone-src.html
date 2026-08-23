@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Build specification — National Health and Medical Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<template id="__bundler_thumbnail" data-bg-color="#15515D">
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+<rect width="1200" height="800" fill="#15515D"/>
+<g transform="translate(600 400)">
+<circle r="150" fill="none" stroke="#F4F2ED" stroke-width="10"/>
+<path d="M-58 -14h44v-44h28v44h44v28h-44v44h-28v-44h-44z" fill="#E9B44C"/>
+</g>
+</svg>
+</template>
+<style>
+:root{--bg:#F4F2ED;--surface:#FBFAF7;--surface2:#EAE7E0;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#15515D;--brand-soft:rgba(21,81,93,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty;line-height:1.7}
+.page{max-width:860px;margin-inline:auto;padding:72px 32px 120px}
+h1{font-size:38px;font-weight:600;letter-spacing:-.035em;line-height:1.2;margin:0 0 28px}
+h2{font-size:26px;font-weight:600;letter-spacing:-.025em;line-height:1.3;margin:56px 0 16px;padding-block-start:28px;border-block-start:1px solid var(--line)}
+h3{font-size:19px;font-weight:600;letter-spacing:-.015em;margin:36px 0 12px}
+p{margin:0 0 16px;font-size:16px}
+ul,ol{margin:0 0 20px;padding-inline-start:22px}
+li{margin-block-end:9px;font-size:16px}
+hr{border:0;height:0;margin:0}
+h2+hr,hr+h2{margin-block-start:0}
+strong{font-weight:600}
+code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--surface2);padding:2px 6px;border-radius:4px}
+blockquote{margin:0 0 20px;padding:18px 24px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--brand);border-radius:0 10px 10px 0;font-size:16px}
+blockquote strong{color:var(--brand)}
+.tw{overflow-x:auto;margin:0 0 24px;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:520px}
+th{background:var(--surface2);text-align:start;font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:11px 16px;border-block-end:1px solid var(--line)}
+td{padding:13px 16px;border-block-end:1px solid var(--line);vertical-align:top;line-height:1.55}
+tr:last-child td{border-block-end:0}
+td:first-child{font-weight:500}
+.masthead{background:var(--brand);color:#F4F2ED;padding:52px 32px 44px}
+.masthead .in{max-width:860px;margin-inline:auto}
+.masthead .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.72;margin-block-end:14px}
+.masthead h1{margin:0 0 12px;color:#F4F2ED}
+.masthead p{margin:0;opacity:.82;font-size:16.5px;max-width:62ch}
+.page>h1:first-child{display:none}
+@media print{
+body{background:#fff}
+.masthead{background:#fff;color:#000;border-block-end:2px solid #000;padding:0 0 24px;margin-block-end:32px}
+.masthead p{opacity:1}
+.page{padding:0;max-width:none}
+h2{break-after:avoid}
+.tw,blockquote,li{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="masthead"><div class="in">
+<div class="eyebrow">Ministry of Public Health · Republic of Lebanon</div>
+<h1>Build specification</h1>
+<p>National Health and Medical Readiness. The rules that are not visible in the markup, and that are what make the product correct.</p>
+</div></div>
+<div class="page">
+<h1>Event Health Readiness Platform — build specification</h1>
+<p>Ministry of Public Health, Republic of Lebanon. A regulatory platform, not a consumer product. Nobody uses it by choice: an organizer arrives because a municipality told them to, or because their event will not be authorised without a reference number from it.</p>
+<p><code>/pages</code> holds six reference designs — complete, bilingual, interactive HTML. They are the source of truth for layout, wording and behaviour. This document carries the rules that are <strong>not</strong> visible in the markup, and those rules are what make the product correct.</p>
+<p>Read <code>ROUTES.md</code> for the screen inventory, <code>tokens.css</code> for the visual system, <code>PROMPTS.md</code> for the build sequence.</p>
+<hr />
+<h2>1. The one rule everything else hangs off</h2>
+<p>An event has a <strong>level: 1, 2 or 3.</strong></p>
+<p>The level is produced by a scored assessment. <strong>It is never a user choice, never a dropdown, never editable.</strong> Everything downstream derives from it:</p>
+<div class="tw"><table><thead><tr><th></th><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead><tbody><tr><td>Filing deadline</td><td>notification only</td><td>≥ 14 calendar days before the event</td><td>≥ 30 calendar days before the event</td></tr><tr><td>Compliance form</td><td>only if the Ministry requests it</td><td>required</td><td>required</td></tr><tr><td>Medical plan</td><td>brief written arrangements, ~1 page</td><td>written plan</td><td>comprehensive plan, maps, EMS declarations</td></tr><tr><td>Event Medical Director</td><td>—</td><td>—</td><td>required, a licensed physician</td></tr><tr><td>EMS readiness declarations</td><td>—</td><td>—</td><td>one per named agency</td></tr><tr><td>Post-event medical report</td><td>after a reportable incident</td><td>after a reportable incident</td><td>after <strong>every</strong> event</td></tr></tbody></table></div>
+<p>If a build lets someone pick a level, the build is wrong.</p>
+<h3>How the level is derived</h3>
+<p>Nine risk domains, scored 0–2 each, total 0–18. Bands: 0–5 → Level 1 · 6–11 → Level 2 · 12–18 → Level 3.</p>
+<p>Then a set of <strong>minimum conditions</strong> applies — nine of them, e.g. 20,000 or more people present at the same time forces Level 3 regardless of score. <strong>The final level is the higher of the two results.</strong> Show both and show which one governed; an organizer who scored 9 but lands at Level 3 must be able to see why.</p>
+<p>The assessment is <strong>versioned, never edited in place.</strong> A re-assessment creates a new version and the previous one remains readable.</p>
+<hr />
+<h2>2. The three outcomes</h2>
+<p>A Ministry reviewer records exactly one of three, and there are no others:</p>
+<ol><li>Submission received but incomplete</li><li>Additional information or revision required</li><li>Health and medical preparedness requirements satisfied</li></ol>
+<p><strong>Never "approved". Never "rejected". Never a status invented for convenience.</strong></p>
+<p>Internal workflow states — assigned, in progress, in queue — must be visually distinguishable from outcomes (grey, quiet) so they are never mistaken for determinations.</p>
+<p>Two limits appear wherever an outcome is recorded:</p>
+<blockquote>The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority.</blockquote>
+<blockquote>This status does not replace any other permit or authorization required under Lebanese law.</blockquote>
+<p>Separately from a revision request, the Ministry <strong>may require additional measures</strong> where necessary. That is a distinct action, not a fourth outcome. Attestations and inspections are also not outcomes, and never block one.</p>
+<hr />
+<h2>3. Seven user classes, and who can do what to whom</h2>
+<p><strong>Organizer</strong> — creates events, completes assessments, files submissions. Cannot file until their organization is recorded by the Ministry, but <em>can</em> create events and complete assessments while that is pending. Never sees another organizer's records.</p>
+<p><strong>EMS agency</strong> — <strong>invited only.</strong> An agency can never add itself to an event and never sees an event it was not named in. It accepts or declines. At Level 3 it signs an EMS Readiness Declaration (ten items). Declining is a <strong>material change</strong> the organizer must report to the Ministry.</p>
+<p><strong>Event Medical Director</strong> — a licensed physician, <strong>nominated by the organizer</strong>, Level 3 only. Same rule: never self-adds, never sees an unnamed event. Named as responsible on five requirements; <strong>requirement 15, the event medical command function, is theirs alone</strong> — no other party is named against it and the organizer cannot file without it.</p>
+<p><strong>Ministry reviewer / inspector / administrator</strong> — reviews, inspects, configures. An inspector records corrective actions and <strong>cannot record any of the three outcomes.</strong></p>
+<p><strong>Platform owner</strong> — above the Ministry. Sees platform-wide usage. A Ministry administrator cannot reach it.</p>
+<p><strong>Facility cardiac-readiness coordinator</strong> / منسّق الجاهزية للاستجابة لحالات توقف القلب — one named person per <strong>covered facility</strong> / مرفق مشمول, and the same person named on that facility's AED records. Maintains the cardiac emergency response plan, confirms readiness annually, files the incident report after any use. Cardiac-arrest instrument only.</p>
+<p><strong>BLS or designated first-response unit</strong> / جهة الإنعاش الأساسي أو وحدة الاستجابة الطبية الأولية المعتمدة — holds the minimum equipment, personnel competence and operational readiness to respond to a cardiac arrest, works to a written response procedure, and files the minimum dataset. Its own account context. Cardiac-arrest instrument only.</p>
+<blockquote><strong>The Participating EMS provider and the BLS or designated first-response unit are different actors</strong>, answering to different instruments, even where one organisation holds both roles. They never share a surface. An EMS readiness declaration is not a first-response readiness declaration, and neither substitutes for the other.</blockquote>
+<p><strong>Lebanese Order of Physicians</strong> — a <em>configurable, non-determinative</em> lane, <strong>off by default</strong>. Verifies physician credentials and may attest to clinical content. It informs the Ministry; it never decides. A reviewer may record any of the three outcomes whether or not Order review is complete. Turning the lane off suspends that access.</p>
+<h3>Nomination states, used consistently everywhere</h3>
+<p><code>Nominated</code> → <code>Confirmed</code> / <code>Declined</code>, and for declarations <code>Draft</code> → <code>Signed</code>. A draft is visible to its author only and does not reach the organizer's package. An organizer cannot certify that participating providers have been identified while a named agency is still merely nominated.</p>
+<h3>Responsible parties are computed, not written</h3>
+<p>Twenty requirements each name a responsible party, and four of them name the Event Medical Director. Because that role exists only at Level 3, the party list must be <strong>derived from the level being viewed</strong>:</p>
+<ul><li>Cardiac-arrest readiness — Level 2: <em>Organizer / participating EMS or medical provider</em>. Level 3: the same, <strong>plus Event Medical Director</strong>.</li><li>Receiving emergency departments, major-incident preparedness, post-event medical report — same pattern.</li><li>Event medical command function — <em>Event Medical Director</em> alone, and it appears only at Level 3.</li></ul>
+<p>Hard-coding "Medical Director at Level 3" into a static string puts a role on a screen where it does not exist. Do not do it.</p>
+<hr />
+<h2>3b. Demonstration data is not seed data</h2>
+<p>Every named record in <code>/pages</code> — Beirut Coastal 12K, Baalbeck Summer Festival, Forum de Beyrouth, Hamra Sports Hall, AED-002, MOPH-EV-2026-0362, and every person named against them — is <strong>demonstration content written to show what a populated screen looks like.</strong> None of it is seeded into the product.</p>
+<p><strong>A new account is empty.</strong> No events, no venues, no facilities, no notifications, no reference numbers. The empty dashboard with <strong>Start a service</strong> is the primary state; the populated dashboard is what it becomes. Build it in that order, not the other way round.</p>
+<p><strong>Role-set demonstration logins</strong>, offered on the sign-in screen so the Ministry can walk the platform without creating records: <code>test_organizer</code>, <code>test_ems</code>, <code>test_director</code>, <code>test_response</code>, <code>test_moph</code>, <code>test_moph_admin</code>. Each lands on its own dashboard, populated with the records in the reference files for that role.</p>
+<p>Demonstration data is <strong>isolated in both directions</strong> — it never appears in a real account, and real records never appear in a demonstration one. A demonstration session carries a persistent band reading <em>Demonstration account. These records are examples.</em></p>
+<hr />
+<h2>4. Sequence</h2>
+<p>Fixed, and the UI should not imply it is skippable:</p>
+<ol><li>Register the organization → 2. Create the event → 3. Complete the assessment → 4. Read the requirements for the resulting level → 5. Prepare the plan and documents → 6. Obtain EMS declarations (Level 3) → 7. File → 8. Receive the Ministry reference number.</li></ol>
+<p>Two identifiers, and they are different things: a <strong>record identifier</strong> issued at creation (<code>EV-0418</code>, <code>VN-0032</code>), and a <strong>Ministry reference number</strong> issued at submission (<code>MOPH-EV-2026-0362</code>). The reference number is what the organizer gives to the authorising authority. Public reference lookup returns only: that a submission exists, the event name, its level, and the current Ministry status — <strong>never contact details, documents or assessment answers.</strong></p>
+<hr />
+<h2>5. Obligations that are distinct and must never be merged</h2>
+<ul><li><strong>24-hour serious-incident notification</strong> and the <strong>post-event medical report</strong> are separate obligations on the same event. Filing the report does not satisfy the notification. Show them separately, and cross-reference them: an overdue report on an event that generated a notification is a different priority from an ordinary late report.</li><li>The <strong>post-event medical report</strong> is due within <strong>7 calendar days</strong>, on three distinct triggers: after every Level 3 event; after a reportable incident at Level 1 or 2; or when the Ministry requests one.</li><li>At <strong>Level 3 the post-event report carries two signatures</strong> — the organizer's and the Event Medical Director's. It is not complete with one.</li><li>A <strong>postponement or cancellation is a notification, not a decision.</strong> A postponed event's status does not automatically carry to a new date.</li><li>The <strong>cardiac-arrest readiness instrument</strong> (covered facilities, AEDs, first-response units) is a <strong>peer regulatory instrument</strong>, live, with its own actors, records and obligations. The two apply independently: registering under one does not satisfy the other, and submissions and approvals stay separate. Only the organisation and physician profile is shared. Do not merge their data.</li><li><strong>Where two applicable requirements differ, the higher governs.</strong> Registered AEDs, trained responders and cardiac arrangements may be <strong>referenced</strong> from a facility record into an event or venue submission rather than re-entered — never copied; the facility record stays the source of truth — provided they remain accessible and operational throughout the event, which the organizer confirms and does not inherit.</li><li><strong>Nothing regulatory is hard-coded.</strong> Phased schedules, capacity thresholds, facility designations, reporting timeframes and corrective-action timelines are Ministry-configurable. Never render a threshold as a fixed number in copy. <strong>The unset state is a first-class answer</strong>, not an error or an empty result: name the missing value, say nothing is in force under that rule until the Ministry sets and publishes it, and say operators are notified when it does.</li></ul>
+<hr />
+<h2>5b. Nothing is always-on</h2>
+<p>Every action is derived from the record's own state. A control that is always clickable is a bug, not a simplification.</p>
+<p><strong>Two behaviours, and conflating them is the mistake that matters:</strong></p>
+<p><strong>Visible and disabled</strong> where the action <em>will</em> become available — it waits on a date, an answer or a step. Show the control, greyed, with the condition in plain words: <em>Available after the event ends, 2 October 2026.</em></p>
+<p><strong>Hidden entirely</strong> where the action does not apply to this record and never will — a matter of level, category or instrument. No row, no greyed control, no mention.</p>
+<p>A Level 2 organizer must not see a greyed Event Medical Director row. There is no director at Level 2, and showing one implies there could be. A post-event report before the event <strong>is</strong> shown, greyed, with its date — because it is coming.</p>
+<div class="tw"><table><thead><tr><th>Gate</th><th>Behaviour</th></tr></thead><tbody><tr><td>Post-event report before the event ends</td><td>Disabled, with the date it opens</td></tr><tr><td>Venue reassessment more than 60 days before expiry</td><td>Disabled, with the date it opens</td></tr><tr><td>Material change before the submission is filed</td><td>Disabled, <em>available once filed</em></td></tr><tr><td>Event Medical Director below Level 3</td><td>Hidden</td></tr><tr><td>Readiness declaration below Level 3</td><td>Hidden — Level 2 gets participation detail and no declaration</td></tr><tr><td>The sixteen plan sections at Level 1</td><td>Collapsed behind the note that brief written arrangements suffice</td></tr><tr><td>Submit, while the organization is pending registration</td><td>Disabled, with the reason and a route to the organization screen</td></tr><tr><td>Submit, while a document is unattached or a named party unanswered</td><td>Disabled, naming the specific item</td></tr><tr><td><em>Requirements satisfied</em>, while a blocking attestation, visit or added requirement is outstanding</td><td>Disabled, each item named. <strong>The other two outcomes stay available</strong></td></tr><tr><td>Sign the declaration, below ten confirmed items</td><td>Disabled, <em>{n} of 10 still to confirm</em></td></tr><tr><td>Continue past the facility category step, where the category awaits a Ministry value</td><td>No Continue at all. <strong>Record an interest</strong>, and a route back</td></tr></tbody></table></div>
+<p><strong>Derived, never entered:</strong> the event level, the plan's device section, the venue floor, every deadline date, every count and badge.</p>
+<hr />
+<h2>5c. Invitations</h2>
+<p>An organizer names a party <strong>from inside the requirement that needs them</strong>, on the requirements screen — not from a separate invitations area. They are reading the requirement; the invite belongs there.</p>
+<p>Named EMS providers sit in group 2 of the requirements page; the Event Medical Director sits on the requirement-15 row, Level 3 only. Both take a name and an email and send.</p>
+<p><strong>The invited party self-registers against the invitation.</strong> The email carries a link; they create their own account, and accepting links it to the event. The organizer never creates an account on their behalf, and never sees their credentials.</p>
+<hr />
+<h2>6. Copy rules</h2>
+<ul><li><strong>Fee: None.</strong> Never "free".</li><li>Plain, declarative, sentence case. No marketing register, no encouragement, no exclamation, no emoji.</li><li><strong>Deadlines as dates</strong>, not "soon" or "3 days left" alone.</li><li><strong>Never name an annex.</strong> The regulatory documents are lettered annexes internally; users never see that. Say <em>risk assessment</em>, <em>compliance and submission form</em>, <em>readiness declaration</em>, <em>post-event medical report</em>, <em>event health and medical plan</em>. Never "Annex A", "Annex C", "EHMP".</li><li><strong>The formal name and acronym NEHRAT</strong> are permitted where they <strong>name the regulatory instrument itself</strong> — a version row, a configuration reference, a link to the document. They are banned where they <strong>substitute for what the user is doing</strong>. "NEHRAT tool version" is correct. "Complete the NEHRAT" is not. A reviewer reading a submission still sees <em>risk assessment</em>.</li><li>State consequences plainly. "The organizer cannot file the Level 3 package without it" beats a warning icon.</li><li>Don't explain the design to the user. Empty states say what the emptiness <em>means</em>; they don't editorialise about it. An empty urgent lane is good news and should read that way.</li><li><strong>Document names, cardiac-arrest instrument.</strong> <em>cardiac emergency response plan</em> / خطة الاستجابة لحالات توقف القلب · <em>AED record</em> / سجل جهاز إزالة الرجفان · <em>facility cardiac-arrest incident report</em> / تقرير حادثة توقف القلب في المرفق · <em>first-response readiness declaration</em> / إقرار جاهزية الاستجابة الأولية.</li><li><strong>Mass-gathering status vocabulary never appears on the facility side.</strong> The three outcome values belong to the mass-gathering instrument. The cardiac-arrest instrument prescribes no status labels at all. Any facility-side status wording is provisional pending Ministry approval and must be marked as such wherever it appears.</li><li>Where a string is quoted from the regulation — the compliance declarations, the sixteen plan sections, the eleven major-incident items, the ten declaration items — it is verbatim and must not be paraphrased.</li></ul>
+<hr />
+<h2>7. Bilingual and RTL — not optional</h2>
+<p>Full English / Arabic parity. Every string, every label, every notification. Switching to Arabic sets <code>dir="rtl"</code> and <strong>mirrors the entire layout</strong> — logo, navigation, tables (first column on the right), cards, controls. Logical CSS properties only (<code>margin-inline-start</code>, <code>border-inline-start</code>, <code>inset-inline-end</code>); never <code>left</code>/<code>right</code>.</p>
+<p>Arabic typography differs: near-zero letter-spacing, looser line-height (~1.75 body, ~1.45 headings). Numerals stay Western Arabic. Dates as <code>YYYY-MM-DD</code>, tabular figures, never reversed.</p>
+<p>Terminology is fixed:</p>
+<div class="tw"><table><thead><tr><th>English</th><th>Arabic</th></tr></thead><tbody><tr><td>Event Medical Director</td><td>المدير الطبي للفعالية</td></tr><tr><td>EMS Readiness Declaration</td><td>إقرار جاهزية خدمات الطوارئ الطبية</td></tr><tr><td>National Event Health Risk Assessment Tool</td><td>التقييم الوطني للمخاطر الصحية للفعاليات</td></tr><tr><td>Compliance and submission form</td><td>نموذج الامتثال والتقديم</td></tr><tr><td>Post-event medical report</td><td>التقرير الطبي لما بعد الفعالية</td></tr><tr><td>Clinical governance</td><td>الحوكمة السريرية</td></tr><tr><td>Event medical command</td><td>القيادة الطبية للفعالية</td></tr><tr><td>Credential verification</td><td>التحقق من المؤهلات</td></tr><tr><td>Material change</td><td>تغيير جوهري</td></tr><tr><td>Nominated</td><td>مُرشَّح</td></tr></tbody></table></div>
+<hr />
+<h2>8. Accessibility and platform</h2>
+<ul><li>Visible keyboard focus on every interactive element.</li><li><strong>Status is never colour alone</strong> — every state chip carries its text.</li><li>Contrast holds in light and dark, in both palettes.</li><li><code>prefers-reduced-motion</code> respected.</li><li>Responsive to 375px: tables collapse to single column, the control dock hides below 900px.</li><li>Text-size control (100 / 112 / 125%), dark mode, palette switch. These are government-accessibility features, not decoration.</li></ul>
+<hr />
+<h2>9. What would make the build wrong</h2>
+<ul><li>The design index tab strip built as product navigation</li><li>Demonstration records seeded into a real account, or a new account arriving pre-populated</li><li>A control that is always enabled — a post-event report fileable before the event, a submission fileable with an unanswered provider</li><li>A level-based element shown greyed rather than hidden, implying a role exists where it does not</li><li>A user choosing an event level, or editing one</li><li>"Approved" / "Rejected" anywhere</li><li>An EMS agency or medical director adding themselves to an event</li><li>Requirement 15 shown as shared, or the Event Medical Director appearing at Level 2</li><li>A shared requirement shown as a sole responsibility — two people each assume the other did it</li><li>The Order of Physicians lane blocking a Ministry outcome</li><li>A physician editing their own credential verification</li><li>A Level 3 post-event report treated as complete with one signature</li><li>The 24-hour notification and the post-event report collapsed into one thing</li><li>A Level 1 organizer pushed through Level 3 depth</li><li>Any annex letter visible to a user</li><li>Arabic that changes text direction without mirroring layout</li><li>Animation, gradients, shadows, emoji, or any promotional copy</li></ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "$comment": "Swept in both languages across messages and rules data. SPEC 6 and 9.",
+  "terms": [
+    {
+      "en": "approved",
+      "ar": "موافق عليه",
+      "why": "Not one of the three outcomes. SPEC 2."
+    },
+    {
+      "en": "rejected",
+      "ar": "مرفوض",
+      "why": "Not one of the three outcomes. SPEC 2."
+    },
+    {
+      "en": "free",
+      "ar": "مجاني",
+      "why": "The copy is 'Fee: None.' SPEC 6."
+    },
+    {
+      "en": "annex",
+      "ar": "الملحق",
+      "why": "No annex letter is ever visible to a user. SPEC 6."
+    },
+    {
+      "en": "EHMP",
+      "ar": "EHMP",
+      "why": "Say 'event health and medical plan'. SPEC 6."
+    }
+  ],
+  "bannedRegex": [
+    {
+      "pattern": "\\bAnnex\\s+[A-Z]\\b",
+      "flags": "",
+      "why": "Annex letters are internal. SPEC 6."
+    },
+    {
+      "pattern": "\\bcomplete the NEHRAT\\b",
+      "flags": "i",
+      "why": "NEHRAT may name the instrument, never substitute for the task. SPEC 6."
+    }
+  ],
+  "emojiRanges": [
+    "\\u{1F300}-\\u{1FAFF}",
+    "\\u{2600}-\\u{27BF}",
+    "\\u{FE0F}"
+  ],
+  "allowedNehratContexts": [
+    "NEHRAT tool version",
+    "NEHRAT instrument",
+    "إصدار أداة NEHRAT"
+  ],
+  "massGatheringOutcomeVocabulary": {
+    "$comment": "These three strings belong to the mass-gathering instrument and must never appear on a facility-side surface. SPEC 6, ROADMAP 6.3.",
+    "en": [
+      "Submission received but incomplete",
+      "Additional information or revision required",
+      "Health and medical preparedness requirements satisfied"
+    ],
+    "ar": [
+      "تم استلام الطلب لكنه غير مكتمل",
+      "مطلوب معلومات إضافية أو تعديل",
+      "استوفت متطلبات الجاهزية الصحية والطبية"
+    ]
+  }
+}

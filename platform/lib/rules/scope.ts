@@ -1,0 +1,100 @@
+/**
+ * Demonstration isolation.
+ *
+ * Non-negotiable #8. Demonstration organizations are real rows carrying `is_demo = true`
+ * and they DO exist in production, so the Ministry can walk the platform. What is forced
+ * off in a deployed environment is the seeder, not the accounts.
+ *
+ * Isolation runs in both directions: a demonstration row never appears in a real surface,
+ * and a real row never appears in a demonstration session.
+ *
+ * Every surface that reads records must declare its policy here. A surface added without a
+ * policy fails to compile, and the completeness test fails if the union grows without the
+ * map growing with it -- so the next surface cannot be added by forgetting.
+ */
+
+export type DemonstrationPolicy =
+  /** Real rows only. Demonstration rows are invisible here, always. */
+  | 'excludeDemonstration'
+  /** Demonstration rows only. A real record never appears in a demonstration session. */
+  | 'demonstrationOnly'
+  /** Follows the session: a demonstration session sees demonstration rows, a real one real rows. */
+  | 'matchSession';
+
+/**
+ * Every surface that reads records. Extend the union and the map together.
+ */
+export type SurfaceKey =
+  | 'nationalRegistry'
+  | 'ministryAggregateCounts'
+  | 'reviewerQueue'
+  | 'ministryFacilityOversight'
+  | 'publicReferenceLookup'
+  | 'organizerDashboard'
+  | 'emsProviderDashboard'
+  | 'medicalDirectorDashboard'
+  | 'notificationsInbox';
+
+export const SURFACE_DEMONSTRATION_POLICY: Record<SurfaceKey, DemonstrationPolicy> = {
+  // The three the Ministry must never see demonstration data in.
+  nationalRegistry: 'excludeDemonstration',
+  ministryAggregateCounts: 'excludeDemonstration',
+  reviewerQueue: 'excludeDemonstration',
+  // A reviewer's facility lane is a Ministry work surface on the same footing.
+  ministryFacilityOversight: 'excludeDemonstration',
+  // A demonstration reference number must not resolve for the public.
+  publicReferenceLookup: 'excludeDemonstration',
+  // The account-scoped surfaces follow the session in both directions.
+  organizerDashboard: 'matchSession',
+  emsProviderDashboard: 'matchSession',
+  medicalDirectorDashboard: 'matchSession',
+  notificationsInbox: 'matchSession',
+};
+
+/** The surfaces a demonstration row must never reach, whatever the session. */
+export const MINISTRY_WORK_SURFACES: readonly SurfaceKey[] = [
+  'nationalRegistry',
+  'ministryAggregateCounts',
+  'reviewerQueue',
+];
+
+export interface SessionContext {
+  readonly isDemonstration: boolean;
+}
+
+/**
+ * The `is_demo` predicate a surface must apply.
+ *
+ * Returned as data rather than applied here, so the same decision drives a SQL where-clause,
+ * an in-memory filter and a test. `{ isDemo: false }` means: real rows only.
+ */
+export interface DemonstrationFilter {
+  readonly isDemo: boolean;
+}
+
+export function demonstrationFilter(
+  surface: SurfaceKey,
+  session: SessionContext,
+): DemonstrationFilter {
+  const policy = SURFACE_DEMONSTRATION_POLICY[surface];
+  switch (policy) {
+    case 'excludeDemonstration':
+      return { isDemo: false };
+    case 'demonstrationOnly':
+      return { isDemo: true };
+    case 'matchSession':
+      return { isDemo: session.isDemonstration };
+    default: {
+      const exhaustive: never = policy;
+      throw new Error(`Surface has no demonstration policy: ${String(exhaustive)}`);
+    }
+  }
+}
+
+/** Applies the filter to a set of rows. The same predicate the query layer uses. */
+export function applyDemonstrationFilter<T extends { isDemo: boolean }>(
+  rows: readonly T[],
+  filter: DemonstrationFilter,
+): readonly T[] {
+  return rows.filter((r) => r.isDemo === filter.isDemo);
+}

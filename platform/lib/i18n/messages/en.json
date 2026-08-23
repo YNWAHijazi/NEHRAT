@@ -1,0 +1,27 @@
+{
+  "outcome": {
+    "incomplete": "Submission received but incomplete",
+    "revisionRequired": "Additional information or revision required",
+    "satisfied": "Health and medical preparedness requirements satisfied"
+  },
+  "workflowState": {
+    "inQueue": "In queue",
+    "inProgress": "In progress",
+    "assigned": "Assigned"
+  },
+  "gate": {
+    "organizationPending": "Your organization is pending Ministry registration. You may prepare everything; filing opens once it is recorded.",
+    "postEventNotYetOpen": "Available after the event ends, {date}",
+    "materialChangeBeforeFiling": "Available once the submission is filed",
+    "venueReassessmentNotYetOpen": "Opens {date}, 60 days before expiry",
+    "declarationItemsOutstanding": "{count} of {total} items still to confirm",
+    "nominationNotConfirmed": "A nomination is not a confirmation",
+    "awaitingMinistryValue": "Nothing is in force under this rule until the Ministry sets and publishes the value. Operators are notified when it does."
+  },
+  "level": {
+    "governedByScore": "Governed by the assessment score",
+    "governedByMinimumCondition": "Governed by a minimum condition",
+    "governedByBoth": "The score and a minimum condition give the same level"
+  },
+  "fee": { "none": "Fee: None." }
+}
