@@ -15,20 +15,17 @@
  * day-counts and urgency states the reference shows -- a walkthrough that decays with
  * the calendar demonstrates nothing.
  *
- * Known reference tension, kept deliberately: the prototype shows the organization as
- * pending (header, banner) while also showing filed submissions with Ministry reference
- * numbers -- states that cannot coexist on one real account. The demonstration data is a
- * showcase of states, not a coherent account, and is reproduced as shown.
+ * One account per state (handoff 4, decision 6): the showcase organizer is RECORDED and
+ * holds the filed submissions; a separate demonstration organizer shows the organization
+ * pending with nothing filed. The prototype's conflation of the two was the author's
+ * error, acknowledged, and is not preserved here.
  */
 
 import type { DatabaseSync } from 'node:sqlite';
+import { beirutToday } from './clock';
 
 /** The prototype's pinned "today". */
 const REFERENCE_TODAY = '2026-08-13';
-
-function beirutToday(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Beirut' }).format(new Date());
-}
 
 function shiftDays(): number {
   const ref = Date.parse(`${REFERENCE_TODAY}T00:00:00Z`);
@@ -60,16 +57,28 @@ export function seedDemonstration(db: DatabaseSync): void {
   // dashboards arrive with their slices.
   const organizer = insertAccount.run('test_organizer', 'R. Haddad', 'RH', 'organizer')
     .lastInsertRowid as number;
+  const organizerPending = insertAccount.run(
+    'test_organizer_pending', 'S. Khoury', 'SK', 'organizer',
+  ).lastInsertRowid as number;
   insertAccount.run('test_ems', 'Demonstration EMS provider', 'EP', 'ems');
   insertAccount.run('test_director', 'Demonstration medical director', 'MD', 'director');
   insertAccount.run('test_response', 'Demonstration first-response unit', 'FR', 'response');
   insertAccount.run('test_moph', 'Demonstration reviewer', 'MR', 'reviewer');
   insertAccount.run('test_moph_admin', 'Demonstration administrator', 'MA', 'ministry_admin');
 
+  // The showcase account: recorded, and it holds the filed submissions below.
+  db.prepare(
+    `INSERT INTO organizations (account_id, name_en, name_ar, status, recorded_at, is_demo)
+     VALUES (?, ?, ?, 'recorded', ?, 1)`,
+  ).run(organizer, 'Beirut Road Runners', 'عدّاؤو بيروت', d('2026-08-06'));
+
+  // The pending-state account: organization filed, awaiting recording, nothing else.
+  // Demonstrates the registration banner, the pending header line and the blocked
+  // Submit without contradicting the recorded showcase.
   db.prepare(
     `INSERT INTO organizations (account_id, name_en, name_ar, status, is_demo)
      VALUES (?, ?, ?, 'pending', 1)`,
-  ).run(organizer, 'Beirut Road Runners', 'عدّاؤو بيروت');
+  ).run(organizerPending, 'Mount Lebanon Trail Association', 'جمعية دروب جبل لبنان');
 
   // The four demonstration events the reference dashboard shows.
   const insertEvent = db.prepare(
@@ -210,12 +219,7 @@ export function seedDemonstration(db: DatabaseSync): void {
       `The submission is owed by ${d('2026-09-18')}, 14 calendar days before the event.`,
       `يُستحق التقديم بحلول \u2066${d('2026-09-18')}\u2069، أي قبل 14 يوماً تقويمياً من الفعالية.`,
       '/events/EV-0418', d('2026-08-11'), 0],
-    ['needs_action',
-      'Organization registration — one document outstanding',
-      'تسجيل المؤسسة — مستند واحد متبقٍّ',
-      'Outstanding: the authorized representative\'s identification document. Assessments and drafts continue meanwhile; submission opens once the organization is recorded.',
-      'المتبقي: مستند هوية الممثل المفوّض. تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة.',
-      '/organization', d('2026-07-30'), 0],
+
     ['for_information',
       'Notification acknowledged — AUB Sports Day',
       'إشعار مستلَم — يوم الرياضة في الجامعة الأميركية',
@@ -226,4 +230,14 @@ export function seedDemonstration(db: DatabaseSync): void {
   for (const [kind, sEn, sAr, bEn, bAr, route, sentAt, read] of rows) {
     insertNotification.run(organizer, kind, sEn, sAr, bEn, bAr, route, sentAt, read);
   }
+
+  // The pending-state account's single notification.
+  insertNotification.run(
+    organizerPending, 'needs_action',
+    'Organization registration — one document outstanding',
+    'تسجيل المؤسسة — مستند واحد متبقٍّ',
+    "Outstanding: the authorized representative's identification document. Assessments and drafts continue meanwhile; submission opens once the organization is recorded.",
+    'المتبقي: مستند هوية الممثل المفوّض. تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة.',
+    '/organization', d('2026-07-30'), 0,
+  );
 }

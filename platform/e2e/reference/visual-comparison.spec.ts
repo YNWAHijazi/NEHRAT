@@ -27,7 +27,7 @@ import {
   screenshotScreen,
   type Lang,
 } from '../helpers/reference';
-import { VISUAL_MANIFEST } from '../visual-manifest';
+import { VISUAL_MANIFEST, type VisualMapping, type VisualRegion } from '../visual-manifest';
 
 const OUTPUT = join(HERE, '..', 'output');
 const DEFAULT_THRESHOLD = 0.02; // 2% of pixels differing fails the comparison
@@ -58,6 +58,84 @@ function compare(a: Buffer, b: Buffer): { ratio: number; diff: PNG } {
   return { ratio: differing / (width * height), diff };
 }
 
+
+
+/** The same pixels, dy rows lower (positive) or higher (negative); edges fill blank. */
+function shiftVertically(shot: Buffer, dy: number): Buffer {
+  const src = PNG.sync.read(shot);
+  const out = new PNG({ width: src.width, height: src.height });
+  const srcY = dy < 0 ? -dy : 0;
+  const dstY = dy > 0 ? dy : 0;
+  const rows = src.height - Math.abs(dy);
+  PNG.bitblt(src, out, 0, srcY, src.width, rows, 0, dstY);
+  return PNG.sync.write(out);
+}
+
+/**
+ * Hides reference elements the handoff author has disavowed, before capture. Injected
+ * CSS rather than node removal: the prototype runtime re-renders on interaction and
+ * would resurrect a removed node, but re-rendered nodes still match the selector.
+ */
+async function applyReferenceMask(
+  page: import('@playwright/test').Page,
+  mask: NonNullable<VisualMapping['referenceMask']>,
+): Promise<void> {
+  const css = mask.map((entry) => `${entry.css}{display:none !important}`).join('\n');
+  await page.addStyleTag({ content: css });
+  await page.waitForTimeout(100);
+}
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Resolves a region's bounding rect in the REFERENCE DOM by its declared strategy. */
+async function referenceRegionRect(
+  page: import('@playwright/test').Page,
+  region: VisualRegion,
+): Promise<Rect | null> {
+  const ref = region.reference;
+  if (!ref) return null;
+  return page.evaluate((r) => {
+    const rectOf = (el: Element): { x: number; y: number; width: number; height: number } => {
+      const b = el.getBoundingClientRect();
+      return { x: b.x + window.scrollX, y: b.y + window.scrollY, width: b.width, height: b.height };
+    };
+    if (r.strategy === 'headerRow') {
+      const h1 = document.querySelector('[data-sec-h1]');
+      const row = h1?.parentElement?.parentElement;
+      return row ? rectOf(row) : null;
+    }
+    const all = Array.from(document.querySelectorAll('span,h2,div'));
+    const hits = all.filter((el) => (el.textContent ?? '').trim().startsWith(r.text ?? ''));
+    const deepest = hits[hits.length - 1];
+    if (!deepest) return null;
+    if (r.strategy === 'cardByText') {
+      // The runtime re-serializes style attributes with spaces: "border-radius: 14px".
+      const card = deepest.closest(
+        'div[style*="border-radius: 14px"], div[style*="border-radius:14px"]',
+      );
+      return card ? rectOf(card) : null;
+    }
+    // headingSection: the heading plus its following block.
+    const heading = deepest.closest('h2') ?? deepest;
+    const section = heading.nextElementSibling;
+    const a = rectOf(heading);
+    const b = section ? rectOf(section) : a;
+    const x = Math.min(a.x, b.x);
+    const y = Math.min(a.y, b.y);
+    return {
+      x,
+      y,
+      width: Math.max(a.x + a.width, b.x + b.width) - x,
+      height: Math.max(a.y + a.height, b.y + b.height) - y,
+    };
+  }, ref);
+}
+
 for (const mapping of VISUAL_MANIFEST) {
   for (const lang of LANGS) {
     test(`${mapping.id} [${lang}] matches the reference`, async ({ page, request }) => {
@@ -67,6 +145,7 @@ for (const mapping of VISUAL_MANIFEST) {
       await openReference(page, mapping.referenceFile);
       await selectTab(page, mapping.referenceTab);
       await setLanguage(page, lang);
+      if (mapping.referenceMask) await applyReferenceMask(page, mapping.referenceMask);
       const referenceShot = await screenshotScreen(page);
       writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.reference.png`), referenceShot);
 
@@ -116,19 +195,92 @@ for (const mapping of VISUAL_MANIFEST) {
       await page.waitForTimeout(150);
       const builtShot = await page.screenshot({ fullPage: true });
       writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.built.png`), builtShot);
+      const builtBody = await page.locator('body').innerText();
 
-      const { ratio, diff } = compare(referenceShot, builtShot);
-      writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.diff.png`), PNG.sync.write(diff));
+      if (!mapping.regions) {
+        const { ratio, diff } = compare(referenceShot, builtShot);
+        writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.diff.png`), PNG.sync.write(diff));
 
-      const threshold = mapping.threshold ?? DEFAULT_THRESHOLD;
-      test
-        .info()
-        .annotations.push({ type: 'diff-ratio', description: `${(ratio * 100).toFixed(2)}%` });
-      expect(
-        ratio,
-        `${mapping.id} [${lang}] differs from the reference on ${(ratio * 100).toFixed(2)}% ` +
-          `of pixels (limit ${(threshold * 100).toFixed(0)}%). See e2e/output/${mapping.id}.${lang}.diff.png`,
-      ).toBeLessThanOrEqual(threshold);
+        const threshold = mapping.threshold ?? DEFAULT_THRESHOLD;
+        test
+          .info()
+          .annotations.push({ type: 'diff-ratio', description: `${(ratio * 100).toFixed(2)}%` });
+        expect(
+          ratio,
+          `${mapping.id} [${lang}] differs from the reference on ${(ratio * 100).toFixed(2)}% ` +
+            `of pixels (limit ${(threshold * 100).toFixed(0)}%). See e2e/output/${mapping.id}.${lang}.diff.png`,
+        ).toBeLessThanOrEqual(threshold);
+        return;
+      }
+
+      // Region-by-region: each named part carries its own verdict and its note.
+      for (const region of mapping.regions) {
+        const tag = `${mapping.id}.${region.name}.${lang}`;
+
+        if (region.mode === 'absentExpected') {
+          // The reference carries it; the built page must not fake it.
+          expect(
+            builtBody,
+            `${tag}: the built page renders "${region.markerText}" -- this region's data belongs to a later slice and must not be faked. ${region.note}`,
+          ).not.toContain(region.markerText ?? '');
+          test.info().annotations.push({ type: `region:${region.name}`, description: `absent as expected — ${region.note}` });
+          continue;
+        }
+
+        if (region.mode === 'expectedDivergent') {
+          // Earlier compare regions leave the browser on the reference; come back.
+          await page.goto(new URL(mapping.builtRoute, base).href);
+          await expect(
+            page.locator(region.builtSelector ?? 'body'),
+            `${tag}: the expected-divergent region is missing from the built page`,
+          ).toBeVisible();
+          test.info().annotations.push({ type: `region:${region.name}`, description: `present, expected divergent — ${region.note}` });
+          continue;
+        }
+
+        // compare
+        await page.goto(new URL(mapping.builtRoute, base).href);
+        await expect
+          .poll(async () => page.evaluate(() => document.documentElement.dir))
+          .toBe(lang === 'ar' ? 'rtl' : 'ltr');
+        await page.addStyleTag({
+          content: '[data-dock]{display:none !important} nextjs-portal{display:none !important}',
+        });
+        const builtRegion = page.locator(region.builtSelector ?? 'body').first();
+        await expect(builtRegion).toBeVisible();
+        const builtRegionShot = await builtRegion.screenshot();
+        writeFileSync(join(OUTPUT, `${tag}.built.png`), builtRegionShot);
+
+        await openReference(page, mapping.referenceFile);
+        await selectTab(page, mapping.referenceTab);
+        await setLanguage(page, lang);
+        const rect = await referenceRegionRect(page, region);
+        expect(rect, `${tag}: could not locate the region in the reference DOM`).not.toBeNull();
+        const referenceRegionShot = await page.screenshot({
+          fullPage: true,
+          clip: rect as Rect,
+        });
+        writeFileSync(join(OUTPUT, `${tag}.reference.png`), referenceRegionShot);
+
+        // Region clips come from getBoundingClientRect and element capture, which round
+        // fractional pixels differently -- a 1-2px translation is a capture artifact,
+        // not a layout difference. Take the best alignment within +/-2px; anything a
+        // shift cannot absorb is a real difference and still fails.
+        let best = compare(referenceRegionShot, builtRegionShot);
+        for (const dy of [-2, -1, 1, 2]) {
+          const shifted = shiftVertically(builtRegionShot, dy);
+          const attempt = compare(referenceRegionShot, shifted);
+          if (attempt.ratio < best.ratio) best = attempt;
+        }
+        const { ratio, diff } = best;
+        writeFileSync(join(OUTPUT, `${tag}.diff.png`), PNG.sync.write(diff));
+        const threshold = region.threshold ?? DEFAULT_THRESHOLD;
+        test.info().annotations.push({ type: `region:${region.name}`, description: `${(ratio * 100).toFixed(2)}%` });
+        expect(
+          ratio,
+          `${tag} differs on ${(ratio * 100).toFixed(2)}% of pixels (limit ${(threshold * 100).toFixed(0)}%). ${region.note} See e2e/output/${tag}.diff.png`,
+        ).toBeLessThanOrEqual(threshold);
+      }
     });
   }
 }

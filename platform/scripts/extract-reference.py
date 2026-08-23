@@ -3,7 +3,7 @@
 Extract the regulatory reference data from the design prototypes.
 
 The nine assessment domains and the ten minimum conditions exist ONLY in
-`handoff 3/pages/Organizer Journey.dc.html`. No markdown document enumerates them.
+`handoff 4/pages/Organizer Journey.dc.html`. No markdown document enumerates them.
 This script is the single supported way to refresh them.
 
 It emits `lib/reference/reference-snapshot.json`, which records:
@@ -29,7 +29,7 @@ from pathlib import Path
 from jsparse import extract
 
 PLATFORM = Path(__file__).resolve().parent.parent
-REFERENCE = PLATFORM.parent / "handoff 3" / "pages" / "Organizer Journey.dc.html"
+REFERENCE = PLATFORM.parent / "handoff 4" / "pages" / "Organizer Journey.dc.html"
 OUT = PLATFORM / "lib" / "reference" / "reference-snapshot.json"
 
 

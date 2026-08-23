@@ -6,13 +6,27 @@ Make the obligation legible and dischargeable. No marketing register, no encoura
 
 ## Authority
 
-`handoff 3/SPEC.md` wins over everything. `handoff 3/ROADMAP.md` is authoritative on routing.
-`ROUTES.md` and `PROMPTS.md` described an earlier build and have been removed — if a copy
-resurfaces, ignore it.
+**`handoff 4/source-documents/` outranks everything** — the actual regulatory instruments,
+English and Arabic. Read its README first. `SPEC.md`, `ROADMAP.md` and
+`CLAUDE-CODE-START-HERE.md` are a summary of them, and the summary has already been wrong
+twice. Where a source and a summary disagree, the source wins — and the disagreement is
+reported, never silently reconciled. `handoff 4/SPEC.md` wins over the other summaries;
+`handoff 4/ROADMAP.md` is authoritative on routing. `ROUTES.md` and `PROMPTS.md` described
+an earlier build and have been removed — if a copy resurfaces, ignore it.
 
-The nine assessment domains and ten minimum conditions exist **only** in
-`handoff 3/pages/Organizer Journey.dc.html` (`domainDefs`, `minDefs`). No markdown file
-enumerates them. That HTML is load-bearing, not decoration.
+**Arabic strings come from the Arabic issue** of the regulation where one exists — it is
+the Arabic issue, not a translation. Known EN/AR divergences are listed in the
+source-documents README; each needs a Ministry decision — follow the English and record it.
+
+**Pixel fidelity to `handoff 4/pages/` is the primary acceptance criterion**, above
+architecture and above cleverness. A visual difference from the reference is a defect
+unless the reviewer said otherwise. Do not improve the reference — copy it and say so;
+several values were argued over.
+
+The nine assessment domains and ten minimum conditions are carried by
+`handoff 4/pages/Organizer Journey.dc.html` (`domainDefs`, `minDefs`) and authoritatively
+by `source-documents/en/02` (Annex A) — the prototype's copies are checked against the
+build by the drift test.
 
 ## Architecture
 
@@ -20,17 +34,19 @@ enumerates them. That HTML is load-bearing, not decoration.
   functions over plain data. Callable from a screen, a route handler and a `.test.ts` alike.
   It owns level derivation, the higher-of rule, deadline dates, the four state chips,
   conditional visibility and the organization-pending rule. **No screen implements its own gating.**
-- **Arabic layout is our work, not the library's.** next-intl does strings, ICU and formatting.
-  It does not set `dir` and does not mirror layout. We do both.
+- **Arabic layout is our work.** No i18n library: both languages live in the DOM via `data-l`
+  spans, and the `<L en ar>` component's required props make parity a compile error. We set
+  `dir`/`lang` from cookies and mirror the layout with logical properties.
 - **Server-side field limits are enforced on the server.** Not a wide query filtered at render.
 
 ## The non-negotiables
 
-**0. Do not port the prototype's deliberate bug.** In `Organizer Journey.dc.html`, `att3`
-(20,000+) and `run21` (course ≥ 21.1 km) carry `derived: false` — manual checkboxes, because the
-prototype has no numeric input. In the build they are **derived**: capture expected maximum
-simultaneous attendance as a number, and course distance as a required field on organized running
-events. An unticked box on a marathon returns Level 2. That is the failure this platform exists to prevent.
+**0. The prototype cannot derive the minimum conditions; the build must.** Seven of ten carry
+`derived: false` in the prototype (`att3`, `club`, `run21`, `tri`, `open`, `combat`, `motor`) and
+`run` over-fires from domain 2's bundled top option. Domain 2 resolves **no** discipline floor.
+The build captures **disciplines as a structured list**, attendance as a number, and course
+distance as a required field on running events; every condition derives from those. **An unset
+input returns "incomplete" naming the field — never a level.**
 
 **1. The level is derived, never chosen.** Nine domains × 0–2 = 0–18. Bands 0–5 / 6–11 / 12–18.
 Ten minimum conditions. **Final level is the higher of the two**, and the UI reports both results

@@ -10,7 +10,14 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
+import {
+  checkPasswordPolicy,
+  hashPassword,
+  verifyPassword,
+  RESET_EXPIRY_MINUTES,
+} from '../lib/password';
 import {
   currentAccount,
   endSession,
@@ -22,6 +29,7 @@ import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
   'test_organizer',
+  'test_organizer_pending',
   'test_ems',
   'test_director',
   'test_response',
@@ -42,9 +50,31 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   redirect('/dashboard');
 }
 
+export async function signInWithPasswordAction(formData: FormData): Promise<void> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  if (!email || !password) redirect('/signin?error=credentials');
+  const row = getDb()
+    .prepare(`SELECT id, password_hash FROM accounts WHERE email = ?`)
+    .get(email) as { id: number; password_hash: string | null } | undefined;
+  // One failure answer: whether the email exists is not disclosed.
+  if (!row?.password_hash || !verifyPassword(password, row.password_hash)) {
+    redirect('/signin?error=credentials');
+  }
+  await startSession(row.id);
+  redirect('/dashboard');
+}
+
 export async function createAccountAction(formData: FormData): Promise<void> {
   const name = String(formData.get('name') ?? '').trim();
-  if (!name) redirect('/signin?error=name-required');
+  const organization = String(formData.get('organization') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  if (!name) redirect('/signin?mode=signup&error=name-required');
+  if (!email) redirect('/signin?mode=signup&error=email-required');
+  if (!checkPasswordPolicy(password).ok) redirect('/signin?mode=signup&error=password-policy');
+  const exists = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email);
+  if (exists) redirect('/signin?mode=signup&error=email-taken');
   const initials = name
     .split(/\s+/)
     .map((w) => w[0] ?? '')
@@ -54,12 +84,39 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   const login = `user_${Date.now().toString(36)}`;
   const result = getDb()
     .prepare(
-      `INSERT INTO accounts (login, display_name, initials, role, is_demo)
-       VALUES (?, ?, ?, 'organizer', 0)`,
+      `INSERT INTO accounts (login, email, password_hash, display_name, initials, role, is_demo)
+       VALUES (?, ?, ?, ?, ?, 'organizer', 0)`,
     )
-    .run(login, name, initials);
+    .run(login, email, hashPassword(password), name, initials);
   await startSession(result.lastInsertRowid as number);
-  redirect('/dashboard');
+  // The reference: after creating the account you continue to the organization
+  // registration form. The organization name captured here pre-fills it.
+  redirect(organization ? `/organization?name=${encodeURIComponent(organization)}` : '/organization');
+}
+
+/**
+ * Issues a reset token: expires per policy (one hour), single-use. The review build has
+ * no mail transport, so the confirmation screen says the link was recorded; sending is
+ * deployment configuration.
+ */
+export async function requestPasswordResetAction(formData: FormData): Promise<void> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  if (email) {
+    const row = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email) as
+      | { id: number }
+      | undefined;
+    if (row) {
+      const token = randomBytes(32).toString('hex');
+      getDb()
+        .prepare(
+          `INSERT INTO password_resets (token, account_id, expires_at)
+           VALUES (?, ?, datetime('now', ?))`,
+        )
+        .run(token, row.id, `+${RESET_EXPIRY_MINUTES} minutes`);
+    }
+  }
+  // The answer is uniform whether or not the email exists.
+  redirect('/signin?mode=reset&notice=reset-sent');
 }
 
 export async function signOutAction(): Promise<void> {

@@ -20,11 +20,16 @@ const inputStyle: React.CSSProperties = {
  * The organization record. Registration blocks filing, not starting (non-negotiable #9):
  * this screen says plainly what continues meanwhile and what waits.
  */
-export default async function OrganizationPage() {
+export default async function OrganizationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ name?: string }>;
+}) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
+  const { name: prefillName } = await searchParams;
 
   return (
     <>
@@ -84,7 +89,7 @@ export default async function OrganizationPage() {
                   <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                     <L en="Organization name (English)" ar="اسم المؤسسة (بالإنكليزية)" />
                   </span>
-                  <input name="nameEn" required style={inputStyle} />
+                  <input name="nameEn" required defaultValue={prefillName ?? ''} style={inputStyle} />
                 </label>
                 <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>

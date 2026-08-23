@@ -4,6 +4,7 @@ import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
+import { clockNow } from '../../../lib/clock';
 import {
   assessmentsFor,
   beirutToday,
@@ -111,7 +112,7 @@ const STAGE_STYLE: Record<StageKind, { color: string; edge: string; ink: string;
 
 function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn: string; noteAr: string }) {
   return (
-    <div style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+    <div data-region="rail" style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
         <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
           <L en="Where this event stands" ar="موضع هذه الفعالية" />
@@ -165,7 +166,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
     eventStartDate: event.startDate,
     filed: event.filed,
     organizationStatus: organization?.status ?? 'none',
-    now: new Date(),
+    now: clockNow(),
   };
 
   const filing = eventFilingDeadline(gateCtx);
@@ -182,7 +183,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const stage: number = !assessed ? 2 : !event.filed ? 3 : 4;
   const stages: RailStage[] = [
     orgRecorded
-      ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: '', metaAr: '' }
+      ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization?.recordedAt ?? '', metaAr: organization?.recordedAt ? `\u2066${organization.recordedAt}\u2069` : '' }
       : { k: 'current', en: 'Organization recording', ar: 'تسجيل المؤسسة', metaEn: 'Pending with the Ministry. Filing waits for it.', metaAr: 'قيد الاستكمال لدى الوزارة. التقديم بانتظاره.' },
     assessed
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
@@ -220,7 +221,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
         {/* Identity header, from the reference */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
+        <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>
             <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginBlockEnd: 12 }}>
               <div>
@@ -288,7 +289,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
 
         {/* The derivation: both results, and which governed. Never the final level alone. */}
         {derivation ? (
-          <div style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40 }}>
+          <div data-region="derivation" style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 18 }}>
               <L en="How the level was determined" ar="كيف تحدد المستوى" />
             </div>
@@ -397,7 +398,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
         </div>
 
         {history.length > 0 ? (
-          <>
+          <div data-region="history">
             <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en="Submission history" ar="سجل التقديم" />
             </h2>
@@ -411,7 +412,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                 </div>
               ))}
             </div>
-          </>
+          </div>
         ) : null}
 
         {/* Assessment history: versioned, never edited in place, previous versions readable */}

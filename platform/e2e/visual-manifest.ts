@@ -12,6 +12,30 @@
 
 import type { ReferenceFile } from './helpers/reference';
 
+/**
+ * A named sub-screen comparison. Modes:
+ *  - compare: pixel-diff the region on both sides at its own threshold (default 2%)
+ *  - expectedDivergent: the region exists only on the built side BY REVIEWER DECISION;
+ *    assert it renders and report it, no pixel comparison
+ *  - absentExpected: the region exists only in the reference because its data belongs
+ *    to a later slice; assert the built page does NOT fake it
+ */
+export interface VisualRegion {
+  name: string;
+  mode: 'compare' | 'expectedDivergent' | 'absentExpected';
+  /** compare: how to find the region in the reference DOM. */
+  reference?:
+    | { strategy: 'cardByText'; text: string }
+    | { strategy: 'headerRow' }
+    | { strategy: 'headingSection'; text: string };
+  /** compare / expectedDivergent: the built side's selector. */
+  builtSelector?: string;
+  /** absentExpected: text that identifies the region and must not appear on the built page. */
+  markerText?: string;
+  threshold?: number;
+  note: string;
+}
+
 export interface VisualMapping {
   /** Stable id; also names the screenshot artifacts. */
   id: string;
@@ -22,6 +46,14 @@ export interface VisualMapping {
   builtRoute: string | null;
   /** Demo login whose session the built screen needs, if any. */
   signInAs?: string;
+  /**
+   * CSS hiding parts of the REFERENCE before capture -- only for prototype content the
+   * handoff author has disavowed (each entry says why). CSS rather than node removal
+   * because the prototype runtime re-renders and would restore a removed node.
+   */
+  referenceMask?: { css: string; why: string }[];
+  /** When present, the comparison is per-region and no full-page ratio is asserted. */
+  regions?: VisualRegion[];
   /**
    * Pixel-difference ratio (0..1) above which the comparison fails.
    * The default in the spec applies when absent.
@@ -57,6 +89,18 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceTab: 'Dashboard',
     builtRoute: '/dashboard',
     signInAs: 'test_organizer',
+    referenceMask: [
+      {
+        // The organization-registration banner card (accent border, accent-soft fill).
+        css: 'div[style*="var(--accent-soft)"][style*="border-radius: 14px"], div[style*="var(--accent-soft)"][style*="border-radius:14px"]',
+        why: 'Prototype error, acknowledged (handoff 4, decision 6): the showcase account is recorded and holds filed submissions; the pending state lives on test_organizer_pending. The banner belongs to that account, not this one.',
+      },
+      {
+        // The header's "Organization pending Ministry approval" line.
+        css: 'header div[style*="var(--accent-ink)"]',
+        why: 'Same decision: the showcase organization is recorded; the pending header line moved to test_organizer_pending.',
+      },
+    ],
   },
   {
     id: 'organizer-assessment',
@@ -70,14 +114,42 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceTab: 'Event record',
     builtRoute: '/events/EV-0418',
     signInAs: 'test_organizer',
-    // Slice 1 deliberately diverges from the reference record: it ADDS the derivation
-    // panel (both results and which governed -- a stated requirement), OMITS the
-    // requirements counters band (its data is Slice 2 and will not be faked), and shows
-    // rail stage 1 as pending because the demonstration organization is pending -- the
-    // prototype shows it recorded while also showing the pending banner, which cannot
-    // both hold. Measured 17-18% against the pinned reference. RATCHET THIS DOWN when
-    // Slice 2 fills in the counters.
-    threshold: 0.19,
+    // Itemised by region (handoff 4, decision 4): a blanket ratchet catches nothing.
+    regions: [
+      {
+        name: 'rail',
+        mode: 'compare',
+        reference: { strategy: 'cardByText', text: 'Where this event stands' },
+        builtSelector: '[data-region="rail"]',
+        note: 'The six-stage rail. Held at 2%. Known residuals inside the budget: stage 3 meta reads "In progress" (reference: "2 outstanding" -- counters are Slice 2 data) and stage 2 shows the actual version-2 date where the reference hand-wrote a different one than its own history list.',
+      },
+      {
+        name: 'record-header',
+        mode: 'compare',
+        reference: { strategy: 'headerRow' },
+        builtSelector: '[data-region="record-header"]',
+        note: 'Identity block and the level/deadline figures. Held at 2%.',
+      },
+      {
+        name: 'history',
+        mode: 'compare',
+        reference: { strategy: 'headingSection', text: 'Submission history' },
+        builtSelector: '[data-region="history"]',
+        note: 'Submission history rows. Held at 2%.',
+      },
+      {
+        name: 'derivation-panel',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="derivation"]',
+        note: 'Expected divergent at reviewer instruction: the record reports both results and which governed. The reference record carries no such panel.',
+      },
+      {
+        name: 'counters-band',
+        mode: 'absentExpected',
+        markerText: 'named agencies yet to answer',
+        note: 'Absent because its data (named agencies, outstanding documents) is Slice 2. Not faked. Becomes a compare region when Slice 2 lands.',
+      },
+    ],
   },
   {
     id: 'organizer-notifications',

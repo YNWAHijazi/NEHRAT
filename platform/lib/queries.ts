@@ -204,10 +204,7 @@ export function unreadCountFor(accountId: number): number {
   return row.n;
 }
 
-/** Today's date in Asia/Beirut, YYYY-MM-DD. */
-export function beirutToday(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Beirut' }).format(new Date());
-}
+export { beirutToday } from './clock';
 
 export function daysBetween(fromIso: string, toIso: string): number {
   const from = Date.parse(`${fromIso}T00:00:00Z`);

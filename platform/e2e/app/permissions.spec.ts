@@ -52,8 +52,15 @@ async function expectRefusal(page: Page, path: string, marker: RegExp): Promise<
   await expect(page.locator('body')).not.toContainText(marker);
 }
 
+/**
+ * VACUOUS UNTIL THEIR SURFACES EXIST. Every route below 404s for everyone today, so a
+ * "refusal" proves nothing about role gating -- and a green test implying coverage it
+ * lacks is worse than a red one. Skipped, with the slice that unskips each. The refusal
+ * contract they will enforce is already written.
+ */
 test.describe('platform-owner surfaces are above the Ministry', () => {
   test('a reviewer cannot reach platform activity', async ({ page }) => {
+    test.skip(true, 'Vacuous: /platform/activity 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.reviewer);
     await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });
@@ -61,11 +68,13 @@ test.describe('platform-owner surfaces are above the Ministry', () => {
   test('a Ministry administrator cannot reach platform activity', async ({ page }) => {
     // ROADMAP 5: "A Ministry administrator cannot reach these." The stronger role is the
     // one worth testing -- admin outranks reviewer everywhere else.
+    test.skip(true, 'Vacuous: /platform/activity 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.admin);
     await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });
 
   test('a Ministry administrator cannot reach master admin', async ({ page }) => {
+    test.skip(true, 'Vacuous: /platform/admin 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.admin);
     await expectRefusal(page, '/platform/admin', /master admin|الإدارة العليا/i);
   });
@@ -73,6 +82,7 @@ test.describe('platform-owner surfaces are above the Ministry', () => {
 
 test.describe('Ministry tiers', () => {
   test('a reviewer cannot reach administrator configuration', async ({ page }) => {
+    test.skip(true, 'Vacuous: /ministry/admin/configuration 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.reviewer);
     await expectRefusal(
       page,
@@ -82,6 +92,7 @@ test.describe('Ministry tiers', () => {
   });
 
   test('an organizer cannot reach the review queue', async ({ page }) => {
+    test.skip(true, 'Vacuous: /ministry/queue 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.organizer);
     await expectRefusal(page, '/ministry/queue', /review queue|قائمة المراجعة/i);
   });
@@ -104,22 +115,29 @@ test.describe('an organizer never sees another organizer\'s records', () => {
 
 test.describe('nominated roles see only what they were named in', () => {
   test('an EMS provider cannot open an event it was not named in', async ({ page }) => {
+    test.skip(true, 'Vacuous: the EMS surface arrives in Slice 5; the route 404s for everyone today.');
     await signInAs(page, LOGINS.ems);
     await expectRefusal(page, '/events/EV-0001/participation', /participation|المشاركة/i);
   });
 
   test('a medical director cannot open an unnamed event', async ({ page }) => {
+    // Not fully vacuous -- /events/:id exists -- but the director ROLE cannot yet hold a
+    // nomination, so the refusal tested (unnamed event) cannot be distinguished from
+    // "role has no events at all". Real once Slice 5 gives directors nominations.
+    test.skip(true, 'Vacuous until Slice 5: directors cannot yet be named in any event.');
     await signInAs(page, LOGINS.director);
     await expectRefusal(page, '/events/EV-0001', /event record|سجل الفعالية/i);
   });
 });
 
 test.describe('signed out', () => {
-  test('every authenticated surface bounces to sign-in', async ({ page }) => {
-    for (const path of ['/dashboard', '/ministry', '/ministry/queue', '/platform/activity']) {
+  test('every built authenticated surface bounces to sign-in', async ({ page }) => {
+    // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
+    // vacuously. Extend this list as slices land.
+    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new']) {
       const response = await page.goto(path);
       const refused =
-        page.url().includes('/signin') || [401, 403, 404].includes(response?.status() ?? 0);
+        page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);
       expect(refused, `${path} served content to a signed-out visitor`).toBe(true);
     }
   });

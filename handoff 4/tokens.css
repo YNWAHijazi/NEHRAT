@@ -1,0 +1,176 @@
+/* ============================================================
+   Event Health Readiness Platform — design tokens
+   Adopt these values verbatim. Do not substitute, round,
+   re-derive or "improve" them.
+   ============================================================ */
+
+/* ---- Fonts: Google Fonts CDN, these two families only ---- */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap');
+
+/* ---- Palette: Petrol, light (the default) ---- */
+:root,
+html[data-palette="petrol"][data-theme="light"] {
+  --bg:         #F4F2ED;   /* page ground */
+  --surface:    #FBFAF7;   /* cards, panels */
+  --surface2:   #EAE7E0;   /* table headers, quiet bands, inert chips */
+  --ink:        #0B1416;   /* body text */
+  --muted:      #4C5B5E;   /* secondary text, labels */
+  --line:       rgba(11,20,22,.14);
+
+  --brand:      #15515D;   /* primary actions, satisfied/complete states */
+  --brand-soft: rgba(21,81,93,.09);
+
+  --accent:     #E9B44C;   /* attention: outstanding, pending, warning */
+  --accent-ink: #8A5C10;   /* accent text — never use --accent for text */
+  --accent-soft:rgba(233,180,76,.20);
+
+  --bad:        #A8482A;   /* overdue, deficiency, declined */
+  --bad-soft:   rgba(168,72,42,.14);
+
+  --l1: #15515D;           /* Level 1 */
+  --l2: #8A5C10;           /* Level 2 */
+  --l3: #A8482A;           /* Level 3 */
+}
+
+/* ---- Palette: Petrol, dark ---- */
+html[data-palette="petrol"][data-theme="dark"] {
+  --bg:#08171B; --surface:#0D2026; --surface2:#12292F;
+  --ink:#E6EDEC; --muted:#9BAFB2; --line:rgba(255,255,255,.13);
+  --brand:#6BA3AE; --brand-soft:rgba(107,163,174,.14);
+  --accent:#E9B44C; --accent-ink:#E9B44C; --accent-soft:rgba(233,180,76,.18);
+  --bad:#D2724B; --bad-soft:rgba(210,114,75,.18);
+  --l1:#6BA3AE; --l2:#E9B44C; --l3:#D2724B;
+}
+
+/* ---- Palette: Cedar, light (second palette, user-switchable) ---- */
+html[data-palette="cedar"][data-theme="light"] {
+  --bg:#F1F1EC; --surface:#FAFAF6; --surface2:#E7E8E0;
+  --ink:#12160F; --muted:#525A4C; --line:rgba(18,22,15,.14);
+  --brand:#2E4A34; --brand-soft:rgba(46,74,52,.09);
+  --accent:#C2452C; --accent-ink:#A3341E; --accent-soft:rgba(194,69,44,.14);
+  --bad:#7E1F12; --bad-soft:rgba(126,31,18,.14);
+  --l1:#2E4A34; --l2:#A3341E; --l3:#7E1F12;
+}
+
+/* ---- Palette: Cedar, dark ---- */
+html[data-palette="cedar"][data-theme="dark"] {
+  --bg:#0E140F; --surface:#141C15; --surface2:#1B241C;
+  --ink:#E9EDE6; --muted:#9FAC9C; --line:rgba(255,255,255,.13);
+  --brand:#8CB292; --brand-soft:rgba(140,178,146,.14);
+  --accent:#E0674B; --accent-ink:#E0674B; --accent-soft:rgba(224,103,75,.18);
+  --bad:#B33A22; --bad-soft:rgba(179,58,34,.22);
+  --l1:#8CB292; --l2:#E0674B; --l3:#B33A22;
+}
+
+/* ---- Base ---- */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;      /* tabular figures everywhere */
+  text-wrap: pretty;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--brand); text-decoration: none; }
+a:hover { color: var(--accent-ink); }
+
+/* ---- Focus: visible on every interactive element, no exceptions ---- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+button:active { transform: translateY(1px); }
+button:disabled { cursor: not-allowed; transform: none; }
+
+/* ---- Bilingual: Arabic hides English and vice versa ---- */
+[data-l="ar"] { display: none !important; }
+html[lang="ar"] [data-l="ar"] { display: revert !important; }
+html[lang="ar"] [data-l="en"] { display: none !important; }
+
+/* Arabic typography differs: no tracking, looser leading */
+[data-l="ar"] {
+  font-family: "IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif;
+  letter-spacing: 0 !important;
+  line-height: 1.75;
+}
+h1 [data-l="ar"], h2 [data-l="ar"], h3 [data-l="ar"] { line-height: 1.45; }
+
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+
+/* ---- Responsive hooks ---- */
+@media (max-width:1000px) { [data-split] { grid-template-columns: 1fr !important; } }
+@media (max-width:900px)  { [data-dock]  { display: none; } }
+@media (max-width:760px)  {
+  [data-sec-h1] { font-size: 30px !important; }
+  [data-pad]    { padding-inline: 20px !important; }
+  [data-stack]  { grid-template-columns: 1fr !important; }
+  [data-th]     { display: none !important; }   /* table header row collapses */
+  [data-row]    { grid-template-columns: 1fr !important; }
+  [data-due]    { text-align: start !important; min-width: 0 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  button:active { transform: none; }
+}
+
+/* ============================================================
+   GEOMETRY AND USAGE RULES — not expressible as tokens.
+   Follow these literally.
+   ============================================================
+
+   Radii            cards and panels 12–16px · inputs and small
+                    panels 8–10px · pills and buttons fully rounded
+                    (height/2) · chips 3–4px
+
+   Control heights  primary button 48px · secondary 44px ·
+                    tertiary/inline 38px · input 44–46px ·
+                    nav pill 34px · filter chip 32px
+                    Never below 44px for a mobile hit target.
+
+   State signalling A 3px border-inline-start on the card or row,
+                    coloured --brand (settled) / --accent-ink
+                    (outstanding) / --bad (overdue or failed) /
+                    --line (no action needed). Dashed instead of
+                    solid when the item is owed by a third party.
+                    ALWAYS pair the colour with a text chip.
+                    Status is never colour alone.
+
+   Chips            padding 3–4px 8–10px, radius 3–4px,
+                    background *-soft, text the matching solid.
+                    Accent chips use --accent-ink for text.
+
+   Section labels   11.5px, uppercase, letter-spacing .06–.07em,
+                    colour --muted.
+
+   Type scale       page h1 38px (30px on the dense Ministry
+                    console) · section h2 24px · sub-head 18–20px ·
+                    body 15–16.5px · secondary 13.5–14.5px ·
+                    label 11.5–13px. Headings letter-spacing
+                    -.02 to -.035em; Arabic overrides to 0.
+
+   Tables           1px gap on a --line background to fake
+                    hairlines, --surface2 header row, first data
+                    column carries the 3px state border.
+
+   Numbers          tabular figures always. Dates YYYY-MM-DD.
+                    Western Arabic numerals in both languages.
+
+   Motion           There is essentially none, by design. No
+                    entrance animations, no transitions beyond
+                    focus and :active, no skeleton shimmer, no
+                    parallax, no scroll effects. This is a
+                    government record system and stillness is the
+                    point. Do not add motion.
+
+   Layout width     public pages max-width 1160px · Ministry
+                    console 1320px · single-column forms 900–940px.
+                    Page padding 32px, 20px below 760px.
+
+   Never            gradients as decoration, drop shadows, emoji,
+                    icon-only buttons without text, colour-only
+                    status, left/right CSS properties.
+   ============================================================ */

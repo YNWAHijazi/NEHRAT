@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand);text-decoration:none}
+a:hover{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+button,a,input,textarea,select{transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,box-shadow 150ms ease-out,transform 120ms ease-out}
+button:not(:disabled):active,a:active{transform:translateY(1px)}
+button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(0,0,0,.035)}
+html[data-theme="dark"] button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.05)}
+button:disabled{cursor:not-allowed;opacity:.75;box-shadow:none;transform:none}
+input:hover:not(:disabled),textarea:hover:not(:disabled){border-color:var(--muted)}
+section#top :focus-visible,footer :focus-visible{outline-color:var(--hero-ink)}
+:root,html[data-palette="petrol"][data-theme="light"]{--bg:#F4F2ED;--surface:#FBFAF7;--surface2:#EAE7E0;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#15515D;--brand-soft:rgba(21,81,93,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14)}
+html[data-palette="petrol"][data-theme="dark"]{--bg:#08171B;--surface:#0D2026;--surface2:#12292F;--ink:#E6EDEC;--muted:#9BAFB2;--line:rgba(255,255,255,.13);--brand:#6BA3AE;--brand-soft:rgba(107,163,174,.14);--accent:#E9B44C;--accent-ink:#E9B44C;--accent-soft:rgba(233,180,76,.18);--bad:#D2724B;--bad-soft:rgba(210,114,75,.18)}
+:root,html[data-palette="petrol"]{--hero-bg:#08171B;--hero-ink:#F4F2ED;--hero-muted:#9DB2B6;--hero-line:rgba(244,242,237,.11);--hero-line2:rgba(244,242,237,.055);--hero-glow:rgba(233,180,76,.13);--hero-field:rgba(244,242,237,.07)}
+html[data-palette="cedar"][data-theme="light"]{--bg:#F1F1EC;--surface:#FAFAF6;--surface2:#E7E8E0;--ink:#12160F;--muted:#525A4C;--line:rgba(18,22,15,.14);--brand:#2E4A34;--brand-soft:rgba(46,74,52,.09);--accent:#C2452C;--accent-ink:#A3341E;--accent-soft:rgba(194,69,44,.14);--bad:#7E1F12;--bad-soft:rgba(126,31,18,.14)}
+html[data-palette="cedar"][data-theme="dark"]{--bg:#0E140F;--surface:#141C15;--surface2:#1B241C;--ink:#E9EDE6;--muted:#9FAC9C;--line:rgba(255,255,255,.13);--brand:#8CB292;--brand-soft:rgba(140,178,146,.14);--accent:#E0674B;--accent-ink:#E0674B;--accent-soft:rgba(224,103,75,.18);--bad:#E8846A;--bad-soft:rgba(232,132,106,.16)}
+html[data-palette="cedar"]{--hero-bg:#0E140F;--hero-ink:#F1F1EC;--hero-muted:#A6B2A3;--hero-line:rgba(241,241,236,.11);--hero-line2:rgba(241,241,236,.055);--hero-glow:rgba(194,69,44,.16);--hero-field:rgba(241,241,236,.07)}
+html[data-palette="petrol"][data-theme="dark"]{--hero-bg:#143440}
+html[data-palette="cedar"][data-theme="dark"]{--hero-bg:#1E2E20}
+[data-l="ar"]{display:none !important}
+html[lang="ar"] [data-l="ar"]{display:revert !important}
+html[lang="ar"] [data-l="en"]{display:none !important}
+[data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
+h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+@media (max-width:900px){[data-dock]{display:none}}
+@media (max-width:700px){[data-sec-h1]{font-size:30px !important}[data-pad]{padding-inline:20px !important}[data-stack]{grid-template-columns:1fr !important}[data-th]{display:none !important}}
+@media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}button:not(:disabled):active,a:active{transform:none !important}}
+@media print{[data-noprint]{display:none !important}[data-wallcard]{border:2px solid #000 !important;background:#fff !important;color:#000 !important}}
+</style>
+<script>
+(function(){var h=document.documentElement;if(!h.getAttribute('data-theme')){h.setAttribute('lang','en');h.setAttribute('dir','ltr');h.setAttribute('data-theme','light');h.setAttribute('data-palette','petrol');}})();
+</script>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg)">
+
+<div style="background:var(--surface2);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:9px 32px;font-size:12.5px;letter-spacing:.02em;color:var(--muted)">
+<span data-l="en">An official service of the Republic of Lebanon</span><span data-l="ar">خدمة رسمية من الجمهورية اللبنانية</span>
+</div>
+</div>
+
+<header data-noprint="" style="position:sticky;top:0;z-index:40;background:var(--bg);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:14px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="display:grid;place-items:center;width:34px;height:34px;border:1.25px solid var(--brand);border-radius:50%;flex:none">
+<span style="display:block;width:13px;height:13px;background:var(--brand);clip-path:polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)"></span>
+</span>
+<span style="display:flex;flex-direction:column;line-height:1.15">
+<span style="font-size:14.5px;font-weight:600;letter-spacing:-.01em"><span data-l="en">Ministry of Public Health</span><span data-l="ar">وزارة الصحة العامة</span></span>
+<span style="font-size:12px;color:var(--muted)"><span data-l="en">Cardiac-arrest readiness</span><span data-l="ar">الجاهزية للاستجابة لحالات توقف القلب</span></span>
+</span>
+</div>
+<div style="margin-inline-start:auto;display:flex;align-items:center;gap:8px">
+<button onClick="{{ cycleText }}" title="Text size" style="height:36px;padding-inline:12px;background:none;border:1px solid var(--line);border-radius:18px;cursor:pointer;font-size:13px">A<span style="font-size:16px">A</span></button>
+<button onClick="{{ toggleLang }}" style="height:36px;padding-inline:14px;background:none;border:1px solid var(--line);border-radius:18px;cursor:pointer;font-size:13.5px"><span data-l="en">العربية</span><span data-l="ar">English</span></button>
+<a href="#top" style="height:36px;display:flex;align-items:center;padding-inline:18px;background:var(--brand);color:var(--bg);border-radius:18px;font-size:13.5px;font-weight:500"><span data-l="en">Sign in</span><span data-l="ar">تسجيل الدخول</span></a>
+</div>
+</div>
+<div data-pad="" data-tabs="" style="max-width:1160px;margin-inline:auto;padding:0 32px 12px;display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="7">
+<button onClick="{{ s.go }}" aria-pressed="{{ s.on }}" style="height:34px;padding-inline:14px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:18px;font-size:13px;cursor:pointer"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></button>
+</sc-for>
+</div>
+</header>
+
+<div id="top" data-pad="" style="max-width:1160px;margin-inline:auto;padding:44px 32px 100px">
+
+<sc-if value="{{ isFramework }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="font-size:13px;color:var(--muted);margin-block-end:20px"><span data-l="en">Home · Frameworks · Cardiac-arrest readiness</span><span data-l="ar">الرئيسية · الأطر · الجاهزية لتوقف القلب</span></div>
+<h1 data-sec-h1="" style="margin:0 0 18px;font-size:38px;font-weight:600;letter-spacing:-.035em;line-height:1.1;max-width:20ch"><span data-l="en">Cardiac-arrest readiness, CPR and public access defibrillation</span><span data-l="ar">الجاهزية لتوقف القلب، والإنعاش القلبي الرئوي، وإتاحة أجهزة الصدمات للعموم</span></h1>
+<p style="margin:0 0 40px;font-size:18px;line-height:1.65;color:var(--muted);max-width:70ch"><span data-l="en">The national framework for covered facilities. A covered facility carries continuous obligations and confirms its readiness to the Ministry once each year.</span><span data-l="ar">الإطار الوطني للمرافق المشمولة. يحمل المرفق المشمول موجبات مستمرة ويؤكّد جاهزيته للوزارة مرة كل سنة.</span></p>
+
+<sc-if value="{{ moduleOn }}" hint-placeholder-val="{{ true }}">
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:44px">
+<h2 style="margin:0 0 12px;font-size:24px;font-weight:600;letter-spacing:-.02em"><span data-l="en">Register a facility</span><span data-l="ar">تسجيل مرفق</span></h2>
+<p style="margin:0 0 26px;font-size:15px;line-height:1.65;color:var(--muted);max-width:70ch"><span data-l="en">Facility profile and category, the cardiac emergency response plan, registration of each AED, and the annual readiness confirmation.</span><span data-l="ar">ملف المرفق وفئته، وخطة الاستجابة لطوارئ توقف القلب، وتسجيل كل جهاز، والتأكيد السنوي للجاهزية.</span></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;padding-block:20px;border-block:1px solid var(--line);margin-block-end:24px">
+<div><div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:5px"><span data-l="en">Renewal</span><span data-l="ar">التجديد</span></div><div style="font-size:15px;font-weight:500"><span data-l="en">Annual</span><span data-l="ar">سنوي</span></div></div>
+<div><div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:5px"><span data-l="en">Fee</span><span data-l="ar">الرسوم</span></div><div style="font-size:15px;font-weight:500;color:{{ feeColor }}"><span data-l="en">{{ feeEn }}</span><span data-l="ar">{{ feeAr }}</span></div></div>
+<div><div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:5px"><span data-l="en">Outcome</span><span data-l="ar">النتيجة</span></div><div style="font-size:15px;font-weight:500"><span data-l="en">Facility record</span><span data-l="ar">سجل مرفق</span></div></div>
+<div><div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:5px"><span data-l="en">Steps</span><span data-l="ar">الخطوات</span></div><div style="font-size:15px;font-weight:500">{{ stepCount }}</div></div>
+</div>
+<sc-if value="{{ feesOn }}" hint-placeholder-val="{{ true }}">
+<p style="margin:0 0 22px;font-size:13.5px;color:var(--muted)"><span data-l="en">A payment step is added after the plan is submitted and before the record is issued.</span><span data-l="ar">تُضاف خطوة دفع بعد تقديم الخطة وقبل إصدار السجل.</span></p>
+</sc-if>
+<button onClick="{{ goDashboard }}" style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Start registration</span><span data-l="ar">ابدأ التسجيل</span></button>
+</div>
+</sc-if>
+
+<sc-if value="{{ moduleOff }}" hint-placeholder-val="{{ true }}">
+<div style="padding:30px 34px;background:var(--surface2);border-radius:14px;margin-block-end:44px;max-width:88ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Reference framework</span><span data-l="ar">إطار مرجعي</span></div>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:var(--muted)"><span data-l="en">Read the covered categories, facility obligations and AED requirements below. Digital registration opens in a later phase.</span><span data-l="ar">اطّلعوا أدناه على الفئات المشمولة وموجبات المرافق ومتطلبات الأجهزة. يبدأ التسجيل الرقمي في مرحلة لاحقة.</span></p>
+<a href="#covered" style="font-size:15px;border-block-end:1px solid var(--brand);padding-block-end:2px"><span data-l="en">Read the framework</span><span data-l="ar">اقرأ الإطار</span></a>
+</div>
+</sc-if>
+
+<div style="padding:32px 34px;border:1px solid var(--accent);background:var(--accent-soft);border-radius:16px;margin-block-end:52px;max-width:84ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-ink);margin-block-end:12px"><span data-l="en">Accessibility rule</span><span data-l="ar">قاعدة إتاحة الوصول</span></div>
+<p style="margin:0;font-size:20px;line-height:1.55;font-weight:500;letter-spacing:-.01em"><span data-l="en">An AED is not considered accessible if retrieval is routinely delayed by locked access, unavailable personnel, or any other avoidable barrier.</span><span data-l="ar">لا يُعتبر الجهاز متاحاً للوصول إذا كان استرجاعه يتأخر عادةً بسبب أبواب مقفلة أو غياب الموظفين أو أي عائق آخر يمكن تفاديه.</span></p>
+</div>
+
+<h2 id="covered" style="margin:0 0 20px;font-size:30px;font-weight:600;letter-spacing:-.03em"><span data-l="en">Covered facilities and AED requirement</span><span data-l="ar">المرافق المشمولة ومتطلب الجهاز</span></h2>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-block-end:52px">
+<div data-stack="" style="display:grid;grid-template-columns:1.7fr 1fr;gap:1px;background:var(--line)">
+<div data-th="" style="background:var(--surface2);padding:14px 20px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Category</span><span data-l="ar">فئة المرفق</span></div>
+<div data-th="" style="background:var(--surface2);padding:14px 20px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">AED requirement</span><span data-l="ar">متطلب الجهاز</span></div>
+<sc-for list="{{ categories }}" as="c" hint-placeholder-count="6">
+<div style="background:var(--bg);padding:18px 20px;font-size:15px;line-height:1.55"><span data-l="en">{{ c.en }}</span><span data-l="ar">{{ c.ar }}</span></div>
+<div style="background:var(--bg);padding:18px 20px;font-size:15px;line-height:1.55;color:var(--muted)"><span data-l="en">{{ c.reqEn }}</span><span data-l="ar">{{ c.reqAr }}</span></div>
+</sc-for>
+</div>
+</div>
+
+<h2 style="margin:0 0 20px;font-size:30px;font-weight:600;letter-spacing:-.03em"><span data-l="en">Facility obligations</span><span data-l="ar">موجبات المرفق</span></h2>
+<ul style="margin:0 0 52px;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 32px">
+<sc-for list="{{ obligations }}" as="o" hint-placeholder-count="9">
+<li style="display:flex;gap:12px;font-size:16px;line-height:1.6">
+<span style="width:5px;height:5px;border-radius:50%;background:var(--brand);margin-block-start:9px;flex:none"></span>
+<span><span data-l="en">{{ o.en }}</span><span data-l="ar">{{ o.ar }}</span></span>
+</sc-for>
+</ul>
+
+<sc-if value="{{ vendorOn }}" hint-placeholder-val="{{ true }}">
+<div style="margin-block-end:52px">
+<h2 style="margin:0 0 8px;font-size:30px;font-weight:600;letter-spacing:-.03em"><span data-l="en">Suppliers and training providers</span><span data-l="ar">الموردون ومقدّمو التدريب</span></h2>
+<p style="margin:0 0 22px;font-size:14px;color:var(--muted);max-width:80ch"><span data-l="en">Listings are commercial. They do not imply Ministry endorsement and form no part of any compliance determination.</span><span data-l="ar">هذه القوائم تجارية. لا تعني إقراراً من الوزارة ولا تدخل في أي قرار امتثال.</span></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+<sc-for list="{{ vendors }}" as="v" hint-placeholder-count="4">
+<div style="padding:22px;border:1px solid var(--line);border-radius:12px">
+<div style="display:flex;justify-content:space-between;gap:10px;align-items:start;margin-block-end:8px">
+<div style="font-size:16px;font-weight:600"><span data-l="en">{{ v.en }}</span><span data-l="ar">{{ v.ar }}</span></div>
+<sc-if value="{{ v.sponsored }}" hint-placeholder-val="{{ true }}">
+<span style="flex:none;padding:3px 8px;border:1px solid var(--line);border-radius:4px;font-size:11px;color:var(--muted)"><span data-l="en">Sponsored</span><span data-l="ar">إعلان مدفوع</span></span>
+</sc-if>
+</div>
+<div style="font-size:14px;color:var(--muted);margin-block-end:14px"><span data-l="en">{{ v.descEn }}</span><span data-l="ar">{{ v.descAr }}</span></div>
+<a href="#top" style="font-size:14px"><span data-l="en">View profile</span><span data-l="ar">عرض الملف</span></a>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<div data-noprint="" style="position:sticky;bottom:0;margin-inline:-32px;padding:16px 32px;background:var(--surface);border-block-start:1px solid var(--line);display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+<div>
+<div style="font-size:15px;font-weight:600"><span data-l="en">Cardiac-arrest readiness</span><span data-l="ar">الجاهزية لتوقف القلب</span></div>
+<div style="font-size:13px;color:var(--muted)"><span data-l="en">Continuous obligations · Annual confirmation · </span><span data-l="ar">موجبات مستمرة · تأكيد سنوي · </span><span data-l="en">{{ feeEn }}</span><span data-l="ar">{{ feeAr }}</span></div>
+</div>
+<button onClick="{{ goDashboard }}" style="height:44px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:14.5px;font-weight:500;cursor:pointer"><span data-l="en">{{ ctaEn }}</span><span data-l="ar">{{ ctaAr }}</span></button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:start;margin-block-end:36px">
+<div>
+<div style="font-size:13px;color:var(--muted);margin-block-end:8px"><span data-l="en">Gyms, fitness centres and sports clubs · Beirut</span><span data-l="ar">الصالات الرياضية والأندية · بيروت</span></div>
+<h1 data-sec-h1="" style="margin:0;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Corniche Sports Club</span><span data-l="ar">نادي الكورنيش الرياضي</span></h1>
+</div>
+<div data-noprint="" style="display:flex;flex-direction:column;gap:8px;align-items:start">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Viewing the ledger as of</span><span data-l="ar">عرض السجل بتاريخ</span></div>
+<div style="display:flex;gap:6px">
+<sc-for list="{{ timeOpts }}" as="t" hint-placeholder-count="3">
+<button onClick="{{ t.set }}" aria-pressed="{{ t.on }}" style="height:34px;padding-inline:13px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};border-radius:18px;font-size:13px;cursor:pointer"><span data-l="en">{{ t.en }}</span><span data-l="ar">{{ t.ar }}</span></button>
+</sc-for>
+</div>
+<div style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums">{{ asOf }}</div>
+</div>
+</div>
+
+<div style="padding:28px 32px;border:1px solid {{ standingBorder }};background:{{ standingBg }};border-radius:16px;margin-block-end:14px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Standing readiness</span><span data-l="ar">الجاهزية القائمة</span></div>
+<div style="font-size:24px;font-weight:600;letter-spacing:-.025em;line-height:1.4;max-width:60ch"><span data-l="en">{{ standingEn }}</span><span data-l="ar">{{ standingAr }}</span></div>
+</div>
+<p style="margin:0 0 40px;font-size:14px;color:var(--muted)"><span data-l="en">Readiness is not a score and does not progress. Each obligation below is affirmed on a date and stops counting on a date.</span><span data-l="ar">الجاهزية ليست نتيجة ولا تتقدّم. كل موجب أدناه يُثبَّت بتاريخ ويتوقف احتسابه بتاريخ.</span></p>
+
+<h2 style="margin:0 0 6px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Validity ledger</span><span data-l="ar">سجل الصلاحية</span></h2>
+<div data-stack="" style="display:grid;grid-template-columns:1.4fr 1fr 1fr .9fr .8fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block-end:44px">
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Obligation</span><span data-l="ar">الموجب</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Last affirmed</span><span data-l="ar">آخر إثبات</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Stops counting</span><span data-l="ar">يتوقف احتسابه</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Status</span><span data-l="ar">الحالة</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px"></div>
+<sc-for list="{{ ledger }}" as="r" hint-placeholder-count="6">
+<div style="background:var(--bg);padding:18px;border-inline-start:3px solid {{ r.color }};font-size:16px;font-weight:500"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></div>
+<div style="background:var(--bg);padding:18px;font-size:14.5px;color:var(--muted);font-variant-numeric:tabular-nums">{{ r.from }}</div>
+<div style="background:var(--bg);padding:18px;font-size:14.5px;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.until }}</div>
+<div style="background:var(--bg);padding:18px;font-size:13.5px"><span style="display:inline-block;padding:4px 10px;border-radius:4px;background:{{ r.chipBg }};color:{{ r.color }}"><span data-l="en">{{ r.statusEn }}</span><span data-l="ar">{{ r.statusAr }}</span></span></div>
+<div style="background:var(--bg);padding:18px;font-size:14px"><a href="#top"><span data-l="en">{{ r.actionEn }}</span><span data-l="ar">{{ r.actionAr }}</span></a></div>
+</sc-for>
+</div>
+
+<h2 style="margin:0 0 18px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Registered AEDs</span><span data-l="ar">الأجهزة المسجّلة</span></h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-block-end:44px">
+<sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+<button onClick="{{ d.open }}" style="text-align:start;padding:22px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ d.color }};border-radius:12px;cursor:pointer">
+<div style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-block-end:8px">{{ d.serial }}</div>
+<div style="font-size:18px;font-weight:600;margin-block-end:10px"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></div>
+<div style="font-size:14px;color:var(--muted);line-height:1.6"><span data-l="en">{{ d.noteEn }}</span><span data-l="ar">{{ d.noteAr }}</span></div>
+</button>
+</sc-for>
+</div>
+
+<sc-if value="{{ hasRequest }}" hint-placeholder-val="{{ true }}">
+<div style="padding:26px 30px;border:1px solid var(--line);border-radius:14px;max-width:88ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Requested by the Ministry</span><span data-l="ar">مطلوب من الوزارة</span></div>
+<div style="font-size:16px;line-height:1.6;margin-block-end:8px"><span data-l="en">Confirm that the poolside AED cabinet is unlocked during operating hours. Corrective action due 2026-09-01.</span><span data-l="ar">تأكيد أن خزانة الجهاز عند المسبح غير مقفلة خلال ساعات العمل. الإجراء التصحيحي مستحق في 2026-09-01.</span></div>
+<a href="#top" style="font-size:14.5px"><span data-l="en">Respond to the request</span><span data-l="ar">الرد على الطلب</span></a>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isRegistry }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 10px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">AED registry</span><span data-l="ar">سجل أجهزة إزالة الرجفان</span></h1>
+<p style="margin:0 0 32px;font-size:16px;color:var(--muted)"><span data-l="en">Each device is a separate record. Select a device to confirm or update it.</span><span data-l="ar">كل جهاز سجل مستقل. اختر جهازاً لتأكيده أو تحديثه.</span></p>
+
+<div data-stack="" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block-end:44px">
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Device</span><span data-l="ar">الجهاز</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Location</span><span data-l="ar">الموقع</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Accessible</span><span data-l="ar">متاح للوصول</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Readiness</span><span data-l="ar">الجاهزية</span></div>
+<sc-for list="{{ devices }}" as="d" hint-placeholder-count="3">
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px;font-variant-numeric:tabular-nums">{{ d.serial }}</div>
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></div>
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px;color:var(--muted)"><span data-l="en">{{ d.accessEn }}</span><span data-l="ar">{{ d.accessAr }}</span></div>
+<div style="background:var(--bg);padding:16px 18px;font-size:13.5px"><span style="display:inline-block;padding:4px 10px;border-radius:4px;background:{{ d.chipBg }};color:{{ d.color }}"><span data-l="en">{{ d.statusEn }}</span><span data-l="ar">{{ d.statusAr }}</span></span></div>
+</sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start">
+<div style="padding:30px;background:var(--surface);border:1px solid var(--line);border-radius:16px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Device record · AED-002</span><span data-l="ar">سجل الجهاز · AED-002</span></div>
+<h2 style="margin:0 0 24px;font-size:24px;font-weight:600;letter-spacing:-.02em"><span data-l="en">Reception desk, ground floor</span><span data-l="ar">مكتب الاستقبال، الطابق الأرضي</span></h2>
+
+<div style="font-size:13px;color:var(--muted);margin-block-end:10px"><span data-l="en">Registration purpose — this determines what is asked below</span><span data-l="ar">غاية التسجيل — تحدّد ما يُطلب أدناه</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-block-end:26px">
+<sc-for list="{{ purposes }}" as="p" hint-placeholder-count="5">
+<button onClick="{{ p.set }}" aria-pressed="{{ p.on }}" style="text-align:start;padding:12px 16px;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.color }};border-radius:8px;font-size:14.5px;cursor:pointer"><span data-l="en">{{ p.en }}</span><span data-l="ar">{{ p.ar }}</span></button>
+</sc-for>
+</div>
+
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:14px"><span data-l="en">Asked for this purpose</span><span data-l="ar">المطلوب لهذه الغاية</span></div>
+<div style="display:flex;flex-direction:column;gap:16px;margin-block-end:24px">
+<sc-for list="{{ purposeFields }}" as="f" hint-placeholder-count="5">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px"><span data-l="en">{{ f.en }}</span><span data-l="ar">{{ f.ar }}</span></span>
+<input type="text" value="{{ f.value }}" readOnly="{{ true }}" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" />
+</label>
+</sc-for>
+</div>
+<div style="padding-block-start:20px;border-block-start:1px solid var(--line);font-size:13.5px;color:var(--muted);line-height:1.6;margin-block-end:20px"><span data-l="en">Confirmation — facility representative confirms that the information is accurate and the AED is operational. Signature and date are recorded on submission.</span><span data-l="ar">التأكيد — يؤكّد ممثل المرفق صحة المعلومات وصلاحية الجهاز للتشغيل. يُسجَّل التوقيع والتاريخ عند التقديم.</span></div>
+<button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">{{ purposeCtaEn }}</span><span data-l="ar">{{ purposeCtaAr }}</span></button>
+</div>
+
+<div style="padding:30px;border:1px solid var(--line);border-radius:16px">
+<h3 style="margin:0 0 10px;font-size:18px;font-weight:600"><span data-l="en">Scan the device</span><span data-l="ar">مسح الجهاز</span></h3>
+<p style="margin:0 0 20px;font-size:14.5px;line-height:1.6;color:var(--muted)"><span data-l="en">Scan the barcode or QR code on the device to fill device identification. Nothing is saved until you confirm the values below.</span><span data-l="ar">امسح الباركود أو رمز الاستجابة السريعة على الجهاز لتعبئة تعريف الجهاز. لا يُحفظ شيء قبل تأكيدك للقيم أدناه.</span></p>
+<div style="height:150px;border:1px dashed var(--line);border-radius:12px;display:grid;place-items:center;margin-block-end:20px;background:var(--surface2)">
+<div style="width:64px;height:64px;border:2px solid var(--brand);border-radius:10px;position:relative">
+<span style="position:absolute;inset-inline:10px;top:50%;height:2px;background:var(--accent)"></span>
+</div>
+</div>
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:12px"><span data-l="en">Extracted — confirm before saving</span><span data-l="ar">القيم المستخرجة — أكّدها قبل الحفظ</span></div>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-block-end:20px">
+<div style="background:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;gap:12px;font-size:14.5px"><span style="color:var(--muted)"><span data-l="en">Serial number</span><span data-l="ar">الرقم التسلسلي</span></span><span style="font-variant-numeric:tabular-nums">HS-4417-B</span></div>
+<div style="background:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;gap:12px;font-size:14.5px"><span style="color:var(--muted)"><span data-l="en">Barcode</span><span data-l="ar">الباركود</span></span><span style="font-variant-numeric:tabular-nums">5 901234 123457</span></div>
+<div style="background:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;gap:12px;font-size:14.5px"><span style="color:var(--muted)"><span data-l="en">Pediatric capability</span><span data-l="ar">إمكانية الاستخدام للأطفال</span></span><span><span data-l="en">Yes</span><span data-l="ar">نعم</span></span></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button style="height:42px;padding-inline:20px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:14.5px;cursor:pointer"><span data-l="en">Confirm values</span><span data-l="ar">تأكيد القيم</span></button>
+<button style="height:42px;padding-inline:20px;border:1px solid var(--line);border-radius:22px;background:none;font-size:14.5px;cursor:pointer"><span data-l="en">Scan again</span><span data-l="ar">إعادة المسح</span></button>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPlan }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 10px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Cardiac Emergency Response Plan</span><span data-l="ar">خطة الاستجابة لطوارئ توقف القلب</span></h1>
+<p style="margin:0 0 36px;font-size:16px;color:var(--muted)"><span data-l="en">A structured plan held on the platform. Update it whenever responsible persons, AED locations or emergency arrangements change.</span><span data-l="ar">خطة منظّمة محفوظة على المنصة. حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة.</span></p>
+
+<div data-wallcard="" style="padding:36px;border:2px solid var(--brand);border-radius:16px;background:var(--surface);margin-block-end:44px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:baseline;margin-block-end:26px">
+<h2 style="margin:0;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Immediate response procedure</span><span data-l="ar">إجراء الاستجابة الفورية</span></h2>
+<button data-noprint="" onClick="{{ print }}" style="height:38px;padding-inline:18px;border:1px solid var(--line);background:none;border-radius:18px;font-size:13.5px;cursor:pointer"><span data-l="en">Print for the AED cabinet</span><span data-l="ar">اطبعها لخزانة الجهاز</span></button>
+</div>
+<ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+<sc-for list="{{ procedure }}" as="p" hint-placeholder-count="8">
+<li style="background:var(--bg);padding:18px 22px;display:flex;gap:20px;align-items:baseline">
+<span style="font-size:24px;font-weight:600;color:var(--brand);min-width:28px;font-variant-numeric:tabular-nums">{{ p.n }}</span>
+<span style="font-size:20px;font-weight:500;line-height:1.4"><span data-l="en">{{ p.en }}</span><span data-l="ar">{{ p.ar }}</span></span>
+</li>
+</sc-for>
+</ol>
+<div style="margin-block-start:22px;display:flex;flex-wrap:wrap;gap:32px">
+<div><div style="font-size:12px;color:var(--muted);margin-block-end:4px"><span data-l="en">Red Cross</span><span data-l="ar">الصليب الأحمر</span></div><div style="font-size:30px;font-weight:600;color:var(--accent-ink)">140</div></div>
+<div><div style="font-size:12px;color:var(--muted);margin-block-end:4px"><span data-l="en">Civil Defence</span><span data-l="ar">الدفاع المدني</span></div><div style="font-size:30px;font-weight:600;color:var(--accent-ink)">125</div></div>
+<div><div style="font-size:12px;color:var(--muted);margin-block-end:4px"><span data-l="en">Facility EMS number</span><span data-l="ar">رقم الإسعاف المعتمد</span></div><div style="font-size:30px;font-weight:600">01 372 802</div></div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+<sc-for list="{{ planSections }}" as="s" hint-placeholder-count="4">
+<div style="padding:28px;border:1px solid var(--line);border-radius:14px">
+<h3 style="margin:0 0 18px;font-size:18px;font-weight:600"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></h3>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;gap:16px;font-size:14.5px;line-height:1.5">
+<span style="color:var(--muted)"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></span>
+<span style="text-align:end"><span data-l="en">{{ r.vEn }}</span><span data-l="ar">{{ r.vAr }}</span></span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isIncident }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:860px">
+<h1 data-sec-h1="" style="margin:0 0 10px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Facility cardiac-arrest incident report</span><span data-l="ar">تقرير حادثة توقف القلب في المرفق</span></h1>
+<p style="margin:0 0 28px;font-size:16px;color:var(--muted)"><span data-l="en">Filed after any suspected cardiac arrest, CPR attempt or AED use.</span><span data-l="ar">يُقدَّم بعد أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام جهاز.</span></p>
+
+<div style="padding:24px 28px;border:1px solid var(--brand);background:var(--brand-soft);border-radius:14px;margin-block-end:32px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand);margin-block-end:10px"><span data-l="en">Before you start</span><span data-l="ar">قبل أن تبدأ</span></div>
+<p style="margin:0;font-size:18px;line-height:1.6;font-weight:500"><span data-l="en">This report must not contain the patient's name or any unnecessary identifying information. Write "the patient".</span><span data-l="ar">يجب ألا يتضمن هذا التقرير اسم المريض أو أي معلومات تعريفية غير ضرورية. اكتب «المريض».</span></p>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:28px">
+<div style="padding:26px;border:1px solid var(--line);border-radius:14px">
+<h3 style="margin:0 0 18px;font-size:18px;font-weight:600"><span data-l="en">Incident information</span><span data-l="ar">معلومات الحادثة</span></h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">Date</span><span data-l="ar">التاريخ</span></span><input type="text" defaultValue="2026-08-11" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">Approximate time</span><span data-l="ar">الوقت التقريبي</span></span><input type="text" defaultValue="18:40" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">Location within the facility</span><span data-l="ar">الموقع داخل المرفق</span></span><input type="text" defaultValue="Pool deck" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+</div>
+</div>
+
+<div style="padding:26px;border:1px solid var(--line);border-radius:14px">
+<h3 style="margin:0 0 18px;font-size:18px;font-weight:600"><span data-l="en">Immediate response</span><span data-l="ar">الاستجابة الفورية</span></h3>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+<sc-for list="{{ incidentChecks }}" as="c" hint-placeholder-count="6">
+<div style="background:var(--bg);padding:14px 16px;display:flex;justify-content:space-between;gap:16px;align-items:center;font-size:14.5px">
+<span><span data-l="en">{{ c.en }}</span><span data-l="ar">{{ c.ar }}</span></span>
+<span style="display:flex;gap:6px;flex:none">
+<span style="padding:4px 12px;border:1px solid var(--brand);background:var(--brand-soft);color:var(--brand);border-radius:14px;font-size:13px"><span data-l="en">Yes</span><span data-l="ar">نعم</span></span>
+<span style="padding:4px 12px;border:1px solid var(--line);border-radius:14px;font-size:13px;color:var(--muted)"><span data-l="en">No</span><span data-l="ar">لا</span></span>
+</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:26px;border:1px solid var(--line);border-radius:14px">
+<h3 style="margin:0 0 18px;font-size:18px;font-weight:600"><span data-l="en">EMS attendance and transfer</span><span data-l="ar">حضور الإسعاف ونقل المسؤولية</span></h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">Agency name, if known</span><span data-l="ar">اسم الهيئة، إن عُرف</span></span><input type="text" defaultValue="Lebanese Red Cross" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">How the patient was transported</span><span data-l="ar">طريقة نقل المريض</span></span><input type="text" defaultValue="Ambulance" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;color:var(--muted)"><span data-l="en">Receiving hospital, if known</span><span data-l="ar">المستشفى المستقبِل، إن عُرف</span></span><input type="text" defaultValue="AUBMC" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+</div>
+</div>
+
+<div style="padding:26px;border:1px solid {{ narrativeBorder }};border-radius:14px">
+<h3 style="margin:0 0 8px;font-size:18px;font-weight:600"><span data-l="en">What happened</span><span data-l="ar">ماذا حصل</span></h3>
+<p style="margin:0 0 14px;font-size:14px;color:var(--muted)"><span data-l="en">Describe the response, not the person. Refer to "the patient".</span><span data-l="ar">صِف الاستجابة لا الشخص. استخدم كلمة «المريض».</span></p>
+<textarea onChange="{{ onNarrative }}" value="{{ narrative }}" rows="4" placeholder="{{ narrativePlaceholder }}" style="width:100%;padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px;line-height:1.6;resize:vertical"></textarea>
+<sc-if value="{{ nameFlag }}" hint-placeholder-val="{{ true }}">
+<div style="margin-block-start:14px;padding:14px 18px;border-inline-start:3px solid var(--bad);background:var(--bad-soft);border-radius:0 8px 8px 0;font-size:14.5px;line-height:1.6">
+<div style="font-weight:600;margin-block-end:4px"><span data-l="en">This looks like a personal name: “{{ flagged }}”</span><span data-l="ar">يبدو هذا اسماً شخصياً: «{{ flagged }}»</span></div>
+<div style="color:var(--muted)"><span data-l="en">Replace it with "the patient" or a role, such as "the lifeguard". The report cannot be submitted while a name is present.</span><span data-l="ar">استبدله بكلمة «المريض» أو بصفة وظيفية مثل «المنقذ». لا يمكن تقديم التقرير مع وجود اسم.</span></div>
+</div>
+</sc-if>
+</div>
+
+<div style="padding:26px;border:1px solid var(--line);border-radius:14px">
+<h3 style="margin:0 0 18px;font-size:18px;font-weight:600"><span data-l="en">Post-incident readiness</span><span data-l="ar">الجاهزية بعد الحادثة</span></h3>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+<sc-for list="{{ postChecks }}" as="c" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:14px 16px;display:flex;justify-content:space-between;gap:16px;align-items:center;font-size:14.5px">
+<span><span data-l="en">{{ c.en }}</span><span data-l="ar">{{ c.ar }}</span></span>
+<span style="display:flex;gap:6px;flex:none">
+<span style="padding:4px 12px;border:1px solid var(--brand);background:var(--brand-soft);color:var(--brand);border-radius:14px;font-size:13px"><span data-l="en">Yes</span><span data-l="ar">نعم</span></span>
+<span style="padding:4px 12px;border:1px solid var(--line);border-radius:14px;font-size:13px;color:var(--muted)"><span data-l="en">No</span><span data-l="ar">لا</span></span>
+</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<button disabled="{{ nameFlag }}" style="height:48px;padding-inline:26px;border:0;border-radius:22px;background:{{ submitBg }};color:{{ submitColor }};font-size:15px;font-weight:500;cursor:{{ submitCursor }}"><span data-l="en">Submit report</span><span data-l="ar">تقديم التقرير</span></button>
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">The Ministry receives this report. It is not shared with any commercial party.</span><span data-l="ar">تتلقى الوزارة هذا التقرير. لا يُشارك مع أي جهة تجارية.</span></span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReview }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 10px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Ministry review — facility oversight</span><span data-l="ar">مراجعة الوزارة — الإشراف على المرافق</span></h1>
+<p style="margin:0 0 32px;font-size:16px;color:var(--muted);max-width:74ch"><span data-l="en">Facilities hold an ongoing readiness state. The Ministry monitors that state and requests corrections against it.</span><span data-l="ar">تحمل المرافق حالة جاهزية مستمرة. تراقب الوزارة هذه الحالة وتطلب تصحيحات بشأنها.</span></p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-block-end:40px">
+<sc-for list="{{ reviewCounts }}" as="k" hint-placeholder-count="4">
+<div style="padding:22px;border:1px solid var(--line);border-inline-start:3px solid {{ k.color }};border-radius:12px">
+<div style="font-size:30px;font-weight:600;letter-spacing:-.03em;color:{{ k.color }}">{{ k.n }}</div>
+<div style="font-size:14px;color:var(--muted);margin-block-start:4px"><span data-l="en">{{ k.en }}</span><span data-l="ar">{{ k.ar }}</span></div>
+</div>
+</sc-for>
+</div>
+
+<h2 style="margin:0 0 16px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Facilities</span><span data-l="ar">المرافق</span></h2>
+<div data-stack="" style="display:grid;grid-template-columns:1.6fr 1.2fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block-end:40px">
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Facility</span><span data-l="ar">المرفق</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Category</span><span data-l="ar">الفئة</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Confirmation due</span><span data-l="ar">التأكيد المستحق</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">State</span><span data-l="ar">الحالة</span></div>
+<sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px;border-inline-start:3px solid {{ r.color }}"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></div>
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px;color:var(--muted)"><span data-l="en">{{ r.catEn }}</span><span data-l="ar">{{ r.catAr }}</span></div>
+<div style="background:var(--bg);padding:16px 18px;font-size:14.5px;font-variant-numeric:tabular-nums">{{ r.due }}</div>
+<div style="background:var(--bg);padding:16px 18px;font-size:13.5px"><span style="display:inline-block;padding:4px 10px;border-radius:4px;background:{{ r.chipBg }};color:{{ r.color }}"><span data-l="en">{{ r.stateEn }}</span><span data-l="ar">{{ r.stateAr }}</span></span></div>
+</sc-for>
+</div>
+
+<h2 style="margin:0 0 16px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Deficiencies and corrective actions</span><span data-l="ar">أوجه القصور والإجراءات التصحيحية</span></h2>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ deficiencies }}" as="d" hint-placeholder-count="3">
+<div style="padding:22px 26px;border:1px solid var(--line);border-inline-start:3px solid var(--bad);border-radius:12px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:start">
+<div style="max-width:62ch">
+<div style="font-size:16px;font-weight:600;margin-block-end:6px"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></div>
+<div style="font-size:14.5px;color:var(--muted);line-height:1.6"><span data-l="en">{{ d.actionEn }}</span><span data-l="ar">{{ d.actionAr }}</span></div>
+</div>
+<div style="text-align:end">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Due</span><span data-l="ar">الاستحقاق</span></div>
+<div style="font-size:15px;font-variant-numeric:tabular-nums">{{ d.due }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<h1 data-sec-h1="" style="margin:0 0 8px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Master admin console</span><span data-l="ar">لوحة الإدارة الرئيسية</span></h1>
+<p style="margin:0 0 28px;font-size:14.5px;color:var(--muted)"><span data-l="en">Platform owner. Toggles take effect immediately across the module.</span><span data-l="ar">مالك المنصة. تسري المفاتيح فوراً على كامل الوحدة.</span></p>
+
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-block-end:26px">
+<sc-for list="{{ flags }}" as="f" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:18px 22px;display:flex;gap:24px;justify-content:space-between;align-items:center">
+<div style="max-width:64ch">
+<div style="font-size:15px;font-weight:600;margin-block-end:3px"><span data-l="en">{{ f.en }}</span><span data-l="ar">{{ f.ar }}</span></div>
+<div style="font-size:13.5px;color:var(--muted);line-height:1.5"><span data-l="en">{{ f.noteEn }}</span><span data-l="ar">{{ f.noteAr }}</span></div>
+</div>
+<button onClick="{{ f.toggle }}" aria-pressed="{{ f.on }}" style="flex:none;height:32px;min-width:92px;padding-inline:14px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:8px;font-size:13px;letter-spacing:.04em;cursor:pointer"><span data-l="en">{{ f.stateEn }}</span><span data-l="ar">{{ f.stateAr }}</span></button>
+</div>
+</sc-for>
+</div>
+
+<div style="padding:20px 24px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.65;color:var(--muted)">
+<span data-l="en">Constraint enforced in code: commercial listings never render on a Ministry review screen, a credential-verification screen, or an incident-reporting screen — including sidebars, footers and contextual prompts.</span><span data-l="ar">قيد مفروض في البرمجة: لا تظهر القوائم التجارية إطلاقاً على شاشات مراجعة الوزارة أو التحقق من المؤهلات أو الإبلاغ عن الحوادث — بما في ذلك الأشرطة الجانبية والتذييلات والرسائل السياقية.</span>
+</div>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ isStates }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Empty and edge states</span><span data-l="ar">الحالات الفارغة والطرفية</span></h1>
+<p style="margin:0 0 38px;font-size:16px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">This module is not live at launch. These are the states the facility screens take when there is nothing registered, when nothing is lapsing, and when something has lapsed.</span><span data-l="ar">هذه الوحدة غير مفعّلة عند الإطلاق. وهذه هي الحالات التي تتخذها شاشات المرفق عندما لا يوجد شيء مُسجَّل، وعندما لا تنقضي صلاحية أي شيء، وعندما تنقضي صلاحية شيء ما.</span></p>
+
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">No AEDs registered</span><span data-l="ar">لا أجهزة إزالة رجفان مسجّلة</span></div>
+<div style="padding:30px 28px"><div style="max-width:78ch">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:10px"><span data-l="en">No devices are registered for this facility.</span><span data-l="ar">لا أجهزة مسجّلة لهذا المرفق.</span></div>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.75;color:var(--muted)"><span data-l="en">Each automated external defibrillator is registered once with its make, model, serial number, location and the expiry dates of its pads and battery. The validity ledger and the annual readiness confirmation are both built from the registry, so neither is available until at least one device is registered.</span><span data-l="ar">يُسجَّل كل جهاز إزالة رجفان آلي خارجي مرة واحدة مع علامته وطرازه ورقمه التسلسلي وموقعه وتاريخي انتهاء لصاقاته وبطاريته. ويُبنى سجل الصلاحية وتأكيد الجاهزية السنوي على السجل، فلا يتوفر أي منهما قبل تسجيل جهاز واحد على الأقل.</span></p>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Register a device</span><span data-l="ar">تسجيل جهاز</span></button></div>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Everything current</span><span data-l="ar">كل شيء ساري</span></div>
+<div style="padding:30px 28px"><div style="max-width:80ch">
+<div style="padding:26px 30px;border:1px solid var(--brand);background:var(--brand-soft);border-radius:12px;margin-block-end:20px">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:10px"><span data-l="en">All 8 devices are current. Nothing lapses in the next 90 days.</span><span data-l="ar">الأجهزة الثمانية جميعها سارية. ولا تنقضي صلاحية أي منها خلال التسعين يوماً المقبلة.</span></div>
+<p style="margin:0;font-size:15px;line-height:1.75"><span data-l="en">The earliest expiry is the pads on device AED-004, on 2027-03-12. The annual readiness confirmation was recorded on 2026-05-20 and is next due 2027-05-20.</span><span data-l="ar">أقرب انتهاء صلاحية هو لصاقات الجهاز AED-004 في 2027-03-12. وسُجّل تأكيد الجاهزية السنوي في 2026-05-20 ويحلّ موعده التالي في 2027-05-20.</span></p>
+</div>
+<p style="margin:0;font-size:14.5px;line-height:1.75;color:var(--muted)"><span data-l="en">The ledger shows every device with its expiry dates whether or not anything is lapsing. A settled ledger is the normal state; an empty one means nothing is registered.</span><span data-l="ar">يُظهر السجل كل جهاز مع تواريخ انتهاء صلاحيته سواء انقضت صلاحية شيء أم لا. فالسجل المستقر هو الحالة الطبيعية؛ أما السجل الفارغ فيعني أنه لا يوجد شيء مُسجَّل.</span></p>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Device past its pad or battery expiry</span><span data-l="ar">جهاز انقضت صلاحية لصاقاته أو بطاريته</span></div>
+<div style="padding:30px 28px"><div style="padding:26px 30px;border:2px solid var(--bad);background:var(--bad-soft);border-radius:12px;max-width:80ch">
+<div style="font-size:20px;font-weight:600;line-height:1.5;margin-block-end:12px"><span data-l="en">AED-002 — pads expired 2026-07-30, 20 days ago.</span><span data-l="ar">AED-002 — انقضت صلاحية اللصاقات في 2026-07-30، قبل 20 يوماً.</span></div>
+<div style="font-size:16px;line-height:1.75;margin-block-end:18px"><span data-l="en">Physio-Control LIFEPAK CR2, serial 44-81027, main reception, ground floor. The device is registered but is not counted as ready while a consumable is expired, and the facility's readiness state is not current until it is replaced and the new expiry recorded.</span><span data-l="ar">Physio-Control LIFEPAK CR2، الرقم التسلسلي 44-81027، الاستقبال الرئيسي، الطابق الأرضي. الجهاز مُسجَّل لكنه لا يُحتسب جاهزاً وإحدى مستهلكاته منتهية الصلاحية، وحالة جاهزية المرفق ليست سارية إلى أن تُستبدل وتُسجَّل صلاحية الجديدة.</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Record replacement pads</span><span data-l="ar">تسجيل لصاقات بديلة</span></button><button style="height:42px;padding-inline:20px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">Mark the device out of service</span><span data-l="ar">وضع الجهاز خارج الخدمة</span></button></div>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Annual readiness confirmation overdue</span><span data-l="ar">تأكيد الجاهزية السنوي متأخر</span></div>
+<div style="padding:30px 28px"><div style="padding:26px 30px;border:2px solid var(--accent);background:var(--accent-soft);border-radius:12px;max-width:80ch">
+<div style="font-size:20px;font-weight:600;line-height:1.5;margin-block-end:12px"><span data-l="en">The annual readiness confirmation is 47 days overdue. It was due 2026-07-03.</span><span data-l="ar">تأخر تأكيد الجاهزية السنوي 47 يوماً. كان مستحقاً في 2026-07-03.</span></div>
+<div style="font-size:16px;line-height:1.75;margin-block-end:18px"><span data-l="en">The confirmation is recorded once a year by the facility coordinator. It confirms the registry is accurate, the response plan is current, and the named responders are trained. Until it is recorded the facility's readiness state reads as not confirmed, whatever the devices show.</span><span data-l="ar">يُسجّل التأكيد مرة في السنة من منسّق المرفق. ويُقرّ بأن السجل دقيق وخطة الاستجابة سارية والمستجيبون المُسمّون مدرَّبون. وإلى أن يُسجَّل، تُقرأ حالة جاهزية المرفق كغير مؤكَّدة، أياً كان ما تُظهره الأجهزة.</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Record the annual confirmation</span><span data-l="ar">تسجيل التأكيد السنوي</span></button></div>
+</div></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<div data-dock="" data-noprint="" style="position:fixed;inset-inline-end:22px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:10px">
+<button onClick="{{ cycleText }}" title="Text size" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px">A<span style="font-size:18px">A</span></button>
+<button onClick="{{ toggleTheme }}" title="Dark mode" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>
+</button>
+<button onClick="{{ togglePalette }}" title="Palette" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:inset 0 0 0 1.5px var(--brand)"></span>
+</button>
+<button onClick="{{ toggleLang }}" title="Language" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500"><span data-l="en">ع</span><span data-l="ar">EN</span></button>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;initialLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialPalette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;petrol&quot;,&quot;cedar&quot;],&quot;default&quot;:&quot;petrol&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: this.props.initialLang || 'en',
+    theme: this.props.initialTheme || 'light',
+    palette: this.props.initialPalette || 'petrol',
+    textScale: 100,
+    screen: 'dashboard',
+    offset: 0,
+    purpose: 1,
+    narrative: 'Staff found the patient unresponsive on the pool deck. CPR was started immediately and the AED was applied.',
+    flags: { module: true, fees: false, vendor: false, sponsored: false, ai: false }
+  };
+
+  componentDidMount() { this.sync(); }
+  componentDidUpdate() { this.sync(); }
+  sync() {
+    const h = document.documentElement;
+    h.setAttribute('lang', this.state.lang);
+    h.setAttribute('dir', this.state.lang === 'ar' ? 'rtl' : 'ltr');
+    h.setAttribute('data-theme', this.state.theme);
+    h.setAttribute('data-palette', this.state.palette);
+    h.style.fontSize = this.state.textScale + '%';
+  }
+
+  iso(d) { return d.toISOString().slice(0, 10); }
+  today() { return new Date(Date.UTC(2026, 7, 13) + this.state.offset * 864e5); }
+  daysTo(dateStr) {
+    return Math.round((new Date(dateStr + 'T00:00:00Z') - this.today()) / 864e5);
+  }
+  statusOf(dateStr) {
+    const d = this.daysTo(dateStr);
+    if (d < 0) return { key: 'lapsed', en: 'Lapsed', ar: 'منتهٍ', color: 'var(--bad)', chipBg: 'var(--bad-soft)' };
+    if (d <= 60) return { key: 'lapsing', en: 'Lapsing', ar: 'يقترب من الانتهاء', color: 'var(--accent-ink)', chipBg: 'var(--accent-soft)' };
+    return { key: 'current', en: 'Current', ar: 'ساري', color: 'var(--brand)', chipBg: 'var(--brand-soft)' };
+  }
+
+  renderVals() {
+    const st = this.state, F = st.flags;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const pill = on => ({
+      on,
+      border: on ? 'var(--brand)' : 'var(--line)',
+      bg: on ? 'var(--brand-soft)' : 'transparent',
+      color: on ? 'var(--brand)' : 'var(--muted)'
+    });
+
+    const screens = [
+      { k: 'framework', en: 'Framework page', ar: 'صفحة الإطار' },
+      { k: 'dashboard', en: 'Facility dashboard', ar: 'لوحة المرفق' },
+      { k: 'registry', en: 'AED registry', ar: 'سجل الأجهزة' },
+      { k: 'plan', en: 'Response plan', ar: 'خطة الاستجابة' },
+      { k: 'incident', en: 'Incident report', ar: 'تقرير الحادثة' },
+      { k: 'review', en: 'Ministry review', ar: 'مراجعة الوزارة' },
+      { k: 'admin', en: 'Admin console', ar: 'لوحة الإدارة' },
+      { k: 'states', en: 'Empty and edge states', ar: 'الحالات الفارغة والطرفية' }
+    ].map(s => Object.assign({ en: s.en, ar: s.ar, go: set('screen', s.k) }, pill(st.screen === s.k)));
+
+    const ledgerSrc = [
+      { en: 'Electrode pad expiry', ar: 'انتهاء لواصق الأقطاب', from: '2024-10-02', until: '2026-10-02', aEn: 'Record replacement', aAr: 'تسجيل الاستبدال' },
+      { en: 'Battery expiry', ar: 'انتهاء البطارية', from: '2025-03-18', until: '2027-03-18', aEn: 'Record replacement', aAr: 'تسجيل الاستبدال' },
+      { en: 'Latest readiness check', ar: 'آخر فحص جاهزية', from: '2026-07-28', until: '2026-10-26', aEn: 'Record a check', aAr: 'تسجيل فحص' },
+      { en: 'Annual practical drill', ar: 'تمرين عملي سنوي', from: '2025-11-04', until: '2026-11-04', aEn: 'Record a drill', aAr: 'تسجيل تمرين' },
+      { en: 'Annual readiness confirmation', ar: 'التأكيد السنوي للجاهزية', from: '2025-09-12', until: '2026-09-12', aEn: 'Confirm now', aAr: 'أكّد الآن' },
+      { en: 'Coordinator details', ar: 'بيانات المنسّق', from: '2026-06-01', until: '2027-06-01', aEn: 'Review details', aAr: 'مراجعة البيانات' }
+    ];
+    const ledger = ledgerSrc.map(r => {
+      const s = this.statusOf(r.until);
+      return { en: r.en, ar: r.ar, from: r.from, until: r.until, statusEn: s.en, statusAr: s.ar, color: s.color, chipBg: s.chipBg, actionEn: r.aEn, actionAr: r.aAr };
+    });
+    const lapsed = ledger.filter(r => r.statusEn === 'Lapsed').length;
+    const lapsing = ledger.filter(r => r.statusEn === 'Lapsing').length;
+
+    let standingEn, standingAr, standingBorder, standingBg;
+    if (lapsed) {
+      standingEn = 'Obligations are not being met. ' + lapsed + ' item' + (lapsed > 1 ? 's have' : ' has') + ' stopped counting' + (lapsing ? ' and ' + lapsing + ' more lapse within 60 days.' : '.');
+      standingAr = 'الموجبات غير مستوفاة. توقّف احتساب ' + lapsed + ' بند' + (lapsing ? ' و' + lapsing + ' بند يقترب من الانتهاء خلال 60 يوماً.' : '.');
+      standingBorder = 'var(--bad)'; standingBg = 'var(--bad-soft)';
+    } else if (lapsing) {
+      standingEn = 'Obligations are being met. ' + lapsing + ' item' + (lapsing > 1 ? 's lapse' : ' lapses') + ' within 60 days.';
+      standingAr = 'الموجبات مستوفاة. ' + lapsing + ' بند ينتهي خلال 60 يوماً.';
+      standingBorder = 'var(--accent)'; standingBg = 'var(--accent-soft)';
+    } else {
+      standingEn = 'Obligations are being met. Nothing lapses within 60 days.';
+      standingAr = 'الموجبات مستوفاة. لا شيء ينتهي خلال 60 يوماً.';
+      standingBorder = 'var(--line)'; standingBg = 'var(--surface)';
+    }
+
+    const timeOpts = [
+      { v: 0, en: 'Today', ar: 'اليوم' },
+      { v: 60, en: '+60 days', ar: '+60 يوماً' },
+      { v: 180, en: '+180 days', ar: '+180 يوماً' }
+    ].map(o => Object.assign({ en: o.en, ar: o.ar, set: set('offset', o.v) }, pill(st.offset === o.v)));
+
+    const devSrc = [
+      { serial: 'AED-001 · HS-4412-A', en: 'Main entrance lobby', ar: 'بهو المدخل الرئيسي', until: '2027-03-18', accessEn: 'Yes · public', accessAr: 'نعم · للعموم', noteEn: 'Pads valid to 2027-01-10 · pediatric capable', noteAr: 'اللواصق صالحة حتى 2027-01-10 · متاح للأطفال' },
+      { serial: 'AED-002 · HS-4417-B', en: 'Reception desk, ground floor', ar: 'مكتب الاستقبال، الطابق الأرضي', until: '2026-10-02', accessEn: 'Yes · staff assisted', accessAr: 'نعم · بمساعدة الموظفين', noteEn: 'Pads expire 2026-10-02 · order replacements', noteAr: 'تنتهي اللواصق في 2026-10-02 · اطلب بدائل' },
+      { serial: 'AED-003 · HS-4420-C', en: 'Pool deck cabinet', ar: 'خزانة المسبح', until: '2026-08-20', accessEn: 'Under Ministry review', accessAr: 'قيد مراجعة الوزارة', noteEn: 'Cabinet reported locked outside class hours', noteAr: 'أُبلغ عن قفل الخزانة خارج أوقات الحصص' }
+    ];
+    const devices = devSrc.map(d => {
+      const s = this.statusOf(d.until);
+      return Object.assign({}, d, { statusEn: s.en, statusAr: s.ar, color: s.color, chipBg: s.chipBg, open: set('screen', 'registry') });
+    });
+
+    const purposeSrc = [
+      { en: 'Initial registration', ar: 'تسجيل أولي', ctaEn: 'Register device', ctaAr: 'تسجيل الجهاز' },
+      { en: 'Annual readiness confirmation', ar: 'تأكيد سنوي للجاهزية', ctaEn: 'Confirm readiness', ctaAr: 'تأكيد الجاهزية' },
+      { en: 'Update after relocation', ar: 'تحديث بعد نقل الموقع', ctaEn: 'Save new location', ctaAr: 'حفظ الموقع الجديد' },
+      { en: 'Update after replacement', ar: 'تحديث بعد الاستبدال', ctaEn: 'Save replacement', ctaAr: 'حفظ الاستبدال' },
+      { en: 'Update after operational or accessibility change', ar: 'تحديث بعد تغيّر التشغيل أو إتاحة الوصول', ctaEn: 'Save change', ctaAr: 'حفظ التغيير' }
+    ];
+    const fieldSets = [
+      [
+        { en: 'Serial or barcode', ar: 'الرقم التسلسلي أو الباركود', value: 'HS-4417-B' },
+        { en: 'Exact location within the facility', ar: 'الموقع الدقيق داخل المرفق', value: 'Reception desk, ground floor' },
+        { en: 'Accessible during operating hours', ar: 'متاح خلال ساعات العمل', value: 'Yes' },
+        { en: 'Publicly accessible', ar: 'متاح للعموم', value: 'No — staff assisted' },
+        { en: 'Pediatric capability', ar: 'إمكانية الاستخدام للأطفال', value: 'Yes' },
+        { en: 'Electrode pad expiry', ar: 'انتهاء لواصق الأقطاب', value: '2026-10-02' },
+        { en: 'Battery replacement or expiry', ar: 'استبدال البطارية أو انتهاؤها', value: '2027-03-18' },
+        { en: 'Coordinator name or position', ar: 'اسم المنسّق أو صفته', value: 'Operations manager' }
+      ],
+      [
+        { en: 'Latest readiness check', ar: 'آخر فحص جاهزية', value: '2026-07-28' },
+        { en: 'Pads present and within expiry', ar: 'اللواصق موجودة وضمن الصلاحية', value: 'Yes' },
+        { en: 'Battery functional', ar: 'البطارية صالحة', value: 'Yes' },
+        { en: 'Signage visible', ar: 'اللافتة ظاهرة', value: 'Yes' },
+        { en: 'Coordinator details unchanged', ar: 'بيانات المنسّق دون تغيير', value: 'Yes' }
+      ],
+      [
+        { en: 'New exact location', ar: 'الموقع الدقيق الجديد', value: 'Gym floor, north wall' },
+        { en: 'Accessible during operating hours', ar: 'متاح خلال ساعات العمل', value: 'Yes' },
+        { en: 'Signage moved with the device', ar: 'نُقلت اللافتة مع الجهاز', value: 'Yes' },
+        { en: 'Response plan updated', ar: 'حُدّثت خطة الاستجابة', value: 'Pending' }
+      ],
+      [
+        { en: 'New serial or barcode', ar: 'الرقم التسلسلي الجديد', value: 'HS-5102-D' },
+        { en: 'Electrode pad expiry', ar: 'انتهاء لواصق الأقطاب', value: '2028-04-01' },
+        { en: 'Battery replacement or expiry', ar: 'استبدال البطارية أو انتهاؤها', value: '2028-04-01' },
+        { en: 'Previous device removed from service', ar: 'سُحب الجهاز السابق من الخدمة', value: 'Yes' }
+      ],
+      [
+        { en: 'Operational', ar: 'صالح للتشغيل', value: 'Yes' },
+        { en: 'Accessible during operating hours', ar: 'متاح خلال ساعات العمل', value: 'No — cabinet locked' },
+        { en: 'Reason for the change', ar: 'سبب التغيير', value: 'Cabinet key held at reception' },
+        { en: 'Date the change took effect', ar: 'تاريخ سريان التغيير', value: '2026-08-09' }
+      ]
+    ];
+    const purposes = purposeSrc.map((p, i) => Object.assign({ en: p.en, ar: p.ar, set: set('purpose', i) }, pill(st.purpose === i)));
+
+    const nameMatch = st.narrative.match(/\b(?!The|CPR|AED|EMS|Staff|Yes|No)[A-Z][a-z]{2,}\b/);
+    const flagged = nameMatch ? nameMatch[0] : '';
+
+    const flagDefs = [
+      { k: 'module', en: 'Facility module visibility', ar: 'إظهار وحدة المرافق', noteEn: 'Off — the landing page keeps the reference-only band. On — the band becomes a live service entry and the module services join the services list.', noteAr: 'مطفأ — تبقى في الصفحة الرئيسية لوحة مرجعية فقط. مشغّل — تتحول اللوحة إلى مدخل خدمة حي وتنضم خدمات الوحدة إلى قائمة الخدمات.' },
+      { k: 'fees', en: 'Application and registration fees', ar: 'رسوم الطلب والتسجيل', noteEn: 'Off — every service reads Fee: None. On — the fee slot carries an amount and a payment step joins the flow.', noteAr: 'مطفأ — تقرأ كل خدمة: لا رسوم. مشغّل — يحمل حقل الرسوم مبلغاً وتُضاف خطوة دفع.' },
+      { k: 'vendor', en: 'Vendor directory', ar: 'دليل الموردين', noteEn: 'Off — no commercial listings anywhere. On — a browsable directory appears on public pages only.', noteAr: 'مطفأ — لا قوائم تجارية في أي مكان. مشغّل — يظهر دليل قابل للتصفح على الصفحات العامة فقط.' },
+      { k: 'sponsored', en: 'Sponsored listings', ar: 'القوائم المدفوعة', noteEn: 'Requires the vendor directory. Sponsored entries carry a visible label.', noteAr: 'يتطلب دليل الموردين. تحمل القوائم المدفوعة تسمية ظاهرة.' },
+      { k: 'ai', en: 'AI assistance', ar: 'المساعدة بالذكاء الاصطناعي', noteEn: 'Off at launch. Barcode extraction and drafting aids remain manual and confirmed by the coordinator.', noteAr: 'مطفأ عند الإطلاق. يبقى استخراج الباركود والمساعدة في الصياغة يدوياً وبتأكيد المنسّق.' }
+    ];
+    const flags = flagDefs.map(f => {
+      const on = F[f.k];
+      return {
+        en: f.en, ar: f.ar, noteEn: f.noteEn, noteAr: f.noteAr, on,
+        stateEn: on ? 'ON' : 'OFF', stateAr: on ? 'مشغّل' : 'مطفأ',
+        border: on ? 'var(--brand)' : 'var(--line)',
+        bg: on ? 'var(--brand-soft)' : 'transparent',
+        color: on ? 'var(--brand)' : 'var(--muted)',
+        toggle: () => this.setState(s => ({ flags: Object.assign({}, s.flags, { [f.k]: !s.flags[f.k] }) }))
+      };
+    });
+
+    return {
+      screens,
+      isFramework: st.screen === 'framework', isDashboard: st.screen === 'dashboard',
+      isRegistry: st.screen === 'registry', isPlan: st.screen === 'plan',
+      isIncident: st.screen === 'incident', isReview: st.screen === 'review',
+      isAdmin: st.screen === 'admin',
+      isStates: st.screen === 'states',
+      moduleOn: F.module, moduleOff: !F.module, feesOn: F.fees, vendorOn: F.vendor,
+      feeEn: F.fees ? '150,000 LBP' : 'None',
+      feeAr: F.fees ? '150,000 ل.ل.' : 'لا توجد',
+      feeColor: F.fees ? 'var(--accent-ink)' : 'var(--ink)',
+      stepCount: 4,
+      ctaEn: F.module ? 'Start registration' : 'Read the framework',
+      ctaAr: F.module ? 'ابدأ التسجيل' : 'اقرأ الإطار',
+      goDashboard: set('screen', 'dashboard'),
+
+      categories: [
+        { en: 'Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities', ar: 'الصالات الرياضية ومراكز اللياقة والأندية والملاعب والمنشآت الرياضية والمائية', reqEn: 'Required', reqAr: 'مطلوب' },
+        { en: 'Schools, universities and educational campuses', ar: 'المدارس والجامعات والحرم التعليمية', reqEn: 'Required, on the approved phased schedule', reqAr: 'مطلوب وفق الجدول المرحلي المعتمد' },
+        { en: 'Airports, passenger ports, transport terminals, shopping centres, public venues above the Ministry capacity threshold', ar: 'المطارات وموانئ الركاب ومحطات النقل والمراكز التجارية والأماكن العامة فوق عتبة السعة التي تحددها الوزارة', reqEn: 'Required', reqAr: 'مطلوب' },
+        { en: 'Remote or difficult-access facilities', ar: 'المرافق النائية أو صعبة الوصول', reqEn: 'Required where the Ministry designates', reqAr: 'مطلوب حيث تحدده الوزارة' },
+        { en: 'Facilities where a cardiac arrest has been reported and confirmed', ar: 'المرافق التي أُبلغ فيها عن توقف قلب وتأكد', reqEn: 'Subject to Ministry review', reqAr: 'خاضع لمراجعة الوزارة' },
+        { en: 'Other facilities designated by the Ministry', ar: 'مرافق أخرى تحددها الوزارة', reqEn: 'As specified', reqAr: 'وفق ما تحدده' }
+      ],
+      obligations: [
+        { en: 'One named cardiac-readiness coordinator', ar: 'منسق واحد مُسمّى للجاهزية للاستجابة لحالات توقف القلب' },
+        { en: 'A maintained cardiac emergency response plan', ar: 'خطة استجابة لطوارئ توقف القلب محدّثة' },
+        { en: 'CPR and AED trained personnel present during operating hours', ar: 'موظفون مدرّبون على الإنعاش واستخدام الجهاز خلال ساعات العمل' },
+        { en: 'An accessible AED where required', ar: 'جهاز متاح للوصول حيث يكون مطلوباً' },
+        { en: 'Visible signage and manufacturer maintenance', ar: 'لافتات ظاهرة وصيانة وفق تعليمات الشركة الصانعة' },
+        { en: 'Clear procedures for calling EMS, guiding them in, and handing over care', ar: 'إجراءات واضحة لاستدعاء الإسعاف وإرشاده ونقل المسؤولية' },
+        { en: 'At least one practical drill each year', ar: 'تمرين عملي واحد على الأقل كل سنة' },
+        { en: 'An incident report after any suspected arrest, CPR attempt or AED use', ar: 'تقرير حادثة بعد أي اشتباه بتوقف قلب أو محاولة إنعاش أو استخدام جهاز' },
+        { en: 'Prompt correction of deficiencies and return of a used AED to service', ar: 'تصحيح سريع لأوجه القصور وإعادة الجهاز المستخدم إلى الخدمة' }
+      ],
+      vendors: [
+        { en: 'AED suppliers', ar: 'موردو الأجهزة', descEn: 'Devices, cabinets and installation', descAr: 'الأجهزة والخزائن والتركيب', sponsored: F.sponsored },
+        { en: 'CPR and AED training', ar: 'تدريب الإنعاش والأجهزة', descEn: 'Certified courses for facility staff', descAr: 'دورات معتمدة لموظفي المرافق', sponsored: false },
+        { en: 'Pads and batteries', ar: 'اللواصق والبطاريات', descEn: 'Consumables and scheduled replacement', descAr: 'المستهلكات والاستبدال الدوري', sponsored: F.sponsored },
+        { en: 'Maintenance services', ar: 'خدمات الصيانة', descEn: 'Manufacturer-authorised servicing', descAr: 'صيانة معتمدة من الشركة الصانعة', sponsored: false }
+      ],
+
+      timeOpts, asOf: this.iso(this.today()),
+      ledger, standingEn, standingAr, standingBorder, standingBg,
+      devices, hasRequest: true,
+
+      purposes, purposeFields: fieldSets[st.purpose],
+      purposeCtaEn: purposeSrc[st.purpose].ctaEn, purposeCtaAr: purposeSrc[st.purpose].ctaAr,
+
+      procedure: [
+        { n: 1, en: 'Confirm the person is unresponsive and not breathing normally', ar: 'تأكّد أن الشخص لا يستجيب ولا يتنفس بشكل طبيعي' },
+        { n: 2, en: 'Contact EMS immediately', ar: 'اتصل بالإسعاف فوراً' },
+        { n: 3, en: 'Start CPR', ar: 'ابدأ الإنعاش القلبي الرئوي' },
+        { n: 4, en: 'Retrieve and apply the AED', ar: 'أحضر الجهاز وطبّقه' },
+        { n: 5, en: 'Follow AED instructions and continue CPR', ar: 'اتبع تعليمات الجهاز وواصل الإنعاش' },
+        { n: 6, en: 'Send the assigned person to meet and guide EMS', ar: 'أرسل الشخص المكلّف لاستقبال الإسعاف وإرشاده' },
+        { n: 7, en: 'Continue care until responsibility is transferred', ar: 'واصل الرعاية حتى نقل المسؤولية' },
+        { n: 8, en: 'Complete the required incident report', ar: 'أكمل تقرير الحادثة المطلوب' }
+      ],
+      planSections: [
+        { en: 'Facility information', ar: 'معلومات المرفق', rows: [
+          { en: 'Facility name', ar: 'اسم المرفق', vEn: 'Corniche Sports Club', vAr: 'نادي الكورنيش الرياضي' },
+          { en: 'Facility category', ar: 'فئة المرفق', vEn: 'Sports club', vAr: 'نادٍ رياضي' },
+          { en: 'Address and municipality', ar: 'العنوان والبلدية', vEn: 'Ain El Mreisseh, Beirut', vAr: 'عين المريسة، بيروت' },
+          { en: 'Operating hours', ar: 'ساعات العمل', vEn: '06:00 – 23:00', vAr: '06:00 – 23:00' },
+          { en: 'Main EMS entrance', ar: 'مدخل الإسعاف الرئيسي', vEn: 'North service gate', vAr: 'بوابة الخدمة الشمالية' },
+          { en: 'EMS contact number used', ar: 'رقم الإسعاف المعتمد', vEn: '140', vAr: '140' }
+        ] },
+        { en: 'Responsible persons', ar: 'الأشخاص المسؤولون', rows: [
+          { en: 'Cardiac-readiness coordinator', ar: 'منسق الجاهزية', vEn: 'Operations manager', vAr: 'مدير العمليات' },
+          { en: 'Alternate contact', ar: 'جهة اتصال بديلة', vEn: 'Duty supervisor', vAr: 'المشرف المناوب' },
+          { en: 'Assigned to meet and guide EMS', ar: 'المكلّف باستقبال الإسعاف', vEn: 'Front desk staff on duty', vAr: 'موظف الاستقبال المناوب' }
+        ] },
+        { en: 'AED information', ar: 'معلومات الأجهزة', rows: [
+          { en: 'AED available', ar: 'يتوفر جهاز', vEn: 'Yes', vAr: 'نعم' },
+          { en: 'Number of AEDs', ar: 'عدد الأجهزة', vEn: '3', vAr: '3' },
+          { en: 'Accessible during operating hours', ar: 'متاح خلال ساعات العمل', vEn: '2 of 3 — one under review', vAr: '2 من 3 — واحد قيد المراجعة' },
+          { en: 'Latest readiness check', ar: 'آخر فحص جاهزية', vEn: '2026-07-28', vAr: '2026-07-28' },
+          { en: 'Pediatric capability', ar: 'إمكانية الاستخدام للأطفال', vEn: 'Yes', vAr: 'نعم' }
+        ] },
+        { en: 'Readiness confirmation', ar: 'تأكيد الجاهزية', rows: [
+          { en: 'Trained personnel during operating hours', ar: 'موظفون مدرّبون خلال ساعات العمل', vEn: 'Confirmed', vAr: 'مؤكّد' },
+          { en: 'AED signage visible', ar: 'لافتات الأجهزة ظاهرة', vEn: 'Confirmed', vAr: 'مؤكّد' },
+          { en: 'AED access not unnecessarily delayed', ar: 'لا تأخير غير ضروري في الوصول', vEn: 'One device under review', vAr: 'جهاز واحد قيد المراجعة' },
+          { en: 'EMS entrance and routes clear', ar: 'مدخل الإسعاف ومساراته سالكة', vEn: 'Confirmed', vAr: 'مؤكّد' },
+          { en: 'Practical drill in the previous 12 months', ar: 'تمرين عملي خلال 12 شهراً', vEn: '2025-11-04', vAr: '2025-11-04' }
+        ] }
+      ],
+      print: () => window.print(),
+
+      narrative: st.narrative,
+      narrativePlaceholder: st.lang === 'ar' ? 'صف الاستجابة باستخدام كلمة «المريض».' : 'Describe the response, referring to "the patient".',
+      onNarrative: e => this.setState({ narrative: e.target.value }),
+      nameFlag: !!flagged, flagged,
+      narrativeBorder: flagged ? 'var(--bad)' : 'var(--line)',
+      submitBg: flagged ? 'var(--surface2)' : 'var(--brand)',
+      submitColor: flagged ? 'var(--muted)' : 'var(--bg)',
+      submitCursor: flagged ? 'not-allowed' : 'pointer',
+      incidentChecks: [
+        { en: 'EMS contacted', ar: 'تم الاتصال بالإسعاف' },
+        { en: 'CPR started before responders arrived', ar: 'بدأ الإنعاش قبل وصول المسعفين' },
+        { en: 'Onsite AED available', ar: 'توفر جهاز في الموقع' },
+        { en: 'Onsite AED applied', ar: 'طُبّق الجهاز' },
+        { en: 'Shock delivered, if known', ar: 'أُعطيت صدمة، إن عُرف' },
+        { en: 'Someone met and guided responders', ar: 'استقبل أحدهم المسعفين وأرشدهم' }
+      ],
+      postChecks: [
+        { en: 'AED checked after use', ar: 'فُحص الجهاز بعد الاستخدام' },
+        { en: 'Used pads replaced', ar: 'استُبدلت اللواصق المستعملة' },
+        { en: 'AED returned to service', ar: 'أُعيد الجهاز إلى الخدمة' },
+        { en: 'Response reviewed with staff', ar: 'روجعت الاستجابة مع الموظفين' },
+        { en: 'Problems or corrective actions recorded', ar: 'سُجّلت المشكلات والإجراءات التصحيحية' }
+      ],
+
+      reviewCounts: [
+        { n: 412, en: 'Covered facilities', ar: 'مرافق مشمولة', color: 'var(--brand)' },
+        { n: 1188, en: 'Registered AEDs', ar: 'أجهزة مسجّلة', color: 'var(--brand)' },
+        { n: 37, en: 'Confirmations overdue', ar: 'تأكيدات متأخرة', color: 'var(--bad)' },
+        { n: 9, en: 'Incidents reported this quarter', ar: 'حوادث مبلّغة هذا الفصل', color: 'var(--accent-ink)' }
+      ],
+      reviewRows: [
+        { en: 'Corniche Sports Club', ar: 'نادي الكورنيش الرياضي', catEn: 'Sports club', catAr: 'نادٍ رياضي', due: '2026-09-12', stateEn: 'Correction requested', stateAr: 'طُلب تصحيح', color: 'var(--accent-ink)', chipBg: 'var(--accent-soft)' },
+        { en: 'Beirut Central Terminal', ar: 'محطة بيروت المركزية', catEn: 'Transport terminal', catAr: 'محطة نقل', due: '2027-01-20', stateEn: 'Maintained', stateAr: 'مستوفٍ', color: 'var(--brand)', chipBg: 'var(--brand-soft)' },
+        { en: 'Jounieh Aquatic Centre', ar: 'مركز جونية المائي', catEn: 'Aquatic facility', catAr: 'منشأة مائية', due: '2026-06-30', stateEn: 'Confirmation overdue', stateAr: 'تأكيد متأخر', color: 'var(--bad)', chipBg: 'var(--bad-soft)' },
+        { en: 'Saida Grand Mall', ar: 'مركز صيدا التجاري', catEn: 'Shopping centre', catAr: 'مركز تجاري', due: '2026-11-05', stateEn: 'Maintained', stateAr: 'مستوفٍ', color: 'var(--brand)', chipBg: 'var(--brand-soft)' },
+        { en: 'Tripoli University Campus', ar: 'حرم جامعة طرابلس', catEn: 'Educational campus', catAr: 'حرم تعليمي', due: '2026-10-01', stateEn: 'Phased — not yet due', stateAr: 'مرحلي — غير مستحق بعد', color: 'var(--muted)', chipBg: 'var(--surface2)' }
+      ],
+      deficiencies: [
+        { en: 'Poolside AED cabinet locked outside class hours', ar: 'خزانة جهاز المسبح مقفلة خارج أوقات الحصص', actionEn: 'Corniche Sports Club — provide unlocked access during all operating hours and confirm with a dated readiness check.', actionAr: 'نادي الكورنيش الرياضي — تأمين وصول غير مقفل طوال ساعات العمل والتأكيد بفحص جاهزية مؤرخ.', due: '2026-09-01' },
+        { en: 'Annual readiness confirmation not submitted', ar: 'لم يُقدَّم التأكيد السنوي للجاهزية', actionEn: 'Jounieh Aquatic Centre — submit the confirmation for all three registered devices.', actionAr: 'مركز جونية المائي — تقديم التأكيد للأجهزة الثلاثة المسجّلة.', due: '2026-08-25' },
+        { en: 'No practical drill recorded in the previous twelve months', ar: 'لم يُسجَّل تمرين عملي خلال اثني عشر شهراً', actionEn: 'Saida Grand Mall — conduct a drill and record the date.', actionAr: 'مركز صيدا التجاري — إجراء تمرين وتسجيل تاريخه.', due: '2026-10-15' }
+      ],
+
+      flags,
+      toggleLang: () => this.setState(s => ({ lang: s.lang === 'en' ? 'ar' : 'en' })),
+      toggleTheme: () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+      togglePalette: () => this.setState(s => ({ palette: s.palette === 'petrol' ? 'cedar' : 'petrol' })),
+      cycleText: () => this.setState(s => ({ textScale: s.textScale === 100 ? 112 : s.textScale === 112 ? 125 : 100 }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -2,8 +2,8 @@
  * Non-negotiable #4. Logical CSS properties only, so the Arabic layout mirrors rather than
  * merely changing text direction.
  *
- * next-intl does not do this for us -- it handles strings, ICU and formatting, and neither
- * sets `dir` nor mirrors layout. Both are ours, so both are tested.
+ * No library does this for us: both languages live in the DOM and `dir` comes from the
+ * cookie. The mirroring is entirely these properties' work, so they are tested.
  */
 
 import { describe, expect, it } from 'vitest';

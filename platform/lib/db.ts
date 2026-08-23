@@ -37,11 +37,25 @@ function migrate(d: DatabaseSync): void {
     CREATE TABLE IF NOT EXISTS accounts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       login TEXT NOT NULL UNIQUE,
+      email TEXT UNIQUE,
+      -- scrypt, formatted salt:hash (lib/password.ts). Null only on demonstration
+      -- accounts, which sign in from the demonstration panel, never with credentials.
+      password_hash TEXT,
       display_name TEXT NOT NULL,
       initials TEXT NOT NULL DEFAULT '',
       role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','ministry_admin','platform_owner')),
       is_demo INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Reset links: single-use, expiring. The note on the reset card is a promise this
+    -- table keeps: expires_at is one hour from issue, used_at marks consumption.
+    CREATE TABLE IF NOT EXISTS password_resets (
+      token TEXT PRIMARY KEY,
+      account_id INTEGER NOT NULL REFERENCES accounts(id),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL,
+      used_at TEXT
     );
 
     CREATE TABLE IF NOT EXISTS sessions (
@@ -57,6 +71,7 @@ function migrate(d: DatabaseSync): void {
       name_ar TEXT NOT NULL,
       -- none: nothing filed. pending: filed, awaiting Ministry recording. recorded.
       status TEXT NOT NULL DEFAULT 'none' CHECK (status IN ('none','pending','recorded')),
+      recorded_at TEXT,
       is_demo INTEGER NOT NULL DEFAULT 0
     );
 

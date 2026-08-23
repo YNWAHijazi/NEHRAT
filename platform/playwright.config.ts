@@ -50,10 +50,18 @@ export default defineConfig({
   ...(APP_EXISTS
     ? {
         webServer: {
-          command: 'npm run dev',
+          // A dedicated database, re-seeded per run, under the pinned review clock:
+          // REVIEW_CLOCK freezes "today" at the prototypes' 2026-08-13 so date STRINGS
+          // match the reference (handoff 4, decision 3). The seeder's re-anchoring
+          // shift becomes zero under the pin. Ignored in production builds.
+          command: 'npm run dev:e2e',
           url: 'http://localhost:3000',
-          reuseExistingServer: true,
+          reuseExistingServer: false,
           timeout: 60_000,
+          env: {
+            REVIEW_CLOCK: '2026-08-13',
+            DATABASE_PATH: 'var/e2e.db',
+          },
         },
       }
     : {}),

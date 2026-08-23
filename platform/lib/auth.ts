@@ -34,6 +34,7 @@ export interface Organization {
   nameEn: string;
   nameAr: string;
   status: 'none' | 'pending' | 'recorded';
+  recordedAt: string | null;
 }
 
 interface AccountRow {
@@ -72,13 +73,13 @@ export async function currentAccount(): Promise<Account | null> {
 export function organizationFor(accountId: number): Organization | null {
   const row = getDb()
     .prepare(
-      `SELECT id, name_en, name_ar, status FROM organizations WHERE account_id = ?`,
+      `SELECT id, name_en, name_ar, status, recorded_at FROM organizations WHERE account_id = ?`,
     )
     .get(accountId) as
-    | { id: number; name_en: string; name_ar: string; status: Organization['status'] }
+    | { id: number; name_en: string; name_ar: string; status: Organization['status']; recorded_at: string | null }
     | undefined;
   return row
-    ? { id: row.id, nameEn: row.name_en, nameAr: row.name_ar, status: row.status }
+    ? { id: row.id, nameEn: row.name_en, nameAr: row.name_ar, status: row.status, recordedAt: row.recorded_at }
     : null;
 }
 

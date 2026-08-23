@@ -1,0 +1,13 @@
+{
+  "$comment": "Credential policy is a Ministry decision (SSO, verification, complexity). These are the review build's placeholders, configurable as data so the decision changes no code.",
+  "password": {
+    "minLength": 8,
+    "requireUppercase": false,
+    "requireDigit": false,
+    "requireSymbol": false
+  },
+  "reset": {
+    "linkExpiryMinutes": 60,
+    "singleUse": true
+  }
+}
