@@ -10,6 +10,8 @@ import {
   facilityLedgerFor,
   facilityRequests,
   unreadCountFor,
+  publishedCycles,
+  ministryConfig,
 } from '../../../lib/queries';
 import { beirutToday } from '../../../lib/clock';
 import {
@@ -59,8 +61,10 @@ export default async function FacilityReadinessPage({
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
 
-  // The preview offsets are the lapse window and three windows out -- data, not 60.
-  const windowDays = FACILITY_CONTENT.ledger.cycles.lapseWindowDays;
+  // The preview offsets are the lapse window and three windows out -- the GOVERNED
+  // window: published where the Ministry has set one, provisional otherwise.
+  const cycles = publishedCycles();
+  const windowDays = cycles.lapseWindowDays;
   const offsets = [0, windowDays, windowDays * 3];
   const requested = Number.parseInt(asof ?? '0', 10) || 0;
   const offset = offsets.includes(requested) ? requested : 0;
@@ -72,11 +76,12 @@ export default async function FacilityReadinessPage({
   const requests = facilityRequests(facility.id);
   const category = facilityCategory(facility.categoryKey);
   const content = FACILITY_CONTENT;
+  const catRequirements = ministryConfig().get('categoryRequirements') ?? null;
   const short = content.categories.find((c) => c.key === facility.categoryKey) as
     | { shortEn?: string; shortAr?: string }
     | undefined;
 
-  const days = content.ledger.cycles.lapseWindowDays;
+  const days = cycles.lapseWindowDays;
   const fill = (tpl: string, n: number): string =>
     tpl.replace('{n}', String(n)).replace('{days}', String(days));
   const standingLine =
@@ -161,9 +166,32 @@ export default async function FacilityReadinessPage({
         <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--muted)' }}>
           <L en={content.ledger.intro.en} ar={content.ledger.intro.ar} />
         </p>
-        <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-          <L en={content.provisionalNote.en} ar={content.provisionalNote.ar} />
-        </p>
+        {cycles.provisional ? (
+          <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <L en={content.provisionalNote.en} ar={content.provisionalNote.ar} />
+          </p>
+        ) : (
+          <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <L
+              en={`Cycles run on the Ministry's published values: device checks every ${cycles.checkCycleDays} days, a ${cycles.lapseWindowDays}-day lapse window.`}
+              ar={`تسري الدورات وفق القيم المنشورة من الوزارة: فحص الأجهزة كل ${cycles.checkCycleDays} يوماً، ونافذة انتهاء ${cycles.lapseWindowDays} يوماً.`}
+            />
+          </p>
+        )}
+
+        {catRequirements ? (
+          <div data-region="category-requirements" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+              <L en="Additional requirements for this category — published by the Ministry" ar="متطلبات إضافية لهذه الفئة — منشورة من الوزارة" />
+            </div>
+            <div style={{ fontSize: '14.5px', lineHeight: 1.65 }}>{catRequirements.value}</div>
+            {catRequirements.effective ? (
+              <div style={{ marginBlockStart: 8, fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                <L en={`Effective ${catRequirements.effective}`} ar={`يسري اعتباراً من ⁦${catRequirements.effective}⁩`} />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
           <L en="Validity ledger" ar="سجل الصلاحية" />

@@ -13,10 +13,10 @@ import { describe, expect, it } from 'vitest';
 import {
   filingDeadline,
   postEventReportWindow,
-  postEventReportIsOpen,
   toBeirut,
   formatIsoDate,
 } from '../lib/rules/deadlines';
+import { postEventReportGate } from '../lib/rules/gates';
 
 // A single-day event: starts and ends 1 October 2026, Beirut.
 const EVENT_START = new Date('2026-10-01T18:00:00+03:00');
@@ -86,12 +86,20 @@ describe('the post-event report window', () => {
     expect(w.opens.instant.getUTCHours()).not.toBe(0);
   });
 
-  it('is closed a minute before it opens and open a minute after', () => {
+  it('is closed a minute before it opens and open a minute after — through the WIRED gate', () => {
+    // Asserted against postEventReportGate, the derivation every screen calls. The
+    // earlier assertion ran against a helper nothing called -- a vacuous pass.
     const w = postEventReportWindow(EVENT_END);
-    const justBefore = new Date(w.opens.instant.getTime() - 60_000);
-    const justAfter = new Date(w.opens.instant.getTime() + 60_000);
-    expect(postEventReportIsOpen(EVENT_END, justBefore)).toBe(false);
-    expect(postEventReportIsOpen(EVENT_END, justAfter)).toBe(true);
+    const ctx = (now: Date) => ({
+      finalLevel: 3 as const,
+      eventEndDate: '2026-10-01',
+      eventStartDate: '2026-10-01',
+      filed: true,
+      organizationStatus: 'recorded' as const,
+      now,
+    });
+    expect(postEventReportGate(ctx(new Date(w.opens.instant.getTime() - 60_000))).behaviour).toBe('disabled');
+    expect(postEventReportGate(ctx(new Date(w.opens.instant.getTime() + 60_000))).behaviour).toBe('enabled');
   });
 });
 

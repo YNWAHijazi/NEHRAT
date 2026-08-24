@@ -223,6 +223,25 @@ function migrate(d: DatabaseSync): void {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Every save archives the row it replaces: "prior versions remain readable" is a
+    -- storage guarantee, not screen copy. Read newest-first for the history block.
+    CREATE TABLE IF NOT EXISTS plan_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      version INTEGER NOT NULL,
+      mode TEXT NOT NULL,
+      ref_confirmed INTEGER NOT NULL,
+      ref_admits_children INTEGER NOT NULL,
+      ref_temporary_areas INTEGER NOT NULL,
+      sections TEXT NOT NULL,
+      attached_file TEXT,
+      major_incident TEXT NOT NULL,
+      saved_at TEXT NOT NULL
+    );
+
+    -- One CURRENT submission per event, versioned: a revision outcome reopens it, and
+    -- re-filing archives the row it replaces into submission_versions. The reference
+    -- number never changes across versions (the outcome notification says so).
     CREATE TABLE IF NOT EXISTS submissions (
       event_id TEXT PRIMARY KEY REFERENCES events(id),
       declarations TEXT NOT NULL DEFAULT '{}', -- JSON: { [index]: true }
@@ -232,7 +251,22 @@ function migrate(d: DatabaseSync): void {
       position TEXT NOT NULL DEFAULT '',
       expedited INTEGER NOT NULL DEFAULT 0,    -- Protocol 8.4: filed inside the lead time
       filed_at TEXT,
-      moph_reference TEXT
+      moph_reference TEXT,
+      version INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS submission_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      version INTEGER NOT NULL,
+      declarations TEXT NOT NULL,
+      insurance TEXT NOT NULL,
+      representative TEXT NOT NULL,
+      telephone TEXT NOT NULL,
+      position TEXT NOT NULL,
+      expedited INTEGER NOT NULL,
+      filed_at TEXT,
+      archived_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
     CREATE TABLE IF NOT EXISTS material_changes (
@@ -246,9 +280,14 @@ function migrate(d: DatabaseSync): void {
 
     -- Protocol 13: the 24-hour serious-incident notification. A separate obligation
     -- from the post-event report; filing the report does not satisfy it.
+    -- Protocol 13 p1: its own obligation with its own control, independent of the
+    -- post-event report and available the moment the event starts. Type and time of
+    -- occurrence are the whole record -- no narrative, no patient data.
     CREATE TABLE IF NOT EXISTS serious_incident_notifications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       event_id TEXT NOT NULL REFERENCES events(id),
+      incident_type TEXT NOT NULL CHECK (incident_type IN ('arrest','death','major','interruption')),
+      occurred_at TEXT NOT NULL,
       notified_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -323,6 +362,9 @@ function migrate(d: DatabaseSync): void {
       email TEXT NOT NULL DEFAULT '',
       access_point TEXT NOT NULL DEFAULT '',
       ems_number TEXT NOT NULL DEFAULT '',
+      -- Power two's evaluable fact: without a recorded capacity, a published
+      -- public-venue threshold has nothing to bite on.
+      licensed_capacity INTEGER,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       is_demo INTEGER NOT NULL DEFAULT 0
     );

@@ -2,9 +2,21 @@
   "$comment": "Bands, lead times and windows. Ministry-configurable: changing a threshold here is a data change, not a code change. Never render any of these numbers as a fixed figure in copy.",
   "timezone": "Asia/Beirut",
   "bands": [
-    { "level": 1, "minScore": 0, "maxScore": 5 },
-    { "level": 2, "minScore": 6, "maxScore": 11 },
-    { "level": 3, "minScore": 12, "maxScore": 18 }
+    {
+      "level": 1,
+      "minScore": 0,
+      "maxScore": 5
+    },
+    {
+      "level": 2,
+      "minScore": 6,
+      "maxScore": 11
+    },
+    {
+      "level": 3,
+      "minScore": 12,
+      "maxScore": 18
+    }
   ],
   "filingDeadline": {
     "$comment": "Lead time BEFORE the event start. Level 1 is conditional per SPEC 8.1: filed before final event authorization is issued, and where no external authorization is required, at least this many days before. This is NOT the post-event report window, which is also 7 days but runs AFTER the event ends.",
@@ -14,22 +26,59 @@
       "conditionEn": "Filed before final event authorization is issued. Where no external authorization is required, at least 7 calendar days before the event.",
       "conditionAr": "يُقدَّم قبل صدور الترخيص النهائي للفعالية. وحيث لا يُشترط ترخيص خارجي، قبل 7 أيام تقويمية على الأقل من الفعالية."
     },
-    "2": { "leadTimeDays": 14, "conditional": false },
-    "3": { "leadTimeDays": 30, "conditional": false }
+    "2": {
+      "leadTimeDays": 14,
+      "conditional": false
+    },
+    "3": {
+      "leadTimeDays": 30,
+      "conditional": false
+    }
   },
   "postEventReport": {
     "$comment": "A separate obligation from the filing deadline. Opens 00:00 Asia/Beirut the day after the event ENDS, not starts. Due within this many days of that opening.",
     "windowDays": 7,
     "opensRelativeTo": "eventEnd",
     "opensAtLocalTime": "00:00",
-    "requiredAtLevels": [3],
-    "requiredOnReportableIncidentAtLevels": [1, 2],
+    "requiredAtLevels": [
+      3
+    ],
+    "requiredOnReportableIncidentAtLevels": [
+      1,
+      2
+    ],
     "requiredOnMinistryRequest": true,
-    "signaturesRequired": { "1": 1, "2": 1, "3": 2 }
+    "signaturesRequired": {
+      "1": 1,
+      "2": 1,
+      "3": 2
+    }
   },
   "seriousIncidentNotification": {
     "$comment": "Distinct from the post-event report. Filing the report does not satisfy this.",
-    "windowHours": 24
+    "windowHours": 24,
+    "types": [
+      {
+        "key": "arrest",
+        "en": "Cardiac arrest",
+        "ar": "توقف قلب"
+      },
+      {
+        "key": "death",
+        "en": "Death",
+        "ar": "وفاة"
+      },
+      {
+        "key": "major",
+        "en": "Major incident",
+        "ar": "حادثة جسيمة"
+      },
+      {
+        "key": "interruption",
+        "en": "Interruption or termination for medical reasons",
+        "ar": "توقف الفعالية أو إنهاؤها لأسباب طبية"
+      }
+    ]
   },
   "reassessmentWindow": {
     "venueClassificationMonths": 12,

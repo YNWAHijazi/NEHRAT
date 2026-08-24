@@ -28,6 +28,7 @@
  */
 
 import type { Level } from './types';
+import { applyDemonstrationFilter, demonstrationFilter } from './scope';
 
 /** The complete list. Adding a field here is a policy change, not a refactor. */
 export const PUBLIC_LOOKUP_FIELDS = ['exists', 'eventName', 'level', 'status'] as const;
@@ -71,12 +72,20 @@ export const NOT_FOUND: PublicLookupResult = {
  */
 export function projectPublicLookup(record: SubmissionRecord | null): PublicLookupResult {
   if (!record) return NOT_FOUND;
-  return {
+  const result: PublicLookupResult = {
     exists: true,
     eventName: record.eventName,
     level: record.level,
     status: record.status,
   };
+  // The four-fields list GOVERNS the shape: a key that drifted in past the type
+  // system (a spread, a wider object) is stripped before anything leaves.
+  for (const key of Object.keys(result)) {
+    if (!(PUBLIC_LOOKUP_FIELDS as readonly string[]).includes(key)) {
+      delete (result as unknown as Record<string, unknown>)[key];
+    }
+  }
+  return result;
 }
 
 export interface LookupQuery {
@@ -105,7 +114,9 @@ export function resolvePublicLookup(
 
   const record = findByReference(query.referenceNumber);
   if (!record) return NOT_FOUND;
-  if (record.isDemo) return NOT_FOUND;
+  if (applyDemonstrationFilter([record], demonstrationFilter('publicReferenceLookup', { isDemonstration: false })).length === 0) {
+    return NOT_FOUND;
+  }
   if (record.eventStartDate !== query.eventStartDate) return NOT_FOUND;
 
   return projectPublicLookup(record);

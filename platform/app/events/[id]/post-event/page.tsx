@@ -3,7 +3,6 @@ import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { PostEventForm } from './PostEventForm';
-import { notifySeriousIncidentAction } from '../../../actions';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { clockNow } from '../../../../lib/clock';
 import {
@@ -107,16 +106,13 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
                 />
               </div>
               {notifiedAt ? (
-                <span style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 22, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 14, fontWeight: 500 }}>
+                <span style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 22, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 14, fontWeight: 500, marginInlineEnd: 10 }}>
                   <L en={`Notified ${notifiedAt.slice(0, 10)}`} ar={`أُبلغ في ⁦${notifiedAt.slice(0, 10)}⁩`} />
                 </span>
-              ) : (
-                <form action={notifySeriousIncidentAction.bind(null, id)} style={{ display: 'inline' }}>
-                  <button type="submit" style={{ height: 40, paddingInline: 18, border: 0, borderRadius: 22, background: 'var(--bad)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                    <L en="Notify now" ar="الإبلاغ الآن" />
-                  </button>
-                </form>
-              )}
+              ) : null}
+              <a href={`/events/${id}/incident`} style={{ display: 'inline-block', height: 40, lineHeight: '40px', paddingInline: 18, borderRadius: 22, background: 'var(--bad)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
+                <L en="Open the notification form" ar="فتح نموذج الإبلاغ" />
+              </a>
             </div>
             <div style={{ padding: '26px 28px', border: '1px solid var(--line)', borderRadius: 14 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>

@@ -55,6 +55,53 @@ export function facilityCategory(key: string): FacilityCategory | null {
   return FACILITY_CATEGORIES.find((c) => c.key === key) ?? null;
 }
 
+export interface PublishedValue {
+  value: string;
+  /** ISO date, null when the publication carries none. */
+  effective: string | null;
+}
+
+/**
+ * The category as governed by what the Ministry has PUBLISHED (powers one and two).
+ * Static data describes the instrument; a published value changes the state:
+ *  - education: a published phased schedule ends the awaiting state -- the category
+ *    becomes partly in force under the schedule's own words, and registration proceeds.
+ *  - transport: a published capacity threshold becomes part of the basis, so the
+ *    public-venue limb is evaluable instead of a bare chip.
+ * Callers that only need the instrument's text keep using facilityCategory().
+ */
+export function categoryWithPublished(
+  key: string,
+  published: { phasedSchedule?: PublishedValue | null; capacityThreshold?: PublishedValue | null },
+): FacilityCategory | null {
+  const base = facilityCategory(key);
+  if (!base) return null;
+  if (key === 'education' && published.phasedSchedule) {
+    const s = published.phasedSchedule;
+    const eff = s.effective ? ` — effective ${s.effective}` : '';
+    const effAr = s.effective ? ` — يسري اعتباراً من ⁦${s.effective}⁩` : '';
+    return {
+      ...base,
+      state: 'partlyInForce',
+      basisEn: `A phased implementation schedule is published${eff}: ${s.value}`,
+      basisAr: `نُشر جدول مرحلي للتنفيذ${effAr}: ${s.value}`,
+      missingEn: undefined,
+      missingAr: undefined,
+    };
+  }
+  if (key === 'transport' && published.capacityThreshold) {
+    const s = published.capacityThreshold;
+    const eff = s.effective ? ` — effective ${s.effective}` : '';
+    const effAr = s.effective ? ` — يسري اعتباراً من ⁦${s.effective}⁩` : '';
+    return {
+      ...base,
+      basisEn: `${base.basisEn} The published capacity threshold is ${s.value} persons${eff}: a public venue at or above it is covered.`,
+      basisAr: `${base.basisAr} عتبة السعة المنشورة هي ${s.value} شخصاً${effAr}: وتُشمل الأماكن العامة التي تبلغها أو تتجاوزها.`,
+    };
+  }
+  return base;
+}
+
 /**
  * Whether step 2 ends the journey. Only awaitingMinistryValue ends it (no Continue
  * button at all -- rule 10's second behaviour: absent, not greyed). A category
@@ -96,9 +143,18 @@ export interface LedgerInputs {
   hasDevices: boolean;
   /** Today, Asia/Beirut, ISO. */
   today: string;
+  /** Published cycles via effectiveCycles(); absent falls back to the provisional figures. */
+  cycles?: LedgerCycles;
 }
 
-const CYCLES = facilityJson.ledger.cycles;
+const PROVISIONAL_CYCLES = facilityJson.ledger.cycles;
+
+export interface LedgerCycles {
+  checkCycleDays: number;
+  lapseWindowDays: number;
+  annualMonths: number;
+  provisional: boolean;
+}
 
 function isoToCalendar(iso: string): CalendarDate {
   const [y, m, d] = iso.split('-').map(Number);
@@ -120,18 +176,31 @@ export function addDaysIso(iso: string, days: number): string {
 }
 
 /** Status of one obligation from its stops-counting date. The window is data. */
-export function obligationStatus(until: string | null, today: string): ObligationStatus {
+export function obligationStatus(
+  until: string | null,
+  today: string,
+  cycles: Pick<LedgerCycles, 'lapseWindowDays'> = { lapseWindowDays: PROVISIONAL_CYCLES.lapseWindowDays },
+): ObligationStatus {
   if (until === null) return 'notRecorded';
   if (today > until) return 'lapsed';
-  if (addDaysIso(today, CYCLES.lapseWindowDays) >= until) return 'lapsing';
+  if (addDaysIso(today, cycles.lapseWindowDays) >= until) return 'lapsing';
   return 'current';
 }
 
 /** The six ledger rows, derived. An unset input is 'notRecorded', never a guess. */
 export function facilityLedger(inputs: LedgerInputs): LedgerRow[] {
+  // Published cycles govern where the Ministry has set them; the Slice 4 provisional
+  // figures apply only while a value is unset. The caller passes what is published --
+  // this module never reads the store.
+  const cycles: LedgerCycles = inputs.cycles ?? {
+    checkCycleDays: PROVISIONAL_CYCLES.checkCycleDays,
+    lapseWindowDays: PROVISIONAL_CYCLES.lapseWindowDays,
+    annualMonths: PROVISIONAL_CYCLES.annualMonths,
+    provisional: true,
+  };
   const annual = (affirmed: string | null): { lastAffirmed: string | null; until: string | null } => ({
     lastAffirmed: affirmed,
-    until: affirmed === null ? null : addMonthsIso(affirmed, CYCLES.annualMonths),
+    until: affirmed === null ? null : addMonthsIso(affirmed, cycles.annualMonths),
   });
   const fixed = (affirmed: string | null, until: string | null) => ({ lastAffirmed: affirmed, until });
   const rows: { lastAffirmed: string | null; until: string | null }[] = [
@@ -139,7 +208,7 @@ export function facilityLedger(inputs: LedgerInputs): LedgerRow[] {
     fixed(inputs.batteryAffirmed, inputs.hasDevices ? inputs.earliestBatteryExpiry : null),
     fixed(
       inputs.oldestCheck,
-      inputs.oldestCheck === null ? null : addDaysIso(inputs.oldestCheck, CYCLES.checkCycleDays),
+      inputs.oldestCheck === null ? null : addDaysIso(inputs.oldestCheck, cycles.checkCycleDays),
     ),
     annual(inputs.drillDate),
     annual(inputs.confirmedAt),
@@ -147,7 +216,7 @@ export function facilityLedger(inputs: LedgerInputs): LedgerRow[] {
   ];
   return facilityJson.ledger.obligations.map((o, i) => {
     const r = rows[i] ?? { lastAffirmed: null, until: null };
-    return { key: o.key, lastAffirmed: r.lastAffirmed, until: r.until, status: obligationStatus(r.until, inputs.today) };
+    return { key: o.key, lastAffirmed: r.lastAffirmed, until: r.until, status: obligationStatus(r.until, inputs.today, cycles) };
   });
 }
 

@@ -20,7 +20,10 @@
     "postEventNeedsEventDate": "يُتاح بعد انتهاء الفعالية. لم يُسجَّل تاريخ الفعالية.",
     "assessmentIncomplete": "يُستنتج المستوى بعد الإجابة عن جميع المجالات وإدخال جميع الأرقام المطلوبة.",
     "courseDistanceRequired": "مسافة المسار مطلوبة لفعالية الجري المنظمة.",
-    "attendanceRequired": "الحد الأقصى المتوقع للحضور المتزامن مطلوب، رقماً."
+    "attendanceRequired": "الحد الأقصى المتوقع للحضور المتزامن مطلوب، رقماً.",
+    "seriousIncidentBeforeFiling": "يُتاح بعد تقديم الطلب",
+    "seriousIncidentBeforeStart": "يُتاح من اليوم الأول للفعالية — {date}",
+    "seriousIncidentNeedsEventDate": "يُتاح بعد تسجيل تواريخ الفعالية"
   },
   "level": {
     "governedByScore": "يحكمه مجموع نقاط التقييم",

@@ -16,6 +16,7 @@ import {
   FACILITY_CATEGORIES,
   FACILITY_CONTENT,
   categoryEndsJourney,
+  categoryWithPublished,
   type FacilityCategory,
 } from '../../../lib/rules';
 import type { StateChip } from '../../../lib/rules';
@@ -45,12 +46,18 @@ const STEPS = [
   { en: 'Registered', ar: 'مُسجَّلة' },
 ].map((s, i) => ({ ...s, n: i + 1 }));
 
-export function RegisterFacilityForm() {
+export function RegisterFacilityForm({
+  published,
+}: {
+  /** What the Ministry has published (powers one and two); governs the category states. */
+  published: { phasedSchedule: { value: string; effective: string | null } | null; capacityThreshold: { value: string; effective: string | null } | null };
+}) {
   const [step, setStep] = useState(1);
   const [catKey, setCatKey] = useState<string | null>(null);
   const [profile, setProfile] = useState<Record<string, string>>({});
   const content = FACILITY_CONTENT;
-  const picked: FacilityCategory | null = FACILITY_CATEGORIES.find((c) => c.key === catKey) ?? null;
+  const governed = (key: string): FacilityCategory | null => categoryWithPublished(key, published);
+  const picked: FacilityCategory | null = catKey === null ? null : governed(catKey);
   const ended = picked !== null && categoryEndsJourney(picked);
 
   const field = (key: string, en: string, ar: string, dir?: 'rtl', hintEn?: string, hintAr?: string) => (
@@ -144,7 +151,8 @@ export function RegisterFacilityForm() {
             />
           </p>
           <div data-region="category-options" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 28 }}>
-            {FACILITY_CATEGORIES.map((c, i) => {
+            {FACILITY_CATEGORIES.map((raw, i) => {
+              const c = governed(raw.key) ?? raw;
               const chip = CHIP[c.state];
               const on = catKey === c.key;
               return (

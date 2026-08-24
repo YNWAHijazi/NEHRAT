@@ -183,7 +183,3 @@ export function postEventReportWindow(eventEnd: Date): PostEventWindow {
   };
 }
 
-/** True once the post-event report has opened. Compared in Beirut, not the browser's zone. */
-export function postEventReportIsOpen(eventEnd: Date, now: Date): boolean {
-  return now.getTime() >= postEventReportWindow(eventEnd).opens.instant.getTime();
-}

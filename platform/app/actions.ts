@@ -26,7 +26,7 @@ import {
 } from '../lib/auth';
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
-  facilityCategory, categoryEndsJourney, detectPersonalName,
+  facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
   declarationGate } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
@@ -332,12 +332,20 @@ export interface PlanPayload {
   majorIncident: Record<string, { covered?: boolean }>;
 }
 
-/** Saves the plan. Saving bumps the version; prior versions remain in the audit trail. */
+/** Saves the plan. The row being replaced is archived first -- prior versions stay readable. */
 export async function savePlanAction(eventId: string, payload: PlanPayload): Promise<{ ok: true } | { error: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
-  getDb()
+  const db = getDb();
+  db.prepare(
+    `INSERT INTO plan_versions (event_id, version, mode, ref_confirmed, ref_admits_children,
+       ref_temporary_areas, sections, attached_file, major_incident, saved_at)
+     SELECT event_id, version, mode, ref_confirmed, ref_admits_children,
+       ref_temporary_areas, sections, attached_file, major_incident, updated_at
+     FROM plans WHERE event_id = ?`,
+  ).run(eventId);
+  db
     .prepare(
       `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
          sections, attached_file, major_incident, version)
@@ -370,6 +378,11 @@ export async function saveComplianceAction(eventId: string, payload: ComplianceP
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  const filedRow = getDb().prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number } | undefined;
+  if (filedRow?.filed === 1) {
+    const { revisionOpenFor } = await import('../lib/queries');
+    if (!revisionOpenFor(eventId)) return { error: 'filed' };
+  }
   getDb()
     .prepare(
       `INSERT INTO submissions (event_id, declarations, insurance, representative, telephone, position)
@@ -394,12 +407,39 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
 
+  const db = getDb();
+  const already = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number } | undefined;
+  if (already?.filed === 1) {
+    // A filed submission reopens only on a revision or incomplete outcome. Re-filing
+    // archives the version it replaces; the reference number does not change.
+    const { revisionOpenFor } = await import('../lib/queries');
+    if (!revisionOpenFor(eventId)) return { error: 'not-open-for-revision' };
+    const { submissionGateFor } = await import('../lib/submission-facts');
+    const gate = submissionGateFor(account.id, eventId);
+    if (!gate.canFile) return { error: 'blocked' };
+    db.prepare(
+      `INSERT INTO submission_versions (event_id, version, declarations, insurance, representative,
+         telephone, position, expedited, filed_at)
+       SELECT event_id, version, declarations, insurance, representative, telephone, position,
+         expedited, filed_at FROM submissions WHERE event_id = ?`,
+    ).run(eventId);
+    db.prepare(
+      `UPDATE submissions SET filed_at = datetime('now'), expedited = ?, version = version + 1
+       WHERE event_id = ?`,
+    ).run(gate.expedited ? 1 : 0, eventId);
+    const ref = (db.prepare(`SELECT moph_reference AS r FROM events WHERE id = ?`).get(eventId) as { r: string }).r;
+    revalidatePath(`/events/${eventId}`);
+    revalidatePath(`/ministry/submissions/${eventId}`);
+    return { reference: ref };
+  }
+
   const { submissionGateFor } = await import('../lib/submission-facts');
   const gate = submissionGateFor(account.id, eventId);
   if (!gate.canFile) return { error: 'blocked' };
 
-  const db = getDb();
-  const year = new Date().getFullYear();
+  // The reference year follows the Beirut clock like every other date computation.
+  const { beirutToday: beirutTodayFn } = await import('../lib/clock');
+  const year = beirutTodayFn().slice(0, 4);
   const last = db
     .prepare(`SELECT moph_reference AS r FROM events WHERE moph_reference LIKE ? ORDER BY moph_reference DESC LIMIT 1`)
     .get(`MOPH-EV-${year}-%`) as { r: string } | undefined;
@@ -466,14 +506,21 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
   const db = getDb();
-  const level = (db.prepare(`SELECT demo_level FROM events WHERE id = ?`).get(eventId) as { demo_level: number | null } | undefined)?.demo_level;
+  // The DERIVED level, like every other call site -- demo_level is the fallback for
+  // seeded rows only. Reading demo_level alone let a derived Level 3 event submit its
+  // report on one signature.
+  const { eventFor, assessmentsFor } = await import('../lib/queries');
+  const event = eventFor(account.id, eventId);
+  const level = assessmentsFor(account.id, eventId)[0]?.derivation.finalLevel ?? event?.level ?? null;
+  const { postEventSignaturesRequired } = await import('../lib/rules');
+  const signaturesRequired = level === null ? 1 : postEventSignaturesRequired(level);
   db.prepare(`UPDATE post_event_reports SET organizer_signed_at = datetime('now') WHERE event_id = ?`).run(eventId);
   const row = db.prepare(`SELECT organizer_signed_at, director_signed_at FROM post_event_reports WHERE event_id = ?`).get(eventId) as
     | { organizer_signed_at: string | null; director_signed_at: string | null }
     | undefined;
   if (!row?.organizer_signed_at) return { error: 'not-saved' };
   // Level 3 carries two signatures; it is not complete with one (SPEC 5).
-  if (level === 3 && !row.director_signed_at) {
+  if (signaturesRequired > 1 && !row.director_signed_at) {
     revalidatePath(`/events/${eventId}/post-event`);
     return { error: 'awaiting-director' };
   }
@@ -483,15 +530,26 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
 }
 
 /** Protocol 13: records the 24-hour serious-incident notification to the Ministry. */
-export async function notifySeriousIncidentAction(eventId: string): Promise<void> {
+/**
+ * Protocol 13 p1: the 24-hour notification. Its own obligation with its own control --
+ * available from the moment the event starts, never waiting for the report window.
+ * Type and occurrence time are the whole record; no narrative, so nothing to screen.
+ */
+export async function notifySeriousIncidentAction(eventId: string, formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const incidentType = String(formData.get('incidentType') ?? '');
+  const occurredAt = String(formData.get('occurredAt') ?? '').trim();
+  if (!['arrest', 'death', 'major', 'interruption'].includes(incidentType) || occurredAt === '') {
+    redirect(`/events/${eventId}/incident?error=incomplete`);
+  }
   getDb()
-    .prepare(`INSERT INTO serious_incident_notifications (event_id) VALUES (?)`)
-    .run(eventId);
-  revalidatePath(`/events/${eventId}/post-event`);
-  redirect(`/events/${eventId}/post-event`);
+    .prepare(`INSERT INTO serious_incident_notifications (event_id, incident_type, occurred_at) VALUES (?, ?, ?)`)
+    .run(eventId, incidentType, occurredAt);
+  revalidatePath(`/events/${eventId}/incident`);
+  revalidatePath('/ministry/incidents');
+  redirect(`/events/${eventId}/incident?notice=notified`);
 }
 
 /* ---------------- Slice 3: the venue service ---------------- */
@@ -642,20 +700,26 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const categoryKey = String(formData.get('category') ?? '');
-  const category = facilityCategory(categoryKey);
+  // The gate runs against the GOVERNED category: a published phased schedule opens the
+  // education journey the static data alone would end at step 2.
+  const { publishedFacilityValues } = await import('../lib/queries');
+  const category = categoryWithPublished(categoryKey, publishedFacilityValues());
   if (!category || categoryEndsJourney(category)) redirect('/facilities/new');
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  const capacityNum = Number(s('capacity'));
   const facilityId = nextRecordId('FC');
   const db = getDb();
   db.prepare(
     `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
        municipality_en, municipality_ar, operating_hours, phone, email, access_point,
-       ems_number, is_demo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ems_number, licensed_capacity, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     facilityId, account.id, s('name'), s('nameAr') || s('name'), categoryKey, s('address'),
     s('municipality'), s('municipalityAr') || s('municipality'), s('hours'), s('phone'),
-    s('email'), s('accessPoint'), s('emsNumber'), account.isDemo ? 1 : 0,
+    s('email'), s('accessPoint'), s('emsNumber'),
+    s('capacity') !== '' && Number.isFinite(capacityNum) ? capacityNum : null,
+    account.isDemo ? 1 : 0,
   );
   const person = db.prepare(
     `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email)

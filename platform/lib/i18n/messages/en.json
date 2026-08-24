@@ -20,7 +20,10 @@
     "postEventNeedsEventDate": "Available after the event ends. The event date has not been recorded.",
     "assessmentIncomplete": "The level is derived once every domain is answered and every required figure is captured.",
     "courseDistanceRequired": "Course distance is required for an organized running event.",
-    "attendanceRequired": "Expected maximum simultaneous attendance is required, as a number."
+    "attendanceRequired": "Expected maximum simultaneous attendance is required, as a number.",
+    "seriousIncidentBeforeFiling": "Available once the submission is filed",
+    "seriousIncidentBeforeStart": "Available from the event’s first day — {date}",
+    "seriousIncidentNeedsEventDate": "Available once the event dates are captured"
   },
   "level": {
     "governedByScore": "Governed by the assessment score",

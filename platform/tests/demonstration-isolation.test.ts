@@ -1,22 +1,29 @@
 /**
- * Non-negotiable #8, as three assertions rather than one.
+ * Non-negotiable #8, under the Slice 6 SYMMETRIC ruling:
  *
- * A demonstration organization's rows never appear:
- *   1. in the national registry
- *   2. in a Ministry aggregate count
- *   3. in a reviewer queue
+ *   - a REAL session never sees a demonstration row, on any surface;
+ *   - a DEMONSTRATION session sees ONLY demonstration rows, so the Ministry can walk
+ *     the whole console against the seeded records;
+ *   - the public reference lookup is the one asymmetric surface: a demonstration
+ *     reference must not resolve for anyone.
  *
- * Plus a completeness guard, so the NEXT Ministry surface cannot be added by forgetting.
+ * Plus a completeness guard, so the NEXT surface cannot be added by forgetting.
+ * These functions are WIRED: lib/queries.ts derives its is_demo bind value from
+ * demonstrationFilter, and the public-lookup resolution refuses through it.
  */
 
 import { describe, expect, it } from 'vitest';
 import {
   SURFACE_DEMONSTRATION_POLICY,
-  MINISTRY_WORK_SURFACES,
   demonstrationFilter,
   applyDemonstrationFilter,
   type SurfaceKey,
 } from '../lib/rules/scope';
+
+// Derived from the policy map, so the list cannot drift from what is enforced.
+const DEMONSTRATION_NEVER_REACHES = (Object.entries(SURFACE_DEMONSTRATION_POLICY) as [SurfaceKey, string][])
+  .filter(([, policy]) => policy === 'excludeDemonstration')
+  .map(([surface]) => surface);
 
 const realRow = { id: 'EV-0418', isDemo: false };
 const demoRow = { id: 'EV-9001', isDemo: true };
@@ -25,73 +32,47 @@ const rows = [realRow, demoRow];
 const realSession = { isDemonstration: false };
 const demoSession = { isDemonstration: true };
 
-describe('a demonstration row never reaches a Ministry work surface', () => {
-  it('1. not the national registry', () => {
-    const filter = demonstrationFilter('nationalRegistry', realSession);
-    expect(filter).toEqual({ isDemo: false });
-    expect(applyDemonstrationFilter(rows, filter)).toEqual([realRow]);
-  });
-
-  it('2. not a Ministry aggregate count', () => {
-    const filter = demonstrationFilter('ministryAggregateCounts', realSession);
-    expect(filter).toEqual({ isDemo: false });
-    expect(applyDemonstrationFilter(rows, filter)).toHaveLength(1);
-    expect(applyDemonstrationFilter(rows, filter)[0]!.isDemo).toBe(false);
-  });
-
-  it('3. not a reviewer queue', () => {
-    const filter = demonstrationFilter('reviewerQueue', realSession);
-    expect(filter).toEqual({ isDemo: false });
-    expect(applyDemonstrationFilter(rows, filter)).toEqual([realRow]);
-  });
-
-  it('and not even when the reviewer is themselves in a demonstration session', () => {
-    // The exclusion is a property of the surface, not of the session. A demonstration
-    // Ministry login must still not see demonstration submissions in its work queue.
-    for (const surface of MINISTRY_WORK_SURFACES) {
-      expect(demonstrationFilter(surface, demoSession), surface).toEqual({ isDemo: false });
-    }
-  });
+describe('a real session never sees a demonstration row', () => {
+  for (const surface of ['nationalRegistry', 'ministryAggregateCounts', 'reviewerQueue', 'organizerDashboard'] as SurfaceKey[]) {
+    it(surface, () => {
+      const filter = demonstrationFilter(surface, realSession);
+      expect(filter).toEqual({ isDemo: false });
+      expect(applyDemonstrationFilter(rows, filter)).toEqual([realRow]);
+    });
+  }
 });
 
-describe('isolation runs in both directions', () => {
-  it('a real record never appears in a demonstration session', () => {
-    const filter = demonstrationFilter('organizerDashboard', demoSession);
-    expect(filter).toEqual({ isDemo: true });
-    expect(applyDemonstrationFilter(rows, filter)).toEqual([demoRow]);
+describe('a demonstration session sees only demonstration rows — the console stays walkable', () => {
+  for (const surface of ['nationalRegistry', 'ministryAggregateCounts', 'reviewerQueue', 'ministryFacilityOversight'] as SurfaceKey[]) {
+    it(surface, () => {
+      const filter = demonstrationFilter(surface, demoSession);
+      expect(filter).toEqual({ isDemo: true });
+      expect(applyDemonstrationFilter(rows, filter)).toEqual([demoRow]);
+    });
+  }
+});
+
+describe('the public lookup is the one asymmetric surface', () => {
+  it('a demonstration reference never resolves, whoever asks', () => {
+    expect(demonstrationFilter('publicReferenceLookup', realSession)).toEqual({ isDemo: false });
+    expect(demonstrationFilter('publicReferenceLookup', demoSession)).toEqual({ isDemo: false });
   });
 
-  it('a demonstration record never appears in a real session', () => {
-    const filter = demonstrationFilter('organizerDashboard', realSession);
-    expect(filter).toEqual({ isDemo: false });
-    expect(applyDemonstrationFilter(rows, filter)).toEqual([realRow]);
+  it('and it is the only surface on the never-reaches list', () => {
+    expect(DEMONSTRATION_NEVER_REACHES).toEqual(['publicReferenceLookup']);
+    for (const surface of DEMONSTRATION_NEVER_REACHES) {
+      expect(SURFACE_DEMONSTRATION_POLICY[surface]).toBe('excludeDemonstration');
+    }
   });
 });
 
 describe('completeness', () => {
-  it('every declared surface has a policy', () => {
-    for (const [surface, policy] of Object.entries(SURFACE_DEMONSTRATION_POLICY)) {
-      expect(policy, `${surface} has no policy`).toBeTruthy();
-    }
-  });
-
-  it('the three named Ministry work surfaces all exclude demonstration rows', () => {
-    for (const surface of MINISTRY_WORK_SURFACES) {
-      expect(SURFACE_DEMONSTRATION_POLICY[surface], surface).toBe('excludeDemonstration');
-    }
-  });
-
-  it('no surface is left to default -- a new one must declare', () => {
+  it('every declared surface has a policy and none is left to default', () => {
     const declared = Object.keys(SURFACE_DEMONSTRATION_POLICY) as SurfaceKey[];
-    expect(declared.length).toBeGreaterThanOrEqual(MINISTRY_WORK_SURFACES.length);
+    expect(declared.length).toBeGreaterThan(0);
     for (const surface of declared) {
+      expect(SURFACE_DEMONSTRATION_POLICY[surface], `${surface} has no policy`).toBeTruthy();
       expect(() => demonstrationFilter(surface, realSession)).not.toThrow();
     }
-  });
-
-  it('the public lookup excludes demonstration rows too', () => {
-    // A demonstration reference number must not resolve for an authorising authority.
-    expect(demonstrationFilter('publicReferenceLookup', realSession)).toEqual({ isDemo: false });
-    expect(demonstrationFilter('publicReferenceLookup', demoSession)).toEqual({ isDemo: false });
   });
 });

@@ -9,7 +9,6 @@
 import domainsJson from './data/domains.json';
 import minimumConditionsJson from './data/minimum-conditions.json';
 import levelsJson from './data/levels.json';
-import bannedTermsJson from './data/banned-terms.json';
 import type { Level, Predicate } from './types';
 
 function asLevel(n: number): Level {
@@ -133,7 +132,6 @@ export function filingDeadlineRule(level: Level): FilingDeadlineRule {
 export const POST_EVENT_REPORT = levelsJson.postEventReport;
 export const SERIOUS_INCIDENT_NOTIFICATION = levelsJson.seriousIncidentNotification;
 export const REASSESSMENT_WINDOW = levelsJson.reassessmentWindow;
-export const BANNED_TERMS = bannedTermsJson;
 
 /** Signatures required on the post-event report at a given level. Level 3 needs two. */
 export function postEventSignaturesRequired(level: Level): number {

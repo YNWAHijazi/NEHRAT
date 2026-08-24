@@ -6,7 +6,7 @@
 
 import { organizationFor } from './auth';
 import { beirutToday, documentStateFor, eventFor, invitationsFor, submissionFor, assessmentsFor } from './queries';
-import { eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
+import { declarationsAreComplete, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
 
 export function submissionGateFor(accountId: number, eventId: string): SubmissionGate & { level: Level | null } {
   const event = eventFor(accountId, eventId);
@@ -43,10 +43,7 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
   };
   const deadline = eventFilingDeadline(gateCtx);
 
-  const declCount = level === 3 ? 8 : 7;
-  const declarationsComplete =
-    submission !== null &&
-    Array.from({ length: declCount }, (_, i) => submission.declarations[String(i)] === true).every(Boolean);
+  const declarationsComplete = declarationsAreComplete(submission?.declarations ?? null, level);
 
   const gate = submissionGate({
     level,

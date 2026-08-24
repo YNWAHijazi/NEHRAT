@@ -68,6 +68,25 @@ export function postEventReportGate(ctx: EventGateContext): Gate {
   };
 }
 
+/**
+ * Serious-incident notification (Protocol 13 p1): a state-then-time gate. Nothing can
+ * have occurred at an event that has not begun; once it has, the control must be live
+ * regardless of the post-event report window.
+ */
+export function seriousIncidentGate(ctx: EventGateContext): Gate {
+  if (!ctx.filed) return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentBeforeFiling' };
+  if (ctx.eventStartDate === null) {
+    return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentNeedsEventDate' };
+  }
+  const start = new Date(`${ctx.eventStartDate}T00:00:00+03:00`);
+  if (ctx.now.getTime() >= start.getTime()) return ENABLED;
+  return {
+    behaviour: 'disabled',
+    reasonKey: 'gate.seriousIncidentBeforeStart',
+    params: { date: ctx.eventStartDate },
+  };
+}
+
 /** Material change: a state gate. Disabled until the submission is filed. */
 export function materialChangeGate(ctx: EventGateContext): Gate {
   if (ctx.filed) return ENABLED;
@@ -81,23 +100,6 @@ export function materialChangeGate(ctx: EventGateContext): Gate {
 export function eventMedicalDirectorGate(ctx: EventGateContext): Gate {
   if (ctx.finalLevel === 3) return ENABLED;
   return ABSENT;
-}
-
-/** EMS readiness declarations: Level 3 only, same absence rule. */
-export function readinessDeclarationGate(ctx: EventGateContext): Gate {
-  if (ctx.finalLevel === 3) return ENABLED;
-  return ABSENT;
-}
-
-/**
- * Submit: a state gate on the organization. An organizer whose organization is not yet
- * recorded prepares everything; only filing is blocked, with the reason and a route.
- */
-export function submitGate(ctx: EventGateContext): Gate {
-  if (ctx.organizationStatus !== 'recorded') {
-    return { behaviour: 'disabled', reasonKey: 'gate.organizationPending' };
-  }
-  return ENABLED;
 }
 
 /** The filing deadline for the record, derived -- never entered. */

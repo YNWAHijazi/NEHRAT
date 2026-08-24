@@ -2,6 +2,8 @@ import { L } from '../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { getDb } from '../../../lib/db';
+import { seriousIncidentsForMinistry } from '../../../lib/queries';
+import { SERIOUS_INCIDENT_NOTIFICATION } from '../../../lib/rules';
 
 /**
  * Incidents and reports, across both instruments -- listed side by side but
@@ -28,11 +30,61 @@ export default async function IncidentsPage() {
     .prepare(`SELECT r.payload, r.mode, r.created_at FROM fr_reports r JOIN accounts a ON a.id = r.account_id WHERE a.is_demo = ? ORDER BY r.created_at DESC`)
     .all(flag) as unknown as { payload: string; mode: string; created_at: string }[];
 
+  const serious = seriousIncidentsForMinistry(account.isDemo);
+  const sinTypes = Object.fromEntries(
+    (SERIOUS_INCIDENT_NOTIFICATION.types as { key: string; en: string; ar: string }[]).map((x) => [x.key, x]),
+  );
+  const windowHours = SERIOUS_INCIDENT_NOTIFICATION.windowHours as number;
+  const withinWindow = (occurred: string, notified: string): boolean => {
+    const o = new Date(occurred.replace(' ', 'T'));
+    const n = new Date(notified.replace(' ', 'T'));
+    return n.getTime() - o.getTime() <= windowHours * 3_600_000;
+  };
+
   return (
     <MinistryShell account={account}>
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Incidents and reports" ar="الحوادث والتقارير" />
       </h1>
+
+      {/* Protocol 13 p1: the 24-hour notifications, first -- they are the urgent lane. */}
+      <div data-region="serious-incidents" style={{ marginBlockEnd: 28 }}>
+        <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+          <L en={`Serious-incident notifications — the ${windowHours}-hour obligation`} ar={`إبلاغات الحوادث الجسيمة — موجب الـ${windowHours} ساعة`} />
+        </h2>
+        {serious.length === 0 ? (
+          <div style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+            <L en="None notified." ar="لا إبلاغات." />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {serious.map((r) => {
+              const t = sinTypes[r.incidentType];
+              const inWindow = withinWindow(r.occurredAt, r.notifiedAt);
+              return (
+                <a key={`${r.eventId}-${r.notifiedAt}`} href={`/ministry/submissions/${r.eventId}`} style={{ padding: '12px 16px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${inWindow ? 'var(--brand)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline', textDecoration: 'none', color: 'var(--ink)' }}>
+                  <span style={{ fontWeight: 500 }}>
+                    <L en={t?.en ?? r.incidentType} ar={t?.ar ?? r.incidentType} />
+                  </span>
+                  <span>
+                    <L en={r.eventEn} ar={r.eventAr} />
+                  </span>
+                  {r.mophReference ? <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{r.mophReference}</span> : null}
+                  <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    <L en={`occurred ${r.occurredAt.replace('T', ' ')}`} ar={`وقعت في ⁦${r.occurredAt.replace('T', ' ')}⁩`} />
+                  </span>
+                  <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    <L en={`notified ${r.notifiedAt.slice(0, 16)}`} ar={`أُبلغ في ⁦${r.notifiedAt.slice(0, 16)}⁩`} />
+                  </span>
+                  <span style={{ flex: 'none', padding: '2px 9px', borderRadius: 4, fontSize: 12, background: inWindow ? 'var(--brand-soft)' : 'var(--bad-soft)', color: inWindow ? 'var(--brand)' : 'var(--bad)' }}>
+                    {inWindow ? <L en={`Within ${windowHours} hours`} ar={`ضمن ${windowHours} ساعة`} /> : <L en={`Outside ${windowHours} hours`} ar={`خارج ${windowHours} ساعة`} />}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <div>
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>

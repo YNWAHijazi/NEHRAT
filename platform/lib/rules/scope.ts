@@ -36,27 +36,23 @@ export type SurfaceKey =
   | 'notificationsInbox';
 
 export const SURFACE_DEMONSTRATION_POLICY: Record<SurfaceKey, DemonstrationPolicy> = {
-  // The three the Ministry must never see demonstration data in.
-  nationalRegistry: 'excludeDemonstration',
-  ministryAggregateCounts: 'excludeDemonstration',
-  reviewerQueue: 'excludeDemonstration',
-  // A reviewer's facility lane is a Ministry work surface on the same footing.
-  ministryFacilityOversight: 'excludeDemonstration',
-  // A demonstration reference number must not resolve for the public.
+  // SYMMETRIC ISOLATION (Slice 6 ruling): every authenticated surface follows the
+  // session -- a real reviewer never sees a demonstration row, and a demonstration
+  // reviewer sees ONLY demonstration rows, so the walkable console stays walkable.
+  // The earlier draft excluded demonstration rows from the Ministry work surfaces
+  // outright; that predates the ruling and left the demonstration console empty.
+  nationalRegistry: 'matchSession',
+  ministryAggregateCounts: 'matchSession',
+  reviewerQueue: 'matchSession',
+  ministryFacilityOversight: 'matchSession',
+  // The one asymmetric surface: a demonstration reference number must not resolve
+  // for the public, whoever asks.
   publicReferenceLookup: 'excludeDemonstration',
-  // The account-scoped surfaces follow the session in both directions.
   organizerDashboard: 'matchSession',
   emsProviderDashboard: 'matchSession',
   medicalDirectorDashboard: 'matchSession',
   notificationsInbox: 'matchSession',
 };
-
-/** The surfaces a demonstration row must never reach, whatever the session. */
-export const MINISTRY_WORK_SURFACES: readonly SurfaceKey[] = [
-  'nationalRegistry',
-  'ministryAggregateCounts',
-  'reviewerQueue',
-];
 
 export interface SessionContext {
   readonly isDemonstration: boolean;

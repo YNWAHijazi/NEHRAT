@@ -77,7 +77,7 @@ export default async function SubmissionReviewPage({
       <div data-region="review-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 28 }}>
         <div>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 8 }}>
-            <L en={`${review.orgEn}${review.mophReference ? ` · ${review.mophReference}` : ''}${review.filedAt ? ` · filed ${review.filedAt}` : ''}`} ar={`${review.orgAr}${review.mophReference ? ` · ${review.mophReference}` : ''}${review.filedAt ? ` · قُدّم في ⁦${review.filedAt}⁩` : ''}`} />
+            <L en={`${review.orgEn}${review.mophReference ? ` · ${review.mophReference}` : ''}${review.filedAt ? ` · filed ${review.filedAt}` : ''}${review.version > 1 ? ` · revised submission, version ${review.version}` : ''}`} ar={`${review.orgAr}${review.mophReference ? ` · ${review.mophReference}` : ''}${review.filedAt ? ` · قُدّم في ⁦${review.filedAt}⁩` : ''}${review.version > 1 ? ` · تقديم معدَّل، النسخة ${review.version}` : ''}`} />
           </div>
           <h1 data-sec-h1="" style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
             <L en={review.nameEn} ar={review.nameAr} />

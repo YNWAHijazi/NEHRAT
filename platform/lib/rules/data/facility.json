@@ -125,6 +125,12 @@
       "key": "email",
       "en": "Facility email",
       "ar": "البريد الإلكتروني للمرفق"
+    },
+    {
+      "key": "capacity",
+      "en": "Licensed or approved capacity (persons), where applicable",
+      "ar": "السعة المرخّصة أو المعتمدة (أشخاص)، حيثما انطبق",
+      "optional": true
     }
   ],
   "accessFields": [

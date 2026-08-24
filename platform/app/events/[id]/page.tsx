@@ -23,7 +23,7 @@ import {
   documentsForLevel,
   eventFilingDeadline,
   eventMedicalDirectorGate,
-  materialChangeGate,
+  materialChangeGate, seriousIncidentGate,
   postEventReportGate,
   type EventGateContext,
   type Gate,
@@ -426,6 +426,12 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
               href={`/events/${event.id}/change`}
               en="Report a material change"
               ar="الإبلاغ عن تغيير جوهري"
+            />
+            <GatedAction
+              gate={seriousIncidentGate(gateCtx)}
+              href={`/events/${event.id}/incident`}
+              en="Notify a serious incident"
+              ar="الإبلاغ عن حادثة جسيمة"
             />
             <GatedAction
               gate={postEventReportGate(gateCtx)}

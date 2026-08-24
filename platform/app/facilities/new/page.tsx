@@ -4,7 +4,7 @@ import { L } from '../../../components/L';
 import { SequenceFooter } from '../../../components/SequenceFooter';
 import { RegisterFacilityForm } from './RegisterFacilityForm';
 import { currentAccount, organizationFor } from '../../../lib/auth';
-import { unreadCountFor } from '../../../lib/queries';
+import { publishedFacilityValues, unreadCountFor } from '../../../lib/queries';
 
 /**
  * Register a facility: steps 1-3 of the six. Step 2 is a determination, not a form,
@@ -34,7 +34,7 @@ export default async function RegisterFacilityPage() {
             ar="ست خطوات. الوسطى منها بتٌّ لا نموذج، وفي بعض الفئات تنتهي عندها الرحلة."
           />
         </p>
-        <RegisterFacilityForm />
+        <RegisterFacilityForm published={publishedFacilityValues()} />
         <SequenceFooter
           labelEn="Next in the sequence"
           labelAr="التالي في التسلسل"

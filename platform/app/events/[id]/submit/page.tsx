@@ -9,11 +9,14 @@ import {
   documentStateFor,
   eventFor,
   invitationsFor,
+  revisionOpenFor,
   submissionFor,
   unreadCountFor,
+  planFor,
+  venueRouteFor,
 } from '../../../../lib/queries';
 import { submissionGateFor } from '../../../../lib/submission-facts';
-import { COMPLIANCE_DECLARATIONS, documentsForLevel, type Level } from '../../../../lib/rules';
+import { COMPLIANCE_DECLARATIONS, COMPLIANCE_HEADER, documentsForLevel, type Level } from '../../../../lib/rules';
 
 export default async function SubmitPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
@@ -35,14 +38,21 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   const providers = invitationsFor(account.id, id).filter((i) => i.kind === 'ems');
   const signedCount = providers.filter((p) => p.declaration === 'signed').length;
 
-  const headerRows = [
-    { en: 'Event name', ar: 'اسم الفعالية', value: event.nameEn },
-    { en: 'Organizer', ar: 'المنظم', value: organization?.nameEn ?? '—' },
-    { en: 'Date(s)', ar: 'تاريخ الفعالية أو تواريخها', value: event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}` },
-    { en: 'Final level', ar: 'المستوى النهائي وفق أداة NEHRAT', value: `Level ${level}` },
-    { en: 'Submission date', ar: 'تاريخ التقديم', value: submission?.filedAt?.slice(0, 10) ?? '—' },
-    { en: 'Ministry reference number', ar: 'الرقم المرجعي لوزارة الصحة العامة', value: event.mophReference ?? '—' },
-  ];
+  // The eight header fields the compliance form defines -- from the data, not
+  // hand-written: two of eight went missing the last time this was a literal list.
+  const plan = planFor(account.id, id);
+  const venueRoute = venueRouteFor(account.id, id);
+  const headerValue: Record<string, string> = {
+    eventName: event.nameEn,
+    organizer: organization?.nameEn ?? '—',
+    dates: event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`,
+    venueRoute: venueRoute || '—',
+    finalLevel: `Level ${level}`,
+    submissionDate: submission?.filedAt?.slice(0, 10) ?? '—',
+    mophReference: event.mophReference ?? '—',
+    planVersion: plan ? String(plan.version) : '—',
+  };
+  const headerRows = COMPLIANCE_HEADER.map((h) => ({ en: h.en, ar: h.ar, value: headerValue[h.key] ?? '—' }));
 
   return (
     <>
@@ -113,6 +123,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           initial={submission}
           blockers={gate.blockers}
           expedited={gate.expedited}
+          revisionOpen={event.filed && revisionOpenFor(id)}
           headerRows={headerRows}
         />
 

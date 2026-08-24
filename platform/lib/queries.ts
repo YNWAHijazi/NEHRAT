@@ -16,6 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn } from './clock';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 
@@ -228,7 +229,36 @@ function ledgerInputsFor(facilityId: string, today: string): LedgerInputs {
     coordinatorUpdatedAt: day(coord?.updated_at),
     hasDevices: dev.n > 0,
     today,
+    cycles: publishedCycles(),
   };
+}
+
+/** The published values the facility categories are governed by (powers one and two). */
+export function publishedFacilityValues(): {
+  phasedSchedule: { value: string; effective: string | null } | null;
+  capacityThreshold: { value: string; effective: string | null } | null;
+} {
+  const config = ministryConfig();
+  const pick = (key: string) => {
+    const row = config.get(key);
+    return row ? { value: row.value, effective: row.effective } : null;
+  };
+  return { phasedSchedule: pick('phasedSchedule'), capacityThreshold: pick('capacityThreshold') };
+}
+
+/**
+ * The cycles the ledger runs on: published values where the Ministry has set them
+ * (power ten), the provisional figures where it has not. The one read every ledger
+ * caller shares -- publishing a cycle changes every screen that shows one.
+ */
+export function publishedCycles(): ReturnType<typeof effectiveCycles> {
+  const config = ministryConfig();
+  const num = (key: string): number | null => {
+    const v = config.get(key)?.value;
+    const n = v == null ? NaN : Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  return effectiveCycles({ checkCycleDays: num('checkCycleDays'), lapseWindowDays: num('lapseWindowDays') });
 }
 
 export function facilityLedgerFor(facilityId: string, today: string): FacilityLedgerRow[] {
@@ -509,6 +539,45 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
   };
 }
 
+export interface PlanVersionRow {
+  version: number;
+  mode: 'write' | 'attach';
+  sections: Record<string, { text?: string; covered?: boolean }>;
+  attachedFile: string | null;
+  majorIncident: Record<string, { covered?: boolean }>;
+  savedAt: string;
+}
+
+/** Archived plan versions, newest first. The current version is on `plans` itself. */
+export function venueRouteFor(accountId: number, eventId: string): string {
+  const r = getDb()
+    .prepare(`SELECT venue_route FROM events WHERE id = ? AND account_id = ?`)
+    .get(eventId, accountId) as { venue_route: string } | undefined;
+  return r?.venue_route ?? '';
+}
+
+export function planVersionsFor(accountId: number, eventId: string): PlanVersionRow[] {
+  const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
+  if (!owned) return [];
+  const rows = getDb()
+    .prepare(
+      `SELECT version, mode, sections, attached_file, major_incident, saved_at
+       FROM plan_versions WHERE event_id = ? ORDER BY version DESC, id DESC`,
+    )
+    .all(eventId) as unknown as {
+    version: number; mode: 'write' | 'attach'; sections: string; attached_file: string | null;
+    major_incident: string; saved_at: string;
+  }[];
+  return rows.map((r) => ({
+    version: r.version,
+    mode: r.mode,
+    sections: JSON.parse(r.sections) as PlanVersionRow['sections'],
+    attachedFile: r.attached_file,
+    majorIncident: JSON.parse(r.major_incident) as PlanVersionRow['majorIncident'],
+    savedAt: r.saved_at,
+  }));
+}
+
 export interface SubmissionRow {
   declarations: Record<string, boolean>;
   insurance: Record<string, string>;
@@ -518,15 +587,16 @@ export interface SubmissionRow {
   expedited: boolean;
   filedAt: string | null;
   mophReference: string | null;
+  version: number;
 }
 
 export function submissionFor(accountId: number, eventId: string): SubmissionRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
   const r = getDb()
-    .prepare(`SELECT declarations, insurance, representative, telephone, position, expedited, filed_at, moph_reference FROM submissions WHERE event_id = ?`)
+    .prepare(`SELECT declarations, insurance, representative, telephone, position, expedited, filed_at, moph_reference, version FROM submissions WHERE event_id = ?`)
     .get(eventId) as
-    | { declarations: string; insurance: string; representative: string; telephone: string; position: string; expedited: number; filed_at: string | null; moph_reference: string | null }
+    | { declarations: string; insurance: string; representative: string; telephone: string; position: string; expedited: number; filed_at: string | null; moph_reference: string | null; version: number }
     | undefined;
   if (!r) return null;
   return {
@@ -538,7 +608,18 @@ export function submissionFor(accountId: number, eventId: string): SubmissionRow
     expedited: r.expedited === 1,
     filedAt: r.filed_at,
     mophReference: r.moph_reference,
+    version: r.version,
   };
+}
+
+/**
+ * A filed submission reopens for revision exactly when the latest recorded outcome is
+ * 'revision' or 'incomplete' -- the two determinations that ask the organizer for more.
+ * 'satisfied' closes the loop; no outcome means the Ministry has not asked.
+ */
+export function revisionOpenFor(eventId: string): boolean {
+  const outcome = latestOutcomeFor(eventId);
+  return outcome === 'revision' || outcome === 'incomplete';
 }
 
 export interface MaterialChangeRow {
@@ -603,20 +684,9 @@ export function documentStateFor(
   const plan = planFor(accountId, eventId);
   const submission = submissionFor(accountId, eventId);
 
-  const planComplete =
-    plan !== null &&
-    (plan.mode === 'attach'
-      ? plan.attachedFile !== null &&
-        Array.from({ length: 16 }, (_, i) => plan.sections[String(i + 1)]?.covered === true).every(Boolean)
-      : Array.from({ length: 16 }, (_, i) => {
-          const s = plan.sections[String(i + 1)];
-          return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
-        }).every(Boolean));
-
-  const declCount = level === 3 ? 8 : 7; // insurance applies at Level 3 only
-  const declarationsComplete =
-    submission !== null &&
-    Array.from({ length: declCount }, (_, i) => submission.declarations[String(i)] === true).every(Boolean);
+  // Both completeness rules live in lib/rules -- this file never re-derives them.
+  const planComplete = planIsComplete(plan, level);
+  const declarationsComplete = declarationsAreComplete(submission?.declarations ?? null, level);
 
   return {
     assessment: true,
@@ -634,13 +704,50 @@ export function facilityById(accountId: number, facilityId: string): FacilityRow
   return facilitiesFor(accountId).find((f) => f.id === facilityId) ?? null;
 }
 
-export function seriousIncidentNotificationFor(accountId: number, eventId: string): string | null {
+export interface SeriousIncidentRow {
+  incidentType: 'arrest' | 'death' | 'major' | 'interruption';
+  occurredAt: string;
+  notifiedAt: string;
+}
+
+export function seriousIncidentNotificationsFor(accountId: number, eventId: string): SeriousIncidentRow[] {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
-  if (!owned) return null;
-  const r = getDb()
-    .prepare(`SELECT notified_at FROM serious_incident_notifications WHERE event_id = ? ORDER BY notified_at LIMIT 1`)
-    .get(eventId) as { notified_at: string } | undefined;
-  return r?.notified_at ?? null;
+  if (!owned) return [];
+  const rows = getDb()
+    .prepare(`SELECT incident_type, occurred_at, notified_at FROM serious_incident_notifications WHERE event_id = ? ORDER BY notified_at DESC`)
+    .all(eventId) as unknown as { incident_type: SeriousIncidentRow['incidentType']; occurred_at: string; notified_at: string }[];
+  return rows.map((r) => ({ incidentType: r.incident_type, occurredAt: r.occurred_at, notifiedAt: r.notified_at }));
+}
+
+/** Kept for the post-event page's cross-reference: the earliest notification date, if any. */
+export function seriousIncidentNotificationFor(accountId: number, eventId: string): string | null {
+  const rows = seriousIncidentNotificationsFor(accountId, eventId);
+  return rows.length ? rows[rows.length - 1]!.notifiedAt : null;
+}
+
+/** The Ministry's lane: every notification, joined to its event. Demo isolation applies. */
+export interface MinistrySeriousIncidentRow extends SeriousIncidentRow {
+  eventId: string;
+  eventEn: string;
+  eventAr: string;
+  mophReference: string | null;
+}
+
+export function seriousIncidentsForMinistry(viewerIsDemo: boolean): MinistrySeriousIncidentRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT n.incident_type, n.occurred_at, n.notified_at, e.id AS event_id, e.name_en, e.name_ar, e.moph_reference
+       FROM serious_incident_notifications n JOIN events e ON e.id = n.event_id
+       WHERE e.is_demo = ? ORDER BY n.notified_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+    incident_type: SeriousIncidentRow['incidentType']; occurred_at: string; notified_at: string;
+    event_id: string; name_en: string; name_ar: string; moph_reference: string | null;
+  }[];
+  return rows.map((r) => ({
+    incidentType: r.incident_type, occurredAt: r.occurred_at, notifiedAt: r.notified_at,
+    eventId: r.event_id, eventEn: r.name_en, eventAr: r.name_ar, mophReference: r.moph_reference,
+  }));
 }
 
 /* ---------------- Slice 3: the venue service ---------------- */
@@ -916,8 +1023,12 @@ export function governanceFor(eventId: string): Record<string, string> {
    matches their own account's. A real reviewer never sees a demonstration
    submission; a demonstration reviewer never sees a real one. */
 
+/**
+ * The `is_demo` bind value for a Ministry work surface -- from the demonstration-scope
+ * rule, not decided here. Symmetric isolation: the session's own flag.
+ */
 function demoFlag(viewerIsDemo: boolean): number {
-  return viewerIsDemo ? 1 : 0;
+  return demonstrationFilter('reviewerQueue', { isDemonstration: viewerIsDemo }).isDemo ? 1 : 0;
 }
 
 export interface QueueRow {
@@ -1320,6 +1431,8 @@ export interface SubmissionReview {
   eventDate: string | null;
   filedAt: string | null;
   mophReference: string | null;
+  /** 1 on first filing; a re-file after a revision outcome increments it. */
+  version: number;
   state: 'queued' | 'assigned' | 'progress';
   reviewer: string;
   providers: { nameEn: string; nameAr: string; status: string; declaration: string; signedAt: string | null }[];
@@ -1331,7 +1444,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
   const r = db
     .prepare(
       `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.demo_level,
-              s.filed_at, s.moph_reference,
+              s.filed_at, s.moph_reference, s.version AS s_version,
               rs.state AS r_state, rs.reviewer AS r_reviewer,
               o.name_en AS org_en, o.name_ar AS org_ar
        FROM submissions s
@@ -1343,7 +1456,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     .get(eventId, demoFlag(viewerIsDemo)) as
     | {
         id: string; name_en: string; name_ar: string; start_date: string | null; demo_level: number | null;
-        filed_at: string | null; moph_reference: string | null;
+        filed_at: string | null; moph_reference: string | null; s_version: number;
         r_state: SubmissionReview['state'] | null; r_reviewer: string | null;
         org_en: string | null; org_ar: string | null;
       }
@@ -1360,6 +1473,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     eventDate: r.start_date,
     filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
     mophReference: r.moph_reference,
+    version: r.s_version,
     state: r.r_state ?? 'queued',
     reviewer: r.r_reviewer ?? '',
     providers: providers.map((p) => ({

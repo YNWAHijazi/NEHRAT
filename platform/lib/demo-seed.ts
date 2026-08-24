@@ -320,6 +320,29 @@ export function seedDemonstration(db: DatabaseSync): void {
     'R. Haddad', '+961 1 000 000', 'Events director',
     d('2026-08-01'), 'MOPH-EV-2026-0362',
   );
+  // Filed events carry a complete plan row: the refile gate recomputes the FULL
+  // package, and a seeded submission that could never refile would contradict the
+  // revision path the outcome invites.
+  const seedPlan = db.prepare(
+    `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
+       sections, attached_file, major_incident, version)
+     VALUES (?, 'attach', 0, 0, 0, ?, ?, ?, 1)`,
+  );
+  const allSections = JSON.stringify(
+    Object.fromEntries(Array.from({ length: 16 }, (_, i) => [String(i + 1), { covered: true }])),
+  );
+  const allMi = JSON.stringify(
+    Object.fromEntries(Array.from({ length: 11 }, (_, i) => [String(i + 1), { covered: true }])),
+  );
+  seedPlan.run('EV-0362', allSections, 'baalbeck-plan-v3.pdf', allMi);
+  const seedAttachment = db.prepare(
+    `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)`,
+  );
+  seedAttachment.run('EV-0362', 'siteMap', 'baalbeck-site-map.pdf');
+  seedAttachment.run('EV-0362', 'deploymentMap', 'baalbeck-deployment-map.pdf');
+  seedPlan.run('EV-0301', allSections, 'aub-sports-day-plan.pdf', allMi);
+  seedPlan.run('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
+
   insertInvitation.run(
     'demo-lrc-baalbeck-0362', 'EV-0362', 'ems',
     'Lebanese Red Cross — Baalbeck', 'الصليب الأحمر اللبناني — بعلبك',

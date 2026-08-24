@@ -14,7 +14,7 @@ import {
 } from '../../../../lib/queries';
 import {
   documentsForLevel,
-  requirementsForLevel,
+  commandFunctionRow, requirementsForLevel,
   type Level,
 } from '../../../../lib/rules';
 import { attachDocumentAction } from '../../../actions';
@@ -84,7 +84,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   // The reference lists every applicable row here, attachable ones included -- their
   // documents live in group 1; this list is the certification view of the whole matrix.
   const certifyRows = requirementsForLevel(level).filter((r) => r.n !== 15 || level !== 3);
-  const commandRow = requirementsForLevel(level).find((r) => r.n === 15) ?? null;
+  const commandRow = commandFunctionRow(level);
 
   const partChip = {
     nominated: { en: 'Nominated', ar: 'مُسمّاة', bg: 'var(--surface2)', color: 'var(--muted)', noteEn: 'Has not answered yet', noteAr: 'لم تُجب بعد' },

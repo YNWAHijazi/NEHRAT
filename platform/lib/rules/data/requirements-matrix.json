@@ -514,7 +514,7 @@
     {
       "n": 16,
       "en": "Major-incident and mass-casualty preparedness",
-      "ar": "تغطية تأمينية للمشاركين والمتفرجين",
+      "ar": "التأهب للحوادث الجسيمة وحوادث الإصابات الجماعية",
       "prototypeAr": "التأهب للحوادث الجسيمة والإصابات الجماعية",
       "parties": [
         [
@@ -538,22 +538,22 @@
       "values": [
         {
           "en": "Emergency escalation procedure",
-          "ar": "—"
+          "ar": "إجراء لتصعيد الاستجابة الطارئة"
         },
         {
           "en": "Written plan coordinated with participating providers",
-          "ar": "—"
+          "ar": "خطة مكتوبة منسقة مع الجهات المشاركة"
         },
         {
           "en": "Detailed plan coordinated with EMS and incorporated into event medical command",
-          "ar": "مطلوبة"
+          "ar": "خطة تفصيلية منسقة مع خدمات الإسعاف ومدمجة ضمن القيادة الطبية للفعالية"
         }
       ]
     },
     {
       "n": 17,
       "en": "Insurance coverage for participants and spectators",
-      "ar": "التأهب للحوادث الجسيمة وحوادث الإصابات الجماعية",
+      "ar": "تغطية تأمينية للمشاركين والمتفرجين",
       "prototypeAr": "تغطية تأمينية للمشاركين والمتفرجين",
       "parties": [
         null,
@@ -570,7 +570,7 @@
         null,
         {
           "en": "Required",
-          "ar": "خطة تفصيلية منسقة مع خدمات الإسعاف ومدمجة ضمن القيادة الطبية للفعالية"
+          "ar": "مطلوبة"
         }
       ]
     },

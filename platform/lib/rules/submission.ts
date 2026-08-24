@@ -9,6 +9,8 @@
  */
 
 import attachmentsCatalog from './data/attachments-catalog.json';
+import complianceJson from './data/compliance-form.json';
+import planJson from './data/plan.json';
 import type { Level } from './types';
 
 export interface CatalogDocument {
@@ -31,6 +33,56 @@ export function documentsForLevel(level: Level): CatalogDocument[] {
   return (attachmentsCatalog.documents as CatalogDocument[]).filter(
     (d) => d.minLevel <= level && (!d.maxLevel || level <= d.maxLevel),
   );
+}
+
+/**
+ * The Section A declarations the level actually renders. The completeness count MUST
+ * come from here and nowhere else: a hard-coded count once demanded a seventh tick the
+ * form never showed below Level 3, and filing was silently impossible at Levels 1 and 2.
+ */
+export function applicableDeclarations(level: Level): { en: string; ar: string; minLevel: number }[] {
+  return (complianceJson.sectionA as { en: string; ar: string; minLevel: number }[]).filter(
+    (d) => d.minLevel <= level,
+  );
+}
+
+export function declarationsAreComplete(
+  ticked: Record<string, boolean> | null,
+  level: Level,
+): boolean {
+  if (!ticked) return false;
+  return applicableDeclarations(level).every((_, i) => ticked[String(i)] === true);
+}
+
+export interface PlanShape {
+  mode: 'write' | 'attach';
+  attachedFile: string | null;
+  sections: Record<string, { text?: string; covered?: boolean }>;
+  majorIncident: Record<string, { covered?: boolean }>;
+}
+
+/**
+ * The plan is complete when all sixteen sections are addressed AND, at Level 2 and 3,
+ * every one of the eleven major-incident items is confirmed (Protocol 12). The eleven
+ * are not decoration on section 12 -- an unconfirmed item blocks filing.
+ */
+export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
+  if (!plan) return false;
+  const sectionsDone =
+    plan.mode === 'attach'
+      ? plan.attachedFile !== null &&
+        Array.from({ length: 16 }, (_, i) => plan.sections[String(i + 1)]?.covered === true).every(Boolean)
+      : Array.from({ length: 16 }, (_, i) => {
+          const s = plan.sections[String(i + 1)];
+          return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
+        }).every(Boolean);
+  if (!sectionsDone) return false;
+  if (level >= 2) {
+    return (planJson.majorIncidentItems as { n: number }[]).every(
+      (item) => plan.majorIncident[String(item.n)]?.covered === true,
+    );
+  }
+  return true;
 }
 
 export interface SubmissionFacts {

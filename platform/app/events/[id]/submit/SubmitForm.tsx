@@ -40,6 +40,7 @@ export function SubmitForm({
   initial,
   blockers,
   expedited,
+  revisionOpen,
   headerRows,
 }: {
   eventId: string;
@@ -48,6 +49,8 @@ export function SubmitForm({
   initial: SubmissionRow | null;
   blockers: SubmissionBlocker[];
   expedited: boolean;
+  /** Filed, and the latest Ministry outcome asks for more -- the form reopens for a re-file. */
+  revisionOpen: boolean;
   headerRows: { en: string; ar: string; value: string }[];
 }) {
   const router = useRouter();
@@ -65,6 +68,8 @@ export function SubmitForm({
   const [fileError, setFileError] = useState(false);
 
   const filed = initial?.filedAt != null;
+  // Locked once filed -- except while a revision or incomplete outcome holds the form open.
+  const locked = filed && !revisionOpen;
 
   const save = () => {
     setSaved(false);
@@ -128,9 +133,9 @@ export function SubmitForm({
                   <button
                     type="button"
                     aria-pressed={on}
-                    disabled={filed}
+                    disabled={locked}
                     onClick={() => setTicked((prev) => ({ ...prev, [String(i)]: !on }))}
-                    style={{ flex: 'none', padding: '4px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 14, fontSize: 13, cursor: filed ? 'default' : 'pointer' }}
+                    style={{ flex: 'none', padding: '4px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 14, fontSize: 13, cursor: locked ? 'default' : 'pointer' }}
                   >
                     {on ? <L en="Declared" ar="مُقَرّ به" /> : <L en="Not declared" ar="غير مُقَرّ به" />}
                   </button>
@@ -145,7 +150,7 @@ export function SubmitForm({
                           </span>
                           <input
                             value={insurance[f.key] ?? ''}
-                            disabled={filed}
+                            disabled={locked}
                             onChange={(e) => setInsurance((prev) => ({ ...prev, [f.key]: e.target.value }))}
                             style={inputStyle}
                           />
@@ -167,22 +172,22 @@ export function SubmitForm({
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Authorized representative" ar="الممثل المفوّض" />
             </span>
-            <input value={representative} disabled={filed} onChange={(e) => setRepresentative(e.target.value)} style={inputStyle} />
+            <input value={representative} disabled={locked} onChange={(e) => setRepresentative(e.target.value)} style={inputStyle} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Position" ar="الصفة" />
             </span>
-            <input value={position} disabled={filed} onChange={(e) => setPosition(e.target.value)} style={inputStyle} />
+            <input value={position} disabled={locked} onChange={(e) => setPosition(e.target.value)} style={inputStyle} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Telephone" ar="الهاتف" />
             </span>
-            <input value={telephone} disabled={filed} onChange={(e) => setTelephone(e.target.value)} style={inputStyle} />
+            <input value={telephone} disabled={locked} onChange={(e) => setTelephone(e.target.value)} style={inputStyle} />
           </label>
         </div>
-        {!filed ? (
+        {!locked ? (
           <div style={{ marginBlockStart: 20, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               type="button"
@@ -201,7 +206,7 @@ export function SubmitForm({
         ) : null}
       </div>
 
-      {filed ? (
+      {locked ? (
         <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: 15, lineHeight: 1.65 }}>
           <L
             en={`Filed. The Ministry reference number is ${initial?.mophReference ?? ''}. The acknowledgment carries what it means.`}
@@ -210,6 +215,14 @@ export function SubmitForm({
         </div>
       ) : (
         <>
+          {revisionOpen ? (
+            <div style={{ padding: '22px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
+              <L
+                en={`The Ministry's determination asks for more. The form is open for revision; re-filing archives version ${initial?.version ?? 1} and your reference number does not change.`}
+                ar={`نتيجة الوزارة تطلب المزيد. النموذج مفتوح للتعديل؛ وإعادة التقديم تؤرشف النسخة ${initial?.version ?? 1} ولا يتغير رقمكم المرجعي.`}
+              />
+            </div>
+          ) : null}
           {expedited ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
               <L
@@ -255,7 +268,11 @@ export function SubmitForm({
                 cursor: blockers.length > 0 ? 'not-allowed' : 'pointer',
               }}
             >
-              <L en="File the submission" ar="تقديم الملف" />
+              {revisionOpen ? (
+                <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
+              ) : (
+                <L en="File the submission" ar="تقديم الملف" />
+              )}
             </button>
             {blockers.length > 0 ? (
               <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}>

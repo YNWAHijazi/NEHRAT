@@ -4,7 +4,7 @@ import { L } from '../../../../components/L';
 import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { DatasetForm } from './DatasetForm';
 import { currentAccount } from '../../../../lib/auth';
-import { unreadCountFor } from '../../../../lib/queries';
+import { unreadCountFor , ministryConfig } from '../../../../lib/queries';
 import { ROLES_CONTENT } from '../../../../lib/rules';
 
 /**
@@ -20,6 +20,7 @@ export default async function DatasetReportPage() {
   if (account.role !== 'response') redirect('/dashboard');
   const unread = unreadCountFor(account.id);
   const content = ROLES_CONTENT.firstResponse;
+  const timeframe = ministryConfig().get('reportingProcedures') ?? null;
 
   return (
     <>
@@ -38,7 +39,14 @@ export default async function DatasetReportPage() {
           </p>
           <DatasetForm />
           <div data-region="timeframe" style={{ marginBlockStart: 20, padding: '18px 22px', border: '1px solid var(--line)', borderRadius: 12, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '80ch' }}>
-            <L en={content.timeframeNote.en} ar={content.timeframeNote.ar} />
+            {timeframe ? (
+              <L
+                en={`The Ministry's published reporting timeframe applies: ${timeframe.value}${timeframe.effective ? ` — effective ${timeframe.effective}` : ''}.`}
+                ar={`تسري مهلة الإبلاغ المنشورة من الوزارة: ${timeframe.value}${timeframe.effective ? ` — اعتباراً من ⁦${timeframe.effective}⁩` : ''}.`}
+              />
+            ) : (
+              <L en={content.timeframeNote.en} ar={content.timeframeNote.ar} />
+            )}
           </div>
         </div>
         <SequenceFooter
