@@ -22,6 +22,10 @@ const APP_EXISTS = existsSync(join(HERE, 'app'));
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
+  // One dev server carries every worker, and the reference captures are pixel-heavy.
+  // Uncapped workers overload it and time honest tests out; four is stable on this
+  // machine and the suite still finishes in minutes.
+  workers: 4,
   forbidOnly: !!process.env['CI'],
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
@@ -57,7 +61,7 @@ export default defineConfig({
           command: 'npm run dev:e2e',
           url: 'http://localhost:3000',
           reuseExistingServer: false,
-          timeout: 60_000,
+          timeout: 120_000,
           env: {
             REVIEW_CLOCK: '2026-08-13',
             DATABASE_PATH: 'var/e2e.db',

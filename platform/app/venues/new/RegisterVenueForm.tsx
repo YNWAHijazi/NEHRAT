@@ -54,6 +54,23 @@ function QuestionLabel({ q }: { q: EligibilityQuestion }) {
  * not one flipping between the answers. Unanswered is its own state -- neither is
  * pre-selected, because a default "No" asserts an answer nobody gave.
  */
+const pillOff: React.CSSProperties = {
+  height: 36,
+  paddingInline: 18,
+  border: '1px solid var(--line)',
+  background: 'var(--bg)',
+  color: 'var(--muted)',
+  borderRadius: 18,
+  fontSize: 14,
+  cursor: 'pointer',
+};
+const pillOn: React.CSSProperties = {
+  ...pillOff,
+  border: '1px solid var(--brand)',
+  background: 'var(--brand-soft)',
+  color: 'var(--brand)',
+};
+
 function YesNoPair({
   value,
   onPick,
@@ -61,22 +78,12 @@ function YesNoPair({
   value: boolean | null;
   onPick: (v: boolean) => void;
 }) {
-  const pill = (on: boolean): React.CSSProperties => ({
-    height: 36,
-    paddingInline: 18,
-    border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`,
-    background: on ? 'var(--brand-soft)' : 'var(--bg)',
-    color: on ? 'var(--brand)' : 'var(--muted)',
-    borderRadius: 18,
-    fontSize: 14,
-    cursor: 'pointer',
-  });
   return (
     <span style={{ display: 'inline-flex', gap: 6 }}>
-      <button type="button" aria-pressed={value === true} onClick={() => onPick(true)} style={pill(value === true)}>
+      <button type="button" aria-pressed={value === true} onClick={() => onPick(true)} style={value === true ? pillOn : pillOff}>
         <L en="Yes" ar="نعم" />
       </button>
-      <button type="button" aria-pressed={value === false} onClick={() => onPick(false)} style={pill(value === false)}>
+      <button type="button" aria-pressed={value === false} onClick={() => onPick(false)} style={value === false ? pillOn : pillOff}>
         <L en="No" ar="لا" />
       </button>
     </span>

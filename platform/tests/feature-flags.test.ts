@@ -36,6 +36,9 @@ describe('commercial and AI capability', () => {
       ...filesUnder('components', ['.tsx', '.ts']),
     ]
       .filter((f) => /featureEnabled|feature-flags/.test(read(f)))
+      // Master admin is the one screen whose PURPOSE is to report the flag states
+      // (it renders no capability behind them); everything else stays forbidden.
+      .filter((f) => !f.endsWith('app/platform/admin/page.tsx'))
       .map(relative);
     expect(
       offenders,

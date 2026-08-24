@@ -1,0 +1,131 @@
+import Link from 'next/link';
+import { L } from '../../../components/L';
+import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { requireMinistryPage } from '../../../lib/ministry-auth';
+import { correctiveActions, facilitiesForOversight } from '../../../lib/queries';
+import { FACILITY_CONTENT, can } from '../../../lib/rules';
+import { ministryConfig } from '../../../lib/queries';
+import { markCorrectiveDoneAction, recordFacilityCorrectiveAction } from '../../ministry-actions';
+
+/**
+ * Facility oversight -- the cardiac lane, carrying no event outcome. Corrective
+ * actions are raised and tracked here; while the corrective-action timeline is
+ * an unset Ministry value, no due date is computed and the row says so.
+ */
+export default async function FacilityOversightPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
+  const account = await requireMinistryPage('viewFacilityLane');
+  const { notice } = await searchParams;
+  const facilities = facilitiesForOversight(account.isDemo);
+  const corrective = correctiveActions(account.isDemo);
+  const mayCorrect = can(account.role, 'recordCorrective');
+  const timeline = ministryConfig().get('correctiveTimelines');
+
+  const shortEn = (key: string): string =>
+    (FACILITY_CONTENT.categories.find((c) => c.key === key) as { shortEn?: string } | undefined)?.shortEn ?? key;
+  const shortAr = (key: string): string =>
+    (FACILITY_CONTENT.categories.find((c) => c.key === key) as { shortAr?: string } | undefined)?.shortAr ?? key;
+
+  return (
+    <MinistryShell account={account}>
+      {notice === 'raised' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The corrective action has been raised and the operator notified." ar="أُثير الإجراء التصحيحي وأُبلغ المشغّل." />
+        </div>
+      ) : null}
+      <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
+        <L en="Facility oversight" ar="الرقابة على المرافق" />
+      </h1>
+      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
+        <L
+          en="A separate lane from event review: nothing here is an event outcome, and mass-gathering status vocabulary does not appear. Status wording is provisional pending Ministry approval."
+          ar="مسار منفصل عن مراجعة الفعاليات: لا شيء هنا نتيجة فعالية، ولا تظهر مفردات حالات الفعاليات الجماهيرية. والصياغة مؤقتة بانتظار موافقة الوزارة."
+        />
+      </p>
+
+      <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
+        {facilities.map((f) => (
+          <div key={f.id} style={{ padding: '15px 20px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>
+              <span style={{ fontSize: 15, fontWeight: 500 }}>
+                <L en={f.nameEn} ar={f.nameAr} />
+              </span>
+              <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
+                <L en={`${shortEn(f.categoryKey)} · ${f.municipality} · ${f.devices} devices`} ar={`${shortAr(f.categoryKey)} · ${f.municipality} · ${f.devices} أجهزة`} />
+              </span>
+            </span>
+            <span style={{ padding: '3px 9px', borderRadius: 4, background: f.standingKind === 'met' ? 'var(--brand-soft)' : f.standingKind === 'lapsing' ? 'var(--accent-soft)' : 'var(--bad-soft)', color: f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent-ink)' : 'var(--bad)', fontSize: '12.5px' }}>
+              {f.standingKind === 'met' ? <L en="Obligations being met" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Items lapsing" ar="بنود تقترب من الانتهاء" /> : <L en="Obligations not being met" ar="الموجبات غير مستوفاة" />}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+        <L en="Corrective actions" ar="الإجراءات التصحيحية" />
+      </h2>
+      <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+        {timeline ? (
+          <L en={`Due dates run ${timeline.value} days from the action being raised, per the published timeline effective ${timeline.effective ?? ''}.`} ar={`تُحتسب تواريخ الاستحقاق ${timeline.value} يوماً من إثارة الإجراء، وفق المهلة المنشورة السارية من ⁦${timeline.effective ?? ''}⁩.`} />
+        ) : (
+          <L en="The corrective-action timeline is a Ministry value not yet set: actions are raised and tracked, and no due date is computed until it is published." ar="مهلة الإجراء التصحيحي قيمة وزارية لم تُحدَّد بعد: تُثار الإجراءات وتُتابع، ولا يُحتسب تاريخ استحقاق قبل نشرها." />
+        )}
+      </p>
+      <div data-region="corrective" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
+        {corrective.map((c) => (
+          <div key={c.id} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 260 }}>
+              <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
+              <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
+                <L en={`Raised ${c.raisedAt}${c.raisedBy ? ` · ${c.raisedBy}` : ''}`} ar={`أُثير في ⁦${c.raisedAt}⁩${c.raisedBy ? ` · ${c.raisedBy}` : ''}`} />
+              </span>
+            </span>
+            <span style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 'none' }}>
+              <span style={{ padding: '3px 9px', borderRadius: 4, background: c.status === 'open' ? 'var(--bad-soft)' : 'var(--brand-soft)', color: c.status === 'open' ? 'var(--bad)' : 'var(--brand)', fontSize: '12.5px' }}>
+                {c.status === 'open' ? <L en="Open" ar="مفتوح" /> : <L en={`Corrected ${c.correctedAt ?? ''}`} ar={`صُحّح ⁦${c.correctedAt ?? ''}⁩`} />}
+              </span>
+              {mayCorrect && c.status === 'open' ? (
+                <form action={markCorrectiveDoneAction.bind(null, c.id)}>
+                  <button type="submit" style={{ height: 32, paddingInline: 12, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                    <L en="Mark corrected" ar="اعتباره مصحَّحاً" />
+                  </button>
+                </form>
+              ) : null}
+            </span>
+          </div>
+        ))}
+      </div>
+      {mayCorrect ? (
+        <form action={recordFacilityCorrectiveAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+              <L en="Facility" ar="المرفق" />
+            </span>
+            <select name="facilityId" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+              <option value="">—</option>
+              {facilities.map((f) => (
+                <option key={f.id} value={f.id}>{f.nameEn}</option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 240 }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+              <L en="What must be corrected, as the operator will read it" ar="ما يجب تصحيحه، كما سيقرأه المشغّل" />
+            </span>
+            <input name="body" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+          </label>
+          <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer' }}>
+            <L en="Raise the corrective action" ar="إثارة الإجراء التصحيحي" />
+          </button>
+        </form>
+      ) : null}
+      <MinistryFooter steps={[
+        { href: '/ministry/facilities/arrests', en: 'Reported arrest locations', ar: 'مواقع الحوادث المبلَّغة', descEn: 'Incidents grouped by place and category.', descAr: 'الحوادث مجمَّعة بحسب المكان والفئة.' },
+        { href: '/ministry', en: 'Dashboard', ar: 'اللوحة', descEn: 'Back to the operational dashboard.', descAr: 'العودة إلى اللوحة التشغيلية.' },
+      ]} />
+    </MinistryShell>
+  );
+}

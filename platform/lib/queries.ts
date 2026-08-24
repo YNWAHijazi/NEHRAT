@@ -887,3 +887,462 @@ export function governanceFor(eventId: string): Record<string, string> {
     .get(eventId) as { sections: string } | undefined;
   return r ? (JSON.parse(r.sections) as Record<string, string>) : {};
 }
+
+
+/* ---------------- Slice 6: the Ministry console ---------------- */
+/* Demonstration isolation is symmetric (SPEC): a viewer sees rows whose is_demo
+   matches their own account's. A real reviewer never sees a demonstration
+   submission; a demonstration reviewer never sees a real one. */
+
+function demoFlag(viewerIsDemo: boolean): number {
+  return viewerIsDemo ? 1 : 0;
+}
+
+export interface QueueRow {
+  eventId: string;
+  nameEn: string; nameAr: string;
+  orgEn: string; orgAr: string;
+  level: Level | null;
+  eventDate: string | null;
+  filedAt: string | null;
+  mophReference: string | null;
+  /** Internal workflow state -- grey, never a determination. */
+  state: 'queued' | 'assigned' | 'progress';
+  reviewer: string;
+  /** The latest determination, if one has been recorded. */
+  outcome: 'incomplete' | 'revision' | 'satisfied' | null;
+  outcomeAt: string | null;
+}
+
+export function reviewQueue(viewerIsDemo: boolean): QueueRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.demo_level, e.account_id,
+              s.filed_at, s.moph_reference,
+              r.state AS r_state, r.reviewer AS r_reviewer,
+              o.name_en AS org_en, o.name_ar AS org_ar,
+              d.outcome AS d_outcome, d.recorded_at AS d_at
+       FROM submissions s
+       JOIN events e ON e.id = s.event_id
+       LEFT JOIN review_state r ON r.event_id = e.id
+       LEFT JOIN organizations o ON o.account_id = e.account_id
+       LEFT JOIN determinations d ON d.id = (
+         SELECT id FROM determinations WHERE event_id = e.id ORDER BY recorded_at DESC, id DESC LIMIT 1
+       )
+       WHERE e.is_demo = ?
+       ORDER BY e.start_date`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+      id: string; name_en: string; name_ar: string; start_date: string | null;
+      demo_level: number | null; account_id: number; filed_at: string | null;
+      moph_reference: string | null; r_state: QueueRow['state'] | null; r_reviewer: string | null;
+      org_en: string | null; org_ar: string | null;
+      d_outcome: QueueRow['outcome']; d_at: string | null;
+    }[];
+  return rows.map((r) => ({
+    eventId: r.id,
+    nameEn: r.name_en, nameAr: r.name_ar,
+    orgEn: r.org_en ?? '', orgAr: r.org_ar ?? '',
+    level: derivedLevelFor(r.id) ?? ((r.demo_level as Level | null) ?? null),
+    eventDate: r.start_date,
+    filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
+    mophReference: r.moph_reference,
+    state: r.r_state ?? 'queued',
+    reviewer: r.r_reviewer ?? '',
+    outcome: r.d_outcome ?? null,
+    outcomeAt: r.d_at ? r.d_at.slice(0, 10) : null,
+  }));
+}
+
+export interface DeterminationRow {
+  outcome: 'incomplete' | 'revision' | 'satisfied';
+  note: string;
+  recordedBy: string;
+  recordedAt: string;
+}
+
+export function determinationsFor(eventId: string): DeterminationRow[] {
+  const rows = getDb()
+    .prepare(`SELECT outcome, note, recorded_by, recorded_at FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC`)
+    .all(eventId) as unknown as { outcome: DeterminationRow['outcome']; note: string; recorded_by: string; recorded_at: string }[];
+  return rows.map((r) => ({ outcome: r.outcome, note: r.note, recordedBy: r.recorded_by, recordedAt: r.recorded_at.slice(0, 10) }));
+}
+
+export interface AddedMeasureRow {
+  id: number;
+  catalogKey: string;
+  note: string;
+  blocking: boolean;
+  clearedAt: string | null;
+  recordedBy: string;
+  recordedAt: string;
+}
+
+export function addedMeasuresFor(eventId: string): AddedMeasureRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, catalog_key, note, blocking, cleared_at, recorded_by, recorded_at FROM added_measures WHERE event_id = ? ORDER BY recorded_at`)
+    .all(eventId) as unknown as { id: number; catalog_key: string; note: string; blocking: number; cleared_at: string | null; recorded_by: string; recorded_at: string }[];
+  return rows.map((r) => ({
+    id: r.id, catalogKey: r.catalog_key, note: r.note, blocking: r.blocking === 1,
+    clearedAt: r.cleared_at, recordedBy: r.recorded_by, recordedAt: r.recorded_at.slice(0, 10),
+  }));
+}
+
+export interface InspectionRow {
+  id: number;
+  titleEn: string; titleAr: string;
+  inspector: string;
+  state: 'none' | 'scheduled' | 'conducted' | 'recorded';
+  date: string | null;
+  blocking: boolean;
+  findings: string;
+}
+
+export function inspectionsFor(eventId: string): InspectionRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, title_en, title_ar, inspector, state, date, blocking, findings FROM inspections WHERE event_id = ? ORDER BY id`)
+    .all(eventId) as unknown as { id: number; title_en: string; title_ar: string; inspector: string; state: InspectionRow['state']; date: string | null; blocking: number; findings: string }[];
+  return rows.map((r) => ({
+    id: r.id, titleEn: r.title_en, titleAr: r.title_ar, inspector: r.inspector,
+    state: r.state, date: r.date, blocking: r.blocking === 1, findings: r.findings,
+  }));
+}
+
+export interface PendingOrganizationRow {
+  id: number;
+  nameEn: string; nameAr: string;
+  status: 'none' | 'pending' | 'recorded';
+  recordedAt: string | null;
+}
+
+export function organizationsForReview(viewerIsDemo: boolean): PendingOrganizationRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, name_en, name_ar, status, recorded_at FROM organizations WHERE is_demo = ? ORDER BY status = 'pending' DESC, name_en`)
+    .all(demoFlag(viewerIsDemo)) as unknown as { id: number; name_en: string; name_ar: string; status: PendingOrganizationRow['status']; recorded_at: string | null }[];
+  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, status: r.status, recordedAt: r.recorded_at }));
+}
+
+export interface MinistryChangeRow {
+  kind: 'material' | 'declined';
+  eventId: string;
+  eventEn: string; eventAr: string;
+  detailEn: string; detailAr: string;
+  when: string;
+}
+
+export function changesForReview(viewerIsDemo: boolean): MinistryChangeRow[] {
+  const db = getDb();
+  const material = db
+    .prepare(
+      `SELECT m.event_id, e.name_en, e.name_ar, m.aspects, m.reported_at
+       FROM material_changes m JOIN events e ON e.id = m.event_id
+       WHERE e.is_demo = ? ORDER BY m.reported_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; aspects: string; reported_at: string }[];
+  const declined = db
+    .prepare(
+      `SELECT i.event_id, e.name_en, e.name_ar, i.name_en AS party_en, i.name_ar AS party_ar, i.answered_at
+       FROM invitations i JOIN events e ON e.id = i.event_id
+       WHERE i.status = 'declined' AND e.is_demo = ? ORDER BY i.answered_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; party_en: string; party_ar: string; answered_at: string | null }[];
+  return [
+    ...material.map((m) => ({
+      kind: 'material' as const, eventId: m.event_id, eventEn: m.name_en, eventAr: m.name_ar,
+      detailEn: 'Material change reported', detailAr: 'أُبلغ عن تغيير جوهري',
+      when: m.reported_at.slice(0, 10),
+    })),
+    ...declined.map((d) => ({
+      kind: 'declined' as const, eventId: d.event_id, eventEn: d.name_en, eventAr: d.name_ar,
+      detailEn: `Named party declined — ${d.party_en}`, detailAr: `اعتذر طرف مُسمّى — ${d.party_ar}`,
+      when: d.answered_at?.slice(0, 10) ?? '',
+    })),
+  ].sort((a, b) => (a.when < b.when ? 1 : -1));
+}
+
+export interface EnquiryRow {
+  id: number;
+  eventId: string;
+  eventEn: string; eventAr: string;
+  mophReference: string | null;
+  askedBy: string;
+  question: string;
+  askedAt: string;
+  reply: string;
+  repliedBy: string;
+  repliedAt: string | null;
+}
+
+export function enquiriesForReview(viewerIsDemo: boolean): EnquiryRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT q.id, q.event_id, e.name_en, e.name_ar, s.moph_reference,
+              q.asked_by, q.question, q.asked_at, q.reply, q.replied_by, q.replied_at
+       FROM enquiries q JOIN events e ON e.id = q.event_id
+       LEFT JOIN submissions s ON s.event_id = e.id
+       WHERE q.is_demo = ? ORDER BY q.replied_at IS NOT NULL, q.asked_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+      id: number; event_id: string; name_en: string; name_ar: string; moph_reference: string | null;
+      asked_by: string; question: string; asked_at: string; reply: string; replied_by: string; replied_at: string | null;
+    }[];
+  return rows.map((r) => ({
+    id: r.id, eventId: r.event_id, eventEn: r.name_en, eventAr: r.name_ar,
+    mophReference: r.moph_reference, askedBy: r.asked_by, question: r.question,
+    askedAt: r.asked_at.slice(0, 10), reply: r.reply, repliedBy: r.replied_by,
+    repliedAt: r.replied_at ? r.replied_at.slice(0, 10) : null,
+  }));
+}
+
+export interface ArrestGroup {
+  placeEn: string; placeAr: string;
+  category: string;
+  municipality: string;
+  count: number;
+  firstMonth: string;
+  lastMonth: string;
+  /** Set when the place matches a registered facility. */
+  facilityId: string | null;
+  designated: boolean;
+}
+
+/**
+ * Reported arrest locations: facility incident reports and first-response
+ * dataset reports, grouped by place and category -- the pattern no single
+ * report shows, and the mechanism by which a place with a confirmed arrest
+ * becomes covered (power eight).
+ */
+export function arrestLocations(viewerIsDemo: boolean): ArrestGroup[] {
+  const db = getDb();
+  const flag = demoFlag(viewerIsDemo);
+  const groups = new Map<string, ArrestGroup>();
+  const add = (placeEn: string, placeAr: string, category: string, municipality: string, month: string, facilityId: string | null) => {
+    const key = placeEn.trim().toLowerCase();
+    const g = groups.get(key);
+    if (g) {
+      g.count += 1;
+      if (month && (g.firstMonth === '' || month < g.firstMonth)) g.firstMonth = month;
+      if (month && month > g.lastMonth) g.lastMonth = month;
+      if (facilityId) g.facilityId = facilityId;
+    } else {
+      groups.set(key, {
+        placeEn: placeEn.trim(), placeAr: placeAr.trim() || placeEn.trim(),
+        category, municipality, count: 1,
+        firstMonth: month, lastMonth: month, facilityId, designated: false,
+      });
+    }
+  };
+  const facilityIncidents = db
+    .prepare(
+      `SELECT i.payload, i.created_at, f.id AS fid, f.name_en, f.name_ar, f.municipality_en, f.category_key
+       FROM facility_incidents i JOIN facilities f ON f.id = i.facility_id
+       WHERE f.is_demo = ?`,
+    )
+    .all(flag) as unknown as { payload: string; created_at: string; fid: string; name_en: string; name_ar: string; municipality_en: string; category_key: string }[];
+  for (const r of facilityIncidents) {
+    const payload = JSON.parse(r.payload) as Record<string, string>;
+    const month = (payload['date'] ?? r.created_at).slice(0, 7);
+    add(r.name_en, r.name_ar, r.category_key, r.municipality_en, month, r.fid);
+  }
+  const frReports = db
+    .prepare(
+      `SELECT r.payload, r.created_at FROM fr_reports r JOIN accounts a ON a.id = r.account_id WHERE a.is_demo = ?`,
+    )
+    .all(flag) as unknown as { payload: string; created_at: string }[];
+  for (const r of frReports) {
+    const payload = JSON.parse(r.payload) as Record<string, string>;
+    const place = payload['incident.location'] ?? '';
+    if (!place) continue;
+    const month = (payload['incident.date'] ?? r.created_at).slice(0, 7);
+    add(place, place, payload['incident.facilityCategory'] ?? '', payload['incident.address'] ?? '', month, null);
+  }
+  const designations = db
+    .prepare(`SELECT name_en FROM facility_designations WHERE is_demo = ?`)
+    .all(flag) as unknown as { name_en: string }[];
+  const designatedNames = new Set(designations.map((d) => d.name_en.trim().toLowerCase()));
+  const out = [...groups.values()];
+  for (const g of out) {
+    g.designated = designatedNames.has(g.placeEn.trim().toLowerCase()) || g.facilityId !== null;
+  }
+  return out.sort((a, b) => b.count - a.count);
+}
+
+export interface ConfigValueRow {
+  key: string;
+  value: string;
+  effective: string | null;
+  publishedBy: string;
+  publishedAt: string;
+}
+
+export function ministryConfig(): Map<string, ConfigValueRow> {
+  const rows = getDb()
+    .prepare(`SELECT key, value, effective, published_by, published_at FROM ministry_config`)
+    .all() as unknown as { key: string; value: string; effective: string | null; published_by: string; published_at: string }[];
+  return new Map(
+    rows.map((r) => [r.key, { key: r.key, value: r.value, effective: r.effective, publishedBy: r.published_by, publishedAt: r.published_at.slice(0, 10) }]),
+  );
+}
+
+export interface MinistryUserRow {
+  login: string;
+  displayName: string;
+  role: string;
+  isDemo: boolean;
+}
+
+export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT login, display_name, role, is_demo FROM accounts
+       WHERE role IN ('reviewer','inspector','ministry_admin','order','platform_owner') AND is_demo = ?
+       ORDER BY role, display_name`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number }[];
+  return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1 }));
+}
+
+/** Counts only. Nothing here names an organizer, an account, an event or a patient. */
+export interface PlatformCounts {
+  organizations: number;
+  events: number;
+  submissions: number;
+  determinations: number;
+  venues: number;
+  facilities: number;
+  devices: number;
+  incidents: number;
+  frReports: number;
+  invitations: number;
+}
+
+export function platformCounts(viewerIsDemo: boolean): PlatformCounts {
+  const db = getDb();
+  const flag = demoFlag(viewerIsDemo);
+  const n = (sql: string): number => (db.prepare(sql).get(flag) as { n: number }).n;
+  return {
+    organizations: n(`SELECT COUNT(*) AS n FROM organizations WHERE is_demo = ?`),
+    events: n(`SELECT COUNT(*) AS n FROM events WHERE is_demo = ?`),
+    submissions: n(`SELECT COUNT(*) AS n FROM submissions s JOIN events e ON e.id = s.event_id WHERE e.is_demo = ?`),
+    determinations: n(`SELECT COUNT(*) AS n FROM determinations d JOIN events e ON e.id = d.event_id WHERE e.is_demo = ?`),
+    venues: n(`SELECT COUNT(*) AS n FROM venues WHERE is_demo = ?`),
+    facilities: n(`SELECT COUNT(*) AS n FROM facilities WHERE is_demo = ?`),
+    devices: n(`SELECT COUNT(*) AS n FROM facility_devices d JOIN facilities f ON f.id = d.facility_id WHERE f.is_demo = ?`),
+    incidents: n(`SELECT COUNT(*) AS n FROM facility_incidents i JOIN facilities f ON f.id = i.facility_id WHERE f.is_demo = ?`),
+    frReports: n(`SELECT COUNT(*) AS n FROM fr_reports r JOIN accounts a ON a.id = r.account_id WHERE a.is_demo = ?`),
+    invitations: n(`SELECT COUNT(*) AS n FROM invitations i JOIN events e ON e.id = i.event_id WHERE e.is_demo = ?`),
+  };
+}
+
+export interface FacilityOversightRow {
+  id: string;
+  nameEn: string; nameAr: string;
+  categoryKey: string;
+  municipality: string;
+  devices: number;
+  standingKind: string;
+}
+
+export function facilitiesForOversight(viewerIsDemo: boolean): FacilityOversightRow[] {
+  const db = getDb();
+  const today = beirutTodayFn();
+  const rows = db
+    .prepare(`SELECT id, name_en, name_ar, category_key, municipality_en FROM facilities WHERE is_demo = ? ORDER BY name_en`)
+    .all(demoFlag(viewerIsDemo)) as unknown as { id: string; name_en: string; name_ar: string; category_key: string; municipality_en: string }[];
+  return rows.map((r) => {
+    const devices = (db.prepare(`SELECT COUNT(*) AS n FROM facility_devices WHERE facility_id = ?`).get(r.id) as { n: number }).n;
+    const standing = facilityStanding(facilityLedgerFor(r.id, today));
+    return {
+      id: r.id, nameEn: r.name_en, nameAr: r.name_ar,
+      categoryKey: r.category_key, municipality: r.municipality_en,
+      devices, standingKind: standing.kind,
+    };
+  });
+}
+
+export interface CorrectiveActionRow {
+  id: number;
+  facilityId: string;
+  facilityEn: string; facilityAr: string;
+  bodyEn: string; bodyAr: string;
+  status: 'open' | 'corrected';
+  raisedBy: string;
+  raisedAt: string;
+  correctedAt: string | null;
+}
+
+export function correctiveActions(viewerIsDemo: boolean): CorrectiveActionRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT q.id, q.facility_id, f.name_en, f.name_ar, q.body_en, q.body_ar, q.status, q.raised_by, q.created_at, q.corrected_at
+       FROM facility_requests q JOIN facilities f ON f.id = q.facility_id
+       WHERE q.is_demo = ? ORDER BY q.status = 'open' DESC, q.created_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+      id: number; facility_id: string; name_en: string; name_ar: string; body_en: string; body_ar: string;
+      status: 'open' | 'corrected'; raised_by: string; created_at: string; corrected_at: string | null;
+    }[];
+  return rows.map((r) => ({
+    id: r.id, facilityId: r.facility_id, facilityEn: r.name_en, facilityAr: r.name_ar,
+    bodyEn: r.body_en, bodyAr: r.body_ar, status: r.status, raisedBy: r.raised_by,
+    raisedAt: r.created_at.slice(0, 10), correctedAt: r.corrected_at ? r.corrected_at.slice(0, 10) : null,
+  }));
+}
+
+
+export interface SubmissionReview {
+  eventId: string;
+  nameEn: string; nameAr: string;
+  orgEn: string; orgAr: string;
+  level: Level | null;
+  eventDate: string | null;
+  filedAt: string | null;
+  mophReference: string | null;
+  state: 'queued' | 'assigned' | 'progress';
+  reviewer: string;
+  providers: { nameEn: string; nameAr: string; status: string; declaration: string; signedAt: string | null }[];
+}
+
+/** The Ministry's read of one filed submission. Demo isolation applies. */
+export function submissionForReview(viewerIsDemo: boolean, eventId: string): SubmissionReview | null {
+  const db = getDb();
+  const r = db
+    .prepare(
+      `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.demo_level,
+              s.filed_at, s.moph_reference,
+              rs.state AS r_state, rs.reviewer AS r_reviewer,
+              o.name_en AS org_en, o.name_ar AS org_ar
+       FROM submissions s
+       JOIN events e ON e.id = s.event_id
+       LEFT JOIN review_state rs ON rs.event_id = e.id
+       LEFT JOIN organizations o ON o.account_id = e.account_id
+       WHERE e.id = ? AND e.is_demo = ?`,
+    )
+    .get(eventId, demoFlag(viewerIsDemo)) as
+    | {
+        id: string; name_en: string; name_ar: string; start_date: string | null; demo_level: number | null;
+        filed_at: string | null; moph_reference: string | null;
+        r_state: SubmissionReview['state'] | null; r_reviewer: string | null;
+        org_en: string | null; org_ar: string | null;
+      }
+    | undefined;
+  if (!r) return null;
+  const providers = db
+    .prepare(`SELECT name_en, name_ar, status, declaration, signed_at FROM invitations WHERE event_id = ? AND kind = 'ems'`)
+    .all(eventId) as unknown as { name_en: string; name_ar: string; status: string; declaration: string; signed_at: string | null }[];
+  return {
+    eventId: r.id,
+    nameEn: r.name_en, nameAr: r.name_ar,
+    orgEn: r.org_en ?? '', orgAr: r.org_ar ?? '',
+    level: derivedLevelFor(r.id) ?? ((r.demo_level as Level | null) ?? null),
+    eventDate: r.start_date,
+    filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
+    mophReference: r.moph_reference,
+    state: r.r_state ?? 'queued',
+    reviewer: r.r_reviewer ?? '',
+    providers: providers.map((p) => ({
+      nameEn: p.name_en, nameAr: p.name_ar, status: p.status, declaration: p.declaration,
+      signedAt: p.signed_at ? p.signed_at.slice(0, 10) : null,
+    })),
+  };
+}

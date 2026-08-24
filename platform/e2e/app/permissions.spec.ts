@@ -60,7 +60,7 @@ async function expectRefusal(page: Page, path: string, marker: RegExp): Promise<
  */
 test.describe('platform-owner surfaces are above the Ministry', () => {
   test('a reviewer cannot reach platform activity', async ({ page }) => {
-    test.skip(true, 'Vacuous: /platform/activity 404s for everyone until Slice 6 builds it.');
+    // Real since Slice 6: the surface exists and a reviewer is refused.
     await signInAs(page, LOGINS.reviewer);
     await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });
@@ -68,13 +68,11 @@ test.describe('platform-owner surfaces are above the Ministry', () => {
   test('a Ministry administrator cannot reach platform activity', async ({ page }) => {
     // ROADMAP 5: "A Ministry administrator cannot reach these." The stronger role is the
     // one worth testing -- admin outranks reviewer everywhere else.
-    test.skip(true, 'Vacuous: /platform/activity 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.admin);
     await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });
 
   test('a Ministry administrator cannot reach master admin', async ({ page }) => {
-    test.skip(true, 'Vacuous: /platform/admin 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.admin);
     await expectRefusal(page, '/platform/admin', /master admin|الإدارة العليا/i);
   });
@@ -82,19 +80,31 @@ test.describe('platform-owner surfaces are above the Ministry', () => {
 
 test.describe('Ministry tiers', () => {
   test('a reviewer cannot reach administrator configuration', async ({ page }) => {
-    test.skip(true, 'Vacuous: /ministry/admin/configuration 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.reviewer);
     await expectRefusal(
       page,
       '/ministry/admin/configuration',
       /configuration and versioning|الإعدادات/i,
     );
+    await expectRefusal(page, '/ministry/admin/cardiac', /cardiac-arrest configuration|إعدادات الجاهزية/i);
+    await expectRefusal(page, '/ministry/admin/users', /users and roles|المستخدمون والأدوار/i);
+  });
+
+  test('an inspector holds no outcome control and no admin surface', async ({ page }) => {
+    // The inspector reaches the queue and a submission, and the outcome block is
+    // ABSENT there -- not greyed (rule 10). Admin surfaces refuse outright.
+    await signInAs(page, 'test_inspector');
+    await page.goto('/ministry/submissions/EV-0362');
+    await expect(page.locator('body')).toContainText(/Inspections|التفتيشات/);
+    await expect(page.locator('[data-region="outcome"]')).toHaveCount(0);
+    await expectRefusal(page, '/ministry/admin/cardiac', /cardiac-arrest configuration|إعدادات الجاهزية/i);
+    await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });
 
   test('an organizer cannot reach the review queue', async ({ page }) => {
-    test.skip(true, 'Vacuous: /ministry/queue 404s for everyone until Slice 6 builds it.');
     await signInAs(page, LOGINS.organizer);
     await expectRefusal(page, '/ministry/queue', /review queue|قائمة المراجعة/i);
+    await expectRefusal(page, '/ministry', /operational dashboard|اللوحة التشغيلية/i);
   });
 });
 
@@ -163,7 +173,7 @@ test.describe('signed out', () => {
   test('every built authenticated surface bounces to sign-in', async ({ page }) => {
     // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
     // vacuously. Extend this list as slices land.
-    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/first-response/readiness', '/first-response/reports/new', '/events/EV-0362/declaration', '/events/EV-0362/governance']) {
+    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/first-response/readiness', '/first-response/reports/new', '/events/EV-0362/declaration', '/events/EV-0362/governance', '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/admin/cardiac', '/platform/admin', '/platform/activity']) {
       const response = await page.goto(path);
       const refused =
         page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);

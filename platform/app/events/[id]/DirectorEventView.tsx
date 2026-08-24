@@ -1,8 +1,7 @@
 /**
  * The Director's view of an event: the requirements that name the Event Medical
  * Director, derived from the matrix (never written as a list), requirement 15 marked
- * as theirs alone, and the shared rows showing who else holds them and whether they
- * have acted -- so nobody assumes someone else did it.
+ * as theirs alone, and the shared rows naming who else holds them.
  */
 
 import Link from 'next/link';
@@ -74,8 +73,8 @@ export function DirectorEventView({
         </h1>
         <p style={{ margin: '0 0 28px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
           <L
-            en={`${requirements.length} requirements name the Event Medical Director. Where a requirement is shared, the other parties and whether they have acted are shown, so nobody assumes someone else did it.`}
-            ar={`${requirements.length} متطلبات تسمّي المدير الطبي للفعالية. وحيث يكون المتطلب مشتركاً، تُعرض الأطراف الأخرى وما إذا كانت قد تصرّفت، كي لا يفترض أحد أن غيره قام به.`}
+            en={`${requirements.length} requirements name the Event Medical Director. Where a requirement is shared, the other parties are named beside it, so nobody assumes it is theirs alone.`}
+            ar={`${requirements.length} متطلبات تسمّي المدير الطبي للفعالية. وحيث يكون المتطلب مشتركاً، تُسمّى الأطراف الأخرى إلى جانبه، كي لا يُفترض أنه لطرف واحد.`}
           />
         </p>
 
@@ -129,23 +128,19 @@ export function DirectorEventView({
                   </div>
                 ) : (
                   <div style={{ marginInlineStart: 34 }}>
+                    {/* The co-holders by name only. The acted/waiting chips were
+                        presumed and are dropped at reviewer instruction (Slice 5
+                        review) -- a presumed chip is worse than no chip. They return
+                        when a real per-party action record exists to derive from. */}
                     <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
                       <L en="Also held by" ar="يتحمّله أيضاً" />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden' }}>
-                      {r.others.map((h) => {
-                        const acted = h.en === 'Organizer' || providerStats.signed > 0;
-                        return (
-                          <div key={h.en} style={{ background: 'var(--bg)', padding: '11px 14px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
-                            <span>
-                              <L en={h.en} ar={h.ar} />
-                            </span>
-                            <span style={{ padding: '3px 8px', borderRadius: 3, background: acted ? 'var(--brand-soft)' : 'var(--accent-soft)', color: acted ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
-                              {acted ? <L en="Acted" ar="تصرّف" /> : <L en="Waiting" ar="بالانتظار" />}
-                            </span>
-                          </div>
-                        );
-                      })}
+                      {r.others.map((h) => (
+                        <div key={h.en} style={{ background: 'var(--bg)', padding: '11px 14px', fontSize: 14 }}>
+                          <L en={h.en} ar={h.ar} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

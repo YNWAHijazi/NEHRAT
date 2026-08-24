@@ -38,6 +38,8 @@ const DEMO_LOGINS = new Set([
   'test_response',
   'test_moph',
   'test_moph_admin',
+  'test_inspector',
+  'test_owner',
 ]);
 
 export async function demoSignInAction(formData: FormData): Promise<void> {
@@ -46,12 +48,15 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   const account = findAccountByLogin(login);
   if (!account) redirect('/signin?error=unknown');
   await startSession(account.id);
-  // Each role lands on its own surface. The Ministry console arrives in Slice 6;
-  // until then those roles return to sign-in with a build notice.
+  // Each role lands on its own surface.
   if (account.role === 'organizer' || account.role === 'ems' || account.role === 'director') {
     redirect('/dashboard');
   }
   if (account.role === 'response') redirect('/first-response/readiness');
+  if (account.role === 'reviewer' || account.role === 'inspector' || account.role === 'ministry_admin') {
+    redirect('/ministry');
+  }
+  if (account.role === 'platform_owner') redirect('/platform/admin');
   redirect('/signin?notice=role-later-slice');
 }
 

@@ -43,7 +43,7 @@ function migrate(d: DatabaseSync): void {
       password_hash TEXT,
       display_name TEXT NOT NULL,
       initials TEXT NOT NULL DEFAULT '',
-      role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','ministry_admin','platform_owner')),
+      role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','inspector','ministry_admin','order','platform_owner')),
       is_demo INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -396,6 +396,12 @@ function migrate(d: DatabaseSync): void {
       facility_id TEXT NOT NULL REFERENCES facilities(id),
       body_en TEXT NOT NULL, body_ar TEXT NOT NULL,
       due TEXT,
+      -- Slice 6: a request is a corrective action with a life of its own. The
+      -- due date derives from the configured corrective timeline; while that
+      -- value is unset no due date is computed, and the row says so.
+      status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','corrected')),
+      raised_by TEXT NOT NULL DEFAULT '',
+      corrected_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       is_demo INTEGER NOT NULL DEFAULT 0
     );
@@ -408,6 +414,98 @@ function migrate(d: DatabaseSync): void {
       category_key TEXT NOT NULL,
       facility_name TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- ---- Slice 6: the Ministry console ----
+
+    -- Internal workflow state on a filed submission: grey, quiet, never a
+    -- determination. One row per event under review.
+    CREATE TABLE IF NOT EXISTS review_state (
+      event_id TEXT PRIMARY KEY REFERENCES events(id),
+      state TEXT NOT NULL DEFAULT 'queued' CHECK (state IN ('queued','assigned','progress')),
+      reviewer TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- The three outcomes -- the ONLY regulatory determinations. History kept:
+    -- a revision then a satisfied are two rows, and the reference number never
+    -- changes between them.
+    CREATE TABLE IF NOT EXISTS determinations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      outcome TEXT NOT NULL CHECK (outcome IN ('incomplete','revision','satisfied')),
+      note TEXT NOT NULL DEFAULT '',
+      recorded_by TEXT NOT NULL,
+      recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Additional measures: a distinct action, not a fourth outcome. The measure
+    -- is a catalogue item (attachments-catalog doc key or requirements-matrix
+    -- row) -- nothing outside the catalogue attaches to a submission. The note
+    -- is a note, never a requirement.
+    CREATE TABLE IF NOT EXISTS added_measures (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      catalog_key TEXT NOT NULL,
+      note TEXT NOT NULL DEFAULT '',
+      blocking INTEGER NOT NULL DEFAULT 1,
+      cleared_at TEXT,
+      recorded_by TEXT NOT NULL,
+      recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Inspections on a submission. An inspector schedules and records findings;
+    -- a blocking inspection without recorded findings gates ONLY the satisfied
+    -- outcome. Findings are not an outcome.
+    CREATE TABLE IF NOT EXISTS inspections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      title_en TEXT NOT NULL, title_ar TEXT NOT NULL,
+      inspector TEXT NOT NULL DEFAULT '',
+      state TEXT NOT NULL DEFAULT 'none' CHECK (state IN ('none','scheduled','conducted','recorded')),
+      date TEXT,
+      blocking INTEGER NOT NULL DEFAULT 0,
+      findings TEXT NOT NULL DEFAULT '',
+      is_demo INTEGER NOT NULL DEFAULT 0
+    );
+
+    -- Ministry configuration values (the cardiac powers). Unset = no row: the
+    -- first-class answer. Publishing records the value, its effective date and
+    -- who published it, and notifies the operators it reaches.
+    CREATE TABLE IF NOT EXISTS ministry_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      effective TEXT,
+      published_by TEXT NOT NULL DEFAULT '',
+      published_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Designation of a place as a covered facility, exercised from Reported
+    -- arrest locations (power eight). The place may not yet hold a facility
+    -- record; the designation stands on its own and its operator is notified.
+    CREATE TABLE IF NOT EXISTS facility_designations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name_en TEXT NOT NULL, name_ar TEXT NOT NULL DEFAULT '',
+      category TEXT NOT NULL DEFAULT '',
+      municipality TEXT NOT NULL DEFAULT '',
+      facility_id TEXT,
+      designated_by TEXT NOT NULL,
+      designated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      is_demo INTEGER NOT NULL DEFAULT 0
+    );
+
+    -- Enquiries against a determination: the organizer asks, the Ministry
+    -- answers. The outcome does not change here.
+    CREATE TABLE IF NOT EXISTS enquiries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      asked_by TEXT NOT NULL DEFAULT '',
+      question TEXT NOT NULL,
+      asked_at TEXT NOT NULL DEFAULT (datetime('now')),
+      reply TEXT NOT NULL DEFAULT '',
+      replied_by TEXT NOT NULL DEFAULT '',
+      replied_at TEXT,
+      is_demo INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS notifications (

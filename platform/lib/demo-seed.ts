@@ -63,8 +63,13 @@ export function seedDemonstration(db: DatabaseSync): void {
   const ems = insertAccount.run('test_ems', 'S. Karam', 'SK', 'ems').lastInsertRowid as number;
   const director = insertAccount.run('test_director', 'Dr N. Salameh', 'NS', 'director').lastInsertRowid as number;
   const response = insertAccount.run('test_response', 'M. Aoun', 'MA', 'response').lastInsertRowid as number;
-  insertAccount.run('test_moph', 'Demonstration reviewer', 'MR', 'reviewer');
-  insertAccount.run('test_moph_admin', 'Demonstration administrator', 'MA', 'ministry_admin');
+  insertAccount.run('test_moph', 'L. Nassar', 'LN', 'reviewer');
+  insertAccount.run('test_inspector', 'K. Abou Jaoude', 'KA', 'inspector');
+  insertAccount.run('test_moph_admin', 'R. Sfeir', 'RS', 'ministry_admin');
+  insertAccount.run('test_owner', 'Platform operations', 'PO', 'platform_owner');
+  // Listed on Users and roles; holds no sign-in button. Its access follows the
+  // Order lane: off (the default) shows it suspended, not active.
+  insertAccount.run('order_reviewer', 'Dr Y. Salameh', 'YS', 'order');
 
   // The showcase account: recorded, and it holds the filed submissions below.
   db.prepare(
@@ -456,6 +461,121 @@ export function seedDemonstration(db: DatabaseSync): void {
       incidentRole: '',
     }),
     d('2026-08-12'),
+  );
+
+  // ---- Slice 6: the Ministry console's showcase state ----
+  // EV-0301 and EV-0244 were filed (their events carry Ministry references);
+  // the queue derives from the submissions table, so the filings exist there.
+  const insertPlainSubmission = db.prepare(
+    `INSERT INTO submissions (event_id, declarations, insurance, representative, telephone, position, filed_at, moph_reference)
+     VALUES (?, ?, '{}', ?, '', '', ?, ?)`,
+  );
+  insertPlainSubmission.run(
+    'EV-0301',
+    JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
+    'R. Haddad', d('2026-08-01'), 'MOPH-EV-2026-0301',
+  );
+  insertPlainSubmission.run(
+    'EV-0244',
+    JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
+    'R. Haddad', d('2026-07-05'), 'MOPH-EV-2026-0244',
+  );
+
+  // Internal workflow states are grey and are not determinations. The recorded
+  // outcomes MATCH the organizer-side presentation seeded above: EV-0362 was
+  // returned for revision, EV-0301 satisfied.
+  db.prepare(
+    `INSERT INTO review_state (event_id, state, reviewer, updated_at) VALUES (?, ?, ?, ?)`,
+  ).run('EV-0362', 'progress', 'L. Nassar', d('2026-08-10'));
+  const insertDetermination = db.prepare(
+    `INSERT INTO determinations (event_id, outcome, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?)`,
+  );
+  insertDetermination.run(
+    'EV-0362', 'revision',
+    'The medical deployment map has not been attached, and one of the named providers has not signed its readiness declaration. File a revised version; your reference number does not change.',
+    'L. Nassar', d('2026-08-10'),
+  );
+  insertDetermination.run('EV-0301', 'satisfied', '', 'R. Sfeir', d('2026-08-04'));
+
+  // A blocking inspection without recorded findings gates ONLY the satisfied
+  // outcome on EV-0362; the recorded one shows what findings look like.
+  const insertInspection = db.prepare(
+    `INSERT INTO inspections (event_id, title_en, title_ar, inspector, state, date, blocking, findings, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+  );
+  insertInspection.run(
+    'EV-0362', 'Medical treatment post and deployment verified on site',
+    'التحقق ميدانياً من نقطة المعالجة الطبية والانتشار',
+    'K. Abou Jaoude', 'scheduled', d('2026-09-06'), 1, '',
+  );
+  insertInspection.run(
+    'EV-0362', 'Ambulance access and patient-extraction routes walked',
+    'معاينة مسارات وصول الإسعاف وإخلاء المرضى سيراً',
+    'K. Abou Jaoude', 'recorded', d('2026-08-01'), 0,
+    'Both extraction routes passable. The northern route narrows to 3.1 m at the market arch; noted, no corrective action raised.',
+  );
+
+  // Enquiries: one awaiting a Ministry response, one answered -- the answer
+  // explains a derivation, and the outcome does not change.
+  const insertEnquiry = db.prepare(
+    `INSERT INTO enquiries (event_id, asked_by, question, asked_at, reply, replied_by, replied_at, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+  );
+  insertEnquiry.run(
+    'EV-0362', 'R. Haddad · Beirut Road Runners',
+    'The deployment map was attached to version 1 and we believe it was overlooked. We ask the Ministry to confirm whether the map on file is the one it requires, before we prepare a further version.',
+    d('2026-08-13'), '', '', null,
+  );
+  insertEnquiry.run(
+    'EV-0244', 'F. Rahal · Beirut Road Runners',
+    'The outcome records Level 3. We had assessed the event at Level 2 and ask on what basis the level was set.',
+    d('2026-07-29'),
+    'The minimum-level condition for 20,000 or more persons present at the same time applied, which sets Level 3 regardless of the domain score. The score-based level was 2; the minimum condition governs. The outcome is unchanged.',
+    'R. Sfeir', d('2026-07-30'),
+  );
+
+  // The arrest pattern: two facility incidents at the registered facility and
+  // two first-response reports at an unregistered terminal, so Reported arrest
+  // locations shows a repeat pattern at a place that is NOT currently covered --
+  // the designation demo.
+  const insertFacIncident = db.prepare(
+    `INSERT INTO facility_incidents (facility_id, payload, narrative, created_at) VALUES ('FC-0014', ?, ?, ?)`,
+  );
+  insertFacIncident.run(
+    JSON.stringify({ date: d('2026-04-11'), time: '18:40', location: 'Pool deck', emsContacted: 'yes', aedAvailable: 'yes', aedApplied: 'yes', shock: 'yes', transportedBy: 'ems' }),
+    'The patient collapsed at the pool deck; staff started CPR and applied the AED before EMS arrived.',
+    d('2026-04-11'),
+  );
+  insertFacIncident.run(
+    JSON.stringify({ date: d('2026-08-11'), time: '19:05', location: 'Gym floor', emsContacted: 'yes', aedAvailable: 'yes', aedApplied: 'yes', shock: 'no', transportedBy: 'ems' }),
+    'The patient became unresponsive on the gym floor; the AED advised no shock and EMS transported.',
+    d('2026-08-11'),
+  );
+  const insertFrReport = db.prepare(
+    `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload, created_at)
+     VALUES (?, 'platform', NULL, '{}', ?, ?)`,
+  );
+  insertFrReport.run(
+    response,
+    JSON.stringify({
+      'incident.caseNumber': 'U3-0712', 'incident.date': d('2026-02-19'), 'incident.time': '08:10',
+      'incident.location': 'Beirut Central Terminal', 'incident.address': 'Beirut',
+      'incident.facilityCategory': 'Transport terminal', 'incident.ageGroup': 'adult',
+      'response.witnessed': 'yes', 'defibrillation.unitApplied': 'yes', 'outcome.transported': 'yes',
+      'agency.agencyName': 'Unit 3 — first response', 'agency.unitId': 'U3', 'agency.completedBy': 'M. Aoun',
+    }),
+    d('2026-02-19'),
+  );
+  insertFrReport.run(
+    response,
+    JSON.stringify({
+      'incident.caseNumber': 'U3-0798', 'incident.date': d('2026-07-03'), 'incident.time': '17:52',
+      'incident.location': 'Beirut Central Terminal', 'incident.address': 'Beirut',
+      'incident.facilityCategory': 'Transport terminal', 'incident.ageGroup': 'adult',
+      'response.witnessed': 'unknown', 'defibrillation.unitApplied': 'yes', 'outcome.transported': 'yes',
+      'agency.agencyName': 'Unit 3 — first response', 'agency.unitId': 'U3', 'agency.completedBy': 'M. Aoun',
+    }),
+    d('2026-07-03'),
   );
 
   const insertNotification = db.prepare(

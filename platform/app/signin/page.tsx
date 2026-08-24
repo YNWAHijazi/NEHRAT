@@ -24,7 +24,9 @@ const DEMO_LOGINS: { login: string; en: string; ar: string }[] = [
   { login: 'test_director', en: 'Event Medical Director', ar: 'المدير الطبي للفعالية' },
   { login: 'test_response', en: 'First-response unit', ar: 'وحدة الاستجابة الأولية' },
   { login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة' },
+  { login: 'test_inspector', en: 'Ministry inspector', ar: 'مفتش الوزارة' },
   { login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة' },
+  { login: 'test_owner', en: 'Platform owner', ar: 'مالك المنصة' },
 ];
 
 /** Reference field geometry: 46px inputs, 8px radius. */
