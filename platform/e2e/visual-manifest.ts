@@ -27,7 +27,13 @@ export interface VisualRegion {
   reference?:
     | { strategy: 'cardByText'; text: string }
     | { strategy: 'headerRow' }
-    | { strategy: 'headingSection'; text: string };
+    | { strategy: 'headingSection'; text: string }
+    /** Deepest element carrying `text`, climbed to the nearest ancestor whose style
+     *  attribute contains `container`. The general form of cardByText. */
+    | { strategy: 'containerOfText'; text: string; container: string }
+    /** Heading (h2) starting with `text`, plus every following sibling until the next
+     *  h1/h2 -- a whole numbered group. */
+    | { strategy: 'headingBlock'; text: string };
   /** compare / expectedDivergent: the built side's selector. */
   builtSelector?: string;
   /** absentExpected: text that identifies the region and must not appear on the built page. */
@@ -144,10 +150,172 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: 'Expected divergent at reviewer instruction: the record reports both results and which governed. The reference record carries no such panel.',
       },
       {
-        name: 'counters-band',
-        mode: 'absentExpected',
-        markerText: 'named agencies yet to answer',
-        note: 'Absent because its data (named agencies, outstanding documents) is Slice 2. Not faked. Becomes a compare region when Slice 2 lands.',
+        name: 'counters',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="counters"]',
+        note: 'Expected divergent, SPEC over pixel parity: the counters themselves are live and match the reference figures, but the prototype leaves Report a material change ungated and omits the post-event control, while the build renders both disabled with their reasons beside them (SPEC 5b). Measured at 48% against the prototype band before the flip — the difference is those two gated controls.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-requirements',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Requirements and attachments',
+    builtRoute: '/events/EV-0418/requirements',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'counters',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'documents left to attach', container: 'display: flex' },
+        builtSelector: '[data-region="counters"]',
+        note: 'The two actionable counters. Held at 2%.',
+      },
+      {
+        name: 'g2',
+        mode: 'compare',
+        reference: { strategy: 'headingBlock', text: 'Named EMS providers' },
+        builtSelector: '[data-region="g2"]',
+        note: 'The named-provider rows and their nomination/declaration chips. Held at 2%.',
+      },
+      {
+        name: 'g3',
+        mode: 'compare',
+        reference: { strategy: 'headingBlock', text: 'Requirements you certify to' },
+        builtSelector: '[data-region="g3"]',
+        note: 'The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
+      },
+      {
+        name: 'g1',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="g1"]',
+        note: 'Expected divergent: the build replaces the prototype\'s inert action buttons with working attach forms, and the plan row carries its official Arabic name (SPEC 2b).',
+      },
+      {
+        name: 'invite',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="invite"]',
+        note: 'Expected divergent: ROADMAP 5c requires the invitation inside the requirement; the prototype shows only already-named rows.',
+      },
+      {
+        name: 'inspections',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="inspections"]',
+        note: 'Expected divergent: inspection rows are Ministry-side data (Slice 6). The build shows the honest empty state; the prototype shows demonstration inspections.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-plan',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Health and medical plan',
+    builtRoute: '/events/EV-0418/plan',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'workflow',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Planning workflow', container: 'border-radius: 14px' },
+        builtSelector: '[data-region="workflow"]',
+        note: 'The Guidance\'s eight-step workflow card. Held at 2%.',
+      },
+      {
+        name: 'depth-table',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Planning depth by event level', container: 'border-radius: 14px' },
+        builtSelector: '[data-region="depth"]',
+        // A single cell wraps at a different word boundary, offsetting every later row by
+        // one text line; strings and the level-column highlight are verified identical.
+        threshold: 0.06,
+        note: 'The depth-by-level table, prototype wording verbatim with the level column highlighted as the prototype does. Held at 6%: one cell wraps a line earlier than the reference and shifts the rows below it; the strings match.',
+      },
+      {
+        name: 'sections',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="sections"]',
+        note: 'Expected divergent: the sixteen rows match, but chip states reflect this account\'s real plan progress, not the prototype\'s demonstration mix, and the Arabic wording follows the plan\'s official name.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-submit',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Submission package',
+    builtRoute: '/events/EV-0418/submit',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'form-card',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="form-card"]',
+        note: 'Expected divergent: declaration chips reflect the account\'s real saved form, the Arabic declarations are verbatim from the Arabic issue (decision 2/3), and the blocker list is derived, not demonstration copy.',
+      },
+      {
+        name: 'package-docs',
+        mode: 'compare',
+        reference: { strategy: 'headingBlock', text: 'Submission package' },
+        builtSelector: '[data-region="package-docs"]',
+        note: 'The package document rows and their states. Held at 2%.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-acknowledgment',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Acknowledgment',
+    builtRoute: '/events/EV-0362/acknowledgment',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'limits',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'This acknowledges receipt', container: 'padding-block-start: 30px' },
+        builtSelector: '[data-region="limits"]',
+        note: 'The two jurisdiction limits, verbatim regulation. Held at 2%.',
+      },
+      {
+        name: 'wallcard',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-wallcard]',
+        note: 'Expected divergent: the built acknowledgment shows EV-0362\'s real filing (reference number, facts, received documents); the prototype shows the EV-0418 preview fixture.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-change',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Material change',
+    builtRoute: '/events/EV-0362/change',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'aspects-card',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'What changed', container: 'border-radius: 14px' },
+        builtSelector: '[data-region="aspects-card"]',
+        note: 'The enumerated aspect chips, the description and the effective date. Held at 2%.',
+      },
+    ],
+  },
+  {
+    id: 'organizer-post-event',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Post-event report',
+    builtRoute: '/events/EV-0244/post-event',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'obligations',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Separate obligation', container: 'display: grid' },
+        builtSelector: '[data-region="obligations"]',
+        note: 'The 24-hour notification and the 7-day report, side by side and never merged. Held at 2%.',
+      },
+      {
+        name: 'counts',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="counts"]',
+        note: 'Expected divergent BY THE SOURCES: the prototype predates Annex D and carries five short labels; the build carries the annex\'s seven fields and eight significant-event entries verbatim (source outranks prototype).',
       },
     ],
   },

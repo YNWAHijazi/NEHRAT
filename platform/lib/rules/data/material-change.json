@@ -1,0 +1,135 @@
+{
+  "$comment": "Protocol 8.5's enumerated material-change aspects, from the prototype. The Protocol has no Arabic issue in the pack; the prototype's Arabic stands.",
+  "aspects": [
+    {
+      "key": "attendance",
+      "en": "Attendance",
+      "ar": "الحضور",
+      "affectsEn": "Domain 1 — maximum simultaneous attendance",
+      "affectsAr": "المجال 1 — الحد الأقصى للحضور المتزامن",
+      "consequenceEn": "Can cross the 10,000 and 20,000 minimum-level thresholds",
+      "consequenceAr": "قد يتجاوز عتبتَي 10,000 و20,000 للحد الأدنى للمستوى",
+      "levelMayChange": true
+    },
+    {
+      "key": "date",
+      "en": "Date",
+      "ar": "التاريخ",
+      "affectsEn": "Domain 6 — environmental exposure",
+      "affectsAr": "المجال 6 — التعرّض البيئي",
+      "consequenceEn": "A weather or environmental warning may apply",
+      "consequenceAr": "قد ينطبق إنذار جوي أو بيئي",
+      "levelMayChange": true
+    },
+    {
+      "key": "duration",
+      "en": "Duration",
+      "ar": "المدة",
+      "affectsEn": "Domain 4 — event duration",
+      "affectsAr": "المجال 4 — مدة الفعالية",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "venue",
+      "en": "Venue",
+      "ar": "الموقع",
+      "affectsEn": "Domain 5 — venue configuration",
+      "affectsAr": "المجال 5 — تكوين الموقع",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "route",
+      "en": "Route",
+      "ar": "المسار",
+      "affectsEn": "Domain 5 — venue configuration",
+      "affectsAr": "المجال 5 — تكوين الموقع",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "activity",
+      "en": "Activity",
+      "ar": "النشاط",
+      "affectsEn": "Domain 2 — event activity",
+      "affectsAr": "المجال 2 — نشاط الفعالية",
+      "consequenceEn": "Can trigger a minimum event level",
+      "consequenceAr": "قد يستدعي حداً أدنى لمستوى الفعالية",
+      "levelMayChange": true
+    },
+    {
+      "key": "crowd",
+      "en": "Crowd configuration",
+      "ar": "تنظيم الجمهور",
+      "affectsEn": "Domain 3 — crowd configuration",
+      "affectsAr": "المجال 3 — تنظيم الجمهور",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "emd",
+      "en": "Event Medical Director",
+      "ar": "المدير الطبي للفعالية",
+      "affectsEn": "Level 3 requirement",
+      "affectsAr": "متطلب المستوى 3",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": false
+    },
+    {
+      "key": "ems",
+      "en": "Participating EMS provider",
+      "ar": "مزوّد الإسعاف المشارك",
+      "affectsEn": "the minimum requirements requirements and the Level 3 declaration",
+      "affectsAr": "متطلبات الحد الأدنى للمتطلبات وإقرار المستوى 3",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": false
+    },
+    {
+      "key": "amb",
+      "en": "Ambulance provision",
+      "ar": "توفير الإسعاف",
+      "affectsEn": "Domain 7 — patient access and extraction",
+      "affectsAr": "المجال 7 — الوصول إلى المرضى وإخلاؤهم",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "extract",
+      "en": "Patient-extraction arrangements",
+      "ar": "ترتيبات إخلاء المريض",
+      "affectsEn": "Domain 7 — patient access and extraction",
+      "affectsAr": "المجال 7 — الوصول إلى المرضى وإخلاؤهم",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "hospital",
+      "en": "Receiving hospital",
+      "ar": "المستشفى المستقبِل",
+      "affectsEn": "Domain 8 — transport time to the receiving emergency department",
+      "affectsAr": "المجال 8 — زمن النقل إلى قسم الطوارئ المستقبِل",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": true
+    },
+    {
+      "key": "other",
+      "en": "Anything else affecting the assessment or the plan",
+      "ar": "أي أمر آخر يؤثر في التقييم أو الخطة",
+      "affectsEn": "The assessment or the event health and medical plan",
+      "affectsAr": "التقييم أو الخطة الصحية والطبية للفعالية",
+      "consequenceEn": "",
+      "consequenceAr": "",
+      "levelMayChange": false
+    }
+  ]
+}

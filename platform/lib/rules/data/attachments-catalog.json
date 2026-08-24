@@ -1,0 +1,65 @@
+{
+  "$comment": "The submitted documents by level, from the prototype's catalog with Arabic aligned to the compliance form's attachment list. The plan carries its official Arabic name (SPEC 2b). State lives in the database; this is the catalog.",
+  "documents": [
+    {
+      "key": "assessment",
+      "en": "Risk assessment",
+      "ar": "تقييم المخاطر",
+      "minLevel": 1,
+      "system": true,
+      "noteEn": "Generated from your assessment",
+      "noteAr": "يُنشأ من تقييمكم"
+    },
+    {
+      "key": "arrangements",
+      "en": "Documented medical arrangements",
+      "ar": "ترتيبات طبية موثّقة",
+      "minLevel": 1,
+      "maxLevel": 1,
+      "attach": true
+    },
+    {
+      "key": "complianceForm",
+      "en": "Compliance and submission form",
+      "ar": "نموذج الامتثال والتقديم",
+      "minLevel": 2,
+      "platform": true
+    },
+    {
+      "key": "plan",
+      "en": "Event health and medical plan",
+      "ar": "خطة التأهب الصحي والطبي للفعالية",
+      "minLevel": 2,
+      "platform": true
+    },
+    {
+      "key": "siteMap",
+      "en": "Event site or route map",
+      "ar": "خريطة موقع الفعالية أو مسارها",
+      "minLevel": 2,
+      "attach": true
+    },
+    {
+      "key": "deploymentMap",
+      "en": "Medical deployment map",
+      "ar": "خريطة الانتشار الطبي",
+      "minLevel": 3,
+      "attach": true
+    },
+    {
+      "key": "emsDeclarations",
+      "en": "EMS readiness declaration from each participating EMS provider",
+      "ar": "إقرار جاهزية الإسعاف من كل مزوّد إسعاف مشارك",
+      "minLevel": 3,
+      "thirdParty": true
+    },
+    {
+      "key": "other",
+      "en": "Other",
+      "ar": "غير ذلك",
+      "minLevel": 2,
+      "attach": true,
+      "optional": true
+    }
+  ]
+}

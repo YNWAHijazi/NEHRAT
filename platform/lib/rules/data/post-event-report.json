@@ -1,0 +1,96 @@
+{
+  "$comment": "Annex D. English from the English issue, Arabic verbatim from the Arabic issue (ar/04). Aggregate data only -- no unnecessary personally identifiable medical information (Protocol 14); the free-text field is name-screened. Two signatures at Level 3.",
+  "activityFields": [
+    {
+      "key": "estimatedAttendance",
+      "en": "Estimated attendance",
+      "ar": "الحضور التقديري للفعالية"
+    },
+    {
+      "key": "patientsTreated",
+      "en": "Patients assessed or treated",
+      "ar": "عدد المرضى الذين جرى تقييمهم أو علاجهم"
+    },
+    {
+      "key": "patientsTransported",
+      "en": "Patients transported to hospital / medically evacuated",
+      "ar": "عدد المرضى المنقولين إلى المستشفى أو الذين جرى إخلاؤهم طبياً"
+    },
+    {
+      "key": "cardiacArrests",
+      "en": "Cardiac arrests",
+      "ar": "عدد حالات توقف القلب"
+    },
+    {
+      "key": "deaths",
+      "en": "Deaths",
+      "ar": "عدد الوفيات"
+    },
+    {
+      "key": "unplannedResources",
+      "en": "Unplanned additional medical or EMS resources requested",
+      "ar": "الموارد الطبية أو موارد خدمات الطوارئ الطبية الإضافية غير المخطط لها التي طُلبت"
+    },
+    {
+      "key": "coverageHours",
+      "en": "Event medical coverage hours",
+      "ar": "إجمالي ساعات التغطية الطبية للفعالية"
+    }
+  ],
+  "significantEvents": [
+    {
+      "key": "majorIncident",
+      "en": "Major incident",
+      "ar": "حادث جسيم"
+    },
+    {
+      "key": "hospitalTransport",
+      "en": "Hospital transport or medical evacuation",
+      "ar": "نقل إلى المستشفى أو إخلاء طبي"
+    },
+    {
+      "key": "cardiacArrest",
+      "en": "Cardiac arrest",
+      "ar": "توقف قلبي"
+    },
+    {
+      "key": "death",
+      "en": "Death",
+      "ar": "وفاة"
+    },
+    {
+      "key": "interrupted",
+      "en": "Event interrupted for medical reasons",
+      "ar": "انقطاع الفعالية لأسباب طبية"
+    },
+    {
+      "key": "terminated",
+      "en": "Event terminated for medical reasons",
+      "ar": "إنهاء الفعالية لأسباب طبية"
+    },
+    {
+      "key": "unplannedRequest",
+      "en": "Unplanned request for additional medical or EMS resources",
+      "ar": "طلب غير مخطط لموارد طبية أو موارد إضافية من خدمات الطوارئ الطبية"
+    },
+    {
+      "key": "none",
+      "en": "None",
+      "ar": "لا شيء مما سبق"
+    }
+  ],
+  "lessons": {
+    "noneEn": "No significant issues identified.",
+    "noneAr": "لم تُحدّد أي مشكلات مهمة.",
+    "identifiedEn": "Issues or corrective actions identified:",
+    "identifiedAr": "حُدّدت مشكلات أو إجراءات تصحيحية، وهي:"
+  },
+  "declaration": {
+    "statementEn": "I certify that the information provided is complete and accurate.",
+    "statementAr": "أقر بأن المعلومات الواردة في هذا التقرير كاملة ودقيقة.",
+    "organizerEn": "Organizer representative",
+    "organizerAr": "ممثل المنظم",
+    "directorEn": "Event Medical Director (Level 3)",
+    "directorAr": "المدير الطبي للفعالية (المستوى الثالث)"
+  }
+}

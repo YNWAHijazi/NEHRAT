@@ -91,6 +91,14 @@ export function AssessmentForm({
   const [nameAr, setNameAr] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [partA, setPartA] = useState({
+    eventType: '', venueRoute: '', municipalities: '',
+    openingTime: '', closingTime: '',
+    expectedParticipants: '', expectedSpectators: '', expectedStaff: '',
+    previousEdition: false, recurringFixedVenue: false,
+  });
+  const setA = (k: keyof typeof partA, v: string | boolean) =>
+    setPartA((prev) => ({ ...prev, [k]: v }));
   const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(Array(9).fill(null));
   const [attendance, setAttendance] = useState('');
   const [disciplines, setDisciplines] = useState<string[]>([]);
@@ -141,6 +149,12 @@ export function AssessmentForm({
         nameAr,
         startDate,
         endDate,
+        partA: {
+          ...partA,
+          expectedParticipants: partA.expectedParticipants === '' ? null : Number(partA.expectedParticipants),
+          expectedSpectators: partA.expectedSpectators === '' ? null : Number(partA.expectedSpectators),
+          expectedStaff: partA.expectedStaff === '' ? null : Number(partA.expectedStaff),
+        },
         answers: answers as DomainAnswers,
         inputs,
       });
@@ -187,6 +201,54 @@ export function AssessmentForm({
           </span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
         </label>
+        {(
+          [
+            ['eventType', 'Event type', 'نوع الفعالية أو نمط التشغيل الاعتيادي'],
+            ['venueRoute', 'Venue, route, or location', 'الموقع أو المسار أو مكان الانعقاد'],
+            ['municipalities', 'Municipality or municipalities', 'البلدية أو البلديات'],
+            ['openingTime', 'Opening time', 'وقت الافتتاح'],
+            ['closingTime', 'Closing time', 'وقت الإغلاق'],
+            ['expectedParticipants', 'Expected participants', 'العدد المتوقع للمشاركين'],
+            ['expectedSpectators', 'Expected spectators or attendees', 'العدد المتوقع للمتفرجين أو الحضور'],
+            ['expectedStaff', 'Expected staff, performers, contractors, and volunteers', 'العدد المتوقع للعاملين والفنانين والمتعاقدين والمتطوعين'],
+          ] as const
+        ).map(([key, en, ar]) => (
+          <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={fieldLabel}>
+              <L en={en} ar={ar} />
+            </span>
+            <input
+              type={key.startsWith('expected') ? 'number' : key.endsWith('Time') ? 'time' : 'text'}
+              value={String(partA[key])}
+              onChange={(e) => setA(key, e.target.value)}
+              style={inputStyle}
+            />
+          </label>
+        ))}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 40 }}>
+        {(
+          [
+            ['previousEdition', 'A previous edition of the same event has been held', 'سبق إقامة الفعالية نفسها'],
+            ['recurringFixedVenue', 'The venue is fixed and hosts events repeatedly', 'الموقع ثابت ويستضيف فعاليات بصورة متكررة'],
+          ] as const
+        ).map(([key, en, ar]) => {
+          const on = partA[key];
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={on}
+              onClick={() => setA(key, !on)}
+              style={{ textAlign: 'start', display: 'flex', gap: 14, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
+            >
+              <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--brand)' : 'transparent', marginBlockStart: 2 }} />
+              <span style={{ fontSize: 15, lineHeight: 1.6 }}>
+                <L en={en} ar={ar} />
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <SectionHeading

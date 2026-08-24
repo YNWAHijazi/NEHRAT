@@ -9,12 +9,15 @@ import {
   assessmentsFor,
   beirutToday,
   daysBetween,
+  documentStateFor,
   eventFor,
+  invitationsFor,
   unreadCountFor,
 } from '../../../lib/queries';
 import {
   DOMAIN_COUNT,
   MAX_SCORE_PER_DOMAIN,
+  documentsForLevel,
   eventFilingDeadline,
   eventMedicalDirectorGate,
   materialChangeGate,
@@ -84,7 +87,7 @@ function GatedAction({
       >
         <L en={en} ar={ar} />
       </button>
-      <span style={{ fontSize: '12.5px', lineHeight: 1.5, color: 'var(--muted)', maxWidth: '38ch' }}>
+      <span style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--muted)', maxWidth: 210 }}>
         <L en={reasonEn} ar={reasonAr} />
       </span>
     </span>
@@ -174,6 +177,16 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const emdGate = eventMedicalDirectorGate(gateCtx);
   const level = gateCtx.finalLevel;
 
+  // The requirements counters, derived from the same state the requirements screen shows.
+  const documentState = level ? documentStateFor(account.id, id, level) : {};
+  const documents = level ? documentsForLevel(level) : [];
+  const attachOutstanding = documents.filter(
+    (d) => !d.optional && !d.thirdParty && !documentState[d.key],
+  ).length;
+  const providers = invitationsFor(account.id, id).filter((i) => i.kind === 'ems');
+  const agencyPending = providers.filter((p) => p.status !== 'confirmed').length;
+  const agencyPendColor = agencyPending > 0 ? 'var(--bad)' : 'var(--brand)';
+
   // The six-stage rail, from the record's own state. Stage 1 follows the organization's
   // real status; stage 6 is level-gated: at Level 3 it is coming (todo), below it is not
   // applicable (na) -- the same two-behaviour rule as everywhere else.
@@ -189,7 +202,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
       : { k: 'current', en: 'Assessment', ar: 'التقييم', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
     stage === 3
-      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: 'In progress', metaAr: 'قيد الإجراء' }
+      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: `${attachOutstanding} outstanding`, metaAr: `${attachOutstanding} غير مقدَّم` }
       : stage > 3
         ? { k: 'done', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' }
         : { k: 'todo', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' },
@@ -359,6 +372,41 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </div>
         ) : null}
 
+        {/* The requirements counters and routes, from the reference record. */}
+        <div data-region="counters" style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 30, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
+              <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
+                <L en="named agencies yet to answer" ar="جهة مُسمّاة لم تُجب بعد" />
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
+              <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
+                <L en="documents left to attach" ar="مستنداً بقي إرفاقه" />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'start' }}>
+            <Link href={`/events/${event.id}/requirements`} style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+              <L en="Open requirements and attachments" ar="فتح المتطلبات والمرفقات" />
+            </Link>
+            <GatedAction
+              gate={materialChangeGate(gateCtx)}
+              href={`/events/${event.id}/change`}
+              en="Report a material change"
+              ar="الإبلاغ عن تغيير جوهري"
+            />
+            <GatedAction
+              gate={postEventReportGate(gateCtx)}
+              href={`/events/${event.id}/post-event`}
+              en="Post-event medical report"
+              ar="التقرير الطبي لما بعد الفعالية"
+            />
+          </div>
+        </div>
+
         {/* Level 3 requirements note: present ONLY at Level 3. At Level 2 this block is
             absent -- no greyed row, no mention (non-negotiable #10). */}
         {emdGate.behaviour !== 'absent' && level === 3 ? (
@@ -374,28 +422,6 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
             </div>
           </div>
         ) : null}
-
-        {/* Actions, each asking the gating module */}
-        <div style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'start' }}>
-          <GatedAction
-            gate={{ behaviour: 'enabled' }}
-            href={`/events/${event.id}/requirements`}
-            en="Open requirements and attachments"
-            ar="فتح المتطلبات والمرفقات"
-          />
-          <GatedAction
-            gate={materialChangeGate(gateCtx)}
-            href={`/events/${event.id}/change`}
-            en="Report a material change"
-            ar="الإبلاغ عن تغيير جوهري"
-          />
-          <GatedAction
-            gate={postEventReportGate(gateCtx)}
-            href={`/events/${event.id}/post-event`}
-            en="Post-event medical report"
-            ar="التقرير الطبي لما بعد الفعالية"
-          />
-        </div>
 
         {history.length > 0 ? (
           <div data-region="history">

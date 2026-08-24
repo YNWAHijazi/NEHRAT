@@ -1,0 +1,267 @@
+{
+  "$comment": "The event health and medical plan (خطة التأهب الصحي والطبي للفعالية, SPEC 2b). The sixteen items are Protocol 6 -- the mandatory checklist, quoted from the prototype which carries the regulation's wording. The eleven items are Protocol 12. The fourteen-section template is the GUIDANCE's recommended structure: non-binding, creates no requirements, offered as structure only. The Guidance has no Arabic issue; the template's Arabic is ours and marked so.",
+  "sections": [
+    {
+      "n": 1,
+      "en": "Event description and schedule",
+      "ar": "وصف الفعالية وبرنامجها",
+      "bodyEn": "One document title and version number throughout. Dates, opening and closing times, setup and demobilization, and when medical coverage begins and ends. Venues, route segments and municipalities.",
+      "bodyAr": "عنوان واحد للمستند ورقم إصدار واحد في كل مكان. التواريخ وأوقات الافتتاح والإقفال والتجهيز والتفكيك، ومتى تبدأ التغطية الطبية وتنتهي. والمواقع وأجزاء المسار والبلديات.",
+      "summaryEn": "Dates, times, coverage window, venues and municipalities."
+    },
+    {
+      "n": 2,
+      "en": "Responsible organizer and participating-provider contacts",
+      "ar": "جهات اتصال المنظّم المسؤول والمزوّدين المشاركين",
+      "bodyEn": "The organizeru2019s legal name and the person authorized to make operational decisions. Each participating provider and its operational contact.",
+      "bodyAr": "الاسم القانوني للمنظّم والشخص المفوّض باتخاذ القرارات التشغيلية. وكل مزوّد مشارك وجهة اتصاله التشغيلية.",
+      "summaryEn": "Names, roles and numbers reachable during the event."
+    },
+    {
+      "n": 3,
+      "en": "Medical and first-aid staffing and deployment",
+      "ar": "ملاك الإسعاف الأولي والطبي وانتشاره",
+      "bodyEn": "Numbers, roles, shifts, locations, competencies and relief.",
+      "bodyAr": "الأعداد والأدوار والفترات والمواقع والكفاءات والاستبدال.",
+      "summaryEn": "Numbers, roles, shifts, locations, competencies, relief."
+    },
+    {
+      "n": 4,
+      "en": "Medical treatment posts",
+      "ar": "نقاط المعالجة الطبية",
+      "bodyEn": "Location, opening time, staff, capacity, equipment, communication method and ambulance access. Shelter, lighting, privacy, safe access and a clear patient entry and exit flow. Separate routine first aid from resuscitation and ambulance loading where feasible.",
+      "bodyAr": "الموقع ووقت الفتح والملاك والسعة والمعدات ووسيلة الاتصال ووصول الإسعاف. والمأوى والإضاءة والخصوصية والوصول الآمن ومسار دخول وخروج واضح للمرضى. وفصل الإسعاف الاعتيادي عن الإنعاش وتحميل سيارات الإسعاف حيث أمكن.",
+      "summaryEn": "Location, staffing, equipment, patient flow and access."
+    },
+    {
+      "n": 5,
+      "en": "CPR and cardiac-arrest response",
+      "ar": "الاستجابة للإنعاش القلبي الرئوي وتوقف القلب",
+      "bodyEn": "Recognition, EMS activation, CPR, AED access, handover and drills.",
+      "bodyAr": "التعرّف واستدعاء الإسعاف والإنعاش والوصول إلى الجهاز ونقل المسؤولية والتمارين.",
+      "summaryEn": "Recognition, activation, CPR, AED access, handover."
+    },
+    {
+      "n": 6,
+      "en": "AED deployment",
+      "ar": "انتشار أجهزة إزالة الرجفان",
+      "bodyEn": "Where each device sits, who retrieves it, and how long retrieval takes from the furthest point of the event area. Pads, batteries and equipment checked before opening and after use. Where the venue is a facility registered under the cardiac-arrest readiness framework, its registered devices can be referenced here rather than re-entered — they count only while they remain accessible and operational throughout the event, and where the two frameworks differ the higher requirement governs.",
+      "bodyAr": "موضع كل جهاز ومن يجلبه وكم يستغرق جلبه من أبعد نقطة في منطقة الفعالية. واللصاقات والبطاريات والمعدات تُفحص قبل الفتح وبعد الاستخدام. وإذا كان الموقع منشأة مسجّلة في إطار الجاهزية لتوقف القلب، يمكن الإحالة إلى أجهزتها المسجّلة بدلاً من إعادة إدخالها — وتُحتسب فقط ما دامت متاحة وصالحة للعمل طوال الفعالية، وحيث يختلف الإطاران يسري المتطلب الأعلى.",
+      "summaryEn": "Locations, retrieval responsibility and retrieval time."
+    },
+    {
+      "n": 7,
+      "en": "Medical equipment and supplies",
+      "ar": "المعدات والمستلزمات الطبية",
+      "bodyEn": "List equipment by location or team and identify who checks it before opening.",
+      "bodyAr": "سرد المعدات بحسب الموقع أو الفريق وتحديد من يفحصها قبل الفتح.",
+      "summaryEn": "Equipment by location or team, and who checks it."
+    },
+    {
+      "n": 8,
+      "en": "Ambulance arrangements",
+      "ar": "ترتيبات سيارات الإسعاف",
+      "bodyEn": "Units, dispatch, destinations, continuity and escalation.",
+      "bodyAr": "الوحدات والإرسال والجهات المقصودة والاستمرارية والتصعيد.",
+      "summaryEn": "Units, dispatch, destinations, continuity, escalation."
+    },
+    {
+      "n": 9,
+      "en": "Patient access and extraction",
+      "ar": "الوصول إلى المرضى وإخلاؤهم",
+      "bodyEn": "Routes, gates, loading points, barriers and responsible teams.",
+      "bodyAr": "المسارات والبوابات ونقاط التحميل والحواجز والفرق المسؤولة.",
+      "summaryEn": "Routes, gates, loading points, barriers, responsible teams."
+    },
+    {
+      "n": 10,
+      "en": "Coordination and communications",
+      "ar": "التنسيق والاتصالات",
+      "bodyEn": "Command structure, channels, call signs, backups and briefing. At Level 3 this includes event medical command.",
+      "bodyAr": "بنية القيادة والقنوات ورموز النداء والبدائل والإحاطة. وفي المستوى 3 يتضمن ذلك القيادة الطبية للفعالية.",
+      "summaryEn": "Command structure, channels, call signs, backups, briefing."
+    },
+    {
+      "n": 11,
+      "en": "Receiving emergency departments",
+      "ar": "أقسام الطوارئ المستقبِلة",
+      "bodyEn": "Which departments receive patients, how they are notified, and expected transport time during event traffic and road closures.",
+      "bodyAr": "أي الأقسام تستقبل المرضى وكيف تُبلَّغ وزمن النقل المتوقع خلال حركة الفعالية وإقفال الطرق.",
+      "summaryEn": "Departments, notification route and transport time."
+    },
+    {
+      "n": 12,
+      "en": "Major-incident and mass-casualty arrangements",
+      "ar": "ترتيبات الحوادث الجسيمة وحوادث الإصابات الجماعية",
+      "bodyEn": "Activation, triage, casualty collection, loading, hospitals and escalation. The eleven items are set out separately below.",
+      "bodyAr": "التنشيط والفرز وتجميع المصابين والتحميل والمستشفيات والتصعيد. والبنود الأحد عشر مفصّلة أدناه.",
+      "summaryEn": "Summarised here; the eleven items are below."
+    },
+    {
+      "n": 13,
+      "en": "Environmental and event-specific contingencies",
+      "ar": "الطوارئ البيئية والخاصة بالفعالية",
+      "bodyEn": "Weather, crowd, venue and activity-specific response triggers.",
+      "bodyAr": "محفّزات الاستجابة المتعلقة بالطقس والجمهور والموقع والنشاط.",
+      "summaryEn": "Weather, crowd, venue and activity triggers."
+    },
+    {
+      "n": 14,
+      "en": "Continuity of medical coverage",
+      "ar": "استمرارية التغطية الطبية",
+      "bodyEn": "How the event stays covered while a patient is being transported, and while an incident is being managed.",
+      "bodyAr": "كيف تبقى الفعالية مغطاة أثناء نقل مريض وأثناء إدارة حادث.",
+      "summaryEn": "Cover during transport and during an incident."
+    },
+    {
+      "n": 15,
+      "en": "Patient documentation",
+      "ar": "توثيق المرضى",
+      "bodyEn": "Care documentation, confidentiality, transfers and the post-event report.",
+      "bodyAr": "توثيق الرعاية والسرية والتحويلات والتقرير اللاحق.",
+      "summaryEn": "Care records, confidentiality, transfers, post-event report."
+    },
+    {
+      "n": 16,
+      "en": "Post-event reporting",
+      "ar": "التقارير اللاحقة للفعالية",
+      "bodyEn": "Who completes the post-event report, on what trigger, and within what time. Seven calendar days where it is owed.",
+      "bodyAr": "من يستكمل التقرير اللاحق وبأي محفّز وخلال أي مدة. سبعة أيام تقويمية حيث يكون مستحقاً.",
+      "summaryEn": "Who files the post-event report, on what trigger, within what time."
+    }
+  ],
+  "majorIncidentItems": [
+    {
+      "n": 1,
+      "en": "Activation criteria, and who may declare or recommend a major incident",
+      "ar": "معايير التنشيط ومن يجوز له إعلان حادث جسيم أو التوصية به"
+    },
+    {
+      "n": 2,
+      "en": "Operational coordination and integration with the overall incident-management structure — including event medical command at Level 3",
+      "ar": "التنسيق التشغيلي والتكامل مع بنية إدارة الحوادث العامة — بما في ذلك القيادة الطبية للفعالية في المستوى 3"
+    },
+    {
+      "n": 3,
+      "en": "Primary and backup communications",
+      "ar": "الاتصالات الأساسية والبديلة"
+    },
+    {
+      "n": 4,
+      "en": "One triage method for all participating medical teams",
+      "ar": "طريقة فرز واحدة لجميع الفرق الطبية المشاركة"
+    },
+    {
+      "n": 5,
+      "en": "Casualty collection and treatment areas",
+      "ar": "مناطق تجميع المصابين ومعالجتهم"
+    },
+    {
+      "n": 6,
+      "en": "Ambulance loading points and access routes",
+      "ar": "نقاط تحميل سيارات الإسعاف ومسارات الوصول"
+    },
+    {
+      "n": 7,
+      "en": "Procedures for requesting additional EMS and public resources",
+      "ar": "إجراءات طلب موارد إسعافية وعامة إضافية"
+    },
+    {
+      "n": 8,
+      "en": "Receiving-hospital notification and patient distribution",
+      "ar": "إبلاغ المستشفيات المستقبِلة وتوزيع المرضى"
+    },
+    {
+      "n": 9,
+      "en": "Continuity of routine event medical coverage",
+      "ar": "استمرارية التغطية الطبية الاعتيادية للفعالية"
+    },
+    {
+      "n": 10,
+      "en": "Authority and communication for event suspension, evacuation, or termination",
+      "ar": "الصلاحية والاتصال لتعليق الفعالية أو إخلائها أو إنهائها"
+    },
+    {
+      "n": 11,
+      "en": "Patient identification, tracking and reunification arrangements where applicable",
+      "ar": "ترتيبات تعريف المرضى وتتبعهم وإعادة جمعهم بعائلاتهم عند الانطباق"
+    }
+  ],
+  "guidanceTemplate": {
+    "nonBindingEn": "The fourteen-section structure below is from the Ministry's guidance. It is non-binding implementation guidance and creates no requirements; the sixteen items above are what the plan must address.",
+    "nonBindingAr": "الهيكل المكوّن من أربعة عشر قسماً أدناه مأخوذ من إرشادات الوزارة. وهو إرشاد تنفيذي غير ملزم ولا يُنشئ أي متطلبات؛ والبنود الستة عشر أعلاه هي ما يجب أن تعالجه الخطة.",
+    "arabicIsTranslation": true,
+    "sections": [
+      {
+        "n": 1,
+        "en": "Document control",
+        "ar": "ضبط المستند"
+      },
+      {
+        "n": 2,
+        "en": "Event profile",
+        "ar": "موجز الفعالية"
+      },
+      {
+        "n": 3,
+        "en": "Risk summary",
+        "ar": "ملخص المخاطر"
+      },
+      {
+        "n": 4,
+        "en": "Accountability, provider contacts, and Level 3 medical direction",
+        "ar": "المسؤولية وجهات اتصال المزوّدين والإدارة الطبية للمستوى 3"
+      },
+      {
+        "n": 5,
+        "en": "Staffing and deployment",
+        "ar": "الكوادر والانتشار"
+      },
+      {
+        "n": 6,
+        "en": "Treatment post(s)",
+        "ar": "نقاط العلاج"
+      },
+      {
+        "n": 7,
+        "en": "CPR and AED response",
+        "ar": "الاستجابة بالإنعاش القلبي الرئوي وأجهزة AED"
+      },
+      {
+        "n": 8,
+        "en": "Patient access/extraction",
+        "ar": "الوصول إلى المرضى وإخلاؤهم"
+      },
+      {
+        "n": 9,
+        "en": "Ambulance and hospital plan",
+        "ar": "خطة الإسعاف والمستشفيات"
+      },
+      {
+        "n": 10,
+        "en": "Coordination and communications; medical command for Level 3",
+        "ar": "التنسيق والاتصالات؛ والقيادة الطبية للمستوى 3"
+      },
+      {
+        "n": 11,
+        "en": "Major incident/MCI plan",
+        "ar": "خطة الحوادث الجسيمة والإصابات الجماعية"
+      },
+      {
+        "n": 12,
+        "en": "Contingencies",
+        "ar": "الطوارئ والاحتمالات"
+      },
+      {
+        "n": 13,
+        "en": "Patient records and reporting",
+        "ar": "سجلات المرضى والإبلاغ"
+      },
+      {
+        "n": 14,
+        "en": "Maps and directories",
+        "ar": "الخرائط والأدلة"
+      }
+    ]
+  }
+}

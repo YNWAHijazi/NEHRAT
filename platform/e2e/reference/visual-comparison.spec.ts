@@ -120,6 +120,35 @@ async function referenceRegionRect(
       );
       return card ? rectOf(card) : null;
     }
+    if (r.strategy === 'containerOfText') {
+      let el: Element | null = deepest;
+      while (el && el !== document.body) {
+        const style = el.getAttribute('style') ?? '';
+        if (style.includes(r.container)) return rectOf(el);
+        el = el.parentElement;
+      }
+      return null;
+    }
+    if (r.strategy === 'headingBlock') {
+      const heading = deepest.closest('h1, h2') ?? deepest;
+      let x1 = Infinity;
+      let y1 = Infinity;
+      let x2 = -Infinity;
+      let y2 = -Infinity;
+      let el: Element | null = heading;
+      while (el && !(el !== heading && (el.tagName === 'H1' || el.tagName === 'H2'))) {
+        const b = rectOf(el);
+        if (b.width > 0 && b.height > 0) {
+          x1 = Math.min(x1, b.x);
+          y1 = Math.min(y1, b.y);
+          x2 = Math.max(x2, b.x + b.width);
+          y2 = Math.max(y2, b.y + b.height);
+        }
+        el = el.nextElementSibling;
+      }
+      if (!Number.isFinite(x1)) return null;
+      return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
+    }
     // headingSection: the heading plus its following block.
     const heading = deepest.closest('h2') ?? deepest;
     const section = heading.nextElementSibling;

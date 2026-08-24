@@ -1,0 +1,672 @@
+{
+  "$comment": "Annex B, the twenty minimum requirements. English and structure from the reference prototype; Arabic row names and cell values verbatim from the Arabic issue (ar/03 requirements matrix). Rows 7, 13 and 15 carry known EN/AR divergences -- follow the English, record the divergence (README). Responsible parties are COMPUTED from `parties` per level, never hard-coded.",
+  "parties": {
+    "O": {
+      "en": "Organizer",
+      "ar": "المنظِّم"
+    },
+    "E": {
+      "en": "Participating EMS provider",
+      "ar": "مزوّد الإسعاف المشارك"
+    },
+    "M": {
+      "en": "Medical provider",
+      "ar": "المزوّد الطبي"
+    },
+    "D": {
+      "en": "Event Medical Director",
+      "ar": "المدير الطبي للفعالية"
+    }
+  },
+  "requirements": [
+    {
+      "n": 1,
+      "en": "Responsible event contact identified",
+      "ar": "تحديد جهة اتصال مسؤولة عن الفعالية",
+      "prototypeAr": "تحديد جهة اتصال مسؤولة للفعالية",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "en": "Health and medical planning",
+      "ar": "التخطيط الصحي والطبي",
+      "prototypeAr": "التخطيط الصحي والطبي",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": true,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Documented medical arrangements",
+          "ar": "ترتيبات طبية موثقة"
+        },
+        {
+          "en": "Event health and medical plan",
+          "ar": "خطة EHMP مطلوبة"
+        },
+        {
+          "en": "Event health and medical plan",
+          "ar": "خطة EHMP مطلوبة"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "en": "Event Medical Director — licensed physician",
+      "ar": "تعيين مدير طبي للفعالية (طبيب مرخّص)",
+      "prototypeAr": "المدير الطبي للفعالية — طبيب مُجاز",
+      "parties": [
+        null,
+        null,
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        null,
+        null,
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "en": "Trained first-aid personnel",
+      "ar": "أفراد مدربون على الإسعافات الأولية",
+      "prototypeAr": "موظفون مدرّبون على الإسعاف الأولي",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "en": "Basic Life Support medical response team",
+      "ar": "توفير فريق أو أكثر للاستجابة الطبية ودعم الحياة الأساسي",
+      "prototypeAr": "فريق استجابة طبية للدعم الحياتي الأساسي",
+      "parties": [
+        null,
+        [
+          "O",
+          "E"
+        ],
+        [
+          "O",
+          "E"
+        ]
+      ],
+      "attach": false,
+      "ems": true,
+      "inspection": false,
+      "values": [
+        null,
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "en": "Medical treatment post",
+      "ar": "توفير نقطة علاج طبي",
+      "prototypeAr": "نقطة معالجة طبية",
+      "parties": [
+        null,
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        null,
+        {
+          "en": "Recommended",
+          "ar": "موصى بها"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوبة"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "en": "Ambulance arrangements",
+      "ar": "ترتيبات سيارات الإسعاف والنقل",
+      "prototypeAr": "ترتيبات الإسعاف",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O",
+          "E"
+        ],
+        [
+          "O",
+          "E"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Access to local EMS",
+          "ar": "إتاحة الوصول إلى خدمات الطوارئ الطبية المحلية"
+        },
+        {
+          "en": "Defined in the plan",
+          "ar": "محددة في خطة EHMP"
+        },
+        {
+          "en": "Defined in the plan",
+          "ar": "محددة في خطة EHMP"
+        }
+      ],
+      "divergence": "Arabic adds transport: ترتيبات سيارات الإسعاف والنقل (README divergence 3)."
+    },
+    {
+      "n": 8,
+      "en": "Cardiac-arrest readiness — CPR and AED",
+      "ar": "الجاهزية للاستجابة لتوقف القلب (CPR وAED)",
+      "prototypeAr": "الجاهزية لتوقف القلب — الإنعاش والجهاز",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O",
+          "E",
+          "M"
+        ],
+        [
+          "O",
+          "E",
+          "M",
+          "D"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "AED recommended",
+          "ar": "يوصى بتوفير AED"
+        },
+        {
+          "en": "At least one AED and a trained CPR/AED responder",
+          "ar": "جهاز AED واحد على الأقل، ومستجيب واحد على الأقل مدرب على CPR/AED"
+        },
+        {
+          "en": "Documented CPR/AED response plan covering the event area",
+          "ar": "خطة موثقة للاستجابة باستخدام CPR/AED تغطي كامل منطقة الفعالية"
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "en": "Basic medical supplies",
+      "ar": "المستلزمات الطبية الأساسية",
+      "prototypeAr": "مستلزمات طبية أساسية",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "en": "Emergency vehicle access",
+      "ar": "وصول مركبات الطوارئ",
+      "prototypeAr": "وصول مركبات الطوارئ",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "en": "Patient-extraction route",
+      "ar": "مسار إخلاء المريض",
+      "prototypeAr": "مسار إخلاء المريض",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 12,
+      "en": "Receiving emergency departments",
+      "ar": "تحديد قسم أو أقسام الطوارئ المستقبِلة",
+      "prototypeAr": "أقسام الطوارئ المستقبِلة",
+      "parties": [
+        null,
+        [
+          "O",
+          "E"
+        ],
+        [
+          "O",
+          "E",
+          "D"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        null,
+        {
+          "en": "Identified",
+          "ar": "محددة"
+        },
+        {
+          "en": "Identified",
+          "ar": "محددة"
+        }
+      ]
+    },
+    {
+      "n": 13,
+      "en": "Participating EMS provider notified and coordinated with",
+      "ar": "إخطار جهة خدمات الطوارئ الطبية المشاركة والتنسيق معها",
+      "prototypeAr": "إخطار مزوّد الإسعاف المشارك والتنسيق معه",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O",
+          "E"
+        ],
+        [
+          "O",
+          "E"
+        ]
+      ],
+      "attach": false,
+      "ems": true,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Where applicable",
+          "ar": "عند الاقتضاء"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ],
+      "divergence": "Arabic adds coordination: والتنسيق معها -- a stronger obligation (README divergence 4)."
+    },
+    {
+      "n": 14,
+      "en": "Reliable communication with EMS and event personnel",
+      "ar": "اتصال موثوق بخدمات الطوارئ الطبية وبالعاملين في الفعالية",
+      "prototypeAr": "اتصال موثوق مع الإسعاف وفريق الفعالية",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 15,
+      "en": "Event medical command function",
+      "ar": "وظيفة محددة للقيادة الطبية",
+      "prototypeAr": "وظيفة القيادة الطبية للفعالية",
+      "parties": [
+        null,
+        null,
+        [
+          "D"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        null,
+        null,
+        {
+          "en": "Required",
+          "ar": "مطلوبة"
+        }
+      ],
+      "divergence": "Arabic requires a DEFINED command function: وظيفة محددة للقيادة الطبية (README divergence 5)."
+    },
+    {
+      "n": 16,
+      "en": "Major-incident and mass-casualty preparedness",
+      "ar": "تغطية تأمينية للمشاركين والمتفرجين",
+      "prototypeAr": "التأهب للحوادث الجسيمة والإصابات الجماعية",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O",
+          "E",
+          "M"
+        ],
+        [
+          "O",
+          "E",
+          "M",
+          "D"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "Emergency escalation procedure",
+          "ar": "—"
+        },
+        {
+          "en": "Written plan coordinated with participating providers",
+          "ar": "—"
+        },
+        {
+          "en": "Detailed plan coordinated with EMS and incorporated into event medical command",
+          "ar": "مطلوبة"
+        }
+      ]
+    },
+    {
+      "n": 17,
+      "en": "Insurance coverage for participants and spectators",
+      "ar": "التأهب للحوادث الجسيمة وحوادث الإصابات الجماعية",
+      "prototypeAr": "تغطية تأمينية للمشاركين والمتفرجين",
+      "parties": [
+        null,
+        null,
+        [
+          "O"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        null,
+        null,
+        {
+          "en": "Required",
+          "ar": "خطة تفصيلية منسقة مع خدمات الإسعاف ومدمجة ضمن القيادة الطبية للفعالية"
+        }
+      ]
+    },
+    {
+      "n": 18,
+      "en": "Patient-care documentation",
+      "ar": "توثيق رعاية المرضى",
+      "prototypeAr": "توثيق رعاية المريض",
+      "parties": [
+        [
+          "M"
+        ],
+        [
+          "M"
+        ],
+        [
+          "M"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "When care is provided",
+          "ar": "عند تقديم أي رعاية"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        },
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    },
+    {
+      "n": 19,
+      "en": "Post-event medical report",
+      "ar": "التقرير الطبي لما بعد الفعالية",
+      "arSource": "التقرير الطبي لما بعد الفعالية (الملحق د)",
+      "prototypeAr": "التقرير الطبي لما بعد الفعالية",
+      "parties": [
+        [
+          "O"
+        ],
+        [
+          "O"
+        ],
+        [
+          "D"
+        ]
+      ],
+      "attach": false,
+      "ems": false,
+      "inspection": false,
+      "values": [
+        {
+          "en": "After a reportable event or on Ministry request",
+          "ar": "بعد أي واقعة واجبة الإبلاغ أو بناءً على طلب الوزارة"
+        },
+        {
+          "en": "After a reportable event or on Ministry request",
+          "ar": "بعد أي واقعة واجبة الإبلاغ أو بناءً على طلب الوزارة"
+        },
+        {
+          "en": "Required for every event",
+          "ar": "مطلوب لجميع الفعاليات"
+        }
+      ]
+    },
+    {
+      "n": 20,
+      "en": "EMS Readiness Declaration",
+      "ar": "إقرار جاهزية خدمات الطوارئ الطبية",
+      "arSource": "إقرار جاهزية خدمات الطوارئ الطبية (الملحق ج)",
+      "prototypeAr": "إقرار جاهزية خدمات الطوارئ الطبية",
+      "parties": [
+        null,
+        null,
+        [
+          "E"
+        ]
+      ],
+      "attach": true,
+      "ems": true,
+      "inspection": false,
+      "values": [
+        null,
+        null,
+        {
+          "en": "Required",
+          "ar": "مطلوب"
+        }
+      ]
+    }
+  ]
+}

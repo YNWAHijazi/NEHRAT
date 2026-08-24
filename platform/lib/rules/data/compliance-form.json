@@ -1,0 +1,181 @@
+{
+  "$comment": "Annex C. English from the reference prototype (which renders the ban-compliant wording); Arabic verbatim from the Arabic issue where it carries the item. The insurance declaration and the Telephone field are English-only -- known divergences 1 and 2; follow the English and record it.",
+  "header": [
+    {
+      "key": "eventName",
+      "en": "Event name",
+      "ar": "اسم الفعالية"
+    },
+    {
+      "key": "organizer",
+      "en": "Organizer",
+      "ar": "المنظم"
+    },
+    {
+      "key": "dates",
+      "en": "Date(s)",
+      "ar": "تاريخ الفعالية أو تواريخها"
+    },
+    {
+      "key": "venueRoute",
+      "en": "Venue / Route",
+      "ar": "الموقع أو المسار"
+    },
+    {
+      "key": "finalLevel",
+      "en": "Final level",
+      "ar": "المستوى النهائي وفق أداة NEHRAT"
+    },
+    {
+      "key": "submissionDate",
+      "en": "Submission date",
+      "ar": "تاريخ التقديم"
+    },
+    {
+      "key": "mophReference",
+      "en": "Ministry reference number",
+      "ar": "الرقم المرجعي لوزارة الصحة العامة"
+    },
+    {
+      "key": "planVersion",
+      "en": "Version of the event health and medical plan",
+      "ar": "رقم إصدار خطة التأهب الصحي والطبي للفعالية"
+    }
+  ],
+  "sectionA": [
+    {
+      "en": "The risk assessment has been completed and the final event level recorded",
+      "minLevel": 1,
+      "ar": "تم استكمال الملحق أ (NEHRAT) وتسجيل المستوى النهائي للفعالية."
+    },
+    {
+      "en": "The applicable minimum requirements have been addressed",
+      "minLevel": 1,
+      "ar": "تم استيفاء متطلبات الملحق ب المنطبقة على مستوى الفعالية."
+    },
+    {
+      "en": "The required documented medical arrangements or event health and medical plan has been prepared",
+      "minLevel": 1,
+      "ar": "تم إعداد الترتيبات الطبية الموثقة أو خطة EHMP المطلوبة بحسب مستوى الفعالية."
+    },
+    {
+      "en": "For Level 2 and Level 3 events, participating emergency medical service or medical providers and their operational contacts have been identified",
+      "minLevel": 1,
+      "ar": "بالنسبة إلى فعاليات المستويين الثاني والثالث، جرى تحديد الجهات المشاركة في تقديم خدمات الإسعاف أو الرعاية الطبية ومسؤولي الاتصال التشغيليين لديها.",
+      "blockedBy": "unansweredProviders"
+    },
+    {
+      "en": "For Level 3 events, a licensed physician Event Medical Director has been appointed",
+      "minLevel": 3,
+      "ar": "بالنسبة إلى فعاليات المستوى الثالث، جرى تعيين مدير طبي للفعالية من الأطباء المرخّصين."
+    },
+    {
+      "en": "For Level 3 events, insurance coverage secured",
+      "minLevel": 3,
+      "ar": "في فعاليات المستوى 3، تأمين التغطية التأمينية",
+      "arabicIsTranslation": true,
+      "divergence": "Arabic Annex C omits the insurance declaration entirely (README divergence 1). Follow the English; the Arabic here is a translation pending the Ministry.",
+      "fields": [
+        {
+          "key": "insurer",
+          "en": "Insurer",
+          "ar": "شركة التأمين"
+        },
+        {
+          "key": "policyNumber",
+          "en": "Policy / certificate number",
+          "ar": "رقم البوليصة أو الشهادة"
+        },
+        {
+          "key": "coveragePeriod",
+          "en": "Coverage period",
+          "ar": "فترة التغطية"
+        },
+        {
+          "key": "evidenceAttached",
+          "en": "Evidence of insurance attached",
+          "ar": "أُرفق إثبات التأمين"
+        }
+      ]
+    },
+    {
+      "en": "The required emergency escalation or major-incident and mass-casualty arrangements are included",
+      "minLevel": 1,
+      "ar": "أُدرجت في الخطة ترتيبات التصعيد في حالات الطوارئ أو الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية، بحسب ما هو مطلوب."
+    },
+    {
+      "en": "Required supporting documents are attached",
+      "minLevel": 1,
+      "ar": "أُرفقت جميع المستندات الداعمة المطلوبة."
+    }
+  ],
+  "organizerCertification": {
+    "statementEn": "I certify that this submission is complete and accurate and that the organizer will comply with the applicable requirements.",
+    "statementAr": "أقر بأن المعلومات الواردة في هذا التقديم كاملة ودقيقة، وأن المنظم سيلتزم بجميع المتطلبات المنطبقة.",
+    "fields": [
+      {
+        "key": "representative",
+        "en": "Authorized representative",
+        "ar": "الممثل المفوض"
+      },
+      {
+        "key": "telephone",
+        "en": "Telephone",
+        "ar": "الهاتف",
+        "arabicIsTranslation": true,
+        "divergence": "Arabic Annex C omits Telephone from both certification blocks (README divergence 2)."
+      },
+      {
+        "key": "position",
+        "en": "Position",
+        "ar": "الصفة"
+      }
+    ]
+  },
+  "sectionB": {
+    "$comment": "The Level 3 EMS Readiness Declaration: ten items, signed separately by each participating agency. Arabic verbatim from the Arabic issue. Rendered on the EMS provider's surface (Slice 5); the organizer sees state only.",
+    "items": [
+      {
+        "en": "EMS agency and operational lead identified.",
+        "ar": "تم تحديد جهة خدمات الطوارئ الطبية المشاركة والمسؤول التشغيلي لديها."
+      },
+      {
+        "en": "Assigned personnel and BLS response teams documented.",
+        "ar": "تم توثيق أسماء الأفراد المكلّفين وفرق الاستجابة لدعم الحياة الأساسي."
+      },
+      {
+        "en": "Assigned ambulances documented and ready for service.",
+        "ar": "تم توثيق سيارات الإسعاف المكلّفة والتحقق من جاهزيتها للخدمة."
+      },
+      {
+        "en": "CPR capability, AEDs, oxygen, airway equipment, communications, and response procedures verified.",
+        "ar": "تم التحقق من توافر القدرة على الإنعاش القلبي الرئوي، وأجهزة AED، والأكسجين، ومعدات مجرى الهواء، ووسائل الاتصال، وإجراءات الاستجابة."
+      },
+      {
+        "en": "Ambulance deployment points and patient-extraction routes confirmed.",
+        "ar": "تم تأكيد نقاط انتشار سيارات الإسعاف ومسارات إخلاء المرضى."
+      },
+      {
+        "en": "Receiving emergency department(s) confirmed.",
+        "ar": "تم تأكيد قسم أو أقسام الطوارئ المستقبِلة."
+      },
+      {
+        "en": "Communication with the Event Medical Director established.",
+        "ar": "تم التنسيق مع المدير الطبي للفعالية وتحديد وسيلة الاتصال به."
+      },
+      {
+        "en": "Procedure for requesting additional EMS resources established.",
+        "ar": "تم اعتماد إجراء لطلب موارد إضافية من خدمات الطوارئ الطبية."
+      },
+      {
+        "en": "Procedure for maintaining event coverage during patient transport established.",
+        "ar": "تم اعتماد إجراء للمحافظة على التغطية الطبية للفعالية أثناء نقل المرضى."
+      },
+      {
+        "en": "The agency has reviewed and confirmed its role in the major-incident / mass-casualty response plan.",
+        "ar": "راجعت الجهة دورها في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية وأكدت جاهزيتها لتنفيذه."
+      }
+    ],
+    "item10Divergence": "Arabic adds: وأكدت جاهزيتها لتنفيذه -- confirmed its readiness to perform it (README divergence 6)."
+  }
+}

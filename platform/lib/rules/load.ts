@@ -61,6 +61,9 @@ export const DOMAINS: readonly Domain[] = domainsJson.domains.map((d) => ({
 
 export const DOMAIN_COUNT: number = domainsJson.domainCount;
 
+/** Which issue of the instrument scores assessments; stamped onto every assessment row. */
+export const NEHRAT_TOOL_VERSION: string = domainsJson.toolVersion;
+
 export interface ArabicOnlyNote {
   readonly where: string;
   readonly ar: string;

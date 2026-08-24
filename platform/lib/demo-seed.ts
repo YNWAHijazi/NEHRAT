@@ -177,6 +177,74 @@ export function seedDemonstration(db: DatabaseSync): void {
     'Obligations being met', 'الموجبات مستوفاة', 'ok',
   );
 
+  // ---- Slice 2 demonstration state ----
+  // EV-0418 (Level 2, mid-requirements): the reference's three named providers and the
+  // attached route map. Two documents outstanding: the compliance form and the plan.
+  const insertInvitation = db.prepare(
+    `INSERT INTO invitations (token, event_id, kind, name_en, name_ar, email, status, declaration, answered_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  insertInvitation.run(
+    'demo-lrc-beirut-0418', 'EV-0418', 'ems',
+    'Lebanese Red Cross — Beirut branch', 'الصليب الأحمر اللبناني — فرع بيروت',
+    'operations@lrc-beirut.example.lb', 'confirmed', 'signed', d('2026-08-10'),
+  );
+  insertInvitation.run(
+    'demo-civil-defence-0418', 'EV-0418', 'ems',
+    'Civil Defence — Beirut', 'الدفاع المدني — بيروت',
+    'beirut@civildefence.example.lb', 'confirmed', 'draft', d('2026-08-11'),
+  );
+  insertInvitation.run(
+    'demo-coastal-medical-0418', 'EV-0418', 'ems',
+    'Coastal Medical Transport', 'النقل الطبي الساحلي',
+    'dispatch@coastalmedical.example.lb', 'nominated', 'none', null,
+  );
+  db.prepare(
+    `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)`,
+  ).run('EV-0418', 'siteMap', 'coastal-12k-route.pdf');
+  // The 12K finishes inside the registered covered facility, so the plan's reference
+  // block renders for it (ROADMAP 2e).
+  db.prepare(`UPDATE events SET venue_facility_id = 'FC-0014' WHERE id = 'EV-0418'`).run();
+
+  // EV-0362 (Level 3, filed and returned): a complete compliance form behind its
+  // Ministry reference, provider and Director confirmed.
+  db.prepare(
+    `INSERT INTO submissions (event_id, declarations, insurance, representative, telephone, position, filed_at, moph_reference)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    'EV-0362',
+    JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
+    JSON.stringify({ insurer: 'Cedar Assurance SAL', policyNumber: 'CA-2026-11842', coveragePeriod: `${d('2026-09-10')} — ${d('2026-09-15')}`, evidenceAttached: 'yes' }),
+    'R. Haddad', '+961 1 000 000', 'Events director',
+    d('2026-08-01'), 'MOPH-EV-2026-0362',
+  );
+  insertInvitation.run(
+    'demo-lrc-baalbeck-0362', 'EV-0362', 'ems',
+    'Lebanese Red Cross — Baalbeck', 'الصليب الأحمر اللبناني — بعلبك',
+    'baalbeck@lrc.example.lb', 'confirmed', 'signed', d('2026-07-25'),
+  );
+  insertInvitation.run(
+    'demo-director-0362', 'EV-0362', 'director',
+    'Dr. N. Salameh', 'د. ن. سلامة',
+    'n.salameh@example.lb', 'confirmed', 'none', d('2026-07-20'),
+  );
+
+  // EV-0244 (Level 3, held): the post-event report is owed; the organizer has figures
+  // saved but has not signed, and the Director's signature is still open.
+  insertInvitation.run(
+    'demo-director-0244', 'EV-0244', 'director',
+    'Dr. N. Salameh', 'د. ن. سلامة',
+    'n.salameh@example.lb', 'confirmed', 'none', d('2026-06-01'),
+  );
+  db.prepare(
+    `INSERT INTO post_event_reports (event_id, activity, significant, lessons_none, lessons_text)
+     VALUES (?, ?, ?, 0, '')`,
+  ).run(
+    'EV-0244',
+    JSON.stringify({ estimatedAttendance: '11,400', patientsTreated: '38', patientsTransported: '4', cardiacArrests: '1', deaths: '0', unplannedResources: '1', coverageHours: '9' }),
+    JSON.stringify({ hospitalTransport: true, cardiacArrest: true, unplannedRequest: true }),
+  );
+
   const insertNotification = db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar,
        record_route, sent_at, read, is_demo)
