@@ -426,3 +426,98 @@ export function seriousIncidentNotificationFor(accountId: number, eventId: strin
     .get(eventId) as { notified_at: string } | undefined;
   return r?.notified_at ?? null;
 }
+
+/* ---------------- Slice 3: the venue service ---------------- */
+
+export interface VenueDetail extends VenueRow {
+  category: string;
+  addressMunicipality: string;
+  responsibleContact: string;
+  licensedCapacity: number | null;
+  regularlyHosts: boolean;
+  isNightclub: boolean;
+  mophReference: string | null;
+  createdAt: string;
+}
+
+export function venueById(accountId: number, venueId: string): VenueDetail | null {
+  const r = getDb()
+    .prepare(
+      `SELECT id, name_en, name_ar, category, address_municipality, responsible_contact,
+              licensed_capacity, regularly_hosts, is_nightclub, level, issued, valid_until,
+              moph_reference, created_at
+       FROM venues WHERE id = ? AND account_id = ?`,
+    )
+    .get(venueId, accountId) as
+    | {
+        id: string; name_en: string; name_ar: string; category: string;
+        address_municipality: string; responsible_contact: string;
+        licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number;
+        level: number | null; issued: string | null; valid_until: string | null;
+        moph_reference: string | null; created_at: string;
+      }
+    | undefined;
+  if (!r) return null;
+  return {
+    id: r.id, nameEn: r.name_en, nameAr: r.name_ar,
+    category: r.category, addressMunicipality: r.address_municipality,
+    responsibleContact: r.responsible_contact,
+    licensedCapacity: r.licensed_capacity,
+    regularlyHosts: r.regularly_hosts === 1,
+    isNightclub: r.is_nightclub === 1,
+    level: r.level, issued: r.issued, validUntil: r.valid_until,
+    mophReference: r.moph_reference, createdAt: r.created_at,
+  };
+}
+
+export interface VenueAssessmentVersion extends AssessmentVersion {
+  effective: string;
+  validUntil: string;
+}
+
+export function venueAssessmentsFor(accountId: number, venueId: string): VenueAssessmentVersion[] {
+  const owned = getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId);
+  if (!owned) return [];
+  const rows = getDb()
+    .prepare(
+      `SELECT version, answers, inputs, effective, valid_until, created_at
+       FROM venue_assessments WHERE venue_id = ? ORDER BY version DESC`,
+    )
+    .all(venueId) as unknown as {
+      version: number; answers: string; inputs: string; effective: string; valid_until: string; created_at: string;
+    }[];
+  return rows.map((r) => {
+    const answers = JSON.parse(r.answers) as DomainAnswers;
+    const inputs = JSON.parse(r.inputs) as MinimumConditionInputs;
+    return {
+      version: r.version, answers, inputs,
+      derivation: deriveLevel({ answers, inputs }),
+      effective: r.effective, validUntil: r.valid_until, createdAt: r.created_at,
+    };
+  });
+}
+
+export function venueChangesFor(accountId: number, venueId: string): MaterialChangeRow[] {
+  const owned = getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId);
+  if (!owned) return [];
+  const rows = getDb()
+    .prepare(`SELECT id, aspects, description, reported_at FROM venue_changes WHERE venue_id = ? ORDER BY reported_at DESC`)
+    .all(venueId) as unknown as { id: number; aspects: string; description: string; reported_at: string }[];
+  return rows.map((r) => ({ id: r.id, aspects: JSON.parse(r.aspects) as string[], description: r.description, reportedAt: r.reported_at }));
+}
+
+/** A change reported since the last recorded assessment forces reassessment open. */
+export function venueChangeSinceAssessment(accountId: number, venueId: string): boolean {
+  const owned = getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId);
+  if (!owned) return false;
+  const r = getDb()
+    .prepare(
+      `SELECT EXISTS (
+         SELECT 1 FROM venue_changes c WHERE c.venue_id = ?
+           AND c.reported_at > COALESCE(
+             (SELECT MAX(a.created_at) FROM venue_assessments a WHERE a.venue_id = ?), '')
+       ) AS x`,
+    )
+    .get(venueId, venueId) as { x: number };
+  return r.x === 1;
+}

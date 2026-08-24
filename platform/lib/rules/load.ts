@@ -38,6 +38,10 @@ export interface MinimumCondition {
   readonly en: string;
   readonly ar: string;
   readonly derivation: Predicate;
+  /** Which issue of Annex A carries this row: both, en-only, or ar-only (SPEC 1). */
+  readonly issue: 'both' | 'en-only' | 'ar-only';
+  /** True where the row's Arabic is a translation pending the Ministry (club). */
+  readonly arabicIsTranslation: boolean;
 }
 
 export interface Band {
@@ -85,7 +89,23 @@ export const MINIMUM_CONDITIONS: readonly MinimumCondition[] =
     en: c.en,
     ar: c.ar,
     derivation: c.derivation as Predicate,
+    issue: (c as { issue?: MinimumCondition['issue'] }).issue ?? 'both',
+    arabicIsTranslation: Boolean((c as { arabicIsTranslation?: boolean }).arabicIsTranslation),
   }));
+
+/**
+ * The recurring-venue capacity threshold, read from the recur condition's own predicate
+ * so the registration screen and the derivation can never disagree (SPEC 3).
+ */
+export const RECURRING_VENUE_MIN_CAPACITY: number = (() => {
+  const recur = MINIMUM_CONDITIONS.find((c) => c.key === 'recur');
+  const all = (recur?.derivation as { all?: { input?: string; op?: string; value?: number }[] })?.all ?? [];
+  const leaf = all.find((l) => l.input === 'venueLicensedCapacity' && l.op === 'gte');
+  if (typeof leaf?.value !== 'number') {
+    throw new Error('minimum-conditions.json: the recur condition no longer carries a venueLicensedCapacity gte threshold');
+  }
+  return leaf.value;
+})();
 
 export const BANDS: readonly Band[] = levelsJson.bands.map((b) => ({
   level: asLevel(b.level),

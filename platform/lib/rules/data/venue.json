@@ -1,0 +1,114 @@
+{
+  "$comment": "The venue service's regulatory content, from the reference prototype. The classification derives from the same NEHRAT engine as events, over one routine operating session; it stands twelve months (levels.json), sets a FLOOR for organizers using the venue and does not certify their events.",
+  "applicabilityIntro": {
+    "$comment": "The reference intro reads 'completes the the risk assessment assessment' -- a doubling left by substituting the instrument's name out of the copy. Rendered once here; the 1,000 figure is the recurring-venue condition's own threshold (minimum-conditions.json), quoted as regulatory copy.",
+    "en": "A venue that regularly hosts organized events and has an approved or licensed capacity of 1,000 persons or more completes the risk assessment once each year for its routine operations.",
+    "ar": "الموقع الذي يستضيف بانتظام فعاليات منظمة وسعته المعتمدة أو المرخّصة 1,000 شخص أو أكثر يستكمل تقييم المخاطر مرة كل سنة لتشغيله الاعتيادي."
+  },
+  "capacityField": {
+    "key": "capacity",
+    "en": "Approved or licensed capacity",
+    "ar": "السعة المعتمدة أو المرخّصة"
+  },
+  "registrationFields": [
+    {
+      "key": "operator",
+      "en": "Operator organization",
+      "ar": "الجهة المشغّلة"
+    },
+    {
+      "key": "name",
+      "en": "Venue name",
+      "ar": "اسم الموقع"
+    },
+    {
+      "key": "category",
+      "en": "Venue category",
+      "ar": "فئة الموقع"
+    },
+    {
+      "key": "address",
+      "en": "Address and municipality",
+      "ar": "العنوان والبلدية"
+    },
+    {
+      "key": "contact",
+      "en": "Responsible contact for health and medical preparedness",
+      "ar": "جهة الاتصال المسؤولة عن الجاهزية الصحية والطبية"
+    }
+  ],
+  "reassessmentTriggers": [
+    {
+      "en": "Approved or licensed capacity",
+      "ar": "السعة المعتمدة أو المرخّصة"
+    },
+    {
+      "en": "Layout",
+      "ar": "التصميم الداخلي"
+    },
+    {
+      "en": "Crowd configuration",
+      "ar": "تنظيم الجمهور"
+    },
+    {
+      "en": "Event activity",
+      "ar": "نشاط الفعالية"
+    },
+    {
+      "en": "Patient-access arrangements",
+      "ar": "ترتيبات الوصول إلى المرضى"
+    }
+  ],
+  "changeAspects": [
+    {
+      "key": "capacity",
+      "en": "Approved or licensed capacity",
+      "ar": "السعة المعتمدة أو المرخّصة",
+      "affectsEn": "Domain 1 — maximum simultaneous attendance",
+      "affectsAr": "المجال 1 — الحد الأقصى للحضور المتزامن",
+      "consequenceEn": "Can cross the 10,000 and 20,000 minimum-level thresholds",
+      "consequenceAr": "قد يتجاوز عتبتَي 10,000 و20,000 للحد الأدنى للمستوى"
+    },
+    {
+      "key": "layout",
+      "en": "Layout",
+      "ar": "التصميم الداخلي",
+      "affectsEn": "Domain 5 — venue configuration",
+      "affectsAr": "المجال 5 — تكوين الموقع",
+      "consequenceEn": "",
+      "consequenceAr": ""
+    },
+    {
+      "key": "crowd",
+      "en": "Crowd configuration",
+      "ar": "تنظيم الجمهور",
+      "affectsEn": "Domain 3 — crowd configuration",
+      "affectsAr": "المجال 3 — تنظيم الجمهور",
+      "consequenceEn": "",
+      "consequenceAr": ""
+    },
+    {
+      "key": "activity",
+      "en": "Event activity",
+      "ar": "نشاط الفعالية",
+      "affectsEn": "Domain 2 — event activity",
+      "affectsAr": "المجال 2 — نشاط الفعالية",
+      "consequenceEn": "Can trigger a minimum event level",
+      "consequenceAr": "قد يستدعي حداً أدنى لمستوى الفعالية"
+    },
+    {
+      "key": "access",
+      "en": "Patient-access arrangements",
+      "ar": "ترتيبات الوصول إلى المرضى",
+      "affectsEn": "Domain 7 — patient access and extraction",
+      "affectsAr": "المجال 7 — الوصول إلى المرضى وإخلاؤهم",
+      "consequenceEn": "",
+      "consequenceAr": ""
+    }
+  ],
+  "floorNote": {
+    "$comment": "Added at reviewer instruction (handoff 5 approval): said wherever an organizer could mistake the classification for an event certification.",
+    "en": "This classification sets a floor for events held at the venue: no event here can be classified below it. It does not certify any event — each event completes its own assessment and its own submission.",
+    "ar": "يحدد هذا التصنيف حداً أدنى للفعاليات المقامة في الموقع: لا يمكن تصنيف أي فعالية هنا دونه. وهو لا يعتمد أي فعالية — فكل فعالية تستكمل تقييمها الخاص وتقديمها الخاص."
+  }
+}

@@ -354,6 +354,46 @@ def main() -> int:
         ],
     })
 
+    # ---------- The venue service (Slice 3) ----------
+    venue_fields = extract_array(src, "venueRegFields", neuter=True)
+    venue_triggers = extract_array(src, "venueTriggers")
+    venue_aspects = extract_array(src, "const venueChangeDefs")
+    write("venue.json", {
+        "$comment": (
+            "The venue service's regulatory content, from the reference prototype. The "
+            "classification derives from the same NEHRAT engine as events, over one "
+            "routine operating session; it stands twelve months (levels.json), sets a "
+            "FLOOR for organizers using the venue and does not certify their events."
+        ),
+        "applicabilityIntro": {
+            "$comment": (
+                "The reference intro reads 'completes the the risk assessment assessment' -- "
+                "a doubling left by substituting the instrument's name out of the copy. "
+                "Rendered once here; the 1,000 figure is the recurring-venue condition's "
+                "own threshold (minimum-conditions.json), quoted as regulatory copy."
+            ),
+            "en": "A venue that regularly hosts organized events and has an approved or licensed capacity of 1,000 persons or more completes the risk assessment once each year for its routine operations.",
+            "ar": "الموقع الذي يستضيف بانتظام فعاليات منظمة وسعته المعتمدة أو المرخّصة 1,000 شخص أو أكثر يستكمل تقييم المخاطر مرة كل سنة لتشغيله الاعتيادي.",
+        },
+        "capacityField": {"key": "capacity", "en": "Approved or licensed capacity", "ar": "السعة المعتمدة أو المرخّصة"},
+        "registrationFields": [
+            {"key": ["operator", "name", "category", "address", "contact"][i], "en": f["en"], "ar": f["ar"]}
+            for i, f in enumerate(venue_fields)
+        ],
+        "reassessmentTriggers": [{"en": t_["en"], "ar": t_["ar"]} for t_ in venue_triggers],
+        "changeAspects": [
+            {"key": a["k"], "en": a["en"], "ar": a["ar"],
+             "affectsEn": a.get("affEn", ""), "affectsAr": a.get("affAr", ""),
+             "consequenceEn": a.get("conEn", ""), "consequenceAr": a.get("conAr", "")}
+            for a in venue_aspects
+        ],
+        "floorNote": {
+            "$comment": "Added at reviewer instruction (handoff 5 approval): said wherever an organizer could mistake the classification for an event certification.",
+            "en": "This classification sets a floor for events held at the venue: no event here can be classified below it. It does not certify any event — each event completes its own assessment and its own submission.",
+            "ar": "يحدد هذا التصنيف حداً أدنى للفعاليات المقامة في الموقع: لا يمكن تصنيف أي فعالية هنا دونه. وهو لا يعتمد أي فعالية — فكل فعالية تستكمل تقييمها الخاص وتقديمها الخاص.",
+        },
+    })
+
     # ---------- Annex D: the post-event medical report ----------
     write("post-event-report.json", {
         "$comment": (

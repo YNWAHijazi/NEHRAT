@@ -60,6 +60,15 @@ function compare(a: Buffer, b: Buffer): { ratio: number; diff: PNG } {
 
 
 
+/** Crops a capture to `height` rows, keeping the top (align 'top') or bottom. */
+function cropToHeight(shot: Buffer, height: number, align: 'top' | 'bottom'): Buffer {
+  const src = PNG.sync.read(shot);
+  if (src.height <= height) return shot;
+  const out = new PNG({ width: src.width, height });
+  PNG.bitblt(src, out, 0, align === 'top' ? 0 : src.height - height, src.width, height, 0, 0);
+  return PNG.sync.write(out);
+}
+
 /** The same pixels, dy rows lower (positive) or higher (negative); edges fill blank. */
 function shiftVertically(shot: Buffer, dy: number): Buffer {
   const src = PNG.sync.read(shot);
@@ -113,18 +122,30 @@ async function referenceRegionRect(
     const hits = all.filter((el) => (el.textContent ?? '').trim().startsWith(r.text ?? ''));
     const deepest = hits[hits.length - 1];
     if (!deepest) return null;
+    // Single-element strategies mark the node so the capture can be element-based --
+    // full-page clips rewrap text when the screenshot pass hides the scrollbar, and the
+    // built side is element-captured, so symmetric capture is the like-for-like one.
+    const mark = (el: Element): void => {
+      document.querySelectorAll('[data-e2e-region]').forEach((n) => n.removeAttribute('data-e2e-region'));
+      el.setAttribute('data-e2e-region', '1');
+    };
     if (r.strategy === 'cardByText') {
       // The runtime re-serializes style attributes with spaces: "border-radius: 14px".
       const card = deepest.closest(
         'div[style*="border-radius: 14px"], div[style*="border-radius:14px"]',
       );
-      return card ? rectOf(card) : null;
+      if (!card) return null;
+      mark(card);
+      return rectOf(card);
     }
     if (r.strategy === 'containerOfText') {
       let el: Element | null = deepest;
       while (el && el !== document.body) {
         const style = el.getAttribute('style') ?? '';
-        if (style.includes(r.container)) return rectOf(el);
+        if (style.includes(r.container)) {
+          mark(el);
+          return rectOf(el);
+        }
         el = el.parentElement;
       }
       return null;
@@ -283,12 +304,15 @@ for (const mapping of VISUAL_MANIFEST) {
         await openReference(page, mapping.referenceFile);
         await selectTab(page, mapping.referenceTab);
         await setLanguage(page, lang);
+        // Fonts can finish loading after the language switch; the reflow moves
+        // everything below the affected text between rect measurement and capture.
+        await page.evaluate(() => document.fonts.ready.then(() => undefined));
         const rect = await referenceRegionRect(page, region);
         expect(rect, `${tag}: could not locate the region in the reference DOM`).not.toBeNull();
-        const referenceRegionShot = await page.screenshot({
-          fullPage: true,
-          clip: rect as Rect,
-        });
+        const marked = page.locator('[data-e2e-region]');
+        const referenceRegionShot = (await marked.count())
+          ? await marked.first().screenshot()
+          : await page.screenshot({ fullPage: true, clip: rect as Rect });
         writeFileSync(join(OUTPUT, `${tag}.reference.png`), referenceRegionShot);
 
         // Region clips come from getBoundingClientRect and element capture, which round
@@ -300,6 +324,23 @@ for (const mapping of VISUAL_MANIFEST) {
           const shifted = shiftVertically(builtRegionShot, dy);
           const attempt = compare(referenceRegionShot, shifted);
           if (attempt.ratio < best.ratio) best = attempt;
+        }
+        // A height difference of a pixel or three is line-height rounding, not layout:
+        // align the captures at the top and at the bottom on the shorter height and
+        // keep the best. Anything a 3px crop cannot absorb still fails.
+        {
+          const ha = PNG.sync.read(referenceRegionShot).height;
+          const hb = PNG.sync.read(builtRegionShot).height;
+          const minH = Math.min(ha, hb);
+          if (ha !== hb && Math.abs(ha - hb) <= 3) {
+            for (const align of ['top', 'bottom'] as const) {
+              const attempt = compare(
+                cropToHeight(referenceRegionShot, minH, align),
+                cropToHeight(builtRegionShot, minH, align),
+              );
+              if (attempt.ratio < best.ratio) best = attempt;
+            }
+          }
         }
         const { ratio, diff } = best;
         writeFileSync(join(OUTPUT, `${tag}.diff.png`), PNG.sync.write(diff));

@@ -143,3 +143,34 @@ describe('daylight saving', () => {
     expect(minuteBefore.day).toBe(28);
   });
 });
+
+describe('the venue reassessment gate', () => {
+  const gate = async () => (await import('../lib/rules/gates')).venueReassessmentGate;
+
+  it('is disabled with the opening date more than 60 days before expiry', async () => {
+    const g = (await gate())({ validUntil: '2027-03-04', today: '2026-08-13', changeReportedSinceAssessment: false });
+    expect(g.behaviour).toBe('disabled');
+    expect(g.reasonKey).toBe('gate.venueReassessmentNotYetOpen');
+    expect(g.params?.['date']).toBe('2027-01-03');
+  });
+
+  it('opens exactly 60 days before expiry', async () => {
+    const g = (await gate())({ validUntil: '2026-09-30', today: '2026-08-13', changeReportedSinceAssessment: false });
+    expect(g.behaviour).toBe('enabled');
+  });
+
+  it('is open after expiry', async () => {
+    const g = (await gate())({ validUntil: '2026-06-15', today: '2026-08-13', changeReportedSinceAssessment: false });
+    expect(g.behaviour).toBe('enabled');
+  });
+
+  it('a reported change overrides the window — it cannot wait for the annual renewal', async () => {
+    const g = (await gate())({ validUntil: '2027-03-04', today: '2026-08-13', changeReportedSinceAssessment: true });
+    expect(g.behaviour).toBe('enabled');
+  });
+
+  it('a never-assessed venue is always open', async () => {
+    const g = (await gate())({ validUntil: null, today: '2026-08-13', changeReportedSinceAssessment: false });
+    expect(g.behaviour).toBe('enabled');
+  });
+});

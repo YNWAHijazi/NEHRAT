@@ -159,12 +159,55 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
 
   const insertVenue = db.prepare(
-    `INSERT INTO venues (id, account_id, name_en, name_ar, level, issued, valid_until, is_demo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+    `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality,
+       responsible_contact, licensed_capacity, regularly_hosts, is_nightclub,
+       level, issued, valid_until, moph_reference, is_demo, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, 1, ?)`,
   );
-  insertVenue.run('VN-0032', organizer, 'Forum de Beyrouth', 'فوروم دو بيروت', 2, d('2026-03-04'), d('2027-03-04'));
-  insertVenue.run('VN-0028', organizer, 'Casino Hall', 'قاعة الكازينو', 2, d('2025-09-30'), d('2026-09-30'));
-  insertVenue.run('VN-0011', organizer, 'Zouk Amphitheatre', 'مدرج ذوق', 2, d('2025-06-15'), d('2026-06-15'));
+  insertVenue.run(
+    'VN-0032', organizer, 'Forum de Beyrouth', 'فوروم دو بيروت',
+    'Exhibition and concert hall', 'Beirut', 'R. Haddad', 4500,
+    2, d('2026-03-04'), d('2027-03-04'), 'MOPH-VN-2026-0032', d('2026-02-19'),
+  );
+  insertVenue.run(
+    'VN-0028', organizer, 'Casino Hall', 'قاعة الكازينو',
+    'Concert and function hall', 'Jounieh', 'R. Haddad', 2800,
+    2, d('2025-09-30'), d('2026-09-30'), 'MOPH-VN-2025-0028', d('2025-09-12'),
+  );
+  insertVenue.run(
+    'VN-0011', organizer, 'Zouk Amphitheatre', 'مدرج ذوق',
+    'Open-air amphitheatre', 'Zouk Mikael', 'R. Haddad', 3200,
+    2, d('2025-06-15'), d('2026-06-15'), 'MOPH-VN-2025-0011', d('2025-05-30'),
+  );
+
+  // Forum's classification demonstrates the union: answers total 4 -- Level 1 by
+  // score -- and the recurring-venue floor (the Arabic issue's row) lifts it to
+  // Level 2. The English issue alone would classify this venue Level 1.
+  const venueInputs = (attendance: number): string => JSON.stringify({
+    expectedMaxSimultaneousAttendance: attendance,
+    eventDisciplines: [],
+    courseDistanceKm: null,
+    venueLicensedCapacity: 4500,
+    venueIsNightclubOrDanceVenue: false,
+    venueRegularlyHostsOrganizedEvents: true,
+  });
+  const insertVenueAssessment = db.prepare(
+    `INSERT INTO venue_assessments (venue_id, version, answers, inputs, derivation,
+       nehrat_tool_version, effective, valid_until, representative, position, created_at)
+     VALUES (?, ?, ?, ?, ?, 'seeded', ?, ?, ?, ?, ?)`,
+  );
+  insertVenueAssessment.run(
+    'VN-0032', 1,
+    JSON.stringify([1, 1, 1, 0, 1, 0, 0, 0, 0]), venueInputs(4200),
+    JSON.stringify({ storedNote: 'recomputed at read' }),
+    d('2026-03-04'), d('2027-03-04'), 'R. Haddad', 'Venue operations manager', d('2026-03-04'),
+  );
+  insertVenueAssessment.run(
+    'VN-0028', 1,
+    JSON.stringify([1, 1, 1, 0, 1, 0, 0, 0, 0]), venueInputs(2600),
+    JSON.stringify({ storedNote: 'recomputed at read' }),
+    d('2025-09-30'), d('2026-09-30'), 'R. Haddad', 'Venue operations manager', d('2025-09-30'),
+  );
 
   db.prepare(
     `INSERT INTO facilities (id, account_id, name_en, name_ar, category_en, category_ar,

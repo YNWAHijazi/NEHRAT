@@ -111,6 +111,21 @@ test.describe('an organizer never sees another organizer\'s records', () => {
     expect(foreignStatus).toBe(missingStatus);
     expect([401, 403, 404]).toContain(foreignStatus);
   });
+
+  test('a foreign venue id refuses like a missing one', async ({ page }) => {
+    // Same property on the venue service (Slice 3): VN-0001 belongs to no demonstration
+    // organizer, VN-9999 to nobody; the record, the assessment and the change screen
+    // must all be indistinguishable between the two.
+    await signInAs(page, LOGINS.organizer);
+    for (const suffix of ['', '/assessment', '/change']) {
+      const foreign = await page.goto(`/venues/VN-0001${suffix}`);
+      const foreignStatus = foreign?.status() ?? 0;
+      const missing = await page.goto(`/venues/VN-9999${suffix}`);
+      const missingStatus = missing?.status() ?? 0;
+      expect(foreignStatus, `/venues/VN-0001${suffix}`).toBe(missingStatus);
+      expect([401, 403, 404]).toContain(foreignStatus);
+    }
+  });
 });
 
 test.describe('nominated roles see only what they were named in', () => {
@@ -134,7 +149,7 @@ test.describe('signed out', () => {
   test('every built authenticated surface bounces to sign-in', async ({ page }) => {
     // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
     // vacuously. Extend this list as slices land.
-    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new']) {
+    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change']) {
       const response = await page.goto(path);
       const refused =
         page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);

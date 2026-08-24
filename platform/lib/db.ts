@@ -205,8 +205,43 @@ function migrate(d: DatabaseSync): void {
       id TEXT PRIMARY KEY,             -- VN-0032
       account_id INTEGER NOT NULL REFERENCES accounts(id),
       name_en TEXT NOT NULL, name_ar TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT '',
+      address_municipality TEXT NOT NULL DEFAULT '',
+      responsible_contact TEXT NOT NULL DEFAULT '',
+      licensed_capacity INTEGER,
+      regularly_hosts INTEGER NOT NULL DEFAULT 0,
+      is_nightclub INTEGER NOT NULL DEFAULT 0,
+      -- classification: derived by the engine at assessment, never entered
       level INTEGER, issued TEXT, valid_until TEXT,
-      is_demo INTEGER NOT NULL DEFAULT 0
+      moph_reference TEXT,             -- MOPH-VN-yyyy-nnnn, at classification
+      is_demo INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- One routine operating session per year; versioned, never edited in place.
+    CREATE TABLE IF NOT EXISTS venue_assessments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      venue_id TEXT NOT NULL REFERENCES venues(id),
+      version INTEGER NOT NULL,
+      answers TEXT NOT NULL,
+      inputs TEXT NOT NULL,
+      derivation TEXT NOT NULL,
+      nehrat_tool_version TEXT NOT NULL DEFAULT '',
+      effective TEXT NOT NULL,         -- the Arabic issue: effective and expiry dates
+      valid_until TEXT NOT NULL,
+      representative TEXT NOT NULL DEFAULT '',
+      position TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (venue_id, version)
+    );
+
+    CREATE TABLE IF NOT EXISTS venue_changes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      venue_id TEXT NOT NULL REFERENCES venues(id),
+      aspects TEXT NOT NULL,
+      description TEXT NOT NULL,
+      effective_date TEXT NOT NULL DEFAULT '',
+      reported_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
     CREATE TABLE IF NOT EXISTS facilities (

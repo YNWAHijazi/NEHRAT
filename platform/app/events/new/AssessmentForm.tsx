@@ -442,6 +442,15 @@ export function AssessmentForm({
                     </span>
                     <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
                       <L en="Derived from the figures above" ar="مستمد من الأرقام أعلاه" />
+                      {condition.issue !== 'both' ? (
+                        <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                          {condition.issue === 'ar-only' ? (
+                            <L en="Arabic issue only" ar="الإصدار العربي فقط" />
+                          ) : (
+                            <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
+                          )}
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                   <span style={{ flex: 'none', fontSize: 13, color: `var(--l${condition.level})` }}>

@@ -24,7 +24,8 @@ import {
   findAccountByLogin,
   startSession,
 } from '../lib/auth';
-import { NEHRAT_TOOL_VERSION, deriveLevel } from '../lib/rules';
+import {
+  RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -473,4 +474,133 @@ export async function notifySeriousIncidentAction(eventId: string): Promise<void
     .run(eventId);
   revalidatePath(`/events/${eventId}/post-event`);
   redirect(`/events/${eventId}/post-event`);
+}
+
+/* ---------------- Slice 3: the venue service ---------------- */
+
+function ownedVenue(accountId: number, venueId: string): boolean {
+  return Boolean(
+    getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId),
+  );
+}
+
+/**
+ * Registers the venue and routes to its first annual assessment. Eligibility asks what
+ * the recurring-venue condition asks -- regularly hosts organized events, capacity at or
+ * above the condition's own threshold; an ineligible venue is not registered, and the
+ * screen says the Ministry makes the final call.
+ */
+export async function registerVenueAction(formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const nameEn = String(formData.get('name') ?? '').trim();
+  const nameAr = String(formData.get('nameAr') ?? '').trim() || nameEn;
+  const category = String(formData.get('category') ?? '').trim();
+  const address = String(formData.get('address') ?? '').trim();
+  const contact = String(formData.get('contact') ?? '').trim();
+  const capacity = Number(String(formData.get('capacity') ?? '').replace(/[^0-9]/g, '')) || null;
+  const regularlyHosts = formData.get('regularlyHosts') === 'yes';
+  const isNightclub = formData.get('isNightclub') === 'yes';
+  if (!nameEn || capacity === null || capacity < RECURRING_VENUE_MIN_CAPACITY || !regularlyHosts) {
+    redirect('/venues/new?notice=outside');
+  }
+  const venueId = nextRecordId('VN');
+  getDb()
+    .prepare(
+      `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality,
+         responsible_contact, licensed_capacity, regularly_hosts, is_nightclub, is_demo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(venueId, account.id, nameEn, nameAr, category, address, contact, capacity, 1, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
+  revalidatePath('/dashboard');
+  redirect(`/venues/${venueId}/assessment`);
+}
+
+export interface VenueAssessmentPayload {
+  answers: DomainAnswers;
+  attendance: number | null;
+  representative: string;
+  position: string;
+}
+
+/**
+ * Records the annual assessment: the classification derives from the same engine as
+ * events, over one routine operating session, and carries an effective date and an
+ * expiry date twelve months on (the Arabic issue's wording). The record identifier
+ * exists from registration; the Ministry reference is issued at first classification.
+ */
+export async function saveVenueAssessmentAction(
+  venueId: string,
+  payload: VenueAssessmentPayload,
+): Promise<{ level: number } | { error: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedVenue(account.id, venueId)) return { error: 'not-found' };
+  const db = getDb();
+  const venue = db
+    .prepare(`SELECT licensed_capacity, regularly_hosts, is_nightclub, moph_reference FROM venues WHERE id = ?`)
+    .get(venueId) as { licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number; moph_reference: string | null };
+
+  const inputs: MinimumConditionInputs = {
+    expectedMaxSimultaneousAttendance: payload.attendance,
+    eventDisciplines: [],
+    courseDistanceKm: null,
+    venueLicensedCapacity: venue.licensed_capacity,
+    venueIsNightclubOrDanceVenue: venue.is_nightclub === 1,
+    venueRegularlyHostsOrganizedEvents: venue.regularly_hosts === 1,
+  };
+  const derivation = deriveLevel({ answers: payload.answers, inputs });
+  if (!derivation.complete || derivation.finalLevel === null) return { error: 'incomplete' };
+
+  const { beirutToday } = await import('../lib/clock');
+  const effective = beirutToday();
+  const { REASSESSMENT_WINDOW } = await import('../lib/rules');
+  const months = REASSESSMENT_WINDOW.venueClassificationMonths;
+  const until = new Date(`${effective}T00:00:00Z`);
+  until.setUTCMonth(until.getUTCMonth() + months);
+  const validUntil = until.toISOString().slice(0, 10);
+
+  const latest = db
+    .prepare(`SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = ?`)
+    .get(venueId) as { v: number | null };
+  db.prepare(
+    `INSERT INTO venue_assessments (venue_id, version, answers, inputs, derivation,
+       nehrat_tool_version, effective, valid_until, representative, position)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    venueId, (latest.v ?? 0) + 1,
+    JSON.stringify(payload.answers), JSON.stringify(inputs), JSON.stringify(derivation),
+    NEHRAT_TOOL_VERSION, effective, validUntil, payload.representative, payload.position,
+  );
+
+  let reference = venue.moph_reference;
+  if (!reference) {
+    const year = new Date().getFullYear();
+    const last = db
+      .prepare(`SELECT moph_reference AS r FROM venues WHERE moph_reference LIKE ? ORDER BY moph_reference DESC LIMIT 1`)
+      .get(`MOPH-VN-${year}-%`) as { r: string } | undefined;
+    const n = last ? Number.parseInt(last.r.slice(-4), 10) + 1 : 1;
+    reference = `MOPH-VN-${year}-${String(n).padStart(4, '0')}`;
+  }
+  db.prepare(
+    `UPDATE venues SET level = ?, issued = ?, valid_until = ?, moph_reference = ? WHERE id = ?`,
+  ).run(derivation.finalLevel, effective, validUntil, reference, venueId);
+  revalidatePath(`/venues/${venueId}`);
+  return { level: derivation.finalLevel };
+}
+
+export async function reportVenueChangeAction(venueId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
+  const aspects = formData.getAll('aspect').map(String);
+  const description = String(formData.get('description') ?? '').trim();
+  const effectiveDate = String(formData.get('effectiveDate') ?? '').trim();
+  if (aspects.length > 0 && description) {
+    getDb()
+      .prepare(`INSERT INTO venue_changes (venue_id, aspects, description, effective_date) VALUES (?, ?, ?, ?)`)
+      .run(venueId, JSON.stringify(aspects), description, effectiveDate);
+  }
+  revalidatePath(`/venues/${venueId}/change`);
+  redirect(`/venues/${venueId}/change?notice=reported`);
 }

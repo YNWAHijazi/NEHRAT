@@ -13,7 +13,7 @@
     "organizationPending": "Your organization is pending Ministry registration. You may prepare everything; filing opens once it is recorded.",
     "postEventNotYetOpen": "Available after the event ends, {date}",
     "materialChangeBeforeFiling": "Available once the submission is filed",
-    "venueReassessmentNotYetOpen": "Opens {date}, 60 days before expiry",
+    "venueReassessmentNotYetOpen": "Opens {date}, {days} days before expiry",
     "declarationItemsOutstanding": "{count} of {total} items still to confirm",
     "nominationNotConfirmed": "A nomination is not a confirmation",
     "awaitingMinistryValue": "Nothing is in force under this rule until the Ministry sets and publishes the value. Operators are notified when it does.",

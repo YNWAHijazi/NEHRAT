@@ -15,7 +15,8 @@
  * not a gate, and must never be expressed through this module.
  */
 
-import { postEventReportWindow, filingDeadline, type FilingDeadline } from './deadlines';
+import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, type FilingDeadline } from './deadlines';
+import { REASSESSMENT_WINDOW } from './load';
 import type { Level } from './types';
 
 export type GateBehaviour = 'enabled' | 'disabled' | 'absent';
@@ -103,6 +104,40 @@ export function submitGate(ctx: EventGateContext): Gate {
 export function eventFilingDeadline(ctx: EventGateContext): FilingDeadline | null {
   if (ctx.finalLevel === null || ctx.eventStartDate === null) return null;
   return filingDeadline(ctx.finalLevel, new Date(`${ctx.eventStartDate}T12:00:00+03:00`));
+}
+
+export interface VenueGateContext {
+  /** YYYY-MM-DD; null when the venue has never been assessed. */
+  validUntil: string | null;
+  /** Today in Asia/Beirut, YYYY-MM-DD. */
+  today: string;
+  /** A reported change since the last assessment requires reassessment regardless. */
+  changeReportedSinceAssessment: boolean;
+}
+
+/**
+ * Annual reassessment: a time gate. Opens 60 days before the classification expires
+ * (configured, not hard-coded); always open when the venue has never been assessed or
+ * has expired; and a reported material change overrides the window entirely -- the
+ * change cannot wait for the annual renewal.
+ */
+export function venueReassessmentGate(ctx: VenueGateContext): Gate {
+  if (ctx.validUntil === null) return { behaviour: 'enabled' };
+  if (ctx.changeReportedSinceAssessment) return { behaviour: 'enabled' };
+  const windowDays = REASSESSMENT_WINDOW.opensDaysBeforeExpiry;
+  const opens = addDays(isoToCalendar(ctx.validUntil), -windowDays);
+  const opensIso = formatIsoDate(opens);
+  if (ctx.today >= opensIso) return { behaviour: 'enabled' };
+  return {
+    behaviour: 'disabled',
+    reasonKey: 'gate.venueReassessmentNotYetOpen',
+    params: { date: opensIso, days: windowDays },
+  };
+}
+
+function isoToCalendar(iso: string): { year: number; month: number; day: number } {
+  const [y, m, d] = iso.split('-').map(Number);
+  return { year: y ?? 1970, month: m ?? 1, day: d ?? 1 };
 }
 
 /**

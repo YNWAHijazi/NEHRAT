@@ -322,4 +322,151 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceTab: 'Notifications',
     builtRoute: null,
   },
+
+  // --- Slice 3: the venue service ---
+  {
+    id: 'venue-registration',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Register a venue',
+    builtRoute: '/venues/new',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'required-note',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Every field is required', container: 'border-radius: 10px' },
+        builtSelector: '[data-region="required-note"]',
+        note: 'The required-fields note. Held at 2%.',
+      },
+      {
+        name: 'exempt-footnote',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'A specific event held at this venue', container: 'border-radius: 12px' },
+        builtSelector: '[data-region="exempt-footnote"]',
+        note: 'Registering a venue does not exempt events held there. Held at 2%.',
+      },
+      {
+        name: 'applicability-intro',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="applicability-intro"]',
+        note: "Expected divergent BY THE REFERENCE'S OWN DEFECT: the prototype intro reads 'completes the the risk assessment assessment' (both languages carry the doubling) -- an artifact of substituting the instrument's name out of the sentence. The build renders the sentence once (venue.json applicabilityIntro).",
+      },
+      {
+        name: 'registration-form',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="registration-form"]',
+        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty and shows the outside-the-process note. The build also adds a nightclub/dance-venue question the prototype lacks -- the English-issue club condition cannot derive without it (non-negotiable #0).',
+      },
+    ],
+  },
+  {
+    id: 'venue-assessment',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Annual venue assessment',
+    // VN-0028: inside the reassessment window at the review clock, so the gate is open.
+    // The reference renders Forum de Beyrouth; VN-0032's gate is correctly closed at the
+    // review clock, and a bounced route cannot be captured.
+    builtRoute: '/venues/VN-0028/assessment',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'session-callout',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Assess one routine operating session', container: 'border-radius: 14px' },
+        builtSelector: '[data-region="session-callout"]',
+        note: 'Assess one routine operating session; the Domain 4 and Domain 9 readings. Held at 2%.',
+      },
+      {
+        name: 'validity-panel',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'A new assessment is required before that date', container: 'border-radius: 16px' },
+        builtSelector: '[data-region="validity"]',
+        note: 'Effective from / valid through and the five reassessment triggers. Both sides compute from the review clock, so the dates agree. Held at 2%.',
+      },
+      {
+        name: 'classification-panel',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="classification"]',
+        note: "Expected divergent, non-negotiable #0 over pixel parity: the prototype's minimum conditions are seven manual checkboxes with 'Locked -- set by' notes on the three it can derive; the build derives all ten from the registration and the attendance figure, renders them read-only, and tags the two rows the issues disagree on (club: English issue only; recur: Arabic issue only). Scores also differ: the built side shows VN-0028's recorded answers, the prototype its own demo state.",
+      },
+      {
+        name: 'declaration',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="declaration"]',
+        note: "Expected divergent: the prototype prefills the declaration and carries a third field, Date, hand-entered beside the derived effective date. The build starts empty and records the declaration timestamp itself -- a hand-entered date that can contradict the derived one is the class of input the derivation rules exclude. Flagged for review rather than copied.",
+      },
+    ],
+  },
+  {
+    id: 'venue-record',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Venue record',
+    builtRoute: '/venues/VN-0032',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'rail',
+        mode: 'compare',
+        reference: { strategy: 'cardByText', text: 'Where this venue stands' },
+        builtSelector: '[data-region="rail"]',
+        note: "The five-stage rail. Held at 2%. Known residuals inside the budget: the reference hand-writes stage dates (stage 1: 2026-01-20, disagreeing with its own organization record; stage 2: 2026-03-02, disagreeing with its own history list's 2026-03-04) where the build shows the record's actual dates.",
+      },
+      {
+        name: 'record-header',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Ministry reference number', container: 'justify-content: space-between' },
+        builtSelector: '[data-region="record-header"]',
+        note: 'Identity block, classification, validity figures and the state chip. Held at 2%.',
+      },
+      {
+        name: 'history',
+        mode: 'compare',
+        reference: { strategy: 'headingSection', text: 'Assessment history' },
+        builtSelector: '[data-region="history"]',
+        note: 'Assessment history rows. Held at 2%.',
+      },
+      {
+        name: 'counters',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'requirements apply at this level', container: 'display: flex' },
+        builtSelector: '[data-region="counters"]',
+        note: 'The two counter cards. Held at 2%. The attachments figure derives from the requirements matrix on the built side; the reference reuses its event fixture for the same number.',
+      },
+      {
+        name: 'requirements',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="requirements"]',
+        note: "Expected divergent BY REFERENCE FIXTURE ARTIFACT: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips.",
+      },
+      {
+        name: 'floor-note',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="floor-note"]',
+        note: 'Expected divergent AT REVIEWER INSTRUCTION (Slice 3 brief): the classification sets a floor for events at the venue and certifies none of them, said where an organizer could mistake one for the other. The reference carries no such note.',
+      },
+    ],
+  },
+  {
+    id: 'venue-change',
+    referenceFile: 'Organizer Journey.dc.html',
+    referenceTab: 'Report a venue change',
+    builtRoute: '/venues/VN-0032/change',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'change-form',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'What changed', container: 'border-radius: 14px' },
+        builtSelector: '[data-region="change-form"]',
+        note: "The five aspect chips, description and effective date. Held at 2%. Known residuals inside the budget: the reference prefills the date (2026-09-01) and sets a placeholder on the description; a new report starts empty, as the event-side change form does.",
+      },
+      {
+        name: 'revision-footnote',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'The Ministry may require a revised', container: 'border-radius: 12px' },
+        builtSelector: '[data-region="revision-footnote"]',
+        note: 'The Ministry may require revised documents. Held at 2%.',
+      },
+    ],
+  },
 ];
