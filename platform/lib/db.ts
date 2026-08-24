@@ -134,7 +134,7 @@ function migrate(d: DatabaseSync): void {
     -- never sequential). kind: ems | director. States per SPEC: nominated -> confirmed/declined;
     -- declarations draft -> signed (Level 3 EMS only).
     CREATE TABLE IF NOT EXISTS invitations (
-      token TEXT PRIMARY KEY,
+      token TEXT PRIMARY KEY,          -- unguessable, never a sequential id (rule 6)
       event_id TEXT NOT NULL REFERENCES events(id),
       kind TEXT NOT NULL CHECK (kind IN ('ems','director')),
       name_en TEXT NOT NULL,
@@ -142,8 +142,67 @@ function migrate(d: DatabaseSync): void {
       email TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'nominated' CHECK (status IN ('nominated','confirmed','declined')),
       declaration TEXT NOT NULL DEFAULT 'none' CHECK (declaration IN ('none','draft','signed')),
+      -- Slice 5: the counterparty's side of the nomination. The account links on
+      -- acceptance; a decline carries its reason (a material change the organizer
+      -- must report); a modification request keeps the nomination open with a note.
+      account_id INTEGER REFERENCES accounts(id),
+      response_note TEXT NOT NULL DEFAULT '',
+      ops_detail TEXT NOT NULL DEFAULT '{}',      -- JSON: the Level 2 operational detail
+      declaration_items TEXT NOT NULL DEFAULT '[]', -- JSON: ten booleans (draft state)
+      certification TEXT NOT NULL DEFAULT '{}',   -- JSON: the provider certification block
+      signed_at TEXT,
       invited_at TEXT NOT NULL DEFAULT (datetime('now')),
       answered_at TEXT
+    );
+
+    -- Shared documents between the organizer and ONE named provider: one list,
+    -- visible to both sides of that pair, sent to the Ministry only if the
+    -- organizer attaches it to the submission.
+    CREATE TABLE IF NOT EXISTS shared_documents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      invitation_token TEXT NOT NULL REFERENCES invitations(token),
+      name_en TEXT NOT NULL, name_ar TEXT NOT NULL DEFAULT '',
+      source TEXT NOT NULL CHECK (source IN ('organizer','provider','requested','missing')),
+      file_name TEXT,
+      meta_en TEXT NOT NULL DEFAULT '', meta_ar TEXT NOT NULL DEFAULT '',
+      added_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- First-response unit (cardiac-arrest instrument): its own account, no facility
+    -- records, no event nominations. Readiness confirmations per group, and one
+    -- dataset report per patient -- by the platform form or an attached
+    -- patient-care report that captures everything required.
+    CREATE TABLE IF NOT EXISTS fr_readiness (
+      account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+      confirmations TEXT NOT NULL DEFAULT '{}',   -- JSON: {equipment:[..],competence:[..],operational:[..]}
+      signed_at TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS fr_reports (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id INTEGER NOT NULL REFERENCES accounts(id),
+      mode TEXT NOT NULL DEFAULT 'platform' CHECK (mode IN ('platform','attach')),
+      attached_file TEXT,
+      covered TEXT NOT NULL DEFAULT '{}',         -- JSON: section key -> covered by the attachment
+      payload TEXT NOT NULL DEFAULT '{}',         -- JSON: section.field -> value
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- The provider / physician profile: completed once, reused across events.
+    CREATE TABLE IF NOT EXISTS role_profiles (
+      account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
+      fields TEXT NOT NULL DEFAULT '{}',          -- JSON: profile field key -> value
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- The Director's clinical-governance text. Written by the Director, rendered
+    -- read-only in the organizer's plan (sections 10 and 12); the organizer cannot
+    -- overwrite it.
+    CREATE TABLE IF NOT EXISTS event_governance (
+      event_id TEXT PRIMARY KEY REFERENCES events(id),
+      sections TEXT NOT NULL DEFAULT '{}',        -- JSON: {clinical, command, incidentRole}
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
     -- The plan: write-here or attach-a-document; sixteen sections either written or

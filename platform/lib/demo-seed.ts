@@ -60,9 +60,9 @@ export function seedDemonstration(db: DatabaseSync): void {
   const organizerPending = insertAccount.run(
     'test_organizer_pending', 'S. Khoury', 'SK', 'organizer',
   ).lastInsertRowid as number;
-  insertAccount.run('test_ems', 'Demonstration EMS provider', 'EP', 'ems');
-  insertAccount.run('test_director', 'Demonstration medical director', 'MD', 'director');
-  insertAccount.run('test_response', 'Demonstration first-response unit', 'FR', 'response');
+  const ems = insertAccount.run('test_ems', 'S. Karam', 'SK', 'ems').lastInsertRowid as number;
+  const director = insertAccount.run('test_director', 'Dr N. Salameh', 'NS', 'director').lastInsertRowid as number;
+  const response = insertAccount.run('test_response', 'M. Aoun', 'MA', 'response').lastInsertRowid as number;
   insertAccount.run('test_moph', 'Demonstration reviewer', 'MR', 'reviewer');
   insertAccount.run('test_moph_admin', 'Demonstration administrator', 'MA', 'ministry_admin');
 
@@ -284,12 +284,12 @@ export function seedDemonstration(db: DatabaseSync): void {
   insertInvitation.run(
     'demo-lrc-beirut-0418', 'EV-0418', 'ems',
     'Lebanese Red Cross — Beirut branch', 'الصليب الأحمر اللبناني — فرع بيروت',
-    'operations@lrc-beirut.example.lb', 'confirmed', 'signed', d('2026-08-10'),
+    'operations@lrc-beirut.example.lb', 'confirmed', 'none', d('2026-08-10'),
   );
   insertInvitation.run(
     'demo-civil-defence-0418', 'EV-0418', 'ems',
     'Civil Defence — Beirut', 'الدفاع المدني — بيروت',
-    'beirut@civildefence.example.lb', 'confirmed', 'draft', d('2026-08-11'),
+    'beirut@civildefence.example.lb', 'confirmed', 'none', d('2026-08-11'),
   );
   insertInvitation.run(
     'demo-coastal-medical-0418', 'EV-0418', 'ems',
@@ -340,6 +340,122 @@ export function seedDemonstration(db: DatabaseSync): void {
     'EV-0244',
     JSON.stringify({ estimatedAttendance: '11,400', patientsTreated: '38', patientsTransported: '4', cardiacArrests: '1', deaths: '0', unplannedResources: '1', coverageHours: '9' }),
     JSON.stringify({ hospitalTransport: true, cardiacArrest: true, unplannedRequest: true }),
+  );
+
+  // ---- Slice 5: the counterparty roles ----
+  // test_ems is the Lebanese Red Cross operational account: named on the Level 2
+  // 12K (participation owed -- operational detail not yet supplied) and on the
+  // Level 3 Baalbeck festival (declaration signed, all ten items).
+  db.prepare(`UPDATE invitations SET account_id = ? WHERE token = 'demo-lrc-beirut-0418'`).run(ems);
+  db.prepare(
+    `UPDATE invitations SET account_id = ?, declaration = 'signed',
+       declaration_items = ?, certification = ?, signed_at = ?
+     WHERE token = 'demo-lrc-baalbeck-0362'`,
+  ).run(
+    ems,
+    JSON.stringify(Array.from({ length: 10 }, () => true)),
+    JSON.stringify({
+      provider: 'Lebanese Red Cross — Beirut branch',
+      representative: 'S. Karam',
+      position: 'Branch operations director',
+      phone: '03 774 120',
+      date: d('2026-08-13'),
+    }),
+    d('2026-08-13'),
+  );
+  db.prepare(`UPDATE invitations SET account_id = ? WHERE token IN ('demo-director-0362', 'demo-director-0244')`).run(director);
+
+  const insertProfile = db.prepare(
+    `INSERT INTO role_profiles (account_id, fields) VALUES (?, ?)`,
+  );
+  insertProfile.run(ems, JSON.stringify({
+    agencyName: 'Lebanese Red Cross — Beirut branch',
+    providerType: 'Emergency medical service',
+    representative: 'S. Karam',
+    operationalLead: 'M. Aoun',
+    leadContact: '03 118 402',
+    phone: '140',
+    email: 'beirut.ops@redcross.lb',
+    address: 'Spears, Beirut',
+    areas: 'Beirut, Baabda, Aley',
+  }));
+  insertProfile.run(director, JSON.stringify({
+    fullName: 'Dr N. Salameh',
+    licence: '14-9982',
+    orderRegistration: 'LOP-B-4471',
+    specialty: 'Emergency medicine',
+    years: '17',
+    phone: '03 421 118',
+    email: 'n.salameh@example.lb',
+    affiliation: 'Dar Al Amal University Hospital',
+  }));
+
+  // Shared documents between the organizer and the Baalbeck provider: the
+  // reference's five rows, one per state.
+  const insertDoc = db.prepare(
+    `INSERT INTO shared_documents (invitation_token, name_en, name_ar, source, file_name, meta_en, meta_ar, added_at)
+     VALUES ('demo-lrc-baalbeck-0362', ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  insertDoc.run(
+    'Event health and medical plan — version 3', 'الخطة الصحية والطبية للفعالية — النسخة 3',
+    'organizer', 'baalbeck-plan-v3.pdf', `From the organizer · ${d('2026-08-11')} · PDF`, `من المنظّم · ⁦${d('2026-08-11')}⁩ · PDF`, d('2026-08-11'),
+  );
+  insertDoc.run(
+    'Medical deployment map', 'خريطة الانتشار الطبي',
+    'requested', null, `Requested from you by the organizer · ${d('2026-08-12')}`, `طلبها منكم المنظّم · ⁦${d('2026-08-12')}⁩`, d('2026-08-12'),
+  );
+  insertDoc.run(
+    'Service agreement', 'اتفاقية الخدمة',
+    'provider', 'service-agreement.pdf', `From your organization · ${d('2026-08-13')} · signed both sides`, `من مؤسستكم · ⁦${d('2026-08-13')}⁩ · موقّعة من الطرفين`, d('2026-08-13'),
+  );
+  insertDoc.run(
+    'Event site and route map', 'خريطة موقع الفعالية والمسار',
+    'organizer', 'baalbeck-site-map.pdf', `From the organizer · ${d('2026-08-04')} · PDF`, `من المنظّم · ⁦${d('2026-08-04')}⁩ · PDF`, d('2026-08-04'),
+  );
+  insertDoc.run(
+    'Radio channel and call-sign schedule', 'جدول القنوات ورموز النداء',
+    'missing', null, 'Not yet added by either side', 'لم يُضفه أي من الطرفين بعد', d('2026-08-13'),
+  );
+
+  // The first-response unit: readiness partly confirmed (the reference's showcase
+  // state) and one dataset report filed by the attach route.
+  db.prepare(
+    `INSERT INTO fr_readiness (account_id, confirmations, signed_at, updated_at)
+     VALUES (?, ?, NULL, ?)`,
+  ).run(
+    response,
+    JSON.stringify({
+      equipment: [true, true, true, true, true],
+      competence: [true, true, true, true, true, true, false],
+      operational: [true, true, true, false, false],
+    }),
+    d('2026-08-01'),
+  );
+  db.prepare(
+    `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload, created_at)
+     VALUES (?, 'attach', 'unit3-pcr-2026-0841.pdf', ?, ?, ?)`,
+  ).run(
+    response,
+    JSON.stringify({ incident: true, response: true, defibrillation: true, outcome: true, agency: false }),
+    JSON.stringify({
+      'agency.agencyName': 'Unit 3 — first response', 'agency.unitId': 'U3',
+      'agency.completedBy': 'M. Aoun', 'agency.phone': '03 118 402',
+      'agency.email': 'unit3@example.lb', 'agency.submitted': d('2026-08-20'),
+    }),
+    d('2026-08-20'),
+  );
+
+  // The Director's governance text for Baalbeck: written, started, and not written --
+  // the reference's three states.
+  db.prepare(
+    `INSERT INTO event_governance (event_id, sections, updated_at) VALUES ('EV-0362', ?, ?)`,
+  ).run(
+    JSON.stringify({
+      clinical: `All medical teams practise under the clinical protocols of their own provider and under my clinical authority for the duration of the event. Standards are set at the pre-event briefing on ${d('2026-09-18')} and confirmed by each team lead. A clinical concern is raised to the team lead, then to me on VHF channel 4 or by telephone; I may stand a responder down.`,
+      command: 'I hold medical command, located at medical post 1 at the main gate.',
+      incidentRole: '',
+    }),
+    d('2026-08-12'),
   );
 
   const insertNotification = db.prepare(

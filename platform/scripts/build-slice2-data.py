@@ -123,7 +123,10 @@ def main() -> int:
             "ar": ar_display,
             **({"arSource": cells[0]} if ar_display != cells[0] else {}),
             "prototypeAr": m["ar"],
-            "parties": m["p"],
+            # Row 19's responsible party in the source is "Organizer / Event Medical
+            # Director for Level 3" -- the two signatures. The prototype hand-wrote
+            # the Director alone at Level 3, dropping the organizer; source wins.
+            "parties": ([["O"], ["O"], ["O", "D"]] if m["n"] == 19 else m["p"]),
             "attach": bool(m.get("attach")),
             "ems": bool(m.get("ems")),
             "inspection": bool(m.get("inspect")),

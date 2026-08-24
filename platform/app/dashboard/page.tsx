@@ -5,6 +5,8 @@ import { L } from '../../components/L';
 import { StartServiceMenu } from '../../components/StartServiceMenu';
 import { SequenceFooter, type SequenceStep } from '../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../lib/auth';
+import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
+import { invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
 import { REASSESSMENT_WINDOW } from '../../lib/rules';
 import {
@@ -163,6 +165,60 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
 export default async function DashboardPage() {
   const account = await currentAccount();
   if (!account) redirect('/signin');
+  // One route, one dashboard per role (ROADMAP): the organizer's record lists, the
+  // EMS provider's and the Director's named-events lists. The first-response unit's
+  // surface is its readiness screen.
+  if (account.role === 'response') redirect('/first-response/readiness');
+  if (account.role === 'ems' || account.role === 'director') {
+    const invitations = invitationsForAccount(account.id);
+    const unreadRole = unreadCountFor(account.id);
+    const todayRole = beirutToday();
+    let rows;
+    if (account.role === 'ems') {
+      rows = emsRows(invitations);
+    } else {
+      const reportState = new Map(
+        invitations.map((i) => {
+          const r = postEventReportFor(i.organizerAccountId, i.eventId);
+          return [i.eventId, { organizerSigned: Boolean(r?.organizerSignedAt), directorSigned: Boolean(r?.directorSignedAt) }] as const;
+        }),
+      );
+      const governanceState = new Map(
+        invitations.map((i) => {
+          const g = governanceFor(i.eventId);
+          return [i.eventId, Object.values(g).filter((v) => v.trim() !== '').length] as const;
+        }),
+      );
+      rows = directorRows(invitations, reportState, governanceState, todayRole);
+    }
+    const owed = rows.filter((r) => !r.done).length;
+    return (
+      <>
+        <GovernmentBand />
+        <Header account={account} organization={null} unreadCount={unreadRole} showBack={false} />
+        <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+          <RoleDashboard
+            rows={rows}
+            countEn={`${rows.length} events · ${owed} need a response from you`}
+            countAr={`${rows.length} فعالية · ${owed} تحتاج ردّاً منكم`}
+          />
+          <SequenceFooter
+            labelEn="Next in the sequence"
+            labelAr="التالي في التسلسل"
+            steps={[
+              {
+                href: '/profile',
+                en: account.role === 'ems' ? 'Agency profile' : 'Physician profile',
+                ar: account.role === 'ems' ? 'ملف الجهة' : 'الملف الطبي',
+                descEn: 'Completed once and reused across every event.',
+                descAr: 'يُستكمل مرة واحدة ويُعاد استخدامه في كل فعالية.',
+              },
+            ]}
+          />
+        </main>
+      </>
+    );
+  }
   const organization = organizationFor(account.id);
   const events = eventsFor(account.id);
   const venues = venuesFor(account.id);

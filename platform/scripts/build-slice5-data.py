@@ -1,0 +1,337 @@
+#!/usr/bin/env python3
+"""Slice 5 regulatory data: the other roles.
+
+Generates lib/rules/data/roles.json. Provenance, in order of authority:
+  - the PAD policy spec sections 8-9 for the first-response unit's readiness lists and
+    the minimum dataset (English), with Arabic verbatim from ar/06 PAD annex E -- the
+    EMS Agency prototype's paraphrases of both are superseded and reported;
+  - the compliance form's own data (compliance-form.json) for the ten declaration
+    items -- not the prototype's slightly different wording;
+  - the two role prototypes for screen copy that exists nowhere in the source
+    (nomination responses, the level 2 operational-detail labels, governance asks),
+    taken verbatim.
+
+The prototype's dataset adds Sex and Presumed cause; the minimum dataset carries
+neither, and the policy's data-minimisation rule forbids adding patient fields.
+Dropped, and reported.
+
+This script owns everything it writes: regenerate rather than hand-edit.
+"""
+import json
+import pathlib
+
+OUT = pathlib.Path(__file__).resolve().parent.parent / "lib" / "rules" / "data"
+
+roles = {
+    "$comment": (
+        "The counterparty surfaces: participating EMS provider (mass-gathering "
+        "instrument), first-response unit (cardiac-arrest instrument), Event Medical "
+        "Director (Level 3 only). The two EMS-side actors never share a surface and "
+        "neither declaration substitutes for the other (SPEC). Nomination states: "
+        "nominated -> confirmed / declined; declarations draft -> signed."
+    ),
+
+    # ---- Participating EMS provider (mass-gathering instrument) ----
+    "ems": {
+        "nominationResponses": [
+            {"key": "accept", "en": "Accept", "ar": "القبول",
+             "descEn": "Your organization becomes a named provider for this event and the declaration opens.",
+             "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح الإقرار."},
+            {"key": "decline", "en": "Decline", "ar": "الاعتذار",
+             "descEn": "A reason is required and returns to the organizer, who must name another provider.",
+             "descAr": "يُطلب سبب يعود إلى المنظّم، وعليه تسمية مزوّد آخر."},
+            {"key": "modification", "en": "Request modification", "ar": "طلب تعديل",
+             "descEn": "A reason is required. Use this where you can serve the event but not as described.",
+             "descAr": "يُطلب سبب. استخدموه إذا كان بإمكانكم خدمة الفعالية لكن ليس بالصيغة الموصوفة.",
+             "$comment": "Not a nomination state (SPEC lists nominated/confirmed/declined). A modification request keeps the nomination open and sends the reason to the organizer."},
+        ],
+        "reasonRequired": {
+            "en": "A reason is required. It is sent to the organizer as written.",
+            "ar": "السبب مطلوب. ويُرسل إلى المنظّم كما هو مكتوب.",
+        },
+        "notACommitment": {
+            "en": "A nomination is not a commitment by either side until you accept.",
+            "ar": "الترشيح ليس التزاماً من أي من الطرفين إلى أن تقبلوا.",
+        },
+        "declineWarning": {
+            "titleEn": "Declining removes your agency as a named provider for this event.",
+            "titleAr": "الاعتذار يزيل جهتكم كمزوّد مُسمّى لهذه الفعالية.",
+            "bodyEn": "That is a material change to the organizer's submission. The organizer must notify the Ministry of it and may need to identify another provider before the event can proceed.",
+            "bodyAr": "وهذا تغيير جوهري في ملف المنظّم. على المنظّم إبلاغ الوزارة به وقد يحتاج إلى تحديد مزوّد آخر قبل أن تمضي الفعالية.",
+        },
+        "profileFields": [
+            {"key": "agencyName", "en": "Agency name", "ar": "اسم الجهة"},
+            {"key": "providerType", "en": "Type of provider", "ar": "نوع المزوّد"},
+            {"key": "representative", "en": "Authorized representative", "ar": "الممثل المفوض"},
+            {"key": "operationalLead", "en": "Operational lead", "ar": "المسؤول التشغيلي"},
+            {"key": "leadContact", "en": "Operational lead contact", "ar": "اتصال المسؤول التشغيلي"},
+            {"key": "phone", "en": "Telephone", "ar": "الهاتف"},
+            {"key": "email", "en": "Email", "ar": "البريد الإلكتروني"},
+            {"key": "address", "en": "Address and municipality", "ar": "العنوان والبلدية"},
+            {"key": "areas", "en": "Municipalities or areas covered", "ar": "البلديات أو المناطق المشمولة"},
+        ],
+        "profileReuse": {
+            "en": "This profile is reused across every event your agency participates in. You never re-enter it per event.",
+            "ar": "يُعاد استخدام هذا الملف في كل فعالية تشارك فيها جهتكم. لا تُعاد تعبئته لكل فعالية.",
+        },
+        "profileSharedNote": {
+            "$comment": "The prototype said the first-response service 'opens in a later phase'; it is now its own account and sign-in. Reworded, reported.",
+            "en": "The cardiac-arrest readiness framework also places obligations on BLS agencies and first-response units. That is a separate regulatory instrument with its own account and sign-in. This profile is shared between the two frameworks; nothing else is.",
+            "ar": "يضع إطار الجاهزية لتوقف القلب موجبات أيضاً على جهات دعم الحياة الأساسي ووحدات الاستجابة الأولية. وهو أداة تنظيمية منفصلة لها حسابها وتسجيل دخولها الخاص. هذا الملف مشترك بين الإطارين، ولا شيء غيره.",
+        },
+        "level2Intro": {
+            "en": "This information goes to the organizer for the event health and medical plan. No declaration is required at Level 2.",
+            "ar": "تذهب هذه المعلومات إلى المنظّم لإدراجها في الخطة الصحية والطبية للفعالية. لا يُطلب أي إقرار في المستوى 2.",
+        },
+        "level2Fields": [
+            {"key": "contactName", "en": "Operational contact for this event — name", "ar": "جهة الاتصال التشغيلية لهذه الفعالية — الاسم"},
+            {"key": "position", "en": "Position", "ar": "الصفة"},
+            {"key": "phone", "en": "Telephone", "ar": "الهاتف"},
+            {"key": "teams", "en": "Assigned personnel and BLS response teams", "ar": "الموظفون المكلّفون وفرق الاستجابة لدعم الحياة الأساسي"},
+            {"key": "ambulances", "en": "Assigned ambulances", "ar": "سيارات الإسعاف المكلّفة"},
+            {"key": "deployment", "en": "Deployment arrangements", "ar": "ترتيبات الانتشار"},
+            {"key": "communications", "en": "Communications — channels and call signs", "ar": "الاتصالات — القنوات ورموز النداء"},
+            {"key": "escalation", "en": "Escalation arrangements", "ar": "ترتيبات التصعيد"},
+            {"key": "access", "en": "Ambulance access and patient-extraction routes", "ar": "وصول الإسعاف ومسارات إخلاء المرضى"},
+            {"key": "hospitals", "en": "Receiving emergency departments", "ar": "أقسام الطوارئ المستقبِلة"},
+        ],
+        "responsibilitySentence": {
+            "$comment": "Protocol 7's fuller list, including patient care (README divergence 7).",
+            "en": "Each participating provider remains professionally and organizationally responsible for its personnel, qualifications, authorization, equipment, protocols, clinical practice, patient care, documentation and services.",
+            "ar": "يبقى كل مزوّد مشارك مسؤولاً مهنياً وتنظيمياً عن موظفيه ومؤهلاتهم وترخيصهم ومعداته وبروتوكولاته وممارسته السريرية ورعاية المرضى والتوثيق والخدمات.",
+        },
+        "certificationFields": [
+            {"key": "provider", "en": "EMS provider", "ar": "مزوّد الإسعاف"},
+            {"key": "representative", "en": "Authorized representative", "ar": "الممثل المفوض"},
+            {"key": "position", "en": "Position", "ar": "الصفة"},
+            {"key": "phone", "en": "Telephone", "ar": "الهاتف", "issue": "en-only",
+             "$comment": "The Arabic issue of the compliance form omits Telephone from both certification blocks (README divergence 2). Union rendered, tagged."},
+            {"key": "date", "en": "Date", "ar": "التاريخ"},
+        ],
+        "draftNote": {
+            "draftEn": "This declaration is a draft. It is visible to your agency only until it is signed.",
+            "draftAr": "هذا الإقرار مسودة. لا يظهر إلا لجهتكم إلى أن يُوقَّع.",
+            "signedEn": "Signed and released to the organizer.",
+            "signedAr": "وُقّع وأُرسل إلى المنظّم.",
+        },
+        "deliveredNote": {
+            "en": "Your declaration is now one of the Level 3 attachments in the organizer's submission package. Only your agency's declaration is shown to you.",
+            "ar": "أصبح إقراركم أحد مرفقات المستوى 3 في حزمة تقديم المنظّم. لا يُعرض لكم سوى إقرار جهتكم.",
+        },
+        "docsIntro": {
+            "en": "One list, visible to your organization and to the organizer. Either side can add a document. Nothing here is sent to the Ministry unless the organizer attaches it to the submission.",
+            "ar": "قائمة واحدة تظهر لمؤسستكم وللمنظّم. ويمكن لأي من الطرفين إضافة مستند. ولا يُرسل شيء منها إلى الوزارة إلا إذا أرفقه المنظّم بالملف.",
+        },
+    },
+
+    # ---- First-response unit (cardiac-arrest instrument) ----
+    "firstResponse": {
+        "accountNote": {
+            "en": "First-response unit account · this account holds no facility records and cannot open a facility's registry or plan",
+            "ar": "حساب وحدة استجابة أولية · لا يحمل هذا الحساب سجلات مرافق ولا يمكنه فتح سجل مرفق أو خطته",
+        },
+        "differentActor": {
+            "en": "This is a different actor from the participating emergency medical provider named on an event. The two answer to different instruments, and neither declaration substitutes for the other, even where one organisation holds both roles.",
+            "ar": "هذا طرف مختلف عن مزوّد الإسعاف المشارك المُسمّى على فعالية. ويخضع الاثنان لإطارين مختلفين، ولا يحل إقرار أحدهما محل الآخر، وإن كانت مؤسسة واحدة تحمل الدورين.",
+        },
+        # The four readiness groups. English from the policy spec 8.1-8.4; Arabic
+        # verbatim from ar annex E part 1. The prototype's lists differed (it added
+        # oxygen and airway equipment and dropped adult pads and protective
+        # equipment) -- superseded by the source, reported.
+        "equipment": [
+            {"en": "Functioning AED or another defibrillator authorized for use by the responding personnel", "ar": "جهاز إزالة رجفان خارجي آلي (AED) صالح للتشغيل، أو أي جهاز إزالة رجفان آخر مرخص باستخدامه من قبل أفراد الوحدة"},
+            {"en": "Adult electrode pads", "ar": "أقطاب كهربائية مخصصة للبالغين"},
+            {"en": "Pediatric pads or pediatric operating capability where children may reasonably be treated", "ar": "أقطاب كهربائية مخصصة للأطفال، أو إمكانية تشغيل الجهاز للأطفال، حيث يُحتمل تقديم الرعاية للأطفال"},
+            {"en": "Bag-valve-mask or other approved basic ventilation equipment", "ar": "قناع الإنعاش المزود بكيس وصمام (Bag-Valve Mask - BVM)، أو أي وسيلة تهوية أساسية أخرى معتمدة"},
+            {"en": "Basic protective equipment required for resuscitation", "ar": "معدات الوقاية الأساسية اللازمة لإجراء الإنعاش"},
+        ],
+        "competence": [
+            {"en": "Recognition of suspected cardiac arrest", "ar": "التعرف إلى حالات توقف القلب المشتبه بها"},
+            {"en": "High-quality CPR", "ar": "إجراء الإنعاش القلبي الرئوي عالي الجودة"},
+            {"en": "Application and operation of the AED or authorized defibrillator", "ar": "استخدام وتشغيل جهاز إزالة الرجفان الخارجي الآلي أو جهاز إزالة الرجفان المعتمد"},
+            {"en": "Basic ventilation", "ar": "توفير التهوية الأساسية"},
+            {"en": "Work within an organized resuscitation team", "ar": "العمل ضمن فريق منظم للاستجابة والإنعاش"},
+            {"en": "Transfer of care to another EMS unit or receiving emergency department", "ar": "تسليم الرعاية إلى وحدة أخرى من خدمات الطوارئ الطبية أو إلى قسم الطوارئ في المستشفى المستقبِل"},
+            {"en": "Documentation and reporting of the response", "ar": "توثيق الاستجابة وإعداد التقارير المطلوبة"},
+        ],
+        "operational": [
+            {"en": "Check the AED or defibrillator before deployment, or at the start of each operational shift", "ar": "فحص جهاز إزالة الرجفان الخارجي الآلي أو جهاز إزالة الرجفان قبل مباشرة الخدمة أو في بداية كل مناوبة تشغيلية"},
+            {"en": "Confirm battery, pads and required supplies are available and functional", "ar": "التأكد من توافر البطارية، والأقطاب الكهربائية، وجميع المستلزمات المطلوبة وصلاحيتها للاستعمال"},
+            {"en": "Immediately report any device that is unavailable or out of service", "ar": "الإبلاغ فوراً عن أي جهاز غير متوافر أو خارج الخدمة"},
+            {"en": "Replace used or expired supplies", "ar": "استبدال المستلزمات المستخدمة أو المنتهية الصلاحية"},
+            {"en": "Return the device and unit to operational readiness after each response", "ar": "إعادة الجهاز والوحدة إلى حالتهما التشغيلية الكاملة بعد كل استجابة"},
+        ],
+        "procedure": [
+            {"n": 1, "en": "Confirm suspected cardiac arrest", "ar": "تأكيد الاشتباه بحالة توقف القلب"},
+            {"n": 2, "en": "Initiate CPR", "ar": "البدء بالإنعاش القلبي الرئوي"},
+            {"n": 3, "en": "Apply the AED or defibrillator as soon as possible", "ar": "استخدام جهاز إزالة الرجفان الخارجي الآلي أو جهاز إزالة الرجفان في أقرب وقت ممكن"},
+            {"n": 4, "en": "Continue resuscitation according to the responder's authorized scope of practice", "ar": "الاستمرار في الإنعاش وفقاً لنطاق الممارسة المهنية المصرح به للمستجيب"},
+            {"n": 5, "en": "Coordinate transport or transfer of care", "ar": "تنسيق نقل المريض أو تسليم الرعاية"},
+            {"n": 6, "en": "Complete the required report", "ar": "استكمال التقرير المطلوب"},
+        ],
+        "nonTransportRule": {
+            "en": "Where the responding unit does not transport patients, it must coordinate handover to the transporting EMS agency or another appropriate medical service.",
+            "ar": "وفي حال كانت وحدة الاستجابة غير مخولة بنقل المرضى، فعليها تنسيق تسليم الحالة إلى جهة خدمات الطوارئ الطبية المختصة بالنقل أو إلى أي جهة طبية مختصة أخرى.",
+        },
+        # The minimum dataset: one report per patient, five sections, no patient name.
+        # Fields verbatim from the policy spec 9 (EN) and ar annex E part 2 (AR).
+        # The onsite device is distinguished from the unit's own device in section C.
+        # The prototype's Sex and Presumed cause fields are NOT in the dataset and are
+        # excluded by the data-minimisation rule -- dropped, reported.
+        "datasetIntro": {
+            "en": "One report for each patient. Five sections. The report carries no patient name.",
+            "ar": "يُستكمل تقرير مستقل لكل مريض. خمسة أقسام. ولا يتضمن التقرير اسم المريض.",
+        },
+        "attachRoute": {
+            "en": "A unit may use its own patient-care report where that report captures everything required here. Attaching it satisfies the obligation; nothing has to be re-typed into the platform.",
+            "ar": "ويجوز للجهة استخدام نموذج تقرير رعاية المريض الورقي أو الإلكتروني المعتمد لديها، متى تضمن جميع المعلومات المطلوبة. وإرفاقه يستوفي الموجب، ولا يلزم إعادة إدخال شيء في المنصة.",
+        },
+        "routes": [
+            {"key": "platform", "en": "Complete it here", "ar": "استكماله هنا"},
+            {"key": "attach", "en": "Attach our own patient-care report", "ar": "إرفاق تقرير رعاية المرضى الخاص بنا"},
+        ],
+        "attachCoverage": {
+            "en": "Confirm the attached report covers each section below. Anything it does not cover is completed here.",
+            "ar": "أكّدوا أن التقرير المرفق يغطي كل قسم أدناه. وما لا يغطيه يُستكمل هنا.",
+        },
+        "coveredChip": {"en": "Covered by the attached report", "ar": "يغطيه التقرير المرفق"},
+        "datasetSections": [
+            {"key": "incident", "en": "Incident information", "ar": "معلومات الحادثة", "fields": [
+                {"key": "caseNumber", "en": "Agency case or report number", "ar": "رقم الحالة أو رقم التقرير لدى الجهة", "kind": "text"},
+                {"key": "date", "en": "Date of incident", "ar": "تاريخ الحادثة", "kind": "date"},
+                {"key": "time", "en": "Approximate time of incident", "ar": "الوقت التقريبي للحادثة", "kind": "time"},
+                {"key": "location", "en": "Exact location or facility name", "ar": "الموقع الدقيق أو اسم المرفق", "kind": "text"},
+                {"key": "address", "en": "Address and municipality", "ar": "العنوان والبلدية", "kind": "text"},
+                {"key": "facilityCategory", "en": "Facility category, if applicable", "ar": "فئة المرفق، عند الاقتضاء", "kind": "text"},
+                {"key": "ageGroup", "en": "Patient age group", "ar": "الفئة العمرية للمريض", "kind": "ageGroup"},
+            ]},
+            {"key": "response", "en": "Response information", "ar": "معلومات الاستجابة", "fields": [
+                {"key": "witnessed", "en": "Cardiac arrest witnessed", "ar": "كانت حالة توقف القلب مشاهدة", "kind": "yesNoUnknown"},
+                {"key": "cprBefore", "en": "CPR started before the responding unit arrived", "ar": "بدأ الإنعاش القلبي الرئوي قبل وصول وحدة الاستجابة", "kind": "yesNoUnknown"},
+                {"key": "requestTime", "en": "Time the request was received, if available", "ar": "وقت تلقي طلب الاستجابة، إن وجد", "kind": "time"},
+                {"key": "arrivalTime", "en": "Time the responding unit arrived, if available", "ar": "وقت وصول وحدة الاستجابة، إن وجد", "kind": "time"},
+            ]},
+            {"key": "defibrillation", "en": "AED and defibrillation", "ar": "جهاز إزالة الرجفان والصدمة الكهربائية", "fields": [
+                {"key": "onsiteAvailable", "en": "Onsite AED available", "ar": "كان جهاز إزالة الرجفان الخارجي الآلي متوافراً في الموقع", "kind": "yesNoUnknown"},
+                {"key": "onsiteApplied", "en": "Onsite AED applied before responder arrival", "ar": "استُخدم جهاز إزالة الرجفان الخارجي الآلي الموجود في الموقع قبل وصول وحدة الاستجابة", "kind": "yesNoUnknown"},
+                {"key": "onsiteShock", "en": "Shock delivered before responder arrival", "ar": "أُعطيت صدمة كهربائية قبل وصول وحدة الاستجابة", "kind": "yesNoUnknown"},
+                {"key": "unitApplied", "en": "Responding unit's AED or defibrillator applied", "ar": "استُخدم جهاز إزالة الرجفان الخارجي الآلي أو جهاز إزالة الرجفان الخاص بوحدة الاستجابة", "kind": "yesNo"},
+                {"key": "unitShock", "en": "Shock delivered by responding personnel", "ar": "أُعطيت صدمة كهربائية بواسطة أفراد وحدة الاستجابة", "kind": "yesNo"},
+            ]},
+            {"key": "outcome", "en": "Immediate outcome and transfer", "ar": "النتيجة المباشرة وتسليم الرعاية", "fields": [
+                {"key": "rosc", "en": "Return of spontaneous circulation before handover", "ar": "عودة الدورة الدموية التلقائية قبل تسليم الحالة", "kind": "yesNoUnknown"},
+                {"key": "transported", "en": "Patient transported", "ar": "تم نقل المريض", "kind": "yesNoNa"},
+                {"key": "hospital", "en": "Receiving emergency department or hospital", "ar": "قسم الطوارئ أو المستشفى المستقبِل", "kind": "text"},
+                {"key": "transferred", "en": "Care transferred to another EMS agency", "ar": "تم تسليم الرعاية إلى جهة أخرى من خدمات الطوارئ الطبية", "kind": "yesNoNa"},
+                {"key": "receivingAgency", "en": "Name of receiving EMS agency, if applicable", "ar": "اسم جهة خدمات الطوارئ الطبية المستلمة، عند الاقتضاء", "kind": "text"},
+            ]},
+            {"key": "agency", "en": "Responding agency", "ar": "الجهة المستجيبة", "fields": [
+                {"key": "agencyName", "en": "EMS or first-response agency", "ar": "جهة خدمات الطوارئ الطبية أو جهة الاستجابة الطبية الأولية", "kind": "text"},
+                {"key": "unitId", "en": "Unit identifier", "ar": "رمز أو معرف الوحدة", "kind": "text"},
+                {"key": "completedBy", "en": "Report completed by", "ar": "اسم معدّ التقرير", "kind": "text"},
+                {"key": "phone", "en": "Telephone", "ar": "رقم الهاتف", "kind": "text"},
+                {"key": "email", "en": "Email", "ar": "البريد الإلكتروني", "kind": "text"},
+                {"key": "submitted", "en": "Date submitted", "ar": "تاريخ تقديم التقرير", "kind": "date"},
+            ]},
+        ],
+        "ageGroups": [
+            {"key": "adult", "en": "Adult", "ar": "بالغ"},
+            {"key": "child", "en": "Child", "ar": "طفل"},
+            {"key": "unknown", "en": "Unknown", "ar": "غير معروف"},
+        ],
+        "timeframeNote": {
+            "$comment": "The submission timeframe is a Ministry value not yet set (annex E part 1, section five). The unset state is the answer.",
+            "en": "The reporting timeframe is set by the Ministry and is not fixed in this form.",
+            "ar": "تحدد الوزارة مهلة الإبلاغ وهي غير مثبّتة في هذا النموذج.",
+        },
+    },
+
+    # ---- Event Medical Director (Level 3 only) ----
+    "director": {
+        "inviteIntro": {
+            "en": "An event organizer has nominated you as the Event Medical Director for a Level 3 event. The role exists only at Level 3, and only an organizer can nominate you.",
+            "ar": "رشّحكم منظّم فعالية مديراً طبياً لفعالية من المستوى 3. ولا يوجد هذا الدور إلا في المستوى 3، ولا يمكن ترشيحكم إلا من منظّم.",
+        },
+        "accepting": {
+            "en": "Accepting makes you personally responsible, as a licensed physician, for the requirements below. Four are shared with the organizer and the participating providers. One is yours alone.",
+            "ar": "القبول يجعلكم مسؤولين شخصياً، بصفتكم طبيباً مُجازاً، عن المتطلبات أدناه. أربعة منها مشتركة مع المنظّم والمزوّدين المشاركين. وواحد منها لكم وحدكم.",
+        },
+        "alsoAccepting": [
+            {"en": "Writing the clinical-governance and event medical-command arrangements into the organizer's event health and medical plan.",
+             "ar": "كتابة ترتيبات الحوكمة السريرية والقيادة الطبية للفعالية في الخطة الصحية والطبية لدى المنظّم."},
+            {"en": "Defining your role within the medical-command and overall incident-management structure in the major-incident plan.",
+             "ar": "تحديد دوركم ضمن القيادة الطبية وبنية إدارة الحوادث العامة في خطة الحوادث الجسيمة."},
+            {"en": "Signing the post-event medical report. At Level 3 it carries two signatures and the organizer's alone does not complete it.",
+             "ar": "توقيع التقرير الطبي لما بعد الفعالية. وفي المستوى 3 يحمل توقيعين ولا يكتمل بتوقيع المنظّم وحده."},
+            {"en": "The Lebanese Order of Physicians will verify your licence for this event, where that lane is active.",
+             "ar": "ستتحقق نقابة الأطباء في لبنان من ترخيصكم لهذه الفعالية، حيث يكون هذا المسار مفعّلاً."},
+        ],
+        "profileFields": [
+            {"key": "fullName", "en": "Full name", "ar": "الاسم الكامل"},
+            {"key": "licence", "en": "Medical licence number", "ar": "رقم الترخيص الطبي"},
+            {"key": "orderRegistration", "en": "Order of Physicians registration", "ar": "تسجيل نقابة الأطباء"},
+            {"key": "specialty", "en": "Specialty", "ar": "الاختصاص"},
+            {"key": "years", "en": "Years in practice", "ar": "سنوات الممارسة"},
+            {"key": "phone", "en": "Telephone", "ar": "الهاتف"},
+            {"key": "email", "en": "Email", "ar": "البريد الإلكتروني"},
+            {"key": "affiliation", "en": "Hospital or practice affiliation", "ar": "الانتساب إلى مستشفى أو عيادة"},
+        ],
+        "soleNote": {
+            "en": "No one else can address this. The organizer cannot file the Level 3 package without it, and no other party is named against it in the requirements matrix.",
+            "ar": "لا يمكن لأحد غيركم معالجة هذا. ولا يمكن للمنظّم تقديم حزمة المستوى 3 من دونه، ولا يُسمّى أي طرف آخر مقابله في مصفوفة المتطلبات.",
+        },
+        "govIntro": {
+            "en": "At Level 3 this content is yours to write. What you enter here writes into the organizer's event health and medical plan; neither of you writes it twice.",
+            "ar": "في المستوى 3 هذا المحتوى من كتابتكم. وما تُدخلونه هنا يُكتب في الخطة الصحية والطبية للفعالية لدى المنظّم؛ ولا يكتبه أي منكما مرتين.",
+        },
+        "govWhere": {
+            "en": "Sections 10 and 12 of the organizer's plan, and the major-incident and mass-casualty plan. The organizer sees your text there and cannot overwrite it.",
+            "ar": "البندان 10 و12 من خطة المنظّم، وخطة الحوادث الجسيمة وحوادث الإصابات الجماعية. ويرى المنظّم نصكم هناك ولا يمكنه استبداله.",
+        },
+        "govSections": [
+            {"key": "clinical", "en": "Clinical-governance arrangements", "ar": "ترتيبات الحوكمة السريرية",
+             "askEn": "How clinical standards are set and maintained across all medical teams at the event, under whose authority they practise, and how a clinical concern is escalated.",
+             "askAr": "كيف تُوضع المعايير السريرية وتُصان عبر جميع الفرق الطبية في الفعالية، وتحت سلطة من تمارس، وكيف يُصعَّد أي قلق سريري.",
+             "intoEn": "Plan section 10 — coordination and communications", "intoAr": "البند 10 من الخطة — التنسيق والاتصالات"},
+            {"key": "command", "en": "Event medical-command arrangements", "ar": "ترتيبات القيادة الطبية للفعالية",
+             "askEn": "Who holds medical command, where they are located, how command is exercised across the site or route, and how it hands over.",
+             "askAr": "من يتولى القيادة الطبية وأين يتمركز وكيف تُمارس القيادة عبر الموقع أو المسار وكيف تُسلَّم.",
+             "intoEn": "Plan section 10, and requirement 15", "intoAr": "البند 10 من الخطة، والمتطلب 15"},
+            {"key": "incidentRole", "en": "Your role in the major-incident and incident-management structure", "ar": "دوركم في بنية الحوادث الجسيمة وإدارة الحوادث",
+             "askEn": "Where the Event Medical Director sits within medical command and the overall incident-management structure during a major incident, and who deputises.",
+             "askAr": "أين يقع المدير الطبي للفعالية ضمن القيادة الطبية وبنية إدارة الحوادث العامة خلال حادث جسيم، ومن ينوب عنه.",
+             "intoEn": "Major-incident plan, items 2 and 10", "intoAr": "خطة الحوادث الجسيمة، البندان 2 و10"},
+        ],
+        "reportIntro": {
+            "en": "The organizer prepares the report and enters the figures. You review it and sign. At Level 3 the report carries two signatures and is not complete with the organizer's alone.",
+            "ar": "يُعدّ المنظّم التقرير ويُدخل الأرقام. وأنتم تراجعونه وتوقّعونه. وفي المستوى 3 يحمل التقرير توقيعين ولا يكتمل بتوقيع المنظّم وحده.",
+        },
+        "reportReadOnly": {
+            "en": "Figures and narrative are the organizer's to enter. You cannot change them here. If something is wrong, return the report rather than signing it.",
+            "ar": "الأرقام والسرد من إدخال المنظّم. ولا يمكنكم تغييرها هنا. وإذا كان شيء غير صحيح، أعيدوا التقرير بدل توقيعه.",
+        },
+        "credIntro": {
+            "en": "The Lebanese Order of Physicians verifies your licence for each Level 3 event. This record is theirs. You can see it; you cannot change it.",
+            "ar": "تتحقق نقابة الأطباء في لبنان من ترخيصكم لكل فعالية من المستوى 3. وهذا السجل سجلّها. يمكنكم رؤيته؛ ولا يمكنكم تغييره.",
+        },
+        "credNonDeterminative": {
+            "en": "Verification informs the Ministry's review. It does not decide it. A Ministry reviewer may record any of the three outcomes on a submission whether or not verification is complete.",
+            "ar": "يُعلم التحقق مراجعة الوزارة ولا يقررها. ويجوز لمراجع الوزارة تسجيل أي من النتائج الثلاث على تقديم سواء اكتمل التحقق أم لا.",
+        },
+        "credLaneOff": {
+            "$comment": "SPEC: the Order lane is configurable, non-determinative and OFF BY DEFAULT. The off state is the first-class answer.",
+            "en": "The Order of Physicians verification lane is not active. Until the Ministry activates it, no verification is performed and no record appears here. This does not affect the Ministry's review of any submission.",
+            "ar": "مسار التحقق لدى نقابة الأطباء غير مفعّل. وإلى أن تفعّله الوزارة، لا يُجرى أي تحقق ولا يظهر أي سجل هنا. ولا يؤثر ذلك في مراجعة الوزارة لأي تقديم.",
+        },
+    },
+
+    # Ministry-configurable lanes. Off by default; turning one on is a Ministry act
+    # recorded here as data, never a code change.
+    "lanes": {
+        "orderOfPhysicians": {"active": False},
+    },
+}
+
+path = OUT / "roles.json"
+path.write_text(json.dumps(roles, ensure_ascii=False, indent=2) + "\n")
+print(f"wrote {path.relative_to(OUT.parent.parent.parent)}")

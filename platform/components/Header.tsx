@@ -151,7 +151,10 @@ export function Header({
                   <L en="Organization pending Ministry approval" ar="المؤسسة بانتظار موافقة الوزارة" />
                 </div>
               ) : null}
-              {!organization ? (
+              {!organization && account.role === 'organizer' ? (
+                // Organizer accounts only: a role account (EMS, Director, first
+                // response) has no organization to record, so the line is ABSENT
+                // there -- not greyed (rule 10).
                 <div style={{ fontSize: 12, color: 'var(--accent-ink)' }}>
                   <L en="Organization not yet recorded" ar="لم تُسجَّل المؤسسة بعد" />
                 </div>

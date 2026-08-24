@@ -718,3 +718,172 @@ export function venueChangeSinceAssessment(accountId: number, venueId: string): 
     .get(venueId, venueId) as { x: number };
   return r.x === 1;
 }
+
+
+/* ---------------- Slice 5: the counterparty roles ---------------- */
+
+export interface InvitationDetail {
+  token: string;
+  eventId: string;
+  kind: 'ems' | 'director';
+  nameEn: string;
+  nameAr: string;
+  email: string;
+  status: 'nominated' | 'confirmed' | 'declined';
+  declaration: 'none' | 'draft' | 'signed';
+  accountId: number | null;
+  responseNote: string;
+  opsDetail: Record<string, string>;
+  declarationItems: boolean[];
+  certification: Record<string, string>;
+  signedAt: string | null;
+  invitedAt: string;
+  answeredAt: string | null;
+  /** The event the nomination names, and who filed it. */
+  eventNameEn: string;
+  eventNameAr: string;
+  eventStart: string | null;
+  eventEnd: string | null;
+  eventLevel: Level | null;
+  organizerAccountId: number;
+  organizationNameEn: string;
+  organizationNameAr: string;
+}
+
+function derivedLevelFor(eventId: string): Level | null {
+  const r = getDb()
+    .prepare(`SELECT answers, inputs FROM assessments WHERE event_id = ? ORDER BY version DESC LIMIT 1`)
+    .get(eventId) as { answers: string; inputs: string } | undefined;
+  if (!r) return null;
+  const derivation = deriveLevel({
+    answers: JSON.parse(r.answers) as DomainAnswers,
+    inputs: JSON.parse(r.inputs) as MinimumConditionInputs,
+  });
+  return derivation.finalLevel;
+}
+
+function mapInvitation(r: {
+  token: string; event_id: string; kind: 'ems' | 'director'; name_en: string; name_ar: string;
+  email: string; status: InvitationDetail['status']; declaration: InvitationDetail['declaration'];
+  account_id: number | null; response_note: string; ops_detail: string; declaration_items: string;
+  certification: string; signed_at: string | null; invited_at: string; answered_at: string | null;
+  ev_name_en: string; ev_name_ar: string; ev_start: string | null; ev_end: string | null;
+  ev_level: number | null; ev_account: number; org_name_en: string | null; org_name_ar: string | null;
+}): InvitationDetail {
+  return {
+    token: r.token, eventId: r.event_id, kind: r.kind,
+    nameEn: r.name_en, nameAr: r.name_ar, email: r.email,
+    status: r.status, declaration: r.declaration,
+    accountId: r.account_id, responseNote: r.response_note,
+    opsDetail: JSON.parse(r.ops_detail) as Record<string, string>,
+    declarationItems: JSON.parse(r.declaration_items) as boolean[],
+    certification: JSON.parse(r.certification) as Record<string, string>,
+    signedAt: r.signed_at, invitedAt: r.invited_at, answeredAt: r.answered_at,
+    eventNameEn: r.ev_name_en, eventNameAr: r.ev_name_ar,
+    eventStart: r.ev_start, eventEnd: r.ev_end,
+    // The level is derived, never chosen: the latest assessment's derivation wins,
+    // the demonstration presentation level fills in for showcase rows without one.
+    eventLevel: derivedLevelFor(r.event_id) ?? ((r.ev_level as Level | null) ?? null),
+    organizerAccountId: r.ev_account,
+    organizationNameEn: r.org_name_en ?? '', organizationNameAr: r.org_name_ar ?? '',
+  };
+}
+
+const INVITATION_SELECT = `
+  SELECT i.token, i.event_id, i.kind, i.name_en, i.name_ar, i.email, i.status,
+         i.declaration, i.account_id, i.response_note, i.ops_detail, i.declaration_items,
+         i.certification, i.signed_at, i.invited_at, i.answered_at,
+         e.name_en AS ev_name_en, e.name_ar AS ev_name_ar, e.start_date AS ev_start,
+         e.end_date AS ev_end, e.demo_level AS ev_level, e.id AS ev_id, e.account_id AS ev_account,
+         o.name_en AS org_name_en, o.name_ar AS org_name_ar
+  FROM invitations i
+  JOIN events e ON e.id = i.event_id
+  LEFT JOIN organizations o ON o.account_id = e.account_id`;
+
+/** The token is the credential (rule 6): whoever holds it sees this one nomination. */
+export function invitationByToken(token: string): InvitationDetail | null {
+  const r = getDb().prepare(`${INVITATION_SELECT} WHERE i.token = ?`).get(token) as
+    | Parameters<typeof mapInvitation>[0]
+    | undefined;
+  return r ? mapInvitation(r) : null;
+}
+
+/** Every nomination linked to this account -- the role dashboards. */
+export function invitationsForAccount(accountId: number): InvitationDetail[] {
+  const rows = getDb()
+    .prepare(`${INVITATION_SELECT} WHERE i.account_id = ? ORDER BY e.start_date`)
+    .all(accountId) as unknown as Parameters<typeof mapInvitation>[0][];
+  return rows.map(mapInvitation);
+}
+
+/** One nomination on one event for this account -- the role event screens. */
+export function invitationForEvent(accountId: number, eventId: string, kind: 'ems' | 'director'): InvitationDetail | null {
+  const r = getDb()
+    .prepare(`${INVITATION_SELECT} WHERE i.account_id = ? AND i.event_id = ? AND i.kind = ?`)
+    .get(accountId, eventId, kind) as Parameters<typeof mapInvitation>[0] | undefined;
+  return r ? mapInvitation(r) : null;
+}
+
+export interface SharedDocumentRow {
+  id: number;
+  nameEn: string; nameAr: string;
+  source: 'organizer' | 'provider' | 'requested' | 'missing';
+  fileName: string | null;
+  metaEn: string; metaAr: string;
+}
+
+export function sharedDocumentsFor(token: string): SharedDocumentRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, name_en, name_ar, source, file_name, meta_en, meta_ar FROM shared_documents WHERE invitation_token = ? ORDER BY added_at`)
+    .all(token) as unknown as { id: number; name_en: string; name_ar: string; source: SharedDocumentRow['source']; file_name: string | null; meta_en: string; meta_ar: string }[];
+  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, source: r.source, fileName: r.file_name, metaEn: r.meta_en, metaAr: r.meta_ar }));
+}
+
+export interface FrReadinessRow {
+  confirmations: { equipment?: boolean[]; competence?: boolean[]; operational?: boolean[] };
+  signedAt: string | null;
+  updatedAt: string;
+}
+
+export function frReadinessFor(accountId: number): FrReadinessRow | null {
+  const r = getDb()
+    .prepare(`SELECT confirmations, signed_at, updated_at FROM fr_readiness WHERE account_id = ?`)
+    .get(accountId) as { confirmations: string; signed_at: string | null; updated_at: string } | undefined;
+  if (!r) return null;
+  return { confirmations: JSON.parse(r.confirmations) as FrReadinessRow['confirmations'], signedAt: r.signed_at, updatedAt: r.updated_at };
+}
+
+export interface FrReportRow {
+  id: number;
+  mode: 'platform' | 'attach';
+  attachedFile: string | null;
+  covered: Record<string, boolean>;
+  payload: Record<string, string>;
+  createdAt: string;
+}
+
+export function frReportsFor(accountId: number): FrReportRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, mode, attached_file, covered, payload, created_at FROM fr_reports WHERE account_id = ? ORDER BY created_at DESC`)
+    .all(accountId) as unknown as { id: number; mode: 'platform' | 'attach'; attached_file: string | null; covered: string; payload: string; created_at: string }[];
+  return rows.map((r) => ({
+    id: r.id, mode: r.mode, attachedFile: r.attached_file,
+    covered: JSON.parse(r.covered) as Record<string, boolean>,
+    payload: JSON.parse(r.payload) as Record<string, string>,
+    createdAt: r.created_at,
+  }));
+}
+
+export function roleProfileFor(accountId: number): Record<string, string> {
+  const r = getDb()
+    .prepare(`SELECT fields FROM role_profiles WHERE account_id = ?`)
+    .get(accountId) as { fields: string } | undefined;
+  return r ? (JSON.parse(r.fields) as Record<string, string>) : {};
+}
+
+export function governanceFor(eventId: string): Record<string, string> {
+  const r = getDb()
+    .prepare(`SELECT sections FROM event_governance WHERE event_id = ?`)
+    .get(eventId) as { sections: string } | undefined;
+  return r ? (JSON.parse(r.sections) as Record<string, string>) : {};
+}

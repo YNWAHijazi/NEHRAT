@@ -26,7 +26,8 @@ import {
 } from '../lib/auth';
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
-  facilityCategory, categoryEndsJourney, detectPersonalName } from '../lib/rules';
+  facilityCategory, categoryEndsJourney, detectPersonalName,
+  declarationGate } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -45,11 +46,13 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   const account = findAccountByLogin(login);
   if (!account) redirect('/signin?error=unknown');
   await startSession(account.id);
-  // Only the organizer surface exists in Slice 1. Other demonstration roles land on
-  // their dashboards in later slices; until then their sign-in routes to the organizer
-  // journey is wrong, so they return to sign-in with a build notice.
-  if (account.role !== 'organizer') redirect('/signin?notice=role-later-slice');
-  redirect('/dashboard');
+  // Each role lands on its own surface. The Ministry console arrives in Slice 6;
+  // until then those roles return to sign-in with a build notice.
+  if (account.role === 'organizer' || account.role === 'ems' || account.role === 'director') {
+    redirect('/dashboard');
+  }
+  if (account.role === 'response') redirect('/first-response/readiness');
+  redirect('/signin?notice=role-later-slice');
 }
 
 export async function signInWithPasswordAction(formData: FormData): Promise<void> {
@@ -800,3 +803,329 @@ export async function submitFacilityIncidentAction(
   redirect(`/facilities/${facilityId}?notice=incident`);
 }
 
+
+
+/* ---------------- Slice 5: the counterparty roles ---------------- */
+
+function invitationRow(token: string): { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string } | null {
+  return (getDb()
+    .prepare(`SELECT event_id, kind, account_id, status FROM invitations WHERE token = ?`)
+    .get(token) ?? null) as { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string } | null;
+}
+
+function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string): void {
+  const db = getDb();
+  const ev = db.prepare(`SELECT account_id, is_demo FROM events WHERE id = ?`).get(eventId) as { account_id: number; is_demo: number } | undefined;
+  if (!ev) return;
+  db.prepare(
+    `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+  ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
+}
+
+/**
+ * The nomination response. The token is the credential (rule 6): the holder responds
+ * to this one nomination and sees nothing else. Accepting links the session's
+ * account; declining requires a reason and is a material change the organizer must
+ * report; a modification request keeps the nomination open with the reason attached.
+ */
+export async function respondToInvitationAction(token: string, formData: FormData): Promise<void> {
+  const inv = invitationRow(token);
+  if (!inv) redirect('/signin');
+  let account = await currentAccount();
+  if (!account) {
+    // Self-registration AGAINST the invitation (rule 6): the account is created from
+    // the nomination screen's own form, with the role the nomination names.
+    const name = String(formData.get('fullName') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim().toLowerCase();
+    const password = String(formData.get('password') ?? '');
+    if (!name || !email || !checkPasswordPolicy(password).ok) {
+      redirect(`/invitations/${token}?error=account`);
+    }
+    const exists = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email);
+    if (exists) redirect(`/invitations/${token}?error=email-taken`);
+    const initials = name.split(/\s+/).map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase();
+    const role = inv.kind === 'ems' ? 'ems' : 'director';
+    const created = getDb()
+      .prepare(
+        `INSERT INTO accounts (login, email, password_hash, display_name, initials, role, is_demo)
+         VALUES (?, ?, ?, ?, ?, ?, 0)`,
+      )
+      .run(`user_${Date.now().toString(36)}`, email, hashPassword(password), name, initials, role);
+    await startSession(created.lastInsertRowid as number);
+    account = await currentAccount();
+    if (!account) redirect('/signin');
+  }
+  const db = getDb();
+  const response = String(formData.get('response') ?? '');
+  const reason = String(formData.get('reason') ?? '').trim();
+  const eventName = db.prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
+
+  if (response === 'accept') {
+    db.prepare(
+      `UPDATE invitations SET status = 'confirmed', account_id = ?, answered_at = datetime('now') WHERE token = ?`,
+    ).run(account.id, token);
+    redirect('/profile?notice=accepted');
+  }
+  if (response === 'decline') {
+    if (!reason) redirect(`/invitations/${token}?error=reason`);
+    db.prepare(
+      `UPDATE invitations SET status = 'declined', account_id = ?, response_note = ?, answered_at = datetime('now') WHERE token = ?`,
+    ).run(account.id, reason, token);
+    // Declining is a MATERIAL CHANGE the organizer must report (rule 6).
+    notifyOrganizerOf(
+      inv.event_id,
+      `A named party has declined — ${eventName.name_en}`,
+      `اعتذر طرف مُسمّى — ${eventName.name_ar}`,
+      `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. This is a material change to your submission: report it to the Ministry and name another party.`,
+      `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». هذا تغيير جوهري في ملفكم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`,
+      `/events/${inv.event_id}/change`,
+    );
+    redirect(`/invitations/${token}?notice=declined`);
+  }
+  if (response === 'modification') {
+    if (!reason) redirect(`/invitations/${token}?error=reason`);
+    // Not a nomination state: the nomination stays open with the note attached.
+    db.prepare(
+      `UPDATE invitations SET response_note = ?, account_id = ? WHERE token = ?`,
+    ).run(reason, account.id, token);
+    notifyOrganizerOf(
+      inv.event_id,
+      `A named party requests a modification — ${eventName.name_en}`,
+      `طلب طرف مُسمّى تعديلاً — ${eventName.name_ar}`,
+      `The nominated party can serve the event but not as described. The reason, as written: “${reason}”. The nomination remains open.`,
+      `يمكن للطرف المُرشَّح خدمة الفعالية لكن ليس بالصيغة الموصوفة. والسبب كما كُتب: «${reason}». ويبقى الترشيح قائماً.`,
+      `/events/${inv.event_id}/requirements`,
+    );
+    redirect(`/invitations/${token}?notice=modification`);
+  }
+  redirect(`/invitations/${token}`);
+}
+
+function ownedInvitation(accountId: number, token: string): boolean {
+  return Boolean(
+    getDb().prepare(`SELECT token FROM invitations WHERE token = ? AND account_id = ?`).get(token, accountId),
+  );
+}
+
+/** Level 2: operational detail for the organizer's plan. No declaration exists. */
+export async function saveOpsDetailAction(token: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedInvitation(account.id, token)) redirect('/dashboard');
+  const detail: Record<string, string> = {};
+  for (const [k, v] of formData.entries()) {
+    if (typeof v === 'string' && k !== 'token') detail[k] = v;
+  }
+  const inv = invitationRow(token);
+  getDb()
+    .prepare(`UPDATE invitations SET ops_detail = ?, status = 'confirmed', answered_at = COALESCE(answered_at, datetime('now')) WHERE token = ?`)
+    .run(JSON.stringify(detail), token);
+  if (inv) {
+    const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
+    notifyOrganizerOf(
+      inv.event_id,
+      `Participation confirmed with operational detail — ${eventName.name_en}`,
+      `تأكدت المشاركة مع التفاصيل التشغيلية — ${eventName.name_ar}`,
+      'A named provider confirmed participation and supplied its operational detail for your health and medical plan.',
+      'أكد مزوّد مُسمّى مشاركته وقدّم تفاصيله التشغيلية لخطتكم الصحية والطبية.',
+      `/events/${inv.event_id}/requirements`,
+    );
+  }
+  redirect(`/events/${inv?.event_id}/participation?notice=sent`);
+}
+
+/** The Level 3 declaration draft: items and certification, visible to the agency only. */
+export async function saveDeclarationDraftAction(
+  token: string,
+  payload: { items: boolean[]; certification: Record<string, string> },
+): Promise<{ ok: true } | { error: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedInvitation(account.id, token)) return { error: 'not-found' };
+  getDb()
+    .prepare(`UPDATE invitations SET declaration = 'draft', declaration_items = ?, certification = ? WHERE token = ? AND declaration != 'signed'`)
+    .run(JSON.stringify(payload.items), JSON.stringify(payload.certification), token);
+  return { ok: true };
+}
+
+/**
+ * Signing the declaration. The gate is enforced HERE as well as in the screen: ten
+ * items, signing blocked until all ten are confirmed (rule 10 -- disabled with the
+ * count named, and a client cannot bypass it).
+ */
+export async function signDeclarationAction(
+  token: string,
+  payload: { items: boolean[]; certification: Record<string, string> },
+): Promise<{ ok: true } | { error: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedInvitation(account.id, token)) return { error: 'not-found' };
+  const gate = declarationGate(payload.items);
+  if (!gate.canSign) return { error: 'items-outstanding' };
+  const db = getDb();
+  db.prepare(
+    `UPDATE invitations SET declaration = 'signed', declaration_items = ?, certification = ?,
+       status = 'confirmed', signed_at = datetime('now'), answered_at = COALESCE(answered_at, datetime('now'))
+     WHERE token = ?`,
+  ).run(JSON.stringify(payload.items), JSON.stringify(payload.certification), token);
+  const inv = invitationRow(token);
+  if (inv) {
+    const eventName = db.prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
+    notifyOrganizerOf(
+      inv.event_id,
+      `EMS readiness declaration signed — ${eventName.name_en}`,
+      `وُقّع إقرار جاهزية خدمات الطوارئ الطبية — ${eventName.name_ar}`,
+      'A named agency has signed its readiness declaration. It is now one of the Level 3 attachments in your submission package.',
+      'وقّعت جهة مُسمّاة إقرار جاهزيتها. وهو الآن أحد مرفقات المستوى 3 في حزمة تقديمكم.',
+      `/events/${inv.event_id}/requirements`,
+    );
+  }
+  return { ok: true };
+}
+
+export async function addSharedDocumentAction(token: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedInvitation(account.id, token)) redirect('/dashboard');
+  const name = String(formData.get('name') ?? '').trim();
+  const fileName = String(formData.get('fileName') ?? '').trim();
+  if (name) {
+    getDb()
+      .prepare(
+        `INSERT INTO shared_documents (invitation_token, name_en, name_ar, source, file_name, meta_en, meta_ar)
+         VALUES (?, ?, ?, 'provider', ?, 'From your organization', 'من مؤسستكم')`,
+      )
+      .run(token, name, String(formData.get('nameAr') ?? '').trim() || name, fileName || null);
+  }
+  const inv = invitationRow(token);
+  redirect(`/events/${inv?.event_id}/documents?notice=added`);
+}
+
+/** The role profile: completed once, reused across every event. */
+export async function saveRoleProfileAction(formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const fields: Record<string, string> = {};
+  for (const [k, v] of formData.entries()) {
+    if (typeof v === 'string') fields[k] = v;
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO role_profiles (account_id, fields, updated_at) VALUES (?, ?, datetime('now'))
+       ON CONFLICT(account_id) DO UPDATE SET fields = excluded.fields, updated_at = excluded.updated_at`,
+    )
+    .run(account.id, JSON.stringify(fields));
+  redirect('/profile?notice=saved');
+}
+
+/* ---- First-response unit (cardiac-arrest instrument) ---- */
+
+export async function saveFrReadinessAction(
+  payload: { confirmations: Record<string, boolean[]>; sign: boolean },
+): Promise<{ ok: true }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  getDb()
+    .prepare(
+      `INSERT INTO fr_readiness (account_id, confirmations, signed_at, updated_at)
+       VALUES (?, ?, ?, datetime('now'))
+       ON CONFLICT(account_id) DO UPDATE SET confirmations = excluded.confirmations,
+         signed_at = COALESCE(excluded.signed_at, fr_readiness.signed_at), updated_at = excluded.updated_at`,
+    )
+    .run(account.id, JSON.stringify(payload.confirmations), payload.sign ? new Date().toISOString() : null);
+  revalidatePath('/first-response/readiness');
+  return { ok: true };
+}
+
+/**
+ * One report per patient, five sections, no patient name. Two routes: the platform
+ * form, or the unit's own patient-care report attached where it captures everything
+ * required -- both land here.
+ */
+export async function submitFrReportAction(
+  payload: {
+    mode: 'platform' | 'attach';
+    attachedFile: string | null;
+    covered: Record<string, boolean>;
+    values: Record<string, string>;
+  },
+): Promise<{ ok: true } | { error: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (payload.mode === 'attach' && !payload.attachedFile) return { error: 'file-missing' };
+  getDb()
+    .prepare(
+      `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload)
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+    .run(
+      account.id, payload.mode, payload.attachedFile,
+      JSON.stringify(payload.covered), JSON.stringify(payload.values),
+    );
+  revalidatePath('/first-response/readiness');
+  return { ok: true };
+}
+
+/* ---- Event Medical Director ---- */
+
+function directorFor(accountId: number, eventId: string): boolean {
+  return Boolean(
+    getDb()
+      .prepare(`SELECT token FROM invitations WHERE event_id = ? AND kind = 'director' AND account_id = ? AND status = 'confirmed'`)
+      .get(eventId, accountId),
+  );
+}
+
+/** The Director's text, rendered read-only in the organizer's plan. */
+export async function saveGovernanceAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  const sections: Record<string, string> = {};
+  for (const key of ['clinical', 'command', 'incidentRole']) {
+    sections[key] = String(formData.get(key) ?? '');
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO event_governance (event_id, sections, updated_at) VALUES (?, ?, datetime('now'))
+       ON CONFLICT(event_id) DO UPDATE SET sections = excluded.sections, updated_at = excluded.updated_at`,
+    )
+    .run(eventId, JSON.stringify(sections));
+  revalidatePath(`/events/${eventId}/governance`);
+  redirect(`/events/${eventId}/governance?notice=saved`);
+}
+
+/** The second signature. At Level 3 the report is not complete with one. */
+export async function signPostEventReportAction(eventId: string): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  getDb()
+    .prepare(`UPDATE post_event_reports SET director_signed_at = datetime('now') WHERE event_id = ?`)
+    .run(eventId);
+  revalidatePath(`/events/${eventId}/report`);
+  redirect(`/events/${eventId}/report?notice=signed`);
+}
+
+/** Returning the report: the figures are the organizer's to correct, not the Director's. */
+export async function returnPostEventReportAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  const reason = String(formData.get('reason') ?? '').trim();
+  const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string };
+  notifyOrganizerOf(
+    eventId,
+    `Post-event report returned by the Event Medical Director — ${eventName.name_en}`,
+    `أعاد المدير الطبي للفعالية التقرير اللاحق — ${eventName.name_ar}`,
+    reason
+      ? `The Director returned the report rather than signing it. The reason, as written: “${reason}”.`
+      : 'The Director returned the report rather than signing it.',
+    reason
+      ? `أعاد المدير التقرير بدل توقيعه. والسبب كما كُتب: «${reason}».`
+      : 'أعاد المدير التقرير بدل توقيعه.',
+    `/events/${eventId}/post-event`,
+  );
+  redirect(`/events/${eventId}/report?notice=returned`);
+}

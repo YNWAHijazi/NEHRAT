@@ -20,3 +20,4 @@ export * from './submission';
 export * from './content';
 export * from './facility';
 export * from './pii';
+export * from './roles';

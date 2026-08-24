@@ -130,18 +130,32 @@ test.describe('an organizer never sees another organizer\'s records', () => {
 
 test.describe('nominated roles see only what they were named in', () => {
   test('an EMS provider cannot open an event it was not named in', async ({ page }) => {
-    test.skip(true, 'Vacuous: the EMS surface arrives in Slice 5; the route 404s for everyone today.');
+    // Real since Slice 5: the surface exists and test_ems holds two nominations.
     await signInAs(page, LOGINS.ems);
-    await expectRefusal(page, '/events/EV-0001/participation', /participation|المشاركة/i);
+    await expectRefusal(page, '/events/EV-0001/participation', /Event participation|المشاركة في الفعالية/i);
+    await expectRefusal(page, '/events/EV-0001/declaration', /Readiness Declaration|إقرار جاهزية/i);
+    // Not even the ORGANIZER'S OWN record: nomination scopes the route, not the role.
+    await expectRefusal(page, '/events/EV-0301/participation', /Event participation|المشاركة في الفعالية/i);
   });
 
   test('a medical director cannot open an unnamed event', async ({ page }) => {
-    // Not fully vacuous -- /events/:id exists -- but the director ROLE cannot yet hold a
-    // nomination, so the refusal tested (unnamed event) cannot be distinguished from
-    // "role has no events at all". Real once Slice 5 gives directors nominations.
-    test.skip(true, 'Vacuous until Slice 5: directors cannot yet be named in any event.');
+    // Real since Slice 5: test_director holds nominations on EV-0362 and EV-0244,
+    // and an unnamed event refuses like a missing one.
     await signInAs(page, LOGINS.director);
-    await expectRefusal(page, '/events/EV-0001', /event record|سجل الفعالية/i);
+    await expectRefusal(page, '/events/EV-0418', /What you are responsible for|ما أنتم مسؤولون عنه/i);
+    await expectRefusal(page, '/events/EV-0418/governance', /Clinical governance|الحوكمة السريرية/i);
+    await expectRefusal(page, '/events/EV-0418/report', /Post-event medical report|التقرير الطبي/i);
+  });
+
+  test('the two EMS-side actors never share a surface', async ({ page }) => {
+    // The first-response unit's account cannot open the provider surfaces, and the
+    // provider's account cannot open the unit's -- different instruments (SPEC).
+    await signInAs(page, LOGINS.response);
+    await expectRefusal(page, '/events/EV-0362/declaration', /Readiness Declaration|إقرار جاهزية/i);
+    await signInAs(page, LOGINS.ems);
+    const r = await page.goto('/first-response/readiness');
+    const refused = page.url().includes('/signin') || page.url().includes('/dashboard') || [401, 403, 404].includes(r?.status() ?? 0);
+    expect(refused, 'the EMS provider account reached the first-response surface').toBe(true);
   });
 });
 
@@ -149,7 +163,7 @@ test.describe('signed out', () => {
   test('every built authenticated surface bounces to sign-in', async ({ page }) => {
     // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
     // vacuously. Extend this list as slices land.
-    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change']) {
+    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/first-response/readiness', '/first-response/reports/new', '/events/EV-0362/declaration', '/events/EV-0362/governance']) {
       const response = await page.goto(path);
       const refused =
         page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);
