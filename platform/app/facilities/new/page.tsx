@@ -1,5 +1,54 @@
-import { DevInterstitial } from '../../../components/DevInterstitial';
+import { redirect } from 'next/navigation';
+import { GovernmentBand, Header } from '../../../components/Header';
+import { L } from '../../../components/L';
+import { SequenceFooter } from '../../../components/SequenceFooter';
+import { RegisterFacilityForm } from './RegisterFacilityForm';
+import { currentAccount, organizationFor } from '../../../lib/auth';
+import { unreadCountFor } from '../../../lib/queries';
 
-export default function FacilityNewPage() {
-  return <DevInterstitial slice="Slice 4, the facility service" />;
+/**
+ * Register a facility: steps 1-3 of the six. Step 2 is a determination, not a form,
+ * and for the categories awaiting a Ministry value it ends the journey -- no Continue
+ * button exists there (ROADMAP 2d; rule 10's absent behaviour).
+ */
+export default async function RegisterFacilityPage() {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const organization = organizationFor(account.id);
+  const unread = unreadCountFor(account.id);
+
+  return (
+    <>
+      <GovernmentBand />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 12 }}>
+          <L en="Cardiac-arrest readiness · new facility registration" ar="الجاهزية لتوقف القلب · تسجيل منشأة جديدة" />
+        </div>
+        <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+          <L en="Register a facility" ar="تسجيل منشأة" />
+        </h1>
+        <p style={{ margin: '0 0 32px', fontSize: '16.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
+          <L
+            en="Six steps. The middle one is a determination rather than a form, and for some categories it ends the journey."
+            ar="ست خطوات. الوسطى منها بتٌّ لا نموذج، وفي بعض الفئات تنتهي عندها الرحلة."
+          />
+        </p>
+        <RegisterFacilityForm />
+        <SequenceFooter
+          labelEn="Next in the sequence"
+          labelAr="التالي في التسلسل"
+          steps={[
+            {
+              href: '/dashboard',
+              en: 'Dashboard',
+              ar: 'اللوحة',
+              descEn: 'Every record on this account, and what each one owes.',
+              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
+            },
+          ]}
+        />
+      </main>
+    </>
+  );
 }

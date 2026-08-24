@@ -209,15 +209,69 @@ export function seedDemonstration(db: DatabaseSync): void {
     d('2025-09-30'), d('2026-09-30'), 'R. Haddad', 'Venue operations manager', d('2025-09-30'),
   );
 
+  // ---- Slice 4: the covered facility, in full ----
+  // Device dates are chosen to reproduce the reference VALIDITY LEDGER exactly
+  // (pads min 2026-10-02, battery min 2027-03-18, oldest check 2026-07-28). The
+  // reference's own AED-003 chip disagrees with its own ledger; the build derives
+  // both from one record, so the ledger -- the load-bearing screen -- wins.
   db.prepare(
-    `INSERT INTO facilities (id, account_id, name_en, name_ar, category_en, category_ar,
-       devices, next_lapse, state_en, state_ar, state_kind, is_demo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+    `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
+       municipality_en, municipality_ar, operating_hours, phone, email,
+       access_point, ems_number, created_at, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
   ).run(
     'FC-0014', organizer, 'Beirut Sports Complex', 'مجمّع بيروت الرياضي',
-    'Sports and aquatic facility', 'منشأة رياضية ومائية',
-    3, d('2026-09-12'),
-    'Obligations being met', 'الموجبات مستوفاة', 'ok',
+    'sports', 'Avenue du Parc', 'Beirut', 'بيروت', '06:00 – 23:00',
+    '01 372 802', 'operations@beirutsports.example.lb',
+    'North service gate', '01 372 802', d('2026-05-20'),
+  );
+
+  const insertPerson = db.prepare(
+    `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  );
+  insertPerson.run('FC-0014', 'coordinator', 'Operations manager', '01 372 802', 'operations@beirutsports.example.lb', d('2026-06-01'));
+  insertPerson.run('FC-0014', 'alternate', 'Duty supervisor', '01 372 803', 'duty@beirutsports.example.lb', d('2026-06-01'));
+  insertPerson.run('FC-0014', 'emsGuide', 'Front desk staff on duty', '01 372 800', 'reception@beirutsports.example.lb', d('2026-06-01'));
+
+  const insertDevice = db.prepare(
+    `INSERT INTO facility_devices (facility_id, label, identification, location_en, location_ar,
+       accessible_hours, publicly_accessible, pediatric, operational,
+       pad_expiry, battery_expiry, latest_check, updated_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`,
+  );
+  insertDevice.run(
+    'FC-0014', 'AED-001', 'HS-4412-A', 'Main entrance lobby', 'بهو المدخل الرئيسي',
+    1, 1, 'yes', d('2027-01-10'), d('2027-03-18'), d('2026-07-28'), d('2026-07-28'), d('2026-05-20'),
+  );
+  insertDevice.run(
+    'FC-0014', 'AED-002', 'HS-4417-B', 'Reception desk, ground floor', 'مكتب الاستقبال، الطابق الأرضي',
+    1, 0, 'no', d('2026-10-02'), d('2027-06-15'), d('2026-07-28'), d('2026-07-28'), d('2026-05-20'),
+  );
+  // The pool-deck cabinet is reported locked: not accessible during operating hours
+  // (Annex A part 3's accessibility rule), and the subject of the Ministry request.
+  insertDevice.run(
+    'FC-0014', 'AED-003', 'HS-4420-C', 'Pool deck cabinet', 'خزانة المسبح',
+    0, 0, 'no', d('2026-11-20'), d('2027-05-01'), d('2026-07-28'), d('2026-08-09'), d('2026-05-20'),
+  );
+
+  db.prepare(
+    `INSERT INTO facility_plan_confirmations (facility_id, checks, drill_date, coordinator, position, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(
+    'FC-0014',
+    JSON.stringify({ trained: true, signage: true, access: false, routes: true, staffKnow: true, drill: true }),
+    d('2025-11-04'), 'Operations manager', 'Operations manager', d('2025-09-12'),
+  );
+
+  db.prepare(
+    `INSERT INTO facility_requests (facility_id, body_en, body_ar, due, created_at, is_demo)
+     VALUES (?, ?, ?, ?, ?, 1)`,
+  ).run(
+    'FC-0014',
+    `Confirm that the poolside AED cabinet is unlocked during operating hours. Corrective action due ${d('2026-09-01')}.`,
+    `تأكيد أن خزانة الجهاز عند المسبح غير مقفلة خلال ساعات العمل. الإجراء التصحيحي مستحق في ⁦${d('2026-09-01')}⁩.`,
+    d('2026-09-01'), d('2026-08-10'),
   );
 
   // ---- Slice 2 demonstration state ----

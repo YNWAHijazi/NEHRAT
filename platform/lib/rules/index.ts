@@ -18,3 +18,5 @@ export * from './flags';
 export * from './requirements';
 export * from './submission';
 export * from './content';
+export * from './facility';
+export * from './pii';

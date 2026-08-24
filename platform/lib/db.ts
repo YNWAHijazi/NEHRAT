@@ -154,6 +154,9 @@ function migrate(d: DatabaseSync): void {
       -- The organizer's own confirmation that referenced facility arrangements remain
       -- accessible and operational throughout the event. Not inherited (SPEC 2e).
       ref_confirmed INTEGER NOT NULL DEFAULT 0,
+      -- The two captured event facts the 12 shortfalls derive from (Slice 4).
+      ref_admits_children INTEGER NOT NULL DEFAULT 0,
+      ref_temporary_areas INTEGER NOT NULL DEFAULT 0,
       sections TEXT NOT NULL DEFAULT '{}',   -- JSON: { [n]: { text?, covered? } }
       attached_file TEXT,
       major_incident TEXT NOT NULL DEFAULT '{}', -- JSON: { [n]: { covered } }
@@ -245,15 +248,107 @@ function migrate(d: DatabaseSync): void {
       reported_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- The facility service (Slice 4). The record id is FC-nnnn at creation; the
+    -- profile is Annex B section 1; the category is a KEY into facility.json --
+    -- its state chip and requirement rule derive at read, never stored.
     CREATE TABLE IF NOT EXISTS facilities (
       id TEXT PRIMARY KEY,             -- FC-0014
       account_id INTEGER NOT NULL REFERENCES accounts(id),
       name_en TEXT NOT NULL, name_ar TEXT NOT NULL,
-      category_en TEXT, category_ar TEXT,
-      devices INTEGER NOT NULL DEFAULT 0,
-      next_lapse TEXT,
-      state_en TEXT, state_ar TEXT, state_kind TEXT,
+      category_key TEXT NOT NULL DEFAULT '',
+      address TEXT NOT NULL DEFAULT '',
+      municipality_en TEXT NOT NULL DEFAULT '',
+      municipality_ar TEXT NOT NULL DEFAULT '',
+      operating_hours TEXT NOT NULL DEFAULT '',
+      phone TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL DEFAULT '',
+      access_point TEXT NOT NULL DEFAULT '',
+      ems_number TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
       is_demo INTEGER NOT NULL DEFAULT 0
+    );
+
+    -- One coordinator record referenced by every device record and the plan
+    -- (ROADMAP 2d): a row per role, the coordinator unique per facility.
+    CREATE TABLE IF NOT EXISTS facility_persons (
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      role TEXT NOT NULL CHECK (role IN ('coordinator','alternate','emsGuide')),
+      name_or_position TEXT NOT NULL DEFAULT '',
+      phone TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (facility_id, role)
+    );
+
+    -- One record per device (Annex C). The label AED-001 is per facility.
+    CREATE TABLE IF NOT EXISTS facility_devices (
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      label TEXT NOT NULL,             -- AED-001
+      identification TEXT NOT NULL DEFAULT '',   -- barcode, QR code or serial number
+      location_en TEXT NOT NULL DEFAULT '',
+      location_ar TEXT NOT NULL DEFAULT '',
+      accessible_hours INTEGER NOT NULL DEFAULT 1,
+      publicly_accessible INTEGER NOT NULL DEFAULT 0,
+      pediatric TEXT NOT NULL DEFAULT 'no' CHECK (pediatric IN ('yes','no','na')),
+      operational INTEGER NOT NULL DEFAULT 1,
+      pad_expiry TEXT,
+      battery_expiry TEXT,
+      latest_check TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (facility_id, label)
+    );
+
+    -- Audit of the five Annex C purposes; signed by the FACILITY REPRESENTATIVE.
+    CREATE TABLE IF NOT EXISTS facility_device_updates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      device_label TEXT NOT NULL,
+      purpose TEXT NOT NULL,
+      representative TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Annex B section 5: readiness confirmation. Signed by the COORDINATOR.
+    CREATE TABLE IF NOT EXISTS facility_plan_confirmations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      checks TEXT NOT NULL,            -- JSON: planChecks keys -> boolean
+      drill_date TEXT,
+      coordinator TEXT NOT NULL DEFAULT '',
+      position TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Annex D. The payload is the full field set as JSON; the narrative is blocked
+    -- at submission while a personal name is detected (non-negotiable 7).
+    CREATE TABLE IF NOT EXISTS facility_incidents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      payload TEXT NOT NULL,
+      narrative TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Ministry corrective-action requests shown on the readiness screen. Recorded by
+    -- the Ministry console (Slice 6); the facility side only displays and answers.
+    CREATE TABLE IF NOT EXISTS facility_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      facility_id TEXT NOT NULL REFERENCES facilities(id),
+      body_en TEXT NOT NULL, body_ar TEXT NOT NULL,
+      due TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      is_demo INTEGER NOT NULL DEFAULT 0
+    );
+
+    -- Record an interest: the end of the journey for a category awaiting a Ministry
+    -- value. The operator is notified when the value activates.
+    CREATE TABLE IF NOT EXISTS facility_interests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      account_id INTEGER NOT NULL REFERENCES accounts(id),
+      category_key TEXT NOT NULL,
+      facility_name TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
     CREATE TABLE IF NOT EXISTS notifications (

@@ -25,7 +25,8 @@ import {
   startSession,
 } from '../lib/auth';
 import {
-  RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel } from '../lib/rules';
+  RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
+  facilityCategory, categoryEndsJourney, detectPersonalName } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -316,6 +317,8 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
 export interface PlanPayload {
   mode: 'write' | 'attach';
   refConfirmed: boolean;
+  refAdmitsChildren: boolean;
+  refTemporaryAreas: boolean;
   sections: Record<string, { text?: string; covered?: boolean }>;
   attachedFile: string | null;
   majorIncident: Record<string, { covered?: boolean }>;
@@ -328,14 +331,21 @@ export async function savePlanAction(eventId: string, payload: PlanPayload): Pro
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
   getDb()
     .prepare(
-      `INSERT INTO plans (event_id, mode, ref_confirmed, sections, attached_file, major_incident, version)
-       VALUES (?, ?, ?, ?, ?, ?, 1)
+      `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
+         sections, attached_file, major_incident, version)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
        ON CONFLICT (event_id) DO UPDATE SET
-         mode = excluded.mode, ref_confirmed = excluded.ref_confirmed, sections = excluded.sections,
+         mode = excluded.mode, ref_confirmed = excluded.ref_confirmed,
+         ref_admits_children = excluded.ref_admits_children,
+         ref_temporary_areas = excluded.ref_temporary_areas, sections = excluded.sections,
          attached_file = excluded.attached_file, major_incident = excluded.major_incident,
          version = plans.version + 1, updated_at = datetime('now')`,
     )
-    .run(eventId, payload.mode, payload.refConfirmed ? 1 : 0, JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident));
+    .run(
+      eventId, payload.mode, payload.refConfirmed ? 1 : 0,
+      payload.refAdmitsChildren ? 1 : 0, payload.refTemporaryAreas ? 1 : 0,
+      JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident),
+    );
   revalidatePath(`/events/${eventId}/plan`);
   return { ok: true };
 }
@@ -605,3 +615,188 @@ export async function reportVenueChangeAction(venueId: string, formData: FormDat
   revalidatePath(`/venues/${venueId}/change`);
   redirect(`/venues/${venueId}/change?notice=reported`);
 }
+
+
+/* ---------------- Slice 4: the facility service ---------------- */
+
+function ownedFacility(accountId: number, facilityId: string): boolean {
+  return Boolean(
+    getDb().prepare(`SELECT id FROM facilities WHERE id = ? AND account_id = ?`).get(facilityId, accountId),
+  );
+}
+
+/**
+ * Steps 1-3 of the registration. The category is a determination: where it awaits a
+ * Ministry value the journey ended on the screen and this action is never reached
+ * with that category -- but the rule is enforced here too, not only in the UI.
+ */
+export async function registerFacilityAction(formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const categoryKey = String(formData.get('category') ?? '');
+  const category = facilityCategory(categoryKey);
+  if (!category || categoryEndsJourney(category)) redirect('/facilities/new');
+  const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  const facilityId = nextRecordId('FC');
+  const db = getDb();
+  db.prepare(
+    `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
+       municipality_en, municipality_ar, operating_hours, phone, email, access_point,
+       ems_number, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    facilityId, account.id, s('name'), s('nameAr') || s('name'), categoryKey, s('address'),
+    s('municipality'), s('municipalityAr') || s('municipality'), s('hours'), s('phone'),
+    s('email'), s('accessPoint'), s('emsNumber'), account.isDemo ? 1 : 0,
+  );
+  const person = db.prepare(
+    `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email)
+     VALUES (?, ?, ?, ?, ?)`,
+  );
+  for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
+    person.run(facilityId, role, s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`));
+  }
+  revalidatePath('/dashboard');
+  redirect(`/facilities/${facilityId}/devices`);
+}
+
+/** The end of the journey for an awaiting category: an interest, nothing more. */
+export async function recordFacilityInterestAction(formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  getDb()
+    .prepare(`INSERT INTO facility_interests (account_id, category_key, facility_name) VALUES (?, ?, ?)`)
+    .run(account.id, String(formData.get('category') ?? ''), String(formData.get('name') ?? '').trim());
+  redirect('/dashboard?notice=interest');
+}
+
+/**
+ * One action for the five Annex C purposes. What is asked -- and what changes --
+ * depends on the purpose; every path stamps updated_at (the ledger's affirmation
+ * date) and logs the update with the facility representative who signed it.
+ */
+export async function saveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  const db = getDb();
+  const purpose = String(formData.get('purpose') ?? 'initial');
+  const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  const yes = (k: string): number => (formData.get(k) === 'yes' ? 1 : 0);
+  let label = s('label');
+
+  if (purpose === 'initial') {
+    const last = db
+      .prepare(`SELECT label FROM facility_devices WHERE facility_id = ? ORDER BY label DESC LIMIT 1`)
+      .get(facilityId) as { label: string } | undefined;
+    const n = last ? Number.parseInt(last.label.slice(4), 10) + 1 : 1;
+    label = `AED-${String(n).padStart(3, '0')}`;
+    db.prepare(
+      `INSERT INTO facility_devices (facility_id, label, identification, location_en, location_ar,
+         accessible_hours, publicly_accessible, pediatric, pad_expiry, battery_expiry, latest_check)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      facilityId, label, s('identification'), s('location'), s('locationAr') || s('location'),
+      yes('accessibleHours'), yes('publiclyAccessible'),
+      ['yes', 'no', 'na'].includes(s('pediatric')) ? s('pediatric') : 'no',
+      s('padExpiry') || null, s('batteryExpiry') || null, s('latestCheck') || null,
+    );
+  } else if (purpose === 'annual') {
+    db.prepare(
+      `UPDATE facility_devices SET latest_check = ?, updated_at = datetime('now')
+       WHERE facility_id = ? AND label = ?`,
+    ).run(s('latestCheck') || null, facilityId, label);
+  } else if (purpose === 'relocation') {
+    db.prepare(
+      `UPDATE facility_devices SET location_en = ?, location_ar = ?, accessible_hours = ?, updated_at = datetime('now')
+       WHERE facility_id = ? AND label = ?`,
+    ).run(s('location'), s('locationAr') || s('location'), yes('accessibleHours'), facilityId, label);
+  } else if (purpose === 'replacement') {
+    db.prepare(
+      `UPDATE facility_devices SET identification = ?, pad_expiry = ?, battery_expiry = ?, updated_at = datetime('now')
+       WHERE facility_id = ? AND label = ?`,
+    ).run(s('identification'), s('padExpiry') || null, s('batteryExpiry') || null, facilityId, label);
+  } else if (purpose === 'statusChange') {
+    db.prepare(
+      `UPDATE facility_devices SET operational = ?, accessible_hours = ?, updated_at = datetime('now')
+       WHERE facility_id = ? AND label = ?`,
+    ).run(yes('operational'), yes('accessibleHours'), facilityId, label);
+  }
+
+  db.prepare(
+    `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative)
+     VALUES (?, ?, ?, ?)`,
+  ).run(facilityId, label, purpose, s('representative'));
+  revalidatePath(`/facilities/${facilityId}/devices`);
+  revalidatePath(`/facilities/${facilityId}`);
+  redirect(`/facilities/${facilityId}/devices?notice=saved`);
+}
+
+/** Annex B section 5, signed by the coordinator. Drives the drill and annual rows. */
+export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  const checkKeys = ['trained', 'signage', 'access', 'routes', 'staffKnow', 'drill'];
+  const checks = Object.fromEntries(checkKeys.map((k) => [k, formData.get(`check_${k}`) === 'on']));
+  getDb()
+    .prepare(
+      `INSERT INTO facility_plan_confirmations (facility_id, checks, drill_date, coordinator, position)
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+    .run(
+      facilityId, JSON.stringify(checks),
+      String(formData.get('drillDate') ?? '').trim() || null,
+      String(formData.get('coordinator') ?? '').trim(),
+      String(formData.get('position') ?? '').trim(),
+    );
+  revalidatePath(`/facilities/${facilityId}/plan`);
+  revalidatePath(`/facilities/${facilityId}`);
+  redirect(`/facilities/${facilityId}?notice=confirmed`);
+}
+
+/** Coordinator review: stamps updated_at, the ledger's affirmation date. */
+export async function saveFacilityPersonsAction(facilityId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  const db = getDb();
+  const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
+    db.prepare(
+      `UPDATE facility_persons SET name_or_position = ?, phone = ?, email = ?, updated_at = datetime('now')
+       WHERE facility_id = ? AND role = ?`,
+    ).run(s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`), facilityId, role);
+  }
+  revalidatePath(`/facilities/${facilityId}`);
+  redirect(`/facilities/${facilityId}?notice=coordinator`);
+}
+
+/**
+ * Annex D. The narrative is checked for a personal name ON THE SERVER as well as in
+ * the screen (non-negotiable 7): a blocked submit that only the client enforces is
+ * not a rule.
+ */
+export async function submitFacilityIncidentAction(
+  facilityId: string,
+  formData: FormData,
+): Promise<{ error: 'name-detected' } | void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  const narrative = String(formData.get('narrative') ?? '');
+  const corrective = String(formData.get('corrective') ?? '');
+  if (detectPersonalName(narrative) || detectPersonalName(corrective)) {
+    return { error: 'name-detected' };
+  }
+  const payload: Record<string, string> = {};
+  for (const [k, v] of formData.entries()) {
+    if (k !== 'narrative' && typeof v === 'string') payload[k] = v;
+  }
+  getDb()
+    .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative) VALUES (?, ?, ?)`)
+    .run(facilityId, JSON.stringify(payload), narrative);
+  revalidatePath(`/facilities/${facilityId}`);
+  redirect(`/facilities/${facilityId}?notice=incident`);
+}
+

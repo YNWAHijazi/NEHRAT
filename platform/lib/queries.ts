@@ -6,6 +6,16 @@
 
 import { getDb } from './db';
 import { deriveLevel } from './rules';
+import {
+  FACILITY_CONTENT,
+  facilityCategory,
+  facilityLedger,
+  facilityStanding,
+  type LedgerInputs,
+  type LedgerRow as FacilityLedgerRow,
+  type Standing,
+} from './rules';
+import { beirutToday as beirutTodayFn } from './clock';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs } from './rules';
 
 export interface EventRow {
@@ -165,16 +175,196 @@ export interface FacilityRow {
   stateEn: string; stateAr: string; stateKind: string;
 }
 
+/** Everything the ledger derives from, in one read. */
+function ledgerInputsFor(facilityId: string, today: string): LedgerInputs {
+  const db = getDb();
+  const dev = db
+    .prepare(
+      `SELECT COUNT(*) AS n, MIN(pad_expiry) AS pads, MIN(battery_expiry) AS battery,
+              MIN(latest_check) AS oldest_check, MAX(updated_at) AS affirmed
+       FROM facility_devices WHERE facility_id = ?`,
+    )
+    .get(facilityId) as { n: number; pads: string | null; battery: string | null; oldest_check: string | null; affirmed: string | null };
+  const plan = db
+    .prepare(
+      `SELECT drill_date, created_at FROM facility_plan_confirmations
+       WHERE facility_id = ? ORDER BY created_at DESC LIMIT 1`,
+    )
+    .get(facilityId) as { drill_date: string | null; created_at: string } | undefined;
+  const coord = db
+    .prepare(`SELECT updated_at FROM facility_persons WHERE facility_id = ? AND role = 'coordinator'`)
+    .get(facilityId) as { updated_at: string } | undefined;
+  const day = (v: string | null | undefined): string | null => (v ? v.slice(0, 10) : null);
+  return {
+    earliestPadExpiry: day(dev.pads),
+    padAffirmed: day(dev.affirmed),
+    earliestBatteryExpiry: day(dev.battery),
+    batteryAffirmed: day(dev.affirmed),
+    oldestCheck: day(dev.oldest_check),
+    drillDate: day(plan?.drill_date),
+    confirmedAt: day(plan?.created_at),
+    coordinatorUpdatedAt: day(coord?.updated_at),
+    hasDevices: dev.n > 0,
+    today,
+  };
+}
+
+export function facilityLedgerFor(facilityId: string, today: string): FacilityLedgerRow[] {
+  return facilityLedger(ledgerInputsFor(facilityId, today));
+}
+
 export function facilitiesFor(accountId: number): FacilityRow[] {
+  const today = beirutTodayFn();
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, category_en, category_ar, devices, next_lapse, state_en, state_ar, state_kind FROM facilities WHERE account_id = ?`)
-    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; category_en: string | null; category_ar: string | null; devices: number; next_lapse: string | null; state_en: string | null; state_ar: string | null; state_kind: string | null }[];
+    .prepare(`SELECT id, name_en, name_ar, category_key FROM facilities WHERE account_id = ?`)
+    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; category_key: string }[];
+  return rows.map((r) => {
+    const cat = facilityCategory(r.category_key);
+    const short = (FACILITY_CONTENT.categories.find((c) => c.key === r.category_key) ?? null) as
+      | { shortEn?: string; shortAr?: string }
+      | null;
+    const devices = getDb()
+      .prepare(`SELECT COUNT(*) AS n FROM facility_devices WHERE facility_id = ?`)
+      .get(r.id) as { n: number };
+    const ledger = facilityLedgerFor(r.id, today);
+    const standing = facilityStanding(ledger);
+    // The dashboard row carries the reference's short state; the readiness screen
+    // carries the full standing line.
+    const line =
+      standing.kind === 'lapsed' ? FACILITY_CONTENT.standingShort.notMet : FACILITY_CONTENT.standingShort.met;
+    const untils = ledger.map((row) => row.until).filter((u): u is string => u !== null);
+    return {
+      id: r.id, nameEn: r.name_en, nameAr: r.name_ar,
+      categoryEn: short?.shortEn ?? cat?.en ?? '',
+      categoryAr: short?.shortAr ?? cat?.ar ?? '',
+      devices: devices.n,
+      nextLapse: untils.length ? untils.reduce((a, b) => (a < b ? a : b)) : null,
+      stateEn: line.en, stateAr: line.ar,
+      stateKind: standing.kind === 'met' ? 'ok' : standing.kind,
+    };
+  });
+}
+
+/* ---------------- Slice 4: the facility service ---------------- */
+
+export interface FacilityDetail {
+  id: string;
+  nameEn: string; nameAr: string;
+  categoryKey: string;
+  address: string;
+  municipalityEn: string; municipalityAr: string;
+  operatingHours: string; phone: string; email: string;
+  accessPoint: string; emsNumber: string;
+  createdAt: string;
+}
+
+export function facilityDetail(accountId: number, facilityId: string): FacilityDetail | null {
+  const r = getDb()
+    .prepare(
+      `SELECT id, name_en, name_ar, category_key, address, municipality_en, municipality_ar,
+              operating_hours, phone, email, access_point, ems_number, created_at
+       FROM facilities WHERE id = ? AND account_id = ?`,
+    )
+    .get(facilityId, accountId) as
+    | {
+        id: string; name_en: string; name_ar: string; category_key: string; address: string;
+        municipality_en: string; municipality_ar: string; operating_hours: string;
+        phone: string; email: string; access_point: string; ems_number: string; created_at: string;
+      }
+    | undefined;
+  if (!r) return null;
+  return {
+    id: r.id, nameEn: r.name_en, nameAr: r.name_ar, categoryKey: r.category_key,
+    address: r.address, municipalityEn: r.municipality_en, municipalityAr: r.municipality_ar,
+    operatingHours: r.operating_hours, phone: r.phone, email: r.email,
+    accessPoint: r.access_point, emsNumber: r.ems_number, createdAt: r.created_at,
+  };
+}
+
+export interface FacilityPerson {
+  role: 'coordinator' | 'alternate' | 'emsGuide';
+  nameOrPosition: string; phone: string; email: string; updatedAt: string;
+}
+
+export function facilityPersons(facilityId: string): FacilityPerson[] {
+  const rows = getDb()
+    .prepare(`SELECT role, name_or_position, phone, email, updated_at FROM facility_persons WHERE facility_id = ?`)
+    .all(facilityId) as unknown as { role: FacilityPerson['role']; name_or_position: string; phone: string; email: string; updated_at: string }[];
+  return rows.map((r) => ({ role: r.role, nameOrPosition: r.name_or_position, phone: r.phone, email: r.email, updatedAt: r.updated_at }));
+}
+
+export interface FacilityDevice {
+  label: string;
+  identification: string;
+  locationEn: string; locationAr: string;
+  accessibleHours: boolean; publiclyAccessible: boolean;
+  pediatric: 'yes' | 'no' | 'na';
+  operational: boolean;
+  padExpiry: string | null; batteryExpiry: string | null; latestCheck: string | null;
+  updatedAt: string;
+}
+
+export function facilityDevices(facilityId: string): FacilityDevice[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT label, identification, location_en, location_ar, accessible_hours,
+              publicly_accessible, pediatric, operational, pad_expiry, battery_expiry,
+              latest_check, updated_at
+       FROM facility_devices WHERE facility_id = ? ORDER BY label`,
+    )
+    .all(facilityId) as unknown as {
+      label: string; identification: string; location_en: string; location_ar: string;
+      accessible_hours: number; publicly_accessible: number; pediatric: 'yes' | 'no' | 'na';
+      operational: number; pad_expiry: string | null; battery_expiry: string | null;
+      latest_check: string | null; updated_at: string;
+    }[];
   return rows.map((r) => ({
-    id: r.id, nameEn: r.name_en, nameAr: r.name_ar,
-    categoryEn: r.category_en ?? '', categoryAr: r.category_ar ?? '',
-    devices: r.devices, nextLapse: r.next_lapse,
-    stateEn: r.state_en ?? '', stateAr: r.state_ar ?? '', stateKind: r.state_kind ?? 'ok',
+    label: r.label, identification: r.identification,
+    locationEn: r.location_en, locationAr: r.location_ar,
+    accessibleHours: r.accessible_hours === 1, publiclyAccessible: r.publicly_accessible === 1,
+    pediatric: r.pediatric, operational: r.operational === 1,
+    padExpiry: r.pad_expiry, batteryExpiry: r.battery_expiry, latestCheck: r.latest_check,
+    updatedAt: r.updated_at,
   }));
+}
+
+export interface FacilityPlanConfirmation {
+  checks: Record<string, boolean>;
+  drillDate: string | null;
+  coordinator: string; position: string;
+  createdAt: string;
+}
+
+export function facilityPlanConfirmation(facilityId: string): FacilityPlanConfirmation | null {
+  const r = getDb()
+    .prepare(
+      `SELECT checks, drill_date, coordinator, position, created_at
+       FROM facility_plan_confirmations WHERE facility_id = ? ORDER BY created_at DESC LIMIT 1`,
+    )
+    .get(facilityId) as { checks: string; drill_date: string | null; coordinator: string; position: string; created_at: string } | undefined;
+  if (!r) return null;
+  return {
+    checks: JSON.parse(r.checks) as Record<string, boolean>,
+    drillDate: r.drill_date, coordinator: r.coordinator, position: r.position, createdAt: r.created_at,
+  };
+}
+
+export interface FacilityRequestRow {
+  id: number; bodyEn: string; bodyAr: string; due: string | null;
+}
+
+export function facilityRequests(facilityId: string): FacilityRequestRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, body_en, body_ar, due FROM facility_requests WHERE facility_id = ? ORDER BY created_at DESC`)
+    .all(facilityId) as unknown as { id: number; body_en: string; body_ar: string; due: string | null }[];
+  return rows.map((r) => ({ id: r.id, bodyEn: r.body_en, bodyAr: r.body_ar, due: r.due }));
+}
+
+export function facilityIncidentCount(facilityId: string): number {
+  const r = getDb()
+    .prepare(`SELECT COUNT(*) AS n FROM facility_incidents WHERE facility_id = ?`)
+    .get(facilityId) as { n: number };
+  return r.n;
 }
 
 export interface NotificationRow {
@@ -266,6 +456,8 @@ export function invitationsFor(accountId: number, eventId: string): InvitationRo
 export interface PlanRow {
   mode: 'write' | 'attach';
   refConfirmed: boolean;
+  refAdmitsChildren: boolean;
+  refTemporaryAreas: boolean;
   sections: Record<string, { text?: string; covered?: boolean }>;
   attachedFile: string | null;
   majorIncident: Record<string, { covered?: boolean }>;
@@ -277,14 +469,16 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
   const r = getDb()
-    .prepare(`SELECT mode, ref_confirmed, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
+    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
     .get(eventId) as
-    | { mode: 'write' | 'attach'; ref_confirmed: number; sections: string; attached_file: string | null; major_incident: string; version: number; updated_at: string }
+    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; major_incident: string; version: number; updated_at: string }
     | undefined;
   if (!r) return null;
   return {
     mode: r.mode,
     refConfirmed: r.ref_confirmed === 1,
+    refAdmitsChildren: r.ref_admits_children === 1,
+    refTemporaryAreas: r.ref_temporary_areas === 1,
     sections: JSON.parse(r.sections) as PlanRow['sections'],
     attachedFile: r.attached_file,
     majorIncident: JSON.parse(r.major_incident) as PlanRow['majorIncident'],

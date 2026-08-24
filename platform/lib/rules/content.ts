@@ -8,6 +8,7 @@ import venueJson from './data/venue.json';
 import materialChangeJson from './data/material-change.json';
 import planJson from './data/plan.json';
 import postEventJson from './data/post-event-report.json';
+import facilityJson from './data/facility.json';
 
 export interface BilingualField {
   key: string;
@@ -87,3 +88,8 @@ export const VENUE_CHANGE_ASPECTS: readonly VenueChangeAspect[] = venueJson.chan
 export const VENUE_FLOOR_NOTE: { en: string; ar: string } = venueJson.floorNote;
 export const VENUE_ELIGIBILITY_QUESTIONS: { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion } =
   venueJson.eligibilityQuestions as { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion };
+
+/* ---------------- The facility service (Slice 4) ---------------- */
+/* Categories and derivations live in lib/rules/facility.ts; screen content here. */
+
+export const FACILITY_CONTENT = facilityJson;

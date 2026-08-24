@@ -13,6 +13,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { savePlanAction, type PlanPayload } from '../../../actions';
+import { FACILITY_CONTENT, referenceShortfalls, type ReferenceDeviceFacts } from '../../../../lib/rules';
 import type { PlanRow, FacilityRow } from '../../../../lib/queries';
 
 interface PlanSection {
@@ -67,6 +68,7 @@ export function PlanForm({
   nonBindingAr,
   initial,
   facility,
+  referenceFacts,
 }: {
   eventId: string;
   level: 1 | 2 | 3;
@@ -81,6 +83,7 @@ export function PlanForm({
   nonBindingAr: string;
   initial: PlanRow | null;
   facility: FacilityRow | null;
+  referenceFacts: ReferenceDeviceFacts | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -91,6 +94,8 @@ export function PlanForm({
   const [mi, setMi] = useState<Record<string, { covered?: boolean }>>(initial?.majorIncident ?? {});
   const [attachedFile, setAttachedFile] = useState(initial?.attachedFile ?? '');
   const [refConfirmed, setRefConfirmed] = useState(initial?.refConfirmed ?? false);
+  const [refAdmitsChildren, setRefAdmitsChildren] = useState(initial?.refAdmitsChildren ?? false);
+  const [refTemporaryAreas, setRefTemporaryAreas] = useState(initial?.refTemporaryAreas ?? false);
   const [open, setOpen] = useState<number>(-1);
   const [collapsed, setCollapsed] = useState(level === 1);
   const [saved, setSaved] = useState(false);
@@ -110,6 +115,8 @@ export function PlanForm({
       const payload: PlanPayload = {
         mode,
         refConfirmed,
+        refAdmitsChildren,
+        refTemporaryAreas,
         sections,
         attachedFile: mode === 'attach' ? attachedFile || null : null,
         majorIncident: mi,
@@ -331,8 +338,8 @@ export function PlanForm({
             {[
               {
                 en: 'Registered defibrillators', ar: 'أجهزة إزالة الرجفان المسجّلة',
-                detailEn: `${facility.devices} registered devices. Exact locations and readiness dates live on the facility record.`,
-                detailAr: `${facility.devices} أجهزة مسجّلة. المواقع الدقيقة وتواريخ الجاهزية في سجل المرفق.`,
+                detailEn: `${facility.devices} registered devices${referenceFacts && referenceFacts.locationsEn.length ? ` — ${referenceFacts.locationsEn.join(', ')}` : ''}. Readiness dates live on the facility record.`,
+                detailAr: `${facility.devices} أجهزة مسجّلة${referenceFacts && referenceFacts.locationsAr.length ? ` — ${referenceFacts.locationsAr.join('، ')}` : ''}. تواريخ الجاهزية في سجل المرفق.`,
               },
               {
                 en: 'Facility readiness standing', ar: 'الحالة القائمة لجاهزية المرفق',
@@ -377,6 +384,61 @@ export function PlanForm({
               </span>
             </span>
           </button>
+
+          {/* The two event facts the shortfalls derive from (ROADMAP 2e condition 2).
+              Where the event requires more than the facility provides, the shortfall
+              surfaces by name and the higher requirement governs -- derived, never
+              asserted by hand. */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 16 }}>
+            {FACILITY_CONTENT.reference.questions.map((q) => {
+              const on = q.key === 'admitsChildren' ? refAdmitsChildren : refTemporaryAreas;
+              const toggle = q.key === 'admitsChildren' ? setRefAdmitsChildren : setRefTemporaryAreas;
+              return (
+                <button
+                  key={q.key}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggle((v) => !v)}
+                  style={{ textAlign: 'start', display: 'flex', gap: 14, alignItems: 'center', padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
+                >
+                  <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, background: on ? 'var(--brand)' : 'transparent', borderRadius: 4 }} />
+                  <span style={{ fontSize: '14.5px', lineHeight: 1.55 }}>
+                    <L en={q.en} ar={q.ar} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {referenceFacts
+            ? referenceShortfalls(referenceFacts, {
+                admitsChildren: refAdmitsChildren,
+                temporaryAreas: refTemporaryAreas,
+              }).map((s) => {
+                const def = FACILITY_CONTENT.reference.shortfalls[s.key];
+                return (
+                  <div
+                    key={s.key}
+                    data-region="shortfall"
+                    style={{ marginBlockStart: 12, padding: '20px 24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'start' }}
+                  >
+                    <div style={{ flex: 1, minWidth: 240 }}>
+                      <div style={{ fontSize: '15.5px', fontWeight: 600, lineHeight: 1.45 }}>
+                        <L en={def.en} ar={def.ar} />
+                      </div>
+                      <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.5 }}>
+                        <L en={def.detailEn} ar={def.detailAr} />
+                      </div>
+                      <div style={{ fontSize: '14.5px', marginBlockStart: 10, lineHeight: 1.6 }}>
+                        <L en={def.bodyEn} ar={def.bodyAr} />
+                      </div>
+                    </div>
+                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent-ink)', fontSize: 13 }}>
+                      <L en={FACILITY_CONTENT.reference.chips.short.en} ar={FACILITY_CONTENT.reference.chips.short.ar} />
+                    </span>
+                  </div>
+                );
+              })
+            : null}
         </div>
       ) : null}
 

@@ -8,6 +8,8 @@ import {
   assessmentsFor,
   eventFor,
   facilityById,
+  facilityDevices,
+  facilityPlanConfirmation,
   planFor,
   unreadCountFor,
 } from '../../../../lib/queries';
@@ -32,6 +34,19 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const workflowStage = !versions[0]?.derivation.complete ? 2 : event.filed ? 7 : 4;
   // 12: renders only where the venue is itself a registered covered facility.
   const facility = event.venueFacilityId ? facilityById(account.id, event.venueFacilityId) : null;
+  // What the reference block may point at, read from the facility record -- a
+  // reference, never a copy. The shortfalls derive in lib/rules from these facts
+  // plus the two event facts the organizer answers on the plan.
+  const refDevices = facility ? facilityDevices(facility.id) : [];
+  const referenceFacts = facility
+    ? {
+        count: refDevices.length,
+        locationsEn: refDevices.map((d) => d.locationEn),
+        locationsAr: refDevices.map((d) => d.locationAr),
+        anyPediatric: refDevices.some((d) => d.pediatric === 'yes'),
+        planConfirmed: facilityPlanConfirmation(facility.id) !== null,
+      }
+    : null;
 
   return (
     <>
@@ -64,6 +79,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           nonBindingAr={GUIDANCE_TEMPLATE.nonBindingAr}
           initial={plan}
           facility={facility}
+          referenceFacts={referenceFacts}
         />
 
         <SequenceFooter
