@@ -355,7 +355,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'registration-form',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="registration-form"]',
-        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty and shows the outside-the-process note. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data at reviewer instruction) and, at reviewer instruction, splits the venue name and address/municipality into bilingual input pairs where the prototype has single values.',
+        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty, its two questions UNANSWERED, and shows no verdict until the determining facts are answered -- an unset input is not a determination. At reviewer instruction (Slice 5 review) each question is a separate Yes button and No button, not one control flipping between the answers. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data) and splits the venue name and address/municipality into bilingual input pairs.',
       },
     ],
   },

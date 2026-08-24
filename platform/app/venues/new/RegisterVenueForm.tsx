@@ -49,12 +49,50 @@ function QuestionLabel({ q }: { q: EligibilityQuestion }) {
   );
 }
 
+/**
+ * A Yes button and a No button (reviewer instruction, Slice 5 review): two controls,
+ * not one flipping between the answers. Unanswered is its own state -- neither is
+ * pre-selected, because a default "No" asserts an answer nobody gave.
+ */
+function YesNoPair({
+  value,
+  onPick,
+}: {
+  value: boolean | null;
+  onPick: (v: boolean) => void;
+}) {
+  const pill = (on: boolean): React.CSSProperties => ({
+    height: 36,
+    paddingInline: 18,
+    border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`,
+    background: on ? 'var(--brand-soft)' : 'var(--bg)',
+    color: on ? 'var(--brand)' : 'var(--muted)',
+    borderRadius: 18,
+    fontSize: 14,
+    cursor: 'pointer',
+  });
+  return (
+    <span style={{ display: 'inline-flex', gap: 6 }}>
+      <button type="button" aria-pressed={value === true} onClick={() => onPick(true)} style={pill(value === true)}>
+        <L en="Yes" ar="نعم" />
+      </button>
+      <button type="button" aria-pressed={value === false} onClick={() => onPick(false)} style={pill(value === false)}>
+        <L en="No" ar="لا" />
+      </button>
+    </span>
+  );
+}
+
 export function RegisterVenueForm({ fields }: { fields: Field[] }) {
   const [capacity, setCapacity] = useState('');
-  const [regular, setRegular] = useState(false);
-  const [nightclub, setNightclub] = useState(false);
+  const [regular, setRegular] = useState<boolean | null>(null);
+  const [nightclub, setNightclub] = useState<boolean | null>(null);
   const capNumber = Number(capacity.replace(/[^0-9]/g, '')) || 0;
-  const eligible = capNumber >= RECURRING_VENUE_MIN_CAPACITY && regular;
+  const eligible = capNumber >= RECURRING_VENUE_MIN_CAPACITY && regular === true;
+  // The outside-the-process note is a statement about the details given; until the
+  // determining facts are answered there is nothing to state (rule 0's spirit: an
+  // unset input is not a determination).
+  const answered = capacity.trim() !== '' && regular !== null;
 
   return (
     <form action={registerVenueAction}>
@@ -95,31 +133,17 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', paddingBlockStart: 20, borderBlockStart: '1px solid var(--line)' }}>
           <QuestionLabel q={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts} />
-          <button
-            type="button"
-            aria-pressed={regular}
-            onClick={() => setRegular((v) => !v)}
-            style={{ height: 36, paddingInline: 18, border: `1px solid ${regular ? 'var(--brand)' : 'var(--line)'}`, background: regular ? 'var(--brand-soft)' : 'var(--bg)', color: regular ? 'var(--brand)' : 'var(--ink)', borderRadius: 18, fontSize: 14, cursor: 'pointer' }}
-          >
-            {regular ? <L en="Yes" ar="نعم" /> : <L en="No" ar="لا" />}
-          </button>
-          <input type="hidden" name="regularlyHosts" value={regular ? 'yes' : 'no'} />
+          <YesNoPair value={regular} onPick={setRegular} />
+          {regular !== null ? <input type="hidden" name="regularlyHosts" value={regular ? 'yes' : 'no'} /> : null}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', paddingBlockStart: 16 }}>
           <QuestionLabel q={VENUE_ELIGIBILITY_QUESTIONS.nightclub} />
-          <button
-            type="button"
-            aria-pressed={nightclub}
-            onClick={() => setNightclub((v) => !v)}
-            style={{ height: 36, paddingInline: 18, border: `1px solid ${nightclub ? 'var(--brand)' : 'var(--line)'}`, background: nightclub ? 'var(--brand-soft)' : 'var(--bg)', color: nightclub ? 'var(--brand)' : 'var(--ink)', borderRadius: 18, fontSize: 14, cursor: 'pointer' }}
-          >
-            {nightclub ? <L en="Yes" ar="نعم" /> : <L en="No" ar="لا" />}
-          </button>
-          <input type="hidden" name="isNightclub" value={nightclub ? 'yes' : 'no'} />
+          <YesNoPair value={nightclub} onPick={setNightclub} />
+          {nightclub !== null ? <input type="hidden" name="isNightclub" value={nightclub ? 'yes' : 'no'} /> : null}
         </div>
       </div>
 
-      {eligible ? (
+      {!eligible && !answered ? null : eligible ? (
         <div style={{ padding: '26px 30px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 14, marginBlockEnd: 20 }}>
           <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>
             <L en="This venue completes the annual assessment." ar="يستكمل هذا الموقع التقييم السنوي." />
