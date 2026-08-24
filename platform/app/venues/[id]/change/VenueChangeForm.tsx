@@ -163,6 +163,11 @@ export function VenueChangeForm({
       >
         <L en="Notify the Ministry of the change" ar="إبلاغ الوزارة بالتغيير" />
       </button>
+      {!any ? (
+        <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+          <L en="Select what changed to notify the Ministry." ar="حدّدوا ما الذي تغيّر لإبلاغ الوزارة." />
+        </p>
+      ) : null}
     </form>
   );
 }
