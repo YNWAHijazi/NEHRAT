@@ -6,25 +6,25 @@ Make the obligation legible and dischargeable. No marketing register, no encoura
 
 ## Authority
 
-**`handoff 4/source-documents/` outranks everything** — the actual regulatory instruments,
+**`handoff 5/source-documents/` outranks everything** — the actual regulatory instruments,
 English and Arabic. Read its README first. `SPEC.md`, `ROADMAP.md` and
 `CLAUDE-CODE-START-HERE.md` are a summary of them, and the summary has already been wrong
 twice. Where a source and a summary disagree, the source wins — and the disagreement is
-reported, never silently reconciled. `handoff 4/SPEC.md` wins over the other summaries;
-`handoff 4/ROADMAP.md` is authoritative on routing. `ROUTES.md` and `PROMPTS.md` described
+reported, never silently reconciled. `handoff 5/SPEC.md` wins over the other summaries;
+`handoff 5/ROADMAP.md` is authoritative on routing. `ROUTES.md` and `PROMPTS.md` described
 an earlier build and have been removed — if a copy resurfaces, ignore it.
 
 **Arabic strings come from the Arabic issue** of the regulation where one exists — it is
 the Arabic issue, not a translation. Known EN/AR divergences are listed in the
 source-documents README; each needs a Ministry decision — follow the English and record it.
 
-**Pixel fidelity to `handoff 4/pages/` is the primary acceptance criterion**, above
+**Pixel fidelity to `handoff 5/pages/` is the primary acceptance criterion**, above
 architecture and above cleverness. A visual difference from the reference is a defect
 unless the reviewer said otherwise. Do not improve the reference — copy it and say so;
 several values were argued over.
 
 The nine assessment domains and ten minimum conditions are carried by
-`handoff 4/pages/Organizer Journey.dc.html` (`domainDefs`, `minDefs`) and authoritatively
+`handoff 5/pages/Organizer Journey.dc.html` (`domainDefs`, `minDefs`) and authoritatively
 by `source-documents/en/02` (Annex A) — the prototype's copies are checked against the
 build by the drift test.
 
@@ -108,7 +108,13 @@ days, but *after* the event.
 **11. Date gates compute in Asia/Beirut.** Not the browser zone, not UTC. The post-event report
 opens 00:00 Asia/Beirut the day after the event **ends**, not starts.
 
-**12. `Fee: None.`** Never "free". No vendor directories, purchase links, fees or commercial content.
+**12. `Fee: None.`** Never "free". **Capability is not content**: the product specification
+requires fee/vendor/advertising capability behind feature flags (`lib/rules/data/feature-flags.json`);
+they ship off and NOTHING commercial renders in the Lebanon tenant.
+
+**13. Platform owner sees counts only** until the Ministry rules (SPEC §2c). Build the narrower
+reading; it is reversible. **14. The AI layer is real, required, and deliberately not built** —
+it needs its own conversation about what the assistants may see; sequence after the Ministry console.
 
 ## Copy
 
@@ -119,6 +125,10 @@ form*, *readiness declaration*, *post-event medical report*, *event health and m
 substitutes for what the user is doing. Quoted regulation is verbatim — do not improve it.
 Mass-gathering status vocabulary never appears on the facility side.
 The glossary in `SPEC.md` §7 is the canonical Arabic — use it rather than inventing terms.
+**التأهب is preparedness (this instrument); الجاهزية is cardiac/first-response readiness** — not
+interchangeable (SPEC §2b). The three outcomes' Arabic is verbatim from the compliance form. The
+plan is خطة التأهب الصحي والطبي للفعالية. Where an Arabic issue exists its wording wins over the
+prototype's Arabic; prototypes' assessment Arabic is provisional until re-issued.
 
 ## Build order
 

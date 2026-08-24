@@ -50,16 +50,16 @@
     "إصدار أداة NEHRAT"
   ],
   "massGatheringOutcomeVocabulary": {
-    "$comment": "These three strings belong to the mass-gathering instrument and must never appear on a facility-side surface. SPEC 6, ROADMAP 6.3.",
+    "$comment": "These three strings belong to the mass-gathering instrument and must never appear on a facility-side surface. Arabic is verbatim from the compliance form's Ministry-use block (SPEC 2b): التأهب is preparedness (this instrument); الجاهزية is cardiac/first-response readiness.",
     "en": [
       "Submission received but incomplete",
       "Additional information or revision required",
       "Health and medical preparedness requirements satisfied"
     ],
     "ar": [
-      "تم استلام الطلب لكنه غير مكتمل",
-      "مطلوب معلومات إضافية أو تعديل",
-      "استوفت متطلبات الجاهزية الصحية والطبية"
+      "تم استلام التقديم، لكنه غير مكتمل",
+      "يلزم تقديم معلومات إضافية أو إجراء تعديلات",
+      "تم استيفاء متطلبات التأهب الصحي والطبي"
     ]
   }
 }

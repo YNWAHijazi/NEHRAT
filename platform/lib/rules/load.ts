@@ -60,6 +60,19 @@ export const DOMAINS: readonly Domain[] = domainsJson.domains.map((d) => ({
 }));
 
 export const DOMAIN_COUNT: number = domainsJson.domainCount;
+
+export interface ArabicOnlyNote {
+  readonly where: string;
+  readonly ar: string;
+  readonly en: string;
+  readonly source: string;
+}
+
+/**
+ * Deltas the Arabic issue of Annex A carries that the English lacks, surfaced as
+ * source-tagged notes rather than folded in silently (handoff 5, decision 1).
+ */
+export const ARABIC_ONLY_NOTES: readonly ArabicOnlyNote[] = domainsJson.arabicOnlyNotes;
 export const MAX_SCORE_PER_DOMAIN: number = domainsJson.maxScorePerDomain;
 
 export const MINIMUM_CONDITIONS: readonly MinimumCondition[] =

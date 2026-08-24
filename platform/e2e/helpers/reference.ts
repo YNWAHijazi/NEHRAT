@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 const HERE = dirname(fileURLToPath(import.meta.url));
 import type { Page } from '@playwright/test';
 
-export const PAGES_DIR = join(HERE, '..', '..', '..', 'handoff 4', 'pages');
+export const PAGES_DIR = join(HERE, '..', '..', '..', 'handoff 5', 'pages');
 
 export type ReferenceFile =
   | 'Event Health Readiness.dc.html'

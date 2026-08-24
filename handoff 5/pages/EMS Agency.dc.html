@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand);text-decoration:none}
+a:hover{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+button,a,input,textarea,select{transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,box-shadow 150ms ease-out,transform 120ms ease-out}
+button:not(:disabled):active,a:active{transform:translateY(1px)}
+button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(0,0,0,.035)}
+html[data-theme="dark"] button:not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.05)}
+button:disabled{cursor:not-allowed;opacity:.75;box-shadow:none;transform:none}
+input:hover:not(:disabled),textarea:hover:not(:disabled){border-color:var(--muted)}
+:root,html[data-palette="petrol"][data-theme="light"]{--bg:#F4F2ED;--surface:#FBFAF7;--surface2:#EAE7E0;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#15515D;--brand-soft:rgba(21,81,93,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14);--l1:#15515D;--l2:#E9B44C;--l3:#A8482A;--l1s:rgba(21,81,93,.14);--l2s:rgba(233,180,76,.20);--l3s:rgba(168,72,42,.16)}
+html[data-palette="petrol"][data-theme="dark"]{--bg:#08171B;--surface:#0D2026;--surface2:#12292F;--ink:#E6EDEC;--muted:#9BAFB2;--line:rgba(255,255,255,.13);--brand:#6BA3AE;--brand-soft:rgba(107,163,174,.14);--accent:#E9B44C;--accent-ink:#E9B44C;--accent-soft:rgba(233,180,76,.18);--bad:#D2724B;--bad-soft:rgba(210,114,75,.18);--l1:#6BA3AE;--l2:#E9B44C;--l3:#D2724B;--l1s:rgba(107,163,174,.18);--l2s:rgba(233,180,76,.20);--l3s:rgba(210,114,75,.20)}
+html[data-palette="cedar"][data-theme="light"]{--bg:#F1F1EC;--surface:#FAFAF6;--surface2:#E7E8E0;--ink:#12160F;--muted:#525A4C;--line:rgba(18,22,15,.14);--brand:#2E4A34;--brand-soft:rgba(46,74,52,.09);--accent:#C2452C;--accent-ink:#A3341E;--accent-soft:rgba(194,69,44,.14);--bad:#7E1F12;--bad-soft:rgba(126,31,18,.14);--l1:#2E4A34;--l2:#C2452C;--l3:#7E1F12;--l1s:rgba(46,74,52,.13);--l2s:rgba(194,69,44,.16);--l3s:rgba(126,31,18,.16)}
+html[data-palette="cedar"][data-theme="dark"]{--bg:#0E140F;--surface:#141C15;--surface2:#1B241C;--ink:#E9EDE6;--muted:#9FAC9C;--line:rgba(255,255,255,.13);--brand:#8CB292;--brand-soft:rgba(140,178,146,.14);--accent:#E0674B;--accent-ink:#E0674B;--accent-soft:rgba(224,103,75,.18);--bad:#E8846A;--bad-soft:rgba(232,132,106,.16);--l1:#8CB292;--l2:#E0674B;--l3:#B33A22;--l1s:rgba(140,178,146,.18);--l2s:rgba(224,103,75,.20);--l3s:rgba(179,58,34,.24)}
+[data-l="ar"]{display:none !important}
+html[lang="ar"] [data-l="ar"]{display:revert !important}
+html[lang="ar"] [data-l="en"]{display:none !important}
+html[lang="ar"] [data-flip]{transform:scaleX(-1)}
+[data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
+h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+@media (max-width:900px){[data-dock]{display:none}}
+@media (max-width:700px){[data-sec-h1]{font-size:30px !important}[data-pad]{padding-inline:20px !important}[data-stack]{grid-template-columns:1fr !important}[data-th]{display:none !important}}
+@media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}button:not(:disabled):active,a:active{transform:none !important}}
+</style>
+<script>
+(function(){var h=document.documentElement;if(!h.getAttribute('data-theme')){h.setAttribute('lang','en');h.setAttribute('dir','ltr');h.setAttribute('data-theme','light');h.setAttribute('data-palette','petrol');}})();
+</script>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg)">
+
+<div style="background:var(--surface2);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:9px 32px;font-size:12.5px;letter-spacing:.02em;color:var(--muted)">
+<span data-l="en">An official service of the Republic of Lebanon</span><span data-l="ar">خدمة رسمية من الجمهورية اللبنانية</span>
+</div>
+</div>
+
+<header style="position:sticky;top:0;z-index:40;background:var(--bg);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:14px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="display:grid;place-items:center;width:34px;height:34px;border:1.25px solid var(--brand);border-radius:50%;flex:none">
+<span style="display:block;width:13px;height:13px;background:var(--brand);clip-path:polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)"></span>
+</span>
+<span style="display:flex;flex-direction:column;line-height:1.15">
+<span style="font-size:14.5px;font-weight:600;letter-spacing:-.01em"><span data-l="en">Ministry of Public Health</span><span data-l="ar">وزارة الصحة العامة</span></span>
+<span style="font-size:12px;color:var(--muted)"><span data-l="en">Event Health Readiness</span><span data-l="ar">الجاهزية الصحية للفعاليات</span></span>
+</span>
+</div>
+<div style="margin-inline-start:auto;display:flex;align-items:center;gap:10px">
+<div style="text-align:end;line-height:1.3">
+<div style="font-size:13.5px;font-weight:500"><span data-l="en">{{ actorNameEn }}</span><span data-l="ar">{{ actorNameAr }}</span></div>
+<div style="font-size:12px;color:var(--muted)"><span data-l="en">{{ actorRoleEn }}</span><span data-l="ar">{{ actorRoleAr }}</span></div>
+</div>
+<button onClick="{{ toggleLang }}" style="height:36px;padding-inline:14px;background:none;border:1px solid var(--line);border-radius:18px;cursor:pointer;font-size:13.5px"><span data-l="en">العربية</span><span data-l="ar">English</span></button>
+</div>
+</div>
+<!-- PROTOTYPE NAVIGATOR — not product navigation. Do not build. See the IA below. -->
+<div data-pad="" data-tabs="" data-prototype-nav="true" style="max-width:1160px;margin-inline:auto;padding:0 32px 12px;display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="5">
+<button onClick="{{ s.go }}" aria-pressed="{{ s.on }}" style="height:34px;padding-inline:14px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:18px;font-size:13px;cursor:pointer"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></button>
+</sc-for>
+</div>
+<!--
+Real IA — participating EMS provider. Shallow by design; a nominated party
+does not need a deep nav.
+  /nomination/:token      nomination landing (pre-account)
+  /register               account + provider profile
+  /events                 events this provider is named in
+  /events/:id             participation — operational detail (Level 2)
+  /events/:id/declaration readiness declaration (Level 3)
+  /events/:id/documents   shared document exchange with the organizer
+  /profile                provider profile (reused across events)
+
+"Empty and edge states" and the notification templates are design references, not routes.
+-->
+</header>
+
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:44px 32px 100px">
+
+<sc-if value="{{ isInvite }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-block-end:14px">
+<span style="padding:4px 11px;border-radius:4px;background:var(--accent-soft);color:var(--accent-ink);font-size:12.5px"><span data-l="en">Nomination — awaiting your response</span><span data-l="ar">ترشيح — بانتظار ردّكم</span></span>
+<span style="font-size:12.5px;color:var(--muted)"><span data-l="en">Sent {{ nomAgeEn }}</span><span data-l="ar">أُرسل {{ nomAgeAr }}</span></span>
+</div>
+<h1 data-sec-h1="" style="margin:0 0 32px;font-size:38px;font-weight:600;letter-spacing:-.035em;max-width:26ch"><span data-l="en">Baalbeck International Festival has named your organization in an event</span><span data-l="ar">سمّت مهرجانات بعلبك الدولية مؤسستكم في فعالية</span></h1>
+
+<div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-block-end:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--line)">
+<sc-for list="{{ nomAnswers }}" as="q" hint-placeholder-count="4">
+<div style="background:var(--surface);padding:24px 26px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:8px"><span data-l="en">{{ q.qEn }}</span><span data-l="ar">{{ q.qAr }}</span></div>
+<div style="font-size:17px;font-weight:500;line-height:1.45;margin-block-end:0"><span data-l="en">{{ q.aEn }}</span><span data-l="ar">{{ q.aAr }}</span></div>
+<sc-if value="{{ q.hasNote }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:13.5px;line-height:1.6;color:{{ q.noteInk }}"><span data-l="en">{{ q.noteEn }}</span><span data-l="ar">{{ q.noteAr }}</span></div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:28px 32px;border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:14px"><span data-l="en">Respond to the nomination</span><span data-l="ar">الردّ على الترشيح</span></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:18px">
+<sc-for list="{{ nomResponses }}" as="r" hint-placeholder-count="3">
+<button onClick="{{ r.pick }}" aria-pressed="{{ r.on }}" style="text-align:start;display:flex;gap:14px;align-items:start;padding:18px 22px;border:1px solid {{ r.border }};background:{{ r.bg }};border-radius:12px;cursor:pointer">
+<span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid {{ r.mark }};background:{{ r.markBg }};margin-block-start:3px"></span>
+<span>
+<span style="display:block;font-size:16px;font-weight:500;line-height:1.4"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></span>
+<span style="display:block;font-size:14px;line-height:1.6;color:var(--muted);margin-block-start:4px"><span data-l="en">{{ r.descEn }}</span><span data-l="ar">{{ r.descAr }}</span></span>
+</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ nomNeedsReason }}" hint-placeholder-val="{{ true }}">
+<div style="margin-block-end:18px">
+<div style="font-size:13.5px;color:var(--muted);margin-block-end:6px"><span data-l="en">A reason is required. It is sent to the organizer as written.</span><span data-l="ar">السبب مطلوب. ويُرسل إلى المنظّم كما هو مكتوب.</span></div>
+<textarea rows="3" style="width:100%;padding:12px;background:var(--bg);border:1px solid var(--accent);border-radius:8px;font-size:15px;line-height:1.6;resize:vertical"></textarea>
+</div>
+</sc-if>
+<div style="font-size:13.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">A nomination is not a commitment by either side until you accept.</span><span data-l="ar">الترشيح ليس التزاماً من أي من الطرفين إلى أن تقبلوا.</span></div>
+</div>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-block-end:26px">
+<sc-for list="{{ inviteFacts }}" as="i" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:16px 18px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:6px"><span data-l="en">{{ i.en }}</span><span data-l="ar">{{ i.ar }}</span></div>
+<div style="font-size:16px;font-weight:500;line-height:1.4"><span data-l="en">{{ i.vEn }}</span><span data-l="ar">{{ i.vAr }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">In full</span><span data-l="ar">بالتفصيل</span></div>
+<div style="font-size:17px;line-height:1.6;max-width:66ch"><span data-l="en">Complete and sign the EMS Readiness Declaration Section B — for this event, and confirm your agency's role in the major-incident and mass-casualty plan. The organizer cannot file the Level 3 package without it.</span><span data-l="ar">استكمال وتوقيع إقرار جاهزية خدمات الطوارئ الطبية — لهذه الفعالية، وتأكيد دور جهتكم في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية. لا يمكن للمنظّم تقديم حزمة المستوى 3 من دونه.</span></div>
+</div>
+
+<div style="padding:32px;border:1px solid var(--line);border-radius:16px">
+<h2 style="margin:0 0 8px;font-size:24px;font-weight:600;letter-spacing:-.02em"><span data-l="en">Set up your account</span><span data-l="ar">إعداد حسابكم</span></h2>
+<p style="margin:0 0 24px;font-size:15px;color:var(--muted);line-height:1.6"><span data-l="en">An individual account gives access to the platform. Your agency profile is completed once and reused across every event.</span><span data-l="ar">يمنح الحساب الفردي الوصول إلى المنصة. يُستكمل ملف جهتكم مرة واحدة ويُعاد استخدامه في كل فعالية.</span></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-block-end:24px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Full name</span><span data-l="ar">الاسم الكامل</span></span><input type="text" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Email</span><span data-l="ar">البريد الإلكتروني</span></span><input type="email" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Password</span><span data-l="ar">كلمة المرور</span></span><input type="password" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+</div>
+<button onClick="{{ goProfile }}" style="height:48px;padding-inline:26px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Accept and continue to the provider profile</span><span data-l="ar">القبول والمتابعة إلى ملف المزوّد</span></button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Agency profile</span><span data-l="ar">ملف الجهة</span></h1>
+<p style="margin:0 0 32px;font-size:16px;line-height:1.65;color:var(--muted);max-width:72ch"><span data-l="en">This profile is reused across every event your agency participates in. You never re-enter it per event.</span><span data-l="ar">يُعاد استخدام هذا الملف في كل فعالية تشارك فيها جهتكم. لا تُعاد تعبئته لكل فعالية.</span></p>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+<sc-for list="{{ profileFields }}" as="p" hint-placeholder-count="9">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">{{ p.en }}</span><span data-l="ar">{{ p.ar }}</span></span>
+<input type="text" defaultValue="{{ p.value }}" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" />
+</label>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:22px 26px;border:1px solid var(--line);border-radius:12px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:80ch">
+<span data-l="en">The cardiac-arrest readiness framework also places obligations on BLS agencies. That is a separate regulatory instrument and its digital service opens in a later phase. This profile is shared between the two frameworks; nothing else is.</span><span data-l="ar">يضع إطار الجاهزية لتوقف القلب موجبات أيضاً على جهات دعم الحياة الأساسي. وهو أداة تنظيمية منفصلة تبدأ خدمتها الرقمية في مرحلة لاحقة. هذا الملف مشترك بين الإطارين، ولا شيء غيره.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 10px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Events you have been named in</span><span data-l="ar">الفعاليات التي سُمّيتم فيها</span></h1>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-block-end:28px">
+<span style="font-size:14px;color:var(--muted)"><span data-l="en">{{ dashCountEn }}</span><span data-l="ar">{{ dashCountAr }}</span></span>
+<span style="width:1px;height:16px;background:var(--line)"></span>
+<span style="font-size:13px;color:var(--muted)"><span data-l="en">Sorted by event date</span><span data-l="ar">مرتبة بحسب تاريخ الفعالية</span></span>
+<sc-for list="{{ dashSorts }}" as="s" hint-placeholder-count="2">
+<button onClick="{{ s.pick }}" aria-pressed="{{ s.on }}" style="height:30px;padding-inline:12px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:15px;font-size:12.5px;cursor:pointer"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></button>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;margin-block-end:14px">
+<h2 style="margin:0;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Outstanding</span><span data-l="ar">غير مُنجز</span></h2>
+<span style="font-size:14px;color:var(--muted)"><span data-l="en">Something is owed by your agency</span><span data-l="ar">على جهتكم موجب قائم</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-block-end:52px">
+<sc-for list="{{ outstanding }}" as="e" hint-placeholder-count="2">
+<button onClick="{{ e.open }}" data-stack="" style="text-align:start;padding:24px 26px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ e.color }};border-radius:14px;cursor:pointer;display:grid;grid-template-columns:minmax(200px,1.6fr) 1fr 1.4fr auto;gap:20px;align-items:center">
+<div>
+<div style="font-size:18px;font-weight:600;letter-spacing:-.015em;margin-block-end:5px"><span data-l="en">{{ e.en }}</span><span data-l="ar">{{ e.ar }}</span></div>
+<div style="font-size:13px;color:var(--muted)"><span data-l="en">{{ e.orgEn }}</span><span data-l="ar">{{ e.orgAr }}</span> · <span style="font-variant-numeric:tabular-nums">{{ e.date }}</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-block-start:8px">
+<span style="padding:3px 8px;border-radius:3px;background:{{ e.partBg }};color:{{ e.partColor }};font-size:12px"><span data-l="en">{{ e.partEn }}</span><span data-l="ar">{{ e.partAr }}</span></span>
+<sc-if value="{{ e.hasDecl }}" hint-placeholder-val="{{ true }}">
+<span style="padding:3px 8px;border-radius:3px;background:{{ e.declBg }};color:{{ e.declColor }};font-size:12px"><span data-l="en">{{ e.declEn }}</span><span data-l="ar">{{ e.declAr }}</span></span>
+</sc-if>
+</div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Level</span><span data-l="ar">المستوى</span></div>
+<div style="font-size:15px;font-weight:500"><span style="display:inline-block;padding:2px 8px;border-radius:3px;border-inline-start:2px solid {{ e.levelColor }};background:{{ e.levelSoft }};color:var(--ink)"><span data-l="en">Level {{ e.level }}</span><span data-l="ar">المستوى {{ e.level }}</span></span></div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Owed by your agency</span><span data-l="ar">المطلوب من جهتكم</span></div>
+<div style="font-size:14.5px;line-height:1.45"><span data-l="en">{{ e.owedEn }}</span><span data-l="ar">{{ e.owedAr }}</span></div>
+</div>
+<div data-due="" style="text-align:end;min-width:190px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">{{ e.byLabelEn }}</span><span data-l="ar">{{ e.byLabelAr }}</span></div>
+<div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ e.color }}"><span data-l="en">{{ e.byEn }}</span><span data-l="ar">{{ e.byAr }}</span></div>
+</div>
+</button>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;margin-block-end:14px">
+<h2 style="margin:0;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Complete</span><span data-l="ar">مُنجز</span></h2>
+<span style="font-size:14px;color:var(--muted)"><span data-l="en">Nothing further is owed by your agency</span><span data-l="ar">لا موجب إضافي على جهتكم</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ complete }}" as="e" hint-placeholder-count="1">
+<div data-stack="" style="padding:22px 26px;border:1px solid var(--line);border-inline-start:3px solid var(--brand);border-radius:14px;display:grid;grid-template-columns:minmax(200px,1.6fr) 1fr 1.4fr auto;gap:20px;align-items:center">
+<div>
+<div style="font-size:18px;font-weight:600;letter-spacing:-.015em;margin-block-end:5px"><span data-l="en">{{ e.en }}</span><span data-l="ar">{{ e.ar }}</span></div>
+<div style="font-size:13px;color:var(--muted)"><span data-l="en">{{ e.orgEn }}</span><span data-l="ar">{{ e.orgAr }}</span> · <span style="font-variant-numeric:tabular-nums">{{ e.date }}</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-block-start:8px">
+<span style="padding:3px 8px;border-radius:3px;background:{{ e.partBg }};color:{{ e.partColor }};font-size:12px"><span data-l="en">{{ e.partEn }}</span><span data-l="ar">{{ e.partAr }}</span></span>
+<sc-if value="{{ e.hasDecl }}" hint-placeholder-val="{{ true }}">
+<span style="padding:3px 8px;border-radius:3px;background:{{ e.declBg }};color:{{ e.declColor }};font-size:12px"><span data-l="en">{{ e.declEn }}</span><span data-l="ar">{{ e.declAr }}</span></span>
+</sc-if>
+</div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Level</span><span data-l="ar">المستوى</span></div>
+<div style="font-size:15px;font-weight:500"><span style="display:inline-block;padding:2px 8px;border-radius:3px;border-inline-start:2px solid {{ e.levelColor }};background:{{ e.levelSoft }};color:var(--ink)"><span data-l="en">Level {{ e.level }}</span><span data-l="ar">المستوى {{ e.level }}</span></span></div>
+</div>
+<div style="font-size:14.5px;line-height:1.45"><span data-l="en">{{ e.owedEn }}</span><span data-l="ar">{{ e.owedAr }}</span></div>
+<div style="text-align:end"><span style="display:inline-block;padding:4px 10px;border-radius:4px;background:var(--brand-soft);color:var(--brand);font-size:13px"><span data-l="en">Signed {{ e.signed }}</span><span data-l="ar">وُقّع {{ e.signed }}</span></span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLevel2 }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Beirut Coastal 12K · Beirut Road Runners · 2026-10-02</span><span data-l="ar">بيروت الساحلي 12 كلم · عدّاؤو بيروت · 2026-10-02</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Event participation — Level 2</span><span data-l="ar">المشاركة في الفعالية — المستوى 2</span></h1>
+
+<div style="padding:24px 28px;border:1px solid var(--brand);background:var(--brand-soft);border-radius:14px;margin-block-end:32px;max-width:76ch">
+<div style="font-size:16px;line-height:1.65"><span data-l="en">This information goes to the organizer for the event health and medical plan. No declaration is required at Level 2.</span><span data-l="ar">تذهب هذه المعلومات إلى المنظّم لإدراجها في الخطة الصحية والطبية للفعالية. لا يُطلب أي إقرار في المستوى 2.</span></div>
+</div>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">Operational detail for the organizer</span><span data-l="ar">التفاصيل التشغيلية للمنظّم</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+<sc-for list="{{ level2Fields }}" as="p" hint-placeholder-count="9">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13.5px;color:var(--muted);line-height:1.4"><span data-l="en">{{ p.en }}</span><span data-l="ar">{{ p.ar }}</span></span>
+<input type="text" defaultValue="{{ p.value }}" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" />
+</label>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button style="height:48px;padding-inline:26px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Confirm participation and send to the organizer</span><span data-l="ar">تأكيد المشاركة وإرسالها إلى المنظّم</span></button>
+<button onClick="{{ toggleDecline }}" style="height:44px;padding-inline:20px;border:1px solid var(--line);background:none;border-radius:22px;font-size:14.5px;cursor:pointer"><span data-l="en">Decline participation</span><span data-l="ar">الاعتذار عن المشاركة</span></button>
+</div>
+
+<sc-if value="{{ declining }}" hint-placeholder-val="{{ true }}">
+<div style="margin-block-start:24px;padding:28px 32px;border:2px solid var(--bad);background:var(--bad-soft);border-radius:16px;max-width:76ch">
+<div style="font-size:20px;font-weight:600;line-height:1.5;margin-block-end:12px"><span data-l="en">Declining removes your agency as a named provider for this event.</span><span data-l="ar">الاعتذار يزيل جهتكم كمزوّد مُسمّى لهذه الفعالية.</span></div>
+<div style="font-size:16px;line-height:1.7;margin-block-end:20px"><span data-l="en">That is a material change to the organizer's submission. The organizer must notify the Ministry of it and may need to identify another provider before the event can proceed at Level 2.</span><span data-l="ar">وهذا تغيير جوهري في ملف المنظّم. على المنظّم إبلاغ الوزارة به وقد يحتاج إلى تحديد مزوّد آخر قبل أن تمضي الفعالية في المستوى 2.</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<button style="height:44px;padding-inline:22px;border:0;border-radius:22px;background:var(--bad);color:var(--bg);font-size:14.5px;font-weight:500;cursor:pointer"><span data-l="en">Decline and notify the organizer</span><span data-l="ar">الاعتذار وإبلاغ المنظّم</span></button>
+<button onClick="{{ toggleDecline }}" style="height:44px;padding-inline:20px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14.5px;cursor:pointer"><span data-l="en">Go back</span><span data-l="ar">العودة</span></button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLevel3 }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Baalbeck Summer Festival · Baalbeck International Festival · 2026-09-19</span><span data-l="ar">مهرجان بعلبك الصيفي · مهرجانات بعلبك الدولية · 2026-09-19</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">EMS Readiness Declaration</span><span data-l="ar">إقرار جاهزية خدمات الطوارئ الطبية</span></h1>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:var(--muted);max-width:72ch"><span data-l="en">the EMS Readiness Declaration. Completed and signed by each participating agency separately. The organizer files by 2026-08-20 and cannot file without this.</span><span data-l="ar">إقرار جاهزية خدمات الطوارئ الطبية. تستكمله وتوقّعه كل جهة مشاركة على حدة. يقدّم المنظّم بحلول 2026-08-20 ولا يمكنه التقديم من دونه.</span></p>
+
+<div style="padding:26px 30px;border:1px solid var(--line);border-radius:14px;margin-block-end:20px;max-width:80ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">What your agency is accepting</span><span data-l="ar">ما تقبله جهتكم</span></div>
+<div style="font-size:16px;line-height:1.7"><span data-l="en">Each participating provider remains professionally and organizationally responsible for its personnel, qualifications, authorization, equipment, protocols, clinical practice, patient care, documentation and services.</span><span data-l="ar">يبقى كل مزوّد مشارك مسؤولاً مهنياً وتنظيمياً عن موظفيه ومؤهلاتهم وترخيصهم ومعداته وبروتوكولاته وممارسته السريرية ورعاية المرضى والتوثيق والخدمات.</span></div>
+</div>
+
+<div data-wide="" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-block-end:32px">
+<div style="padding:24px 26px;background:var(--surface);border:1px solid var(--line);border-radius:14px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Event Medical Director — for item 7</span><span data-l="ar">المدير الطبي للفعالية — للبند 7</span></div>
+<div style="font-size:18px;font-weight:600;margin-block-end:6px">Dr N. Khoury</div>
+<div style="font-size:14.5px;color:var(--muted);line-height:1.6">03 421 118 · n.khoury@bif.lb</div>
+</div>
+<div style="padding:24px 26px;background:var(--surface);border:1px solid var(--line);border-radius:14px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Major-incident and mass-casualty plan — for item 10</span><span data-l="ar">خطة الحوادث الجسيمة وحوادث الإصابات الجماعية — للبند 10</span></div>
+<div style="font-size:14.5px;color:var(--muted);line-height:1.6;margin-block-end:14px"><span data-l="en">Version 3 · from the organizer's submission</span><span data-l="ar">النسخة 3 · من ملف المنظّم</span></div>
+<button style="height:38px;padding-inline:18px;border:1px solid var(--line);background:var(--bg);border-radius:18px;font-size:14px;cursor:pointer"><span data-l="en">Open the plan</span><span data-l="ar">فتح الخطة</span></button>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:32px">
+<sc-for list="{{ declItems }}" as="d" hint-placeholder-count="10">
+<button onClick="{{ d.toggle }}" aria-pressed="{{ d.on }}" style="text-align:start;display:flex;gap:16px;align-items:start;padding:18px 22px;border:1px solid {{ d.border }};background:{{ d.bg }};border-radius:12px;cursor:pointer">
+<span style="flex:none;width:18px;height:18px;border:1.5px solid {{ d.mark }};border-radius:3px;background:{{ d.markBg }};margin-block-start:3px"></span>
+<span style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;min-width:18px">{{ d.n }}</span>
+<span style="font-size:16px;line-height:1.55"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></span>
+</button>
+</sc-for>
+</div>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">EMS provider certification</span><span data-l="ar">تصديق مزوّد الإسعاف</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">
+<sc-for list="{{ certFields }}" as="c" hint-placeholder-count="6">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">{{ c.en }}</span><span data-l="ar">{{ c.ar }}</span></span>
+<input type="text" defaultValue="{{ c.value }}" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" />
+</label>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:16px 20px;border:1px solid var(--line);border-radius:10px;margin-block-end:20px;font-size:14px;line-height:1.6;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<span><span data-l="en">{{ draftStateEn }}</span><span data-l="ar">{{ draftStateAr }}</span></span>
+<span style="padding:4px 10px;border-radius:4px;background:{{ draftChipBg }};color:{{ draftChipColor }};font-size:13px"><span data-l="en">{{ draftChipEn }}</span><span data-l="ar">{{ draftChipAr }}</span></span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<button onClick="{{ sign }}" disabled="{{ signBlocked }}" style="height:48px;padding-inline:26px;border:0;border-radius:22px;background:{{ signBg }};color:{{ signColor }};font-size:15px;font-weight:500;cursor:{{ signCursor }}"><span data-l="en">Sign the declaration</span><span data-l="ar">توقيع الإقرار</span></button>
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">{{ signHintEn }}</span><span data-l="ar">{{ signHintAr }}</span></span>
+</div>
+
+<sc-if value="{{ signed }}" hint-placeholder-val="{{ true }}">
+<div style="margin-block-start:32px;padding:32px;background:var(--surface);border:1px solid var(--brand);border-radius:16px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand);margin-block-end:14px"><span data-l="en">Delivered to the organizer</span><span data-l="ar">سُلّم إلى المنظّم</span></div>
+<div style="font-size:16px;line-height:1.7;max-width:74ch;margin-block-end:20px"><span data-l="en">Your declaration is now one of the Level 3 attachments in the organizer's submission package. Only your agency's declaration is shown to you.</span><span data-l="ar">أصبح إقراركم أحد مرفقات المستوى 3 في حزمة تقديم المنظّم. لا يُعرض لكم سوى إقرار جهتكم.</span></div>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+<div style="background:var(--bg);padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:14.5px"><span><span data-l="en">Signed</span><span data-l="ar">وُقّع</span></span><span style="font-variant-numeric:tabular-nums">2026-08-13</span></div>
+<div style="background:var(--bg);padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:14.5px"><span><span data-l="en">Status on the organizer's side</span><span data-l="ar">الحالة لدى المنظّم</span></span><span style="padding:3px 9px;border-radius:4px;background:var(--brand-soft);color:var(--brand);font-size:13px"><span data-l="en">Provided</span><span data-l="ar">مُقدَّم</span></span></div>
+<div style="background:var(--bg);padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:14.5px"><span><span data-l="en">Organizer files by</span><span data-l="ar">يقدّم المنظّم بحلول</span></span><span style="font-variant-numeric:tabular-nums">2026-08-20</span></div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDocs }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:1000px">
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Baalbeck Summer Festival · Baalbeck International Festival · Level 3</span><span data-l="ar">مهرجان بعلبك الصيفي · مهرجانات بعلبك الدولية · المستوى 3</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Shared documents</span><span data-l="ar">المستندات المشتركة</span></h1>
+<p style="margin:0 0 32px;font-size:16px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">One list, visible to your organization and to the organizer. Either side can add a document. Nothing here is sent to the Ministry unless the organizer attaches it to the submission.</span><span data-l="ar">قائمة واحدة تظهر لمؤسستكم وللمنظّم. ويمكن لأي من الطرفين إضافة مستند. ولا يُرسل شيء منها إلى الوزارة إلا إذا أرفقه المنظّم بالملف.</span></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin-block-end:24px">
+<button style="height:44px;padding-inline:22px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Add a document</span><span data-l="ar">إضافة مستند</span></button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ sharedDocs }}" as="d" hint-placeholder-count="5">
+<div style="padding:18px 22px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px {{ d.edge }} {{ d.color }};border-radius:12px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+<div style="flex:1;min-width:260px">
+<div style="font-size:16px;line-height:1.45"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></div>
+<div style="font-size:13.5px;color:var(--muted);margin-block-start:5px;font-variant-numeric:tabular-nums"><span data-l="en">{{ d.metaEn }}</span><span data-l="ar">{{ d.metaAr }}</span></div>
+</div>
+<div style="display:flex;gap:12px;align-items:center;flex:none">
+<span style="padding:4px 10px;border-radius:4px;background:{{ d.chipBg }};color:{{ d.color }};font-size:13px"><span data-l="en">{{ d.stateEn }}</span><span data-l="ar">{{ d.stateAr }}</span></span>
+<button style="height:38px;padding-inline:18px;border:1px solid var(--line);background:var(--bg);border-radius:19px;font-size:14px;cursor:pointer"><span data-l="en">{{ d.ctaEn }}</span><span data-l="ar">{{ d.ctaAr }}</span></button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBls }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="font-size:12.5px;color:var(--muted);margin-block-end:10px"><span data-l="en">First-response unit account · this account holds no facility records and cannot open a facility's registry or plan</span><span data-l="ar">حساب وحدة استجابة أولية · لا يحمل هذا الحساب سجلات مرافق ولا يمكنه فتح سجل مرفق أو خطته</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">First-response readiness</span><span data-l="ar">جاهزية الاستجابة الأولية</span></h1>
+<p style="margin:0 0 20px;font-size:16.5px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">A basic life support or designated first-response unit holds the equipment, the competence and the operational readiness to respond to a cardiac arrest, works to a written procedure, and reports what it does.</span><span data-l="ar">تملك وحدة الإنعاش الأساسي أو الاستجابة الأولية المعتمدة المعدات والكفاءة والجهوزية التشغيلية للاستجابة لتوقف القلب، وتعمل بإجراء مكتوب، وتُبلغ عمّا تقوم به.</span></p>
+<div style="padding:20px 24px;border:1px solid var(--line);border-radius:12px;margin-block-end:40px;max-width:80ch;font-size:14.5px;line-height:1.7;color:var(--muted)">
+<span data-l="en">This is a different actor from the participating emergency medical provider named on an event. The two answer to different instruments, and neither declaration substitutes for the other, even where one organisation holds both roles.</span><span data-l="ar">هذا طرف مختلف عن مزوّد الإسعاف المشارك المُسمّى على فعالية. ويخضع الاثنان لإطارين مختلفين، ولا يحل إقرار أحدهما محل الآخر، وإن كانت مؤسسة واحدة تحمل الدورين.</span>
+</div>
+
+<h2 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Minimum equipment</span><span data-l="ar">الحد الأدنى للمعدات</span></h2>
+<p style="margin:0 0 18px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">Carried on every deployment.</span><span data-l="ar">تُحمَل في كل انتشار.</span></p>
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:40px">
+<sc-for list="{{ blsEquip }}" as="i" hint-placeholder-count="5">
+<div style="padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ i.color }};border-radius:12px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+<span style="display:flex;gap:14px;align-items:baseline;flex:1;min-width:240px">
+<span style="flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:16px">{{ i.n }}</span>
+<span style="font-size:15px;line-height:1.55"><span data-l="en">{{ i.en }}</span><span data-l="ar">{{ i.ar }}</span></span>
+</span>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ i.chipBg }};color:{{ i.color }};font-size:12.5px"><span data-l="en">{{ i.stateEn }}</span><span data-l="ar">{{ i.stateAr }}</span></span>
+</div>
+</sc-for>
+</div>
+<h2 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Personnel competence</span><span data-l="ar">كفاءة الموظفين</span></h2>
+<p style="margin:0 0 18px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">Held by the responders the unit deploys, and evidenced on request.</span><span data-l="ar">يحملها المستجيبون الذين تنشرهم الوحدة، وتُثبَت عند الطلب.</span></p>
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:40px">
+<sc-for list="{{ blsComp }}" as="i" hint-placeholder-count="7">
+<div style="padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ i.color }};border-radius:12px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+<span style="display:flex;gap:14px;align-items:baseline;flex:1;min-width:240px">
+<span style="flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:16px">{{ i.n }}</span>
+<span style="font-size:15px;line-height:1.55"><span data-l="en">{{ i.en }}</span><span data-l="ar">{{ i.ar }}</span></span>
+</span>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ i.chipBg }};color:{{ i.color }};font-size:12.5px"><span data-l="en">{{ i.stateEn }}</span><span data-l="ar">{{ i.stateAr }}</span></span>
+</div>
+</sc-for>
+</div>
+<h2 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Operational readiness</span><span data-l="ar">الجهوزية التشغيلية</span></h2>
+<p style="margin:0 0 18px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">Ongoing, not a one-time check.</span><span data-l="ar">مستمرة لا فحصاً لمرة واحدة.</span></p>
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:40px">
+<sc-for list="{{ blsOps }}" as="i" hint-placeholder-count="5">
+<div style="padding:16px 20px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ i.color }};border-radius:12px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+<span style="display:flex;gap:14px;align-items:baseline;flex:1;min-width:240px">
+<span style="flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:16px">{{ i.n }}</span>
+<span style="font-size:15px;line-height:1.55"><span data-l="en">{{ i.en }}</span><span data-l="ar">{{ i.ar }}</span></span>
+</span>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ i.chipBg }};color:{{ i.color }};font-size:12.5px"><span data-l="en">{{ i.stateEn }}</span><span data-l="ar">{{ i.stateAr }}</span></span>
+</div>
+</sc-for>
+</div>
+
+<h2 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Written cardiac-arrest response procedure</span><span data-l="ar">إجراء الاستجابة المكتوب لتوقف القلب</span></h2>
+<p style="margin:0 0 18px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">Six steps, written and held by the unit. Step six governs the case where the unit does not transport.</span><span data-l="ar">ست خطوات مكتوبة تحتفظ بها الوحدة. وتحكم الخطوة السادسة الحالة التي لا تنقل فيها الوحدة المريض.</span></p>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block-end:40px">
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Step</span><span data-l="ar">الخطوة</span></div>
+<div data-th="" style="background:var(--surface2);padding:12px 18px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)"><span data-l="en">What the procedure states</span><span data-l="ar">ما ينص عليه الإجراء</span></div>
+<sc-for list="{{ blsProc }}" as="s" hint-placeholder-count="6">
+<div style="background:var(--bg);padding:16px 18px;font-size:15px;font-variant-numeric:tabular-nums;color:var(--brand)">{{ s.n }}</div>
+<div style="background:var(--bg);padding:16px 18px;font-size:15px;line-height:1.6"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button style="height:48px;padding-inline:26px;border:0;border-radius:24px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Sign the first-response readiness declaration</span><span data-l="ar">توقيع إقرار جاهزية الاستجابة الأولية</span></button>
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">{{ blsSignHintEn }}</span><span data-l="ar">{{ blsSignHintAr }}</span></span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDataset }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<div style="font-size:12.5px;color:var(--muted);margin-block-end:10px"><span data-l="en">First-response unit account</span><span data-l="ar">حساب وحدة استجابة أولية</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Minimum dataset</span><span data-l="ar">الحد الأدنى للبيانات</span></h1>
+<p style="margin:0 0 20px;font-size:16.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">One report for each patient. Five sections. The report carries no patient name.</span><span data-l="ar">تقرير واحد لكل مريض. خمسة أقسام. ولا يتضمن التقرير اسم المريض.</span></p>
+
+<div style="padding:24px 28px;border:1px solid var(--line);border-radius:14px;margin-block-end:16px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:12px"><span data-l="en">How to submit</span><span data-l="ar">كيفية التقديم</span></div>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.7"><span data-l="en">A unit may use its own patient-care report where that report captures everything required here. Attaching it satisfies the obligation; nothing has to be re-typed into the platform.</span><span data-l="ar">يجوز للوحدة استخدام تقرير رعاية المرضى الخاص بها حيث يغطي ذلك التقرير كل ما هو مطلوب هنا. وإرفاقه يستوفي الموجب، ولا يلزم إعادة إدخال شيء في المنصة.</span></p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<sc-for list="{{ dsRoutes }}" as="r" hint-placeholder-count="2">
+<button onClick="{{ r.pick }}" aria-pressed="{{ r.on }}" style="height:42px;padding-inline:20px;border:1px solid {{ r.border }};background:{{ r.bg }};color:{{ r.color }};border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ dsAttach }}" hint-placeholder-val="{{ true }}">
+<div style="padding:26px 30px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-block-end:16px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;margin-block-end:18px">
+<div>
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:6px"><span data-l="en">Attached report</span><span data-l="ar">التقرير المرفق</span></div>
+<div style="font-size:16px;font-variant-numeric:tabular-nums">unit3-pcr-2026-0841.pdf</div>
+</div>
+<button style="height:40px;padding-inline:18px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">Replace file</span><span data-l="ar">استبدال الملف</span></button>
+</div>
+<div style="font-size:14.5px;line-height:1.7;color:var(--muted)"><span data-l="en">Confirm the attached report covers each section below. Anything it does not cover is completed here.</span><span data-l="ar">أكّدوا أن التقرير المرفق يغطي كل قسم أدناه. وما لا يغطيه يُستكمل هنا.</span></div>
+</div>
+</sc-if>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ dsSections }}" as="s" hint-placeholder-count="5">
+<div style="background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid var(--brand);border-radius:12px;overflow:hidden">
+<div style="padding:20px 24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:baseline">
+<span style="display:flex;gap:14px;align-items:baseline;flex:1;min-width:240px">
+<span style="flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:16px">{{ s.n }}</span>
+<span style="font-size:17px;font-weight:600;letter-spacing:-.015em"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></span>
+</span>
+<sc-if value="{{ dsAttach }}" hint-placeholder-val="{{ true }}">
+<button style="flex:none;height:34px;padding-inline:14px;border:1px solid var(--line);background:var(--bg);border-radius:17px;font-size:13px;cursor:pointer"><span data-l="en">Covered by the attached report</span><span data-l="ar">يغطيه التقرير المرفق</span></button>
+</sc-if>
+</div>
+<div style="padding:0 24px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+<sc-for list="{{ s.fields }}" as="d" hint-placeholder-count="4">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13px;color:var(--muted);line-height:1.45"><span data-l="en">{{ d.en }}</span><span data-l="ar">{{ d.ar }}</span></span>
+<input type="text" defaultValue="{{ d.value }}" placeholder="{{ d.ph }}" style="height:42px;padding-inline:13px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:14.5px" />
+</label>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="margin-block-start:20px;padding:18px 22px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;line-height:1.7;color:var(--muted);max-width:80ch">
+<span data-l="en">The reporting timeframe is set by the Ministry and is not fixed in this form.</span><span data-l="ar">تحدد الوزارة مهلة الإبلاغ وهي غير مثبّتة في هذا النموذج.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStates }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Empty and edge states</span><span data-l="ar">الحالات الفارغة والطرفية</span></h1>
+<p style="margin:0 0 38px;font-size:16px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">What your agency sees when there is nothing to do, and when something has gone wrong.</span><span data-l="ar">ما تراه جهتكم عندما لا يوجد ما يُنجز، وعندما يحدث خلل.</span></p>
+
+<h2 style="margin:0 0 18px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Empty states</span><span data-l="ar">الحالات الفارغة</span></h2>
+<div style="display:flex;flex-direction:column;gap:14px;margin-block-end:48px">
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">No events named in</span><span data-l="ar">لم تُسمَّ في أي فعالية</span></div>
+<div style="padding:30px 28px"><div style="max-width:78ch">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:10px"><span data-l="en">No organizer has named your agency in an event.</span><span data-l="ar">لم يسمِّ أي منظّم جهتكم في فعالية.</span></div>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.75;color:var(--muted)"><span data-l="en">Events appear here when an organizer names your agency as a participating emergency medical service. You cannot add yourself to an event; the organizer names you, and you accept or decline.</span><span data-l="ar">تظهر الفعاليات هنا عندما يسمّي منظّم جهتكم كجهة خدمات طوارئ طبية مشاركة. ولا يمكنكم إضافة أنفسكم إلى فعالية؛ فالمنظّم هو من يسمّيكم، وأنتم تقبلون أو تعتذرون.</span></p>
+<p style="margin:0 0 20px;font-size:15px;line-height:1.75;color:var(--muted)"><span data-l="en">Your agency profile is complete, so nothing is holding up a nomination. Keeping it current is the one thing you can do meanwhile — organizers see it when they name you.</span><span data-l="ar">ملف جهتكم مكتمل، فلا شيء يعوق تسميتكم. والحفاظ على تحديثه هو ما يمكنكم فعله في هذه الأثناء — إذ يراه المنظّمون عند تسميتكم.</span></p>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button style="height:42px;padding-inline:20px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">Review the agency profile</span><span data-l="ar">مراجعة ملف الجهة</span></button></div>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Nothing outstanding</span><span data-l="ar">لا موجب قائم</span></div>
+<div style="padding:30px 28px"><div style="max-width:78ch">
+<div style="padding:26px 30px;border:1px solid var(--brand);background:var(--brand-soft);border-radius:12px;margin-block-end:20px">
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:10px"><span data-l="en">Nothing is owed by your agency.</span><span data-l="ar">لا موجب على جهتكم.</span></div>
+<p style="margin:0;font-size:15px;line-height:1.75"><span data-l="en">Three events are complete: every participation confirmed and every declaration signed. Two of them are still ahead — Tyre Triathlon on 2026-11-08 and Byblos Amphitheatre on 2027-01-14.</span><span data-l="ar">ثلاث فعاليات مُنجزة: كل مشاركة مؤكَّدة وكل إقرار موقَّع. واثنتان منها لم تُقَما بعد — ترياتلون صور في 2026-11-08 ومدرج جبيل في 2027-01-14.</span></p>
+</div>
+<p style="margin:0;font-size:14.5px;line-height:1.75;color:var(--muted)"><span data-l="en">A signed declaration stands unless the event materially changes. If an organizer revises a Level 3 submission in a way that affects your role, the declaration returns here to be signed again.</span><span data-l="ar">يبقى الإقرار الموقَّع سارياً إلا إذا تغيّرت الفعالية تغييراً جوهرياً. وإذا عدّل المنظّم تقديم مستوى 3 بما يمسّ دوركم، يعود الإقرار إلى هنا ليُوقَّع مرة أخرى.</span></p>
+</div></div>
+</div>
+</div>
+
+<h2 style="margin:0 0 18px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Edge states</span><span data-l="ar">الحالات الطرفية</span></h2>
+<div style="display:flex;flex-direction:column;gap:14px;margin-block-end:48px">
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Organizer's filing date passed, declaration never signed</span><span data-l="ar">انقضى تاريخ تقديم المنظّم ولم يُوقَّع الإقرار</span></div>
+<div style="padding:30px 28px"><div style="padding:26px 30px;border:2px solid var(--bad);background:var(--bad-soft);border-radius:12px;max-width:80ch">
+<div style="font-size:20px;font-weight:600;line-height:1.5;margin-block-end:12px"><span data-l="en">The organizer's filing date for Baalbeck Summer Festival passed on 2026-08-20. Your declaration was never signed.</span><span data-l="ar">انقضى تاريخ تقديم مهرجان بعلبك الصيفي في 2026-08-20. ولم يُوقَّع إقراركم.</span></div>
+<div style="font-size:16px;line-height:1.75;margin-block-end:18px"><span data-l="en">At Level 3 the organizer cannot file a complete package without a signed declaration from every named agency. The event is on 2026-09-19 and the submission stands incomplete on that ground. Sign it now, or tell the organizer your agency will not participate so they can name another provider.</span><span data-l="ar">في المستوى 3 لا يمكن للمنظّم تقديم حزمة مكتملة دون إقرار موقَّع من كل جهة مُسمّاة. الفعالية في 2026-09-19 والتقديم غير مكتمل لهذا السبب. وقّعوه الآن، أو أبلغوا المنظّم بأن جهتكم لن تشارك ليسمّي مزوّداً آخر.</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Sign the declaration now</span><span data-l="ar">توقيع الإقرار الآن</span></button><button style="height:42px;padding-inline:20px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">Decline participation</span><span data-l="ar">الاعتذار عن المشاركة</span></button></div>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">Declaration in draft, organizer's deadline approaching</span><span data-l="ar">الإقرار مسودة ومهلة المنظّم تقترب</span></div>
+<div style="padding:30px 28px"><div style="padding:26px 30px;border:2px solid var(--accent);background:var(--accent-soft);border-radius:12px;max-width:80ch">
+<div style="font-size:20px;font-weight:600;line-height:1.5;margin-block-end:12px"><span data-l="en">Your declaration is a draft. The organizer files in 4 days, on 2026-08-20.</span><span data-l="ar">إقراركم مسودة. ويقدّم المنظّم بعد 4 أيام، في 2026-08-20.</span></div>
+<div style="font-size:16px;line-height:1.75;margin-block-end:18px"><span data-l="en">Seven of the ten items are confirmed. A draft is visible to your agency only and does not reach the organizer's package; only a signed declaration does. Three items remain: receiving emergency departments, the procedure for requesting additional EMS resources, and the major-incident plan role.</span><span data-l="ar">سبعة من البنود العشرة مؤكَّدة. والمسودة لا تظهر إلا لجهتكم ولا تصل إلى حزمة المنظّم؛ ولا يصلها سوى الإقرار الموقَّع. وتبقى ثلاثة بنود: أقسام الطوارئ المستقبِلة، وإجراء طلب موارد إسعافية إضافية، والدور في خطة الحوادث الجسيمة.</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px"><button style="height:46px;padding-inline:24px;border:0;border-radius:22px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Continue the declaration</span><span data-l="ar">متابعة الإقرار</span></button></div>
+</div></div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">The agency declined</span><span data-l="ar">اعتذرت الجهة</span></div>
+<div style="padding:30px 28px"><div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:start;margin-block-end:18px">
+<div>
+<div style="font-size:13px;color:var(--muted);margin-block-end:5px"><span data-l="en">Beirut Coastal 12K · Beirut Road Runners · 2026-10-02 · Level 2</span><span data-l="ar">بيروت الساحلي 12 كلم · عدّاؤو بيروت · 2026-10-02 · المستوى 2</span></div>
+<div style="font-size:20px;font-weight:600;letter-spacing:-.02em"><span data-l="en">Participation declined 2026-08-14</span><span data-l="ar">اعتُذر عن المشاركة في 2026-08-14</span></div>
+</div>
+<span style="padding:5px 12px;border-radius:4px;background:var(--bad-soft);color:var(--bad);font-size:13.5px"><span data-l="en">Declined</span><span data-l="ar">معتذرة</span></span>
+</div>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.75;max-width:80ch"><span data-l="en">Your agency is no longer a named provider for this event. The operational detail you had supplied has been withdrawn from the organizer's plan. The organizer has been notified that this is a material change they must report to the Ministry.</span><span data-l="ar">لم تعد جهتكم مزوّداً مُسمّى لهذه الفعالية. وسُحبت التفاصيل التشغيلية التي كنتم قدّمتموها من خطة المنظّم. وقد أُبلغ المنظّم بأن هذا تغيير جوهري عليه الإبلاغ عنه إلى الوزارة.</span></p>
+<p style="margin:0 0 18px;font-size:14.5px;line-height:1.75;color:var(--muted);max-width:80ch"><span data-l="en">The record stays on your account. Declining does not remove it, and the Ministry's record retains it. If the organizer names your agency again for this event, it returns to your outstanding list.</span><span data-l="ar">يبقى السجل في حسابكم. فالاعتذار لا يحذفه، ويحتفظ به سجل الوزارة. وإذا سمّى المنظّم جهتكم مرة أخرى لهذه الفعالية، يعود إلى قائمة الموجبات القائمة عندكم.</span></p>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button style="height:42px;padding-inline:20px;border:1px solid var(--line);background:var(--bg);border-radius:22px;font-size:14px;cursor:pointer"><span data-l="en">View the record</span><span data-l="ar">عرض السجل</span></button></div></div>
+</div>
+</div>
+
+<h2 style="margin:0 0 8px;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Notifications</span><span data-l="ar">الإشعارات</span></h2>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">Sent bilingually, as received.</span><span data-l="ar">تُرسل بلغتين، كما تُستلم.</span></p>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">
+<span><span data-l="en">Named in an event</span><span data-l="ar">التسمية في فعالية</span></span>
+<span style="letter-spacing:0;text-transform:none">organizer names the agency</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--line)">
+<div dir="ltr" style="background:var(--bg);padding:26px 28px;text-align:start">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px">Subject</div>
+<div style="font-size:16px;font-weight:600;line-height:1.5;margin-block-end:18px">Your agency has been named in Baalbeck Summer Festival — Level 3</div>
+<div style="font-size:15px;line-height:1.75;white-space:pre-line">Baalbeck International Festival has named Lebanese Red Cross — Beirut branch as a participating emergency medical service for Baalbeck Summer Festival, event date 2026-09-19.
+
+The event is Level 3. You are asked to complete and sign the EMS Readiness Declaration Section B — and to confirm your agency's role in the major-incident and mass-casualty plan.
+
+The organizer files by 2026-08-20 and cannot file a complete package without it.
+
+Accepting links your agency to this event. Each participating provider remains professionally and organizationally responsible for its own personnel, equipment, protocols and services.</div>
+</div>
+<div dir="rtl" style="background:var(--bg);padding:26px 28px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif">
+<div style="font-size:11.5px;color:var(--muted);margin-block-end:8px">الموضوع</div>
+<div style="font-size:16px;font-weight:600;line-height:1.6;margin-block-end:18px">سُمّيت جهتكم في مهرجان بعلبك الصيفي — المستوى 3</div>
+<div style="font-size:15px;line-height:1.9;white-space:pre-line">سمّت مهرجانات بعلبك الدولية الصليب الأحمر اللبناني — فرع بيروت كجهة خدمات طوارئ طبية مشاركة في مهرجان بعلبك الصيفي، بتاريخ فعالية 2026-09-19.
+
+الفعالية من المستوى 3. والمطلوب منكم استكمال وتوقيع إقرار جاهزية خدمات الطوارئ الطبية — وتأكيد دور جهتكم في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية.
+
+يقدّم المنظّم بحلول 2026-08-20 ولا يمكنه تقديم حزمة مكتملة من دونه.
+
+القبول يربط جهتكم بهذه الفعالية. ويبقى كل مزوّد مشارك مسؤولاً مهنياً وتنظيمياً عن موظفيه ومعداته وبروتوكولاته وخدماته.</div>
+</div>
+</div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">
+<span><span data-l="en">Declaration due</span><span data-l="ar">الإقرار مستحق</span></span>
+<span style="letter-spacing:0;text-transform:none">on acceptance</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--line)">
+<div dir="ltr" style="background:var(--bg);padding:26px 28px;text-align:start">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px">Subject</div>
+<div style="font-size:16px;font-weight:600;line-height:1.5;margin-block-end:18px">EMS Readiness Declaration due — organizer files 2026-08-20</div>
+<div style="font-size:15px;line-height:1.75;white-space:pre-line">Your EMS Readiness Declaration for Baalbeck Summer Festival has not been signed.
+
+The organizer, Baalbeck International Festival, files by 2026-08-20. Event date 2026-09-19.
+
+The declaration has ten items. It is signed by your agency's authorized representative. A draft is visible to your agency only; only a signed declaration reaches the organizer's submission package.</div>
+</div>
+<div dir="rtl" style="background:var(--bg);padding:26px 28px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif">
+<div style="font-size:11.5px;color:var(--muted);margin-block-end:8px">الموضوع</div>
+<div style="font-size:16px;font-weight:600;line-height:1.6;margin-block-end:18px">إقرار جاهزية خدمات الطوارئ الطبية مستحق — يقدّم المنظّم في 2026-08-20</div>
+<div style="font-size:15px;line-height:1.9;white-space:pre-line">لم يُوقَّع إقرار جاهزيتكم لمهرجان بعلبك الصيفي.
+
+يقدّم المنظّم، مهرجانات بعلبك الدولية، بحلول 2026-08-20. تاريخ الفعالية 2026-09-19.
+
+يتضمن الإقرار عشرة بنود، ويوقّعه الممثل المفوّض لجهتكم. والمسودة لا تظهر إلا لجهتكم؛ ولا يصل إلى حزمة تقديم المنظّم سوى الإقرار الموقَّع.</div>
+</div>
+</div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">
+<span><span data-l="en">Organizer's deadline approaching</span><span data-l="ar">اقتراب مهلة المنظّم</span></span>
+<span style="letter-spacing:0;text-transform:none">4 days before filing</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--line)">
+<div dir="ltr" style="background:var(--bg);padding:26px 28px;text-align:start">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px">Subject</div>
+<div style="font-size:16px;font-weight:600;line-height:1.5;margin-block-end:18px">Organizer files in 4 days — your declaration is still a draft</div>
+<div style="font-size:15px;line-height:1.75;white-space:pre-line">Baalbeck International Festival files its submission for Baalbeck Summer Festival on 2026-08-20, in 4 days.
+
+Your declaration is a draft with 7 of 10 items confirmed. At Level 3 the organizer cannot file a complete package without a signed declaration from every named agency.
+
+If your agency will not participate, decline through the platform so the organizer can name another provider.</div>
+</div>
+<div dir="rtl" style="background:var(--bg);padding:26px 28px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif">
+<div style="font-size:11.5px;color:var(--muted);margin-block-end:8px">الموضوع</div>
+<div style="font-size:16px;font-weight:600;line-height:1.6;margin-block-end:18px">يقدّم المنظّم بعد 4 أيام — إقراركم لا يزال مسودة</div>
+<div style="font-size:15px;line-height:1.9;white-space:pre-line">تقدّم مهرجانات بعلبك الدولية ملفها لمهرجان بعلبك الصيفي في 2026-08-20، أي بعد 4 أيام.
+
+إقراركم مسودة أُكِّد فيها 7 من 10 بنود. وفي المستوى 3 لا يمكن للمنظّم تقديم حزمة مكتملة دون إقرار موقَّع من كل جهة مُسمّاة.
+
+وإذا لم تشارك جهتكم، فاعتذروا عبر المنصة ليتمكن المنظّم من تسمية مزوّد آخر.</div>
+</div>
+</div>
+</div>
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">
+<span><span data-l="en">Declaration received</span><span data-l="ar">استلام الإقرار</span></span>
+<span style="letter-spacing:0;text-transform:none">on signing</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--line)">
+<div dir="ltr" style="background:var(--bg);padding:26px 28px;text-align:start">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px">Subject</div>
+<div style="font-size:16px;font-weight:600;line-height:1.5;margin-block-end:18px">Declaration received — Baalbeck Summer Festival</div>
+<div style="font-size:15px;line-height:1.75;white-space:pre-line">Your EMS Readiness Declaration for Baalbeck Summer Festival was signed on 2026-08-13 by S. Karam, Branch operations director.
+
+It is now one of the Level 3 attachments in Baalbeck International Festival's submission package and shows there as provided. The organizer files by 2026-08-20.
+
+Only your agency's declaration is visible to you. The declarations of other named agencies are not.</div>
+</div>
+<div dir="rtl" style="background:var(--bg);padding:26px 28px;font-family:'IBM Plex Sans Arabic','IBM Plex Sans',sans-serif">
+<div style="font-size:11.5px;color:var(--muted);margin-block-end:8px">الموضوع</div>
+<div style="font-size:16px;font-weight:600;line-height:1.6;margin-block-end:18px">استُلم الإقرار — مهرجان بعلبك الصيفي</div>
+<div style="font-size:15px;line-height:1.9;white-space:pre-line">وُقّع إقرار جاهزيتكم لمهرجان بعلبك الصيفي في 2026-08-13 من س. كرم، مدير عمليات الفرع.
+
+وهو الآن أحد مرفقات المستوى 3 في حزمة تقديم مهرجانات بعلبك الدولية ويظهر فيها مُقدَّماً. ويقدّم المنظّم بحلول 2026-08-20.
+
+لا يظهر لكم سوى إقرار جهتكم. ولا تظهر إقرارات الجهات المُسمّاة الأخرى.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+
+
+<sc-if value="{{ hasNext }}" hint-placeholder-val="{{ true }}">
+<div data-seq="" style="margin-block-start:64px;padding-block-start:32px;border-block-start:1px solid var(--line)">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">{{ nextLabelEn }}</span><span data-l="ar">{{ nextLabelAr }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px">
+<sc-for list="{{ nextSteps }}" as="n" hint-placeholder-count="3">
+<button onClick="{{ n.go }}" style="text-align:start;padding:22px 24px;background:{{ n.bg }};border:1px solid {{ n.border }};border-radius:14px;cursor:pointer;display:flex;gap:14px;align-items:start">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ n.ink }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-block-start:2px"><path d="{{ n.d1 }}"></path><path d="{{ n.d2 }}"></path></svg>
+<span>
+<span style="display:block;font-size:16px;font-weight:500;line-height:1.4;color:{{ n.ink }}"><span data-l="en">{{ n.en }}</span><span data-l="ar">{{ n.ar }}</span></span>
+<span style="display:block;font-size:13.5px;line-height:1.6;color:var(--muted);margin-block-start:5px"><span data-l="en">{{ n.descEn }}</span><span data-l="ar">{{ n.descAr }}</span></span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+<div data-dock="" style="position:fixed;inset-inline-end:22px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:10px">
+<button onClick="{{ cycleText }}" title="Text size" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px">A<span style="font-size:18px">A</span></button>
+<button onClick="{{ toggleTheme }}" title="Dark mode" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>
+</button>
+<button onClick="{{ togglePalette }}" title="Palette" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:inset 0 0 0 1.5px var(--brand)"></span>
+</button>
+<button onClick="{{ toggleLang }}" title="Language" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500"><span data-l="en">ع</span><span data-l="ar">EN</span></button>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;initialLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialPalette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;petrol&quot;,&quot;cedar&quot;],&quot;default&quot;:&quot;petrol&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: this.props.initialLang || 'en',
+    theme: this.props.initialTheme || 'light',
+    palette: this.props.initialPalette || 'petrol',
+    textScale: 100,
+    screen: 'dashboard',
+    nomResponse: -1,
+    dashSort: 0,
+    declining: false,
+    items: [false, false, false, false, false, false, false, false, false, false],
+    signed: false
+  };
+
+  componentDidMount() { this.sync(); }
+  componentDidUpdate() { this.sync(); }
+  sync() {
+    const h = document.documentElement;
+    h.setAttribute('lang', this.state.lang);
+    h.setAttribute('dir', this.state.lang === 'ar' ? 'rtl' : 'ltr');
+    h.setAttribute('data-theme', this.state.theme);
+    h.setAttribute('data-palette', this.state.palette);
+    h.style.fontSize = this.state.textScale + '%';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const pill = on => ({ on, border: on ? 'var(--brand)' : 'var(--line)', bg: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)' });
+
+    /* SEQUENCE — each screen names where it leads. Not product navigation; this is the
+       reviewable path through the journey so every screen has an outbound route. */
+    const SEQ_DEF = {
+      invite:    ['Nomination and account', 'الترشيح والحساب', 'Who nominated you, which event, what is asked, and by when.', 'من رشّحكم وأي فعالية وما المطلوب وبحلول متى.', 'M12 11.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z', 'M5.5 20c0-3.3 2.9-5.5 6.5-5.5s6.5 2.2 6.5 5.5'],
+      profile:   ['Provider profile', 'ملف المزوّد', 'Completed once and reused across every event you are named in.', 'يُستكمل مرة واحدة ويُعاد استخدامه في كل فعالية تُسمّون فيها.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 11.5h6M9.5 15.5h4'],
+      dashboard: ['Dashboard', 'اللوحة', 'Every event you are named in, and what is owed on each.', 'كل فعالية تُسمّون فيها وما هو المطلوب على كل منها.', 'M4 4.5h6.5v6.5H4zM13.5 4.5H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z'],
+      level2:    ['Event participation — Level 2', 'المشاركة — المستوى 2', 'Operational detail for the organizer. No declaration at Level 2.', 'التفاصيل التشغيلية للمنظّم. لا إقرار في المستوى 2.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 12h6M9.5 16h3'],
+      level3:    ['Readiness declaration — Level 3', 'إقرار الجاهزية — المستوى 3', 'Ten items, signed by your organization separately from every other provider.', 'عشرة بنود توقّعها مؤسستكم على حدة عن كل مزوّد آخر.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 15c1.5-1.2 3 1.2 4.5 0'],
+      bls:       ['First-response readiness', 'جاهزية الاستجابة الأولية', 'Equipment, competence, operational readiness and the written procedure.', 'المعدات والكفاءة والجهوزية التشغيلية والإجراء المكتوب.', 'M12 4l6 2.5v5c0 4-2.6 6.6-6 8.5-3.4-1.9-6-4.5-6-8.5v-5z', 'M9.5 12l1.9 1.9 3.6-3.6'],
+      dataset:   ['Minimum dataset', 'الحد الأدنى للبيانات', 'One report per patient. Five sections. No patient name.', 'تقرير واحد لكل مريض. خمسة أقسام. دون اسم المريض.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 11.5h6M9.5 15h4'],
+      states:    ['Empty and edge states', 'الحالات الفارغة والطرفية', 'Design reference, not a route.', 'مرجع تصميمي لا مسار.', 'M12 4.5l7.5 4-7.5 4-7.5-4z', 'M4.5 13l7.5 4 7.5-4'],
+      docs:      ['Shared documents', 'المستندات المشتركة', 'One list, visible to you and to the organizer.', 'قائمة واحدة تظهر لكم وللمنظّم.', 'M3.5 7.5l6-2 5 2 6-2v11l-6 2-5-2-6 2z', 'M9.5 5.5v11M14.5 7.5v11']
+    };
+    const SEQ = {
+      invite:    ['profile'],
+      profile:   ['dashboard'],
+      dashboard: ['level3', 'level2', 'docs'],
+      level2:    ['docs', 'dashboard'],
+      level3:    ['docs', 'dashboard'],
+      docs:      ['level3', 'dashboard'],
+      bls:       ['dataset', 'dashboard'],
+      dataset:   ['bls'],
+      states:    ['dashboard']
+    };
+    const SEQ_LABEL = {
+      invite:    ['Once you accept', 'بعد القبول'],
+      profile:   ['Next', 'التالي'],
+      dashboard: ['Open an event', 'افتحوا فعالية'],
+      level2:    ['Also on this event', 'أيضاً على هذه الفعالية'],
+      level3:    ['Also on this event', 'أيضاً على هذه الفعالية'],
+      docs:      ['Back to', 'العودة إلى'],
+      bls:       ['Once readiness is declared', 'بعد إقرار الجاهزية'],
+      dataset:   ['Back to', 'العودة إلى'],
+      states:    ['Back to the journey', 'العودة إلى المسار']
+    };
+
+    const blsCtx = st.screen === 'bls' || st.screen === 'dataset';
+    /* FIRST-RESPONSE UNIT — its own actor, its own account, no facility surface. */
+    const rdy = ok => ok
+      ? { en: 'Confirmed', ar: 'مؤكَّد', color: 'var(--brand)', chipBg: 'var(--brand-soft)' }
+      : { en: 'Not confirmed', ar: 'غير مؤكَّد', color: 'var(--muted)', chipBg: 'var(--surface2)' };
+    const blsRows = (defs, doneCount) => defs.map((d, i) => {
+      const s = rdy(i < doneCount);
+      return { n: i + 1, en: d[0], ar: d[1], stateEn: s.en, stateAr: s.ar, color: s.color, chipBg: s.chipBg };
+    });
+    const equipDefs = [
+      ['An automated external defibrillator, with pads in date and a charged battery', 'جهاز إزالة رجفان آلي خارجي، بلصاقات سارية وبطارية مشحونة'],
+      ['Pediatric pads or a pediatric mode where children are among those the unit serves', 'لصاقات أطفال أو وضع أطفال حيث يكون الأطفال ممن تخدمهم الوحدة'],
+      ['Airway management equipment appropriate to basic life support', 'معدات إدارة مجرى الهواء المناسبة لدعم الحياة الأساسي'],
+      ['Oxygen and a delivery device', 'الأوكسجين وجهاز إيصاله'],
+      ['Barrier or ventilation equipment for rescue breathing', 'معدات حاجزة أو للتهوية لأغراض التنفس الإنقاذي']
+    ];
+    const compDefs = [
+      ['Recognition of cardiac arrest', 'التعرّف على توقف القلب'],
+      ['Activation of the emergency medical service', 'استدعاء خدمة الإسعاف'],
+      ['High-quality chest compressions', 'ضغطات صدر عالية الجودة'],
+      ['Defibrillator operation, including pad placement and safe delivery of a shock', 'تشغيل جهاز إزالة الرجفان، بما في ذلك وضع اللصاقات وإيصال الصدمة بأمان'],
+      ['Rescue breathing and airway management at basic life support level', 'التنفس الإنقاذي وإدارة مجرى الهواء على مستوى دعم الحياة الأساسي'],
+      ['Care of the patient after return of spontaneous circulation', 'رعاية المريض بعد عودة الدورة الدموية التلقائية'],
+      ['Handover to the arriving ambulance service', 'نقل المسؤولية إلى خدمة الإسعاف الواصلة']
+    ];
+    const opsDefs = [
+      ['A device check before each deployment, or at the start of each shift for a standing unit', 'فحص الجهاز قبل كل انتشار، أو في بداية كل نوبة للوحدة الدائمة'],
+      ['Immediate reporting of any device taken out of service, and its replacement before the next deployment', 'الإبلاغ الفوري عن أي جهاز يُخرج من الخدمة، واستبداله قبل الانتشار التالي'],
+      ['Consumables replaced after any use and before the unit returns to availability', 'استبدال المستهلكات بعد أي استخدام وقبل عودة الوحدة إلى الجهوزية'],
+      ['A named responder on duty for the whole period the unit holds itself available', 'مستجيب مُسمّى في الخدمة طوال الفترة التي تعلن فيها الوحدة جهوزيتها'],
+      ['Communications tested and a means of contacting the ambulance service confirmed', 'اختبار الاتصالات وتأكيد وسيلة للتواصل مع خدمة الإسعاف']
+    ];
+    const blsEquip = blsRows(equipDefs, 5);
+    const blsComp = blsRows(compDefs, 6);
+    const blsOps = blsRows(opsDefs, 3);
+    const blsOpen = blsEquip.concat(blsComp, blsOps).filter(r => r.stateEn !== 'Confirmed').length;
+    const blsProc = [
+      ['Recognise the arrest and start compressions without waiting for equipment.', 'التعرّف على توقف القلب وبدء الضغطات دون انتظار المعدات.'],
+      ['Call the ambulance service, and state the location precisely enough to be found.', 'الاتصال بخدمة الإسعاف وتحديد الموقع بدقة تكفي للعثور عليه.'],
+      ['Send a second person for the nearest defibrillator, named in advance.', 'إرسال شخص ثانٍ لأقرب جهاز إزالة رجفان، يُسمّى مسبقاً.'],
+      ['Apply the pads and follow the device prompts, resuming compressions between analyses.', 'وضع اللصاقات واتباع تعليمات الجهاز، مع استئناف الضغطات بين التحليلات.'],
+      ['Continue until the ambulance service takes over, the patient recovers, or a clinician directs otherwise.', 'الاستمرار إلى أن تتسلم خدمة الإسعاف، أو يتعافى المريض، أو يوجّه طبيب بخلاف ذلك.'],
+      ['Where the unit does not transport, hand over to the ambulance service with what was done, when it started, how many shocks were delivered, and the patient\u2019s state at handover. Responsibility passes at that point and not before.', 'حيث لا تنقل الوحدة المريض، تُسلّم المسؤولية إلى خدمة الإسعاف مع بيان ما جرى ومتى بدأ وكم صدمة أُعطيت وحالة المريض عند التسليم. وتنتقل المسؤولية عند تلك اللحظة لا قبلها.']
+    ].map((s, i) => ({ n: i + 1, en: s[0], ar: s[1] }));
+
+    const dsRoutes = [
+      { k: 'platform', en: 'Complete it here', ar: 'استكماله هنا' },
+      { k: 'attach', en: 'Attach our own patient-care report', ar: 'إرفاق تقرير رعاية المرضى الخاص بنا' }
+    ].map(r => {
+      const on = (st.dsRoute || 'platform') === r.k;
+      return { en: r.en, ar: r.ar, on: on,
+        border: on ? 'var(--brand)' : 'var(--line)',
+        bg: on ? 'var(--brand-soft)' : 'var(--bg)',
+        color: on ? 'var(--brand)' : 'var(--ink)',
+        pick: () => this.setState({ dsRoute: r.k }) };
+    });
+    const F_ = (en, ar, value, ph) => ({ en: en, ar: ar, value: value || '', ph: ph || '' });
+    const dsSections = [
+      { n: 1, en: 'Event and location', ar: 'الحادثة والموقع',
+        fields: [
+          F_('Date', 'التاريخ', '2026-08-19'),
+          F_('Time of collapse', 'وقت السقوط', '18:42'),
+          F_('Location type', 'نوع الموقع', 'Covered facility'),
+          F_('Facility or place', 'المرفق أو المكان', 'Hamra Sports Hall'),
+          F_('Witnessed', 'مشهود', 'Yes')
+        ] },
+      { n: 2, en: 'Patient', ar: 'المريض',
+        fields: [
+          F_('Age group', 'الفئة العمرية', 'Adult', 'Adult · Child · Unknown'),
+          F_('Sex', 'الجنس', ''),
+          F_('Presumed cause', 'السبب المفترض', 'Medical'),
+          F_('Patient identifier', 'معرّف المريض', '', 'No name is recorded')
+        ] },
+      { n: 3, en: 'Onsite response before the unit arrived', ar: 'الاستجابة الميدانية قبل وصول الوحدة',
+        fields: [
+          F_('Bystander compressions started', 'بدء ضغطات من الحاضرين', 'Yes'),
+          F_('Time compressions started', 'وقت بدء الضغطات', '18:43'),
+          F_('Onsite defibrillator applied', 'استُخدم جهاز الموقع', 'Yes'),
+          F_('Onsite device identifier', 'معرّف جهاز الموقع', 'AED-002'),
+          F_('Shocks delivered by the onsite device', 'الصدمات من جهاز الموقع', '1')
+        ] },
+      { n: 4, en: 'Response by this unit', ar: 'استجابة هذه الوحدة',
+        fields: [
+          F_('Time the unit arrived', 'وقت وصول الوحدة', '18:51'),
+          F_('Unit defibrillator applied', 'استُخدم جهاز الوحدة', 'Yes'),
+          F_('Unit device identifier', 'معرّف جهاز الوحدة', 'U3-AED-01'),
+          F_('Shocks delivered by the unit device', 'الصدمات من جهاز الوحدة', '2'),
+          F_('Airway and oxygen used', 'استُخدم مجرى الهواء والأوكسجين', 'Yes')
+        ] },
+      { n: 5, en: 'Handover and outcome at handover', ar: 'نقل المسؤولية والحالة عنده',
+        fields: [
+          F_('Ambulance service arrived', 'وصول خدمة الإسعاف', '19:04'),
+          F_('Circulation returned before handover', 'عودة الدورة قبل التسليم', 'Yes'),
+          F_('Patient state at handover', 'حالة المريض عند التسليم', 'Breathing, unresponsive'),
+          F_('Receiving service', 'الجهة المستلمة', 'Lebanese Red Cross — Beirut'),
+          F_('Responder completing this report', 'المستجيب الذي يستكمل التقرير', 'M. Aoun')
+        ] }
+    ];
+
+    const screens = [
+      { k: 'invite', en: 'Invitation and account', ar: 'الدعوة والحساب' },
+      { k: 'profile', en: 'Agency profile', ar: 'ملف الجهة' },
+      { k: 'dashboard', en: 'Dashboard', ar: 'اللوحة' },
+      { k: 'level2', en: 'Event participation — Level 2', ar: 'المشاركة — المستوى 2' },
+      { k: 'level3', en: 'EMS Readiness Declaration — Level 3', ar: 'إقرار الجاهزية — المستوى 3' },
+      { k: 'docs', en: 'Shared documents', ar: 'المستندات المشتركة' },
+      { k: 'bls', en: 'First-response readiness', ar: 'جاهزية الاستجابة الأولية' },
+      { k: 'dataset', en: 'Minimum dataset', ar: 'الحد الأدنى للبيانات' },
+      { k: 'states', en: 'Empty and edge states', ar: 'الحالات الفارغة والطرفية' }
+    ].map(s => Object.assign({ en: s.en, ar: s.ar, go: set('screen', s.k) }, pill(st.screen === s.k)));
+
+    const declText = [
+      ['EMS provider and operational lead identified', 'تحديد مزوّد الإسعاف والمسؤول التشغيلي'],
+      ['Assigned personnel and BLS response teams documented', 'توثيق الموظفين المكلّفين وفرق الاستجابة لدعم الحياة الأساسي'],
+      ['Assigned ambulances documented and ready for service', 'توثيق سيارات الإسعاف المكلّفة وجهوزيتها للخدمة'],
+      ['CPR capability, AEDs, oxygen, airway equipment, communications, and response procedures verified', 'التحقق من قدرة الإنعاش القلبي الرئوي وأجهزة إزالة الرجفان والأوكسجين ومعدات مجرى الهواء والاتصالات وإجراءات الاستجابة'],
+      ['Ambulance deployment points and patient-extraction routes confirmed', 'تأكيد نقاط انتشار سيارات الإسعاف ومسارات إخلاء المرضى'],
+      ['Receiving emergency department(s) confirmed', 'تأكيد قسم أو أقسام الطوارئ المستقبِلة'],
+      ['Coordination with the Event Medical Director established, including means of communication', 'تم التنسيق مع المدير الطبي للفعالية وتحديد وسيلة الاتصال به'],
+      ['Procedure for requesting additional EMS resources established', 'وضع إجراء لطلب موارد إسعافية إضافية'],
+      ['Procedure for maintaining event coverage during patient transport established', 'وضع إجراء للحفاظ على تغطية الفعالية أثناء نقل المرضى'],
+      ['The agency has reviewed and confirmed its role in the major-incident / mass-casualty response plan', 'راجعت الجهة دورها في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية وأكّدته']
+    ];
+    const declItems = declText.map((t, i) => {
+      const on = st.items[i];
+      return {
+        n: i + 1, en: t[0], ar: t[1], on: on,
+        border: on ? 'var(--brand)' : 'var(--line)',
+        bg: on ? 'var(--brand-soft)' : 'var(--surface)',
+        mark: on ? 'var(--brand)' : 'var(--muted)',
+        markBg: on ? 'var(--brand)' : 'transparent',
+        toggle: () => this.setState(s => { const a = s.items.slice(); a[i] = !a[i]; return { items: a }; })
+      };
+    });
+    const remaining = st.items.filter(x => !x).length;
+
+    const rows = [
+      { en: 'Baalbeck Summer Festival', ar: 'مهرجان بعلبك الصيفي', orgEn: 'Baalbeck International Festival', orgAr: 'مهرجانات بعلبك الدولية', date: '2026-09-19', level: 3, done: st.signed, p: 'confirmed', d: st.signed ? 'signed' : 'draft',
+        owedEn: 'EMS Readiness Declaration Section B', owedAr: 'إقرار جاهزية خدمات الطوارئ الطبية',
+        byLabelEn: 'Organizer files by', byLabelAr: 'يقدّم المنظّم بحلول', byEn: '2026-08-20', byAr: '2026-08-20', color: 'var(--bad)', screen: 'level3', signed: '2026-08-13' },
+      { en: 'Beirut Coastal 12K', ar: 'بيروت الساحلي 12 كلم', orgEn: 'Beirut Road Runners', orgAr: 'عدّاؤو بيروت', date: '2026-10-02', level: 2, done: false, p: 'nominated', d: 'none',
+        owedEn: 'Confirm participation and supply operational detail', owedAr: 'تأكيد المشاركة وتزويد التفاصيل التشغيلية',
+        byLabelEn: 'No declaration at Level 2', byLabelAr: 'لا إقرار في المستوى 2', byEn: 'For the organizer’s plan', byAr: 'لخطة المنظّم', color: 'var(--accent-ink)', screen: 'level2', signed: '' },
+      { en: 'Tripoli Marathon', ar: 'ماراتون طرابلس', orgEn: 'Tripoli Athletics Union', orgAr: 'اتحاد ألعاب القوى في طرابلس', date: '2026-08-09', level: 3, done: true, p: 'confirmed', d: 'signed',
+        owedEn: 'EMS Readiness Declaration Section B', owedAr: 'إقرار جاهزية خدمات الطوارئ الطبية',
+        byLabelEn: '', byLabelAr: '', byEn: '', byAr: '', color: 'var(--brand)', screen: 'level3', signed: '2026-07-08' }
+    ].map(r => {
+      const p = ({
+        nominated: { en: 'Nominated', ar: 'مُسمّاة', bg: 'var(--surface2)', color: 'var(--muted)' },
+        confirmed: { en: 'Confirmed', ar: 'مؤكِّدة', bg: 'var(--brand-soft)', color: 'var(--brand)' },
+        declined: { en: 'Declined', ar: 'معتذرة', bg: 'var(--bad-soft)', color: 'var(--bad)' }
+      })[r.p];
+      const d = ({
+        none: null,
+        draft: { en: 'Declaration — draft', ar: 'الإقرار — مسودة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+        signed: { en: 'Declaration — signed', ar: 'الإقرار — موقّع', bg: 'var(--brand-soft)', color: 'var(--brand)' }
+      })[r.d];
+      return Object.assign({}, r, {
+        levelColor: 'var(--l' + r.level + ')', levelSoft: 'var(--l' + r.level + 's)', open: set('screen', r.screen),
+        partEn: p.en, partAr: p.ar, partBg: p.bg, partColor: p.color,
+        hasDecl: !!d, declEn: d ? d.en : '', declAr: d ? d.ar : '',
+        declBg: d ? d.bg : '', declColor: d ? d.color : ''
+      });
+    });
+
+    return {
+      screens,
+      isInvite: st.screen === 'invite', isProfile: st.screen === 'profile',
+      isDashboard: st.screen === 'dashboard', isLevel2: st.screen === 'level2', isLevel3: st.screen === 'level3',
+      isDocs: st.screen === 'docs',
+      hasNext: (SEQ[st.screen] || []).length > 0,
+      nextLabelEn: SEQ_LABEL[st.screen] ? SEQ_LABEL[st.screen][0] : 'Continue',
+      nextLabelAr: SEQ_LABEL[st.screen] ? SEQ_LABEL[st.screen][1] : 'المتابعة',
+      nextSteps: (SEQ[st.screen] || []).map(k => {
+        const d = SEQ_DEF[k];
+
+        return {
+          en: d[0], ar: d[1], descEn: d[2], descAr: d[3], d1: d[4], d2: d[5] || '',
+          bg: 'var(--surface)',
+          border: 'var(--line)',
+          ink: 'var(--ink)',
+          go: set('screen', k)
+        };
+      }),
+      isStates: st.screen === 'states',
+      isBls: st.screen === 'bls', isDataset: st.screen === 'dataset',
+      blsEquip: blsEquip, blsComp: blsComp, blsOps: blsOps, blsProc: blsProc,
+      blsSignHintEn: blsOpen === 0 ? 'All items confirmed' : blsOpen + ' of 17 items still to confirm',
+      blsSignHintAr: blsOpen === 0 ? 'تم تأكيد كل البنود' : 'بقي تأكيد ' + blsOpen + ' من 17 بنداً',
+      dsRoutes: dsRoutes, dsAttach: st.dsRoute === 'attach', dsSections: dsSections,
+      actorNameEn: blsCtx ? 'Beirut First Response Unit 3' : 'Lebanese Red Cross — Beirut branch',
+      actorNameAr: blsCtx ? 'وحدة الاستجابة الأولى في بيروت 3' : 'الصليب الأحمر اللبناني — فرع بيروت',
+      actorRoleEn: blsCtx ? 'Designated first-response unit — a separate account' : 'Participating EMS provider',
+      actorRoleAr: blsCtx ? 'وحدة استجابة أولية معتمدة — حساب منفصل' : 'مزوّد الإسعاف المشارك',
+      goProfile: set('screen', 'profile'),
+
+      nomAgeEn: '11 days ago, on 2026-08-11',
+      nomAgeAr: 'قبل 11 يوماً، في 2026-08-11',
+      nomAnswers: [
+        { qEn: 'Who nominated you', qAr: 'من رشّحكم', aEn: 'Baalbeck International Festival', aAr: 'مهرجانات بعلبك الدولية',
+          hasNote: true, noteInk: 'var(--muted)', noteEn: 'H. Fares, festival director · 01 372 900', noteAr: 'ح. فارس، مدير المهرجان · 01 372 900' },
+        { qEn: 'Which event', qAr: 'أي فعالية', aEn: 'Baalbeck Summer Festival — Level 3', aAr: 'مهرجان بعلبك الصيفي — المستوى 3',
+          hasNote: true, noteInk: 'var(--muted)', noteEn: '2026-09-19 · Baalbeck Roman Acropolis · 22,000 expected', noteAr: '2026-09-19 · أكروبوليس بعلبك الروماني · 22,000 متوقعاً' },
+        { qEn: 'What you are being asked to do', qAr: 'ما المطلوب منكم', aEn: 'Sign the EMS readiness declaration', aAr: 'توقيع إقرار جاهزية الإسعاف',
+          hasNote: true, noteInk: 'var(--muted)', noteEn: 'Ten items, plus confirmation of your role in the major-incident plan.', noteAr: 'عشرة بنود، مع تأكيد دوركم في خطة الحوادث الجسيمة.' },
+        { qEn: 'By when', qAr: 'بحلول أي تاريخ', aEn: '2026-08-20', aAr: '2026-08-20',
+          hasNote: true, noteInk: 'var(--bad)', noteEn: 'In 4 days. The organizer cannot file the Level 3 package without your declaration.', noteAr: 'بعد 4 أيام. لا يمكن للمنظّم تقديم حزمة المستوى 3 دون إقراركم.' }
+      ],
+      nomResponses: [
+        { en: 'Accept', ar: 'القبول', descEn: 'Your organization becomes a named provider for this event and the declaration opens.', descAr: 'تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح الإقرار.' },
+        { en: 'Decline', ar: 'الاعتذار', descEn: 'A reason is required and returns to the organizer, who must name another provider.', descAr: 'يُطلب سبب يعود إلى المنظّم، وعليه تسمية مزوّد آخر.' },
+        { en: 'Request modification', ar: 'طلب تعديل', descEn: 'A reason is required. Use this where you can serve the event but not as described.', descAr: 'يُطلب سبب. استخدموه إذا كان بإمكانكم خدمة الفعالية لكن ليس بالصيغة الموصوفة.' }
+      ].map((r, i) => {
+        const on = st.nomResponse === i;
+        return Object.assign({}, r, { on,
+          border: on ? 'var(--brand)' : 'var(--line)', bg: on ? 'var(--brand-soft)' : 'var(--bg)',
+          mark: on ? 'var(--brand)' : 'var(--muted)', markBg: on ? 'var(--brand)' : 'transparent',
+          pick: set('nomResponse', i) });
+      }),
+      nomNeedsReason: st.nomResponse === 1 || st.nomResponse === 2,
+
+      dashCountEn: rows.length + ' events · ' + rows.filter(r => !r.done).length + ' need a response from you',
+      dashCountAr: rows.length + ' فعالية · ' + rows.filter(r => !r.done).length + ' تحتاج ردّاً منكم',
+      dashSorts: [
+        { en: 'Event date', ar: 'تاريخ الفعالية' },
+        { en: 'What is owed', ar: 'الموجب القائم' }
+      ].map((s, i) => {
+        const on = st.dashSort === i;
+        return Object.assign({}, s, { on,
+          border: on ? 'var(--brand)' : 'var(--line)', bg: on ? 'var(--brand-soft)' : 'transparent',
+          color: on ? 'var(--brand)' : 'var(--muted)', pick: set('dashSort', i) });
+      }),
+
+      sharedDocs: [
+        { en: 'Event health and medical plan — version 3', ar: 'الخطة الصحية والطبية للفعالية — النسخة 3',
+          metaEn: 'From the organizer · 2026-08-11 · PDF', metaAr: 'من المنظّم · 2026-08-11 · PDF',
+          stateEn: 'Shared with you', stateAr: 'مشتركة معكم', color: 'var(--brand)', chipBg: 'var(--brand-soft)', edge: 'solid',
+          ctaEn: 'Open', ctaAr: 'فتح' },
+        { en: 'Medical deployment map', ar: 'خريطة الانتشار الطبي',
+          metaEn: 'Requested from you by the organizer · 2026-08-12', metaAr: 'طلبها منكم المنظّم · 2026-08-12',
+          stateEn: 'Awaiting you', stateAr: 'بانتظاركم', color: 'var(--accent-ink)', chipBg: 'var(--accent-soft)', edge: 'solid',
+          ctaEn: 'Add the file', ctaAr: 'إضافة الملف' },
+        { en: 'Service agreement', ar: 'اتفاقية الخدمة',
+          metaEn: 'From your organization · 2026-08-13 · signed both sides', metaAr: 'من مؤسستكم · 2026-08-13 · موقّعة من الطرفين',
+          stateEn: 'Complete', stateAr: 'مكتملة', color: 'var(--brand)', chipBg: 'var(--brand-soft)', edge: 'solid',
+          ctaEn: 'Open', ctaAr: 'فتح' },
+        { en: 'Event site and route map', ar: 'خريطة موقع الفعالية والمسار',
+          metaEn: 'From the organizer · 2026-08-04 · PDF', metaAr: 'من المنظّم · 2026-08-04 · PDF',
+          stateEn: 'Shared with you', stateAr: 'مشتركة معكم', color: 'var(--brand)', chipBg: 'var(--brand-soft)', edge: 'solid',
+          ctaEn: 'Open', ctaAr: 'فتح' },
+        { en: 'Radio channel and call-sign schedule', ar: 'جدول القنوات ورموز النداء',
+          metaEn: 'Not yet added by either side', metaAr: 'لم يُضفه أي من الطرفين بعد',
+          stateEn: 'Missing', stateAr: 'ناقص', color: 'var(--muted)', chipBg: 'var(--surface2)', edge: 'dashed',
+          ctaEn: 'Add the file', ctaAr: 'إضافة الملف' }
+      ],
+
+      inviteFacts: [
+        { en: 'Invited by', ar: 'الدعوة من', vEn: 'Baalbeck International Festival', vAr: 'مهرجانات بعلبك الدولية' },
+        { en: 'Event', ar: 'الفعالية', vEn: 'Baalbeck Summer Festival', vAr: 'مهرجان بعلبك الصيفي' },
+        { en: 'Event level', ar: 'مستوى الفعالية', vEn: 'Level 3', vAr: 'المستوى 3' },
+        { en: 'Event date', ar: 'تاريخ الفعالية', vEn: '2026-09-19', vAr: '2026-09-19' },
+        { en: 'Organizer files by', ar: 'يقدّم المنظّم بحلول', vEn: '2026-08-20', vAr: '2026-08-20' }
+      ],
+
+      profileFields: [
+        { en: 'Agency name', ar: 'اسم الجهة', value: 'Lebanese Red Cross — Beirut branch' },
+        { en: 'Type of provider', ar: 'نوع المزوّد', value: 'Emergency medical service' },
+        { en: 'Authorized representative', ar: 'الممثل المفوض', value: 'S. Karam' },
+        { en: 'Operational lead', ar: 'المسؤول التشغيلي', value: 'M. Aoun' },
+        { en: 'Operational lead contact', ar: 'اتصال المسؤول التشغيلي', value: '03 118 402' },
+        { en: 'Telephone', ar: 'الهاتف', value: '140' },
+        { en: 'Email', ar: 'البريد الإلكتروني', value: 'beirut.ops@redcross.lb' },
+        { en: 'Address and municipality', ar: 'العنوان والبلدية', value: 'Spears, Beirut' },
+        { en: 'Municipalities or areas covered', ar: 'البلديات أو المناطق المشمولة', value: 'Beirut, Baabda, Aley' }
+      ],
+
+      outstanding: rows.filter(r => !r.done),
+      complete: rows.filter(r => r.done),
+
+      level2Fields: [
+        { en: 'Operational contact for this event — name', ar: 'جهة الاتصال التشغيلية لهذه الفعالية — الاسم', value: 'M. Aoun' },
+        { en: 'Position', ar: 'الصفة', value: 'Shift supervisor' },
+        { en: 'Telephone', ar: 'الهاتف', value: '03 118 402' },
+        { en: 'Assigned personnel and BLS response teams', ar: 'الموظفون المكلّفون وفرق الاستجابة لدعم الحياة الأساسي', value: '2 teams · 8 responders' },
+        { en: 'Assigned ambulances', ar: 'سيارات الإسعاف المكلّفة', value: '2' },
+        { en: 'Deployment arrangements', ar: 'ترتيبات الانتشار', value: 'Start line and km 8 turnaround' },
+        { en: 'Communications — channels and call signs', ar: 'الاتصالات — القنوات ورموز النداء', value: 'VHF ch. 4 · LRC-B2' },
+        { en: 'Escalation arrangements', ar: 'ترتيبات التصعيد', value: 'Duty officer, then regional dispatch' },
+        { en: 'Ambulance access and patient-extraction routes', ar: 'وصول الإسعاف ومسارات إخلاء المرضى', value: 'Corniche service lane, both directions' },
+        { en: 'Receiving emergency departments', ar: 'أقسام الطوارئ المستقبِلة', value: 'AUBMC · Hôtel-Dieu' }
+      ],
+
+      certFields: [
+        { en: 'EMS provider', ar: 'مزوّد الإسعاف', value: 'Lebanese Red Cross — Beirut branch' },
+        { en: 'Authorized representative', ar: 'الممثل المفوض', value: 'S. Karam' },
+        { en: 'Position', ar: 'الصفة', value: 'Branch operations director' },
+        { en: 'Telephone', ar: 'الهاتف', value: '03 774 120' },
+        { en: 'Signature', ar: 'التوقيع', value: '' },
+        { en: 'Date', ar: 'التاريخ', value: '2026-08-13' }
+      ],
+
+      declItems,
+      signed: st.signed,
+      signBlocked: remaining > 0,
+      signBg: remaining > 0 ? 'var(--surface2)' : 'var(--brand)',
+      signColor: remaining > 0 ? 'var(--muted)' : 'var(--bg)',
+      signCursor: remaining > 0 ? 'not-allowed' : 'pointer',
+      signHintEn: remaining > 0 ? remaining + ' of 10 items still to confirm' : 'All ten items confirmed',
+      signHintAr: remaining > 0 ? 'بقي تأكيد ' + remaining + ' من 10 بنود' : 'تم تأكيد البنود العشرة',
+      sign: () => this.setState({ signed: true }),
+      draftStateEn: st.signed ? 'Signed and released to the organizer.' : 'This declaration is a draft. It is visible to your agency only until it is signed.',
+      draftStateAr: st.signed ? 'وُقّع وأُرسل إلى المنظّم.' : 'هذا الإقرار مسودة. لا يظهر إلا لجهتكم إلى أن يُوقَّع.',
+      draftChipEn: st.signed ? 'Signed' : 'Draft', draftChipAr: st.signed ? 'موقّع' : 'مسودة',
+      draftChipBg: st.signed ? 'var(--brand-soft)' : 'var(--accent-soft)',
+      draftChipColor: st.signed ? 'var(--brand)' : 'var(--accent-ink)',
+
+      declining: st.declining,
+      toggleDecline: () => this.setState(s => ({ declining: !s.declining })),
+
+      toggleLang: () => this.setState(s => ({ lang: s.lang === 'en' ? 'ar' : 'en' })),
+      toggleTheme: () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+      togglePalette: () => this.setState(s => ({ palette: s.palette === 'petrol' ? 'cedar' : 'petrol' })),
+      cycleText: () => this.setState(s => ({ textScale: s.textScale === 100 ? 112 : s.textScale === 112 ? 125 : 100 }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

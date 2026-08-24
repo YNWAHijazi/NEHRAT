@@ -14,3 +14,4 @@ export * from './deadlines';
 export * from './scope';
 export * from './public-lookup';
 export * from './gates';
+export * from './flags';

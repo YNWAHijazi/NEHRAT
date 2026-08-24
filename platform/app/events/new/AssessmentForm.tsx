@@ -17,7 +17,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { createEventAction } from '../../actions';
-import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
+import type { ArabicOnlyNote, Band, Domain, MinimumCondition } from '../../../lib/rules/load';
 import { deriveLevel, bandForScore } from '../../../lib/rules/derive';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
 
@@ -60,16 +60,30 @@ function SectionHeading({ en, ar, noteEn, noteAr }: { en: string; ar: string; no
   );
 }
 
+/** A source-tagged note: wording one issue of the regulation carries and the other lacks. */
+function SourceNote({ note }: { note: ArabicOnlyNote }) {
+  return (
+    <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
+      <span style={{ display: 'inline-block', padding: '1px 7px', marginInlineEnd: 7, border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+        <L en="Arabic issue" ar="الإصدار العربي" />
+      </span>
+      <L en={note.en} ar={note.ar} />
+    </p>
+  );
+}
+
 export function AssessmentForm({
   domains,
   conditions,
   bands,
   maxScore,
+  arabicOnlyNotes,
 }: {
   domains: Domain[];
   conditions: MinimumCondition[];
   bands: Band[];
   maxScore: number;
+  arabicOnlyNotes: ArabicOnlyNote[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -278,7 +292,12 @@ export function AssessmentForm({
                 <L en={domain.noteEn} ar={domain.noteAr} />
               </p>
             ) : null}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {arabicOnlyNotes
+              .filter((n) => n.where.startsWith(`domain ${domain.number},`))
+              .map((n) => (
+                <SourceNote key={n.where} note={n} />
+              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 10 }}>
               {domain.options.map((option) => {
                 const on = answers[di] === option.score;
                 return (
@@ -370,6 +389,11 @@ export function AssessmentForm({
               );
             })}
           </div>
+          {arabicOnlyNotes
+            .filter((n) => n.where === 'recurring venues')
+            .map((n) => (
+              <SourceNote key={n.where} note={n} />
+            ))}
         </div>
 
         <div style={{ marginBlockStart: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>

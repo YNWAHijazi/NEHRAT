@@ -1,0 +1,17 @@
+{
+  "$comment": "Capability is not content (SPEC 2c). The product specification requires these capabilities to exist behind flags because the platform is licensed, not bespoke. They ship OFF and nothing commercial renders in the Lebanon tenant. Turning one on is a Ministry/owner decision recorded here as data -- never a code change, never a default.",
+  "flags": {
+    "applicationFees": false,
+    "platformTransactionFees": false,
+    "vendorDirectory": false,
+    "sponsoredListings": false,
+    "advertising": false,
+    "aedPurchaseLinks": false,
+    "aiAedIdentifierCapture": false,
+    "aiUserReadinessAssistant": false,
+    "aiReviewerAssistant": false,
+    "aiPlatformIntelligenceAssistant": false,
+    "aedGeolocationRegistry": false,
+    "aedAutomatedNotifications": false
+  }
+}

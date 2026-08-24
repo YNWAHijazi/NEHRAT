@@ -22,6 +22,31 @@ import { PLATFORM_ROOT } from './helpers/files';
 
 const REGENERATE = 'npm run rules:regenerate';
 
+describe('the snapshot matches the Arabic issue of Annex A', () => {
+  const arabicPath = join(PLATFORM_ROOT, '..', snapshot.arabicSourceFile);
+
+  it('can find the Arabic NEHRAT', () => {
+    expect(existsSync(arabicPath), `Arabic issue not found at ${snapshot.arabicSourceFile}`).toBe(true);
+  });
+
+  it('is current -- the Arabic issue has not changed since extraction', () => {
+    const actual = createHash('sha256').update(readFileSync(arabicPath)).digest('hex');
+    expect(
+      actual,
+      `The Arabic NEHRAT has changed since the snapshot was taken. Run \`${REGENERATE}\` -- ` +
+        `Arabic assessment strings come from the Arabic issue, not the prototype (handoff 5, decision 3).`,
+    ).toBe(snapshot.arabicSourceSha256);
+  });
+
+  it('every condition is tagged with the issue that carries it', () => {
+    const tags = Object.fromEntries(snapshot.minimumConditions.map((c) => [c.key, c.issue]));
+    // The union of ten: nine in each issue, disagreeing on one row each way.
+    expect(tags['club']).toBe('en-only');
+    expect(tags['recur']).toBe('ar-only');
+    expect(Object.values(tags).filter((v) => v === 'both')).toHaveLength(8);
+  });
+});
+
 describe('the snapshot matches the reference prototype', () => {
   const referencePath = join(PLATFORM_ROOT, '..', snapshot.sourceFile);
 

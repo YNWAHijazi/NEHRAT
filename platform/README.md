@@ -4,7 +4,7 @@ Ministry of Public Health, Republic of Lebanon. Two regulatory instruments on on
 platform: health and medical preparedness at mass-gathering events, and cardiac-arrest
 readiness in designated facilities.
 
-Authority order: `../handoff 4/source-documents/` (the regulation itself) over
+Authority order: `../handoff 5/source-documents/` (the regulation itself) over
 `SPEC.md`/`ROADMAP.md` (the summary) over everything else. See `../CLAUDE.md`.
 
 ## Running the review build
@@ -46,6 +46,6 @@ reviewer queue.
   `tests/reference-drift.test.ts` fails when either side moves.
 - `app/` — Next.js App Router screens. Screens ask `lib/rules`; none decides.
 - `e2e/` — Playwright: permission refusals by navigation, the public-lookup wire shape,
-  and the visual comparison against `../handoff 4/pages/` (per-region where declared).
+  and the visual comparison against `../handoff 5/pages/` (per-region where declared).
   The e2e server runs with `REVIEW_CLOCK=2026-08-13` so date strings match the pinned
   reference; the clock override is ignored in production builds.

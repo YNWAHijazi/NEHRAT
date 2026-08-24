@@ -1,7 +1,27 @@
 {
-  "$comment": "Regulatory values as data. Ministry-configurable. Text mirrors the reference prototype; scripts/extract-reference.py + tests/reference-drift.test.ts keep them in step.",
+  "$comment": "Regulatory values as data. Arabic wording from the Arabic issue of Annex A (handoff 5, decision 3); English mirrors the reference prototype. scripts/extract-reference.py + tests/reference-drift.test.ts keep them in step.",
   "domainCount": 9,
   "maxScorePerDomain": 2,
+  "arabicOnlyNotes": [
+    {
+      "where": "domain 2, score 0",
+      "ar": "يضيف الإصدار العربي: أو خدمة دينية يحضرها الجمهور جلوساً",
+      "en": "The Arabic issue adds: or a religious service attended by a seated public.",
+      "source": "ar/02 NEHRAT, Part B, domain 2"
+    },
+    {
+      "where": "domain 6, score 2",
+      "ar": "يشترط الإصدار العربي أن يكون التحذير صادراً عن سلطة عامة مختصة",
+      "en": "The Arabic issue requires the warning be issued by a competent public authority.",
+      "source": "ar/02 NEHRAT, Part B, domain 6"
+    },
+    {
+      "where": "recurring venues",
+      "ar": "يضيف الإصدار العربي: يُحدَّد في التقييم السنوي تاريخ بدء سريانه وتاريخ انتهاء صلاحيته",
+      "en": "The Arabic issue adds: the annual assessment carries an effective date and an expiry date.",
+      "source": "ar/02 NEHRAT, Part D, recurring venues"
+    }
+  ],
   "domains": [
     {
       "number": 1,
@@ -37,41 +57,41 @@
         {
           "score": 0,
           "en": "Conference, meeting, exhibition, ceremony or other recreational event without organized physical activity",
-          "ar": "مؤتمر أو اجتماع أو معرض أو احتفال أو فعالية ترفيهية أخرى بلا نشاط بدني منظم"
+          "ar": "مؤتمر أو اجتماع أو معرض أو مراسم أو خدمة دينية يحضرها الجمهور جلوساً، أو فعالية أخرى لا تتضمن نشاطاً بدنياً منظماً"
         },
         {
           "score": 1,
           "en": "Concert, festival, performance, community event, recreational activity or team sport",
-          "ar": "حفل موسيقي أو مهرجان أو عرض أو فعالية مجتمعية أو نشاط ترفيهي أو رياضة جماعية"
+          "ar": "حفلة أو مهرجان أو عرض أو فعالية مجتمعية أو نشاط ترفيهي أو رياضة جماعية"
         },
         {
           "score": 2,
           "en": "Organized running event, cycling race, triathlon, open-water event, boxing, kickboxing, Muay Thai, mixed martial arts, or motor-vehicle race",
-          "ar": "فعالية جري منظمة أو سباق دراجات أو ترياتلون أو سباحة في المياه المفتوحة أو ملاكمة أو كيك بوكسينغ أو مواي تاي أو فنون قتالية مختلطة أو سباق سيارات"
+          "ar": "فعالية جري منظمة، أو سباق دراجات، أو سباق ثلاثي (ترياتلون)، أو فعالية منظمة في المياه المفتوحة، أو ملاكمة، أو كيك بوكسينغ، أو مواي تاي، أو فنون قتالية مختلطة، أو سباق مركبات آلية"
         }
       ]
     },
     {
       "number": 3,
       "en": "Crowd configuration",
-      "ar": "تنظيم الجمهور",
+      "ar": "تكوين الحشد",
       "noteEn": "",
       "noteAr": "",
       "options": [
         {
           "score": 0,
           "en": "Attendees have assigned seats or assigned fixed places",
-          "ar": "للحاضرين مقاعد أو أماكن ثابتة مخصصة"
+          "ar": "للحضور مقاعد محددة أو أماكن ثابتة مخصصة"
         },
         {
           "score": 1,
           "en": "Attendees may stand or move but remain within separate controlled sections",
-          "ar": "يمكن للحاضرين الوقوف أو التحرك ضمن أقسام منفصلة ومضبوطة"
+          "ar": "يمكن للحضور الوقوف أو التحرك، لكنهم يبقون ضمن قطاعات منفصلة يمكن ضبطها"
         },
         {
           "score": 2,
           "en": "Attendees may stand and move freely within one shared audience, gathering or dance area",
-          "ar": "يمكن للحاضرين الوقوف والتحرك بحرية في منطقة جمهور أو تجمع أو رقص مشتركة"
+          "ar": "يمكن للحضور الوقوف والتحرك بحرية ضمن مساحة مشتركة واحدة مخصصة للجمهور أو التجمع أو الرقص"
         }
       ]
     },
@@ -90,12 +110,12 @@
         {
           "score": 1,
           "en": "More than 8 hours during one continuous operating period",
-          "ar": "أكثر من 8 ساعات في فترة تشغيل واحدة متصلة"
+          "ar": "أكثر من 8 ساعات خلال فترة تشغيل متواصلة واحدة"
         },
         {
           "score": 2,
           "en": "The same event program operates on two or more separate dates",
-          "ar": "يعمل البرنامج نفسه في تاريخين منفصلين أو أكثر"
+          "ar": "تُقام الفعالية بالبرنامج نفسه في تاريخين منفصلين أو أكثر"
         }
       ]
     },
@@ -109,65 +129,65 @@
         {
           "score": 0,
           "en": "One fixed venue with all event areas in one continuous space",
-          "ar": "موقع ثابت واحد وجميع مناطق الفعالية في حيز متصل"
+          "ar": "موقع ثابت واحد تقع جميع مناطق الفعالية فيه ضمن مساحة متصلة واحدة"
         },
         {
           "score": 1,
           "en": "One fixed venue with event areas on different floors, or in separate halls, rooms, stands, buildings or zones",
-          "ar": "موقع ثابت واحد بمناطق على طوابق مختلفة أو في قاعات أو غرف أو مدرجات أو مبانٍ أو نطاقات منفصلة"
+          "ar": "موقع ثابت واحد تتوزع مناطق الفعالية فيه على طوابق أو قاعات أو غرف أو مدرجات أو مبانٍ أو قطاعات منفصلة"
         },
         {
           "score": 2,
           "en": "A road, trail, waterway, procession, race course or other route, or an event at two or more separate sites",
-          "ar": "طريق أو درب أو مجرى مائي أو موكب أو مسار سباق أو مسار آخر، أو فعالية في موقعين منفصلين أو أكثر"
+          "ar": "طريق، أو ممر طبيعي، أو مسطح مائي، أو مسيرة، أو مضمار سباق، أو مسار آخر؛ أو فعالية تقام في موقعين منفصلين أو أكثر"
         }
       ]
     },
     {
       "number": 6,
       "en": "Environmental exposure",
-      "ar": "التعرّض البيئي",
+      "ar": "التعرض البيئي",
       "noteEn": "",
       "noteAr": "",
       "options": [
         {
           "score": 0,
           "en": "The entire event takes place inside a fully enclosed, climate-controlled building",
-          "ar": "تُقام الفعالية بكاملها داخل مبنى مغلق تماماً ومكيّف"
+          "ar": "تقام الفعالية بكاملها داخل مبنى مغلق بالكامل وخاضع للتحكم المناخي"
         },
         {
           "score": 1,
           "en": "Any part of the event takes place outdoors or in a non-climate-controlled structure",
-          "ar": "أي جزء من الفعالية في الهواء الطلق أو في بناء غير مكيّف"
+          "ar": "يقام أي جزء من الفعالية في الهواء الطلق أو داخل منشأة غير خاضعة للتحكم المناخي"
         },
         {
           "score": 2,
           "en": "An official weather or environmental warning applies to the event location and time",
-          "ar": "إنذار رسمي جوي أو بيئي ينطبق على موقع الفعالية ووقتها"
+          "ar": "يكون موقع الفعالية وموعدها مشمولين بتحذير رسمي صادر عن سلطة عامة مختصة بشأن خطر متعلق بالطقس أو البيئة"
         }
       ]
     },
     {
       "number": 7,
       "en": "Patient access and extraction",
-      "ar": "الوصول إلى المرضى وإخلاؤهم",
+      "ar": "الوصول إلى المريض وإخلاؤه",
       "noteEn": "",
       "noteAr": "",
       "options": [
         {
           "score": 0,
           "en": "A road ambulance can directly reach every event area",
-          "ar": "يمكن لسيارة إسعاف الوصول مباشرة إلى كل منطقة"
+          "ar": "يمكن لسيارة إسعاف برية الوصول مباشرة إلى جميع مناطق الفعالية"
         },
         {
           "score": 1,
           "en": "At least one area cannot be reached directly by ambulance, but a clear and documented patient-extraction route is available",
-          "ar": "منطقة واحدة على الأقل لا يمكن الوصول إليها مباشرة، لكن يتوفر مسار إخلاء مريض واضح وموثّق"
+          "ar": "يتعذر وصول سيارة الإسعاف مباشرة إلى منطقة واحدة على الأقل، لكن يتوافر مسار واضح وموثق لإخلاء المرضى منها"
         },
         {
           "score": 2,
           "en": "At least one area has no clear and documented patient-extraction route",
-          "ar": "منطقة واحدة على الأقل بلا مسار إخلاء مريض واضح وموثّق"
+          "ar": "توجد منطقة واحدة على الأقل لا يتوافر لها مسار واضح وموثق لإخلاء المرضى"
         }
       ]
     },
@@ -198,24 +218,24 @@
     {
       "number": 9,
       "en": "Previous event history",
-      "ar": "سجل النسخ السابقة",
+      "ar": "التاريخ السابق للفعالية",
       "noteEn": "",
       "noteAr": "",
       "options": [
         {
           "score": 0,
           "en": "First-time event, or no previous hospital transport, cardiac arrest, death, major incident or unplanned request for additional medical resources",
-          "ar": "فعالية أولى، أو لا نقل سابق إلى المستشفى ولا توقف قلب ولا وفاة ولا حادثة جسيمة ولا طلب غير مخطط لموارد طبية إضافية"
+          "ar": "فعالية تقام للمرة الأولى، أو لم تشهد أي نسخة سابقة منها نقلاً إلى المستشفى، أو توقفاً قلبياً، أو وفاة، أو حادثاً جسيماً، أو طلباً غير مخطط لموارد طبية إضافية"
         },
         {
           "score": 1,
           "en": "One or more previous hospital transports or unplanned requests for additional medical resources",
-          "ar": "نقل سابق واحد أو أكثر إلى المستشفى أو طلبات غير مخططة لموارد طبية إضافية"
+          "ar": "حالة واحدة أو أكثر من النقل السابق إلى المستشفى، أو طلب غير مخطط لموارد طبية إضافية"
         },
         {
           "score": 2,
           "en": "A cardiac arrest, death, major-incident activation, or interruption or termination of a previous edition for medical reasons",
-          "ar": "توقف قلب أو وفاة أو تفعيل حادثة جسيمة أو توقف نسخة سابقة أو إنهاؤها لأسباب طبية"
+          "ar": "توقف قلبي، أو وفاة، أو تفعيل الاستجابة لحادث جسيم، أو انقطاع أي نسخة سابقة من الفعالية أو إنهاؤها لأسباب طبية"
         }
       ]
     }
