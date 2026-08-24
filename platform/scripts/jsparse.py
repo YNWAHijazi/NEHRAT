@@ -43,7 +43,11 @@ class P:
         while s.t[s.i] != q:
             if s.t[s.i] == '\\':
                 nxt = s.t[s.i+1]
-                out.append({'n':'\n','t':'\t','r':'\r'}.get(nxt, nxt)); s.i += 2
+                if nxt == 'u':
+                    # \uXXXX escapes must decode, not degrade to literal 'uXXXX'
+                    out.append(chr(int(s.t[s.i+2:s.i+6], 16))); s.i += 6
+                else:
+                    out.append({'n':'\n','t':'\t','r':'\r'}.get(nxt, nxt)); s.i += 2
             else:
                 out.append(s.t[s.i]); s.i += 1
         s.i += 1

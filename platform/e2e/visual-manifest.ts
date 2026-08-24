@@ -224,10 +224,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'compare',
         reference: { strategy: 'containerOfText', text: 'Planning depth by event level', container: 'border-radius: 14px' },
         builtSelector: '[data-region="depth"]',
-        // A single cell wraps at a different word boundary, offsetting every later row by
-        // one text line; strings and the level-column highlight are verified identical.
-        threshold: 0.06,
-        note: 'The depth-by-level table, prototype wording verbatim with the level column highlighted as the prototype does. Held at 6%: one cell wraps a line earlier than the reference and shifts the rows below it; the strings match.',
+        note: 'The depth-by-level table, prototype wording verbatim with the level column highlighted as the prototype does. Held at 2%. (An earlier 6% allowance hid a real defect: the extractor degraded a unicode escape into literal text and the longer string wrapped an extra line.)',
       },
       {
         name: 'sections',

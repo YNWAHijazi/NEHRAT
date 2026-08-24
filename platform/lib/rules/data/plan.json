@@ -13,7 +13,7 @@
       "n": 2,
       "en": "Responsible organizer and participating-provider contacts",
       "ar": "جهات اتصال المنظّم المسؤول والمزوّدين المشاركين",
-      "bodyEn": "The organizeru2019s legal name and the person authorized to make operational decisions. Each participating provider and its operational contact.",
+      "bodyEn": "The organizer’s legal name and the person authorized to make operational decisions. Each participating provider and its operational contact.",
       "bodyAr": "الاسم القانوني للمنظّم والشخص المفوّض باتخاذ القرارات التشغيلية. وكل مزوّد مشارك وجهة اتصاله التشغيلية.",
       "summaryEn": "Names, roles and numbers reachable during the event."
     },
@@ -187,6 +187,126 @@
       "ar": "ترتيبات تعريف المرضى وتتبعهم وإعادة جمعهم بعائلاتهم عند الانطباق"
     }
   ],
+  "guidanceWorkflow": {
+    "$comment": "The eight-step planning workflow. Wording from the reference prototype (copy is final); the Guidance's fuller phrasing is in source-documents/en/05. No Arabic issue exists; the prototype's Arabic stands.",
+    "steps": [
+      {
+        "n": 1,
+        "en": "Screen applicability under the National Protocol.",
+        "ar": "فحص الانطباق بموجب البروتوكول الوطني."
+      },
+      {
+        "n": 2,
+        "en": "Complete the risk assessment and identify the final event level.",
+        "ar": "استكمال التقييم الوطني للمخاطر وتحديد المستوى النهائي للفعالية."
+      },
+      {
+        "n": 3,
+        "en": "Review the requirements for your level.",
+        "ar": "مراجعة متطلبات مستواكم."
+      },
+      {
+        "n": 4,
+        "en": "Prepare the plan and supporting maps.",
+        "ar": "إعداد الخطة والخرائط الداعمة."
+      },
+      {
+        "n": 5,
+        "en": "Obtain EMS readiness confirmation when required.",
+        "ar": "الحصول على تأكيد جاهزية الإسعاف عند الطلب."
+      },
+      {
+        "n": 6,
+        "en": "Submit the risk assessment for Level 1 notification. For Level 2 and Level 3, complete the compliance and submission form and submit the required package within the applicable timeline.",
+        "ar": "تقديم التقييم الوطني للمخاطر لإبلاغ المستوى 1. وفي المستويين 2 و3، استكمال نموذج الامتثال والتقديم وتقديم الحزمة المطلوبة خلال المهلة المنطبقة."
+      },
+      {
+        "n": 7,
+        "en": "Brief teams, verify readiness and conduct the event.",
+        "ar": "إحاطة الفرق والتحقق من الجاهزية وإقامة الفعالية."
+      },
+      {
+        "n": 8,
+        "en": "Complete the post-event report when required and use lessons for the next edition.",
+        "ar": "استكمال التقرير اللاحق عند الطلب واستخدام الدروس للنسخة المقبلة."
+      }
+    ]
+  },
+  "guidanceDepth": {
+    "$comment": "The planning-depth-by-level table. Wording from the reference prototype (copy is final); the Guidance's fuller table is in source-documents/en/05. The event's own level column is highlighted, as the prototype does.",
+    "rows": [
+      {
+        "en": "Format",
+        "ar": "الشكل",
+        "l1En": "Brief written arrangements, usually 1 page",
+        "l1Ar": "ترتيبات مكتوبة موجزة، عادةً صفحة واحدة",
+        "l2En": "Written plan",
+        "l2Ar": "خطة مكتوبة",
+        "l3En": "Comprehensive plan with maps and EMS declarations",
+        "l3Ar": "خطة شاملة مع خرائط وإقرارات إسعاف"
+      },
+      {
+        "en": "Accountability and medical leadership",
+        "ar": "المسؤولية والقيادة الطبية",
+        "l1En": "Responsible organizer contact",
+        "l1Ar": "جهة اتصال مسؤولة من المنظّم",
+        "l2En": "Responsible organizer contact and participating-provider operational contacts",
+        "l2Ar": "جهة اتصال المنظّم وجهات الاتصال التشغيلية للمزوّدين المشاركين",
+        "l3En": "Licensed physician Event Medical Director and participating-provider operational contacts",
+        "l3Ar": "مدير طبي للفعالية طبيب مُجاز وجهات الاتصال التشغيلية للمزوّدين"
+      },
+      {
+        "en": "Medical response teams",
+        "ar": "فرق الاستجابة الطبية",
+        "l1En": "Trained first-aid personnel",
+        "l1Ar": "موظفون مدرّبون على الإسعاف الأولي",
+        "l2En": "BLS team or teams under the provider’s protocols and oversight",
+        "l2Ar": "فريق أو فرق دعم الحياة الأساسي وفق بروتوكولات المزوّد وإشرافه",
+        "l3En": "Integrated medical and BLS teams under event medical command",
+        "l3Ar": "فرق طبية ودعم حياة أساسي متكاملة تحت القيادة الطبية للفعالية"
+      },
+      {
+        "en": "Medical treatment post",
+        "ar": "نقطة المعالجة الطبية",
+        "l1En": "Not required",
+        "l1Ar": "غير مطلوبة",
+        "l2En": "Recommended",
+        "l2Ar": "يُستحسن",
+        "l3En": "Required",
+        "l3Ar": "مطلوبة"
+      },
+      {
+        "en": "Ambulance and EMS",
+        "ar": "الإسعاف وخدمات الطوارئ",
+        "l1En": "Access to local EMS",
+        "l1Ar": "إتاحة الوصول إلى الإسعاف المحلي",
+        "l2En": "Defined in the plan",
+        "l2Ar": "محددة في الخطة",
+        "l3En": "EMS resources documented and coordinated",
+        "l3Ar": "موارد إسعافية موثقة ومنسّقة"
+      },
+      {
+        "en": "Major-incident plan",
+        "ar": "خطة الحوادث الجسيمة",
+        "l1En": "Emergency escalation procedure",
+        "l1Ar": "إجراء تصعيد طارئ",
+        "l2En": "Written plan",
+        "l2Ar": "خطة مكتوبة",
+        "l3En": "Detailed coordinated plan",
+        "l3Ar": "خطة مفصّلة ومنسّقة"
+      },
+      {
+        "en": "Submission to the Ministry",
+        "ar": "التقديم إلى الوزارة",
+        "l1En": "the risk assessment notification; full package only if requested",
+        "l1Ar": "إبلاغ بالتقييم الوطني للمخاطر؛ والحزمة الكاملة عند الطلب فقط",
+        "l2En": "At least 14 calendar days",
+        "l2Ar": "14 يوماً تقويمياً على الأقل",
+        "l3En": "At least 30 calendar days",
+        "l3Ar": "30 يوماً تقويمياً على الأقل"
+      }
+    ]
+  },
   "guidanceTemplate": {
     "nonBindingEn": "The fourteen-section structure below is from the Ministry's guidance. It is non-binding implementation guidance and creates no requirements; the sixteen items above are what the plan must address.",
     "nonBindingAr": "الهيكل المكوّن من أربعة عشر قسماً أدناه مأخوذ من إرشادات الوزارة. وهو إرشاد تنفيذي غير ملزم ولا يُنشئ أي متطلبات؛ والبنود الستة عشر أعلاه هي ما يجب أن تعالجه الخطة.",

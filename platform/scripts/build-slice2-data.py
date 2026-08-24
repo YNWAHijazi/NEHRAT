@@ -270,7 +270,10 @@ def main() -> int:
     # ---------- The plan: 16 mandatory items, 11 MI items, the non-binding template ----------
     plan_defs = extract_array(src, "const planDefs")
     mi_defs = extract_array(src, "const miDefs")
+    wf_defs = extract_array(src, "wfDefs")
+    depth_defs = extract_array(src, "const depthDefs")
     assert len(plan_defs) == 16 and len(mi_defs) == 11
+    assert len(wf_defs) == 8 and len(depth_defs) == 7
     write("plan.json", {
         "$comment": (
             "The event health and medical plan (خطة التأهب الصحي والطبي للفعالية, SPEC 2b). "
@@ -288,6 +291,28 @@ def main() -> int:
         "majorIncidentItems": [
             {"n": i + 1, "en": d[0], "ar": d[1]} for i, d in enumerate(mi_defs)
         ],
+        "guidanceWorkflow": {
+            "$comment": (
+                "The eight-step planning workflow. Wording from the reference prototype "
+                "(copy is final); the Guidance's fuller phrasing is in "
+                "source-documents/en/05. No Arabic issue exists; the prototype's Arabic stands."
+            ),
+            "steps": [
+                {"n": i + 1, "en": d[0], "ar": d[1]} for i, d in enumerate(wf_defs)
+            ],
+        },
+        "guidanceDepth": {
+            "$comment": (
+                "The planning-depth-by-level table. Wording from the reference prototype "
+                "(copy is final); the Guidance's fuller table is in source-documents/en/05. "
+                "The event's own level column is highlighted, as the prototype does."
+            ),
+            "rows": [
+                {"en": r[0], "ar": r[1], "l1En": r[2], "l1Ar": r[3],
+                 "l2En": r[4], "l2Ar": r[5], "l3En": r[6], "l3Ar": r[7]}
+                for r in depth_defs
+            ],
+        },
         "guidanceTemplate": {
             "nonBindingEn": "The fourteen-section structure below is from the Ministry's guidance. It is non-binding implementation guidance and creates no requirements; the sixteen items above are what the plan must address.",
             "nonBindingAr": "الهيكل المكوّن من أربعة عشر قسماً أدناه مأخوذ من إرشادات الوزارة. وهو إرشاد تنفيذي غير ملزم ولا يُنشئ أي متطلبات؛ والبنود الستة عشر أعلاه هي ما يجب أن تعالجه الخطة.",
