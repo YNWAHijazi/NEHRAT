@@ -21,6 +21,8 @@ import {
   type SubmissionRecord,
 } from '../../../../lib/rules/public-lookup';
 import type { Level } from '../../../../lib/rules/types';
+import { MINISTRY_CONTENT } from '../../../../lib/rules/ministry';
+import { latestOutcomeFor } from '../../../../lib/queries';
 
 // Per-client rate limit: a small fixed window, in memory. The values are deployment
 // configuration in spirit; they live here until a config layer exists in Slice 6.
@@ -42,11 +44,12 @@ function rateLimited(clientKey: string): boolean {
 function findByReference(reference: string): SubmissionRecord | null {
   const row = getDb()
     .prepare(
-      `SELECT e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
+      `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
        FROM events e WHERE e.moph_reference = ?`,
     )
     .get(reference) as
     | {
+        id: string;
         moph_reference: string;
         name_en: string;
         start_date: string | null;
@@ -56,11 +59,17 @@ function findByReference(reference: string): SubmissionRecord | null {
       }
     | undefined;
   if (!row) return null;
+  // The same precedence as the organizer's own screens: a recorded outcome wins,
+  // so the public register never disagrees with the dashboard on the same event.
+  const outcome = latestOutcomeFor(row.id);
+  const outcomeLabel = outcome
+    ? MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome)?.en
+    : undefined;
   return {
     referenceNumber: row.moph_reference,
     eventName: row.name_en,
     level: (row.demo_level ?? 1) as Level,
-    status: row.demo_state_en ?? 'Submission received but incomplete',
+    status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
     isDemo: row.is_demo === 1,
     eventStartDate: row.start_date ?? '',
   };

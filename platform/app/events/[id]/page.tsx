@@ -220,7 +220,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const orgRecorded = organization?.status === 'recorded';
   const assessed = derivation?.complete === true;
   const latestDate = latest?.createdAt.slice(0, 10) ?? '';
-  const stage: number = !assessed ? 2 : !event.filed ? 3 : 4;
+  const stage: number = !assessed ? 2 : !event.filed ? 3 : event.outcome ? 5 : 4;
   const stages: RailStage[] = [
     orgRecorded
       ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization?.recordedAt ?? '', metaAr: organization?.recordedAt ? `\u2066${organization.recordedAt}\u2069` : '' }
@@ -236,7 +236,9 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
     event.filed
       ? { k: 'done', en: 'Submitted', ar: 'التقديم', metaEn: event.mophReference ?? '', metaAr: event.mophReference ?? '' }
       : { k: 'todo', en: 'Submitted', ar: 'التقديم', metaEn: filing ? `File by ${filing.date}` : '', metaAr: filing ? `التقديم بحلول \u2066${filing.date}\u2069` : '' },
-    { k: 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'One of three outcomes', metaAr: 'إحدى ثلاث نتائج' },
+    event.outcome
+      ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: event.stateEn, metaAr: event.stateAr }
+      : { k: event.filed ? 'current' : 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'One of three outcomes', metaAr: 'إحدى ثلاث نتائج' },
     level === 3
       ? { k: 'todo', en: 'Post-event report', ar: 'التقرير اللاحق', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
       : { k: 'na', en: 'Post-event report', ar: 'التقرير اللاحق', metaEn: 'Owed only after a reportable event or on Ministry request', metaAr: 'يُستحق فقط بعد واقعة واجبة الإبلاغ أو بطلب الوزارة' },

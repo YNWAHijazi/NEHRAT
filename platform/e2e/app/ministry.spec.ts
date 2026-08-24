@@ -66,6 +66,56 @@ test.describe('internal states and determinations', () => {
   });
 });
 
+test.describe('the pinned vocabulary', () => {
+  // The reviewer's ratchet on the two panels that carry the vocabulary and the
+  // unset state: exact strings, both languages. The EN limits are ALSO
+  // pixel-compared (visual manifest, ministry-review.outcome-limits); the Arabic
+  // rides here until the prototype's glossary defect is corrected in Pass C.
+  test('the outcome card and the limit sentences read verbatim, in both languages', async ({ page }) => {
+    await signInAs(page, 'test_moph');
+    await page.goto('/ministry/submissions/EV-0362');
+    const outcome = page.locator('[data-region="outcome"]');
+    await expect(outcome).toContainText('Record an outcome');
+    await expect(outcome).toContainText('Three outcomes exist. Nothing else is a determination.');
+    await expect(outcome).toContainText('Everything must be complete before a clearance is shown. The other two outcomes stay available.');
+    const limits = page.locator('[data-region="limits"]');
+    await expect(limits).toContainText('The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority.');
+    await expect(limits).toContainText('This status does not replace any other permit or authorization required under Lebanese law.');
+    // Arabic, verbatim -- التأهب per the glossary, never الجاهزية on the event side.
+    await expect(outcome).toContainText('تسجيل نتيجة');
+    await expect(outcome).toContainText('توجد ثلاث نتائج فقط. ما عداها ليس قراراً.');
+    await expect(limits).toContainText('تراجع الوزارة التأهب الصحي والطبي فقط. ويبقى الترخيص بالفعالية لدى السلطة المختصة قانوناً.');
+    await expect(limits).toContainText('لا تحل هذه الحالة محل أي تصريح أو ترخيص آخر مطلوب بموجب القانون اللبناني.');
+  });
+
+  test('the cardiac unset state reads verbatim, in both languages', async ({ page }) => {
+    await signInAs(page, 'test_moph_admin');
+    await page.goto('/ministry/admin/cardiac');
+    const powersRegion = page.locator('[data-region="powers"]');
+    await expect(powersRegion).toContainText('Not set — nothing is in force under this value');
+    await expect(powersRegion).toContainText('غير محددة — لا يسري شيء بموجب هذه القيمة');
+    await expect(powersRegion).toContainText('Not set — the provisional figure');
+    await expect(powersRegion).toContainText('غير محددة — الرقم المؤقت');
+  });
+});
+
+test.describe('the organizer reads the same determination', () => {
+  // The unification the reviewer ordered: a recorded outcome is what the organizer's
+  // dashboard and event screen show -- never a stale seeded presentation string.
+  test('the dashboard state and the event rail carry the recorded outcome', async ({ page }) => {
+    await signInAs(page, 'test_organizer');
+    await page.goto('/dashboard');
+    const body = page.locator('body');
+    // EV-0362 carries a recorded revision; the seeded 'Information required' must not show.
+    await expect(body).toContainText('Additional information or revision required');
+    // EV-0301 carries a recorded satisfied outcome.
+    await expect(body).toContainText('Health and medical preparedness requirements satisfied');
+    await page.goto('/events/EV-0362');
+    // Stage 5 of the rail is the outcome, done, in the compliance form's wording.
+    await expect(page.locator('body')).toContainText('Additional information or revision required');
+  });
+});
+
 test.describe('cardiac configuration', () => {
   test('an unset value is a first-class answer, and publishing records the effective date', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');

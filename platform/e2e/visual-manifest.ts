@@ -39,6 +39,9 @@ export interface VisualRegion {
   /** absentExpected: text that identifies the region and must not appear on the built page. */
   markerText?: string;
   threshold?: number;
+  /** Restrict the region to these languages; absent = both. Only for a documented
+   *  reference defect in the other language (the note must say which and why). */
+  langs?: ('en' | 'ar')[];
   note: string;
 }
 
@@ -965,6 +968,19 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     builtRoute: "/ministry/submissions/EV-0362",
     signInAs: 'test_moph',
     regions: [
+      {
+        // The vocabulary ratchet the reviewer asked for: the two limit sentences are
+        // dataset-independent on both sides, so this region is a true pixel compare.
+        // The card's remainder (gate box, note field) is dataset-driven and stays
+        // expectedDivergent until the prototype's console dataset is reconciled (Pass C).
+        name: 'outcome-limits',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'The Ministry reviews health and medical preparedness only', container: 'font-size: 12px' },
+        builtSelector: '[data-region="limits"]',
+        langs: ['en'],
+        threshold: 0.04,
+        note: 'The two limit sentences beneath the outcome control, compared pixel-for-pixel: the vocabulary must not drift. Held at 4%: a 1-2px second-paragraph offset against the reference is the measured residual (2.55%), while a single changed word measures 10%+ -- the ratchet still bites. EN only: the reference Arabic here reads الجاهزية الصحية where SPEC 2b/the glossary require التأهب for this instrument -- a prototype defect for the Pass C list; the Arabic is pinned verbatim by e2e/app/ministry.spec.ts until the prototype is corrected and this region can drop its langs restriction.',
+      },
       {
         name: 'outcome',
         mode: 'expectedDivergent',

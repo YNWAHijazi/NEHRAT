@@ -101,6 +101,29 @@ export function outcomeAvailability(blockers: OutcomeBlocker[]): OutcomeAvailabi
   }));
 }
 
+export type OutcomeKey = OutcomeAvailability['key'];
+
+/**
+ * The organizer-facing state for an event, ONE derivation for every surface that
+ * shows it -- dashboard, event screen, public lookup. A recorded outcome wins,
+ * in the compliance form's verbatim wording; a filed event without one shows a
+ * grey non-determination; otherwise the assessment progress speaks.
+ */
+export function organizerEventState(input: {
+  outcome: OutcomeKey | null;
+  filed: boolean;
+  assessed: boolean;
+}): { en: string; ar: string } {
+  if (input.outcome) {
+    const o = ministryJson.outcomes.find((x) => x.key === input.outcome);
+    if (o) return { en: o.en, ar: o.ar };
+  }
+  if (input.filed) return { en: 'Filed — under review', ar: 'مقدَّمة — قيد المراجعة' };
+  return input.assessed
+    ? { en: 'Assessed — not submitted', ar: 'مُقيَّمة — غير مقدَّمة' }
+    : { en: 'Assessment in progress', ar: 'التقييم قيد الإجراء' };
+}
+
 /* ---------------- configuration values ---------------- */
 
 export interface ConfigValue {

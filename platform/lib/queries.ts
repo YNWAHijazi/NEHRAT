@@ -16,7 +16,8 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn } from './clock';
-import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs } from './rules';
+import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
+import { organizerEventState } from './rules';
 
 export interface EventRow {
   id: string;
@@ -27,6 +28,8 @@ export interface EventRow {
   mophReference: string | null;
   filed: boolean;
   level: Level | null;
+  /** Latest recorded determination, null until a reviewer records one. */
+  outcome: OutcomeKey | null;
   stateEn: string;
   stateAr: string;
   due: string | null;
@@ -86,10 +89,28 @@ function latestDerivation(eventId: string): LevelDerivation | null {
   });
 }
 
+/** Latest recorded outcome -- same ordering as the Ministry queue, so the two sides never disagree. */
+export function latestOutcomeFor(eventId: string): OutcomeKey | null {
+  const row = getDb()
+    .prepare(
+      `SELECT outcome FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC LIMIT 1`,
+    )
+    .get(eventId) as { outcome: OutcomeKey } | undefined;
+  return row?.outcome ?? null;
+}
+
 function toEventRow(row: EventDbRow): EventRow {
   const derivation = latestDerivation(row.id);
   const level =
     derivation?.finalLevel ?? (row.demo_level as Level | null) ?? null;
+  // A recorded outcome overrides the seeded presentation state: the organizer must
+  // read the same determination the reviewer recorded, not a stale seeded string.
+  const outcome = latestOutcomeFor(row.id);
+  const derivedState = organizerEventState({
+    outcome,
+    filed: row.filed === 1,
+    assessed: derivation?.complete ?? false,
+  });
   return {
     id: row.id,
     nameEn: row.name_en,
@@ -99,8 +120,9 @@ function toEventRow(row: EventDbRow): EventRow {
     mophReference: row.moph_reference,
     filed: row.filed === 1,
     level,
-    stateEn: row.demo_state_en ?? (derivation?.complete ? 'Assessed — not submitted' : 'Assessment in progress'),
-    stateAr: row.demo_state_ar ?? (derivation?.complete ? 'مُقيَّمة — غير مقدَّمة' : 'التقييم قيد الإجراء'),
+    outcome,
+    stateEn: outcome ? derivedState.en : (row.demo_state_en ?? derivedState.en),
+    stateAr: outcome ? derivedState.ar : (row.demo_state_ar ?? derivedState.ar),
     due: row.demo_due,
     dueLabelEn: row.demo_due_label_en ?? 'File by',
     dueLabelAr: row.demo_due_label_ar ?? 'التقديم بحلول',

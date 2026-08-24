@@ -106,6 +106,9 @@ export async function recordOutcomeAction(eventId: string, formData: FormData): 
     outcome === 'satisfied' ? `/events/${eventId}/acknowledgment` : `/events/${eventId}`,
   );
   revalidatePath(`/ministry/submissions/${eventId}`);
+  // The organizer's surfaces show the same determination -- refresh them too.
+  revalidatePath('/dashboard');
+  revalidatePath(`/events/${eventId}`);
   redirect(`/ministry/submissions/${eventId}?notice=recorded`);
 }
 

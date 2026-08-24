@@ -226,7 +226,9 @@ export default async function DashboardPage() {
   const unread = unreadCountFor(account.id);
   const today = beirutToday();
 
-  const returned = events.find((e) => e.stateEn === 'Information required');
+  const returned = events.find(
+    (e) => e.outcome === 'revision' || e.stateEn === 'Information required',
+  );
   const empty = events.length === 0 && venues.length === 0 && facilities.length === 0;
 
   return (

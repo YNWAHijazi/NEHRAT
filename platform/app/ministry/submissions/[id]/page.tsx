@@ -105,7 +105,7 @@ export default async function SubmissionReviewPage({
         ) : null}
       </div>
 
-      <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 24 }}>
+      <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 20, alignItems: 'start' }}>
         <div>
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Named EMS providers" ar="مزوّدو الإسعاف المُسمّون" />
@@ -259,12 +259,12 @@ export default async function SubmissionReviewPage({
 
         <div>
           {mayRecord ? (
-            <div data-region="outcome" style={{ padding: '24px 26px', border: '2px solid var(--brand)', borderRadius: 14, marginBlockEnd: 20 }}>
+            <div data-region="outcome" style={{ padding: 24, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-                <L en="Record the outcome" ar="تسجيل النتيجة" />
+                <L en="Record an outcome" ar="تسجيل نتيجة" />
               </h2>
               <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-                <L en="One of three, and there are no others. This is the only regulatory determination on this submission." ar="واحدة من ثلاث، ولا غيرها. وهذا هو القرار التنظيمي الوحيد على هذا التقديم." />
+                <L en="Three outcomes exist. Nothing else is a determination." ar="توجد ثلاث نتائج فقط. ما عداها ليس قراراً." />
               </p>
               <form action={recordOutcomeAction.bind(null, id)}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 14 }}>
@@ -278,13 +278,16 @@ export default async function SubmissionReviewPage({
                         {!o.available ? (
                           <span style={{ display: 'block', marginBlockStart: 8 }}>
                             <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 4 }}>
-                              <L en="Blocked while these are outstanding — the other two remain available" ar="محجوبة ما دامت هذه قائمة — والنتيجتان الأخريان متاحتان" />
+                              <L en={`Unavailable — ${o.blockers.length} outstanding`} ar={`غير متاح — ${o.blockers.length} قائم`} />
                             </span>
                             {o.blockers.map((b) => (
                               <span key={b.en} style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
                                 <L en={b.en} ar={b.ar} />
                               </span>
                             ))}
+                            <span style={{ display: 'block', marginBlockStart: 8, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                              <L en="Everything must be complete before a clearance is shown. The other two outcomes stay available." ar="يجب أن يكتمل كل شيء قبل إظهار الاستيفاء. وتبقى النتيجتان الأخريان متاحتين." />
+                            </span>
                           </span>
                         ) : null}
                       </span>
@@ -301,12 +304,14 @@ export default async function SubmissionReviewPage({
                   <L en="Record the outcome" ar="تسجيل النتيجة" />
                 </button>
               </form>
-              <div data-region="limits" style={{ marginBlockStart: 16, paddingBlockStart: 14, borderBlockStart: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {MINISTRY_CONTENT.outcomeLimits.map((l) => (
-                  <div key={l.en} style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-                    <L en={l.en} ar={l.ar} />
-                  </div>
-                ))}
+              <div style={{ marginBlockStart: 16, paddingBlockStart: 14, borderBlockStart: '1px solid var(--line)' }}>
+                <div data-region="limits" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+                  {MINISTRY_CONTENT.outcomeLimits.map((l, i) => (
+                    <div key={l.en} style={i === 0 ? { marginBlockEnd: 8 } : undefined}>
+                      <L en={l.en} ar={l.ar} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           ) : null}

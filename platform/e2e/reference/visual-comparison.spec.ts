@@ -128,6 +128,14 @@ async function referenceRegionRect(
     const mark = (el: Element): void => {
       document.querySelectorAll('[data-e2e-region]').forEach((n) => n.removeAttribute('data-e2e-region'));
       el.setAttribute('data-e2e-region', '1');
+      // A sticky ancestor pins to the viewport when the element is scrolled into
+      // view, so the capture clips the space the card vacated -- a blank image.
+      // Sticky occupies its normal flow slot, so switching it to static moves nothing.
+      for (let a: Element | null = el; a && a !== document.body; a = a.parentElement) {
+        if (window.getComputedStyle(a).position === 'sticky') {
+          (a as HTMLElement).style.position = 'static';
+        }
+      }
     };
     if (r.strategy === 'cardByText') {
       // The runtime re-serializes style attributes with spaces: "border-radius: 14px".
@@ -265,6 +273,10 @@ for (const mapping of VISUAL_MANIFEST) {
 
       // Region-by-region: each named part carries its own verdict and its note.
       for (const region of mapping.regions) {
+        // A region restricted to one language: used where the OTHER language's
+        // reference carries a known defect (e.g. glossary Arabic) awaiting a
+        // prototype fix -- the restricted language still pixel-compares.
+        if (region.langs && !region.langs.includes(lang)) continue;
         const tag = `${mapping.id}.${region.name}.${lang}`;
 
         if (region.mode === 'absentExpected') {
