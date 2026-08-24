@@ -9,12 +9,18 @@
 import { useState } from 'react';
 import { L } from '../../../components/L';
 import { registerVenueAction } from '../../actions';
-import { RECURRING_VENUE_MIN_CAPACITY, VENUE_CAPACITY_FIELD } from '../../../lib/rules';
+import {
+  RECURRING_VENUE_MIN_CAPACITY,
+  VENUE_CAPACITY_FIELD,
+  VENUE_ELIGIBILITY_QUESTIONS,
+  type EligibilityQuestion,
+} from '../../../lib/rules';
 
 interface Field {
   key: string;
   en: string;
   ar: string;
+  bilingual?: boolean;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -25,6 +31,23 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 8,
   fontSize: 15,
 };
+
+function QuestionLabel({ q }: { q: EligibilityQuestion }) {
+  return (
+    <span style={{ fontSize: '14.5px' }}>
+      <L en={q.en} ar={q.ar} />
+      {q.issue !== 'both' ? (
+        <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--muted)', verticalAlign: 'middle' }}>
+          {q.issue === 'en-only' ? (
+            <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
+          ) : (
+            <L en="Arabic issue only" ar="الإصدار العربي فقط" />
+          )}
+        </span>
+      ) : null}
+    </span>
+  );
+}
 
 export function RegisterVenueForm({ fields }: { fields: Field[] }) {
   const [capacity, setCapacity] = useState('');
@@ -37,14 +60,26 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
     <form action={registerVenueAction}>
       <div data-region="registration-form" style={{ padding: 28, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
-          {fields.map((f) => (
-            <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-                <L en={f.en} ar={f.ar} />
-              </span>
-              <input name={f.key === 'name' ? 'name' : f.key} required={f.key !== 'contact'} style={inputStyle} />
-            </label>
-          ))}
+          {fields.flatMap((f) => {
+            const base = (
+              <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+                  <L en={f.en} ar={f.ar} />
+                </span>
+                <input name={f.key} required={f.key !== 'contact'} style={inputStyle} />
+              </label>
+            );
+            if (!f.bilingual) return [base];
+            return [
+              base,
+              <label key={`${f.key}Ar`} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+                  <L en={`${f.en} (Arabic)`} ar={`${f.ar} (بالعربية)`} />
+                </span>
+                <input name={`${f.key}Ar`} dir="rtl" required={true} style={inputStyle} />
+              </label>,
+            ];
+          })}
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en={VENUE_CAPACITY_FIELD.en} ar={VENUE_CAPACITY_FIELD.ar} />
@@ -59,9 +94,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
           </label>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', paddingBlockStart: 20, borderBlockStart: '1px solid var(--line)' }}>
-          <span style={{ fontSize: '14.5px' }}>
-            <L en="Does the venue regularly host organized events?" ar="هل يستضيف الموقع بانتظام فعاليات منظمة؟" />
-          </span>
+          <QuestionLabel q={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts} />
           <button
             type="button"
             aria-pressed={regular}
@@ -73,9 +106,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
           <input type="hidden" name="regularlyHosts" value={regular ? 'yes' : 'no'} />
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', paddingBlockStart: 16 }}>
-          <span style={{ fontSize: '14.5px' }}>
-            <L en="Is the venue a nightclub or dance venue?" ar="هل الموقع ملهى ليلي أو مكان للرقص؟" />
-          </span>
+          <QuestionLabel q={VENUE_ELIGIBILITY_QUESTIONS.nightclub} />
           <button
             type="button"
             aria-pressed={nightclub}

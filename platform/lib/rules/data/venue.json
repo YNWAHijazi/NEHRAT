@@ -19,7 +19,8 @@
     {
       "key": "name",
       "en": "Venue name",
-      "ar": "اسم الموقع"
+      "ar": "اسم الموقع",
+      "bilingual": true
     },
     {
       "key": "category",
@@ -29,14 +30,28 @@
     {
       "key": "address",
       "en": "Address and municipality",
-      "ar": "العنوان والبلدية"
+      "ar": "العنوان والبلدية",
+      "bilingual": true
     },
     {
       "key": "contact",
       "en": "Responsible contact for health and medical preparedness",
-      "ar": "جهة الاتصال المسؤولة عن الجاهزية الصحية والطبية"
+      "ar": "جهة الاتصال المسؤولة عن التأهب الصحي والطبي"
     }
   ],
+  "eligibilityQuestions": {
+    "$comment": "The two yes/no facts the minimum conditions need from a venue. The regularly-hosts question serves the recurring-venue row (both issues; the Level 2 floor is the Arabic issue's). The nightclub question exists ONLY because of the English issue's nightclub/dance-venue condition -- the prototype lacks it; tagged en-only so it reads as issue-specific, not a design choice (reviewer instruction, Slice 3 approval).",
+    "regularlyHosts": {
+      "en": "Does the venue regularly host organized events?",
+      "ar": "هل يستضيف الموقع بانتظام فعاليات منظمة؟",
+      "issue": "both"
+    },
+    "nightclub": {
+      "en": "Is the venue a nightclub or dance venue?",
+      "ar": "هل الموقع ملهى ليلي أو مكان للرقص؟",
+      "issue": "en-only"
+    }
+  },
   "reassessmentTriggers": [
     {
       "en": "Approved or licensed capacity",

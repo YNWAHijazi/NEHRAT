@@ -496,7 +496,8 @@ export async function registerVenueAction(formData: FormData): Promise<void> {
   const nameEn = String(formData.get('name') ?? '').trim();
   const nameAr = String(formData.get('nameAr') ?? '').trim() || nameEn;
   const category = String(formData.get('category') ?? '').trim();
-  const address = String(formData.get('address') ?? '').trim();
+  const addressEn = String(formData.get('address') ?? '').trim();
+  const addressAr = String(formData.get('addressAr') ?? '').trim() || addressEn;
   const contact = String(formData.get('contact') ?? '').trim();
   const capacity = Number(String(formData.get('capacity') ?? '').replace(/[^0-9]/g, '')) || null;
   const regularlyHosts = formData.get('regularlyHosts') === 'yes';
@@ -507,11 +508,11 @@ export async function registerVenueAction(formData: FormData): Promise<void> {
   const venueId = nextRecordId('VN');
   getDb()
     .prepare(
-      `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality,
-         responsible_contact, licensed_capacity, regularly_hosts, is_nightclub, is_demo)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality_en,
+         address_municipality_ar, responsible_contact, licensed_capacity, regularly_hosts, is_nightclub, is_demo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .run(venueId, account.id, nameEn, nameAr, category, address, contact, capacity, 1, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
+    .run(venueId, account.id, nameEn, nameAr, category, addressEn, addressAr, contact, capacity, 1, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
   revalidatePath('/dashboard');
   redirect(`/venues/${venueId}/assessment`);
 }

@@ -13,6 +13,15 @@ export interface BilingualField {
   key: string;
   en: string;
   ar: string;
+  /** True where the value itself is a proper noun entered in both languages. */
+  bilingual?: boolean;
+}
+
+/** A yes/no fact a derivation needs, tagged by which issue of the regulation asks it. */
+export interface EligibilityQuestion {
+  en: string;
+  ar: string;
+  issue: 'both' | 'en-only' | 'ar-only';
 }
 
 export interface ComplianceDeclaration {
@@ -76,3 +85,5 @@ export const VENUE_REGISTRATION_FIELDS: readonly BilingualField[] = venueJson.re
 export const VENUE_REASSESSMENT_TRIGGERS: readonly { en: string; ar: string }[] = venueJson.reassessmentTriggers;
 export const VENUE_CHANGE_ASPECTS: readonly VenueChangeAspect[] = venueJson.changeAspects;
 export const VENUE_FLOOR_NOTE: { en: string; ar: string } = venueJson.floorNote;
+export const VENUE_ELIGIBILITY_QUESTIONS: { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion } =
+  venueJson.eligibilityQuestions as { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion };

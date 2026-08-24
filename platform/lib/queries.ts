@@ -431,7 +431,8 @@ export function seriousIncidentNotificationFor(accountId: number, eventId: strin
 
 export interface VenueDetail extends VenueRow {
   category: string;
-  addressMunicipality: string;
+  addressMunicipalityEn: string;
+  addressMunicipalityAr: string;
   responsibleContact: string;
   licensedCapacity: number | null;
   regularlyHosts: boolean;
@@ -443,7 +444,7 @@ export interface VenueDetail extends VenueRow {
 export function venueById(accountId: number, venueId: string): VenueDetail | null {
   const r = getDb()
     .prepare(
-      `SELECT id, name_en, name_ar, category, address_municipality, responsible_contact,
+      `SELECT id, name_en, name_ar, category, address_municipality_en, address_municipality_ar, responsible_contact,
               licensed_capacity, regularly_hosts, is_nightclub, level, issued, valid_until,
               moph_reference, created_at
        FROM venues WHERE id = ? AND account_id = ?`,
@@ -451,7 +452,7 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
     .get(venueId, accountId) as
     | {
         id: string; name_en: string; name_ar: string; category: string;
-        address_municipality: string; responsible_contact: string;
+        address_municipality_en: string; address_municipality_ar: string; responsible_contact: string;
         licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number;
         level: number | null; issued: string | null; valid_until: string | null;
         moph_reference: string | null; created_at: string;
@@ -460,7 +461,9 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
   if (!r) return null;
   return {
     id: r.id, nameEn: r.name_en, nameAr: r.name_ar,
-    category: r.category, addressMunicipality: r.address_municipality,
+    category: r.category,
+    addressMunicipalityEn: r.address_municipality_en,
+    addressMunicipalityAr: r.address_municipality_ar,
     responsibleContact: r.responsible_contact,
     licensedCapacity: r.licensed_capacity,
     regularlyHosts: r.regularly_hosts === 1,

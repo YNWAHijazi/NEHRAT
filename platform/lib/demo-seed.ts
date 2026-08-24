@@ -159,24 +159,24 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
 
   const insertVenue = db.prepare(
-    `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality,
-       responsible_contact, licensed_capacity, regularly_hosts, is_nightclub,
+    `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality_en,
+       address_municipality_ar, responsible_contact, licensed_capacity, regularly_hosts, is_nightclub,
        level, issued, valid_until, moph_reference, is_demo, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, 1, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, 1, ?)`,
   );
   insertVenue.run(
     'VN-0032', organizer, 'Forum de Beyrouth', 'فوروم دو بيروت',
-    'Exhibition and concert hall', 'Beirut', 'R. Haddad', 4500,
+    'Exhibition and concert hall', 'Beirut', 'بيروت', 'R. Haddad', 4500,
     2, d('2026-03-04'), d('2027-03-04'), 'MOPH-VN-2026-0032', d('2026-02-19'),
   );
   insertVenue.run(
     'VN-0028', organizer, 'Casino Hall', 'قاعة الكازينو',
-    'Concert and function hall', 'Jounieh', 'R. Haddad', 2800,
+    'Concert and function hall', 'Jounieh', 'جونية', 'R. Haddad', 2800,
     2, d('2025-09-30'), d('2026-09-30'), 'MOPH-VN-2025-0028', d('2025-09-12'),
   );
   insertVenue.run(
     'VN-0011', organizer, 'Zouk Amphitheatre', 'مدرج ذوق',
-    'Open-air amphitheatre', 'Zouk Mikael', 'R. Haddad', 3200,
+    'Open-air amphitheatre', 'Zouk Mikael', 'ذوق مكايل', 'R. Haddad', 3200,
     2, d('2025-06-15'), d('2026-06-15'), 'MOPH-VN-2025-0011', d('2025-05-30'),
   );
 

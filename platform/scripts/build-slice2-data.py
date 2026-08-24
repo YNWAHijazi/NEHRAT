@@ -377,9 +377,38 @@ def main() -> int:
         },
         "capacityField": {"key": "capacity", "en": "Approved or licensed capacity", "ar": "السعة المعتمدة أو المرخّصة"},
         "registrationFields": [
-            {"key": ["operator", "name", "category", "address", "contact"][i], "en": f["en"], "ar": f["ar"]}
+            # name and address are proper nouns entered in BOTH languages (reviewer
+            # instruction, Slice 3 approval: "a bilingual field, not a single value").
+            # The contact field's Arabic is corrected from the prototype's الجاهزية to
+            # التأهب: SPEC 2b reserves الجاهزية for cardiac readiness; this instrument
+            # is preparedness.
+            {"key": ["operator", "name", "category", "address", "contact"][i],
+             "en": f["en"],
+             "ar": (f["ar"].replace("الجاهزية الصحية والطبية", "التأهب الصحي والطبي")
+                    if i == 4 else f["ar"]),
+             **({"bilingual": True} if i in (1, 3) else {})}
             for i, f in enumerate(venue_fields)
         ],
+        "eligibilityQuestions": {
+            "$comment": (
+                "The two yes/no facts the minimum conditions need from a venue. The "
+                "regularly-hosts question serves the recurring-venue row (both issues; "
+                "the Level 2 floor is the Arabic issue's). The nightclub question exists "
+                "ONLY because of the English issue's nightclub/dance-venue condition -- "
+                "the prototype lacks it; tagged en-only so it reads as issue-specific, "
+                "not a design choice (reviewer instruction, Slice 3 approval)."
+            ),
+            "regularlyHosts": {
+                "en": "Does the venue regularly host organized events?",
+                "ar": "هل يستضيف الموقع بانتظام فعاليات منظمة؟",
+                "issue": "both",
+            },
+            "nightclub": {
+                "en": "Is the venue a nightclub or dance venue?",
+                "ar": "هل الموقع ملهى ليلي أو مكان للرقص؟",
+                "issue": "en-only",
+            },
+        },
         "reassessmentTriggers": [{"en": t_["en"], "ar": t_["ar"]} for t_ in venue_triggers],
         "changeAspects": [
             {"key": a["k"], "en": a["en"], "ar": a["ar"],

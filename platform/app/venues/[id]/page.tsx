@@ -121,32 +121,46 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
     changeReportedSinceAssessment: venueChangeSinceAssessment(account.id, venue.id),
   });
 
-  // The five-stage rail from the reference. The classification issues when the
-  // assessment is recorded, so stages 2-5 complete together in this build.
+  // The venue's own stages (reviewer instruction, Slice 3 approval): registration,
+  // assessment, classification recorded, valid, reassessment due. The reference rail
+  // reused the event flow's names ("Requirements", "Submitted") for steps a venue does
+  // not have; accurate beats faithful on a status display.
   const effective = latest?.effective ?? '';
+  const registered = venue.createdAt.slice(0, 10);
+  const expired = daysLeft !== null && daysLeft < 0;
+  const reassessmentDue = gate.behaviour === 'enabled' && classified;
+  const opensDate = gate.behaviour === 'disabled' ? String(gate.params?.['date'] ?? '') : '';
   const stages: RailStage[] = [
-    organization?.status === 'recorded'
-      ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization.recordedAt ?? '', metaAr: organization.recordedAt ? `⁦${organization.recordedAt}⁩` : '' }
-      : { k: 'current', en: 'Organization recording', ar: 'تسجيل المؤسسة', metaEn: 'Pending with the Ministry', metaAr: 'قيد الاستكمال لدى الوزارة' },
+    { k: 'done', en: 'Registration', ar: 'التسجيل', metaEn: registered, metaAr: `⁦${registered}⁩` },
     classified
-      ? { k: 'done', en: 'Annual assessment complete', ar: 'إتمام التقييم السنوي', metaEn: effective, metaAr: `⁦${effective}⁩` }
+      ? { k: 'done', en: 'Annual assessment', ar: 'التقييم السنوي', metaEn: effective, metaAr: `⁦${effective}⁩` }
       : { k: 'current', en: 'Annual assessment', ar: 'التقييم السنوي', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
     classified
-      ? { k: 'done', en: 'Requirements', ar: 'المتطلبات', metaEn: effective, metaAr: `⁦${effective}⁩` }
-      : { k: 'todo', en: 'Requirements', ar: 'المتطلبات', metaEn: '', metaAr: '' },
-    classified
-      ? { k: 'done', en: 'Submitted', ar: 'التقديم', metaEn: effective, metaAr: `⁦${effective}⁩` }
-      : { k: 'todo', en: 'Submitted', ar: 'التقديم', metaEn: '', metaAr: '' },
-    classified
-      ? { k: 'issued', en: 'Classification issued', ar: 'إصدار التصنيف', metaEn: `Level ${level} · valid through ${venue.validUntil}`, metaAr: `المستوى ${level} · صالح حتى ⁦${venue.validUntil}⁩` }
-      : { k: 'todo', en: 'Classification issued', ar: 'إصدار التصنيف', metaEn: '', metaAr: '' },
+      ? { k: 'issued', en: 'Classification recorded', ar: 'تسجيل التصنيف', metaEn: `Level ${level} · ${venue.issued}`, metaAr: `المستوى ${level} · ⁦${venue.issued}⁩` }
+      : { k: 'todo', en: 'Classification recorded', ar: 'تسجيل التصنيف', metaEn: '', metaAr: '' },
+    !classified
+      ? { k: 'todo', en: 'Valid', ar: 'ساري الصلاحية', metaEn: '', metaAr: '' }
+      : expired
+        ? { k: 'done', en: 'Valid', ar: 'ساري الصلاحية', metaEn: `Ended ${venue.validUntil}`, metaAr: `انتهى في ⁦${venue.validUntil}⁩` }
+        : reassessmentDue
+          ? { k: 'done', en: 'Valid', ar: 'ساري الصلاحية', metaEn: `Through ${venue.validUntil}`, metaAr: `حتى ⁦${venue.validUntil}⁩` }
+          : { k: 'current', en: 'Valid', ar: 'ساري الصلاحية', metaEn: `Through ${venue.validUntil}`, metaAr: `حتى ⁦${venue.validUntil}⁩` },
+    !classified
+      ? { k: 'todo', en: 'Reassessment due', ar: 'استحقاق إعادة التقييم', metaEn: '', metaAr: '' }
+      : reassessmentDue
+        ? { k: 'current', en: 'Reassessment due', ar: 'استحقاق إعادة التقييم', metaEn: expired ? 'Classification expired' : `Before ${venue.validUntil}`, metaAr: expired ? 'انتهت صلاحية التصنيف' : `قبل ⁦${venue.validUntil}⁩` }
+        : { k: 'todo', en: 'Reassessment due', ar: 'استحقاق إعادة التقييم', metaEn: opensDate ? `Opens ${opensDate}` : '', metaAr: opensDate ? `يُفتح في ⁦${opensDate}⁩` : '' },
   ];
-  const railNoteEn = classified
-    ? `Stage 5 of 5 · next annual assessment before ${venue.validUntil}`
-    : 'Stage 2 of 5';
-  const railNoteAr = classified
-    ? `المرحلة 5 من 5 · التقييم السنوي المقبل قبل ⁦${venue.validUntil}⁩`
-    : 'المرحلة 2 من 5';
+  const railNoteEn = !classified
+    ? 'Stage 2 of 5'
+    : reassessmentDue
+      ? `Stage 5 of 5 · reassessment before ${venue.validUntil}`
+      : `Stage 4 of 5 · reassessment opens ${opensDate}`;
+  const railNoteAr = !classified
+    ? 'المرحلة 2 من 5'
+    : reassessmentDue
+      ? `المرحلة 5 من 5 · إعادة التقييم قبل ⁦${venue.validUntil}⁩`
+      : `المرحلة 4 من 5 · تُفتح إعادة التقييم في ⁦${opensDate}⁩`;
 
   const requirements = level ? requirementsForLevel(level) : [];
   const attachOutstanding = requirements.filter((r) => r.attach).length;
@@ -205,7 +219,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>
             <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-              <L en={`Recurring venue · ${venue.addressMunicipality}`} ar={`موقع فعاليات دوري · ${venue.addressMunicipality}`} />
+              <L en={`Recurring venue · ${venue.addressMunicipalityEn}`} ar={`موقع فعاليات دوري · ${venue.addressMunicipalityAr}`} />
             </div>
             <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginBlockEnd: 12 }}>
               <div>

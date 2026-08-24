@@ -355,7 +355,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'registration-form',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="registration-form"]',
-        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty and shows the outside-the-process note. The build also adds a nightclub/dance-venue question the prototype lacks -- the English-issue club condition cannot derive without it (non-negotiable #0).',
+        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty and shows the outside-the-process note. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data at reviewer instruction) and, at reviewer instruction, splits the venue name and address/municipality into bilingual input pairs where the prototype has single values.',
       },
     ],
   },
@@ -406,10 +406,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'rail',
-        mode: 'compare',
-        reference: { strategy: 'cardByText', text: 'Where this venue stands' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="rail"]',
-        note: "The five-stage rail. Held at 2%. Known residuals inside the budget: the reference hand-writes stage dates (stage 1: 2026-01-20, disagreeing with its own organization record; stage 2: 2026-03-02, disagreeing with its own history list's 2026-03-04) where the build shows the record's actual dates.",
+        note: "Expected divergent AT REVIEWER INSTRUCTION (Slice 3 approval): the reference rail reuses the event flow's stage names ('Requirements', 'Submitted') for steps a venue does not have; the build renames the stages to registration / assessment / classification recorded / valid / reassessment due, and shows the record's actual dates where the reference hand-writes disagreeing ones (stage 1: 2026-01-20 vs its own organization record; stage 2: 2026-03-02 vs its own history list's 2026-03-04). Geometry, chip styling and the note line still follow the reference.",
       },
       {
         name: 'record-header',
