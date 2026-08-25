@@ -58,7 +58,12 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     // Level 1 package: the assessment (system) and the documented arrangements.
     await page.goto(`/events/${eventId}/requirements`);
     const attach = page.locator('form:has(input[name="docKey"])').first();
-    await attach.locator('input[name="fileName"]').fill('arrangements.pdf');
+    // The control is a real file picker: a document is chosen, never a typed name.
+    await attach.locator('input[type="file"]').setInputFiles({
+      name: 'arrangements.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('review-build placeholder'),
+    });
     await attach.locator('button:has-text("Attach")').click();
     await page.waitForLoadState('networkidle');
 

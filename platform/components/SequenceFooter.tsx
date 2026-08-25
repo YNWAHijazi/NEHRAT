@@ -60,7 +60,7 @@ export function SequenceFooter({
             style={{
               textAlign: 'start',
               padding: '22px 24px',
-              background: step.primary ? 'var(--brand-soft)' : 'var(--surface)',
+              background: 'var(--surface)',
               border: `1px solid ${step.primary ? 'var(--brand)' : 'var(--line)'}`,
               borderRadius: 14,
               display: 'flex',

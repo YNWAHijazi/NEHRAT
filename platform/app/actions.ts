@@ -285,7 +285,12 @@ export async function attachDocumentAction(eventId: string, formData: FormData):
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   const docKey = String(formData.get('docKey') ?? '');
-  const fileName = String(formData.get('fileName') ?? '').trim();
+  // A real document is attached, never a typed name: the control is a file picker and
+  // the record carries the chosen file's own name. (Binary storage remains the recorded
+  // deployment decision; the name is what the review build keeps.)
+  const file = formData.get('file');
+  const fileName =
+    file instanceof File && file.size >= 0 ? file.name.trim() : String(formData.get('fileName') ?? '').trim();
   if (docKey && fileName) {
     getDb()
       .prepare(

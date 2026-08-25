@@ -136,7 +136,7 @@ export function PlanForm({
     bodyEn: string,
     bodyAr: string,
   ) => (
-    <div style={{ padding: '26px 30px', border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 14 }}>
+    <div style={{ padding: '26px 30px', border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 14, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 10 }}>
         <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.02em' }}>
           <L en={titleEn} ar={titleAr} />
@@ -147,13 +147,13 @@ export function PlanForm({
           </span>
         ) : null}
       </div>
-      <p style={{ margin: '0 0 18px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+      <p style={{ margin: '0 0 18px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
         <L en={bodyEn} ar={bodyAr} />
       </p>
       <button
         type="button"
         onClick={() => setMode(which)}
-        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer' }}
+        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer', alignSelf: 'start', marginBlockStart: 'auto' }}
       >
         <L en="Use this route" ar="اعتماد هذا المسار" />
       </button>
@@ -196,12 +196,16 @@ export function PlanForm({
                 <L en="Attached plan" ar="الخطة المرفقة" />
               </div>
               <input
-                value={attachedFile}
-                onChange={(e) => setAttachedFile(e.target.value)}
-                placeholder="plan-file.pdf"
-                aria-label="Attached plan file name"
-                style={{ height: 42, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15, width: '100%', maxWidth: 380, fontVariantNumeric: 'tabular-nums' }}
+                type="file"
+                onChange={(e) => setAttachedFile(e.target.files?.[0]?.name ?? '')}
+                aria-label="Attach the plan document"
+                style={{ fontSize: 14, maxWidth: 380 }}
               />
+              {attachedFile ? (
+                <div style={{ marginBlockStart: 8, fontSize: '13.5px', fontVariantNumeric: 'tabular-nums' }}>
+                  <L en={`Attached: ${attachedFile}`} ar={`المرفق: ${attachedFile}`} />
+                </div>
+              ) : null}
             </div>
           </div>
           <div style={{ fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>

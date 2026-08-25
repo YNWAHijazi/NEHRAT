@@ -248,22 +248,19 @@ export default async function DashboardPage() {
         </div>
 
         {organization && organization.status === 'pending' ? (
-          <div style={{ padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 16, display: 'flex', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href="/organization" style={{ display: 'block', padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 16, color: 'var(--ink)', textDecoration: 'none' }}>
             <div style={{ maxWidth: '70ch' }}>
               <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 5 }}>
                 <L en="Organization registration is with the Ministry" ar="تسجيل المؤسسة لدى الوزارة" />
               </div>
               <div style={{ fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
                 <L
-                  en="Outstanding: the authorized representative's identification document. Assessments and drafts continue meanwhile; submission opens once the organization is recorded."
-                  ar="المتبقي: مستند هوية الممثل المفوّض. تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة."
+                  en="Assessments and drafts continue meanwhile; submission opens once the organization is recorded."
+                  ar="تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة."
                 />
               </div>
             </div>
-            <Link href="/organization" style={{ flex: 'none', height: 40, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
-              <L en="Add the document" ar="إضافة المستند" />
-            </Link>
-          </div>
+          </Link>
         ) : null}
 
         {returned ? (
@@ -281,33 +278,47 @@ export default async function DashboardPage() {
         ) : null}
 
         {empty ? (
-          <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12 }}>
+          <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Events" ar="الفعاليات" />
               </div>
-              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
                 <L
                   en="Each event you hold is recorded here with its assessment, its level and its submission. Create the event first; the assessment determines the level and the level sets the deadline."
                   ar="تُسجَّل هنا كل فعالية تقيمونها مع تقييمها ومستواها وتقديمها. أنشئوا الفعالية أولاً؛ فالتقييم يحدد المستوى، والمستوى يحدد المهلة."
                 />
               </p>
-              <Link href="/events/new" style={{ display: 'inline-flex', alignItems: 'center', height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500 }}>
+              <Link href="/events/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500 }}>
                 <L en="Create an event" ar="إنشاء فعالية" />
               </Link>
             </div>
-            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12 }}>
+            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Venues" ar="المواقع" />
               </div>
-              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
                 <L
                   en="A venue that regularly hosts organized events and is licensed for 1,000 persons or more is classified annually. Its classification carries a minimum level into every event held there."
                   ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر. ويحمل تصنيفه حداً أدنى للمستوى إلى كل فعالية تُقام فيه."
                 />
               </p>
-              <Link href="/venues/new" style={{ display: 'inline-flex', alignItems: 'center', height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--ink)' }}>
+              <Link href="/venues/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--ink)' }}>
                 <L en="Register a venue" ar="تسجيل موقع" />
+              </Link>
+            </div>
+            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
+                <L en="Facilities" ar="المنشآت" />
+              </div>
+              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
+                <L
+                  en="A covered facility registers once with its coordinator and each defibrillator, and keeps its response plan current — under cardiac-arrest readiness, separate from events."
+                  ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة — ضمن الجاهزية لتوقف القلب، بمعزل عن الفعاليات."
+                />
+              </p>
+              <Link href="/facilities/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--ink)' }}>
+                <L en="Register a facility" ar="تسجيل منشأة" />
               </Link>
             </div>
           </div>
@@ -493,6 +504,13 @@ function dashboardSteps(events: EventRow[]): SequenceStep[] {
       ar: 'تسجيل موقع',
       descEn: 'Recurring venues licensed for 1,000 or more.',
       descAr: 'المواقع الدورية المرخّصة لألف شخص أو أكثر.',
+    },
+    {
+      href: '/facilities/new',
+      en: 'Register a facility',
+      ar: 'تسجيل منشأة',
+      descEn: 'The facility, its coordinator and each defibrillator, under cardiac-arrest readiness.',
+      descAr: 'المنشأة ومنسّقها وكل جهاز، ضمن الجاهزية لتوقف القلب.',
     },
     {
       href: '/notifications',

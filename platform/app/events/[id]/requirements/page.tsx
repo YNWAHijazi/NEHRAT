@@ -192,11 +192,11 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     >
                       <input type="hidden" name="docKey" value={doc.key} />
                       <input
-                        name="fileName"
+                        type="file"
+                        name="file"
                         required
-                        placeholder="file-name.pdf"
-                        aria-label="File name"
-                        style={{ height: 38, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 14, width: 180 }}
+                        aria-label="Attach the document"
+                        style={{ fontSize: 13, maxWidth: 230 }}
                       />
                       <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 14, cursor: 'pointer' }}>
                         <L en="Attach" ar="إرفاق" />

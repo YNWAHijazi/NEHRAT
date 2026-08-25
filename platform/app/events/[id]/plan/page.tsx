@@ -87,12 +87,32 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         {priorVersions.length > 0 ? (
           <section style={{ marginBlockStart: 32 }}>
             <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-              <L en="Earlier versions" ar="النسخ السابقة" />
+              <L en="Versions" ar="النسخ" />
             </h2>
             <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L en="Each save archives the version it replaced. Earlier versions are read-only." ar="كل حفظ يؤرشف النسخة التي حلّ محلها. النسخ السابقة للقراءة فقط." />
+              <L en="Each save archives the version it replaced. The current version leads; earlier versions are read-only." ar="كل حفظ يؤرشف النسخة التي حلّ محلها. النسخة الحالية أولاً؛ والنسخ السابقة للقراءة فقط." />
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {plan ? (
+                <div style={{ border: '1px solid var(--brand)', borderRadius: 10, padding: '10px 14px', fontSize: '13.5px', display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'baseline' }}>
+                  <span style={{ fontWeight: 500 }}>
+                    <L en={`Version ${plan.version} — current`} ar={`النسخة ${plan.version} — الحالية`} />
+                  </span>
+                  <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{plan.updatedAt.slice(0, 10)}</span>
+                  <span style={{ color: 'var(--muted)' }}>
+                    <L
+                      en={`${Array.from({ length: 16 }, (_, i) => {
+                        const s = plan.sections[String(i + 1)];
+                        return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
+                      }).filter(Boolean).length} of 16 sections addressed`}
+                      ar={`${Array.from({ length: 16 }, (_, i) => {
+                        const s = plan.sections[String(i + 1)];
+                        return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
+                      }).filter(Boolean).length} من 16 قسماً مُعالَج`}
+                    />
+                  </span>
+                </div>
+              ) : null}
               {priorVersions.map((v) => {
                 const addressed = Array.from({ length: 16 }, (_, i) => {
                   const s = v.sections[String(i + 1)];
