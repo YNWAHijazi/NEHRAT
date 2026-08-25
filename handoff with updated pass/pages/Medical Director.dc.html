@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand);text-decoration:none}
+a:hover{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+button:active{transform:translateY(1px)}
+button:disabled{cursor:not-allowed;transform:none}
+:root,html[data-palette="petrol"][data-theme="light"]{--bg:#F4F2ED;--surface:#FBFAF7;--surface2:#EAE7E0;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#15515D;--brand-soft:rgba(21,81,93,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14);--l1:#15515D;--l2:#8A5C10;--l3:#A8482A}
+html[data-palette="petrol"][data-theme="dark"]{--bg:#08171B;--surface:#0D2026;--surface2:#12292F;--ink:#E6EDEC;--muted:#9BAFB2;--line:rgba(255,255,255,.13);--brand:#6BA3AE;--brand-soft:rgba(107,163,174,.14);--accent:#E9B44C;--accent-ink:#E9B44C;--accent-soft:rgba(233,180,76,.18);--bad:#D2724B;--bad-soft:rgba(210,114,75,.18);--l1:#6BA3AE;--l2:#E9B44C;--l3:#D2724B}
+html[data-palette="cedar"][data-theme="light"]{--bg:#F1F1EC;--surface:#FAFAF6;--surface2:#E7E8E0;--ink:#12160F;--muted:#525A4C;--line:rgba(18,22,15,.14);--brand:#2E4A34;--brand-soft:rgba(46,74,52,.09);--accent:#C2452C;--accent-ink:#A3341E;--accent-soft:rgba(194,69,44,.14);--bad:#7E1F12;--bad-soft:rgba(126,31,18,.14);--l1:#2E4A34;--l2:#A3341E;--l3:#7E1F12}
+html[data-palette="cedar"][data-theme="dark"]{--bg:#0E140F;--surface:#141C15;--surface2:#1B241C;--ink:#E9EDE6;--muted:#9FAC9C;--line:rgba(255,255,255,.13);--brand:#8CB292;--brand-soft:rgba(140,178,146,.14);--accent:#E0674B;--accent-ink:#E0674B;--accent-soft:rgba(224,103,75,.18);--bad:#B33A22;--bad-soft:rgba(179,58,34,.22);--l1:#8CB292;--l2:#E0674B;--l3:#B33A22}
+[data-l="ar"]{display:none !important}
+html[lang="ar"] [data-l="ar"]{display:revert !important}
+html[lang="ar"] [data-l="en"]{display:none !important}
+html[lang="ar"] [data-flip]{transform:scaleX(-1)}
+[data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
+h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+@media (max-width:1000px){[data-split]{grid-template-columns:1fr !important}}
+@media (max-width:900px){[data-dock]{display:none}}
+@media (max-width:760px){[data-sec-h1]{font-size:30px !important}[data-pad]{padding-inline:20px !important}[data-stack]{grid-template-columns:1fr !important}[data-th]{display:none !important}[data-row]{grid-template-columns:1fr !important}[data-due]{text-align:start !important;min-width:0 !important}}
+@media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}button:active{transform:none}}
+</style>
+<script>
+(function(){var h=document.documentElement;if(!h.getAttribute('data-theme')){h.setAttribute('lang','en');h.setAttribute('dir','ltr');h.setAttribute('data-theme','light');h.setAttribute('data-palette','petrol');}})();
+</script>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg)">
+
+<div style="background:var(--surface2);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:9px 32px;font-size:12.5px;letter-spacing:.02em;color:var(--muted)">
+<span data-l="en">An official service of the Republic of Lebanon</span><span data-l="ar">خدمة رسمية من الجمهورية اللبنانية</span>
+</div>
+</div>
+
+<header style="position:sticky;top:0;z-index:40;background:var(--bg);border-block-end:1px solid var(--line)">
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:14px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;gap:12px">
+<span style="display:grid;place-items:center;width:34px;height:34px;border:1.25px solid var(--brand);border-radius:50%;flex:none">
+<span style="display:block;width:13px;height:13px;background:var(--brand);clip-path:polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)"></span>
+</span>
+<span style="display:flex;flex-direction:column;line-height:1.15">
+<span style="font-size:14.5px;font-weight:600;letter-spacing:-.01em"><span data-l="en">Ministry of Public Health</span><span data-l="ar">وزارة الصحة العامة</span></span>
+<span style="font-size:12px;color:var(--muted)"><span data-l="en">Event Health Readiness</span><span data-l="ar">التأهب الصحي للفعاليات</span></span>
+</span>
+</div>
+<div style="margin-inline-start:auto;display:flex;align-items:center;gap:10px">
+<div style="text-align:end;line-height:1.3">
+<div style="font-size:13.5px;font-weight:500">Dr N. Khoury</div>
+<div style="font-size:12px;color:var(--muted)"><span data-l="en">Event Medical Director</span><span data-l="ar">المدير الطبي للفعالية</span></div>
+</div>
+<button onClick="{{ toggleLang }}" style="height:36px;padding-inline:14px;background:none;border:1px solid var(--line);border-radius:18px;cursor:pointer;font-size:13.5px"><span data-l="en">العربية</span><span data-l="ar">English</span></button>
+</div>
+</div>
+<!-- PROTOTYPE NAVIGATOR — not product navigation. Do not build. See the IA below. -->
+<div data-pad="" data-tabs="" data-prototype-nav="true" style="max-width:1160px;margin-inline:auto;padding:0 32px 12px;display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="8">
+<button onClick="{{ s.go }}" aria-pressed="{{ s.on }}" style="height:34px;padding-inline:14px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:17px;font-size:13px;cursor:pointer"><span data-l="en">{{ s.en }}</span><span data-l="ar">{{ s.ar }}</span></button>
+</sc-for>
+</div>
+<!--
+Real IA — Event Medical Director. Level 3 only; the role does not exist below it.
+  /nomination/:token   nomination landing (pre-account)
+  /register            account + credential submission
+  /events              events this director is appointed to
+  /events/:id          what you are responsible for
+  /events/:id/command  clinical governance and event medical command
+  /events/:id/report   post-event medical report — second signature
+  /credentials         credential verification (read-only; the Order owns this record)
+  /profile             physician profile
+
+"Empty and edge states" is a design reference, not a route.
+-->
+</header>
+
+<div data-pad="" style="max-width:1160px;margin-inline:auto;padding:44px 32px 100px">
+
+<sc-if value="{{ isInvite }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">You have been nominated as Event Medical Director</span><span data-l="ar">رُشِّحتم مديراً طبياً للفعالية</span></h1>
+<p style="margin:0 0 32px;font-size:16.5px;line-height:1.65;color:var(--muted);max-width:70ch"><span data-l="en">An event organizer has nominated you as the Event Medical Director for a Level 3 event. The role exists only at Level 3, and only an organizer can nominate you.</span><span data-l="ar">رشّحكم منظّم فعالية مديراً طبياً لفعالية من المستوى 3. ولا يوجد هذا الدور إلا في المستوى 3، ولا يمكن ترشيحكم إلا من منظّم.</span></p>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+<sc-for list="{{ inviteFacts }}" as="i" hint-placeholder-count="5">
+<div style="background:var(--bg);padding:16px 18px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:6px"><span data-l="en">{{ i.en }}</span><span data-l="ar">{{ i.ar }}</span></div>
+<div style="font-size:15.5px;font-weight:500;line-height:1.4"><span data-l="en">{{ i.vEn }}</span><span data-l="ar">{{ i.vAr }}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:32px 36px;border:2px solid var(--brand);border-radius:16px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--brand);margin-block-end:14px"><span data-l="en">What you would be accepting</span><span data-l="ar">ما ستقبلونه</span></div>
+<p style="margin:0 0 24px;font-size:19px;line-height:1.65;max-width:66ch"><span data-l="en">Accepting makes you personally responsible, as a licensed physician, for the requirements below. Four are shared with the organizer and the participating providers. One is yours alone.</span><span data-l="ar">القبول يجعلكم مسؤولين شخصياً، بصفتكم طبيباً مُجازاً، عن المتطلبات أدناه. أربعة منها مشتركة مع المنظّم والمزوّدين المشاركين. وواحد منها لكم وحدكم.</span></p>
+
+<div style="display:flex;flex-direction:column;gap:8px;margin-block-end:24px">
+<sc-for list="{{ reqPreview }}" as="r" hint-placeholder-count="5">
+<div style="padding:14px 18px;border:{{ r.border }};background:{{ r.bg }};border-inline-start:3px solid {{ r.color }};border-radius:10px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center">
+<span style="display:flex;gap:14px;align-items:baseline;flex:1;min-width:230px">
+<span style="flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:18px">{{ r.n }}</span>
+<span style="font-size:15px;line-height:1.45;font-weight:{{ r.weight }}"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></span>
+</span>
+<span style="flex:none;padding:3px 9px;border-radius:3px;background:{{ r.chipBg }};color:{{ r.color }};font-size:12.5px"><span data-l="en">{{ r.holdEn }}</span><span data-l="ar">{{ r.holdAr }}</span></span>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin-block-end:8px">
+<sc-for list="{{ alsoAccepting }}" as="a" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:start">
+<span style="flex:none;width:6px;height:6px;border-radius:50%;background:var(--brand);margin-block-start:9px"></span>
+<span style="font-size:15.5px;line-height:1.65"><span data-l="en">{{ a.en }}</span><span data-l="ar">{{ a.ar }}</span></span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:32px;border:1px solid var(--line);border-radius:16px">
+<h2 style="margin:0 0 8px;font-size:22px;font-weight:600;letter-spacing:-.02em"><span data-l="en">Set up your account</span><span data-l="ar">إعداد حسابكم</span></h2>
+<p style="margin:0 0 24px;font-size:15px;color:var(--muted);line-height:1.6"><span data-l="en">Your physician profile is completed once and reused across every event you direct. Fee: None.</span><span data-l="ar">يُستكمل ملفكم الطبي مرة واحدة ويُعاد استخدامه في كل فعالية تديرونها. الرسم: لا يوجد.</span></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-block-end:24px">
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Full name</span><span data-l="ar">الاسم الكامل</span></span><input type="text" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Email</span><span data-l="ar">البريد الإلكتروني</span></span><input type="email" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+<label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:var(--muted)"><span data-l="en">Password</span><span data-l="ar">كلمة المرور</span></span><input type="password" defaultValue="" style="height:46px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" /></label>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button onClick="{{ goProfile }}" style="height:48px;padding-inline:26px;border:0;border-radius:24px;background:var(--brand);color:var(--bg);font-size:15px;font-weight:500;cursor:pointer"><span data-l="en">Accept and continue to your profile</span><span data-l="ar">القبول والمتابعة إلى ملفكم</span></button>
+<button style="height:44px;padding-inline:20px;border:1px solid var(--line);background:none;border-radius:22px;font-size:14.5px;cursor:pointer"><span data-l="en">Decline the nomination</span><span data-l="ar">رفض الترشيح</span></button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Physician profile</span><span data-l="ar">الملف الطبي</span></h1>
+<p style="margin:0 0 32px;font-size:16.5px;line-height:1.65;color:var(--muted);max-width:72ch"><span data-l="en">This profile is reused across every event you direct. You never re-enter it per event. The Lebanese Order of Physicians verifies your licence for each Level 3 event.</span><span data-l="ar">يُعاد استخدام هذا الملف في كل فعالية تديرونها. ولا تُعاد تعبئته لكل فعالية. وتتحقق نقابة الأطباء في لبنان من ترخيصكم لكل فعالية من المستوى 3.</span></p>
+
+<div style="padding:32px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-block-end:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+<sc-for list="{{ profileFields }}" as="p" hint-placeholder-count="8">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13.5px;color:var(--muted)"><span data-l="en">{{ p.en }}</span><span data-l="ar">{{ p.ar }}</span></span>
+<input type="text" defaultValue="{{ p.value }}" style="height:44px;padding-inline:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px" />
+</label>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:22px 26px;border:1px solid var(--line);border-radius:12px;font-size:14.5px;line-height:1.65;color:var(--muted);max-width:80ch">
+<span data-l="en">Your licence and Order registration are verified by the Order of Physicians, not by you and not by the Ministry. You can see the state of that verification on each event record; you cannot change it.</span><span data-l="ar">تتحقق نقابة الأطباء من ترخيصكم وتسجيلكم، لا أنتم ولا الوزارة. ويمكنكم رؤية حالة التحقق على كل سجل فعالية؛ ولا يمكنكم تغييرها.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Events you direct</span><span data-l="ar">الفعاليات التي تديرونها</span></h1>
+
+<div style="padding:28px 32px;border:2px solid {{ apptBorder }};background:{{ apptBg }};border-radius:16px;margin-block-end:28px;max-width:84ch">
+<div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:start;margin-block-end:14px">
+<div style="font-size:19px;font-weight:600;line-height:1.5;max-width:52ch"><span data-l="en">{{ apptTitleEn }}</span><span data-l="ar">{{ apptTitleAr }}</span></div>
+<span style="flex:none;padding:4px 11px;border-radius:4px;background:{{ apptChipBg }};color:{{ apptChipInk }};font-size:12.5px"><span data-l="en">{{ apptChipEn }}</span><span data-l="ar">{{ apptChipAr }}</span></span>
+</div>
+<p style="margin:0 0 20px;font-size:15.5px;line-height:1.75"><span data-l="en">{{ apptBodyEn }}</span><span data-l="ar">{{ apptBodyAr }}</span></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+<sc-for list="{{ verifications }}" as="v" hint-placeholder-count="2">
+<div style="background:var(--bg);padding:18px 20px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px"><span data-l="en">{{ v.byEn }}</span><span data-l="ar">{{ v.byAr }}</span></div>
+<div style="font-size:15.5px;font-weight:500;line-height:1.4;margin-block-end:6px"><span data-l="en">{{ v.whatEn }}</span><span data-l="ar">{{ v.whatAr }}</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<span style="padding:3px 9px;border-radius:3px;background:{{ v.chipBg }};color:{{ v.color }};font-size:12.5px"><span data-l="en">{{ v.stateEn }}</span><span data-l="ar">{{ v.stateAr }}</span></span>
+<span style="font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums">{{ v.when }}</span>
+</div>
+<div style="font-size:13px;line-height:1.6;color:var(--muted);margin-block-start:8px"><span data-l="en">{{ v.noteEn }}</span><span data-l="ar">{{ v.noteAr }}</span></div>
+</div>
+</sc-for>
+</div>
+<button onClick="{{ toggleAppt }}" style="margin-block-start:16px;height:36px;padding-inline:16px;border:1px solid var(--line);background:var(--bg);border-radius:18px;font-size:13px;cursor:pointer"><span data-l="en">{{ apptToggleEn }}</span><span data-l="ar">{{ apptToggleAr }}</span></button>
+<div style="margin-block-start:14px;font-size:13.5px;line-height:1.65;color:var(--muted)"><span data-l="en">These are two separate decisions by two separate authorities. Either can be pending while the other is settled.</span><span data-l="ar">هذان قرارَان منفصلان من سلطتين منفصلتين. ويمكن أن يبقى أحدهما معلّقاً والآخر محسوماً.</span></div>
+</div>
+<p style="margin:0 0 32px;font-size:16px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">Your deadline is the organizer's filing date, not the event date. At Level 3 the organizer files at least 30 calendar days before the event and cannot file until your requirements are addressed.</span><span data-l="ar">مهلتكم هي تاريخ تقديم المنظّم، لا تاريخ الفعالية. وفي المستوى 3 يقدّم المنظّم قبل 30 يوماً تقويمياً على الأقل من الفعالية، ولا يمكنه التقديم قبل معالجة متطلباتكم.</span></p>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;margin-block-end:14px">
+<h2 style="margin:0;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Outstanding</span><span data-l="ar">غير مُنجز</span></h2>
+<span style="font-size:14px;color:var(--muted)"><span data-l="en">Something is owed by you</span><span data-l="ar">عليكم موجب قائم</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-block-end:52px">
+<sc-for list="{{ outstanding }}" as="e" hint-placeholder-count="3">
+<button onClick="{{ e.open }}" data-row="" style="text-align:start;padding:24px 26px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ e.color }};border-radius:14px;cursor:pointer;display:grid;grid-template-columns:minmax(200px,1.5fr) .7fr 1.4fr auto;gap:20px;align-items:center">
+<div>
+<div style="font-size:17.5px;font-weight:600;letter-spacing:-.015em;margin-block-end:5px"><span data-l="en">{{ e.en }}</span><span data-l="ar">{{ e.ar }}</span></div>
+<div style="font-size:13px;color:var(--muted)"><span data-l="en">{{ e.orgEn }}</span><span data-l="ar">{{ e.orgAr }}</span> · <span style="font-variant-numeric:tabular-nums">{{ e.date }}</span></div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Level</span><span data-l="ar">المستوى</span></div>
+<div style="font-size:15px;font-weight:500;color:var(--l3)"><span data-l="en">Level 3</span><span data-l="ar">المستوى 3</span></div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Owed by you</span><span data-l="ar">المطلوب منكم</span></div>
+<div style="font-size:14.5px;line-height:1.45"><span data-l="en">{{ e.owedEn }}</span><span data-l="ar">{{ e.owedAr }}</span></div>
+</div>
+<div data-due="" style="text-align:end;min-width:190px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">{{ e.byLabelEn }}</span><span data-l="ar">{{ e.byLabelAr }}</span></div>
+<div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ e.color }}">{{ e.by }}</div>
+<div style="font-size:12.5px;color:var(--muted);margin-block-start:3px"><span data-l="en">{{ e.noteEn }}</span><span data-l="ar">{{ e.noteAr }}</span></div>
+</div>
+</button>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;margin-block-end:14px">
+<h2 style="margin:0;font-size:24px;font-weight:600;letter-spacing:-.025em"><span data-l="en">Complete</span><span data-l="ar">مُنجز</span></h2>
+<span style="font-size:14px;color:var(--muted)"><span data-l="en">Nothing further is owed by you</span><span data-l="ar">لا موجب إضافي عليكم</span></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ complete }}" as="e" hint-placeholder-count="1">
+<div data-row="" style="padding:22px 26px;border:1px solid var(--line);border-inline-start:3px solid var(--brand);border-radius:14px;display:grid;grid-template-columns:minmax(200px,1.5fr) .7fr 1.4fr auto;gap:20px;align-items:center">
+<div>
+<div style="font-size:17px;font-weight:600;letter-spacing:-.015em;margin-block-end:5px"><span data-l="en">{{ e.en }}</span><span data-l="ar">{{ e.ar }}</span></div>
+<div style="font-size:13px;color:var(--muted)"><span data-l="en">{{ e.orgEn }}</span><span data-l="ar">{{ e.orgAr }}</span> · <span style="font-variant-numeric:tabular-nums">{{ e.date }}</span></div>
+</div>
+<div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:4px"><span data-l="en">Level</span><span data-l="ar">المستوى</span></div>
+<div style="font-size:15px;font-weight:500;color:var(--l3)"><span data-l="en">Level 3</span><span data-l="ar">المستوى 3</span></div>
+</div>
+<div style="font-size:14.5px;line-height:1.45"><span data-l="en">{{ e.owedEn }}</span><span data-l="ar">{{ e.owedAr }}</span></div>
+<div style="text-align:end"><span style="display:inline-block;padding:4px 10px;border-radius:4px;background:var(--brand-soft);color:var(--brand);font-size:13px"><span data-l="en">Signed {{ e.by }}</span><span data-l="ar">وُقّع {{ e.by }}</span></span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEvent }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Baalbeck Summer Festival · Baalbeck International Festival · 2026-09-19 · Level 3</span><span data-l="ar">مهرجان بعلبك الصيفي · مهرجانات بعلبك الدولية · 2026-09-19 · المستوى 3</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">What you are responsible for</span><span data-l="ar">ما أنتم مسؤولون عنه</span></h1>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">Five requirements name the Event Medical Director. Where a requirement is shared, the other parties and whether they have acted are shown, so nobody assumes someone else did it.</span><span data-l="ar">خمسة متطلبات تسمّي المدير الطبي للفعالية. وحيث يكون المتطلب مشتركاً، تُعرض الأطراف الأخرى وما إذا كانت قد تصرّفت، كي لا يفترض أحد أن غيره قام به.</span></p>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-block-end:40px">
+<div style="flex:1;min-width:230px;padding:20px 24px;border:1px solid var(--line);border-inline-start:3px solid {{ mineColor }};border-radius:12px">
+<div style="font-size:30px;font-weight:600;color:{{ mineColor }}">{{ openCount }}</div>
+<div style="font-size:14px;color:var(--muted);margin-block-start:4px"><span data-l="en">requirements left to address</span><span data-l="ar">متطلباً بقي معالجته</span></div>
+</div>
+<div style="flex:1;min-width:230px;padding:20px 24px;border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:12px">
+<div style="font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--accent-ink);margin-block-start:6px">2026-08-20</div>
+<div style="font-size:14px;color:var(--muted);margin-block-start:6px"><span data-l="en">organizer files by this date and cannot file until these are addressed</span><span data-l="ar">يقدّم المنظّم بحلول هذا التاريخ ولا يمكنه التقديم قبل معالجتها</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px;margin-block-end:44px">
+<sc-for list="{{ requirements }}" as="r" hint-placeholder-count="5">
+<div style="background:{{ r.bg }};border:{{ r.border }};border-inline-start:3px solid {{ r.color }};border-radius:12px;padding:22px 26px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:start;margin-block-end:12px">
+<div style="flex:1;min-width:260px">
+<div style="display:flex;gap:14px;align-items:baseline;margin-block-end:6px">
+<span style="flex:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:20px">{{ r.n }}</span>
+<span style="font-size:16.5px;font-weight:{{ r.weight }};line-height:1.45"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></span>
+</div>
+<div style="font-size:14px;color:var(--muted);line-height:1.55;margin-inline-start:34px"><span data-l="en">{{ r.valueEn }}</span><span data-l="ar">{{ r.valueAr }}</span></div>
+</div>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ r.chipBg }};color:{{ r.color }};font-size:13px"><span data-l="en">{{ r.stateEn }}</span><span data-l="ar">{{ r.stateAr }}</span></span>
+</div>
+
+<sc-if value="{{ r.sole }}" hint-placeholder-val="{{ true }}">
+<div style="margin-inline-start:34px;padding:14px 18px;background:var(--bg);border-radius:10px;font-size:14.5px;line-height:1.65">
+<span style="display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);margin-block-end:6px"><span data-l="en">Yours alone</span><span data-l="ar">لكم وحدكم</span></span>
+<span data-l="en">No one else can address this. The organizer cannot file the Level 3 package without it, and no other party is named against it in the requirements matrix.</span><span data-l="ar">لا يمكن لأحد غيركم معالجة هذا. ولا يمكن للمنظّم تقديم حزمة المستوى 3 من دونه، ولا يُسمّى أي طرف آخر مقابله في مصفوفة المتطلبات.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ r.shared }}" hint-placeholder-val="{{ true }}">
+<div style="margin-inline-start:34px">
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:8px"><span data-l="en">Also held by</span><span data-l="ar">يتحمّله أيضاً</span></div>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden">
+<sc-for list="{{ r.holders }}" as="h" hint-placeholder-count="2">
+<div style="background:var(--bg);padding:11px 14px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:14px">
+<span><span data-l="en">{{ h.en }}</span><span data-l="ar">{{ h.ar }}</span></span>
+<span style="padding:3px 8px;border-radius:3px;background:{{ h.bg }};color:{{ h.color }};font-size:12.5px"><span data-l="en">{{ h.stateEn }}</span><span data-l="ar">{{ h.stateAr }}</span></span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ r.hasLink }}" hint-placeholder-val="{{ true }}">
+<div style="margin-inline-start:34px;margin-block-start:14px">
+<button onClick="{{ r.go }}" style="height:38px;padding-inline:18px;border:1px solid var(--line);background:var(--bg);border-radius:19px;font-size:14px;cursor:pointer"><span data-l="en">{{ r.linkEn }}</span><span data-l="ar">{{ r.linkAr }}</span></button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div style="padding:24px 28px;border:1px solid var(--line);border-radius:12px;max-width:82ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Certified about you by others</span><span data-l="ar">ما يُصدَّق عنكم من الآخرين</span></div>
+<div style="font-size:15px;line-height:1.7"><span data-l="en">Each participating emergency medical service certifies that communication with the Event Medical Director is established — item 7 of its readiness declaration. Two of the three named agencies have signed.</span><span data-l="ar">تصدّق كل جهة خدمات طوارئ طبية مشاركة على أن التواصل مع المدير الطبي للفعالية قائم — البند 7 من إقرار جاهزيتها. وقد وقّعت جهتان من الجهات الثلاث المُسمّاة.</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isGov }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:940px">
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Baalbeck Summer Festival · Level 3</span><span data-l="ar">مهرجان بعلبك الصيفي · المستوى 3</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Clinical governance and medical command</span><span data-l="ar">الحوكمة السريرية والقيادة الطبية</span></h1>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">At Level 3 this content is yours to write. What you enter here writes into the organizer's event health and medical plan; neither of you writes it twice.</span><span data-l="ar">في المستوى 3 هذا المحتوى من كتابتكم. وما تُدخلونه هنا يُكتب في الخطة الصحية والطبية للفعالية لدى المنظّم؛ ولا يكتبه أي منكما مرتين.</span></p>
+
+<div style="padding:20px 24px;background:var(--surface2);border-radius:12px;margin-block-end:28px;max-width:80ch">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:8px"><span data-l="en">Where this appears</span><span data-l="ar">أين يظهر هذا</span></div>
+<div style="font-size:14.5px;line-height:1.7"><span data-l="en">Sections 10 and 12 of the organizer's plan, and the major-incident and mass-casualty plan. The organizer sees your text there and cannot overwrite it.</span><span data-l="ar">البندان 10 و12 من خطة المنظّم، وخطة الحوادث الجسيمة وحوادث الإصابات الجماعية. ويرى المنظّم نصكم هناك ولا يمكنه استبداله.</span></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ govSections }}" as="g" hint-placeholder-count="3">
+<div style="padding:28px 32px;background:var(--surface);border:1px solid var(--line);border-inline-start:3px solid {{ g.color }};border-radius:14px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:start;margin-block-end:12px">
+<h2 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em;flex:1;min-width:240px"><span data-l="en">{{ g.en }}</span><span data-l="ar">{{ g.ar }}</span></h2>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ g.chipBg }};color:{{ g.color }};font-size:13px"><span data-l="en">{{ g.stateEn }}</span><span data-l="ar">{{ g.stateAr }}</span></span>
+</div>
+<div style="font-size:14.5px;line-height:1.7;color:var(--muted);margin-block-end:16px;max-width:70ch"><span data-l="en">{{ g.askEn }}</span><span data-l="ar">{{ g.askAr }}</span></div>
+<textarea rows="4" defaultValue="{{ g.value }}" placeholder="{{ g.phEn }}" style="width:100%;padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;font-size:15px;line-height:1.7;resize:vertical"></textarea>
+<div style="margin-block-start:12px;font-size:13px;color:var(--muted)"><span data-l="en">Writes into: {{ g.intoEn }}</span><span data-l="ar">يُكتب في: {{ g.intoAr }}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReport }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:940px">
+<div style="font-size:13px;color:var(--muted);margin-block-end:14px"><span data-l="en">Tripoli Marathon · Tripoli Athletics Union · held 2026-08-09 · Level 3</span><span data-l="ar">ماراتون طرابلس · اتحاد ألعاب القوى في طرابلس · أُقيم 2026-08-09 · المستوى 3</span></div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Post-event medical report</span><span data-l="ar">التقرير الطبي لما بعد الفعالية</span></h1>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">The organizer prepares the report and enters the figures. You review it and sign. At Level 3 the report carries two signatures and is not complete with the organizer's alone.</span><span data-l="ar">يُعدّ المنظّم التقرير ويُدخل الأرقام. وأنتم تراجعونه وتوقّعونه. وفي المستوى 3 يحمل التقرير توقيعين ولا يكتمل بتوقيع المنظّم وحده.</span></p>
+
+<div style="padding:26px 30px;border:2px solid {{ dueColor }};background:{{ dueBg }};border-radius:14px;margin-block-end:20px">
+<div style="font-size:19px;font-weight:600;line-height:1.5;margin-block-end:10px"><span data-l="en">{{ dueHeadEn }}</span><span data-l="ar">{{ dueHeadAr }}</span></div>
+<div style="font-size:15px;line-height:1.7"><span data-l="en">Due 2026-08-16, seven calendar days after the event. The organizer signed on 2026-08-14. Your signature is the one outstanding.</span><span data-l="ar">مستحق في 2026-08-16، سبعة أيام تقويمية بعد الفعالية. وقّع المنظّم في 2026-08-14. وتوقيعكم هو المتبقي.</span></div>
+</div>
+
+<div style="padding:28px 32px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">The report as prepared — entered by the organizer</span><span data-l="ar">التقرير كما أُعدّ — أدخله المنظّم</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-block-end:20px">
+<sc-for list="{{ reportFigures }}" as="r" hint-placeholder-count="7">
+<div style="background:var(--bg);padding:16px 18px">
+<div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.v }}</div>
+<div style="font-size:12.5px;color:var(--muted);margin-block-start:4px;line-height:1.4"><span data-l="en">{{ r.en }}</span><span data-l="ar">{{ r.ar }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-block-end:10px"><span data-l="en">Significant events recorded</span><span data-l="ar">الوقائع الجسيمة المسجّلة</span></div>
+<div style="display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-block-end:20px">
+<sc-for list="{{ reportEvents }}" as="e" hint-placeholder-count="3">
+<div style="background:var(--bg);padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:14px">
+<span><span data-l="en">{{ e.en }}</span><span data-l="ar">{{ e.ar }}</span></span>
+<span style="color:{{ e.color }}"><span data-l="en">{{ e.vEn }}</span><span data-l="ar">{{ e.vAr }}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="font-size:14.5px;line-height:1.7;color:var(--muted)"><span data-l="en">Figures and narrative are the organizer's to enter. You cannot change them here. If something is wrong, return the report rather than signing it.</span><span data-l="ar">الأرقام والسرد من إدخال المنظّم. ولا يمكنكم تغييرها هنا. وإذا كان شيء غير صحيح، أعيدوا التقرير بدل توقيعه.</span></div>
+</div>
+
+<div style="padding:28px 32px;background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-block-end:20px">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">Signatures</span><span data-l="ar">التواقيع</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-block-end:22px">
+<sc-for list="{{ signatures }}" as="s" hint-placeholder-count="2">
+<div style="padding:16px 20px;border:1px solid var(--line);border-inline-start:3px {{ s.edge }} {{ s.color }};border-radius:10px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center">
+<div>
+<div style="font-size:15px;font-weight:500"><span data-l="en">{{ s.roleEn }}</span><span data-l="ar">{{ s.roleAr }}</span></div>
+<div style="font-size:13.5px;color:var(--muted);margin-block-start:3px">{{ s.who }}</div>
+</div>
+<span style="padding:4px 10px;border-radius:4px;background:{{ s.chipBg }};color:{{ s.color }};font-size:13px"><span data-l="en">{{ s.stateEn }}</span><span data-l="ar">{{ s.stateAr }}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<button onClick="{{ sign }}" disabled="{{ signed }}" style="height:48px;padding-inline:26px;border:0;border-radius:24px;background:{{ signBg }};color:{{ signColor }};font-size:15px;font-weight:500;cursor:{{ signCursor }}"><span data-l="en">{{ signLabelEn }}</span><span data-l="ar">{{ signLabelAr }}</span></button>
+<button style="height:44px;padding-inline:20px;border:1px solid var(--line);background:none;border-radius:22px;font-size:14.5px;cursor:pointer"><span data-l="en">Return the report to the organizer</span><span data-l="ar">إعادة التقرير إلى المنظّم</span></button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCred }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:900px">
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Credential verification</span><span data-l="ar">التحقق من المؤهلات</span></h1>
+<p style="margin:0 0 32px;font-size:16px;line-height:1.65;color:var(--muted);max-width:76ch"><span data-l="en">The Lebanese Order of Physicians verifies your licence for each Level 3 event. This record is theirs. You can see it; you cannot change it.</span><span data-l="ar">تتحقق نقابة الأطباء في لبنان من ترخيصكم لكل فعالية من المستوى 3. وهذا السجل سجلّها. يمكنكم رؤيته؛ ولا يمكنكم تغييره.</span></p>
+
+<sc-if value="{{ laneOff }}" hint-placeholder-val="{{ true }}">
+<div style="padding:32px 36px;background:var(--surface2);border-radius:16px;margin-block-end:20px;max-width:80ch">
+<div style="font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:12px"><span data-l="en">The verification lane is not active.</span><span data-l="ar">مسار التحقق غير مفعّل.</span></div>
+<p style="margin:0 0 14px;font-size:15.5px;line-height:1.75"><span data-l="en">The Ministry has not activated the Order of Physicians lane, so no verification record exists for any of your events. Nothing is owed by you and nothing is pending.</span><span data-l="ar">لم تفعّل الوزارة مسار نقابة الأطباء، فلا يوجد سجل تحقق لأي من فعالياتكم. ولا شيء مطلوب منكم ولا شيء قيد الانتظار.</span></p>
+<p style="margin:0;font-size:14.5px;line-height:1.75;color:var(--muted)"><span data-l="en">Ministry review is unaffected. A reviewer may record any of the three outcomes on a submission whether or not this lane is ever activated.</span><span data-l="ar">لا تتأثر مراجعة الوزارة. ويجوز للمراجع تسجيل أي من النتائج الثلاث على تقديم سواء فُعّل هذا المسار أم لا.</span></p>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ credentials }}" as="c" hint-placeholder-count="3">
+<div style="padding:26px 30px;background:var(--surface);border:1px dashed var(--muted);border-inline-start:3px solid {{ c.color }};border-radius:14px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:start;margin-block-end:14px">
+<div style="flex:1;min-width:240px">
+<div style="font-size:17px;font-weight:600;letter-spacing:-.015em;margin-block-end:4px"><span data-l="en">{{ c.en }}</span><span data-l="ar">{{ c.ar }}</span></div>
+<div style="font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums"><span data-l="en">{{ c.metaEn }}</span><span data-l="ar">{{ c.metaAr }}</span></div>
+</div>
+<span style="flex:none;padding:4px 10px;border-radius:4px;background:{{ c.chipBg }};color:{{ c.color }};font-size:13px"><span data-l="en">{{ c.stateEn }}</span><span data-l="ar">{{ c.stateAr }}</span></span>
+</div>
+<sc-if value="{{ c.hasReason }}" hint-placeholder-val="{{ true }}">
+<div style="padding:14px 18px;background:var(--bad-soft);border-radius:10px;font-size:14.5px;line-height:1.65">
+<span style="display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--bad);margin-block-end:6px"><span data-l="en">Deficiency raised — for you to resolve</span><span data-l="ar">قصور مُثار — عليكم معالجته</span></span>
+<span data-l="en">{{ c.reasonEn }}</span><span data-l="ar">{{ c.reasonAr }}</span>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-block-start:24px;padding:22px 26px;border:1px solid var(--line);border-radius:12px;font-size:14.5px;line-height:1.7;color:var(--muted);max-width:82ch">
+<span data-l="en">Verification informs the Ministry's review. It does not decide it. A Ministry reviewer may record any of the three outcomes on a submission whether or not verification is complete.</span><span data-l="ar">يُعلم التحقق مراجعة الوزارة ولا يقررها. ويجوز لمراجع الوزارة تسجيل أي من النتائج الثلاث على تقديم سواء اكتمل التحقق أم لا.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStates }}" hint-placeholder-val="{{ true }}">
+<div>
+<h1 data-sec-h1="" style="margin:0 0 12px;font-size:38px;font-weight:600;letter-spacing:-.035em"><span data-l="en">Empty and edge states</span><span data-l="ar">الحالات الفارغة والطرفية</span></h1>
+<p style="margin:0 0 38px;font-size:16.5px;line-height:1.65;color:var(--muted);max-width:74ch"><span data-l="en">What you see when there is nothing to do, and when something has gone wrong.</span><span data-l="ar">ما ترونه عندما لا يوجد ما يُنجز، وعندما يحدث خلل.</span></p>
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ stateCards }}" as="s" hint-placeholder-count="5">
+<div style="border:1px solid var(--line);border-radius:14px;overflow:hidden">
+<div style="padding:11px 20px;background:var(--surface2);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)"><span data-l="en">{{ s.tagEn }}</span><span data-l="ar">{{ s.tagAr }}</span></div>
+<div style="padding:30px 28px">
+<div style="padding:{{ s.pad }};border:{{ s.border }};background:{{ s.bg }};border-radius:12px;max-width:80ch">
+<div style="font-size:19px;font-weight:600;letter-spacing:-.02em;line-height:1.5;margin-block-end:12px"><span data-l="en">{{ s.headEn }}</span><span data-l="ar">{{ s.headAr }}</span></div>
+<p style="margin:0;font-size:15px;line-height:1.75;color:{{ s.bodyColor }}"><span data-l="en">{{ s.bodyEn }}</span><span data-l="ar">{{ s.bodyAr }}</span></p>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+
+
+<sc-if value="{{ hasNext }}" hint-placeholder-val="{{ true }}">
+<div data-seq="" style="margin-block-start:64px;padding-block-start:32px;border-block-start:1px solid var(--line)">
+<div style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-block-end:16px"><span data-l="en">{{ nextLabelEn }}</span><span data-l="ar">{{ nextLabelAr }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px">
+<sc-for list="{{ nextSteps }}" as="n" hint-placeholder-count="3">
+<button onClick="{{ n.go }}" style="text-align:start;padding:22px 24px;background:{{ n.bg }};border:1px solid {{ n.border }};border-radius:14px;cursor:pointer;display:flex;gap:14px;align-items:start">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ n.ink }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-block-start:2px"><path d="{{ n.d1 }}"></path><path d="{{ n.d2 }}"></path></svg>
+<span>
+<span style="display:block;font-size:16px;font-weight:500;line-height:1.4;color:{{ n.ink }}"><span data-l="en">{{ n.en }}</span><span data-l="ar">{{ n.ar }}</span></span>
+<span style="display:block;font-size:13.5px;line-height:1.6;color:var(--muted);margin-block-start:5px"><span data-l="en">{{ n.descEn }}</span><span data-l="ar">{{ n.descAr }}</span></span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+
+<div data-dock="" style="position:fixed;inset-inline-end:22px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:10px">
+<button onClick="{{ cycleText }}" title="Text size" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px">A<span style="font-size:17px">A</span></button>
+<button onClick="{{ toggleTheme }}" title="Dark mode" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>
+</button>
+<button onClick="{{ togglePalette }}" title="Palette" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center">
+<span style="display:block;width:16px;height:16px;border-radius:50%;background:var(--accent);box-shadow:inset 0 0 0 1.5px var(--brand)"></span>
+</button>
+<button onClick="{{ toggleLang }}" title="Language" style="width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500"><span data-l="en">ع</span><span data-l="ar">EN</span></button>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;initialLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;ar&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;},&quot;initialPalette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;petrol&quot;,&quot;cedar&quot;],&quot;default&quot;:&quot;petrol&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Display&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: this.props.initialLang || 'en',
+    theme: this.props.initialTheme || 'light',
+    palette: this.props.initialPalette || 'petrol',
+    textScale: 100,
+    screen: 'dashboard',
+    laneActive: false,
+    apptApproved: false,
+    signed: false
+  };
+
+  componentDidMount() { this.sync(); }
+  componentDidUpdate() { this.sync(); }
+  sync() {
+    const h = document.documentElement;
+    h.setAttribute('lang', this.state.lang);
+    h.setAttribute('dir', this.state.lang === 'ar' ? 'rtl' : 'ltr');
+    h.setAttribute('data-theme', this.state.theme);
+    h.setAttribute('data-palette', this.state.palette);
+    h.style.fontSize = this.state.textScale + '%';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const pill = on => ({ on, border: on ? 'var(--brand)' : 'var(--line)', bg: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)' });
+
+    /* SEQUENCE — each screen names where it leads. Not product navigation; this is the
+       reviewable path through the journey so every screen has an outbound route. */
+    const SEQ_DEF = {
+      invite:    ['Nomination and account', 'الترشيح والحساب', 'Who nominated you, which event, and the five requirements you would carry.', 'من رشّحكم وأي فعالية والمتطلبات الخمسة التي ستحملونها.', 'M12 11.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z', 'M5.5 20c0-3.3 2.9-5.5 6.5-5.5s6.5 2.2 6.5 5.5'],
+      profile:   ['Physician profile', 'الملف الطبي', 'Licence, Order registration and specialty. Reused across every event.', 'الإجازة وتسجيل النقابة والاختصاص. يُعاد استخدامها في كل فعالية.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 11.5h6M9.5 15.5h4'],
+      dashboard: ['Dashboard', 'اللوحة', 'Events you direct, against the organizer\u2019s filing dates.', 'الفعاليات التي تديرونها، مقابل تواريخ تقديم المنظّم.', 'M4 4.5h6.5v6.5H4zM13.5 4.5H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z'],
+      event:     ['What you are responsible for', 'ما أنتم مسؤولون عنه', 'Five requirements. One is yours alone.', 'خمسة متطلبات. واحد منها لكم وحدكم.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 11l1.25 1.25L13 10M9.5 16l1.25 1.25L13 15'],
+      gov:       ['Clinical governance and command', 'الحوكمة السريرية والقيادة', 'Writes into the organizer\u2019s plan. Requirement 15 is discharged here.', 'تُكتب في خطة المنظّم. ويُستوفى المتطلب 15 هنا.', 'M12 4.5l7 3.5v5c0 4-3 6-7 7-4-1-7-3-7-7v-5z', 'M9.5 12l1.75 1.75L15 10'],
+      report:    ['Post-event medical report', 'التقرير الطبي اللاحق', 'Your signature is the second of two. The report is not complete without it.', 'توقيعكم هو الثاني من اثنين. ولا يكتمل التقرير من دونه.', 'M6.5 4h8l3.5 3.5V20h-11.5z', 'M9.5 12h6M9.5 16h3'],
+      states:    ['Empty and edge states', 'الحالات الفارغة والطرفية', 'Design reference, not a route.', 'مرجع تصميمي لا مسار.', 'M12 4.5l7.5 4-7.5 4-7.5-4z', 'M4.5 13l7.5 4 7.5-4'],
+      cred:      ['Credential verification', 'التحقق من المؤهلات', 'Read-only. The Order of Physicians owns this record.', 'للقراءة فقط. ونقابة الأطباء تملك هذا السجل.', 'M12 4.5l7 3.5v5c0 4-3 6-7 7-4-1-7-3-7-7v-5z', 'M9.5 12l1.75 1.75L15 10']
+    };
+    const SEQ = {
+      invite:    ['profile'],
+      profile:   ['cred', 'dashboard'],
+      dashboard: ['event', 'cred'],
+      event:     ['gov', 'report', 'dashboard'],
+      gov:       ['event', 'report'],
+      report:    ['event', 'dashboard'],
+      states:    ['Empty and edge states', 'الحالات الفارغة والطرفية', 'Design reference, not a route.', 'مرجع تصميمي لا مسار.', 'M12 4.5l7.5 4-7.5 4-7.5-4z', 'M4.5 13l7.5 4 7.5-4'],
+      cred:      ['dashboard', 'profile'],
+      states:    ['dashboard']
+    };
+    const SEQ_LABEL = {
+      invite:    ['Once you accept', 'بعد القبول'],
+      profile:   ['Next', 'التالي'],
+      dashboard: ['Open an event', 'افتحوا فعالية'],
+      event:     ['Where these are discharged', 'حيث تُستوفى', ],
+      gov:       ['Also on this event', 'أيضاً على هذه الفعالية'],
+      report:    ['Back to', 'العودة إلى'],
+      states:    ['Empty and edge states', 'الحالات الفارغة والطرفية', 'Design reference, not a route.', 'مرجع تصميمي لا مسار.', 'M12 4.5l7.5 4-7.5 4-7.5-4z', 'M4.5 13l7.5 4 7.5-4'],
+      cred:      ['Back to', 'العودة إلى'],
+      states:    ['Back to the journey', 'العودة إلى المسار']
+    };
+
+    const screens = [
+      { k: 'invite', en: 'Nomination and account', ar: 'الترشيح والحساب' },
+      { k: 'profile', en: 'Physician profile', ar: 'الملف الطبي' },
+      { k: 'dashboard', en: 'Dashboard', ar: 'اللوحة' },
+      { k: 'event', en: 'What you are responsible for', ar: 'ما أنتم مسؤولون عنه' },
+      { k: 'gov', en: 'Clinical governance and command', ar: 'الحوكمة السريرية والقيادة' },
+      { k: 'report', en: 'Post-event medical report', ar: 'التقرير الطبي لما بعد الفعالية' },
+      { k: 'cred', en: 'Credential verification', ar: 'التحقق من المؤهلات' },
+      { k: 'states', en: 'Empty and edge states', ar: 'الحالات الفارغة والطرفية' }
+    ].map(s => Object.assign({ en: s.en, ar: s.ar, go: set('screen', s.k) }, pill(st.screen === s.k)));
+
+    const rState = k => ({
+      done: { en: 'Addressed', ar: 'مُعالَج', bg: 'var(--brand-soft)', color: 'var(--brand)' },
+      part: { en: 'Started', ar: 'بُدئ', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+      open: { en: 'Not addressed', ar: 'غير مُعالَج', bg: 'var(--bad-soft)', color: 'var(--bad)' }
+    })[k];
+    const hState = k => ({
+      acted: { en: 'Addressed', ar: 'عولج', bg: 'var(--brand-soft)', color: 'var(--brand)' },
+      waiting: { en: 'Not yet addressed', ar: 'لم يُعالَج بعد', bg: 'var(--surface2)', color: 'var(--muted)' }
+    })[k];
+
+    const reqSrc = [
+      { n: 8, en: 'Cardiac-arrest readiness — documented CPR and AED response plan covering the event area',
+        ar: 'الجاهزية لتوقف القلب — خطة موثقة للإنعاش القلبي الرئوي وإزالة الرجفان تغطي منطقة الفعالية',
+        valueEn: 'Level 3: documented plan, AEDs positioned and staff trained across the event area.',
+        valueAr: 'المستوى 3: خطة موثقة وأجهزة إزالة رجفان موزّعة وملاك مدرّب في منطقة الفعالية.',
+        s: 'done', sole: false,
+        holders: [['Organizer', 'المنظّم', 'acted'], ['Participating EMS provider', 'مزوّد خدمات الطوارئ المشارك', 'acted']] },
+      { n: 12, en: 'Receiving emergency departments identified',
+        ar: 'تحديد أقسام الطوارئ المستقبِلة',
+        valueEn: 'Level 3: departments identified, notified and confirmed, with expected transport time.',
+        valueAr: 'المستوى 3: أقسام محددة ومُبلَّغة ومؤكَّدة، مع زمن النقل المتوقع.',
+        s: 'done', sole: false,
+        holders: [['Organizer', 'المنظّم', 'acted'], ['Participating EMS provider', 'مزوّد خدمات الطوارئ المشارك', 'acted']] },
+      { n: 15, en: 'Event medical command function',
+        ar: 'وظيفة القيادة الطبية للفعالية',
+        valueEn: 'Level 3: required. No other party is named against this requirement.',
+        valueAr: 'المستوى 3: مطلوبة. ولا يُسمّى أي طرف آخر مقابل هذا المتطلب.',
+        s: 'part', sole: true, link: 'gov',
+        linkEn: 'Write the medical-command arrangements', linkAr: 'كتابة ترتيبات القيادة الطبية' },
+      { n: 16, en: 'Major-incident and mass-casualty plan, coordinated with emergency medical services and incorporated into event medical command',
+        ar: 'خطة الحوادث الجسيمة وحوادث الإصابات الجماعية، منسّقة مع خدمات الطوارئ الطبية ومدمجة في القيادة الطبية للفعالية',
+        valueEn: 'Level 3: detailed coordinated plan. Eleven items, set by the Protocol.',
+        valueAr: 'المستوى 3: خطة مفصّلة ومنسّقة. أحد عشر بنداً يضعها البروتوكول.',
+        s: 'part', sole: false, link: 'gov',
+        linkEn: 'Write your role in the incident structure', linkAr: 'كتابة دوركم في بنية الحوادث',
+        holders: [['Organizer', 'المنظّم', 'acted'], ['Participating EMS providers', 'مزوّدو خدمات الطوارئ المشاركون', 'waiting']] },
+      { n: 19, en: 'Post-event medical report',
+        ar: 'التقرير الطبي لما بعد الفعالية',
+        valueEn: 'Level 3: required after every event, within seven calendar days. Two signatures.',
+        valueAr: 'المستوى 3: مطلوب بعد كل فعالية، خلال سبعة أيام تقويمية. بتوقيعين.',
+        s: 'open', sole: false, link: 'report',
+        linkEn: 'Open the report awaiting your signature', linkAr: 'فتح التقرير بانتظار توقيعكم',
+        holders: [['Organizer', 'المنظّم', 'waiting']] }
+    ];
+    const requirements = reqSrc.map(r => {
+      const s = rState(r.s);
+      return {
+        n: r.n, en: r.en, ar: r.ar, valueEn: r.valueEn, valueAr: r.valueAr,
+        stateEn: s.en, stateAr: s.ar, chipBg: s.bg,
+        color: r.sole ? 'var(--accent)' : s.color,
+        bg: r.sole ? 'var(--accent-soft)' : 'var(--surface)',
+        border: r.sole ? '1px solid var(--accent)' : '1px solid var(--line)',
+        weight: r.sole ? '600' : '500',
+        sole: !!r.sole, shared: !r.sole,
+        holders: (r.holders || []).map(h => {
+          const x = hState(h[2]);
+          return { en: h[0], ar: h[1], stateEn: x.en, stateAr: x.ar, bg: x.bg, color: x.color };
+        }),
+        hasLink: !!r.link, linkEn: r.linkEn || '', linkAr: r.linkAr || '',
+        go: r.link ? set('screen', r.link) : null
+      };
+    });
+    const openCount = reqSrc.filter(r => r.s !== 'done').length;
+
+    const rows = [
+      { en: 'Baalbeck Summer Festival', ar: 'مهرجان بعلبك الصيفي', orgEn: 'Baalbeck International Festival', orgAr: 'مهرجانات بعلبك الدولية', date: '2026-09-19', done: false,
+        owedEn: 'Event medical command function, and your role in the major-incident plan', owedAr: 'وظيفة القيادة الطبية للفعالية، ودوركم في خطة الحوادث الجسيمة',
+        byLabelEn: 'Organizer files by', byLabelAr: 'يقدّم المنظّم بحلول', by: '2026-08-20',
+        noteEn: 'in 4 days · 30 days before the event', noteAr: 'بعد 4 أيام · قبل 30 يوماً من الفعالية',
+        color: 'var(--bad)', screen: 'event' },
+      { en: 'Tripoli Marathon', ar: 'ماراتون طرابلس', orgEn: 'Tripoli Athletics Union', orgAr: 'اتحاد ألعاب القوى في طرابلس', date: '2026-08-09', done: st.signed,
+        owedEn: 'Post-event medical report — your signature', owedAr: 'التقرير الطبي لما بعد الفعالية — توقيعكم',
+        byLabelEn: 'Report due', byLabelAr: 'التقرير مستحق', by: '2026-08-16',
+        noteEn: 'event already held · 5 days overdue', noteAr: 'أُقيمت الفعالية · متأخر 5 أيام',
+        color: 'var(--bad)', screen: 'report' },
+      { en: 'Zahle Motor Rally', ar: 'رالي زحلة للسيارات', orgEn: 'Bekaa Motorsport Club', orgAr: 'نادي البقاع للسيارات', date: '2026-10-25', done: false,
+        owedEn: 'Clinical-governance arrangements', owedAr: 'ترتيبات الحوكمة السريرية',
+        byLabelEn: 'Organizer files by', byLabelAr: 'يقدّم المنظّم بحلول', by: '2026-09-25',
+        noteEn: 'in 40 days', noteAr: 'بعد 40 يوماً',
+        color: 'var(--accent-ink)', screen: 'gov' },
+      { en: 'Tyre Half Marathon', ar: 'نصف ماراتون صور', orgEn: 'Tyre Athletics Union', orgAr: 'اتحاد ألعاب القوى في صور', date: '2026-07-19', done: true,
+        owedEn: 'Post-event medical report', owedAr: 'التقرير الطبي لما بعد الفعالية',
+        byLabelEn: '', byLabelAr: '', by: '2026-07-24', noteEn: '', noteAr: '',
+        color: 'var(--brand)', screen: 'report' }
+    ].map(r => Object.assign({}, r, { open: set('screen', r.screen) }));
+
+    const gState = k => ({
+      done: { en: 'Written', ar: 'مكتوب', bg: 'var(--brand-soft)', color: 'var(--brand)' },
+      part: { en: 'Started', ar: 'بُدئ', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+      open: { en: 'Not written', ar: 'غير مكتوب', bg: 'var(--bad-soft)', color: 'var(--bad)' }
+    })[k];
+    const govSrc = [
+      { s: 'done', en: 'Clinical-governance arrangements', ar: 'ترتيبات الحوكمة السريرية',
+        askEn: 'How clinical standards are set and maintained across all medical teams at the event, under whose authority they practise, and how a clinical concern is escalated.',
+        askAr: 'كيف تُوضع المعايير السريرية وتُصان عبر جميع الفرق الطبية في الفعالية، وتحت سلطة من تمارس، وكيف يُصعَّد أي قلق سريري.',
+        value: 'All medical teams practise under the clinical protocols of their own provider and under my clinical authority for the duration of the event. Standards are set at the pre-event briefing on 2026-09-18 and confirmed by each team lead. A clinical concern is raised to the team lead, then to me on VHF channel 4 or by telephone; I may stand a responder down.',
+        intoEn: 'Plan section 10 — coordination and communications', intoAr: 'البند 10 من الخطة — التنسيق والاتصالات' },
+      { s: 'part', en: 'Event medical-command arrangements', ar: 'ترتيبات القيادة الطبية للفعالية',
+        askEn: 'Who holds medical command, where they are located, how command is exercised across the site or route, and how it hands over.',
+        askAr: 'من يتولى القيادة الطبية وأين يتمركز وكيف تُمارس القيادة عبر الموقع أو المسار وكيف تُسلَّم.',
+        value: 'I hold medical command, located at medical post 1 at the main gate.',
+        intoEn: 'Plan section 10, and requirement 15', intoAr: 'البند 10 من الخطة، والمتطلب 15' },
+      { s: 'open', en: 'Your role in the major-incident and incident-management structure', ar: 'دوركم في بنية الحوادث الجسيمة وإدارة الحوادث',
+        askEn: 'Where the Event Medical Director sits within medical command and the overall incident-management structure during a major incident, and who deputises.',
+        askAr: 'أين يقع المدير الطبي للفعالية ضمن القيادة الطبية وبنية إدارة الحوادث العامة خلال حادث جسيم، ومن ينوب عنه.',
+        value: '',
+        intoEn: 'Major-incident plan, items 2 and 10', intoAr: 'خطة الحوادث الجسيمة، البندان 2 و10' }
+    ];
+    const govSections = govSrc.map(g => {
+      const s = gState(g.s);
+      return { en: g.en, ar: g.ar, askEn: g.askEn, askAr: g.askAr, value: g.value,
+        phEn: st.lang === 'ar' ? 'اكتبوا هنا' : 'Write here',
+        stateEn: s.en, stateAr: s.ar, chipBg: s.bg, color: s.color,
+        intoEn: g.intoEn, intoAr: g.intoAr };
+    });
+
+    /* The Order lane is off unless the Ministry activates it. Off is the live state and the
+       first-class answer, not an empty result: no verification record exists while it is off. */
+    const laneActive = st.laneActive === true;
+    const credSrc = laneActive ? [
+      { en: 'Baalbeck Summer Festival', ar: 'مهرجان بعلبك الصيفي',
+        metaEn: 'Requested 2026-08-06 · organizer files 2026-08-20', metaAr: 'طُلب 2026-08-06 · يقدّم المنظّم 2026-08-20',
+        s: 'pending' }
+    ] : [];
+    const credentials = credSrc.map(c => {
+      const m = ({
+        pending: { en: 'Verification pending', ar: 'التحقق قيد الإنجاز', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+        deficiency: { en: 'Deficiency flagged', ar: 'أُشير إلى قصور', bg: 'var(--bad-soft)', color: 'var(--bad)' },
+        verified: { en: 'Verified', ar: 'تم التحقق', bg: 'var(--brand-soft)', color: 'var(--brand)' }
+      })[c.s];
+      return { en: c.en, ar: c.ar, metaEn: c.metaEn, metaAr: c.metaAr,
+        stateEn: m.en, stateAr: m.ar, chipBg: m.bg, color: m.color,
+        hasReason: !!c.reasonEn, reasonEn: c.reasonEn || '', reasonAr: c.reasonAr || '' };
+    });
+
+    const card = (tagEn, tagAr, headEn, headAr, bodyEn, bodyAr, tone) => ({
+      tagEn, tagAr, headEn, headAr, bodyEn, bodyAr,
+      pad: tone === 'plain' ? '0' : '26px 30px',
+      border: tone === 'good' ? '1px solid var(--brand)' : tone === 'bad' ? '2px solid var(--bad)' : tone === 'warn' ? '2px solid var(--accent)' : '0',
+      bg: tone === 'good' ? 'var(--brand-soft)' : tone === 'bad' ? 'var(--bad-soft)' : tone === 'warn' ? 'var(--accent-soft)' : 'transparent',
+      bodyColor: tone === 'plain' ? 'var(--muted)' : 'var(--ink)'
+    });
+
+    return {
+      screens,
+      isInvite: st.screen === 'invite', isProfile: st.screen === 'profile',
+      isDashboard: st.screen === 'dashboard', isEvent: st.screen === 'event',
+      isGov: st.screen === 'gov', isReport: st.screen === 'report',
+      isCred: st.screen === 'cred', isStates: st.screen === 'states',
+      hasNext: (SEQ[st.screen] || []).length > 0,
+      nextLabelEn: SEQ_LABEL[st.screen] ? SEQ_LABEL[st.screen][0] : 'Continue',
+      nextLabelAr: SEQ_LABEL[st.screen] ? SEQ_LABEL[st.screen][1] : 'المتابعة',
+      nextSteps: (SEQ[st.screen] || []).map(k => {
+        const d = SEQ_DEF[k];
+
+        return {
+          en: d[0], ar: d[1], descEn: d[2], descAr: d[3], d1: d[4], d2: d[5] || '',
+          bg: 'var(--surface)',
+          border: 'var(--line)',
+          ink: 'var(--ink)',
+          go: set('screen', k)
+        };
+      }),
+
+      apptPending: !st.apptApproved,
+      apptBorder: st.apptApproved ? 'var(--brand)' : 'var(--accent)',
+      apptBg: st.apptApproved ? 'var(--brand-soft)' : 'var(--accent-soft)',
+      apptChipEn: st.apptApproved ? 'Appointment effective' : 'Appointment pending',
+      apptChipAr: st.apptApproved ? 'التعيين ساري' : 'التعيين معلّق',
+      apptChipBg: st.apptApproved ? 'var(--brand-soft)' : 'var(--accent-soft)',
+      apptChipInk: st.apptApproved ? 'var(--brand)' : 'var(--accent-ink)',
+      apptTitleEn: st.apptApproved
+        ? 'Your appointment is effective. You hold event medical command for Baalbeck Summer Festival.'
+        : 'Your appointment is not yet effective. The Ministry has not approved it.',
+      apptTitleAr: st.apptApproved
+        ? 'تعيينكم ساري. وتتولّون القيادة الطبية لمهرجان بعلبك الصيفي.'
+        : 'تعيينكم غير ساري بعد. ولم توافق عليه الوزارة.',
+      apptBodyEn: st.apptApproved
+        ? 'You can sign, exercise command functions and file the post-event report.'
+        : 'You can view the event and prepare, but you cannot sign, cannot exercise command functions, and cannot file the post-event report until the Ministry approves the appointment. Plan on that basis.',
+      apptBodyAr: st.apptApproved
+        ? 'يمكنكم التوقيع وممارسة مهام القيادة وتقديم التقرير اللاحق.'
+        : 'يمكنكم الاطّلاع على الفعالية والتحضير، لكن لا يمكنكم التوقيع ولا ممارسة مهام القيادة ولا تقديم التقرير اللاحق قبل موافقة الوزارة على التعيين. خطّطوا على هذا الأساس.',
+      laneActive: laneActive, laneOff: !laneActive,
+      verifications: [
+        { byEn: 'Ministry of Public Health', byAr: 'وزارة الصحة العامة',
+          whatEn: 'Approval of the appointment', whatAr: 'الموافقة على التعيين',
+          stateEn: st.apptApproved ? 'Approved' : 'Pending', stateAr: st.apptApproved ? 'موافَق عليه' : 'معلّق',
+          color: st.apptApproved ? 'var(--brand)' : 'var(--accent-ink)',
+          chipBg: st.apptApproved ? 'var(--brand-soft)' : 'var(--accent-soft)',
+          when: st.apptApproved ? '2026-08-15' : 'submitted 2026-08-12',
+          noteEn: 'The appointment takes effect only on Ministry approval. Nobody may register themselves as a director without a nomination and this approval.',
+          noteAr: 'لا يسري التعيين إلا بموافقة الوزارة. ولا يمكن لأحد تسجيل نفسه مديراً دون ترشيح وهذه الموافقة.' },
+        { byEn: 'Lebanese Order of Physicians', byAr: 'نقابة الأطباء في لبنان',
+          whatEn: 'Verification of your credentials', whatAr: 'التحقق من مؤهلاتكم',
+          stateEn: 'Verified', stateAr: 'مُتحقق منها', color: 'var(--brand)', chipBg: 'var(--brand-soft)',
+          when: '2026-08-14',
+          noteEn: 'Separate from and additional to the Ministry approval. The Order owns this record; you cannot edit it.',
+          noteAr: 'منفصل عن موافقة الوزارة وإضافة إليها. والنقابة تملك هذا السجل ولا يمكنكم تعديله.' }
+      ],
+      toggleAppt: () => this.setState(s => ({ apptApproved: !s.apptApproved })),
+      apptToggleEn: st.apptApproved ? 'Show the pending state' : 'Show the approved state',
+      apptToggleAr: st.apptApproved ? 'إظهار الحالة المعلّقة' : 'إظهار حالة الموافقة',
+      goProfile: set('screen', 'profile'),
+
+      inviteFacts: [
+        { en: 'Nominated by', ar: 'الترشيح من', vEn: 'Baalbeck International Festival', vAr: 'مهرجانات بعلبك الدولية' },
+        { en: 'Event', ar: 'الفعالية', vEn: 'Baalbeck Summer Festival', vAr: 'مهرجان بعلبك الصيفي' },
+        { en: 'Event level', ar: 'مستوى الفعالية', vEn: 'Level 3', vAr: 'المستوى 3' },
+        { en: 'Event date', ar: 'تاريخ الفعالية', vEn: '2026-09-19', vAr: '2026-09-19' },
+        { en: 'Organizer files by', ar: 'يقدّم المنظّم بحلول', vEn: '2026-08-20', vAr: '2026-08-20' }
+      ],
+      reqPreview: reqSrc.map(r => ({
+        n: r.n, en: r.en, ar: r.ar,
+        holdEn: r.sole ? 'Yours alone' : 'Shared', holdAr: r.sole ? 'لكم وحدكم' : 'مشترك',
+        color: r.sole ? 'var(--accent-ink)' : 'var(--muted)',
+        chipBg: r.sole ? 'var(--accent-soft)' : 'var(--surface2)',
+        bg: r.sole ? 'var(--accent-soft)' : 'var(--surface)',
+        border: r.sole ? '1px solid var(--accent)' : '1px solid var(--line)',
+        weight: r.sole ? '600' : '400'
+      })),
+      alsoAccepting: [
+        { en: 'Writing the clinical-governance and event medical-command arrangements into the organizer\u2019s event health and medical plan.', ar: 'كتابة ترتيبات الحوكمة السريرية والقيادة الطبية للفعالية في الخطة الصحية والطبية لدى المنظّم.' },
+        { en: 'Defining your role within the medical-command and overall incident-management structure in the major-incident plan.', ar: 'تحديد دوركم ضمن القيادة الطبية وبنية إدارة الحوادث العامة في خطة الحوادث الجسيمة.' },
+        { en: 'Signing the post-event medical report. At Level 3 it carries two signatures and the organizer\u2019s alone does not complete it.', ar: 'توقيع التقرير الطبي لما بعد الفعالية. وفي المستوى 3 يحمل توقيعين ولا يكتمل بتوقيع المنظّم وحده.' },
+        { en: 'The Lebanese Order of Physicians will verify your licence for this event.', ar: 'ستتحقق نقابة الأطباء في لبنان من ترخيصكم لهذه الفعالية.' }
+      ],
+
+      profileFields: [
+        { en: 'Full name', ar: 'الاسم الكامل', value: 'Dr N. Khoury' },
+        { en: 'Medical licence number', ar: 'رقم الترخيص الطبي', value: '14-9982' },
+        { en: 'Order of Physicians registration', ar: 'تسجيل نقابة الأطباء', value: 'LOP-B-4471' },
+        { en: 'Specialty', ar: 'الاختصاص', value: 'Emergency medicine' },
+        { en: 'Years in practice', ar: 'سنوات الممارسة', value: '17' },
+        { en: 'Telephone', ar: 'الهاتف', value: '03 421 118' },
+        { en: 'Email', ar: 'البريد الإلكتروني', value: 'n.khoury@bif.lb' },
+        { en: 'Hospital or practice affiliation', ar: 'الانتساب إلى مستشفى أو عيادة', value: 'Dar Al Amal University Hospital' }
+      ],
+
+      outstanding: rows.filter(r => !r.done),
+      complete: rows.filter(r => r.done),
+
+      requirements, openCount,
+      mineColor: openCount > 0 ? 'var(--bad)' : 'var(--brand)',
+
+      govSections,
+
+      dueHeadEn: st.signed ? 'The report is complete. Both signatures are recorded.' : 'This report is 5 days overdue and is waiting on your signature.',
+      dueHeadAr: st.signed ? 'اكتمل التقرير. وسُجّل التوقيعان.' : 'تأخر هذا التقرير 5 أيام وهو بانتظار توقيعكم.',
+      dueColor: st.signed ? 'var(--brand)' : 'var(--bad)',
+      dueBg: st.signed ? 'var(--brand-soft)' : 'var(--bad-soft)',
+      reportFigures: [
+        { v: '4,180', en: 'Estimated attendance', ar: 'الحضور التقديري', color: 'var(--ink)' },
+        { v: '38', en: 'Patients assessed or treated', ar: 'مرضى فُحصوا أو عولجوا', color: 'var(--ink)' },
+        { v: '31', en: 'Treated and released on site', ar: 'عولجوا وأُخلي سبيلهم في الموقع', color: 'var(--ink)' },
+        { v: '6', en: 'Transported to hospital', ar: 'نُقلوا إلى المستشفى', color: 'var(--ink)' },
+        { v: '1', en: 'Cardiac arrests', ar: 'حالات توقف القلب', color: 'var(--bad)' },
+        { v: '0', en: 'Deaths', ar: 'وفيات', color: 'var(--ink)' },
+        { v: '2', en: 'Unplanned resource requests', ar: 'طلبات موارد غير مخططة', color: 'var(--ink)' }
+      ],
+      reportEvents: [
+        { en: 'Cardiac arrest during the event', ar: 'توقف قلب أثناء الفعالية', vEn: 'Yes — notified within 24 hours', vAr: 'نعم — أُبلغ خلال 24 ساعة', color: 'var(--bad)' },
+        { en: 'Event interrupted for medical reasons', ar: 'توقفت الفعالية لأسباب طبية', vEn: 'No', vAr: 'لا', color: 'var(--muted)' },
+        { en: 'Medical resources exceeded', ar: 'تجاوز الموارد الطبية', vEn: 'Yes — one additional unit requested', vAr: 'نعم — طُلبت وحدة إضافية', color: 'var(--accent-ink)' }
+      ],
+      signatures: [
+        { roleEn: 'Organizer representative', roleAr: 'ممثل المنظّم', who: 'F. Rahal · 2026-08-14',
+          stateEn: 'Signed', stateAr: 'وُقّع', chipBg: 'var(--brand-soft)', color: 'var(--brand)', edge: 'solid' },
+        { roleEn: 'Event Medical Director', roleAr: 'المدير الطبي للفعالية', who: 'Dr N. Khoury',
+          stateEn: st.signed ? 'Signed' : 'Awaiting your signature', stateAr: st.signed ? 'وُقّع' : 'بانتظار توقيعكم',
+          chipBg: st.signed ? 'var(--brand-soft)' : 'var(--bad-soft)',
+          color: st.signed ? 'var(--brand)' : 'var(--bad)', edge: st.signed ? 'solid' : 'dashed' }
+      ],
+      signed: st.signed,
+      sign: () => this.setState({ signed: true }),
+      signBg: st.signed ? 'var(--surface2)' : 'var(--brand)',
+      signColor: st.signed ? 'var(--muted)' : 'var(--bg)',
+      signCursor: st.signed ? 'not-allowed' : 'pointer',
+      signLabelEn: st.signed ? 'Signed 2026-08-21' : 'Review complete — sign the report',
+      signLabelAr: st.signed ? 'وُقّع 2026-08-21' : 'اكتملت المراجعة — توقيع التقرير',
+
+      credentials,
+
+      stateCards: [
+        card('No events', 'لا فعاليات',
+          'No organizer has nominated you as Event Medical Director.',
+          'لم يرشّحكم أي منظّم مديراً طبياً لفعالية.',
+          'Events appear here when an organizer nominates you for a Level 3 event. The role exists only at Level 3. You cannot add yourself to an event; the organizer nominates you, and you accept or decline. Your physician profile is complete, so nothing is holding up a nomination.',
+          'تظهر الفعاليات هنا عندما يرشّحكم منظّم لفعالية من المستوى 3. ولا يوجد هذا الدور إلا في المستوى 3. ولا يمكنكم إضافة أنفسكم إلى فعالية؛ فالمنظّم يرشّحكم وأنتم تقبلون أو ترفضون. وملفكم الطبي مكتمل، فلا شيء يعوق ترشيحكم.',
+          'plain'),
+        card('Nothing outstanding', 'لا موجب قائم',
+          'Nothing is owed by you.',
+          'لا موجب عليكم.',
+          'Three events are complete: every requirement addressed and every post-event report signed. Two of them are still ahead — Tyre Triathlon on 2026-11-08 and Byblos Amphitheatre on 2027-01-14. A written arrangement stands unless the event materially changes; if an organizer revises a Level 3 submission in a way that affects your role, it returns here.',
+          'ثلاث فعاليات مُنجزة: كل متطلب عولج وكل تقرير لاحق وُقّع. واثنتان منها لم تُقَما بعد — ترياتلون صور في 2026-11-08 ومدرج جبيل في 2027-01-14. ويبقى الترتيب المكتوب سارياً إلا إذا تغيّرت الفعالية تغييراً جوهرياً؛ وإذا عدّل المنظّم تقديم مستوى 3 بما يمسّ دوركم، عاد إلى هنا.',
+          'good'),
+        card('Nominated, not yet accepted', 'مُرشَّح ولم يُقبل بعد',
+          'You were nominated for Zahle Motor Rally on 2026-08-14 and have not answered.',
+          'رُشِّحتم لرالي زحلة للسيارات في 2026-08-14 ولم تُجيبوا.',
+          'Until you accept, you hold none of the five requirements and cannot write into the plan. The organizer sees your nomination as unanswered and cannot certify that the Event Medical Director is appointed. They file on 2026-09-25.',
+          'إلى أن تقبلوا، لا تتحمّلون أياً من المتطلبات الخمسة ولا يمكنكم الكتابة في الخطة. ويرى المنظّم ترشيحكم دون إجابة ولا يمكنه الإقرار بتعيين المدير الطبي للفعالية. وهو يقدّم في 2026-09-25.',
+          'warn'),
+        card('Filing date passed, requirement unaddressed', 'انقضى تاريخ التقديم ومتطلب لم يُعالَج',
+          'The organizer\u2019s filing date passed on 2026-08-20. The event medical command function is still not addressed.',
+          'انقضى تاريخ تقديم المنظّم في 2026-08-20. ولا تزال وظيفة القيادة الطبية للفعالية غير معالَجة.',
+          'Requirement 15 is yours alone; no one else can address it. The organizer cannot file a complete Level 3 package without it and the event is on 2026-09-19. Write the arrangements, or tell the organizer you are standing down so they can nominate another physician.',
+          'المتطلب 15 لكم وحدكم؛ ولا يمكن لأحد غيركم معالجته. ولا يمكن للمنظّم تقديم حزمة مستوى 3 مكتملة من دونه، والفعالية في 2026-09-19. اكتبوا الترتيبات، أو أبلغوا المنظّم بانسحابكم ليرشّح طبيباً آخر.',
+          'bad'),
+        card('Signature owed on an event already held', 'توقيع مستحق على فعالية أُقيمت',
+          'Tripoli Marathon was held on 2026-08-09. Its post-event medical report is 5 days overdue and waiting on your signature.',
+          'أُقيم ماراتون طرابلس في 2026-08-09. وتأخر تقريره الطبي اللاحق 5 أيام وهو بانتظار توقيعكم.',
+          'The organizer signed on 2026-08-14. At Level 3 the report carries two signatures and is not complete with theirs alone, so the obligation is recorded against the event as unmet until you sign. A cardiac arrest was recorded at this event and notified separately within 24 hours; that notification does not satisfy the report.',
+          'وقّع المنظّم في 2026-08-14. وفي المستوى 3 يحمل التقرير توقيعين ولا يكتمل بتوقيعه وحده، فيُسجَّل الموجب على الفعالية كغير مستوفى إلى أن توقّعوا. وسُجّلت حالة توقف قلب في هذه الفعالية وأُبلغ عنها منفصلةً خلال 24 ساعة؛ وذلك الإبلاغ لا يستوفي التقرير.',
+          'bad'),
+        card('Verification pending close to the filing date', 'التحقق قيد الإنجاز قرب تاريخ التقديم',
+          'The Order of Physicians has not completed your verification for Baalbeck Summer Festival. The organizer files in 4 days.',
+          'لم تُنجز نقابة الأطباء التحقق من مؤهلاتكم لمهرجان بعلبك الصيفي. ويقدّم المنظّم بعد 4 أيام.',
+          'Verification is the Order\u2019s to complete and is not something you can act on. It informs the Ministry\u2019s review but does not decide it: a reviewer may record any of the three outcomes whether or not verification is complete. Your five requirements are unaffected and remain yours to address.',
+          'إنجاز التحقق من صلاحية النقابة وليس أمراً يمكنكم التصرف به. وهو يُعلم مراجعة الوزارة ولا يقررها: فيجوز للمراجع تسجيل أي من النتائج الثلاث سواء اكتمل التحقق أم لا. ومتطلباتكم الخمسة غير متأثرة وتبقى عليكم معالجتها.',
+          'warn')
+      ],
+
+      toggleLang: () => this.setState(s => ({ lang: s.lang === 'en' ? 'ar' : 'en' })),
+      toggleTheme: () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
+      togglePalette: () => this.setState(s => ({ palette: s.palette === 'petrol' ? 'cedar' : 'petrol' })),
+      cycleText: () => this.setState(s => ({ textScale: s.textScale === 100 ? 112 : s.textScale === 112 ? 125 : 100 }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

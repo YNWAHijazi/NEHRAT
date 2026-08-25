@@ -42,6 +42,10 @@ export default defineConfig({
     navigationTimeout: 60_000,
   },
   timeout: 60_000,
+  // Assertions wait long enough for a dev-mode first compile of the BUILT page, which
+  // competes with parsing the reviewer's prototypes (some are ~450KB) in the same
+  // browser. Still short enough that a genuinely absent region fails rather than hangs.
+  expect: { timeout: 15_000 },
   projects: [
     {
       name: 'reference',

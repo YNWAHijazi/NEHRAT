@@ -31,7 +31,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 from jsparse import P
 
 PLATFORM = Path(__file__).resolve().parent.parent
-HANDOFF = PLATFORM.parent / "handoff 5"
+sys.path.insert(0, str(Path(__file__).parent))
+from pack import pack_dir
+HANDOFF = pack_dir(PLATFORM)
 PAGE = HANDOFF / "pages" / "Organizer Journey.dc.html"
 AR = HANDOFF / "source-documents" / "ar"
 DATA = PLATFORM / "lib" / "rules" / "data"

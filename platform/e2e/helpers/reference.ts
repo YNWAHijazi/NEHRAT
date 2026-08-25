@@ -7,12 +7,13 @@
  */
 
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { HANDOFF_PACK } from '../../lib/handoff-pack';
 import { dirname, join } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 import type { Page } from '@playwright/test';
 
-export const PAGES_DIR = join(HERE, '..', '..', '..', 'handoff 5', 'pages');
+export const PAGES_DIR = join(HERE, '..', '..', '..', HANDOFF_PACK, 'pages');
 
 export type ReferenceFile =
   | 'Event Health Readiness.dc.html'

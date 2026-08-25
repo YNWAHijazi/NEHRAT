@@ -32,8 +32,10 @@ import zipfile
 from xml.etree import ElementTree as ET
 
 PLATFORM = Path(__file__).resolve().parent.parent
-REFERENCE = PLATFORM.parent / "handoff 5" / "pages" / "Organizer Journey.dc.html"
-ARABIC_NEHRAT = PLATFORM.parent / "handoff 5" / "source-documents" / "ar" / "02 NEHRAT.docx"
+sys.path.insert(0, str(Path(__file__).parent))
+from pack import pack_dir
+REFERENCE = pack_dir(PLATFORM) / "pages" / "Organizer Journey.dc.html"
+ARABIC_NEHRAT = pack_dir(PLATFORM) / "source-documents" / "ar" / "02 NEHRAT.docx"
 OUT = PLATFORM / "lib" / "reference" / "reference-snapshot.json"
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"

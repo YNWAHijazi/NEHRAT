@@ -9,6 +9,7 @@
  */
 
 import { redirect } from 'next/navigation';
+import { nowStamp } from '../lib/clock';
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
@@ -1114,7 +1115,7 @@ export async function saveFrReadinessAction(
        ON CONFLICT(account_id) DO UPDATE SET confirmations = excluded.confirmations,
          signed_at = COALESCE(excluded.signed_at, fr_readiness.signed_at), updated_at = excluded.updated_at`,
     )
-    .run(account.id, JSON.stringify(payload.confirmations), payload.sign ? new Date().toISOString() : null);
+    .run(account.id, JSON.stringify(payload.confirmations), payload.sign ? nowStamp() : null);
   revalidatePath('/first-response/readiness');
   return { ok: true };
 }

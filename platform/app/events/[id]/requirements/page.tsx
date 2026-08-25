@@ -97,7 +97,9 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   const attachOutstanding = documents.filter(
     (d) => !d.optional && !d.thirdParty && !documentState[d.key],
   ).length;
-  const agencyPending = providers.filter((p) => p.status !== 'confirmed').length;
+  // A declined party HAS answered -- the counter must not contradict the gate that
+  // explains it (the event record derives the same way).
+  const agencyPending = invitations.filter((p) => p.status === 'nominated').length;
   const agencyPendColor = agencyPending > 0 ? 'var(--bad)' : 'var(--brand)';
 
   // Group 3: the certify-to rows -- everything the matrix carries at this level that is

@@ -19,11 +19,20 @@ import snapshot from '../lib/reference/reference-snapshot.json';
 import domainsJson from '../lib/rules/data/domains.json';
 import conditionsJson from '../lib/rules/data/minimum-conditions.json';
 import { PLATFORM_ROOT } from './helpers/files';
+import { HANDOFF_PACK } from '../lib/handoff-pack';
+
+/**
+ * The pack IN FORCE, not the one the snapshot was taken from. Reading the recorded
+ * path let a wholesale pack replacement pass unnoticed: the guard checked a file
+ * nobody was building against any more.
+ */
+const inPack = (recorded: string): string =>
+  join(PLATFORM_ROOT, '..', HANDOFF_PACK, recorded.split('/').slice(1).join('/'));
 
 const REGENERATE = 'npm run rules:regenerate';
 
 describe('the snapshot matches the Arabic issue of Annex A', () => {
-  const arabicPath = join(PLATFORM_ROOT, '..', snapshot.arabicSourceFile);
+  const arabicPath = inPack(snapshot.arabicSourceFile);
 
   it('can find the Arabic NEHRAT', () => {
     expect(existsSync(arabicPath), `Arabic issue not found at ${snapshot.arabicSourceFile}`).toBe(true);
@@ -48,7 +57,7 @@ describe('the snapshot matches the Arabic issue of Annex A', () => {
 });
 
 describe('the snapshot matches the reference prototype', () => {
-  const referencePath = join(PLATFORM_ROOT, '..', snapshot.sourceFile);
+  const referencePath = inPack(snapshot.sourceFile);
 
   it('can find the reference file', () => {
     expect(
@@ -129,15 +138,21 @@ describe('the nine domains match the reference', () => {
 /**
  * Non-negotiable #0, asserted as a standing fact rather than a comment.
  *
- * Seven conditions were manual checkboxes in the prototype. Every one of them must be
- * derived in the build. If a future edit reintroduces a manual condition, this fails.
+ * Seven conditions were manual checkboxes in the prototype and every one had to be
+ * derived in the build. The reviewer's Pass C prototypes now derive all ten from
+ * structured inputs, so the standing fact is stronger: NEITHER side leaves a condition
+ * manual. If a future edit reintroduces one on either side, this fails.
  */
-describe('no condition is left manual in the build', () => {
-  it('records which conditions the prototype left manual', () => {
+describe('no condition is left manual, on either side', () => {
+  it('the prototype leaves none manual', () => {
     const manual = snapshot.minimumConditions
-      .filter((c) => c.prototypeDerivedFrom === false)
+      .filter((c) => (c.prototypeDerivedFrom as string | false) === false)
       .map((c) => c.key);
-    expect(manual).toEqual(['att3', 'club', 'run21', 'tri', 'open', 'combat', 'motor']);
+    expect(
+      manual,
+      'A condition went back to a manual checkbox in the prototype. Every minimum ' +
+        'condition derives from captured inputs on both sides (non-negotiable 0).',
+    ).toEqual([]);
   });
 
   it('every condition in the build derives from captured inputs', () => {

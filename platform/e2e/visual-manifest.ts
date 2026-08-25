@@ -98,18 +98,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceTab: 'Dashboard',
     builtRoute: '/dashboard',
     signInAs: 'test_organizer',
-    referenceMask: [
-      {
-        // The organization-registration banner card (accent border, accent-soft fill).
-        css: 'div[style*="var(--accent-soft)"][style*="border-radius: 14px"], div[style*="var(--accent-soft)"][style*="border-radius:14px"]',
-        why: 'Prototype error, acknowledged (handoff 4, decision 6): the showcase account is recorded and holds filed submissions; the pending state lives on test_organizer_pending. The banner belongs to that account, not this one.',
-      },
-      {
-        // The header's "Organization pending Ministry approval" line.
-        css: 'header div[style*="var(--accent-ink)"]',
-        why: 'Same decision: the showcase organization is recorded; the pending header line moved to test_organizer_pending.',
-      },
-    ],
   },
   {
     id: 'organizer-assessment',
@@ -981,9 +969,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'compare',
         reference: { strategy: 'containerOfText', text: 'The Ministry reviews health and medical preparedness only', container: 'font-size: 12px' },
         builtSelector: '[data-region="limits"]',
-        langs: ['en'],
         threshold: 0.04,
-        note: 'The two limit sentences beneath the outcome control, compared pixel-for-pixel: the vocabulary must not drift. Held at 4%: a 1-2px second-paragraph offset against the reference is the measured residual (2.55%), while a single changed word measures 10%+ -- the ratchet still bites. EN only: the reference Arabic here reads الجاهزية الصحية where SPEC 2b/the glossary require التأهب for this instrument -- a prototype defect for the Pass C list; the Arabic is pinned verbatim by e2e/app/ministry.spec.ts until the prototype is corrected and this region can drop its langs restriction.',
+        note: 'The two limit sentences beneath the outcome control, compared pixel-for-pixel in BOTH languages: the vocabulary must not drift. Held at 4%: a 1-2px second-paragraph offset is the measured residual, while a single changed word measures 10%+ -- the ratchet still bites. The EN-only restriction retired in Pass C: the prototype now reads التأهب الصحي والطبي, as the glossary requires.',
       },
       {
         name: 'outcome',

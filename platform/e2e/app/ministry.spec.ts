@@ -85,8 +85,8 @@ test.describe('the pinned vocabulary', () => {
     // Arabic, verbatim -- التأهب per the glossary, never الجاهزية on the event side.
     await expect(outcome).toContainText('تسجيل نتيجة');
     await expect(outcome).toContainText('توجد ثلاث نتائج فقط. ما عداها ليس قراراً.');
-    await expect(limits).toContainText('تراجع الوزارة التأهب الصحي والطبي فقط. ويبقى الترخيص بالفعالية لدى السلطة المختصة قانوناً.');
-    await expect(limits).toContainText('لا تحل هذه الحالة محل أي تصريح أو ترخيص آخر مطلوب بموجب القانون اللبناني.');
+    await expect(limits).toContainText('تراجع الوزارة التأهب الصحي والطبي فقط. يبقى ترخيص الفعالية من صلاحية السلطة المختصة قانوناً.');
+    await expect(limits).toContainText('لا تحل هذه الحالة محل أي ترخيص أو إذن آخر مطلوب بموجب القانون اللبناني.');
   });
 
   test('the cardiac unset state reads verbatim, in both languages', async ({ page }) => {

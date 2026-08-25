@@ -68,7 +68,9 @@ function findByReference(reference: string): SubmissionRecord | null {
   return {
     referenceNumber: row.moph_reference,
     eventName: row.name_en,
-    level: (derivedLevelFor(row.id) ?? 1) as Level,
+    // No derivable level is NOT Level 1 (non-negotiable 0): the register reports the
+    // absence rather than inventing the lowest band.
+    level: derivedLevelFor(row.id),
     status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
     isDemo: row.is_demo === 1,
     eventStartDate: row.start_date ?? '',

@@ -20,11 +20,11 @@
   "outcomeLimits": [
     {
       "en": "The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority.",
-      "ar": "تراجع الوزارة التأهب الصحي والطبي فقط. ويبقى الترخيص بالفعالية لدى السلطة المختصة قانوناً."
+      "ar": "تراجع الوزارة التأهب الصحي والطبي فقط. يبقى ترخيص الفعالية من صلاحية السلطة المختصة قانوناً."
     },
     {
       "en": "This status does not replace any other permit or authorization required under Lebanese law.",
-      "ar": "لا تحل هذه الحالة محل أي تصريح أو ترخيص آخر مطلوب بموجب القانون اللبناني."
+      "ar": "لا تحل هذه الحالة محل أي ترخيص أو إذن آخر مطلوب بموجب القانون اللبناني."
     }
   ],
   "internalStates": {

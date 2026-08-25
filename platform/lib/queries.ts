@@ -997,10 +997,22 @@ export function invitationsForAccount(accountId: number): InvitationDetail[] {
 }
 
 /** One nomination on one event for this account -- the role event screens. */
+/**
+ * The nomination this account is ACTING under for the event. One account can hold more
+ * than one nomination on the same event (a second agency invited to the same address),
+ * so a declined row must never be the one a signature lands on: signing resurrected it,
+ * flipping declined back to confirmed. Live nominations first, declined never chosen
+ * while a live one exists.
+ */
 export function invitationForEvent(accountId: number, eventId: string, kind: 'ems' | 'director'): InvitationDetail | null {
-  const r = getDb()
-    .prepare(`${INVITATION_SELECT} WHERE i.account_id = ? AND i.event_id = ? AND i.kind = ?`)
-    .get(accountId, eventId, kind) as Parameters<typeof mapInvitation>[0] | undefined;
+  const rows = getDb()
+    .prepare(
+      `${INVITATION_SELECT} WHERE i.account_id = ? AND i.event_id = ? AND i.kind = ?
+       ORDER BY CASE i.status WHEN 'confirmed' THEN 0 WHEN 'nominated' THEN 1 ELSE 2 END,
+                i.invited_at DESC`,
+    )
+    .all(accountId, eventId, kind) as unknown as Parameters<typeof mapInvitation>[0][];
+  const r = rows[0];
   return r ? mapInvitation(r) : null;
 }
 
@@ -1113,7 +1125,7 @@ export function reviewQueue(viewerIsDemo: boolean): QueueRow[] {
        LEFT JOIN determinations d ON d.id = (
          SELECT id FROM determinations WHERE event_id = e.id ORDER BY recorded_at DESC, id DESC LIMIT 1
        )
-       WHERE e.is_demo = ?
+       WHERE e.is_demo = ? AND s.filed_at IS NOT NULL
        ORDER BY e.start_date`,
     )
     .all(demoFlag(viewerIsDemo)) as unknown as {
@@ -1506,7 +1518,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
        JOIN events e ON e.id = s.event_id
        LEFT JOIN review_state rs ON rs.event_id = e.id
        LEFT JOIN organizations o ON o.account_id = e.account_id
-       WHERE e.id = ? AND e.is_demo = ?`,
+       WHERE e.id = ? AND e.is_demo = ? AND s.filed_at IS NOT NULL`,
     )
     .get(eventId, demoFlag(viewerIsDemo)) as
     | {

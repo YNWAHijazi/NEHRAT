@@ -49,7 +49,7 @@ export interface PublicLookupResult {
 export interface SubmissionRecord {
   readonly referenceNumber: string;
   readonly eventName: string;
-  readonly level: Level;
+  readonly level: Level | null;
   readonly status: string;
   readonly isDemo: boolean;
   readonly eventStartDate: string; // YYYY-MM-DD, the second factor

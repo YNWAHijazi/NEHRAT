@@ -31,10 +31,12 @@ export function getDb(): DatabaseSync {
 
   // The seeder is forced off in deployed environments -- the guard is NODE_ENV, and
   // there is deliberately no environment variable that re-enables it in production.
+  // BEFORE the seeder: triggers installed afterwards never see the rows it wrote, so
+  // every seeded default kept the real clock while the gates ran on the review clock.
+  stampDefaultsOnTheOneClock(db);
   if (process.env.NODE_ENV !== 'production') {
     seedDemonstration(db);
   }
-  stampDefaultsOnTheOneClock(db);
   return db;
 }
 

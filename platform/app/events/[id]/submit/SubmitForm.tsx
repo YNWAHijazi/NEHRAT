@@ -257,7 +257,7 @@ export function SubmitForm({
             <div style={{ padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch' }}>
               <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
                 <L
-                  en={`The compliance and submission form cannot be certified yet — ${blockers.length} items outstanding`}
+                  en={`The compliance and submission form cannot be certified yet — ${blockers.length} ${blockers.length === 1 ? 'item' : 'items'} outstanding`}
                   ar={`لا يمكن التصديق على نموذج الامتثال والتقديم بعد — ${blockers.length} بنود غير مستوفاة`}
                 />
               </div>
@@ -299,7 +299,7 @@ export function SubmitForm({
             {blockers.length > 0 ? (
               <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
                 <L
-                  en={`Blocked while ${blockers.length} items are outstanding.`}
+                  en={`Blocked while ${blockers.length} ${blockers.length === 1 ? 'item is' : 'items are'} outstanding.`}
                   ar={`محجوب ما دامت ${blockers.length} بنود غير مستوفاة.`}
                 />
               </span>

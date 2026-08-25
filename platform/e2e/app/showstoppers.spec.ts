@@ -157,7 +157,9 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' }).click();
     await page.locator('textarea').first().fill('Version two wording, replacing version one.');
     await page.locator('button:has-text("Save the plan")').first().click();
-    await page.waitForLoadState('networkidle');
+    // Wait for the SECOND save to land before reloading -- networkidle raced it, and a
+    // reload mid-save read the page back before version 1 had been archived.
+    await expect(page.locator('text=A new version was recorded')).toBeVisible({ timeout: 20_000 });
     await page.reload();
     const history = page.locator('details', { hasText: 'Version 1' }).first();
     await expect(history).toBeVisible();

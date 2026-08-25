@@ -15,6 +15,7 @@ import { facilityLedger, type LedgerInputs } from '../lib/rules/facility';
 import { effectiveCycles } from '../lib/rules/ministry';
 import { detectPersonalName } from '../lib/rules/pii';
 import { deriveLevel } from '../lib/rules/derive';
+import { resolvePublicLookup } from '../lib/rules/public-lookup';
 
 describe('showstopper 1 — the declaration gate counts what the form renders', () => {
   it('Level 1 renders six declarations and completes on exactly those six', () => {
@@ -229,5 +230,26 @@ describe('non-negotiable 0 — the two venue floors have a real unset state', ()
     expect(d.complete).toBe(true);
     expect(d.finalLevel).toBe(2);
     expect(d.governedBy).toBe('minimumCondition');
+  });
+});
+
+describe('the public register never invents a level', () => {
+  // Pass C re-walk (N1): the lookup read `derivedLevelFor(id) ?? 1`, so an event with
+  // no derivable level was published to the national register as Level 1.
+  it('the four-field result carries a null level rather than the lowest band', () => {
+    const record = {
+      referenceNumber: 'MOPH-EV-2026-0001',
+      eventName: 'Unassessed event',
+      level: null,
+      status: 'Submission received but incomplete',
+      isDemo: false,
+      eventStartDate: '2026-09-01',
+    };
+    const out = resolvePublicLookup(
+      { referenceNumber: record.referenceNumber, eventStartDate: '2026-09-01' },
+      () => record,
+    );
+    expect(out.exists).toBe(true);
+    expect(out.level).toBeNull();
   });
 });

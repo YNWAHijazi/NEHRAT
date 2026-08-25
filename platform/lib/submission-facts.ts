@@ -5,6 +5,7 @@
  */
 
 import { organizationFor } from './auth';
+import { clockNow } from './clock';
 import { beirutToday, documentStateFor, eventFor, invitationsFor, submissionFor, assessmentsFor } from './queries';
 import { declarationsAreComplete, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
 
@@ -39,7 +40,7 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
     eventStartDate: event.startDate,
     filed: event.filed,
     organizationStatus: organization?.status ?? 'none',
-    now: new Date(),
+    now: clockNow(),
   };
   const deadline = eventFilingDeadline(gateCtx);
 
