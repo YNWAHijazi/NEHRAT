@@ -32,7 +32,11 @@ html[lang="ar"] [data-flip]{transform:scaleX(-1)}
 [data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
 h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
-@media (max-width:900px){[data-dock]{display:none}}
+@media (max-width:900px){[data-dock]{display:none !important}}
+/* The service menu end-anchors to its trigger (reference geometry). On narrow
+   viewports the trigger sits at the content's inline-start, so an end-anchored
+   380px panel would overflow the start edge -- re-anchor it to the start there. */
+@media (max-width:700px){[data-svc-menu]{inset-inline-end:auto !important;inset-inline-start:0 !important}}
 @media (max-width:700px){[data-rail]{grid-template-columns:1fr 1fr !important}[data-sec-h1]{font-size:30px !important}[data-pad]{padding-inline:20px !important}[data-wide],[data-stack]{grid-template-columns:1fr !important}[data-stack] [data-due]{min-width:0 !important;text-align:start !important}[data-th]{display:none !important}}
 @media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
 @keyframes sk{0%{background-position:100% 0}100%{background-position:-100% 0}}

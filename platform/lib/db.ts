@@ -562,6 +562,23 @@ function migrate(d: DatabaseSync): void {
       is_demo INTEGER NOT NULL DEFAULT 0
     );
   `);
+
+  // Additive column migrations: CREATE TABLE IF NOT EXISTS never alters an existing
+  // table, so a database created before a column existed keeps its old shape and the
+  // first query against the new column crashes. Guarded ALTERs bring it forward.
+  const addColumn = (table: string, column: string, ddl: string): void => {
+    const cols = d.prepare(`SELECT name FROM pragma_table_info(?)`).all(table) as { name: string }[];
+    if (!cols.some((c) => c.name === column)) {
+      d.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+    }
+  };
+  addColumn('submissions', 'version', 'version INTEGER NOT NULL DEFAULT 1');
+  addColumn('facilities', 'licensed_capacity', 'licensed_capacity INTEGER');
+  // SQLite cannot add a NOT NULL column without a default; the CHECK stays on new
+  // databases, and pre-migration rows (which predate typed notifications) read as
+  // the generic 'major' kind rather than crashing every screen that lists them.
+  addColumn('serious_incident_notifications', 'incident_type', "incident_type TEXT NOT NULL DEFAULT 'major'");
+  addColumn('serious_incident_notifications', 'occurred_at', "occurred_at TEXT NOT NULL DEFAULT ''");
 }
 
 /** Next EV-nnnn style identifier. Sequential by design -- correct inside a session. */

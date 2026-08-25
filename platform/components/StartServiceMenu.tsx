@@ -77,6 +77,7 @@ export function StartServiceMenu() {
       </button>
       {open ? (
         <div
+          data-svc-menu=""
           style={{
             position: 'absolute',
             insetInlineEnd: 0,
