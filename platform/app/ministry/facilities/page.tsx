@@ -30,7 +30,7 @@ export default async function FacilityOversightPage({
     (FACILITY_CONTENT.categories.find((c) => c.key === key) as { shortAr?: string } | undefined)?.shortAr ?? key;
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       {notice === 'raised' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The corrective action has been raised and the operator notified." ar="أُثير الإجراء التصحيحي وأُبلغ المشغّل." />

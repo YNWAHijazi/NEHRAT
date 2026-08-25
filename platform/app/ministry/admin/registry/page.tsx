@@ -46,7 +46,7 @@ export default async function RegistryPage() {
   );
 
   return (
-    <MinistryShell account={account} consoleEn="Administration" consoleAr="الإدارة">
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }} consoleEn="Administration" consoleAr="الإدارة">
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="National registry" ar="السجل الوطني" />
       </h1>

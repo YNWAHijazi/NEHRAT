@@ -9,7 +9,7 @@ export default async function ChangesPage() {
   const account = await requireMinistryPage('viewMinistry');
   const rows = changesForReview(account.isDemo);
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Changes and notifications" ar="التغييرات والإشعارات" />
       </h1>

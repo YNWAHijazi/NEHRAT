@@ -20,7 +20,7 @@ export default async function UsersPage() {
   const matrixRoles = ['reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner'];
 
   return (
-    <MinistryShell account={account} consoleEn="Administration" consoleAr="الإدارة">
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }} consoleEn="Administration" consoleAr="الإدارة">
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Users and roles" ar="المستخدمون والأدوار" />
       </h1>

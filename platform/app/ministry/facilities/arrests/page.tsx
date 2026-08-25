@@ -26,7 +26,7 @@ export default async function ArrestLocationsPage({
   for (const g of groups) byCategory.set(g.category || '—', (byCategory.get(g.category || '—') ?? 0) + g.count);
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry/facilities', en: 'Facility oversight', ar: 'الرقابة على المرافق' }}>
       {notice === 'designated' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Designated as covered. Its obligations run from the designation date, and its operator has been notified where a record exists." ar="حُدِّد كمشمول. وتسري موجباته من تاريخ التحديد، وأُبلغ مشغّله حيث يوجد سجل." />

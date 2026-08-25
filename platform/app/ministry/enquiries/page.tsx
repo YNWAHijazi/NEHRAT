@@ -17,7 +17,7 @@ export default async function EnquiriesPage({
   const mayRespond = can(account.role, 'respondEnquiry');
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       {notice === 'responded' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The response has been recorded and sent as written." ar="سُجّل الرد وأُرسل كما كُتب." />

@@ -27,7 +27,7 @@ export default async function DeterminationsPage() {
     .all(flag) as unknown as { name_en: string; name_ar: string; category: string; municipality: string; designated_by: string; designated_at: string }[];
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Determinations and designations" ar="البت والتحديد" />
       </h1>

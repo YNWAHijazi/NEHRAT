@@ -42,7 +42,7 @@ export default async function IncidentsPage() {
   };
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Incidents and reports" ar="الحوادث والتقارير" />
       </h1>

@@ -26,7 +26,7 @@ export default async function PlatformActivityPage() {
     { n: counts.frReports, en: 'First-response dataset reports', ar: 'تقارير بيانات استجابة أولية' },
   ];
   return (
-    <MinistryShell account={account} consoleEn="Platform owner" consoleAr="مالك المنصة">
+    <MinistryShell account={account} back={{ href: '/platform/admin', en: 'Master admin', ar: 'الإدارة العليا' }} consoleEn="Platform owner" consoleAr="مالك المنصة">
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Platform activity" ar="نشاط المنصة" />
       </h1>

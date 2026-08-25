@@ -15,7 +15,7 @@ export default async function OrderLanePage() {
   const active = config ? config.value === 'on' : orderLaneActive();
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Order of Physicians lane" ar="مسار نقابة الأطباء" />
       </h1>

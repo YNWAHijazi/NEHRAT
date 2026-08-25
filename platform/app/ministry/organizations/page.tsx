@@ -20,7 +20,7 @@ export default async function OrganizationsPage({
   const mayRecord = can(account.role, 'recordOrganization');
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       {notice === 'recorded' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Recorded. Filing is open for the organizer, and they have been notified." ar="سُجّلت. وفُتح التقديم للمنظّم، وأُبلغ بذلك." />

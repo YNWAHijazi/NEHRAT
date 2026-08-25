@@ -45,7 +45,7 @@ export default async function CardiacConfigPage({
   const provisionalCycles = FACILITY_CONTENT.ledger.cycles;
 
   return (
-    <MinistryShell account={account} consoleEn="Administration" consoleAr="الإدارة">
+    <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }} consoleEn="Administration" consoleAr="الإدارة">
       {notice === 'published' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Set and published. The operators the value reaches have been notified, effective on the date named." ar="حُدِّدت ونُشرت. وأُبلغ المشغّلون الذين تصلهم القيمة، وتسري بالتاريخ المسمّى." />

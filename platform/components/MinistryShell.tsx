@@ -17,11 +17,14 @@ export function MinistryShell({
   children,
   consoleEn = 'Review console',
   consoleAr = 'لوحة المراجعة',
+  back,
 }: {
   account: Account;
   children: React.ReactNode;
   consoleEn?: string;
   consoleAr?: string;
+  /** Back pill named after its destination; absent only on the console's own dashboard. */
+  back?: { href: string; en: string; ar: string };
 }) {
   const roleLabel = (MINISTRY_CONTENT.roleLabels as Record<string, { en: string; ar: string }>)[account.role] ?? {
     en: account.role,
@@ -45,6 +48,17 @@ export function MinistryShell({
               </span>
             </span>
           </Link>
+          {back ? (
+            <Link
+              href={back.href}
+              style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8, flex: 'none', color: 'var(--ink)' }}
+            >
+              <svg aria-hidden="true" data-flip="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 5l-7 7 7 7" />
+              </svg>
+              <L en={back.en} ar={back.ar} />
+            </Link>
+          ) : null}
           <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ textAlign: 'end', lineHeight: 1.3 }}>
               <div style={{ fontSize: 13, fontWeight: 500 }}>{account.displayName}</div>

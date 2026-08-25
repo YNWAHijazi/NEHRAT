@@ -57,7 +57,7 @@ export default async function SubmissionReviewPage({
   };
 
   return (
-    <MinistryShell account={account}>
+    <MinistryShell account={account} back={{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة' }}>
       {notice === 'recorded' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The outcome has been recorded and the organizer notified. The reference number does not change." ar="سُجّلت النتيجة وأُبلغ المنظّم. ولا يتغير الرقم المرجعي." />
