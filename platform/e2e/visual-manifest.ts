@@ -176,7 +176,11 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'g2',
-        mode: 'compare',
+        // Was a straight compare. Pass B finding B-1 (the nomination loop could not be
+        // closed from the UI) was fixed at reviewer order by surfacing the invitation
+        // link against each pending nomination -- the reference predates the block.
+        // Flips back to compare when the prototype adopts it (Pass C).
+        mode: 'expectedDivergent',
         reference: { strategy: 'headingBlock', text: 'Named EMS providers' },
         builtSelector: '[data-region="g2"]',
         note: 'The named-provider rows and their nomination/declaration chips. Held at 2%.',

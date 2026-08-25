@@ -22,7 +22,7 @@ import {
 } from '../../../../lib/rules/public-lookup';
 import type { Level } from '../../../../lib/rules/types';
 import { MINISTRY_CONTENT } from '../../../../lib/rules/ministry';
-import { latestOutcomeFor } from '../../../../lib/queries';
+import { derivedLevelFor, latestOutcomeFor } from '../../../../lib/queries';
 
 // Per-client rate limit: a small fixed window, in memory. The values are deployment
 // configuration in spirit; they live here until a config layer exists in Slice 6.
@@ -68,7 +68,7 @@ function findByReference(reference: string): SubmissionRecord | null {
   return {
     referenceNumber: row.moph_reference,
     eventName: row.name_en,
-    level: (row.demo_level ?? 1) as Level,
+    level: (derivedLevelFor(row.id) ?? 1) as Level,
     status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
     isDemo: row.is_demo === 1,
     eventStartDate: row.start_date ?? '',

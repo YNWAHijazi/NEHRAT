@@ -73,8 +73,10 @@ export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
       ? plan.attachedFile !== null &&
         Array.from({ length: 16 }, (_, i) => plan.sections[String(i + 1)]?.covered === true).every(Boolean)
       : Array.from({ length: 16 }, (_, i) => {
+          // Write mode is complete by WRITTEN text alone: a coverage confirmation
+          // belongs to the attach route and does not survive switching modes.
           const s = plan.sections[String(i + 1)];
-          return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
+          return Boolean(s?.text && s.text.trim() !== '');
         }).every(Boolean);
   if (!sectionsDone) return false;
   if (level >= 2) {

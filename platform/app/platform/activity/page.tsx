@@ -30,8 +30,14 @@ export default async function PlatformActivityPage() {
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Platform activity" ar="نشاط المنصة" />
       </h1>
-      <p data-region="scope" style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '86ch', lineHeight: 1.65 }}>
+      <p data-region="scope" style={{ margin: '0 0 8px', fontSize: 14, color: 'var(--muted)', maxWidth: '86ch', lineHeight: 1.65 }}>
         <L en={MINISTRY_CONTENT.activityScope.en} ar={MINISTRY_CONTENT.activityScope.ar} />
+      </p>
+      <p data-region="demo-exclusion" style={{ margin: '0 0 24px', fontSize: '12.5px', color: 'var(--muted)', maxWidth: '86ch', lineHeight: 1.6 }}>
+        <L
+          en="Demonstration rows are excluded from every figure here, in every session: these are national volumes, never example data."
+          ar="تُستبعد السجلات التوضيحية من كل رقم هنا، وفي كل جلسة: هذه أحجام وطنية، لا بيانات أمثلة."
+        />
       </p>
       <div data-region="counts" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', maxWidth: 1000 }}>
         {rows.map((r) => (

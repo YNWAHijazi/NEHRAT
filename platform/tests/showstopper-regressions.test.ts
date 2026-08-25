@@ -13,6 +13,7 @@ import {
 import { seriousIncidentGate } from '../lib/rules/gates';
 import { facilityLedger, type LedgerInputs } from '../lib/rules/facility';
 import { effectiveCycles } from '../lib/rules/ministry';
+import { detectPersonalName } from '../lib/rules/pii';
 
 describe('showstopper 1 — the declaration gate counts what the form renders', () => {
   it('Level 1 renders six declarations and completes on exactly those six', () => {
@@ -67,6 +68,20 @@ describe('showstopper 2 — the eleven major-incident items gate filing at Level
   it('all eleven confirmed completes at Level 2 and 3', () => {
     expect(planIsComplete(plan(allMi), 2)).toBe(true);
     expect(planIsComplete(plan(allMi), 3)).toBe(true);
+  });
+
+  it('attach-mode confirmations do not survive a switch to write mode', () => {
+    // Reviewer walk: confirm everything on the attach route, switch to write, and
+    // every section showed done with no text. Write mode completes by text alone.
+    const coveredOnly = Object.fromEntries(
+      Array.from({ length: 16 }, (_, i) => [String(i + 1), { covered: true }]),
+    );
+    expect(
+      planIsComplete({ mode: 'write', attachedFile: null, sections: coveredOnly, majorIncident: allMi }, 2),
+    ).toBe(false);
+    expect(
+      planIsComplete({ mode: 'attach', attachedFile: 'plan.pdf', sections: coveredOnly, majorIncident: allMi }, 2),
+    ).toBe(true);
   });
 
   it('Level 1 does not carry the eleven', () => {
@@ -131,5 +146,30 @@ describe('showstopper 5 — published cycles govern the ledger', () => {
   it('effectiveCycles reports provisional only while a value is unset', () => {
     expect(effectiveCycles({}).provisional).toBe(true);
     expect(effectiveCycles({ checkCycleDays: 10, lapseWindowDays: 5 }).provisional).toBe(false);
+  });
+});
+
+describe('non-negotiable 7 — the name gate catches the bare capitalized name', () => {
+  // Pass B journey 4: this exact narrative passed the gate and was stored. A detector
+  // that catches honorifics but not a bare name teaches people it works. Absolute rule.
+  it('the canonical narrative is blocked', () => {
+    expect(detectPersonalName('Ali Hassan collapsed near the east stand.')).toBe(true);
+  });
+
+  it('the precise shapes still catch', () => {
+    expect(detectPersonalName('Mr Haddad was treated on site.')).toBe(true);
+    expect(detectPersonalName('The patient Sara Khalil was transported.')).toBe(true);
+    expect(detectPersonalName('المريض اسمه علي حسن')).toBe(true);
+  });
+
+  it('domain vocabulary does not cry wolf', () => {
+    expect(detectPersonalName('The Beirut Marathon treatment post handled eleven cases.')).toBe(false);
+    expect(detectPersonalName('Municipal Stadium main stand, near Gate Two.')).toBe(false);
+    expect(detectPersonalName('The Red Cross attended and transported one case.')).toBe(false);
+    expect(detectPersonalName('AED applied at the pool deck; CPR continued to handover.')).toBe(false);
+  });
+
+  it('a proper-noun pair flags even at sentence start', () => {
+    expect(detectPersonalName('Karim Fares was assisted by staff.')).toBe(true);
   });
 });

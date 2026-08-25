@@ -13,7 +13,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { savePlanAction, type PlanPayload } from '../../../actions';
-import { FACILITY_CONTENT, referenceShortfalls, type ReferenceDeviceFacts } from '../../../../lib/rules';
+import { FACILITY_CONTENT, referenceShortfalls, type ReferenceDeviceFacts , GOVERNANCE_LANDING } from '../../../../lib/rules';
 import type { PlanRow, FacilityRow } from '../../../../lib/queries';
 
 interface PlanSection {
@@ -69,6 +69,7 @@ export function PlanForm({
   initial,
   facility,
   referenceFacts,
+  governance,
 }: {
   eventId: string;
   level: 1 | 2 | 3;
@@ -84,6 +85,10 @@ export function PlanForm({
   initial: PlanRow | null;
   facility: FacilityRow | null;
   referenceFacts: ReferenceDeviceFacts | null;
+  /** The Event Medical Director's governance text: lands read-only in sections 10 and
+   *  12 and beside the major-incident items -- exactly where the governance screen
+   *  promises, and the organizer cannot overwrite it. */
+  governance: Record<string, string>;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -463,7 +468,9 @@ export function PlanForm({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
             {sectionsDef.map((s) => {
               const st = sections[String(s.n)];
-              const done = mode === 'attach' ? st?.covered === true : Boolean(st?.text?.trim()) || st?.covered === true;
+              // Write mode is done by WRITTEN text alone: a coverage confirmation
+              // belongs to the attach route and does not survive switching modes.
+              const done = mode === 'attach' ? st?.covered === true : Boolean(st?.text?.trim());
               const c = chip(done ? 'done' : 'open');
               const isOpen = open === s.n;
               return (
@@ -494,6 +501,21 @@ export function PlanForm({
                           <L en={s.bodyEn} ar={s.bodyAr} />
                         </span>
                       </div>
+                      {(s.n === GOVERNANCE_LANDING.clinicalSection && (governance['clinical']?.trim() || governance['command']?.trim())) ||
+                      (s.n === GOVERNANCE_LANDING.incidentSection && governance['incidentRole']?.trim()) ? (
+                        <div style={{ marginBlockEnd: 14, padding: '12px 16px', border: '1px solid var(--brand)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, background: 'var(--brand-soft)' }}>
+                          <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 6 }}>
+                            <L en="From the Event Medical Director — part of this section, not overwritable" ar="من المدير الطبي للفعالية — جزء من هذا البند وغير قابل للتعديل" />
+                          </div>
+                          {(s.n === GOVERNANCE_LANDING.clinicalSection ? ['clinical', 'command'] : ['incidentRole']).map((k) =>
+                            governance[k]?.trim() ? (
+                              <div key={k} style={{ whiteSpace: 'pre-wrap', fontSize: '13.5px', lineHeight: 1.65, marginBlockEnd: 6 }}>
+                                {governance[k]}
+                              </div>
+                            ) : null,
+                          )}
+                        </div>
+                      ) : null}
                       {mode === 'write' ? (
                         <textarea
                           rows={4}
@@ -534,6 +556,14 @@ export function PlanForm({
             <L en="Eleven items, set by the Protocol. Confirm each is identified in your plan." ar="أحد عشر بنداً يحددها البروتوكول. أكّدوا أن كلاً منها محدد في خطتكم." />
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
+            {governance['incidentRole']?.trim() ? (
+              <div style={{ marginBlockEnd: 6, padding: '12px 16px', border: '1px solid var(--brand)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, background: 'var(--brand-soft)' }}>
+                <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 6 }}>
+                  <L en="From the Event Medical Director — their role under items 2 and 10" ar="من المدير الطبي للفعالية — دوره في البندين 2 و10" />
+                </div>
+                <div style={{ whiteSpace: 'pre-wrap', fontSize: '13.5px', lineHeight: 1.65 }}>{governance['incidentRole']}</div>
+              </div>
+            ) : null}
             {miDef.map((item) => {
               const covered = mi[String(item.n)]?.covered === true;
               return (

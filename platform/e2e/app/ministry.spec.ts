@@ -48,7 +48,8 @@ test.describe('the outcome gate', () => {
     // The gate opens for the reviewer.
     await signInAs(page, 'test_moph');
     await page.goto('/ministry/submissions/EV-0362');
-    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled();
+    // Generous under full-suite dev-compile load; the state itself is instant.
+    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 15_000 });
   });
 });
 

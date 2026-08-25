@@ -41,7 +41,7 @@ export function MinistryShell({
             </span>
             <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
               <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-.01em' }}>
-                <L en="Event Health Readiness" ar="الجاهزية الصحية للفعاليات" />
+                <L en="Event Health Readiness" ar="التأهب الصحي للفعاليات" />
               </span>
               <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>
                 <L en={consoleEn} ar={consoleAr} />

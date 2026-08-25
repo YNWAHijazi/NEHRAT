@@ -6,13 +6,13 @@ import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
 import { invitationForEvent, governanceFor, postEventReportFor } from '../../../lib/queries';
+import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
 import {
   assessmentsFor,
   beirutToday,
   daysBetween,
-  documentStateFor,
   eventFor,
   invitationsFor,
   unreadCountFor,
@@ -20,9 +20,8 @@ import {
 import {
   DOMAIN_COUNT,
   MAX_SCORE_PER_DOMAIN,
-  documentsForLevel,
   eventFilingDeadline,
-  eventMedicalDirectorGate,
+  eventMedicalDirectorGate, eventStage, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
   materialChangeGate, seriousIncidentGate,
   postEventReportGate,
   type EventGateContext,
@@ -204,23 +203,35 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const emdGate = eventMedicalDirectorGate(gateCtx);
   const level = gateCtx.finalLevel;
 
-  // The requirements counters, derived from the same state the requirements screen shows.
-  const documentState = level ? documentStateFor(account.id, id, level) : {};
-  const documents = level ? documentsForLevel(level) : [];
-  const attachOutstanding = documents.filter(
-    (d) => !d.optional && !d.thirdParty && !documentState[d.key],
-  ).length;
-  const providers = invitationsFor(account.id, id).filter((i) => i.kind === 'ems');
-  const agencyPending = providers.filter((p) => p.status !== 'confirmed').length;
+  const allInvitations = invitationsFor(account.id, id);
+  // Both kinds count; a declined party HAS answered and is not pending.
+  const agencyPending = allInvitations.filter((p) => p.status === 'nominated').length;
   const agencyPendColor = agencyPending > 0 ? 'var(--bad)' : 'var(--brand)';
+  // The record and the submission package speak with one voice: the outstanding
+  // figure IS the submit gate's blocker count, not a separate arithmetic.
+  const gate = submissionGateFor(account.id, id);
+  const outstanding = gate.blockers.length;
 
   // The six-stage rail, from the record's own state. Stage 1 follows the organization's
   // real status; stage 6 is level-gated: at Level 3 it is coming (todo), below it is not
   // applicable (na) -- the same two-behaviour rule as everywhere else.
   const orgRecorded = organization?.status === 'recorded';
-  const assessed = derivation?.complete === true;
+  // A seeded row's level stands in for stored answers (the level is the
+  // assessment's product); the stage comes from the SHARED rule the dashboard
+  // tile uses, so the two can never disagree again.
+  const assessed = derivation?.complete === true || (derivation === null && event.level !== null);
   const latestDate = latest?.createdAt.slice(0, 10) ?? '';
-  const stage: number = !assessed ? 2 : !event.filed ? 3 : event.outcome ? 5 : 4;
+  const reportSubmitted = postEventReportFor(account.id, id)?.submittedAt != null;
+  const stageInfo = eventStage({
+    assessed,
+    filed: event.filed,
+    outcome: event.outcome,
+    finalLevel: level,
+    eventEndDate: event.endDate,
+    reportSubmitted,
+    now: clockNow(),
+  });
+  const stage = stageInfo.stage;
   const stages: RailStage[] = [
     orgRecorded
       ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization?.recordedAt ?? '', metaAr: organization?.recordedAt ? `\u2066${organization.recordedAt}\u2069` : '' }
@@ -229,7 +240,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
       : { k: 'current', en: 'Assessment', ar: 'التقييم', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
     stage === 3
-      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: `${attachOutstanding} outstanding`, metaAr: `${attachOutstanding} غير مقدَّم` }
+      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: `${outstanding} outstanding`, metaAr: `${outstanding} غير مستوفى` }
       : stage > 3
         ? { k: 'done', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' }
         : { k: 'todo', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' },
@@ -240,11 +251,13 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: event.stateEn, metaAr: event.stateAr }
       : { k: event.filed ? 'current' : 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'One of three outcomes', metaAr: 'إحدى ثلاث نتائج' },
     level === 3
-      ? { k: 'todo', en: 'Post-event report', ar: 'التقرير اللاحق', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
-      : { k: 'na', en: 'Post-event report', ar: 'التقرير اللاحق', metaEn: 'Owed only after a reportable event or on Ministry request', metaAr: 'يُستحق فقط بعد واقعة واجبة الإبلاغ أو بطلب الوزارة' },
+      ? stage === POST_EVENT_STAGE
+        ? { k: 'current', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Open now — within 7 days of the event', metaAr: 'مفتوح الآن — خلال 7 أيام من الفعالية' }
+        : { k: reportSubmitted ? 'done' : 'todo', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
+      : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Owed only after a reportable event or on Ministry request', metaAr: 'يُستحق فقط بعد واقعة واجبة الإبلاغ أو بطلب الوزارة' },
   ];
-  const railNoteEn = `Stage ${stage} of 6` + (level === 3 ? '' : ' · stage 6 not applicable');
-  const railNoteAr = `المرحلة ${stage} من 6` + (level === 3 ? '' : ' · المرحلة 6 غير منطبقة');
+  const railNoteEn = `Stage ${stage} of ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · stage ${POST_EVENT_STAGE} not applicable`);
+  const railNoteAr = `المرحلة ${stage} من ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · المرحلة ${POST_EVENT_STAGE} غير منطبقة`);
 
   // Submission history: the assessment versions plus creation, newest first.
   const history: { en: string; ar: string; date: string }[] = [
@@ -262,6 +275,42 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
+
+        {/* The master filing control, on the record itself: never buried at the foot
+            of another screen. Ready files in one step; blocked names the count and
+            opens the package where every item is listed. */}
+        {!event.filed ? (
+          gate.canFile ? (
+            <Link
+              href={`/events/${event.id}/submit`}
+              data-region="master-submit"
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 26px', background: 'var(--brand)', color: 'var(--bg)', borderRadius: 14, marginBlockEnd: 28, textDecoration: 'none' }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 600 }}>
+                <L en="Everything is in place — file the submission" ar="كل شيء مستوفى — قدّموا الملف" />
+              </span>
+              <span style={{ fontSize: '13.5px', opacity: 0.85 }}>
+                <L en="Open the submission package to certify and file" ar="افتحوا حزمة التقديم للتصديق والتقديم" />
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href={`/events/${event.id}/submit`}
+              data-region="master-submit"
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 28, color: 'var(--ink)', textDecoration: 'none' }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 600 }}>
+                <L
+                  en={`Submission package — ${outstanding} ${outstanding === 1 ? 'item' : 'items'} outstanding`}
+                  ar={`حزمة التقديم — ${outstanding} ${outstanding === 1 ? 'بند غير مستوفى' : 'بنود غير مستوفاة'}`}
+                />
+              </span>
+              <span style={{ fontSize: '13.5px', color: 'var(--accent-ink)' }}>
+                <L en="Open the package — every outstanding item is named there" ar="افتحوا الحزمة — كل بند غير مستوفى مُسمّى هناك" />
+              </span>
+            </Link>
+          )
+        ) : null}
         {/* Identity header, from the reference */}
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>
@@ -411,9 +460,9 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
+              <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{outstanding}</div>
               <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                <L en="documents left to attach" ar="مستنداً بقي إرفاقه" />
+                <L en="items outstanding before filing" ar="بنداً غير مستوفى قبل التقديم" />
               </div>
             </div>
           </div>

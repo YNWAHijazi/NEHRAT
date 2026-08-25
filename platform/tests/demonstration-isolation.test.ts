@@ -52,14 +52,14 @@ describe('a demonstration session sees only demonstration rows — the console s
   }
 });
 
-describe('the public lookup is the one asymmetric surface', () => {
+describe('the asymmetric surfaces', () => {
   it('a demonstration reference never resolves, whoever asks', () => {
     expect(demonstrationFilter('publicReferenceLookup', realSession)).toEqual({ isDemo: false });
     expect(demonstrationFilter('publicReferenceLookup', demoSession)).toEqual({ isDemo: false });
   });
 
-  it('and it is the only surface on the never-reaches list', () => {
-    expect(DEMONSTRATION_NEVER_REACHES).toEqual(['publicReferenceLookup']);
+  it('the never-reaches list is exactly the two ruled surfaces', () => {
+    expect(DEMONSTRATION_NEVER_REACHES.sort()).toEqual(['platformActivityCounts', 'publicReferenceLookup']);
     for (const surface of DEMONSTRATION_NEVER_REACHES) {
       expect(SURFACE_DEMONSTRATION_POLICY[surface]).toBe('excludeDemonstration');
     }

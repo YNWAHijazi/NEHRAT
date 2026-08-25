@@ -60,7 +60,7 @@ function MinistryMark() {
           <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />
         </span>
         <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-          <L en="Event Health Readiness" ar="الجاهزية الصحية للفعاليات" />
+          <L en="Event Health Readiness" ar="التأهب الصحي للفعاليات" />
         </span>
       </span>
     </div>

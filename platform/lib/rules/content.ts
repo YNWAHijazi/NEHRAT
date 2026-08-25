@@ -93,3 +93,8 @@ export const VENUE_ELIGIBILITY_QUESTIONS: { regularlyHosts: EligibilityQuestion;
 /* Categories and derivations live in lib/rules/facility.ts; screen content here. */
 
 export const FACILITY_CONTENT = facilityJson;
+
+/** Where the Director's governance text lands in the organizer's plan (the
+ *  governance screen's own promises): clinical + command into section 10,
+ *  the incident role into section 12. */
+export const GOVERNANCE_LANDING = { clinicalSection: 10, incidentSection: 12 } as const;

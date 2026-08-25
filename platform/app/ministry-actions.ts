@@ -34,7 +34,7 @@ function notifyEventOwner(eventId: string, subjectEn: string, subjectAr: string,
   if (!ev) return;
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
   ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
 }
 
@@ -67,7 +67,7 @@ export async function assignReviewAction(eventId: string, formData: FormData): P
   getDb()
     .prepare(
       `INSERT INTO review_state (event_id, state, reviewer, updated_at)
-       VALUES (?, ?, ?, datetime('now'))
+       VALUES (?, ?, ?, now_stamp())
        ON CONFLICT(event_id) DO UPDATE SET state = excluded.state, reviewer = excluded.reviewer, updated_at = excluded.updated_at`,
     )
     .run(eventId, ['queued', 'assigned', 'progress'].includes(state) ? state : 'progress', actor.displayName);
@@ -136,7 +136,7 @@ export async function requireMeasureAction(eventId: string, formData: FormData):
 
 export async function clearMeasureAction(eventId: string, measureId: number): Promise<void> {
   await requireMinistry('requireMeasures');
-  getDb().prepare(`UPDATE added_measures SET cleared_at = datetime('now') WHERE id = ? AND event_id = ?`).run(measureId, eventId);
+  getDb().prepare(`UPDATE added_measures SET cleared_at = now_stamp() WHERE id = ? AND event_id = ?`).run(measureId, eventId);
   revalidatePath(`/ministry/submissions/${eventId}`);
   redirect(`/ministry/submissions/${eventId}`);
 }
@@ -149,10 +149,10 @@ export async function recordOrganizationAction(orgId: number): Promise<void> {
     | { account_id: number; name_en: string; name_ar: string; is_demo: number }
     | undefined;
   if (!org) redirect('/ministry/organizations');
-  db.prepare(`UPDATE organizations SET status = 'recorded', recorded_at = datetime('now') WHERE id = ?`).run(orgId);
+  db.prepare(`UPDATE organizations SET status = 'recorded', recorded_at = now_stamp() WHERE id = ?`).run(orgId);
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'for_information', ?, ?, ?, ?, '/organization', datetime('now'), ?)`,
+     VALUES (?, 'for_information', ?, ?, ?, ?, '/organization', now_stamp(), ?)`,
   ).run(
     org.account_id,
     `Organization recorded — ${org.name_en}`,
@@ -170,7 +170,7 @@ export async function respondEnquiryAction(enquiryId: number, formData: FormData
   const reply = String(formData.get('reply') ?? '').trim();
   if (!reply) redirect('/ministry/enquiries');
   getDb()
-    .prepare(`UPDATE enquiries SET reply = ?, replied_by = ?, replied_at = datetime('now') WHERE id = ?`)
+    .prepare(`UPDATE enquiries SET reply = ?, replied_by = ?, replied_at = now_stamp() WHERE id = ?`)
     .run(reply, actor.displayName, enquiryId);
   revalidatePath('/ministry/enquiries');
   redirect('/ministry/enquiries?notice=responded');
@@ -213,7 +213,7 @@ export async function recordFacilityCorrectiveAction(formData: FormData): Promis
   ).run(facilityId, bodyEn, bodyAr, actor.displayName, fac.is_demo);
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
   ).run(
     fac.account_id,
     `Corrective action required — ${fac.name_en}`,
@@ -226,7 +226,7 @@ export async function recordFacilityCorrectiveAction(formData: FormData): Promis
 
 export async function markCorrectiveDoneAction(requestId: number): Promise<void> {
   await requireMinistry('recordCorrective');
-  getDb().prepare(`UPDATE facility_requests SET status = 'corrected', corrected_at = datetime('now') WHERE id = ?`).run(requestId);
+  getDb().prepare(`UPDATE facility_requests SET status = 'corrected', corrected_at = now_stamp() WHERE id = ?`).run(requestId);
   revalidatePath('/ministry/facilities');
   redirect('/ministry/facilities');
 }
@@ -254,7 +254,7 @@ export async function designateCoveredAction(formData: FormData): Promise<void> 
     if (fac) {
       db.prepare(
         `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-         VALUES (?, 'needs_action', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+         VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
       ).run(
         fac.account_id,
         `Designated as a covered facility — ${nameEn}`,
@@ -284,7 +284,7 @@ export async function publishConfigAction(formData: FormData): Promise<void> {
   const db = getDb();
   db.prepare(
     `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
-     VALUES (?, ?, ?, ?, datetime('now'))
+     VALUES (?, ?, ?, ?, now_stamp())
      ON CONFLICT(key) DO UPDATE SET value = excluded.value, effective = excluded.effective,
        published_by = excluded.published_by, published_at = excluded.published_at`,
   ).run(key, value, effective, actor.displayName);
@@ -302,7 +302,7 @@ export async function publishConfigAction(formData: FormData): Promise<void> {
     for (const i of interests) {
       db.prepare(
         `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-         VALUES (?, 'needs_action', ?, ?, ?, ?, '/facilities/new', datetime('now'), ?)`,
+         VALUES (?, 'needs_action', ?, ?, ?, ?, '/facilities/new', now_stamp(), ?)`,
       ).run(
         i.account_id,
         'The phased implementation schedule has been published',
@@ -322,7 +322,7 @@ export async function publishConfigAction(formData: FormData): Promise<void> {
     for (const o of operators) {
       db.prepare(
         `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-         VALUES (?, 'for_information', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+         VALUES (?, 'for_information', ?, ?, ?, ?, ?, now_stamp(), ?)`,
       ).run(
         o.account_id,
         'A readiness cycle has been published',
@@ -345,7 +345,7 @@ export async function setOrderLaneAction(formData: FormData): Promise<void> {
   getDb()
     .prepare(
       `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
-       VALUES ('orderLane', ?, NULL, ?, datetime('now'))
+       VALUES ('orderLane', ?, NULL, ?, now_stamp())
        ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
     )
     .run(active ? 'on' : 'off', actor.displayName);

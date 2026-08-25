@@ -52,7 +52,9 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
     providers: invitations
       .filter((i) => i.kind === 'ems')
       .map((i) => ({ name: i.nameEn, status: i.status, declaration: i.declaration })),
-    director: invitations.find((i) => i.kind === 'director') ?? null,
+    // A declined Director is not the record's Director: the blocker must say "name
+    // one", not "has not accepted".
+    director: invitations.find((i) => i.kind === 'director' && i.status !== 'declined') ?? null,
     declarationsComplete,
     today: beirutToday(),
     filingDeadline: deadline?.date ?? null,

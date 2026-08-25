@@ -54,8 +54,8 @@ export default async function DirectorReportPage({
           ) : null}
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
             <L
-              en={`${invitation.eventNameEn} · ${invitation.organizationNameEn} · held ${invitation.eventEnd ?? ''} · Level 3`}
-              ar={`${invitation.eventNameAr} · ${invitation.organizationNameAr} · أُقيم في ⁦${invitation.eventEnd ?? ''}⁩ · المستوى 3`}
+              en={`${invitation.eventNameEn} · ${invitation.organizationNameEn} · event end date ${invitation.eventEnd ?? ''} · Level 3`}
+              ar={`${invitation.eventNameAr} · ${invitation.organizationNameAr} · تاريخ انتهاء الفعالية ⁦${invitation.eventEnd ?? ''}⁩ · المستوى 3`}
             />
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
@@ -68,8 +68,15 @@ export default async function DirectorReportPage({
           {due ? (
             <div data-region="due" style={{ padding: '26px 30px', border: `2px solid ${directorSigned ? 'var(--brand)' : 'var(--bad)'}`, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', borderRadius: 14, marginBlockEnd: 20 }}>
               <div style={{ fontSize: 19, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>
-                {directorSigned ? (
+                {/* Order-independent co-signature (reviewer ruling): either party may sign
+                    first; complete only when BOTH have; and no claim that the other
+                    is waiting when it isn't. */}
+                {directorSigned && organizerSigned ? (
                   <L en="The report is complete. Both signatures are recorded." ar="اكتمل التقرير. وسُجّل التوقيعان." />
+                ) : directorSigned ? (
+                  <L en="You have signed. The organizer's signature completes the report." ar="وقّعتم. وتوقيع المنظّم يُكمل التقرير." />
+                ) : !report ? (
+                  <L en="The organizer has not prepared the report yet. Your signature becomes available once the figures exist." ar="لم يُعِدّ المنظّم التقرير بعد. يصبح توقيعكم متاحاً متى وُجدت الأرقام." />
                 ) : overdueDays > 0 ? (
                   <L en={`This report is ${overdueDays} days overdue and is waiting on your signature.`} ar={`تأخر هذا التقرير ${overdueDays} أيام وهو بانتظار توقيعكم.`} />
                 ) : (
@@ -78,8 +85,8 @@ export default async function DirectorReportPage({
               </div>
               <div style={{ fontSize: 15, lineHeight: 1.7 }}>
                 <L
-                  en={`Due ${due}, ${POST_EVENT_REPORT.windowDays} calendar days after the event. ${organizerSigned ? 'The organizer has signed.' : 'The organizer has not yet signed.'}`}
-                  ar={`مستحق في ⁦${due}⁩، ${POST_EVENT_REPORT.windowDays} أيام تقويمية بعد الفعالية. ${organizerSigned ? 'وقّع المنظّم.' : 'لم يوقّع المنظّم بعد.'}`}
+                  en={`Due ${due}, ${POST_EVENT_REPORT.windowDays} calendar days after the event. Either signature may come first; the report is complete when both are recorded. ${organizerSigned ? 'The organizer has signed.' : 'The organizer has not yet signed.'}`}
+                  ar={`مستحق في ⁦${due}⁩، ${POST_EVENT_REPORT.windowDays} أيام تقويمية بعد الفعالية. لأيٍّ من التوقيعين أن يسبق؛ ويكتمل التقرير بتسجيلهما معاً. ${organizerSigned ? 'وقّع المنظّم.' : 'لم يوقّع المنظّم بعد.'}`}
                 />
               </div>
             </div>

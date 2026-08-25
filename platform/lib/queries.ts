@@ -15,8 +15,8 @@ import {
   type LedgerRow as FacilityLedgerRow,
   type Standing,
 } from './rules';
-import { beirutToday as beirutTodayFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter } from './rules';
+import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 
@@ -90,6 +90,11 @@ function latestDerivation(eventId: string): LevelDerivation | null {
   });
 }
 
+/** The full latest derivation, unscoped -- the review screen reports both results and which governed (non-negotiable 1). */
+export function derivationForReview(eventId: string): LevelDerivation | null {
+  return latestDerivation(eventId);
+}
+
 /** Latest recorded outcome -- same ordering as the Ministry queue, so the two sides never disagree. */
 export function latestOutcomeFor(eventId: string): OutcomeKey | null {
   const row = getDb()
@@ -100,18 +105,44 @@ export function latestOutcomeFor(eventId: string): OutcomeKey | null {
   return row?.outcome ?? null;
 }
 
-function toEventRow(row: EventDbRow): EventRow {
+function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
   const derivation = latestDerivation(row.id);
   const level =
     derivation?.finalLevel ?? (row.demo_level as Level | null) ?? null;
   // A recorded outcome overrides the seeded presentation state: the organizer must
   // read the same determination the reviewer recorded, not a stale seeded string.
   const outcome = latestOutcomeFor(row.id);
-  const derivedState = organizerEventState({
+  // A seeded row's level IS its assessment's product: assessed when either the
+  // stored answers derive, or a demonstration level stands in for them.
+  const assessed = (derivation?.complete ?? false) || (derivation === null && level !== null);
+  const filed = row.filed === 1;
+  const derivedState = organizerEventState({ outcome, filed, assessed });
+  // The dashboard tile derives what the record derives: seeded presentation values
+  // apply only where they exist, and a real row is never a blank tile beside a
+  // record that knows its own deadline and stage.
+  const derivedDue =
+    level !== null && row.start_date !== null
+      ? filingDeadline(level, new Date(`${row.start_date}T12:00:00+03:00`)).date
+      : null;
+  const reportSubmitted =
+    (getDb().prepare(`SELECT submitted_at FROM post_event_reports WHERE event_id = ?`).get(row.id) as { submitted_at: string | null } | undefined)?.submitted_at != null;
+  const stageInfo = eventStage({
+    assessed,
+    filed,
     outcome,
-    filed: row.filed === 1,
-    assessed: derivation?.complete ?? false,
+    finalLevel: level,
+    eventEndDate: row.end_date,
+    reportSubmitted,
+    now: clockNowFn(),
   });
+  const derivedStages = [
+    orgRecorded ? 'done' : 'current',
+    assessed ? 'done' : 'current',
+    !assessed ? 'todo' : filed ? 'done' : 'current',
+    filed ? 'done' : 'todo',
+    outcome ? (outcome === 'satisfied' ? 'done' : 'returned') : filed && stageInfo.stage < 6 ? 'current' : filed ? 'done' : 'todo',
+    stageInfo.stage === 6 ? 'current' : level === 3 ? 'todo' : 'na',
+  ];
   return {
     id: row.id,
     nameEn: row.name_en,
@@ -124,13 +155,13 @@ function toEventRow(row: EventDbRow): EventRow {
     outcome,
     stateEn: outcome ? derivedState.en : (row.demo_state_en ?? derivedState.en),
     stateAr: outcome ? derivedState.ar : (row.demo_state_ar ?? derivedState.ar),
-    due: row.demo_due,
+    due: row.demo_due ?? derivedDue,
     dueLabelEn: row.demo_due_label_en ?? 'File by',
     dueLabelAr: row.demo_due_label_ar ?? 'التقديم بحلول',
-    stage: row.demo_stage,
-    stageEn: row.demo_stage_en ?? '',
-    stageAr: row.demo_stage_ar ?? '',
-    stages: row.demo_stages ? (JSON.parse(row.demo_stages) as string[]) : [],
+    stage: row.demo_stage ?? stageInfo.stage,
+    stageEn: row.demo_stage_en ?? stageInfo.en,
+    stageAr: row.demo_stage_ar ?? stageInfo.ar,
+    stages: row.demo_stages ? (JSON.parse(row.demo_stages) as string[]) : derivedStages,
     span: row.demo_span ?? 60,
     createdAt: row.created_at,
     venueFacilityId: row.venue_facility_id,
@@ -141,11 +172,19 @@ const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, moph_referenc
    demo_state_en, demo_state_ar, demo_due, demo_due_label_en, demo_due_label_ar,
    demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id`;
 
+function orgRecordedFor(accountId: number): boolean {
+  const r = getDb()
+    .prepare(`SELECT status FROM organizations WHERE account_id = ?`)
+    .get(accountId) as { status: string } | undefined;
+  return r?.status === 'recorded';
+}
+
 export function eventsFor(accountId: number): EventRow[] {
+  const orgRecorded = orgRecordedFor(accountId);
   const rows = getDb()
     .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? ORDER BY created_at DESC`)
     .all(accountId) as unknown as EventDbRow[];
-  return rows.map(toEventRow);
+  return rows.map((r) => toEventRow(r, orgRecorded));
 }
 
 /** Scoped to the owner: a foreign id returns null exactly like a missing one. */
@@ -153,7 +192,7 @@ export function eventFor(accountId: number, eventId: string): EventRow | null {
   const row = getDb()
     .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE id = ? AND account_id = ?`)
     .get(eventId, accountId) as unknown as EventDbRow | undefined;
-  return row ? toEventRow(row) : null;
+  return row ? toEventRow(row, orgRecordedFor(accountId)) : null;
 }
 
 export function assessmentsFor(accountId: number, eventId: string): AssessmentVersion[] {
@@ -695,7 +734,12 @@ export function documentStateFor(
     plan: planComplete,
     siteMap: attached.has('siteMap'),
     deploymentMap: attached.has('deploymentMap'),
-    emsDeclarations: providers.length > 0 && providers.every((p) => p.declaration === 'signed'),
+    // CONFIRMED providers only, per lib/rules/submission.ts: a declined party has
+    // answered and can never sign -- counting them made one decline block filing
+    // forever. At least one confirmed provider must exist and every one must sign.
+    emsDeclarations:
+      providers.filter((p) => p.status === 'confirmed').length > 0 &&
+      providers.filter((p) => p.status === 'confirmed').every((p) => p.declaration === 'signed'),
     other: attached.has('other'),
   };
 }
@@ -879,11 +923,18 @@ export interface InvitationDetail {
   organizationNameAr: string;
 }
 
-function derivedLevelFor(eventId: string): Level | null {
+/**
+ * The DERIVED final level, unscoped: stored answers first, demo_level as the seeded
+ * fallback. The public lookup uses this -- demo_level alone reported real events as Level 1.
+ */
+export function derivedLevelFor(eventId: string): Level | null {
   const r = getDb()
     .prepare(`SELECT answers, inputs FROM assessments WHERE event_id = ? ORDER BY version DESC LIMIT 1`)
     .get(eventId) as { answers: string; inputs: string } | undefined;
-  if (!r) return null;
+  if (!r) {
+    const d = getDb().prepare(`SELECT demo_level FROM events WHERE id = ?`).get(eventId) as { demo_level: number | null } | undefined;
+    return (d?.demo_level as Level | null) ?? null;
+  }
   const derivation = deriveLevel({
     answers: JSON.parse(r.answers) as DomainAnswers,
     inputs: JSON.parse(r.inputs) as MinimumConditionInputs,
@@ -1351,7 +1402,11 @@ export interface PlatformCounts {
 
 export function platformCounts(viewerIsDemo: boolean): PlatformCounts {
   const db = getDb();
-  const flag = demoFlag(viewerIsDemo);
+  // Reviewer ruling: the owner's volumes are REAL volumes, whoever is looking --
+  // demonstration rows are excluded even in a demonstration session, and the
+  // surface says so.
+  void viewerIsDemo;
+  const flag = demonstrationFilter('platformActivityCounts', { isDemonstration: viewerIsDemo }).isDemo ? 1 : 0;
   const n = (sql: string): number => (db.prepare(sql).get(flag) as { n: number }).n;
   return {
     organizations: n(`SELECT COUNT(*) AS n FROM organizations WHERE is_demo = ?`),

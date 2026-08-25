@@ -10,6 +10,7 @@ import {
   facilityById,
   facilityDevices,
   facilityPlanConfirmation,
+  governanceFor,
   planFor,
   planVersionsFor,
   unreadCountFor,
@@ -28,6 +29,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const versions = assessmentsFor(account.id, id);
   const level = (versions[0]?.derivation.finalLevel ?? event.level) as Level | null;
   const priorVersions = planVersionsFor(account.id, id);
+  const governance = governanceFor(id);
   if (level === null) redirect(`/events/${id}`);
 
   const plan = planFor(account.id, id);
@@ -82,6 +84,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           initial={plan}
           facility={facility}
           referenceFacts={referenceFacts}
+          governance={governance}
         />
 
         {priorVersions.length > 0 ? (

@@ -295,7 +295,7 @@ export async function attachDocumentAction(eventId: string, formData: FormData):
     getDb()
       .prepare(
         `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)
-         ON CONFLICT (event_id, doc_key) DO UPDATE SET file_name = excluded.file_name, attached_at = datetime('now')`,
+         ON CONFLICT (event_id, doc_key) DO UPDATE SET file_name = excluded.file_name, attached_at = now_stamp()`,
       )
       .run(eventId, docKey, fileName);
   }
@@ -360,7 +360,7 @@ export async function savePlanAction(eventId: string, payload: PlanPayload): Pro
          ref_admits_children = excluded.ref_admits_children,
          ref_temporary_areas = excluded.ref_temporary_areas, sections = excluded.sections,
          attached_file = excluded.attached_file, major_incident = excluded.major_incident,
-         version = plans.version + 1, updated_at = datetime('now')`,
+         version = plans.version + 1, updated_at = now_stamp()`,
     )
     .run(
       eventId, payload.mode, payload.refConfirmed ? 1 : 0,
@@ -429,7 +429,7 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
          expedited, filed_at FROM submissions WHERE event_id = ?`,
     ).run(eventId);
     db.prepare(
-      `UPDATE submissions SET filed_at = datetime('now'), expedited = ?, version = version + 1
+      `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
        WHERE event_id = ?`,
     ).run(gate.expedited ? 1 : 0, eventId);
     const ref = (db.prepare(`SELECT moph_reference AS r FROM events WHERE id = ?`).get(eventId) as { r: string }).r;
@@ -452,7 +452,7 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   const reference = `MOPH-EV-${year}-${String(n).padStart(4, '0')}`;
 
   db.prepare(
-    `UPDATE submissions SET filed_at = datetime('now'), moph_reference = ?, expedited = ? WHERE event_id = ?`,
+    `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
   ).run(reference, gate.expedited ? 1 : 0, eventId);
   db.prepare(`UPDATE events SET filed = 1, moph_reference = ? WHERE id = ?`).run(reference, eventId);
   revalidatePath(`/events/${eventId}`);
@@ -519,7 +519,7 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
   const level = assessmentsFor(account.id, eventId)[0]?.derivation.finalLevel ?? event?.level ?? null;
   const { postEventSignaturesRequired } = await import('../lib/rules');
   const signaturesRequired = level === null ? 1 : postEventSignaturesRequired(level);
-  db.prepare(`UPDATE post_event_reports SET organizer_signed_at = datetime('now') WHERE event_id = ?`).run(eventId);
+  db.prepare(`UPDATE post_event_reports SET organizer_signed_at = now_stamp() WHERE event_id = ?`).run(eventId);
   const row = db.prepare(`SELECT organizer_signed_at, director_signed_at FROM post_event_reports WHERE event_id = ?`).get(eventId) as
     | { organizer_signed_at: string | null; director_signed_at: string | null }
     | undefined;
@@ -529,7 +529,7 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
     revalidatePath(`/events/${eventId}/post-event`);
     return { error: 'awaiting-director' };
   }
-  db.prepare(`UPDATE post_event_reports SET submitted_at = datetime('now') WHERE event_id = ?`).run(eventId);
+  db.prepare(`UPDATE post_event_reports SET submitted_at = now_stamp() WHERE event_id = ?`).run(eventId);
   revalidatePath(`/events/${eventId}/post-event`);
   return { ok: true };
 }
@@ -780,22 +780,22 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
     );
   } else if (purpose === 'annual') {
     db.prepare(
-      `UPDATE facility_devices SET latest_check = ?, updated_at = datetime('now')
+      `UPDATE facility_devices SET latest_check = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
     ).run(s('latestCheck') || null, facilityId, label);
   } else if (purpose === 'relocation') {
     db.prepare(
-      `UPDATE facility_devices SET location_en = ?, location_ar = ?, accessible_hours = ?, updated_at = datetime('now')
+      `UPDATE facility_devices SET location_en = ?, location_ar = ?, accessible_hours = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
     ).run(s('location'), s('locationAr') || s('location'), yes('accessibleHours'), facilityId, label);
   } else if (purpose === 'replacement') {
     db.prepare(
-      `UPDATE facility_devices SET identification = ?, pad_expiry = ?, battery_expiry = ?, updated_at = datetime('now')
+      `UPDATE facility_devices SET identification = ?, pad_expiry = ?, battery_expiry = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
     ).run(s('identification'), s('padExpiry') || null, s('batteryExpiry') || null, facilityId, label);
   } else if (purpose === 'statusChange') {
     db.prepare(
-      `UPDATE facility_devices SET operational = ?, accessible_hours = ?, updated_at = datetime('now')
+      `UPDATE facility_devices SET operational = ?, accessible_hours = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
     ).run(yes('operational'), yes('accessibleHours'), facilityId, label);
   }
@@ -841,7 +841,7 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
   for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
     db.prepare(
-      `UPDATE facility_persons SET name_or_position = ?, phone = ?, email = ?, updated_at = datetime('now')
+      `UPDATE facility_persons SET name_or_position = ?, phone = ?, email = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND role = ?`,
     ).run(s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`), facilityId, role);
   }
@@ -893,7 +893,7 @@ function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string
   if (!ev) return;
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, datetime('now'), ?)`,
+     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
   ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
 }
 
@@ -937,23 +937,30 @@ export async function respondToInvitationAction(token: string, formData: FormDat
 
   if (response === 'accept') {
     db.prepare(
-      `UPDATE invitations SET status = 'confirmed', account_id = ?, answered_at = datetime('now') WHERE token = ?`,
+      `UPDATE invitations SET status = 'confirmed', account_id = ?, answered_at = now_stamp() WHERE token = ?`,
     ).run(account.id, token);
     redirect('/profile?notice=accepted');
   }
   if (response === 'decline') {
     if (!reason) redirect(`/invitations/${token}?error=reason`);
     db.prepare(
-      `UPDATE invitations SET status = 'declined', account_id = ?, response_note = ?, answered_at = datetime('now') WHERE token = ?`,
+      `UPDATE invitations SET status = 'declined', account_id = ?, response_note = ?, answered_at = now_stamp() WHERE token = ?`,
     ).run(account.id, reason, token);
-    // Declining is a MATERIAL CHANGE the organizer must report (rule 6).
+    // Declining is a MATERIAL CHANGE the organizer must report (rule 6) -- but only
+    // a FILED submission has anything on file to change. Before filing, the
+    // instruction is simply to name another party; the change route would bounce.
+    const evFiled = (db.prepare(`SELECT filed FROM events WHERE id = ?`).get(inv.event_id) as { filed: number }).filed === 1;
     notifyOrganizerOf(
       inv.event_id,
       `A named party has declined — ${eventName.name_en}`,
       `اعتذر طرف مُسمّى — ${eventName.name_ar}`,
-      `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. This is a material change to your submission: report it to the Ministry and name another party.`,
-      `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». هذا تغيير جوهري في ملفكم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`,
-      `/events/${inv.event_id}/change`,
+      evFiled
+        ? `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
+        : `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
+      evFiled
+        ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
+        : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
+      evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
     );
     redirect(`/invitations/${token}?notice=declined`);
   }
@@ -993,7 +1000,7 @@ export async function saveOpsDetailAction(token: string, formData: FormData): Pr
   }
   const inv = invitationRow(token);
   getDb()
-    .prepare(`UPDATE invitations SET ops_detail = ?, status = 'confirmed', answered_at = COALESCE(answered_at, datetime('now')) WHERE token = ?`)
+    .prepare(`UPDATE invitations SET ops_detail = ?, status = 'confirmed', answered_at = COALESCE(answered_at, now_stamp()) WHERE token = ?`)
     .run(JSON.stringify(detail), token);
   if (inv) {
     const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
@@ -1040,7 +1047,7 @@ export async function signDeclarationAction(
   const db = getDb();
   db.prepare(
     `UPDATE invitations SET declaration = 'signed', declaration_items = ?, certification = ?,
-       status = 'confirmed', signed_at = datetime('now'), answered_at = COALESCE(answered_at, datetime('now'))
+       status = 'confirmed', signed_at = now_stamp(), answered_at = COALESCE(answered_at, now_stamp())
      WHERE token = ?`,
   ).run(JSON.stringify(payload.items), JSON.stringify(payload.certification), token);
   const inv = invitationRow(token);
@@ -1086,7 +1093,7 @@ export async function saveRoleProfileAction(formData: FormData): Promise<void> {
   }
   getDb()
     .prepare(
-      `INSERT INTO role_profiles (account_id, fields, updated_at) VALUES (?, ?, datetime('now'))
+      `INSERT INTO role_profiles (account_id, fields, updated_at) VALUES (?, ?, now_stamp())
        ON CONFLICT(account_id) DO UPDATE SET fields = excluded.fields, updated_at = excluded.updated_at`,
     )
     .run(account.id, JSON.stringify(fields));
@@ -1103,7 +1110,7 @@ export async function saveFrReadinessAction(
   getDb()
     .prepare(
       `INSERT INTO fr_readiness (account_id, confirmations, signed_at, updated_at)
-       VALUES (?, ?, ?, datetime('now'))
+       VALUES (?, ?, ?, now_stamp())
        ON CONFLICT(account_id) DO UPDATE SET confirmations = excluded.confirmations,
          signed_at = COALESCE(excluded.signed_at, fr_readiness.signed_at), updated_at = excluded.updated_at`,
     )
@@ -1162,7 +1169,7 @@ export async function saveGovernanceAction(eventId: string, formData: FormData):
   }
   getDb()
     .prepare(
-      `INSERT INTO event_governance (event_id, sections, updated_at) VALUES (?, ?, datetime('now'))
+      `INSERT INTO event_governance (event_id, sections, updated_at) VALUES (?, ?, now_stamp())
        ON CONFLICT(event_id) DO UPDATE SET sections = excluded.sections, updated_at = excluded.updated_at`,
     )
     .run(eventId, JSON.stringify(sections));
@@ -1176,7 +1183,7 @@ export async function signPostEventReportAction(eventId: string): Promise<void> 
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
   getDb()
-    .prepare(`UPDATE post_event_reports SET director_signed_at = datetime('now') WHERE event_id = ?`)
+    .prepare(`UPDATE post_event_reports SET director_signed_at = now_stamp() WHERE event_id = ?`)
     .run(eventId);
   revalidatePath(`/events/${eventId}/report`);
   redirect(`/events/${eventId}/report?notice=signed`);

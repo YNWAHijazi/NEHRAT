@@ -24,3 +24,17 @@ export function clockNow(): Date {
   if (pinned) return new Date(`${pinned}T12:00:00+03:00`);
   return new Date();
 }
+
+/**
+ * The recorded-timestamp stamp: 'YYYY-MM-DD HH:MM:SS' on the SAME clock the date
+ * gates run on. Under REVIEW_CLOCK the date is the pinned day (the time of day is
+ * real, so orderings within a session hold); in production it is real Beirut time.
+ * One clock: a determination can never be dated after "today" again.
+ */
+export function nowStamp(): string {
+  const time = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Beirut', hour12: false,
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).format(new Date());
+  return `${beirutToday()} ${time}`;
+}

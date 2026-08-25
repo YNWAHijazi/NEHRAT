@@ -235,6 +235,10 @@ export default async function SignInPage({
             ) : null}
           </div>
 
+          {/* Reviewer ruling: the demonstration panel exists only in a review build --
+              the same guard that forces the seeder off in production (lib/db.ts).
+              A production sign-in shows no demonstration accounts. */}
+          {process.env.NODE_ENV !== 'production' ? (
           <div style={{ padding: 34, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16 }}>
             <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en="Demonstration accounts" ar="حسابات العرض التوضيحي" />
@@ -282,7 +286,7 @@ export default async function SignInPage({
               ))}
             </div>
           </div>
-        </div>
+          ) : null}        </div>
       </main>
     </>
   );

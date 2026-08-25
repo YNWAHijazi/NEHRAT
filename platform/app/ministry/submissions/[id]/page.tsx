@@ -7,6 +7,7 @@ import {
   determinationsFor,
   inspectionsFor,
   submissionForReview,
+  derivationForReview,
 } from '../../../../lib/queries';
 import { MINISTRY_CONTENT, can, documentsForLevel, outcomeAvailability } from '../../../../lib/rules';
 import {
@@ -36,6 +37,7 @@ export default async function SubmissionReviewPage({
   const account = await requireMinistryPage('viewSubmission');
   const { id } = await params;
   const review = submissionForReview(account.isDemo, id);
+  const derivation = derivationForReview(id);
   if (!review) notFound();
   const { notice, error } = await searchParams;
 
@@ -103,6 +105,74 @@ export default async function SubmissionReviewPage({
             </button>
           </form>
         ) : null}
+      </div>
+
+      {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --
+          never a bare level chip. A seeded submission without stored answers says so. */}
+      <div data-region="derivation" style={{ padding: '18px 24px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24 }}>
+        <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
+          <L en="How the level was determined" ar="كيف تحدد المستوى" />
+        </div>
+        {derivation && derivation.complete ? (
+          <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockEnd: 3 }}>
+                <L en="Assessment score" ar="نتيجة التقييم" />
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                {derivation.scoreTotal} / 18
+              </div>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                <L en={`Score band: Level ${derivation.scoreBandLevel}`} ar={`نطاق النتيجة: المستوى ${derivation.scoreBandLevel}`} />
+              </div>
+            </div>
+            <div style={{ maxWidth: '40ch' }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockEnd: 3 }}>
+                <L en="Minimum conditions" ar="الحد الأدنى للشروط" />
+              </div>
+              {derivation.minimumConditionLevel !== null ? (
+                <>
+                  <div style={{ fontSize: 18, fontWeight: 600 }}>
+                    <L en={`Level ${derivation.minimumConditionLevel}`} ar={`المستوى ${derivation.minimumConditionLevel}`} />
+                  </div>
+                  {derivation.triggeredConditions.map((c) => (
+                    <div key={c.key} style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
+                      <L en={c.en} ar={c.ar} />
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--muted)' }}>
+                  <L en="None triggered" ar="لم يتحقق أي شرط" />
+                </div>
+              )}
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockEnd: 3 }}>
+                <L en="Final level — the higher of the two" ar="المستوى النهائي — الأعلى من الاثنين" />
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 600, color: `var(--l${derivation.finalLevel})` }}>
+                <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
+              </div>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                {derivation.governedBy === 'minimumCondition' ? (
+                  <L en="Governed by a minimum condition" ar="محكوم بشرط من الحد الأدنى" />
+                ) : derivation.governedBy === 'both' ? (
+                  <L en="The score and a minimum condition give the same level" ar="النتيجة وشرط الحد الأدنى يعطيان المستوى نفسه" />
+                ) : (
+                  <L en="Governed by the assessment score" ar="محكوم بنتيجة التقييم" />
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <L
+              en="This demonstration record carries a seeded level without stored assessment answers, so no derivation can be shown. A real submission shows the score, the minimum conditions and which governed."
+              ar="يحمل هذا السجل التوضيحي مستوى مُهيّأ دون إجابات تقييم مخزنة، فلا يمكن عرض الاستنتاج. أما التقديم الحقيقي فيعرض النتيجة وشروط الحد الأدنى وأيهما حكم."
+            />
+          </div>
+        )}
       </div>
 
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 20, alignItems: 'start' }}>

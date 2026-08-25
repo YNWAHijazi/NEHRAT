@@ -30,6 +30,7 @@ export type SurfaceKey =
   | 'reviewerQueue'
   | 'ministryFacilityOversight'
   | 'publicReferenceLookup'
+  | 'platformActivityCounts'
   | 'organizerDashboard'
   | 'emsProviderDashboard'
   | 'medicalDirectorDashboard'
@@ -45,9 +46,11 @@ export const SURFACE_DEMONSTRATION_POLICY: Record<SurfaceKey, DemonstrationPolic
   ministryAggregateCounts: 'matchSession',
   reviewerQueue: 'matchSession',
   ministryFacilityOversight: 'matchSession',
-  // The one asymmetric surface: a demonstration reference number must not resolve
-  // for the public, whoever asks.
+  // The asymmetric surfaces: a demonstration reference must not resolve for the
+  // public, and an owner reading national volumes must not be reading fiction
+  // (reviewer ruling) -- whoever asks.
   publicReferenceLookup: 'excludeDemonstration',
+  platformActivityCounts: 'excludeDemonstration',
   organizerDashboard: 'matchSession',
   emsProviderDashboard: 'matchSession',
   medicalDirectorDashboard: 'matchSession',

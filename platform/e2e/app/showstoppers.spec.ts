@@ -69,11 +69,11 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
 
     // The compliance form renders SIX declarations at Level 1 -- and completes on six.
     await page.goto(`/events/${eventId}/submit`);
-    const ticks = page.locator('button:has-text("Not declared")');
+    const ticks = page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' });
     await expect(ticks).toHaveCount(6);
     for (let i = 0; i < 6; i += 1) {
       // The list re-renders on every tick; always take the first remaining.
-      await page.locator('button:has-text("Not declared")').first().click();
+      await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
     }
     // Blockers are server-derived: save, let the refresh recompute, then file.
     await page.locator('button:has-text("Save the form")').click();

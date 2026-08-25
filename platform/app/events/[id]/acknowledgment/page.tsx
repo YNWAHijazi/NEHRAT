@@ -86,7 +86,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
                   <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />
                 </span>
                 <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
-                  <L en="Republic of Lebanon · Event Health Readiness" ar="الجمهورية اللبنانية · الجاهزية الصحية للفعاليات" />
+                  <L en="Republic of Lebanon · Event Health Readiness" ar="الجمهورية اللبنانية · التأهب الصحي للفعاليات" />
                 </span>
               </span>
             </div>

@@ -11,6 +11,7 @@ import {
   eventFor,
   invitationsFor,
   unreadCountFor,
+  governanceFor,
 } from '../../../../lib/queries';
 import {
   documentsForLevel,
@@ -47,6 +48,26 @@ function SectionHeading({ n, en, ar, noteEn, noteAr }: { n: number; en: string; 
  * acting on. Everything derives from the level; a requirement that does not apply is
  * absent, not shown as "not required" (non-negotiable #10).
  */
+function InvitationLinkBlock({ token }: { token: string }) {
+  const path = `/invitations/${token}`;
+  return (
+    <div style={{ width: '100%', marginBlockStart: 12, paddingBlockStart: 12, borderBlockStart: '1px dashed var(--line)' }}>
+      <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
+        <L en="The invitation link — hand it to the nominated party" ar="رابط الدعوة — سلّموه إلى الطرف المُسمّى" />
+      </div>
+      <code dir="ltr" style={{ display: 'block', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px', overflowWrap: 'anywhere', userSelect: 'all' }}>
+        {path}
+      </code>
+      <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 6, maxWidth: '80ch' }}>
+        <L
+          en="They answer through it. The token is unguessable; share it only with the party it names."
+          ar="من خلاله يجيبون. الرمز غير قابل للتخمين؛ فلا تشاركوه إلا مع الطرف الذي يسمّيه."
+        />
+      </div>
+    </div>
+  );
+}
+
 export default async function RequirementsPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -85,6 +106,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   // documents live in group 1; this list is the certification view of the whole matrix.
   const certifyRows = requirementsForLevel(level).filter((r) => r.n !== 15 || level !== 3);
   const commandRow = commandFunctionRow(level);
+  const governance = governanceFor(id);
 
   const partChip = {
     nominated: { en: 'Nominated', ar: 'مُسمّاة', bg: 'var(--surface2)', color: 'var(--muted)', noteEn: 'Has not answered yet', noteAr: 'لم تُجب بعد' },
@@ -245,6 +267,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     </span>
                   ) : null}
                 </div>
+                {p.status === 'nominated' ? <InvitationLinkBlock token={p.token} /> : null}
               </div>
             );
           })}
@@ -276,10 +299,16 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     {' · '}
                     <L en={commandRow.respEn} ar={commandRow.respAr} />
                   </div>
+                  {governance['command']?.trim() ? (
+                    <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
+                      <L en="Medical-command arrangements written by the Director — requirement 15 addressed; the text sits in plan section 10." ar="كتب المدير الترتيبات للقيادة الطبية — المتطلب 15 مُعالَج؛ والنص في البند 10 من الخطة." />
+                    </div>
+                  ) : null}
                 </div>
                 <span style={{ padding: '4px 10px', borderRadius: 4, background: partChip[director.status].bg, color: partChip[director.status].color, fontSize: 13 }}>
                   <L en={partChip[director.status].en} ar={partChip[director.status].ar} />
                 </span>
+                {director.status === 'nominated' ? <InvitationLinkBlock token={director.token} /> : null}
               </div>
             ) : (
               <InviteForm eventId={id} kind="director" />

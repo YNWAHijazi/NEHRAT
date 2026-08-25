@@ -87,6 +87,39 @@ export function seriousIncidentGate(ctx: EventGateContext): Gate {
   };
 }
 
+/**
+ * The record's stage on the six-stage rail -- ONE derivation, shared by the
+ * dashboard tile and the event record so the two can never disagree again.
+ * A seeded row whose level exists without stored answers counts as assessed:
+ * the level is the assessment's product.
+ */
+/** The rail has six stages; stage six is the post-event report. */
+export const RAIL_STAGE_COUNT = 6;
+export const POST_EVENT_STAGE = 6;
+
+export function eventStage(input: {
+  assessed: boolean;
+  filed: boolean;
+  outcome: string | null;
+  finalLevel: Level | null;
+  eventEndDate: string | null;
+  reportSubmitted: boolean;
+  now: Date;
+}): { stage: number; en: string; ar: string } {
+  if (!input.assessed) return { stage: 2, en: 'Assessment', ar: 'التقييم' };
+  if (!input.filed) return { stage: 3, en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات' };
+  if (
+    input.finalLevel === 3 &&
+    !input.reportSubmitted &&
+    input.eventEndDate !== null &&
+    input.now.getTime() >= postEventReportWindow(endInstant(input.eventEndDate)).opens.instant.getTime()
+  ) {
+    return { stage: POST_EVENT_STAGE, en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية' };
+  }
+  if (input.outcome) return { stage: 5, en: 'Ministry outcome recorded', ar: 'تسجيل نتيجة الوزارة' };
+  return { stage: 4, en: 'Submitted', ar: 'التقديم' };
+}
+
 /** Material change: a state gate. Disabled until the submission is filed. */
 export function materialChangeGate(ctx: EventGateContext): Gate {
   if (ctx.filed) return ENABLED;

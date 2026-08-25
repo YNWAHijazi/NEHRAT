@@ -7,6 +7,7 @@
  */
 
 import { DatabaseSync } from 'node:sqlite';
+import { nowStamp } from './clock';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedDemonstration } from './demo-seed';
@@ -22,6 +23,10 @@ export function getDb(): DatabaseSync {
   db = new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA foreign_keys = ON');
+  // now_stamp(): the review-clock-aware timestamp, registered as a SQL function so
+  // every write can use it inline. Schema DEFAULTs cannot call it (SQLite restricts
+  // defaults to built-ins), so write paths pass timestamps explicitly.
+  db.function('now_stamp', () => nowStamp());
   migrate(db);
 
   // The seeder is forced off in deployed environments -- the guard is NODE_ENV, and
@@ -29,7 +34,46 @@ export function getDb(): DatabaseSync {
   if (process.env.NODE_ENV !== 'production') {
     seedDemonstration(db);
   }
+  stampDefaultsOnTheOneClock(db);
   return db;
+}
+
+/**
+ * ONE CLOCK. Date gates run on the Beirut review clock; schema DEFAULTs run on
+ * SQLite's UTC datetime('now') and cannot call now_stamp(). These per-connection
+ * triggers re-stamp any timestamp a DEFAULT just populated (recognised by being
+ * within seconds of UTC now) onto now_stamp() -- the same clock as every gate.
+ * Explicit values -- the seeder's historical dates, an app-passed stamp -- fall
+ * outside the window and are never touched.
+ */
+function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
+  const defaulted: [string, string][] = [
+    ['accounts', 'created_at'], ['password_resets', 'created_at'], ['sessions', 'created_at'],
+    ['events', 'created_at'], ['assessments', 'created_at'], ['event_attachments', 'attached_at'],
+    ['invitations', 'invited_at'], ['shared_documents', 'added_at'], ['fr_readiness', 'updated_at'],
+    ['fr_reports', 'created_at'], ['role_profiles', 'updated_at'], ['event_governance', 'updated_at'],
+    ['plans', 'updated_at'], ['submission_versions', 'archived_at'], ['material_changes', 'reported_at'],
+    ['serious_incident_notifications', 'notified_at'], ['venues', 'created_at'],
+    ['venue_assessments', 'created_at'], ['venue_changes', 'reported_at'], ['facilities', 'created_at'],
+    ['facility_persons', 'updated_at'], ['facility_devices', 'updated_at'], ['facility_devices', 'created_at'],
+    ['facility_device_updates', 'created_at'], ['facility_plan_confirmations', 'created_at'],
+    ['facility_incidents', 'created_at'], ['facility_requests', 'created_at'],
+    ['facility_interests', 'created_at'], ['review_state', 'updated_at'],
+    ['determinations', 'recorded_at'], ['added_measures', 'recorded_at'],
+    ['ministry_config', 'published_at'], ['facility_designations', 'designated_at'],
+    ['enquiries', 'asked_at'],
+  ];
+  for (const [table, col] of defaulted) {
+    d.exec(`
+      CREATE TEMP TRIGGER IF NOT EXISTS one_clock_${table}_${col}
+      AFTER INSERT ON ${table}
+      FOR EACH ROW
+      WHEN NEW.${col} >= datetime('now', '-2 seconds') AND NEW.${col} <= datetime('now', '+2 seconds')
+      BEGIN
+        UPDATE ${table} SET ${col} = now_stamp() WHERE rowid = NEW.rowid;
+      END;
+    `);
+  }
 }
 
 function migrate(d: DatabaseSync): void {

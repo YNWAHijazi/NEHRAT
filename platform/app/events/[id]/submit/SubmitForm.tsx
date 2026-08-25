@@ -126,20 +126,22 @@ export function SubmitForm({
             const on = ticked[String(i)] === true;
             return (
               <div key={d.en} style={{ background: 'var(--bg)' }}>
-                <div style={{ padding: '14px 16px', display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', fontSize: '14.5px' }}>
-                  <span style={{ lineHeight: 1.5 }}>
+                {/* A real checkbox: the control must look pressable (reviewer walk). */}
+                <label style={{ padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'start', fontSize: '14.5px', cursor: locked ? 'default' : 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={on}
+                    disabled={locked}
+                    onChange={() => setTicked((prev) => ({ ...prev, [String(i)]: !on }))}
+                    style={{ flex: 'none', width: 18, height: 18, marginBlockStart: 2, accentColor: 'var(--brand)' }}
+                  />
+                  <span style={{ lineHeight: 1.5, flex: 1 }}>
                     <L en={d.en} ar={d.ar} />
                   </span>
-                  <button
-                    type="button"
-                    aria-pressed={on}
-                    disabled={locked}
-                    onClick={() => setTicked((prev) => ({ ...prev, [String(i)]: !on }))}
-                    style={{ flex: 'none', padding: '4px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 14, fontSize: 13, cursor: locked ? 'default' : 'pointer' }}
-                  >
+                  <span style={{ flex: 'none', fontSize: 13, color: on ? 'var(--brand)' : 'var(--muted)' }}>
                     {on ? <L en="Declared" ar="مُقَرّ به" /> : <L en="Not declared" ar="غير مُقَرّ به" />}
-                  </button>
-                </div>
+                  </span>
+                </label>
                 {d.fields && level === 3 ? (
                   <div style={{ padding: '0 16px 16px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
