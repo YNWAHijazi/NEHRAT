@@ -240,7 +240,9 @@
           "ar": "محددة في خطة EHMP"
         }
       ],
-      "divergence": "Arabic adds transport: ترتيبات سيارات الإسعاف والنقل (README divergence 3)."
+      "divergence": "Arabic adds transport: ترتيبات سيارات الإسعاف والنقل (README divergence 3).",
+      "divergenceNoteEn": "The Arabic issue of this requirement reads “ambulance and transport arrangements”. The English is followed; the difference is recorded and awaits a Ministry decision.",
+      "divergenceNoteAr": "يقرأ الإصدار العربي لهذا المتطلب «ترتيبات سيارات الإسعاف والنقل». ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
     },
     {
       "n": 8,
@@ -450,7 +452,9 @@
           "ar": "مطلوب"
         }
       ],
-      "divergence": "Arabic adds coordination: والتنسيق معها -- a stronger obligation (README divergence 4)."
+      "divergence": "Arabic adds coordination: والتنسيق معها -- a stronger obligation (README divergence 4).",
+      "divergenceNoteEn": "The Arabic issue requires notification and coordination with the provider, not notification alone — a stronger obligation. The English is followed; the difference is recorded and awaits a Ministry decision.",
+      "divergenceNoteAr": "يشترط الإصدار العربي الإخطار والتنسيق مع الجهة، لا الإخطار وحده — وهو موجب أشدّ. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
     },
     {
       "n": 14,
@@ -509,7 +513,9 @@
           "ar": "مطلوبة"
         }
       ],
-      "divergence": "Arabic requires a DEFINED command function: وظيفة محددة للقيادة الطبية (README divergence 5)."
+      "divergence": "Arabic requires a DEFINED command function: وظيفة محددة للقيادة الطبية (README divergence 5).",
+      "divergenceNoteEn": "The Arabic issue requires a defined medical-command function, not a command function alone. The English is followed; the difference is recorded and awaits a Ministry decision.",
+      "divergenceNoteAr": "يشترط الإصدار العربي وظيفة محددة للقيادة الطبية، لا وظيفة قيادة فحسب. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
     },
     {
       "n": 16,

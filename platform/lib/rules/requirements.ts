@@ -24,6 +24,9 @@ export interface RequirementRow {
   attach: boolean;
   ems: boolean;
   divergence: string | null;
+  /** The user-facing bilingual statement of the divergence, rendered where the row is read. */
+  divergenceNoteEn: string | null;
+  divergenceNoteAr: string | null;
 }
 
 const PARTIES = matrixJson.parties as Record<string, { en: string; ar: string }>;
@@ -50,6 +53,8 @@ export function requirementsForLevel(level: Level): RequirementRow[] {
       attach: r.attach,
       ems: r.ems,
       divergence: (r as { divergence?: string }).divergence ?? null,
+      divergenceNoteEn: (r as { divergenceNoteEn?: string }).divergenceNoteEn ?? null,
+      divergenceNoteAr: (r as { divergenceNoteAr?: string }).divergenceNoteAr ?? null,
     });
   }
   return rows;

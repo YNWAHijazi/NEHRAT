@@ -16,6 +16,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
+import { YesNoPair } from '../../../components/YesNoPair';
 import { createEventAction } from '../../actions';
 import type { ArabicOnlyNote, Band, Domain, MinimumCondition } from '../../../lib/rules/load';
 import { deriveLevel, bandForScore } from '../../../lib/rules/derive';
@@ -104,8 +105,10 @@ export function AssessmentForm({
   const [disciplines, setDisciplines] = useState<string[]>([]);
   const [courseKm, setCourseKm] = useState('');
   const [capacity, setCapacity] = useState('');
-  const [nightclub, setNightclub] = useState(false);
-  const [regularVenue, setRegularVenue] = useState(false);
+  // Unanswered, not false: a seeded false asserts an answer nobody gave, and the two
+  // venue floors could then never report "incomplete" naming the field (non-negotiable 0).
+  const [nightclub, setNightclub] = useState<boolean | null>(null);
+  const [regularVenue, setRegularVenue] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const inputs: MinimumConditionInputs = useMemo(
@@ -134,6 +137,14 @@ export function AssessmentForm({
     if (k === 'expectedMaxSimultaneousAttendance')
       return { en: 'Expected maximum simultaneous attendance', ar: 'الحد الأقصى المتوقع للحضور المتزامن' };
     if (k === 'courseDistanceKm') return { en: 'Course distance', ar: 'مسافة المسار' };
+    if (k === 'venueIsNightclubOrDanceVenue')
+      return { en: 'Whether the venue is a nightclub or dance venue', ar: 'ما إذا كان الموقع ملهى ليلياً أو مكاناً للرقص' };
+    if (k === 'venueRegularlyHostsOrganizedEvents')
+      return { en: 'Whether the venue regularly hosts organized events', ar: 'ما إذا كان الموقع يستضيف فعاليات منظمة بانتظام' };
+    if (k === 'venueLicensedCapacity')
+      return { en: 'Licensed venue capacity', ar: 'السعة المرخّصة للموقع' };
+    if (k === 'eventDisciplines')
+      return { en: 'Disciplines the event includes', ar: 'الرياضات التي تشملها الفعالية' };
     if (k.startsWith('domain')) {
       const n = k.slice(6);
       return { en: `Domain ${n}`, ar: `المجال ${n}` };
@@ -271,33 +282,39 @@ export function AssessmentForm({
           <input type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} style={inputStyle} />
         </label>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 24 }}>
         {[
           {
-            on: nightclub,
-            toggle: () => setNightclub((v) => !v),
+            value: nightclub,
+            onPick: setNightclub,
             en: 'The venue is a nightclub or dance venue',
             ar: 'الموقع ملهى ليلي أو مكان للرقص',
+            issue: 'en-only' as const,
           },
           {
-            on: regularVenue,
-            toggle: () => setRegularVenue((v) => !v),
+            value: regularVenue,
+            onPick: setRegularVenue,
             en: 'The venue regularly hosts organized events',
             ar: 'يستضيف الموقع فعاليات منظمة بانتظام',
+            issue: 'ar-only' as const,
           },
         ].map((c) => (
-          <button
+          <div
             key={c.en}
-            type="button"
-            onClick={c.toggle}
-            aria-pressed={c.on}
-            style={{ textAlign: 'start', display: 'flex', gap: 14, padding: '14px 18px', border: `1px solid ${c.on ? 'var(--brand)' : 'var(--line)'}`, background: c.on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', border: `1px solid ${c.value === null ? 'var(--accent)' : 'var(--line)'}`, background: 'var(--surface)', borderRadius: 10 }}
           >
-            <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${c.on ? 'var(--brand)' : 'var(--muted)'}`, borderRadius: 3, background: c.on ? 'var(--brand)' : 'transparent', marginBlockStart: 2 }} />
-            <span style={{ fontSize: 15, lineHeight: 1.6 }}>
+            <span style={{ fontSize: 15, lineHeight: 1.6, flex: 1, minWidth: 240 }}>
               <L en={c.en} ar={c.ar} />
+              <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--muted)', verticalAlign: 'middle' }}>
+                {c.issue === 'en-only' ? (
+                  <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
+                ) : (
+                  <L en="Arabic issue only" ar="الإصدار العربي فقط" />
+                )}
+              </span>
             </span>
-          </button>
+            <YesNoPair value={c.value} onPick={c.onPick} />
+          </div>
         ))}
       </div>
       <div style={{ marginBlockEnd: 16 }}>

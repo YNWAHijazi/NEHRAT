@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
+import { SourceDivergence } from '../../../../components/SourceDivergence';
 import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { InviteForm } from './InviteForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
@@ -299,6 +300,9 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     {' · '}
                     <L en={commandRow.respEn} ar={commandRow.respAr} />
                   </div>
+                  {commandRow.divergenceNoteEn && commandRow.divergenceNoteAr ? (
+                    <SourceDivergence en={commandRow.divergenceNoteEn} ar={commandRow.divergenceNoteAr} />
+                  ) : null}
                   {governance['command']?.trim() ? (
                     <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
                       <L en="Medical-command arrangements written by the Director — requirement 15 addressed; the text sits in plan section 10." ar="كتب المدير الترتيبات للقيادة الطبية — المتطلب 15 مُعالَج؛ والنص في البند 10 من الخطة." />
@@ -342,6 +346,9 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     <span style={{ display: 'inline-block', marginBlockStart: 6, fontSize: 12, color: 'var(--accent-ink)' }}>
                       <L en={r.raisedEn} ar={r.raisedAr} />
                     </span>
+                  ) : null}
+                  {r.divergenceNoteEn && r.divergenceNoteAr ? (
+                    <SourceDivergence en={r.divergenceNoteEn} ar={r.divergenceNoteAr} />
                   ) : null}
                 </span>
               </div>

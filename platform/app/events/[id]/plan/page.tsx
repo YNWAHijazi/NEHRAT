@@ -88,7 +88,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         />
 
         {priorVersions.length > 0 ? (
-          <section style={{ marginBlockStart: 32 }}>
+          <section data-region="versions" style={{ marginBlockStart: 32 }}>
             <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en="Versions" ar="النسخ" />
             </h2>

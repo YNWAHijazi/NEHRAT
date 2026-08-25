@@ -14,6 +14,7 @@ import { seriousIncidentGate } from '../lib/rules/gates';
 import { facilityLedger, type LedgerInputs } from '../lib/rules/facility';
 import { effectiveCycles } from '../lib/rules/ministry';
 import { detectPersonalName } from '../lib/rules/pii';
+import { deriveLevel } from '../lib/rules/derive';
 
 describe('showstopper 1 — the declaration gate counts what the form renders', () => {
   it('Level 1 renders six declarations and completes on exactly those six', () => {
@@ -171,5 +172,62 @@ describe('non-negotiable 7 — the name gate catches the bare capitalized name',
 
   it('a proper-noun pair flags even at sentence start', () => {
     expect(detectPersonalName('Karim Fares was assisted by staff.')).toBe(true);
+  });
+});
+
+describe('non-negotiable 0 — the two venue floors have a real unset state', () => {
+  // Pass A: the event form seeded both flags `false`, so these two conditions could
+  // never report "incomplete naming the field" -- the level derived from a question
+  // nobody was asked. The form is now tri-state; these traps hold the rule.
+  const answers = Array(9).fill(0) as (0 | 1 | 2)[];
+  const base = {
+    expectedMaxSimultaneousAttendance: 500,
+    eventDisciplines: [] as string[],
+    courseDistanceKm: null,
+    venueLicensedCapacity: null,
+  };
+
+  it('unanswered venue questions return incomplete, naming them — never a level', () => {
+    const d = deriveLevel({
+      answers,
+      inputs: { ...base, venueIsNightclubOrDanceVenue: null, venueRegularlyHostsOrganizedEvents: null },
+    });
+    expect(d.complete).toBe(false);
+    expect(d.finalLevel).toBeNull();
+    expect(d.missingInputs).toContain('venueIsNightclubOrDanceVenue');
+    expect(d.missingInputs).toContain('venueRegularlyHostsOrganizedEvents');
+  });
+
+  it('a definite No settles the condition and derives', () => {
+    const d = deriveLevel({
+      answers,
+      inputs: { ...base, venueIsNightclubOrDanceVenue: false, venueRegularlyHostsOrganizedEvents: false },
+    });
+    expect(d.complete).toBe(true);
+    expect(d.finalLevel).toBe(1);
+  });
+
+  it('Yes without the capacity names the capacity as owed', () => {
+    const d = deriveLevel({
+      answers,
+      inputs: { ...base, venueIsNightclubOrDanceVenue: true, venueRegularlyHostsOrganizedEvents: false },
+    });
+    expect(d.complete).toBe(false);
+    expect(d.missingInputs).toContain('venueLicensedCapacity');
+  });
+
+  it('Yes with a licensed capacity at or above the threshold raises the floor to Level 2', () => {
+    const d = deriveLevel({
+      answers,
+      inputs: {
+        ...base,
+        venueLicensedCapacity: 1200,
+        venueIsNightclubOrDanceVenue: true,
+        venueRegularlyHostsOrganizedEvents: false,
+      },
+    });
+    expect(d.complete).toBe(true);
+    expect(d.finalLevel).toBe(2);
+    expect(d.governedBy).toBe('minimumCondition');
   });
 });

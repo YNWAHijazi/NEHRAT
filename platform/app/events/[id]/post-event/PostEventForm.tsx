@@ -9,6 +9,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
+import { POST_EVENT_CERTIFICATION_STATEMENT } from '../../../../lib/rules';
 import { savePostEventReportAction, signAndSubmitPostEventAction } from '../../../actions';
 import type { PostEventReportRow } from '../../../../lib/queries';
 
@@ -171,6 +172,11 @@ export function PostEventForm({
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="Signatures" ar="التواقيع" />
         </div>
+        {POST_EVENT_CERTIFICATION_STATEMENT ? (
+          <div data-region="certification-statement" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+            <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
+          </div>
+        ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px', background: 'var(--bg)', borderRadius: 8, fontSize: '14.5px' }}>
             <span>

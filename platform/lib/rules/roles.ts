@@ -72,6 +72,18 @@ export interface DeclarationItem {
 /** The ten items, from the compliance form's own data -- Arabic verbatim. */
 export const DECLARATION_ITEMS: readonly DeclarationItem[] = complianceJson.sectionB.items;
 
+/**
+ * The recorded divergence on section B item 10 (README divergence 6): the Arabic
+ * issue adds that the agency confirmed its READINESS to perform the role. Follow
+ * the English, report the difference where the item is signed.
+ */
+export const DECLARATION_ITEM10_DIVERGENCE: { index: number; en: string; ar: string } | null = (() => {
+  const c = complianceJson as { item10DivergenceEn?: string; item10DivergenceAr?: string };
+  return c.item10DivergenceEn && c.item10DivergenceAr
+    ? { index: 9, en: c.item10DivergenceEn, ar: c.item10DivergenceAr }
+    : null;
+})();
+
 export interface DeclarationGate {
   canSign: boolean;
   confirmedCount: number;

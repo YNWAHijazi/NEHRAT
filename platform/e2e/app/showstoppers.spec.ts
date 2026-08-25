@@ -42,6 +42,12 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await fill(page, 'Expected spectators or attendees', '40');
     await fill(page, 'Expected staff, performers, contractors, and volunteers', '10');
     await fill(page, 'Expected maximum simultaneous attendance', '120');
+    // The two venue questions must be ANSWERED: the form no longer answers them on the
+    // organizer's behalf, so an unanswered pair derives nothing (non-negotiable 0).
+    const noPills = page.locator('button[data-yesno="no"]');
+    await expect(noPills).toHaveCount(2);
+    await noPills.nth(0).click();
+    await noPills.nth(1).click();
     // Every domain at score 0: the option button whose marker span reads exactly "0".
     const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
     const count = await zeros.count();
@@ -133,6 +139,8 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
 
 test.describe('showstopper 6 — plan versions survive saving', () => {
   test('a second save archives version 1, readable under Earlier versions', async ({ page }) => {
+    // Two save-and-reload cycles: generous under full-suite dev-compile load.
+    test.setTimeout(90_000);
     await signInAs(page, 'test_organizer');
     await page.goto('/events/EV-0418/plan');
     // Sections are accordion rows: expand section 1, whose textarea then renders.
@@ -142,7 +150,8 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await expect(firstSection).toBeVisible();
     await firstSection.fill('Version one wording for the schedule.');
     await page.locator('button:has-text("Save the plan")').first().click();
-    await page.waitForLoadState('networkidle');
+    // The versions section appears only AFTER a second save; wait on the save itself.
+    await expect(page.locator('text=A new version was recorded')).toBeVisible({ timeout: 20_000 });
     // The accordion may close on refresh; re-open before the second edit.
     await page.reload();
     await page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' }).click();

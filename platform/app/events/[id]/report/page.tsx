@@ -6,7 +6,7 @@ import { ReturnReportBlock } from './ReturnReportBlock';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, postEventReportFor, unreadCountFor } from '../../../../lib/queries';
 import { beirutToday } from '../../../../lib/clock';
-import { POST_EVENT_ACTIVITY_FIELDS, POST_EVENT_REPORT, POST_EVENT_SIGNIFICANT, ROLES_CONTENT, addDaysIso } from '../../../../lib/rules';
+import { POST_EVENT_CERTIFICATION_STATEMENT, POST_EVENT_ACTIVITY_FIELDS, POST_EVENT_REPORT, POST_EVENT_SIGNIFICANT, ROLES_CONTENT, addDaysIso } from '../../../../lib/rules';
 import { signPostEventReportAction } from '../../../actions';
 
 /**
@@ -141,6 +141,13 @@ export default async function DirectorReportPage({
             <div data-region="signatures" style={{ padding: '28px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Signatures" ar="التواقيع" />
+              </div>
+              {POST_EVENT_CERTIFICATION_STATEMENT ? (
+                <div data-region="certification-statement" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+                  <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
+                </div>
+              ) : null}
+              <div style={{ display: 'contents' }}>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 22 }}>
                 <div style={{ padding: '16px 20px', border: '1px solid var(--line)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>

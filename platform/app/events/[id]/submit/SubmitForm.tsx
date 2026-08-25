@@ -12,6 +12,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { fileSubmissionAction, saveComplianceAction } from '../../../actions';
+import { SourceDivergence } from '../../../../components/SourceDivergence';
 import type { SubmissionRow } from '../../../../lib/queries';
 import type { SubmissionBlocker } from '../../../../lib/rules';
 
@@ -21,6 +22,8 @@ interface DeclItem {
   minLevel: number;
   arabicIsTranslation?: boolean;
   divergence?: string;
+  divergenceNoteEn?: string;
+  divergenceNoteAr?: string;
   fields?: { key: string; en: string; ar: string }[];
 }
 
@@ -42,6 +45,8 @@ export function SubmitForm({
   expedited,
   revisionOpen,
   headerRows,
+  telephoneDivergence,
+  certificationStatement,
 }: {
   eventId: string;
   level: 1 | 2 | 3;
@@ -51,6 +56,10 @@ export function SubmitForm({
   expedited: boolean;
   /** Filed, and the latest Ministry outcome asks for more -- the form reopens for a re-file. */
   revisionOpen: boolean;
+  /** The recorded EN/AR divergence on the certification telephone, or null. */
+  telephoneDivergence: { en: string; ar: string } | null;
+  /** The compliance form's certifying words, shown above the fields they are signed with. */
+  certificationStatement: { en: string; ar: string } | null;
   headerRows: { en: string; ar: string; value: string }[];
 }) {
   const router = useRouter();
@@ -137,6 +146,9 @@ export function SubmitForm({
                   />
                   <span style={{ lineHeight: 1.5, flex: 1 }}>
                     <L en={d.en} ar={d.ar} />
+                    {d.divergenceNoteEn && d.divergenceNoteAr ? (
+                      <SourceDivergence en={d.divergenceNoteEn} ar={d.divergenceNoteAr} />
+                    ) : null}
                   </span>
                   <span style={{ flex: 'none', fontSize: 13, color: on ? 'var(--brand)' : 'var(--muted)' }}>
                     {on ? <L en="Declared" ar="مُقَرّ به" /> : <L en="Not declared" ar="غير مُقَرّ به" />}
@@ -169,6 +181,11 @@ export function SubmitForm({
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Organizer certification" ar="تصديق المنظِّم" />
         </div>
+        {certificationStatement ? (
+          <div data-region="certification-statement" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 18, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+            <L en={certificationStatement.en} ar={certificationStatement.ar} />
+          </div>
+        ) : null}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 16 }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
@@ -185,6 +202,9 @@ export function SubmitForm({
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Telephone" ar="الهاتف" />
+              {telephoneDivergence ? (
+                <SourceDivergence en={telephoneDivergence.en} ar={telephoneDivergence.ar} />
+              ) : null}
             </span>
             <input value={telephone} disabled={locked} onChange={(e) => setTelephone(e.target.value)} style={inputStyle} />
           </label>

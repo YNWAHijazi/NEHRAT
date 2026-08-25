@@ -35,7 +35,13 @@ export default defineConfig({
     // 900px. 1280x900 shows every screen at its designed density.
     viewport: { width: 1280, height: 900 },
     trace: 'retain-on-failure',
+    // `next dev` compiles a route on its first request, so under parallel load a first
+    // navigation can take far longer than the interaction that follows. This budget is
+    // for COMPILATION, not for the product: every assertion keeps its own short timeout,
+    // so a genuinely slow screen still fails.
+    navigationTimeout: 60_000,
   },
+  timeout: 60_000,
   projects: [
     {
       name: 'reference',

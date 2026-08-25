@@ -16,7 +16,7 @@ import {
   venueRouteFor,
 } from '../../../../lib/queries';
 import { submissionGateFor } from '../../../../lib/submission-facts';
-import { COMPLIANCE_DECLARATIONS, COMPLIANCE_HEADER, documentsForLevel, type Level } from '../../../../lib/rules';
+import { COMPLIANCE_DECLARATIONS, COMPLIANCE_CERTIFICATION_DIVERGENCE, COMPLIANCE_CERTIFICATION_STATEMENT, COMPLIANCE_HEADER, documentsForLevel, type Level } from '../../../../lib/rules';
 
 export default async function SubmitPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
@@ -124,6 +124,8 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           blockers={gate.blockers}
           expedited={gate.expedited}
           revisionOpen={event.filed && revisionOpenFor(id)}
+          telephoneDivergence={COMPLIANCE_CERTIFICATION_DIVERGENCE}
+          certificationStatement={COMPLIANCE_CERTIFICATION_STATEMENT}
           headerRows={headerRows}
         />
 

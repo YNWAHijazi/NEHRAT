@@ -187,10 +187,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'g3',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'headingBlock', text: 'Requirements you certify to' },
         builtSelector: '[data-region="g3"]',
-        note: 'The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
+        note: 'Was a compare in English. Pass A found six recorded EN/AR divergences flagged in the data and rendered NOWHERE; requirements 7, 13 and 15 now carry a bilingual note stating what the other issue says and that the English is followed — the reference predates the note. Flips back to compare when the prototype adopts it (Pass C). The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
       },
       {
         name: 'g1',

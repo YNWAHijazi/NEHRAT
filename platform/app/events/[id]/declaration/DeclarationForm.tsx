@@ -9,6 +9,8 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
+import { SourceDivergence } from '../../../../components/SourceDivergence';
+import { DECLARATION_ITEM10_DIVERGENCE } from '../../../../lib/rules';
 import { saveDeclarationDraftAction, signDeclarationAction } from '../../../actions';
 import { ROLES_CONTENT, declarationGate, type DeclarationItem } from '../../../../lib/rules';
 
@@ -88,6 +90,9 @@ export function DeclarationForm({
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', flex: 'none', minWidth: 18 }}>{i + 1}</span>
               <span style={{ fontSize: 16, lineHeight: 1.55 }}>
                 <L en={item.en} ar={item.ar} />
+                {DECLARATION_ITEM10_DIVERGENCE && DECLARATION_ITEM10_DIVERGENCE.index === i ? (
+                  <SourceDivergence en={DECLARATION_ITEM10_DIVERGENCE.en} ar={DECLARATION_ITEM10_DIVERGENCE.ar} />
+                ) : null}
               </span>
             </button>
           );

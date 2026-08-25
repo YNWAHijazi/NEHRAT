@@ -31,6 +31,8 @@ export interface ComplianceDeclaration {
   minLevel: number;
   arabicIsTranslation?: boolean;
   divergence?: string;
+  divergenceNoteEn?: string;
+  divergenceNoteAr?: string;
   fields?: BilingualField[];
 }
 
@@ -98,3 +100,32 @@ export const FACILITY_CONTENT = facilityJson;
  *  governance screen's own promises): clinical + command into section 10,
  *  the incident role into section 12. */
 export const GOVERNANCE_LANDING = { clinicalSection: 10, incidentSection: 12 } as const;
+
+/**
+ * The recorded divergence on the certification blocks' Telephone field (README
+ * divergence 2): the Arabic issue omits it from both. Follow the English, report it.
+ */
+export const COMPLIANCE_CERTIFICATION_DIVERGENCE: { en: string; ar: string } | null = (() => {
+  const fields = (complianceJson as { organizerCertification?: { fields?: { divergenceNoteEn?: string; divergenceNoteAr?: string }[] } })
+    .organizerCertification?.fields ?? [];
+  const flagged = fields.find((f) => f.divergenceNoteEn && f.divergenceNoteAr);
+  return flagged?.divergenceNoteEn && flagged?.divergenceNoteAr
+    ? { en: flagged.divergenceNoteEn, ar: flagged.divergenceNoteAr }
+    : null;
+})();
+
+/**
+ * The certification statements, verbatim from the instruments. Both existed in the
+ * data and reached no screen: people signed without the certifying words in front of
+ * them. Annex C certifies the submission; Annex D certifies the post-event report.
+ */
+export const COMPLIANCE_CERTIFICATION_STATEMENT: { en: string; ar: string } | null = (() => {
+  const c = (complianceJson as { organizerCertification?: { statementEn?: string; statementAr?: string } }).organizerCertification;
+  return c?.statementEn && c?.statementAr ? { en: c.statementEn, ar: c.statementAr } : null;
+})();
+
+/** Annex D's declaration, verbatim. Rendered above the signatures, never omitted. */
+export const POST_EVENT_CERTIFICATION_STATEMENT: { en: string; ar: string } | null = (() => {
+  const d = (postEventJson as { declaration?: { statementEn?: string; statementAr?: string } }).declaration;
+  return d?.statementEn && d?.statementAr ? { en: d.statementEn, ar: d.statementAr } : null;
+})();

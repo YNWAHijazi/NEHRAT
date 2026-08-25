@@ -130,6 +130,7 @@ export function filingDeadlineRule(level: Level): FilingDeadlineRule {
 }
 
 export const POST_EVENT_REPORT = levelsJson.postEventReport;
+
 export const SERIOUS_INCIDENT_NOTIFICATION = levelsJson.seriousIncidentNotification;
 export const REASSESSMENT_WINDOW = levelsJson.reassessmentWindow;
 

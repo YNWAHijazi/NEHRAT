@@ -96,7 +96,9 @@
           "en": "Evidence of insurance attached",
           "ar": "أُرفق إثبات التأمين"
         }
-      ]
+      ],
+      "divergenceNoteEn": "The Arabic issue of the compliance form carries no insurance declaration at all. The English is followed, so this item is declared here; the Arabic wording is a translation pending a Ministry decision.",
+      "divergenceNoteAr": "لا يتضمن الإصدار العربي من نموذج الامتثال أي إقرار تأمين. ويُتبع النص الإنكليزي، فيُقَرّ هذا البند هنا؛ والصياغة العربية ترجمة بانتظار قرار الوزارة."
     },
     {
       "en": "The required emergency escalation or major-incident and mass-casualty arrangements are included",
@@ -123,7 +125,9 @@
         "en": "Telephone",
         "ar": "الهاتف",
         "arabicIsTranslation": true,
-        "divergence": "Arabic Annex C omits Telephone from both certification blocks (README divergence 2)."
+        "divergence": "Arabic Annex C omits Telephone from both certification blocks (README divergence 2).",
+        "divergenceNoteEn": "The Arabic issue omits Telephone from both certification blocks. The English is followed; the difference is recorded and awaits a Ministry decision.",
+        "divergenceNoteAr": "يغفل الإصدار العربي حقل الهاتف من كتلتَي التصديق. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
       },
       {
         "key": "position",
@@ -177,5 +181,7 @@
       }
     ],
     "item10Divergence": "Arabic adds: وأكدت جاهزيتها لتنفيذه -- confirmed its readiness to perform it (README divergence 6)."
-  }
+  },
+  "item10DivergenceEn": "The Arabic issue adds that the agency has confirmed its readiness to perform the role, not only reviewed and confirmed it — a stronger obligation. The English is followed; the difference is recorded and awaits a Ministry decision.",
+  "item10DivergenceAr": "يضيف الإصدار العربي أن الجهة أكدت جاهزيتها لتنفيذ الدور، لا مراجعته وتأكيده فحسب — وهو موجب أشدّ. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
 }
