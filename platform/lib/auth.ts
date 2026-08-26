@@ -97,6 +97,52 @@ export async function startSession(accountId: number): Promise<void> {
   });
 }
 
+/**
+ * What the visitor typed, carried across a failed sign-in so they do not retype it.
+ *
+ * A cookie rather than a query parameter: an email address in the URL lands in browser
+ * history, server logs and referrer headers. httpOnly (only the server renders it back),
+ * scoped to /signin, and short-lived so it does not outlive the attempt.
+ */
+const SIGNIN_FIELDS_COOKIE = 'signin_fields';
+
+export interface RememberedSignInFields {
+  email?: string;
+  name?: string;
+  organization?: string;
+}
+
+export async function rememberSignInFields(fields: RememberedSignInFields): Promise<void> {
+  const jar = await cookies();
+  jar.set(SIGNIN_FIELDS_COOKIE, JSON.stringify(fields), {
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/signin',
+    maxAge: 300,
+    secure: process.env.NODE_ENV === 'production',
+  });
+}
+
+/** Read on render. Never carries a password -- one is never remembered. */
+export async function rememberedSignInFields(): Promise<RememberedSignInFields> {
+  const raw = (await cookies()).get(SIGNIN_FIELDS_COOKIE)?.value;
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as RememberedSignInFields;
+    const out: RememberedSignInFields = {};
+    if (typeof parsed.email === 'string') out.email = parsed.email;
+    if (typeof parsed.name === 'string') out.name = parsed.name;
+    if (typeof parsed.organization === 'string') out.organization = parsed.organization;
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export async function forgetSignInFields(): Promise<void> {
+  (await cookies()).delete({ name: SIGNIN_FIELDS_COOKIE, path: '/signin' });
+}
+
 export async function endSession(): Promise<void> {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;

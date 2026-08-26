@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { rememberedSignInFields } from '../../lib/auth';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
 import {
@@ -97,6 +98,8 @@ export default async function SignInPage({
   const mode: Mode =
     params.mode === 'signup' ? 'signup' : params.mode === 'reset' ? 'reset' : 'signin';
   const error = params.error ? ERROR_STRINGS[params.error] : undefined;
+  // What the visitor typed on a failed attempt, so nothing is retyped. Never a password.
+  const typed = await rememberedSignInFields();
 
   const action =
     mode === 'signup'
@@ -158,13 +161,13 @@ export default async function SignInPage({
                     <span style={fieldLabel}>
                       <L en="Full name" ar="الاسم الكامل" />
                     </span>
-                    <input name="name" type="text" required style={inputStyle} />
+                    <input name="name" type="text" required defaultValue={typed.name ?? ''} style={inputStyle} />
                   </label>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={fieldLabel}>
                       <L en="Organization you are joining or creating" ar="المؤسسة التي تنضمون إليها أو تنشئونها" />
                     </span>
-                    <input name="organization" type="text" style={inputStyle} />
+                    <input name="organization" type="text" defaultValue={typed.organization ?? ''} style={inputStyle} />
                   </label>
                 </div>
               ) : null}
@@ -182,7 +185,7 @@ export default async function SignInPage({
                 <span style={fieldLabel}>
                   <L en="Email" ar="البريد الإلكتروني" />
                 </span>
-                <input name="email" type="email" required style={inputStyle} />
+                <input name="email" type="email" required defaultValue={typed.email ?? ''} autoFocus={Boolean(error) && !typed.email} style={inputStyle} />
               </label>
 
               {mode !== 'reset' ? (
@@ -190,7 +193,7 @@ export default async function SignInPage({
                   <span style={fieldLabel}>
                     <L en="Password" ar="كلمة المرور" />
                   </span>
-                  <input name="password" type="password" required style={inputStyle} />
+                  <input name="password" type="password" required autoFocus={Boolean(error) && Boolean(typed.email)} style={inputStyle} />
                 </label>
               ) : null}
 

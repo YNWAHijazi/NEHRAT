@@ -19,7 +19,7 @@ import {
   verifyPassword,
   RESET_EXPIRY_MINUTES,
 } from '../lib/password';
-import {
+import { forgetSignInFields, rememberSignInFields,
   currentAccount,
   endSession,
   findAccountByLogin,
@@ -64,14 +64,20 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
 export async function signInWithPasswordAction(formData: FormData): Promise<void> {
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
-  if (!email || !password) redirect('/signin?error=credentials');
+  // The email survives a failed attempt so nobody retypes it; the password never does.
+  if (!email || !password) {
+    await rememberSignInFields({ email });
+    redirect('/signin?error=credentials');
+  }
   const row = getDb()
     .prepare(`SELECT id, password_hash FROM accounts WHERE email = ?`)
     .get(email) as { id: number; password_hash: string | null } | undefined;
   // One failure answer: whether the email exists is not disclosed.
   if (!row?.password_hash || !verifyPassword(password, row.password_hash)) {
+    await rememberSignInFields({ email });
     redirect('/signin?error=credentials');
   }
+  await forgetSignInFields();
   await startSession(row.id);
   redirect('/dashboard');
 }
@@ -81,11 +87,25 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   const organization = String(formData.get('organization') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
-  if (!name) redirect('/signin?mode=signup&error=name-required');
-  if (!email) redirect('/signin?mode=signup&error=email-required');
-  if (!checkPasswordPolicy(password).ok) redirect('/signin?mode=signup&error=password-policy');
+  const typed = { email, name, organization };
+  if (!name) {
+    await rememberSignInFields(typed);
+    redirect('/signin?mode=signup&error=name-required');
+  }
+  if (!email) {
+    await rememberSignInFields(typed);
+    redirect('/signin?mode=signup&error=email-required');
+  }
+  if (!checkPasswordPolicy(password).ok) {
+    await rememberSignInFields(typed);
+    redirect('/signin?mode=signup&error=password-policy');
+  }
   const exists = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email);
-  if (exists) redirect('/signin?mode=signup&error=email-taken');
+  if (exists) {
+    await rememberSignInFields(typed);
+    redirect('/signin?mode=signup&error=email-taken');
+  }
+  await forgetSignInFields();
   const initials = name
     .split(/\s+/)
     .map((w) => w[0] ?? '')
