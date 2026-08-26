@@ -113,13 +113,25 @@ export function seedDemonstration(db: DatabaseSync): void {
     JSON.stringify(['done', 'done', 'done', 'returned', 'todo', 'todo']), 21, 3,
     d('2026-06-20'),
   );
+  // The reference's fourth queue row is Saida Night Run, not AUB Sports Day: a Level 2
+  // filing that missed its lead time, carrying Short notice and Event imminent, and
+  // determined "submission received but incomplete". It is the demonstration set's only
+  // late filing and its only incomplete determination, which is why it is there.
+  //
+  // ONE DATE DIFFERS FROM THE REFERENCE, DELIBERATELY. The prototype shows this row
+  // filed 2026-08-15 AND marked "Filed late". Both cannot hold: Level 2 requires
+  // filing 14 calendar days before, and 2026-08-29 less 14 days is exactly 2026-08-15,
+  // so that filing MEETS the deadline. Seeding 08-15 would make the derived chip read
+  // "Met" beside two flags that say the opposite. The intent is plainly a late filing,
+  // so the seed carries 2026-08-16 and the chip derives honestly. Reported, not
+  // reconciled -- the reviewer moves the prototype's date by one day and this note goes.
   insertEvent.run(
-    'EV-0301', organizer, 'AUB Sports Day', 'يوم الرياضة في الجامعة الأميركية',
-    d('2026-09-05'), d('2026-09-05'), 'MOPH-EV-2026-0301', 1,
-    'Notification acknowledged', 'إشعار مستلَم',
-    d('2026-09-05'), 'Event date', 'تاريخ الفعالية',
+    'EV-0301', organizer, 'Saida Night Run', 'ركض صيدا الليلي',
+    d('2026-08-29'), d('2026-08-29'), 'MOPH-EV-2026-0301', 1,
+    'Submission received but incomplete', 'تم استلام التقديم لكنه غير مكتمل',
+    d('2026-08-29'), 'Event date', 'تاريخ الفعالية',
     5, 'Ministry outcome recorded', 'سُجّلت نتيجة الوزارة',
-    JSON.stringify(['done', 'done', 'done', 'done', 'done', 'na']), 90, 1,
+    JSON.stringify(['done', 'done', 'done', 'done', 'done', 'na']), 90, 2,
     d('2026-06-02'),
   );
   insertEvent.run(
@@ -345,7 +357,7 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
   seedAttachment.run('EV-0362', 'siteMap', 'baalbeck-site-map.pdf');
   seedAttachment.run('EV-0362', 'deploymentMap', 'baalbeck-deployment-map.pdf');
-  seedPlan.run('EV-0301', allSections, 'aub-sports-day-plan.pdf', allMi);
+  seedPlan.run('EV-0301', allSections, 'saida-night-run-plan.pdf', allMi);
   seedPlan.run('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
 
   insertInvitation.run(
@@ -492,7 +504,8 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
 
   // ---- Slice 6: the Ministry console's showcase state ----
-  // EV-0301 and EV-0244 were filed (their events carry Ministry references);
+  // EV-0301 (Saida Night Run) and EV-0244 (Tripoli Marathon) were filed (their events
+  // carry Ministry references);
   // the queue derives from the submissions table, so the filings exist there.
   const insertPlainSubmission = db.prepare(
     `INSERT INTO submissions (event_id, declarations, insurance, representative, telephone, position, filed_at, moph_reference)
@@ -501,7 +514,7 @@ export function seedDemonstration(db: DatabaseSync): void {
   insertPlainSubmission.run(
     'EV-0301',
     JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
-    'R. Haddad', d('2026-08-01'), 'MOPH-EV-2026-0301',
+    'R. Haddad', d('2026-08-16'), 'MOPH-EV-2026-0301',
   );
   insertPlainSubmission.run(
     'EV-0244',
@@ -511,7 +524,7 @@ export function seedDemonstration(db: DatabaseSync): void {
 
   // Internal workflow states are grey and are not determinations. The recorded
   // outcomes MATCH the organizer-side presentation seeded above: EV-0362 was
-  // returned for revision, EV-0301 satisfied.
+  // returned for revision, EV-0244 satisfied, EV-0301 incomplete.
   db.prepare(
     `INSERT INTO review_state (event_id, state, reviewer, updated_at) VALUES (?, ?, ?, ?)`,
   ).run('EV-0362', 'progress', 'L. Nassar', d('2026-08-10'));
@@ -523,7 +536,14 @@ export function seedDemonstration(db: DatabaseSync): void {
     'The medical deployment map has not been attached, and one of the named providers has not signed its readiness declaration. File a revised version; your reference number does not change.',
     'L. Nassar', d('2026-08-10'),
   );
-  insertDetermination.run('EV-0301', 'satisfied', '', 'R. Sfeir', d('2026-08-04'));
+  // The reference puts SATISFIED on Tripoli Marathon and INCOMPLETE on Saida Night Run.
+  // The build had satisfied on the fourth row and nothing on Tripoli; both now match.
+  insertDetermination.run(
+    'EV-0301', 'incomplete',
+    'The compliance and submission form is incomplete and the filing did not meet the fourteen-day lead time for Level 2.',
+    'R. Sfeir', d('2026-08-17'),
+  );
+  insertDetermination.run('EV-0244', 'satisfied', '', 'R. Sfeir', d('2026-07-20'));
 
   // A blocking inspection without recorded findings gates ONLY the satisfied
   // outcome on EV-0362; the recorded one shows what findings look like.
@@ -650,11 +670,11 @@ export function seedDemonstration(db: DatabaseSync): void {
       '/events/EV-0418', d('2026-08-11'), 0],
 
     ['for_information',
-      'Notification acknowledged — AUB Sports Day',
-      'إشعار مستلَم — يوم الرياضة في الجامعة الأميركية',
-      'The Level 1 notification has been acknowledged. No further filing is owed unless a reportable incident occurs.',
-      'تم استلام إشعار المستوى 1. لا يُستحق أي تقديم إضافي ما لم تقع حادثة موجبة للإبلاغ.',
-      '/events/EV-0301', d('2026-07-28'), 1],
+      'Submission received but incomplete — Saida Night Run',
+      'تم استلام التقديم لكنه غير مكتمل — ركض صيدا الليلي',
+      'The compliance and submission form is incomplete and the filing did not meet the fourteen-day lead time. Complete the outstanding items and file again; your reference number does not change.',
+      'نموذج الامتثال والتقديم غير مكتمل، ولم يلتزم التقديم بمهلة الأربعة عشر يوماً. أكملوا البنود المتبقية وقدّموا مجدداً؛ ولا يتغيّر رقمكم المرجعي.',
+      '/events/EV-0301', d('2026-08-17'), 1],
   ];
   for (const [kind, sEn, sAr, bEn, bAr, route, sentAt, read] of rows) {
     insertNotification.run(organizer, kind, sEn, sAr, bEn, bAr, route, sentAt, read);

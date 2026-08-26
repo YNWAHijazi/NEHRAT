@@ -66,9 +66,23 @@ const FIGURES = regulatoryFigures();
 
 // Logic lives in .ts and .tsx. Style sheets are excluded wholesale: a number in CSS is
 // never a regulatory rule, because rules must come from the module, not the sheet.
+// `lib` is swept too. It used to be app + components only, which left the query layer,
+// the presentation helpers, the seeder and the auth layer unchecked -- everything that
+// sits between a screen and the rules module. `lib/rules/` itself is exempt: it IS the
+// source, it loads the JSON on purpose, and its own figures are the ones under test
+// elsewhere. Everything outside it must ask rather than inline.
 const SOURCE = [
   ...filesUnder('app', ['.tsx', '.ts']),
   ...filesUnder('components', ['.tsx', '.ts']),
+  ...filesUnder('lib', ['.ts'])
+    .filter((f) => !f.includes('/rules/'))
+    // Two named exemptions, each for a reason the file itself states:
+    //   demo-seed.ts IS the demonstration dataset -- a course distance of 12 km and an
+    //     event called "Beirut Coastal 12K" are the data, not a rule inlined.
+    //   presentation.ts holds COLOUR thresholds only; its own docstring says no gate,
+    //     deadline or obligation derives from them, and they coincide with nothing
+    //     enforced. The enforced windows live in levels.json.
+    .filter((f) => !/lib\/(demo-seed|presentation)\.ts$/.test(f)),
 ];
 
 describe('regulatory figures live in data, not in components', () => {
@@ -132,7 +146,13 @@ describe('the narrowing itself', () => {
 
 describe('components ask the rules module rather than deciding', () => {
   it('no component reads the rules JSON directly', () => {
-    const offenders = SOURCE.filter((f) => /lib\/rules\/data\//.test(read(f))).map(relative);
+    // Match the IMPORT, not the mention. The old pattern searched the whole file text,
+    // so a docstring that merely names the path -- "the enforced windows live in
+    // lib/rules/data/levels.json" -- counted as a violation, while the surrounding
+    // sweep was narrow enough that no such docstring was ever in range. Widening the
+    // sweep to lib surfaced three of them at once.
+    const rawImport = /(?:import|require)[^\n;]*['"][^'"\n]*rules\/data\/[^'"\n]*\.json['"]/;
+    const offenders = SOURCE.filter((f) => rawImport.test(read(f))).map(relative);
     expect(
       offenders,
       'Import from lib/rules, which narrows and validates, rather than from the raw JSON.',

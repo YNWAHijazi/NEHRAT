@@ -91,7 +91,7 @@ export default async function SubmissionReviewPage({
               </span>
             ) : null}
             {/* Internal workflow state: grey, quiet, not a determination. */}
-            <span style={{ padding: '3px 9px', borderRadius: 3, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
+            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 3, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
               <L en={internal.en} ar={internal.ar} />
               {review.reviewer ? ` · ${review.reviewer}` : null}
             </span>

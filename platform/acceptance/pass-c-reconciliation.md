@@ -141,3 +141,92 @@ retired on inspection: neither was ever in the prototypes.
 
 **Standing count: 68 exceptions against 38 comparisons.** The number to watch is not the exception
 count but the *comparison* count, which is what actually holds the build to the drawings.
+
+---
+
+## Addendum 2, 2026-08-26 — the queue rebuilt, and the guards swept
+
+**The queue is fixed.** Eight columns and the reference's headings — Event or venue,
+Organizer, Level, Event date, Filing date, Status, Reviewer, Days — where the build had six,
+with Organizer folded into the first cell as a sub-line, Days dropped, and Submission / Filed /
+State standing in for the reference's wording. Neither missing column lacked data behind it:
+**Days** derives from the filing date to today on the Beirut clock, and **Filing date** now
+carries the reference's Met / Filed late chip, derived from the level's lead time rather than
+stored.
+
+**The exception can no longer certify itself.** `tests/visual-exceptions.test.ts`: an
+`expectedDivergent` region that makes a claim about fidelity — that geometry, layout,
+vocabulary or gating follows the reference — must carry a reference-side locator, or say
+UNVERIFIED and drop the claim. Turning it on caught **29** regions. Twenty carried the
+identical propagated sentence; nine were individually worded. All 29 now say plainly what has
+not been checked. Nothing was retired by flipping a flag.
+
+**The demonstration set now matches the reference three rows out of four.** The fourth row is
+Saida Night Run, not AUB Sports Day: a Level 2 filing that missed its lead time, carrying
+"submission received but incomplete" — the set's only late filing and its only incomplete
+determination, which is why the reference has it. Satisfied moved to Tripoli Marathon, where
+the reference puts it.
+
+Two things the seed could not reconcile, both reported rather than invented:
+
+- **The reference's Saida row is internally inconsistent.** It shows the filing date as
+  2026-08-15 *and* marks it "Filed late". Level 2 requires filing fourteen calendar days
+  before, and 2026-08-29 less 14 days is exactly 2026-08-15 — that filing MEETS the deadline.
+  Seeding 08-15 would derive "Met" beside two flags saying the opposite, so the seed carries
+  08-16 and the chip derives honestly. *Move the prototype's date by one day and this note goes.*
+- **The two prototype files disagree about Beirut Coastal 12K.** `Ministry Review` has it FILED
+  and in progress with a reviewer; `Organizer Journey` has it at stage 3, requirements and
+  attachments, with no reference number. The organizer file governs the organizer's own record,
+  so EV-0418 stays unfiled — and the demonstration set therefore has **no filed-and-unreviewed
+  submission**, so the console cannot demonstrate a grey internal state in the queue at all.
+  That is worth a ruling: the Ministry walking the platform should be able to see one.
+
+**The §11 powers, ruled against the source.** PAD §11 lists exactly ten, and the build renders
+exactly those ten, one for one. Mapping the prototype's eleven onto them gives three findings:
+
+1. **"Readiness check and lapse cycles" is not a §11 power.** Neither the power nor the 90/60
+   figures appear anywhere in the policy — searching the source for "90", "60", "check cycle"
+   and "lapse" returns nothing. The cadence is a platform construct for the device ledger. It
+   is real and configurable and the ledger needs it; it is not one of the ten. Merge it under
+   §11.5, *establish electronic registration and reporting procedures*, which is the power a
+   check cadence would be established under — or keep it as a configurable value shown outside
+   the powers table and labelled as such.
+2. **§11.10 is missing from the prototype** — *request readiness confirmation and require
+   corrective action where deficiencies are identified*. The build renders it; the eleven do not
+   include it.
+3. **§11.3 is split into two prototype rows** — remote/difficult-access and individual
+   facilities — where the source is one power with two limbs. Defensible as a UI split; noted so
+   the count reconciles.
+
+### The guard sweep
+
+Checked every guard for the hand-named-inputs pattern. Three more had it:
+
+- ✔ **bilingual-parity** named five files out of twelve — the same blind spot as banned-terms,
+  and a worse one, since parity is non-negotiable 4. It now reads the directory and pairs by key
+  shape (`en`↔`ar`, `<name>En`↔`<name>Ar`). It found the plan's sixteen English-only section
+  summaries — **and the prototype carries them English-only too**, its section arrays being
+  `[titleEn, titleAr, bodyEn, bodyAr, summaryEn]` with no Arabic fifth element. Nothing renders
+  them in the build, so they are dead data rather than a live parity break; they are on this list
+  because the prototype needs the Arabic before either side can render them.
+- ✔ **no-hardcoded-values** swept app and components only. Extended to `lib` (exempting
+  `lib/rules/`, which IS the source). It caught two real bypasses: `lib/queries.ts` hard-coded
+  the post-event stage number 6 instead of `POST_EVENT_STAGE`, and `lib/password.ts` imported
+  `auth-policy.json` straight from disk — precisely the bypass its "ask the rules module" check
+  exists to catch, in a directory that check never looked at. The policy is now `AUTH_POLICY`,
+  exported and read through the module. The same widening also exposed a flaw in the check
+  itself: it matched the path anywhere in the file, so a docstring *naming* the path counted as a
+  violation. It matches the import now.
+- ✔ **rules-wiring** already read the directory, but an aliased import (`AUTH_POLICY as
+  authPolicy`) hid a real use from it, since it discounts import lines. The alias is gone. Worth
+  knowing: this guard cannot see a rule used only under an alias.
+- **feature-flags** names app and components. Left as is, deliberately: its question is "does a
+  SCREEN consult a flag", and `lib` holds no screens. Recorded so the decision is visible rather
+  than an oversight.
+
+### On the pack
+
+The prototypes on disk are still the 2026-08-25 23:02 set. The white variant still carries both
+facility identities, and `Facility Cardiac Readiness.dc.html` is still present with four
+"Corniche Sports Club" strings. The two retirements described as unblocked cannot be verified
+until the new pack lands; `lib/handoff-pack.ts` is the one line that points at it.

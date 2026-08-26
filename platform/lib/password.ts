@@ -7,7 +7,7 @@
  */
 
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import authPolicy from './rules/data/auth-policy.json';
+import { AUTH_POLICY } from './rules';
 
 const KEY_LENGTH = 64;
 
@@ -33,7 +33,7 @@ export interface PolicyCheck {
 }
 
 export function checkPasswordPolicy(password: string): PolicyCheck {
-  const p = authPolicy.password;
+  const p = AUTH_POLICY.password;
   if (password.length < p.minLength) return { ok: false, failed: 'minLength' };
   if (p.requireUppercase && !/[A-Z]/.test(password)) return { ok: false, failed: 'requireUppercase' };
   if (p.requireDigit && !/\d/.test(password)) return { ok: false, failed: 'requireDigit' };
@@ -41,4 +41,4 @@ export function checkPasswordPolicy(password: string): PolicyCheck {
   return { ok: true };
 }
 
-export const RESET_EXPIRY_MINUTES: number = authPolicy.reset.linkExpiryMinutes;
+export const RESET_EXPIRY_MINUTES: number = AUTH_POLICY.reset.linkExpiryMinutes;

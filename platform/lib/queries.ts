@@ -16,7 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, POST_EVENT_STAGE } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 
@@ -140,8 +140,16 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     assessed ? 'done' : 'current',
     !assessed ? 'todo' : filed ? 'done' : 'current',
     filed ? 'done' : 'todo',
-    outcome ? (outcome === 'satisfied' ? 'done' : 'returned') : filed && stageInfo.stage < 6 ? 'current' : filed ? 'done' : 'todo',
-    stageInfo.stage === 6 ? 'current' : level === 3 ? 'todo' : 'na',
+    outcome
+      ? outcome === 'satisfied'
+        ? 'done'
+        : 'returned'
+      : filed && stageInfo.stage < POST_EVENT_STAGE
+        ? 'current'
+        : filed
+          ? 'done'
+          : 'todo',
+    stageInfo.stage === POST_EVENT_STAGE ? 'current' : level === 3 ? 'todo' : 'na',
   ];
   return {
     id: row.id,
@@ -1108,6 +1116,17 @@ export interface QueueRow {
   /** The latest determination, if one has been recorded. */
   outcome: 'incomplete' | 'revision' | 'satisfied' | null;
   outcomeAt: string | null;
+  /**
+   * Days the submission has been waiting, filing date to today on the Beirut clock.
+   * The reference's rightmost column; a plain count, no unit, beside the reviewer.
+   */
+  daysWaiting: number | null;
+  /**
+   * Whether the filing met its deadline. Derived from the level's lead time against the
+   * event start (filingDeadline), never stored -- the reference shows Met / Filed late
+   * beneath the filing date, and a stored flag would drift from the rule.
+   */
+  filingMet: boolean | null;
 }
 
 export function reviewQueue(viewerIsDemo: boolean): QueueRow[] {
@@ -1147,7 +1166,24 @@ export function reviewQueue(viewerIsDemo: boolean): QueueRow[] {
     reviewer: r.r_reviewer ?? '',
     outcome: r.d_outcome ?? null,
     outcomeAt: r.d_at ? r.d_at.slice(0, 10) : null,
+    daysWaiting: r.filed_at ? daysBetween(r.filed_at.slice(0, 10), beirutTodayFn()) : null,
+    filingMet: filingMetFor(r.start_date, derivedLevelFor(r.id) ?? ((r.demo_level as Level | null) ?? null), r.filed_at),
   }));
+}
+
+/**
+ * Did the filing meet the lead time its level requires? The deadline comes from the
+ * rules layer (filingDeadline); this only compares dates. Null when anything the
+ * comparison needs is missing -- an unknown answer is never rendered as "Met".
+ */
+function filingMetFor(
+  eventStart: string | null,
+  level: Level | null,
+  filedAt: string | null,
+): boolean | null {
+  if (!eventStart || level === null || !filedAt) return null;
+  const deadline = filingDeadline(level, new Date(`${eventStart}T12:00:00+03:00`));
+  return filedAt.slice(0, 10) <= deadline.date;
 }
 
 export interface DeterminationRow {

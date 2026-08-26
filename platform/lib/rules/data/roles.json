@@ -6,11 +6,11 @@
         "key": "accept",
         "en": "Accept",
         "ar": "القبول",
-        "descEn": "Your organization becomes a named provider for this event and the declaration opens.",
-        "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح الإقرار.",
-        "$commentNoDeclaration": "The declaration exists only at Level 3 (emsDeclarationGate). Below it the accept description must not promise one -- these two strings are used instead.",
-        "descNoDeclarationEn": "Your organization becomes a named provider for this event. You record your operational detail; there is no declaration at this level.",
-        "descNoDeclarationAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية. وتسجّلون تفاصيلكم التشغيلية؛ ولا يوجد إقرار في هذا المستوى."
+        "$commentLevelAware": "Accept reads differently by level, at reviewer instruction. The readiness declaration exists only at Level 3 (emsDeclarationGate); at Levels 1 and 2 the obligation is operational detail for the organizer's plan and nothing more. The absence is NAMED rather than left silent -- a provider should know the lighter obligation is deliberate, not an omission. descEn/descAr are the Level 3 wording; descNoDeclarationEn/Ar are Levels 1 and 2. Decline and Request modification reference no declaration at any level and are level-neutral by inspection.",
+        "descEn": "Your organization becomes a named provider for this event and the readiness declaration opens.",
+        "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح إقرار الجاهزية.",
+        "descNoDeclarationEn": "Your organization becomes a named provider for this event. No declaration is required at this level; you supply operational detail for the organizer's plan.",
+        "descNoDeclarationAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية. ولا يُطلب أي إقرار في هذا المستوى؛ بل تقدّمون التفاصيل التشغيلية لخطة المنظّم."
       },
       {
         "key": "decline",

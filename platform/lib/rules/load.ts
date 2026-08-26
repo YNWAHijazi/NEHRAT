@@ -9,6 +9,7 @@
 import domainsJson from './data/domains.json';
 import minimumConditionsJson from './data/minimum-conditions.json';
 import levelsJson from './data/levels.json';
+import authPolicyJson from './data/auth-policy.json';
 import type { Level, Predicate } from './types';
 
 function asLevel(n: number): Level {
@@ -143,3 +144,12 @@ export function postEventSignaturesRequired(level: Level): number {
   }
   return n;
 }
+
+/**
+ * The authentication policy. A Ministry decision pending, so it lives in the data like
+ * every other configurable value -- and it is read THROUGH this module, not straight
+ * from the JSON. lib/password.ts used to import the file directly, which is exactly the
+ * bypass the "import from lib/rules, which narrows and validates" guard exists to catch;
+ * the guard only swept app and components, so it never saw it.
+ */
+export const AUTH_POLICY = authPolicyJson;

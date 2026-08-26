@@ -58,12 +58,25 @@ test.describe('internal states and determinations', () => {
     await signInAs(page, 'test_moph');
     await page.goto('/ministry/queue');
     const queue = page.locator('[data-region="queue"]');
-    // EV-0362 carries a recorded revision outcome; EV-0244 has no determination
-    // and shows the grey in-queue state.
+    // All three seeded filings now carry recorded determinations, matching the
+    // reference: EV-0362 revision, EV-0244 satisfied, EV-0301 incomplete.
     await expect(queue).toContainText('Additional information or revision required');
-    await expect(queue).toContainText('In queue');
+    await expect(queue).toContainText('Health and medical preparedness requirements satisfied');
+    await expect(queue).toContainText('Submission received but incomplete');
     // Never approved, never rejected.
     await expect(queue).not.toContainText(/approved|rejected/i);
+
+    // The grey internal state is asserted where the demonstration set can still show
+    // one -- on the submission itself. The queue cannot: the reference's in-progress
+    // row is Beirut Coastal 12K, and the two prototype files disagree about that event
+    // (the Ministry file has it FILED and in progress; the Organizer Journey has it at
+    // stage 3, requirements and attachments, with no reference number). The organizer
+    // file governs the organizer's own record, so EV-0418 stays unfiled and the
+    // demonstration set has no filed-and-unreviewed submission. Reported, not invented.
+    await page.goto('/ministry/submissions/EV-0362');
+    const state = page.locator('[data-region="review-state"]');
+    await expect(state).toBeVisible();
+    await expect(state).not.toContainText(/approved|rejected/i);
   });
 });
 
@@ -109,7 +122,8 @@ test.describe('the organizer reads the same determination', () => {
     const body = page.locator('body');
     // EV-0362 carries a recorded revision; the seeded 'Information required' must not show.
     await expect(body).toContainText('Additional information or revision required');
-    // EV-0301 carries a recorded satisfied outcome.
+    // EV-0244 (Tripoli Marathon) carries a recorded satisfied outcome; EV-0301
+    // (Saida Night Run) carries incomplete. Both are the organizer's own records.
     await expect(body).toContainText('Health and medical preparedness requirements satisfied');
     await page.goto('/events/EV-0362');
     // Stage 5 of the rail is the outcome, done, in the compliance form's wording.

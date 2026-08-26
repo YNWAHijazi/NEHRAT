@@ -26,14 +26,21 @@ export default async function ReviewQueuePage() {
         />
       </p>
 
-      <div data-region="queue" data-stack="" style={{ display: 'grid', gridTemplateColumns: 'minmax(220px,1.6fr) .7fr 1fr 1fr 1.2fr .8fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
+      {/* Eight columns, the reference's own proportions and its own headings. The build
+          had six: Organizer was folded into the first cell as a sub-line and Days was
+          dropped, and three headings were renamed (Submission, Filed, State). None of
+          that was a reviewer decision -- the exception covering this region claimed
+          "geometry, vocabulary and gating follow the reference" and did not. */}
+      <div data-region="queue" data-stack="" data-xscroll="" style={{ display: 'grid', gridTemplateColumns: '1.7fr 1.1fr .6fr .9fr 1.1fr 1.2fr .9fr .7fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
         {[
-          { en: 'Submission', ar: 'التقديم' },
+          { en: 'Event or venue', ar: 'الفعالية أو الموقع' },
+          { en: 'Organizer', ar: 'المنظّم' },
           { en: 'Level', ar: 'المستوى' },
           { en: 'Event date', ar: 'تاريخ الفعالية' },
-          { en: 'Filed', ar: 'قُدّم' },
-          { en: 'State', ar: 'الحالة' },
+          { en: 'Filing date', ar: 'تاريخ التقديم' },
+          { en: 'Status', ar: 'الحالة' },
           { en: 'Reviewer', ar: 'المراجع' },
+          { en: 'Days', ar: 'أيام' },
         ].map((h) => (
           <div key={h.en} data-th="" style={{ background: 'var(--surface2)', padding: '11px 16px', fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             <L en={h.en} ar={h.ar} />
@@ -47,11 +54,15 @@ export default async function ReviewQueuePage() {
               <div style={{ fontSize: 15, fontWeight: 500, lineHeight: 1.4 }}>
                 <L en={r.nameEn} ar={r.nameAr} />
               </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
-                <L en={r.orgEn} ar={r.orgAr} />
-                {r.mophReference ? <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {r.mophReference}</span> : null}
-              </div>
+              {r.mophReference ? (
+                <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
+                  {r.mophReference}
+                </div>
+              ) : null}
             </Link>,
+            <div key={`${r.eventId}-org`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14, lineHeight: 1.4 }}>
+              {r.orgEn ? <L en={r.orgEn} ar={r.orgAr} /> : '—'}
+            </div>,
             <div key={`${r.eventId}-b`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14 }}>
               {r.level !== null ? (
                 <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 3, borderInlineStart: `2px solid var(--l${r.level})`, background: `var(--l${r.level}s)` }}>
@@ -62,7 +73,15 @@ export default async function ReviewQueuePage() {
               )}
             </div>,
             <div key={`${r.eventId}-c`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14, fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>{r.eventDate ?? '—'}</div>,
-            <div key={`${r.eventId}-d`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14, fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>{r.filedAt ?? '—'}</div>,
+            <div key={`${r.eventId}-d`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14, color: 'var(--muted)' }}>
+              <div style={{ fontVariantNumeric: 'tabular-nums' }}>{r.filedAt ?? '—'}</div>
+              {/* Met or late against the level's lead time, derived -- never stored. */}
+              {r.filingMet !== null ? (
+                <div style={{ fontSize: '12px', marginBlockStart: 3, color: r.filingMet ? 'var(--muted)' : 'var(--bad)' }}>
+                  {r.filingMet ? <L en="Met" ar="ملتزم" /> : <L en="Filed late" ar="قُدّم متأخراً" />}
+                </div>
+              ) : null}
+            </div>,
             <div key={`${r.eventId}-e`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: '12.5px' }}>
               {outcome ? (
                 <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 4, background: r.outcome === 'satisfied' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: r.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent-ink)', lineHeight: 1.4 }}>
@@ -76,6 +95,10 @@ export default async function ReviewQueuePage() {
               )}
             </div>,
             <div key={`${r.eventId}-f`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14, color: 'var(--muted)' }}>{r.reviewer || '—'}</div>,
+            // Days waiting: filing date to today on the Beirut clock.
+            <div key={`${r.eventId}-g`} style={{ background: 'var(--bg)', padding: '13px 14px', fontSize: '13.5px', fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>
+              {r.daysWaiting ?? '—'}
+            </div>,
           ];
         })}
         {rows.length === 0 ? (
