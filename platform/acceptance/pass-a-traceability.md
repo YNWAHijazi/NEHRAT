@@ -9,7 +9,12 @@ Enumeration was performed by six independent audit passes, one per instrument ar
 finding of showstopper class was then re-verified by hand against the code before entering
 this table. Three rows were overridden on re-verification and are marked ⟲.
 
-Audited 2026-08-25 against commit `0b1710b`.
+Audited 2026-08-25 against commit `0b1710b`. Re-audited 2026-08-26: the classification at the
+foot of this document now carries each bug row's current state (✔ fixed / ◑ half / ○ open) with
+the evidence. **The per-instrument rows below are as first written** — they record what the audit
+found on 2026-08-25 and are deliberately not rewritten, so the original finding stays readable
+next to what was done about it. Where a row below and the classification disagree, the
+classification is the current state.
 
 ## The count
 
@@ -20,7 +25,10 @@ Audited 2026-08-25 against commit `0b1710b`.
 | absent | 15 |
 | deliberately deferred | 13 |
 
-290 obligations traced. (Grouped table rows expand to their counts: "discharged (×16)" is sixteen obligations.)
+290 obligations traced, as at the first audit. The four counts have not been restated: doing
+so honestly means re-tracing all 290, which is a fresh Pass A rather than a mark-up of this one.
+Fourteen of the twenty-six bug rows have closed since (see the classification), so *discharged*
+is now higher and *partial*/*absent* lower than the table shows. (Grouped table rows expand to their counts: "discharged (×16)" is sixteen obligations.)
 
 Every row not marked discharged is classified at the end of this document as either a **bug**
 (the build is wrong against a settled rule and the fix needs no ruling) or a **decision**
@@ -391,28 +399,74 @@ not greyed (`lib/rules/requirements.ts:35`; `requirements/page.tsx:86`).
 
 ## Bugs (the rule is settled; the build is wrong; no ruling needed)
 
-Showstoppers 1–6 above, plus:
+Re-audited 2026-08-26 against the working tree. Each row carries its current state:
+**✔ fixed** with the evidence, or **○ open** with what remains. Nothing here was closed by
+argument — every ✔ was re-checked in the code on the date above, and the six showstoppers
+are additionally held by `e2e/app/showstoppers.spec.ts` and `tests/showstopper-regressions.test.ts`
+so they cannot silently reopen.
 
-- **B.16/B.17 Arabic mispairing** — the EN and AR issues order the two rows differently; the build paired by index. Fix: pair by content; record the ordering divergence in the source-documents README.
-- **D.club / D.recur silently default** — tri-state the two venue flags on the event form so unset returns incomplete naming the field (non-negotiable 0).
-- **Six recorded EN/AR divergences never rendered** — B.7, B.13, B.15, C.A.6-AR, C.B.10, certification telephone. The badge pattern exists on the declaration screen; the data carries the flags; no screen shows them.
-- **Certification statements unrendered** — Annex C organizer statement and Annex D statement exist in data and render nowhere; Annex A Part F does not exist at all. People sign without the certifying words on screen.
-- **Director post-event signature reads `demo_level`** — a derived Level 3 event completes on one signature (`actions.ts:469`).
-- **Reference year from the server clock** — use the Beirut clock like every other date computation.
-- **`unansweredProviders` dead data** — wire the declared blocker or remove it; today the declaration ticks freely.
-- **Expedited flag invisible to the reviewer** — derived and stored but no console surface reads it.
-- **Governance text never reaches the plan** — the plan screen doesn't call `governanceFor`, contradicting the governance screen's own copy.
-- **§11 powers 1, 2, 4, 5, 9 publish into a void** — same class as showstopper 5: published values with no consumer while the console reports them in force.
-- **Provisional-cycle note missing on the device registry** — `facility.json:2` mandates it wherever the chips render.
-- **Annex D identity fields** — dates (start), venue/route, organizer, final level missing from the report surface.
-- **Device readiness checks only on the annual purpose** — initial registration never asks them.
-- **Annex B §6.2 missing status-change routes** — after AED use; on Ministry readiness request.
-- **Incident report facility references** — category and address omitted (§7.1).
-- **L1 measures selector cannot request Annex C/EHMP** — populate from the requestable catalogue, not `documentsForLevel(1)` (§8.1 third limb).
-- **Compliance header incomplete** — two of eight fields omitted; the typed export exists unused.
-- **Malls capacity field missing** — the profile captures nothing a published threshold could evaluate.
-- **§13 ¶2(b) reportable-event trigger read nowhere** — configured, named in copy, never evaluated.
-- **§13 ¶2(c) no Ministry request control** — two screens promise a trigger the console cannot fire.
+**Showstoppers 1–6: all ✔ fixed.**
+
+1. ✔ The declaration gate counts what the form renders (`lib/rules/submission.ts`
+   `applicableDeclarations`/`declarationsAreComplete`); a Level 1 event files end to end.
+2. ✔ `planIsComplete` requires every applicable major-incident item confirmed
+   (`lib/rules/submission.ts:84-85`), not only the sixteen sections.
+3. ✔ The 24-hour notification has its own route (`/events/[id]/incident`), captures type and
+   time, and the Ministry reads it at `/ministry/incidents`.
+4. ✔ `submission_versions` exists; a revision reopens the form and re-files as version 2 with
+   the reference unchanged and the version visible to the reviewer.
+5. ✔ `effectiveCycles` is wired through `publishedCycles` (`lib/queries.ts:293`) into
+   `lib/rules/facility.ts`; a published value replaces the provisional note on the facility side.
+6. ✔ `plan_versions` archives the replaced version; prior versions are readable on the screen.
+
+Then, in the order they were listed:
+
+- ✔ **B.16/B.17 Arabic mispairing** — paired by content, not index; the ordering difference is
+  recorded as divergence 9 in the source-documents README.
+- ✔ **D.club / D.recur silently default** — both venue flags are tri-state (`components/YesNoPair.tsx`);
+  unset returns incomplete naming the field.
+- ✔ **Six recorded EN/AR divergences never rendered** — `components/SourceDivergence.tsx` renders
+  all six beside the rows that carry them, on the requirements, compliance-form and declaration
+  screens. Each says which issue is followed and that the difference awaits a Ministry decision.
+- ◑ **Certification statements unrendered** — the Annex C organizer statement and the Annex D
+  statement now render above their signature blocks. **Annex A Part F still does not exist**; it
+  is the one certifying text with no surface, and it is the remaining half of this row.
+- ✔ **Director post-event signature reads `demo_level`** — reads the derived level like every
+  other call site; `demo_level` is the seeded-row fallback only (`app/actions.ts:535`).
+- ✔ **Reference year from the server clock** — both mints now read the Beirut clock: the event
+  reference at `app/actions.ts:467`, the venue reference at `app/actions.ts:681`. The venue half
+  was still on `new Date()` at the previous audit and was fixed on 2026-08-26.
+- ✔ **`unansweredProviders` dead data** — the waiting-on-others state is derived in
+  `lib/rules/submission.ts` and reported by the event record's next-action panel.
+- ○ **Expedited flag invisible to the reviewer** — still derived and stored with no console
+  surface reading it. `grep expedited app/ministry` returns nothing.
+- ✔ **Governance text never reaches the plan** — the plan screen calls `governanceFor`; the
+  Director's three fields render read-only in sections 10 and 12 and beside the eleven items.
+- ○ **§11 powers 1, 2, 4, 5, 9 publish into a void** — the two cycle powers are wired (showstopper
+  5). Five of the ten still have no consumer while the console reports them in force.
+- ○ **Provisional-cycle note missing on the device registry** — `facility.json:2` mandates it
+  wherever the chips render; `DeviceRegistry.tsx` still renders them without it.
+- ✔ **Annex D identity fields** — the report now opens with the instrument's header block
+  (`data-region="report-identity"`): event name, date(s), venue or route, organizer, final level.
+- ○ **Device readiness checks only on the annual purpose** — initial registration still does not ask them.
+- ○ **Annex B §6.2 missing status-change routes** — after AED use; on Ministry readiness request.
+- ○ **Incident report facility references** — category and address still omitted (§7.1).
+- ○ **L1 measures selector cannot request Annex C/EHMP** — still populated from `documentsForLevel(1)`.
+- ✔ **Compliance header incomplete** — all eight fields render from `COMPLIANCE_HEADER`
+  (`compliance-form.json:header`). Corrected on re-audit: this row was marked open in error, then
+  checked and found closed. A separate defect WAS found in the same block and fixed: the eight rows
+  carried one value for both languages, so the Arabic form header read "Level 3" and the organizer's
+  English name on an otherwise Arabic page. Each row now carries `valueEn`/`valueAr`.
+- ○ **Malls capacity field missing** — the facility profile still captures nothing a published
+  threshold could evaluate.
+- ○ **§13 ¶2(b) reportable-event trigger read nowhere** — configured, named in copy, never evaluated.
+- ○ **§13 ¶2(c) no Ministry request control** — two screens still promise a trigger the console
+  cannot fire.
+
+**Count: 6 showstoppers + 9 further bugs fixed, 1 half-fixed, 10 open.** The eleven open rows are
+all narrower than the six showstoppers — none of them blocks a journey; each is an obligation
+discharged incompletely rather than not at all. They are the next body of work and are not
+mixed into the decisions list below, which needs rulings rather than code.
 
 ## Decisions (building either way would guess; each needs an owner)
 
@@ -434,3 +488,61 @@ Showstoppers 1–6 above, plus:
 16. **Platform owner reach and the owner console** — counts-only stands until ruled; the fourteen owner-console capabilities wait on the commercial flags. *Ministry + product.*
 17. **Rate-limiter mechanism** — already a recorded open decision; per-process today.
 18. **B.18 medical-provider surface** — party `M` has no login class; whether patient-care documentation needs its own surface or stays an organizer certification. *Ministry.*
+
+
+---
+
+## Added 2026-08-26 — what the fifteen-journey re-walk turned up
+
+None of these blocked a journey; all fifteen completed. They are settled-rule defects, and all but
+the last two are fixed.
+
+- ✔ **The post-event report was due a day late.** `postEventReportWindow` counted the seven days
+  from the day the window OPENS rather than from the event end, so an event ending 2026-08-08 was
+  shown as due the 16th where Protocol 13 says "within seven (7) calendar days after" — the 15th.
+  The unit test pinned the wrong date too. Found because the Director's screen and the organizer's
+  screen disagreed by exactly one day: the Director's screen was computing its own deadline with
+  its own arithmetic, and happened to be right. The rule is corrected and **the screen now calls
+  the rule** — a screen with its own arithmetic is how a wrong rule survives having a witness.
+- ✔ **"The report now carries both signatures"** was shown after the first signature, beside a
+  panel correctly saying the organizer had not signed. The notice now reports what is recorded.
+- ✔ **Publishing the cycle figures withdrew a caveat about something else.** The provisional-status
+  note was gated on `cycles.provisional`, so publishing a check cadence silently removed the note
+  saying the STATUS WORDING is provisional — two different provisional things. `facility.json`
+  requires the note "wherever they appear"; it now always renders.
+- ✔ **The attachment counter and the next-action panel disagreed** (4 vs 2): the counter counted
+  the plan and the compliance form, which are completed on the platform, not attached. Both now
+  read the catalogue's `attach` flag.
+- ✔ **The Level 2 invitation promised a declaration that does not exist.** Accept said "the
+  declaration opens" at every level. The rule — declaration at Level 3 only — was written inline in
+  the declaration route as `eventLevel !== 3`, where the invitation screen could not consult it. It
+  is now `emsDeclarationGate` in `lib/rules/gates.ts` and both screens call it.
+- ✔ **A second group "2"** on the requirements screen: the Event Medical Director block carried its
+  own heading number. It is part of group 2; numbering that shifts with the level would also
+  renumber the groups below it for Level 3 organizers only.
+- ✔ **Doubled full stop** in the decline notification (`…that weekend.".`) — the reason is quoted
+  verbatim and already ended in one. `verbatimQuote` de-duplicates the terminal punctuation without
+  touching the wording, at all four sites that quote a person's own words.
+- ✔ **Arabic named two annexes the English did not**, and said `خطة EHMP` in four cells. Both terms
+  had been on the banned list all along; **the sweep only looked at four data files out of twelve.**
+  It now sweeps the directory. See the systemic note below.
+- ✔ **The plan's Arabic name had drifted** to الخطة الصحية والطبية للفعالية in four places against
+  the glossary's خطة التأهب الصحي والطبي للفعالية. Corrected and now guarded.
+- ○ **Arabic number agreement is not handled.** `2 بنود` where the dual requires بندان, and
+  `1 بنود` for one. The English switches item/items correctly. This needs a small plural helper
+  (Arabic has singular, dual and plural), not a string fix. *Open.*
+- ○ **The platform owner also gets the organizer surface.** `test_owner` can reach `/dashboard`,
+  `/events/new`, `/venues/new` and `/organization`. Non-negotiable 13 constrains what the owner sees
+  of MINISTRY data, and `/platform/activity` is correctly counts-only — whether one account may hold
+  both roles is the role-model decision (open decision 7), not something to settle in code. *Decision.*
+
+### The systemic one
+
+The banned-terms sweep named its inputs by hand: `en.json`, `ar.json`, `minimum-conditions.json`,
+`domains.json`. Twelve files live in that directory. The eight it did not name carried both banned
+terms, in Arabic, on screens organizers actually sign. **A guard with a hand-written list of inputs
+stops guarding the moment someone adds a file, and says nothing while it happens** — the same shape
+as showstopper 5, where a tested function had no caller. The sweep now reads the directory. Turning
+it on immediately surfaced fourteen strings: seven were genuine (fixed above) and seven were the
+word "approved" in its ordinary sense — an approved capacity, approved ventilation equipment — which
+are now a short, reasoned allowlist in `banned-terms.json` rather than a widened rule.

@@ -123,8 +123,13 @@ export function seedDemonstration(db: DatabaseSync): void {
     d('2026-06-02'),
   );
   insertEvent.run(
+    // Held 2026-08-09, as every reference file has it (the Ministry queue's eventDate,
+    // the post-event screen's "held 2026-08-09", both notification templates). The seed
+    // carried 08-08, and the report window rule was counting a day too many; the two
+    // errors cancelled and the due date came out right for the wrong reason. Both are
+    // corrected: seven calendar days after 08-09 is 08-16.
     'EV-0244', organizer, 'Tripoli Marathon', 'ماراتون طرابلس',
-    d('2026-08-08'), d('2026-08-08'), 'MOPH-EV-2026-0244', 1,
+    d('2026-08-09'), d('2026-08-09'), 'MOPH-EV-2026-0244', 1,
     'Post-event report owed', 'تقرير لاحق مستحق',
     d('2026-08-16'), 'Report by', 'التقرير بحلول',
     6, 'post-event report', 'التقرير اللاحق',

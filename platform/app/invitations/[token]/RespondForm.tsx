@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import { L } from '../../../components/L';
 import { respondToInvitationAction } from '../../actions';
-import { ROLES_CONTENT } from '../../../lib/rules';
+import { ROLES_CONTENT, emsDeclarationGate, type Level } from '../../../lib/rules';
 
 const inputStyle: React.CSSProperties = {
   height: 46,
@@ -21,8 +21,25 @@ const inputStyle: React.CSSProperties = {
   fontSize: 15,
 };
 
-export function RespondForm({ token, kind, signedIn }: { token: string; kind: 'ems' | 'director'; signedIn: boolean }) {
+export function RespondForm({
+  token,
+  kind,
+  signedIn,
+  eventLevel,
+}: {
+  token: string;
+  kind: 'ems' | 'director';
+  signedIn: boolean;
+  eventLevel: Level | null;
+}) {
   const content = ROLES_CONTENT.ems;
+  // Accept promised "the declaration opens" at every level. It opens only at Level 3.
+  const declarationOpens = emsDeclarationGate(eventLevel).behaviour === 'enabled';
+  const accept = content.nominationResponses.find((r) => r.key === 'accept');
+  const acceptCopy = {
+    en: accept?.descNoDeclarationEn ?? accept?.descEn ?? '',
+    ar: accept?.descNoDeclarationAr ?? accept?.descAr ?? '',
+  };
   const [picked, setPicked] = useState<string | null>(null);
   const [declineOpen, setDeclineOpen] = useState(false);
   const responses = kind === 'ems' ? content.nominationResponses : content.nominationResponses.filter((r) => r.key !== 'modification');
@@ -51,7 +68,11 @@ export function RespondForm({ token, kind, signedIn }: { token: string; kind: 'e
                     <L en={r.en} ar={r.ar} />
                   </span>
                   <span style={{ display: 'block', fontSize: 14, lineHeight: 1.6, color: 'var(--muted)', marginBlockStart: 4 }}>
-                    <L en={r.descEn} ar={r.descAr} />
+                    {r.key === 'accept' && !declarationOpens ? (
+                      <L en={acceptCopy.en} ar={acceptCopy.ar} />
+                    ) : (
+                      <L en={r.descEn} ar={r.descAr} />
+                    )}
                   </span>
                 </span>
               </button>

@@ -174,7 +174,12 @@ export function postEventReportWindow(eventEnd: Date): PostEventWindow {
   const endDate = toBeirut(eventEnd);
   const opensDate = addDays(endDate, 1);
   const windowDays = POST_EVENT_REPORT.windowDays;
-  const dueDate = addDays(opensDate, windowDays);
+  // The due date counts from the EVENT END, not from the day the window opens.
+  // Protocol 13: the report "shall be submitted within seven (7) calendar days AFTER
+  // every Level 3 event". Counting the seven from the opening day gave every organizer
+  // an extra day they do not have -- an event ending the 8th was shown as due the 16th
+  // where the instrument says the 15th. The window still OPENS the day after the end.
+  const dueDate = addDays(endDate, windowDays);
   return {
     opens: deadlineFrom(opensDate),
     due: deadlineFrom(dueDate),

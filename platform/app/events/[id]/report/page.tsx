@@ -6,7 +6,7 @@ import { ReturnReportBlock } from './ReturnReportBlock';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, postEventReportFor, unreadCountFor } from '../../../../lib/queries';
 import { beirutToday } from '../../../../lib/clock';
-import { POST_EVENT_CERTIFICATION_STATEMENT, POST_EVENT_ACTIVITY_FIELDS, POST_EVENT_REPORT, POST_EVENT_SIGNIFICANT, ROLES_CONTENT, addDaysIso } from '../../../../lib/rules';
+import { POST_EVENT_CERTIFICATION_STATEMENT, POST_EVENT_ACTIVITY_FIELDS, POST_EVENT_REPORT, POST_EVENT_SIGNIFICANT, ROLES_CONTENT, postEventReportWindow } from '../../../../lib/rules';
 import { signPostEventReportAction } from '../../../actions';
 
 /**
@@ -31,7 +31,12 @@ export default async function DirectorReportPage({
   const content = ROLES_CONTENT.director;
   const report = postEventReportFor(invitation.organizerAccountId, id);
   const today = beirutToday();
-  const due = invitation.eventEnd ? addDaysIso(invitation.eventEnd, POST_EVENT_REPORT.windowDays) : null;
+  // The shared rule, not this screen's own arithmetic -- the two disagreed by a day
+  // until the rule was corrected, and a screen that computes its own deadline is how
+  // that disagreement survived. No screen implements its own gating.
+  const due = invitation.eventEnd
+    ? postEventReportWindow(new Date(`${invitation.eventEnd}T12:00:00+03:00`)).due.date
+    : null;
   const overdueDays = due && today > due ? Math.round((Date.parse(today) - Date.parse(due)) / 86400000) : 0;
   const directorSigned = Boolean(report?.directorSignedAt);
   const organizerSigned = Boolean(report?.organizerSignedAt);
@@ -44,7 +49,14 @@ export default async function DirectorReportPage({
         <div style={{ maxWidth: 940 }}>
           {notice === 'signed' ? (
             <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="Signed. The report now carries both signatures." ar="وُقّع. ويحمل التقرير الآن التوقيعين." />
+              {directorSigned && organizerSigned ? (
+                <L en="Signed. The report now carries both signatures." ar="وُقّع. ويحمل التقرير الآن التوقيعين." />
+              ) : (
+                <L
+                  en="Signed. The organizer has not yet signed; the report is complete when both signatures are recorded."
+                  ar="وُقّع. لم يوقّع المنظّم بعد؛ ويكتمل التقرير بتسجيل التوقيعين معاً."
+                />
+              )}
             </div>
           ) : null}
           {notice === 'returned' ? (

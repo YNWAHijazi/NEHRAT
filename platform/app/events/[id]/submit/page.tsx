@@ -42,17 +42,27 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   // hand-written: two of eight went missing the last time this was a literal list.
   const plan = planFor(account.id, id);
   const venueRoute = venueRouteFor(account.id, id);
-  const headerValue: Record<string, string> = {
-    eventName: event.nameEn,
-    organizer: organization?.nameEn ?? '—',
-    dates: event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`,
-    venueRoute: venueRoute || '—',
-    finalLevel: `Level ${level}`,
-    submissionDate: submission?.filedAt?.slice(0, 10) ?? '—',
-    mophReference: event.mophReference ?? '—',
-    planVersion: plan ? String(plan.version) : '—',
+  // Three of these have an Arabic form, and the header used to carry ONE value for both
+  // languages -- so the Arabic form header read "Level 3" and the organizer's English
+  // name, on a page that is otherwise entirely Arabic (non-negotiable 4).
+  const dates =
+    event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`;
+  const headerValue: Record<string, { en: string; ar: string }> = {
+    eventName: { en: event.nameEn, ar: event.nameAr },
+    organizer: { en: organization?.nameEn ?? '—', ar: organization?.nameAr ?? '—' },
+    dates: { en: dates, ar: dates },
+    venueRoute: { en: venueRoute || '—', ar: venueRoute || '—' },
+    finalLevel: { en: `Level ${level}`, ar: `المستوى ${level}` },
+    submissionDate: { en: submission?.filedAt?.slice(0, 10) ?? '—', ar: submission?.filedAt?.slice(0, 10) ?? '—' },
+    mophReference: { en: event.mophReference ?? '—', ar: event.mophReference ?? '—' },
+    planVersion: { en: plan ? String(plan.version) : '—', ar: plan ? String(plan.version) : '—' },
   };
-  const headerRows = COMPLIANCE_HEADER.map((h) => ({ en: h.en, ar: h.ar, value: headerValue[h.key] ?? '—' }));
+  const headerRows = COMPLIANCE_HEADER.map((h) => ({
+    en: h.en,
+    ar: h.ar,
+    valueEn: headerValue[h.key]?.en ?? '—',
+    valueAr: headerValue[h.key]?.ar ?? '—',
+  }));
 
   return (
     <>

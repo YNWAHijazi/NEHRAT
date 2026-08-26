@@ -12,6 +12,7 @@ import {
   postEventReportFor,
   seriousIncidentNotificationFor,
   unreadCountFor,
+  venueRouteFor,
 } from '../../../../lib/queries';
 import {
   POST_EVENT_ACTIVITY_FIELDS,
@@ -63,6 +64,27 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
   );
   const notifiedAt = seriousIncidentNotificationFor(account.id, id);
 
+  // The post-event medical report's header block. The instrument names the report's subject on it
+  // itself -- event, dates, venue or route, organizer, final level -- so the sheet is
+  // self-identifying once printed or exported. Every value is read from the record.
+  const dates =
+    event.startDate && event.endDate && event.startDate !== event.endDate
+      ? `${event.startDate} \u2013 ${event.endDate}`
+      : (event.endDate ?? event.startDate ?? '');
+  const route = venueRouteFor(account.id, id);
+  const identity: { en: string; ar: string; valueEn: string; valueAr: string }[] = [
+    { en: 'Event name', ar: 'اسم الفعالية', valueEn: event.nameEn, valueAr: event.nameAr },
+    { en: 'Event date(s)', ar: 'تاريخ الفعالية', valueEn: dates, valueAr: dates },
+    { en: 'Venue or route', ar: 'الموقع أو المسار', valueEn: route, valueAr: route },
+    {
+      en: 'Organizer',
+      ar: 'الجهة المنظمة',
+      valueEn: organization?.nameEn ?? '',
+      valueAr: organization?.nameAr ?? '',
+    },
+    { en: 'Final level', ar: 'المستوى النهائي', valueEn: `Level ${level}`, valueAr: `المستوى ${level}` },
+  ];
+
   return (
     <>
       <GovernmentBand />
@@ -90,6 +112,25 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             </span>
           </div>
 
+          <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+            {identity.map((f) => (
+              <div key={f.en} style={{ padding: '14px 18px', borderInlineEnd: '1px solid var(--line)' }}>
+                <dt style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
+                  <L en={f.en} ar={f.ar} />
+                </dt>
+                <dd style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.5 }}>
+                  {f.valueEn ? (
+                    <L en={f.valueEn} ar={f.valueAr || f.valueEn} />
+                  ) : (
+                    <span style={{ color: 'var(--muted)' }}>
+                      <L en="Not recorded" ar="غير مسجَّل" />
+                    </span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
           {/* Two obligations, same event, never merged. */}
           <div data-wide="" data-region="obligations" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBlockEnd: 40 }}>
             <div style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 14, background: 'var(--bad-soft)' }}>
@@ -111,7 +152,8 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
                 </span>
               ) : null}
               <a href={`/events/${id}/incident`} style={{ display: 'inline-block', height: 40, lineHeight: '40px', paddingInline: 18, borderRadius: 22, background: 'var(--bad)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
-                <L en="Open the notification form" ar="فتح نموذج الإبلاغ" />
+                {/* The reference's own wording, copied not improved: "Notify now". */}
+                <L en="Notify now" ar="الإبلاغ الآن" />
               </a>
             </div>
             <div style={{ padding: '26px 28px', border: '1px solid var(--line)', borderRadius: 14 }}>

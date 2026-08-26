@@ -30,11 +30,18 @@ const upLabel: React.CSSProperties = {
   color: 'var(--muted)',
 };
 
-function SectionHeading({ n, en, ar, noteEn, noteAr }: { n: number; en: string; ar: string; noteEn: string; noteAr: string }) {
+/**
+ * `n` is the group number. The Event Medical Director block passes NONE: it is part of
+ * group 2, the parties you name, and giving it its own heading number printed a second
+ * "2" beside group 2 at Level 3. Numbering must also not shift with the level -- the
+ * Director is absent below Level 3, so a real number here would renumber the groups
+ * underneath it for Level 3 organizers only.
+ */
+function SectionHeading({ n, en, ar, noteEn, noteAr }: { n?: number; en: string; ar: string; noteEn: string; noteAr: string }) {
   return (
     <>
       <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em', display: 'flex', gap: 14, alignItems: 'baseline' }}>
-        <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{n}</span>
+        <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }} aria-hidden={n === undefined}>{n}</span>
         <span>
           <L en={en} ar={ar} />
         </span>
@@ -96,8 +103,12 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   const providers = invitations.filter((i) => i.kind === 'ems');
   const director = invitations.find((i) => i.kind === 'director') ?? null;
 
+  // Only what is genuinely ATTACHED counts here. The plan and the compliance form are
+  // completed on the platform, and counting them as documents-left-to-attach made this
+  // counter read 4 while the record's next-action panel -- deriving from the same
+  // catalogue's `attach` flag -- correctly said 2. Same fact, one source.
   const attachOutstanding = documents.filter(
-    (d) => !d.optional && !d.thirdParty && !documentState[d.key],
+    (d) => d.attach === true && !d.optional && !d.thirdParty && !documentState[d.key],
   ).length;
   // A declined party HAS answered -- the counter must not contradict the gate that
   // explains it (the event record derives the same way).
@@ -289,7 +300,6 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
         {level === 3 && commandRow ? (
           <>
             <SectionHeading
-              n={2}
               en="Event Medical Director"
               ar="المدير الطبي للفعالية"
               noteEn="A licensed physician, nominated here. The event medical command function is theirs alone, and the Level 3 package cannot be filed without them."

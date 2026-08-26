@@ -90,3 +90,54 @@ converted regions from *expectedDivergent* to *compare* in the manifest and drop
 `langs: ['en']` restriction on `outcome-limits`. When that lands, the comparison is
 meaningful again: the remaining divergence list is section B, which is the record of
 intent, not of exceptions.
+
+---
+
+## Addendum, 2026-08-26 — the retirement attempt, and what it found
+
+The reviewer asked for these exceptions to be retired against the Pass C prototypes: the console
+dataset across all thirteen arrays, the ten cardiac powers, the التأهب limit sentences, the two
+dashboard masks, the facility identity, both rails' dates, the doubled words, the Order lane's off
+state, the forbidden dataset fields, the tri-state answers, the recordable plan confirmation, the
+venue declaration date, and P6/P7 on inspection. The expectation was that the list would "shrink to
+almost nothing." It did not, and the reason is worth more than the outcome.
+
+**1. Twenty-one of the exceptions were never comparisons.** `expectedDivergent` regions carry a
+`builtSelector` and no `reference` strategy — there was never a reference-side locator to diff
+against. Flipping all twenty-one console regions to `compare` produced thirty-four failures, every
+one of them `could not locate the region in the reference DOM`. **Not a single pixel was compared.**
+Retiring one of these is not a flag flip: it means authoring the reference locator that the
+exception let us skip. That is the honest cost, and it was hidden by the exception's own shape.
+
+**2. Where the comparison was authored by hand, the sides are structurally different.** Taking the
+largest — the review queue — the prototype table is **eight** columns (Event or venue, Organizer,
+Level, Event date, Filing date, Status, Reviewer, Days) against the build's **six** (Submission,
+Level, Event date, Filed, State, Reviewer). Organizer and Days are absent; three headings are
+renamed. Under the pixel-fidelity rule that is a **build defect**, not a dataset difference — and it
+was sitting behind an exception whose note said "geometry, vocabulary and gating follow the
+reference". **That same sentence appears verbatim on all twenty-one console exceptions.** One of
+the twenty-one is now known to be false; the other twenty are unverified, because verifying one
+costs a hand-authored locator. The queue's note has been corrected in the manifest. *This is the
+most serious thing in the addendum: an exception that overstates its own narrowness hides whatever
+else diverges inside the region it excuses.*
+
+**3. Three of the named retirements are still blocked by the prototypes, with evidence.**
+
+- *The console dataset.* Three of the four queue events now match the seeded records
+  (Baalbeck Summer Festival, Beirut Coastal 12K, Tripoli Marathon). The fourth does not: the
+  prototype carries **Saida Night Run**, the build seeds **AUB Sports Day / EV-0301**.
+- *The ten cardiac powers.* `ministry.json` renders the source's ten (PAD §11). The prototype
+  carries eleven — designations split into three, one belonging to §3's facility categories, and
+  the arrest-location review dropped. The source outranks the prototype, so the build stands.
+- *The facility identity.* The prototype files still disagree with **each other**:
+  `Facility Cardiac Readiness.dc.html` says *Corniche Sports Club* (×4), while
+  `Ministry Review.dc.html` and `Organizer Journey.dc.html` say *Beirut Sports Complex / FC-0014*.
+  The new `Organizer Journey white.dc.html` carries **both**. No build change can reconcile that.
+
+**4. What did retire** (in `5212d2c`): the two dashboard masks, the outcome-limits language
+restriction — and the build **adopted** the prototype's Arabic for both limit sentences, the
+Protocol having no Arabic issue. The doubled words are fixed in the prototype. P6 and P7 are
+retired on inspection: neither was ever in the prototypes.
+
+**Standing count: 68 exceptions against 38 comparisons.** The number to watch is not the exception
+count but the *comparison* count, which is what actually holds the build to the drawings.

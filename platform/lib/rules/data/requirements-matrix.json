@@ -1,5 +1,6 @@
 {
   "$comment": "Annex B, the twenty minimum requirements. English and structure from the reference prototype; Arabic row names and cell values verbatim from the Arabic issue (ar/03 requirements matrix). Rows 7, 13 and 15 carry known EN/AR divergences -- follow the English, record the divergence (README). Responsible parties are COMPUTED from `parties` per level, never hard-coded.",
+  "$commentArabicCopyRule": "Four Arabic cells said خطة EHMP (rows 2 and 7, the Level 2 and Level 3 columns). EHMP is a banned acronym in user-facing copy; the glossary form is خطة التأهب الصحي والطبي للفعالية, which those cells now carry. Same class as the compliance form's Section A: a deliberate divergence from the Arabic issue's literal wording, obeying the copy rule, recorded for Ministry ratification.",
   "parties": {
     "O": {
       "en": "Organizer",
@@ -79,11 +80,11 @@
         },
         {
           "en": "Event health and medical plan",
-          "ar": "خطة EHMP مطلوبة"
+          "ar": "خطة التأهب الصحي والطبي للفعالية مطلوبة"
         },
         {
           "en": "Event health and medical plan",
-          "ar": "خطة EHMP مطلوبة"
+          "ar": "خطة التأهب الصحي والطبي للفعالية مطلوبة"
         }
       ]
     },
@@ -233,11 +234,11 @@
         },
         {
           "en": "Defined in the plan",
-          "ar": "محددة في خطة EHMP"
+          "ar": "محددة في خطة التأهب الصحي والطبي للفعالية"
         },
         {
           "en": "Defined in the plan",
-          "ar": "محددة في خطة EHMP"
+          "ar": "محددة في خطة التأهب الصحي والطبي للفعالية"
         }
       ],
       "divergence": "Arabic adds transport: ترتيبات سيارات الإسعاف والنقل (README divergence 3).",

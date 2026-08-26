@@ -7,7 +7,10 @@
         "en": "Accept",
         "ar": "القبول",
         "descEn": "Your organization becomes a named provider for this event and the declaration opens.",
-        "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح الإقرار."
+        "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح الإقرار.",
+        "$commentNoDeclaration": "The declaration exists only at Level 3 (emsDeclarationGate). Below it the accept description must not promise one -- these two strings are used instead.",
+        "descNoDeclarationEn": "Your organization becomes a named provider for this event. You record your operational detail; there is no declaration at this level.",
+        "descNoDeclarationAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية. وتسجّلون تفاصيلكم التشغيلية؛ ولا يوجد إقرار في هذا المستوى."
       },
       {
         "key": "decline",
@@ -97,7 +100,7 @@
     },
     "level2Intro": {
       "en": "This information goes to the organizer for the event health and medical plan. No declaration is required at Level 2.",
-      "ar": "تذهب هذه المعلومات إلى المنظّم لإدراجها في الخطة الصحية والطبية للفعالية. لا يُطلب أي إقرار في المستوى 2."
+      "ar": "تذهب هذه المعلومات إلى المنظّم لإدراجها في خطة التأهب الصحي والطبي للفعالية. لا يُطلب أي إقرار في المستوى 2."
     },
     "level2Fields": [
       {
@@ -644,7 +647,7 @@
     },
     "govIntro": {
       "en": "At Level 3 this content is yours to write. What you enter here writes into the organizer's event health and medical plan; neither of you writes it twice.",
-      "ar": "في المستوى 3 هذا المحتوى من كتابتكم. وما تُدخلونه هنا يُكتب في الخطة الصحية والطبية للفعالية لدى المنظّم؛ ولا يكتبه أي منكما مرتين."
+      "ar": "في المستوى 3 هذا المحتوى من كتابتكم. وما تُدخلونه هنا يُكتب في خطة التأهب الصحي والطبي للفعالية لدى المنظّم؛ ولا يكتبه أي منكما مرتين."
     },
     "govWhere": {
       "en": "Sections 10 and 12 of the organizer's plan, and the major-incident and mass-casualty plan. The organizer sees your text there and cannot overwrite it.",

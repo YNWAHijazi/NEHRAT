@@ -13,19 +13,56 @@ import domainsJson from '../lib/rules/data/domains.json';
 import banned from '../lib/rules/data/banned-terms.json';
 import { walkStrings, filesUnder, read, relative } from './helpers/files';
 
-/** Everything a user can read: the catalogues and the regulatory text. */
+/**
+ * Everything a user can read.
+ *
+ * This list used to name FOUR files, and the eight it did not name carried the terms.
+ * The compliance form said الملحق أ and الملحق ب in Arabic while its English said
+ * "risk assessment"; the requirements matrix said خطة EHMP in four places. Both terms
+ * were already on the banned list and had been for as long as the list existed -- the
+ * sweep simply never looked at the file. A guard with a hand-written list of inputs
+ * fails silently the moment someone adds a ninth file, so the list is now the DIRECTORY.
+ *
+ * Excluded paths are the ones no user reads: `$comment` (notes to ourselves), `why`
+ * (the banned list's own rationale, which must name the terms it bans), and `*Source`
+ * (the citation recording which instrument a row came from, e.g. arSource).
+ */
+const dataStrings = filesUnder('lib/rules/data', ['.json'])
+  .filter((f) => !f.endsWith('banned-terms.json'))
+  .flatMap((f) =>
+    walkStrings(JSON.parse(read(f)) as unknown).map((s) => ({ ...s, source: relative(f) })),
+  );
+
 const userFacing = [
   ...walkStrings(en).map((s) => ({ ...s, source: 'en.json' })),
   ...walkStrings(ar).map((s) => ({ ...s, source: 'ar.json' })),
   ...walkStrings(conditionsJson.conditions).map((s) => ({ ...s, source: 'minimum-conditions.json' })),
   ...walkStrings(domainsJson.domains).map((s) => ({ ...s, source: 'domains.json' })),
-].filter((s) => !s.path.includes('$comment') && !s.path.includes('why'));
+  ...dataStrings,
+].filter(
+  (s) =>
+    !s.path.includes('$comment') &&
+    !s.path.includes('why') &&
+    !/Source$|Source\./.test(s.path) &&
+    !s.path.includes('divergence') &&
+    !s.path.includes('arNote') &&
+    !s.path.includes('enNote'),
+);
 
 describe('banned terms', () => {
   for (const term of banned.terms) {
     it(`never says "${term.en}" -- ${term.why}`, () => {
       const needle = new RegExp(`\\b${term.en}\\b`, 'i');
-      const hits = userFacing.filter((s) => needle.test(s.value));
+      // A handful of instrument phrases use "approved" in its ordinary sense (an
+      // approved capacity, approved equipment). Each is listed in banned-terms.json
+      // with the sense it carries; the word is blanked before the test so a NEW
+      // occurrence still fails.
+      const scrub = (v: string): string =>
+        banned.allowedPhrases.reduce(
+          (acc, a) => acc.replace(new RegExp(a.phrase, 'gi'), ''),
+          v,
+        );
+      const hits = userFacing.filter((s) => needle.test(scrub(s.value)));
       expect(hits.map((h) => `${h.source}:${h.path}`)).toEqual([]);
     });
 

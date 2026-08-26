@@ -60,7 +60,7 @@ export function SubmitForm({
   telephoneDivergence: { en: string; ar: string } | null;
   /** The compliance form's certifying words, shown above the fields they are signed with. */
   certificationStatement: { en: string; ar: string } | null;
-  headerRows: { en: string; ar: string; value: string }[];
+  headerRows: { en: string; ar: string; valueEn: string; valueAr: string }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -122,7 +122,9 @@ export function SubmitForm({
               <span style={{ color: 'var(--muted)' }}>
                 <L en={h.en} ar={h.ar} />
               </span>
-              <span style={{ textAlign: 'end', fontVariantNumeric: 'tabular-nums' }}>{h.value}</span>
+              <span style={{ textAlign: 'end', fontVariantNumeric: 'tabular-nums' }}>
+                <L en={h.valueEn} ar={h.valueAr} />
+              </span>
             </div>
           ))}
         </div>

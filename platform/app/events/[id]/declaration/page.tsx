@@ -6,7 +6,7 @@ import { DeclarationForm } from './DeclarationForm';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, invitationsForAccount, roleProfileFor, unreadCountFor } from '../../../../lib/queries';
 import { getDb } from '../../../../lib/db';
-import { DECLARATION_ITEMS, ROLES_CONTENT, filingDeadline } from '../../../../lib/rules';
+import { DECLARATION_ITEMS, ROLES_CONTENT, filingDeadline , emsDeclarationGate} from '../../../../lib/rules';
 
 /**
  * The Level 3 EMS Readiness Declaration: ten items, signed by each participating
@@ -24,7 +24,11 @@ export default async function DeclarationPage({
   const { id } = await params;
   const invitation = invitationForEvent(account.id, id, 'ems');
   if (!invitation) notFound();
-  if (invitation.eventLevel !== 3) redirect(`/events/${id}/participation`);
+  // The rule, not this screen's own test (rule 10 and "no screen implements its own
+  // gating"). The invitation screen consults the same gate for its accept wording.
+  if (emsDeclarationGate(invitation.eventLevel).behaviour !== 'enabled') {
+    redirect(`/events/${id}/participation`);
+  }
   const unread = unreadCountFor(account.id);
   const content = ROLES_CONTENT.ems;
   const profile = roleProfileFor(account.id);

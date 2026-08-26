@@ -268,9 +268,13 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       titleEn: attachable === 1 ? 'Attach the outstanding document' : `Attach the ${attachable} outstanding documents`,
       titleAr: attachable === 1 ? 'أرفقوا المستند غير المقدَّم' : `أرفقوا المستندات غير المقدَّمة (${attachable})`,
       bodyEn:
-        'Everything else on this event can wait. The submission cannot be filed until these are attached.',
+        attachable === 1
+          ? 'Everything else on this event can wait. The submission cannot be filed until it is attached.'
+          : 'Everything else on this event can wait. The submission cannot be filed until they are attached.',
       bodyAr:
-        'كل ما عدا ذلك في هذه الفعالية يمكن أن ينتظر. ولا يمكن تقديم الملف قبل إرفاقها.',
+        attachable === 1
+          ? 'كل ما عدا ذلك في هذه الفعالية يمكن أن ينتظر. ولا يمكن تقديم الملف قبل إرفاقه.'
+          : 'كل ما عدا ذلك في هذه الفعالية يمكن أن ينتظر. ولا يمكن تقديم الملف قبل إرفاقها.',
       buttonEn: 'Open the documents',
       buttonAr: 'فتح المستندات',
     };
@@ -282,7 +286,7 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       href: 'plan',
       tone: 'accent',
       titleEn: 'Write the event health and medical plan',
-      titleAr: 'اكتبوا الخطة الصحية والطبية للفعالية',
+      titleAr: 'اكتبوا خطة التأهب الصحي والطبي للفعالية',
       bodyEn:
         'Everything else on this event can wait. Write the plan on the platform or attach one you already hold; the submission cannot be filed without it.',
       bodyAr:

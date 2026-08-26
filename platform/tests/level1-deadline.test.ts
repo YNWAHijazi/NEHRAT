@@ -56,11 +56,16 @@ describe('the Level 1 filing deadline', () => {
 });
 
 describe('the post-event report window', () => {
-  it('opens the day after the event ends, and is due 7 days after that', () => {
+  it('opens the day after the event ends, and is due 7 days after the EVENT', () => {
+    // Protocol 13: the report "shall be submitted within seven (7) calendar days after
+    // every Level 3 event". Seven from the EVENT END, not seven from the opening day.
+    // This test previously pinned 2026-10-09 -- one day later than the instrument
+    // allows -- and the Director's screen, which computed its own date, disagreed with
+    // the organizer's by exactly that day. That disagreement is what exposed it.
     const w = postEventReportWindow(EVENT_END);
     expect(w.opens.date).toBe('2026-10-02');
     expect(w.windowDays).toBe(7);
-    expect(w.due.date).toBe('2026-10-09');
+    expect(w.due.date).toBe('2026-10-08');
     expect(w.obligation).toBe('postEventReport');
   });
 
@@ -108,7 +113,7 @@ describe('the two obligations are distinct', () => {
     const filing = filingDeadline(1, EVENT_START);
     const post = postEventReportWindow(EVENT_END);
     expect(filing.date).toBe('2026-09-24');
-    expect(post.due.date).toBe('2026-10-09');
+    expect(post.due.date).toBe('2026-10-08');
     expect(filing.date).not.toBe(post.due.date);
   });
 

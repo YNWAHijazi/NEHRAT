@@ -19,6 +19,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 const APP_EXISTS = existsSync(join(HERE, 'app'));
 
+// The harness starts its OWN server on a freshly seeded database and never reuses one,
+// so a developer's `npm run dev` on 3000 would otherwise block the whole suite. E2E_PORT
+// moves the harness out of the way; the default is unchanged.
+const PORT = Number(process.env['E2E_PORT'] ?? 3000);
+const BASE_URL = `http://localhost:${PORT}`;
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
@@ -56,7 +62,7 @@ export default defineConfig({
           {
             name: 'app',
             testMatch: /app\/.*\.spec\.ts/,
-            use: { baseURL: 'http://localhost:3000' },
+            use: { baseURL: BASE_URL },
           },
         ]
       : []),
@@ -68,8 +74,8 @@ export default defineConfig({
           // REVIEW_CLOCK freezes "today" at the prototypes' 2026-08-13 so date STRINGS
           // match the reference (handoff 4, decision 3). The seeder's re-anchoring
           // shift becomes zero under the pin. Ignored in production builds.
-          command: 'npm run dev:e2e',
-          url: 'http://localhost:3000',
+          command: `npm run dev:e2e -- --port ${PORT}`,
+          url: BASE_URL,
           reuseExistingServer: false,
           timeout: 120_000,
           env: {

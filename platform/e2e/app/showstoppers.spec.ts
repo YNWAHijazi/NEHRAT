@@ -113,10 +113,11 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
 test.describe('showstopper 3 — the 24-hour notification lives on its own route', () => {
   test('notifiable on a started event, and the Ministry incidents lane reads it', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    // EV-0244 ended before the review clock -- started, filed, notifiable.
+    // EV-0244 is held 2026-08-09 and ended before the review clock (2026-08-13):
+    // started, filed, notifiable. The occurrence is on the event's own day.
     await page.goto('/events/EV-0244/incident');
     await page.locator('label:has-text("Major incident") input[type="radio"]').check();
-    await page.locator('input[name="occurredAt"]').fill('2026-08-05T21:30');
+    await page.locator('input[name="occurredAt"]').fill('2026-08-09T21:30');
     await page.locator('button:has-text("Notify the Ministry")').click();
     await page.waitForURL(/notice=notified/);
     await expect(page.locator('body')).toContainText('The Ministry has been notified');

@@ -664,10 +664,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'respond',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Respond to the nomination', container: 'border-radius: 16px' },
         builtSelector: '[data-region="respond"]',
-        note: 'The three responses, the reason rule and the not-a-commitment line. Held at 2%.',
+        note: "Expected divergent, THE PROTOTYPE PROMISES SOMETHING THAT DOES NOT EXIST. Its Accept description reads 'and the declaration opens' at every level. This fixture is EV-0418, a LEVEL 2 event, and there is no declaration below Level 3 -- the route redirects to /participation and the requirements screen shows no declaration row. The build says instead that the organization becomes a named provider and records operational detail, with no declaration at this level. FOR THE REVIEWER: making the prototype's Accept line level-aware retires this exception. Everything else in the region -- the three responses, the reason rule, the not-a-commitment line -- was matching at 2% and is unchanged.",
       },
       {
         name: 'invite-facts',
@@ -723,10 +723,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'l2-intro',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'This information goes to the organizer', container: 'border-radius: 14px' },
         builtSelector: '[data-region="l2-intro"]',
-        note: 'No declaration is required at Level 2. Held at 2%.',
+        note: "Expected divergent, THE GLOSSARY OVER THE PROTOTYPE'S ARABIC, English unchanged. The prototype's Arabic names the plan الخطة الصحية والطبية للفعالية; the canonical form is خطة التأهب الصحي والطبي للفعالية (SPEC 7, and CLAUDE.md states it outright). The looser form had drifted into four places in the build and is now guarded by a banned-terms pattern. The prototype's Arabic is provisional until re-issued, so the glossary wins. English matches. FOR THE REVIEWER: this is a one-phrase change in the prototype.",
       },
       {
         name: 'ops-detail',
@@ -949,7 +949,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'queue',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="queue"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records; geometry, vocabulary and gating follow the reference and are exercised by e2e/app/ministry.spec.ts. Grey internal states vs coloured outcomes, on the three seeded filings. Never approved, never rejected -- e2e-asserted.",
+        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. CORRECTED 2026-08-26: the rest of this note used to claim geometry follows the reference. It does not. The prototype table is EIGHT columns (Event or venue, Organizer, Level, Event date, Filing date, Status, Reviewer, Days); the built table is SIX (Submission, Level, Event date, Filed, State, Reviewer) -- Organizer and Days are absent and three headings are renamed. That is a build defect under the pixel-fidelity rule, not a dataset difference, and it is open. Gating and vocabulary ARE exercised by e2e/app/ministry.spec.ts: grey internal states vs coloured outcomes on the three seeded filings, never approved, never rejected.",
       },
     ],
   },

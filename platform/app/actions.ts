@@ -10,6 +10,17 @@
 
 import { redirect } from 'next/navigation';
 import { nowStamp } from '../lib/clock';
+
+/**
+ * A person's own words, quoted inside “ ” or « », with our sentence-ending full stop
+ * outside. Their sentence usually ends in one already, and adding ours produced
+ * `...that weekend.".` in the decline notification. Strip theirs, keep ours: the
+ * wording is untouched, only the terminal punctuation is de-duplicated.
+ */
+function verbatimQuote(reason: string): string {
+  const trimmed = reason.trimEnd();
+  return /[.!?؟]$/.test(trimmed) ? trimmed.slice(0, -1) : trimmed;
+}
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
@@ -678,7 +689,8 @@ export async function saveVenueAssessmentAction(
 
   let reference = venue.moph_reference;
   if (!reference) {
-    const year = new Date().getFullYear();
+    // The Beirut clock, like the event reference and every other date computation.
+    const year = effective.slice(0, 4);
     const last = db
       .prepare(`SELECT moph_reference AS r FROM venues WHERE moph_reference LIKE ? ORDER BY moph_reference DESC LIMIT 1`)
       .get(`MOPH-VN-${year}-%`) as { r: string } | undefined;
@@ -976,11 +988,11 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `A named party has declined — ${eventName.name_en}`,
       `اعتذر طرف مُسمّى — ${eventName.name_ar}`,
       evFiled
-        ? `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
-        : `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${reason}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
+        ? `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
+        : `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
       evFiled
-        ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
-        : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${reason}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
+        ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
+        : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
       evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
     );
     redirect(`/invitations/${token}?notice=declined`);
@@ -995,8 +1007,8 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       inv.event_id,
       `A named party requests a modification — ${eventName.name_en}`,
       `طلب طرف مُسمّى تعديلاً — ${eventName.name_ar}`,
-      `The nominated party can serve the event but not as described. The reason, as written: “${reason}”. The nomination remains open.`,
-      `يمكن للطرف المُرشَّح خدمة الفعالية لكن ليس بالصيغة الموصوفة. والسبب كما كُتب: «${reason}». ويبقى الترشيح قائماً.`,
+      `The nominated party can serve the event but not as described. The reason, as written: “${verbatimQuote(reason)}”. The nomination remains open.`,
+      `يمكن للطرف المُرشَّح خدمة الفعالية لكن ليس بالصيغة الموصوفة. والسبب كما كُتب: «${verbatimQuote(reason)}». ويبقى الترشيح قائماً.`,
       `/events/${inv.event_id}/requirements`,
     );
     redirect(`/invitations/${token}?notice=modification`);
@@ -1222,10 +1234,10 @@ export async function returnPostEventReportAction(eventId: string, formData: For
     `Post-event report returned by the Event Medical Director — ${eventName.name_en}`,
     `أعاد المدير الطبي للفعالية التقرير اللاحق — ${eventName.name_ar}`,
     reason
-      ? `The Director returned the report rather than signing it. The reason, as written: “${reason}”.`
+      ? `The Director returned the report rather than signing it. The reason, as written: “${verbatimQuote(reason)}”.`
       : 'The Director returned the report rather than signing it.',
     reason
-      ? `أعاد المدير التقرير بدل توقيعه. والسبب كما كُتب: «${reason}».`
+      ? `أعاد المدير التقرير بدل توقيعه. والسبب كما كُتب: «${verbatimQuote(reason)}».`
       : 'أعاد المدير التقرير بدل توقيعه.',
     `/events/${eventId}/post-event`,
   );

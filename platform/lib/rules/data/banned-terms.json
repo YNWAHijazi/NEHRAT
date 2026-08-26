@@ -37,6 +37,11 @@
       "pattern": "\\bcomplete the NEHRAT\\b",
       "flags": "i",
       "why": "NEHRAT may name the instrument, never substitute for the task. SPEC 6."
+    },
+    {
+      "pattern": "الخطة الصحية والطبية للفعالية",
+      "flags": "",
+      "why": "The plan's canonical Arabic is خطة التأهب الصحي والطبي للفعالية (SPEC 7 glossary). The looser form drifted into four places -- the next-action panel, roles.json twice and material-change.json -- because nothing checked it. التأهب is preparedness, this instrument; الجاهزية is cardiac readiness, and the two are not interchangeable."
     }
   ],
   "emojiRanges": [
@@ -61,5 +66,24 @@
       "يلزم تقديم معلومات إضافية أو إجراء تعديلات",
       "تم استيفاء متطلبات التأهب الصحي والطبي"
     ]
-  }
+  },
+  "$commentAllowed": "The ban on 'approved' is on the DETERMINATION -- the Ministry never approves or rejects. These phrases use the word in its ordinary regulatory sense and come verbatim from the instruments; each is listed with the sense it carries so the exception cannot quietly widen.",
+  "allowedPhrases": [
+    {
+      "phrase": "approved or licensed capacity",
+      "why": "Protocol 3 and the venue instrument: the capacity a venue is licensed for. Not a determination."
+    },
+    {
+      "phrase": "licensed or approved capacity",
+      "why": "The same phrase with the pair reversed, as the facility profile field writes it."
+    },
+    {
+      "phrase": "approved basic ventilation equipment",
+      "why": "PAD readiness list: equipment of an approved type. Not a determination."
+    },
+    {
+      "phrase": "approved first-response agency",
+      "why": "PAD: an agency the Ministry has approved to respond. Not a determination on a submission."
+    }
+  ]
 }

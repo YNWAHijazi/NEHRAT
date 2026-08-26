@@ -1,5 +1,6 @@
 {
   "$comment": "Annex C. English from the reference prototype (which renders the ban-compliant wording); Arabic verbatim from the Arabic issue where it carries the item. The insurance declaration and the Telephone field are English-only -- known divergences 1 and 2; follow the English and record it.",
+  "$commentArabicCopyRule": "Section A's Arabic departs from the Arabic issue's LITERAL wording in the same three places the English departs from the English issue, and for the same reason. The instruments write 'Annex A (NEHRAT) has been completed', 'the applicable Annex B requirements', 'or EHMP'; the copy rule forbids naming an annex to a user and forbids EHMP as an acronym. The English was rewritten when this file was built; the Arabic was left verbatim, so for months the Arabic named two annexes the English did not -- a parity break in register, caught by extending the banned-terms sweep to this directory. The Arabic now says تقييم المخاطر, المتطلبات الدنيا and خطة التأهب الصحي والطبي للفعالية. This is a deliberate divergence from the Arabic issue, recorded here, and it is a Ministry decision to ratify -- not a translation choice.",
   "header": [
     {
       "key": "eventName",
@@ -24,7 +25,7 @@
     {
       "key": "finalLevel",
       "en": "Final level",
-      "ar": "المستوى النهائي وفق أداة NEHRAT"
+      "ar": "المستوى النهائي"
     },
     {
       "key": "submissionDate",
@@ -46,17 +47,17 @@
     {
       "en": "The risk assessment has been completed and the final event level recorded",
       "minLevel": 1,
-      "ar": "تم استكمال الملحق أ (NEHRAT) وتسجيل المستوى النهائي للفعالية."
+      "ar": "تم استكمال تقييم المخاطر وتسجيل المستوى النهائي للفعالية."
     },
     {
       "en": "The applicable minimum requirements have been addressed",
       "minLevel": 1,
-      "ar": "تم استيفاء متطلبات الملحق ب المنطبقة على مستوى الفعالية."
+      "ar": "تم استيفاء المتطلبات الدنيا المنطبقة على مستوى الفعالية."
     },
     {
       "en": "The required documented medical arrangements or event health and medical plan has been prepared",
       "minLevel": 1,
-      "ar": "تم إعداد الترتيبات الطبية الموثقة أو خطة EHMP المطلوبة بحسب مستوى الفعالية."
+      "ar": "تم إعداد الترتيبات الطبية الموثقة أو خطة التأهب الصحي والطبي للفعالية المطلوبة بحسب مستوى الفعالية."
     },
     {
       "en": "For Level 2 and Level 3 events, participating emergency medical service or medical providers and their operational contacts have been identified",

@@ -166,18 +166,25 @@ export default async function FacilityReadinessPage({
         <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--muted)' }}>
           <L en={content.ledger.intro.en} ar={content.ledger.intro.ar} />
         </p>
-        {cycles.provisional ? (
-          <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-            <L en={content.provisionalNote.en} ar={content.provisionalNote.ar} />
-          </p>
-        ) : (
-          <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-            <L
-              en={`Cycles run on the Ministry's published values: device checks every ${cycles.checkCycleDays} days, a ${cycles.lapseWindowDays}-day lapse window.`}
-              ar={`تسري الدورات وفق القيم المنشورة من الوزارة: فحص الأجهزة كل ${cycles.checkCycleDays} يوماً، ونافذة انتهاء ${cycles.lapseWindowDays} يوماً.`}
-            />
-          </p>
-        )}
+        {/* Two different provisional things, and publishing one does not settle the
+            other. The CYCLE FIGURES stop being provisional when the Ministry publishes
+            them. The STATUS WORDING (Current, Lapsing, Lapsed and the standing line)
+            stays provisional until the Ministry approves the labels themselves --
+            facility.json: "provisionalNote below must render wherever they appear".
+            Gating the wording note on the figures made publishing a cadence silently
+            withdraw a caveat about something else entirely. */}
+        <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+          <L en={content.provisionalNote.en} ar={content.provisionalNote.ar} />
+          {!cycles.provisional ? (
+            <>
+              {' '}
+              <L
+                en={`Cycles run on the Ministry's published values: device checks every ${cycles.checkCycleDays} days, a ${cycles.lapseWindowDays}-day lapse window.`}
+                ar={`تسري الدورات وفق القيم المنشورة من الوزارة: فحص الأجهزة كل ${cycles.checkCycleDays} يوماً، ونافذة انتهاء ${cycles.lapseWindowDays} يوماً.`}
+              />
+            </>
+          ) : null}
+        </p>
 
         {catRequirements ? (
           <div data-region="category-requirements" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>

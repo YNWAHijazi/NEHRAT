@@ -219,7 +219,8 @@ for (const mapping of VISUAL_MANIFEST) {
       }
 
       // Side two: the built screen, same viewport.
-      const base = test.info().project.use.baseURL ?? 'http://localhost:3000';
+      const base =
+        test.info().project.use.baseURL ?? `http://localhost:${process.env['E2E_PORT'] ?? 3000}`;
       const probe = await request.get(base).catch(() => null);
       if (!probe) {
         test.info().annotations.push({

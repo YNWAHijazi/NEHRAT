@@ -149,7 +149,7 @@ export default async function InvitationPage({
           ) : null}
 
           {invitation.status === 'nominated' ? (
-            <RespondForm token={token} kind={invitation.kind} signedIn={account !== null} />
+            <RespondForm token={token} kind={invitation.kind} signedIn={account !== null} eventLevel={invitation.eventLevel} />
           ) : null}
           {invitation.status === 'confirmed' && account ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, fontSize: 15 }}>

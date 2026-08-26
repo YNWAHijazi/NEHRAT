@@ -135,6 +135,20 @@ export function eventMedicalDirectorGate(ctx: EventGateContext): Gate {
   return ABSENT;
 }
 
+/**
+ * The EMS readiness declaration: a level gate, like the Director. The ten-item
+ * declaration exists only at Level 3; at Levels 1 and 2 there is no declaration at all,
+ * so the row is ABSENT rather than greyed (rule 10).
+ *
+ * This test used to be written inline in the declaration route as `eventLevel !== 3`,
+ * which meant the invitation screen could not consult it -- and it did not: it promised
+ * every accepting provider that "the declaration opens", including at Level 2 where
+ * nothing opens. One rule, both callers.
+ */
+export function emsDeclarationGate(finalLevel: Level | null): Gate {
+  return finalLevel === 3 ? ENABLED : ABSENT;
+}
+
 /** The filing deadline for the record, derived -- never entered. */
 export function eventFilingDeadline(ctx: EventGateContext): FilingDeadline | null {
   if (ctx.finalLevel === null || ctx.eventStartDate === null) return null;
