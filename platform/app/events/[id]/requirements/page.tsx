@@ -13,9 +13,11 @@ import {
   invitationsFor,
   unreadCountFor,
   governanceFor,
+  inspectionsFor,
 } from '../../../../lib/queries';
 import {
   documentsForLevel,
+  certifyRowGroups,
   commandFunctionRow, requirementsForLevel,
   type Level,
 } from '../../../../lib/rules';
@@ -108,7 +110,9 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   // The reference lists every applicable row here, attachable ones included -- their
   // documents live in group 1; this list is the certification view of the whole matrix.
   const certifyRows = requirementsForLevel(level).filter((r) => r.n !== 15 || level !== 3);
+  const certifyGroups = certifyRowGroups(certifyRows);
   const commandRow = commandFunctionRow(level);
+  const inspections = inspectionsFor(id);
   const governance = governanceFor(id);
 
   const partChip = {
@@ -324,63 +328,148 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
         ) : null}
 
         {/* Group 3 — Requirements you certify to */}
-        <div data-region="g3">
-        <SectionHeading
-          n={3}
-          en="Requirements you certify to"
-          ar="المتطلبات التي تصدّقون عليها"
-          noteEn={`The remaining minimum requirements at Level ${level}. Nothing is attached against these; they are discharged together by one line in the compliance and submission form — the applicable minimum requirements have been addressed.`}
-          noteAr={`بقية الحد الأدنى للمتطلبات في المستوى ${level}. لا يُرفق شيء مقابلها؛ وتُستوفى مجتمعةً بسطر واحد في نموذج الامتثال والتقديم — عولج الحد الأدنى للمتطلبات المنطبقة.`}
-        />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 52 }}>
-          {certifyRows.map((r) => (
-            <div key={r.n} style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--line)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', gap: 14, alignItems: 'start', minWidth: 280, flex: 1 }}>
-                <span style={{ flex: 'none', width: 8, height: 8, borderRadius: '50%', background: 'var(--line)', marginBlockStart: 9 }} />
-                <span>
-                  <span style={{ display: 'block', fontSize: 16, lineHeight: 1.45 }}>
-                    <L en={r.en} ar={r.ar} />
-                  </span>
-                  <span style={{ display: 'block', fontSize: 14, color: 'var(--muted)', lineHeight: 1.5, marginBlockStart: 3 }}>
-                    <L en={r.valueEn} ar={r.valueAr} />
-                  </span>
-                  {r.raised ? (
-                    <span style={{ display: 'inline-block', marginBlockStart: 6, fontSize: 12, color: 'var(--accent-ink)' }}>
-                      <L en={r.raisedEn} ar={r.raisedAr} />
-                    </span>
-                  ) : null}
-                  {r.divergenceNoteEn && r.divergenceNoteAr ? (
-                    <SourceDivergence en={r.divergenceNoteEn} ar={r.divergenceNoteAr} />
-                  ) : null}
-                </span>
-              </div>
-              <span style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, minWidth: 0, textAlign: 'end' }}>
-                <L en={r.respEn} ar={r.respAr} />
-              </span>
-            </div>
-          ))}
-        </div>
-
-        </div>
-
-        {/* Group 4 — Inspections and visits */}
-        <div data-region="inspections">
-        <SectionHeading
-          n={4}
-          en="Inspections and visits"
-          ar="التفتيش والزيارات"
-          noteEn="Some requirements are checked on site rather than on paper. You do not schedule these; the authority conducting them does, and you will be told the date. Nothing is attached against them."
-          noteAr="تُتحقَّق بعض المتطلبات ميدانياً لا على الورق. ولا تجدولونها أنتم؛ بل الجهة التي تجريها، وستُبلَّغون بالتاريخ. ولا يُرفق شيء مقابلها."
-        />
-        <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, maxWidth: '74ch' }}>
-          <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+        {/* Groups 3 and 4 are not the organizer's work: one is reading, the other is
+            somebody visiting them. Both collapse to a header with a derived count, so
+            the two groups that ARE work are what the page leads with. */}
+        <details data-region="g3" style={{ marginBlockEnd: 20 }}>
+          <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', paddingBlock: 10 }}>
+            <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>3</span>
+            <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+              <L en="Requirements you certify to" ar="المتطلبات التي تصدّقون عليها" />
+            </span>
+            <span style={{ fontSize: 14, color: 'var(--muted)' }}>
+              <L
+                en={`${certifyRows.length} requirements, nothing to do`}
+                ar={`${certifyRows.length} متطلباً، لا إجراء عليها`}
+              />
+            </span>
+            <span style={{ marginInlineStart: 'auto', fontSize: 14, color: 'var(--brand)' }}>
+              <L en="Read them" ar="قراءتها" />
+            </span>
+          </summary>
+          <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
             <L
-              en="No inspection or visit has been scheduled for this event. The conducting authority sets the date, and it appears here and in your notifications when it does."
-              ar="لم يُحدَّد أي تفتيش أو زيارة لهذه الفعالية. تحدد الجهة المنفِّذة التاريخ، ويظهر هنا وفي إشعاراتكم عند تحديده."
+              en="Nothing is attached against these and there is nothing here to tick. You certify to all of them together with one line in the compliance and submission form."
+              ar="لا يُرفق شيء مقابلها ولا شيء هنا للتأشير. وتصدّقون عليها جميعاً بسطر واحد في نموذج الامتثال والتقديم."
             />
           </p>
-        </div>
-        </div>
+          {[
+            {
+              rows: certifyGroups.everyLevel,
+              en: 'Required at every level',
+              ar: 'مطلوبة في كل المستويات',
+              countEn: `${certifyGroups.everyLevel.length} apply at every level`,
+              countAr: `${certifyGroups.everyLevel.length} تنطبق في كل المستويات`,
+              tone: 'var(--muted)',
+            },
+            {
+              rows: certifyGroups.addedOrRaised,
+              en: `Added or raised at Level ${level}`,
+              ar: `أُضيفت أو رُفعت في المستوى ${level}`,
+              countEn: `${certifyGroups.addedOrRaised.length} begin or increase at Level ${level}`,
+              countAr: `${certifyGroups.addedOrRaised.length} تبدأ أو تزيد في المستوى ${level}`,
+              tone: 'var(--accent-ink)',
+            },
+          ]
+            .filter((g) => g.rows.length > 0)
+            .map((g) => (
+              <div key={g.en} style={{ marginBlockEnd: 28 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'baseline', marginBlockEnd: 10 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>
+                    <L en={g.en} ar={g.ar} />
+                  </span>
+                  <span style={{ fontSize: '13.5px', color: g.tone }}>
+                    <L en={g.countEn} ar={g.countAr} />
+                  </span>
+                </div>
+                {/* A plain hairline table: requirement, value, responsible party. No
+                    edge, dot or chip -- those are the vocabulary of the actionable
+                    groups, and using them here made a read-only list look like work. */}
+                <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {g.rows.map((r, i) => (
+                    <div
+                      key={r.n}
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 16,
+                        justifyContent: 'space-between',
+                        alignItems: 'baseline',
+                        padding: '14px 18px',
+                        borderBlockStart: i === 0 ? '0' : '1px solid var(--line)',
+                      }}
+                    >
+                      <span style={{ flex: 1, minWidth: 260 }}>
+                        <span style={{ display: 'block', fontSize: '15.5px', lineHeight: 1.45 }}>
+                          <L en={r.en} ar={r.ar} />
+                        </span>
+                        <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, marginBlockStart: 2 }}>
+                          <L en={r.valueEn} ar={r.valueAr} />
+                        </span>
+                        {r.divergenceNoteEn && r.divergenceNoteAr ? (
+                          <SourceDivergence en={r.divergenceNoteEn} ar={r.divergenceNoteAr} />
+                        ) : null}
+                      </span>
+                      <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, textAlign: 'end' }}>
+                        <L en={r.respEn} ar={r.respAr} />
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </details>
+
+        <details data-region="inspections" style={{ marginBlockEnd: 44 }}>
+          <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', paddingBlock: 10 }}>
+            <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>4</span>
+            <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+              <L en="Inspections and visits" ar="التفتيش والزيارات" />
+            </span>
+            <span style={{ fontSize: 14, color: 'var(--muted)' }}>
+              {inspections.length === 0 ? (
+                <L en="none scheduled, conducted by an authority" ar="لا شيء مجدول، تجريها جهة مختصة" />
+              ) : (
+                <L
+                  en={`${inspections.length} ${inspections.length === 1 ? 'check' : 'checks'}, conducted by an authority`}
+                  ar={`${inspections.length} ${inspections.length === 1 ? 'تحقق' : 'تحققات'}، تجريها جهة مختصة`}
+                />
+              )}
+            </span>
+            <span style={{ marginInlineStart: 'auto', fontSize: 14, color: 'var(--brand)' }}>
+              <L en="See them" ar="الاطلاع عليها" />
+            </span>
+          </summary>
+          <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
+            <L
+              en="Some requirements are checked on site rather than on paper. You do not schedule these; the authority conducting them does, and you will be told the date. Nothing is attached against them."
+              ar="تُتحقَّق بعض المتطلبات ميدانياً لا على الورق. ولا تجدولونها أنتم؛ بل الجهة التي تجريها، وستُبلَّغون بالتاريخ. ولا يُرفق شيء مقابلها."
+            />
+          </p>
+          {inspections.length === 0 ? (
+            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, maxWidth: '74ch' }}>
+              <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+                <L
+                  en="No inspection or visit has been scheduled for this event. The conducting authority sets the date, and it appears here and in your notifications when it does."
+                  ar="لم يُحدَّد أي تفتيش أو زيارة لهذه الفعالية. تحدد الجهة المنفِّذة التاريخ، ويظهر هنا وفي إشعاراتكم عند تحديده."
+                />
+              </p>
+            </div>
+          ) : (
+            <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', maxWidth: '74ch' }}>
+              {inspections.map((ins, i) => (
+                <div key={ins.id} style={{ padding: '14px 18px', borderBlockStart: i === 0 ? '0' : '1px solid var(--line)', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ flex: 1, minWidth: 240, fontSize: '15.5px', lineHeight: 1.45 }}>
+                    <L en={ins.titleEn} ar={ins.titleAr} />
+                  </span>
+                  <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    {ins.date ?? ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </details>
 
         <SequenceFooter
           labelEn="Next in the sequence"

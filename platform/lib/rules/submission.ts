@@ -12,6 +12,7 @@ import attachmentsCatalog from './data/attachments-catalog.json';
 import complianceJson from './data/compliance-form.json';
 import planJson from './data/plan.json';
 import type { Level } from './types';
+import type { RequirementRow } from './requirements';
 
 export interface CatalogDocument {
   key: string;
@@ -114,6 +115,9 @@ export type BlockerKind =
 
 export interface SubmissionBlocker {
   kind: BlockerKind;
+  /** For documentMissing: the catalogue key, so a caller can tell an ATTACHED
+   *  document from one COMPLETED on the platform (the plan, the compliance form). */
+  docKey?: string;
   /** The specific item, named (SPEC 5b). */
   itemEn: string;
   itemAr: string;
@@ -143,7 +147,7 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
   for (const doc of documentsForLevel(facts.level)) {
     if (doc.optional) continue;
     if (!facts.documentState[doc.key]) {
-      blockers.push({ kind: 'documentMissing', itemEn: doc.en, itemAr: doc.ar });
+      blockers.push({ kind: 'documentMissing', docKey: doc.key, itemEn: doc.en, itemAr: doc.ar });
     }
   }
 
@@ -192,4 +196,174 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
     facts.filingDeadline !== null && facts.today > facts.filingDeadline;
 
   return { canFile: blockers.length === 0, blockers, expedited };
+}
+
+/* ---------------- the one next action ---------------- */
+
+export type NextActionKind =
+  | 'organizationPending'
+  | 'documents'
+  | 'plan'
+  | 'declarations'
+  | 'director'
+  | 'waitingOnOthers'
+  | 'ready';
+
+export interface NextAction {
+  kind: NextActionKind;
+  /** Where the single button goes, relative to the event. */
+  href: 'requirements' | 'submit' | 'organization' | 'plan';
+  /** brand when it is time to file; accent while anything is outstanding. */
+  tone: 'brand' | 'accent';
+  titleEn: string;
+  titleAr: string;
+  bodyEn: string;
+  bodyAr: string;
+  buttonEn: string;
+  buttonAr: string;
+}
+
+/**
+ * ONE thing to do, derived from the SAME blockers the Submit gate names -- so the
+ * panel can never disagree with the screen it sends you to.
+ *
+ * The order is the order a person can act in: what the Ministry owes first (nothing
+ * the organizer can do), then the organizer's own work, then what is owed by someone
+ * else, then filing. The waiting state matters most: a page full of amber otherwise
+ * gives no way to tell that the amber is somebody else's move.
+ */
+export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
+  const has = (k: BlockerKind): boolean => blockers.some((b) => b.kind === k);
+  const count = (...kinds: BlockerKind[]): number =>
+    blockers.filter((b) => kinds.includes(b.kind)).length;
+
+  if (has('organizationPending')) {
+    return {
+      kind: 'organizationPending',
+      href: 'organization',
+      tone: 'accent',
+      titleEn: 'Wait for the Ministry to record the organization',
+      titleAr: 'انتظروا تسجيل الوزارة للمؤسسة',
+      bodyEn:
+        'Nothing is owed by you meanwhile. Everything on this event can be prepared now; only filing waits for the organization to be recorded.',
+      bodyAr:
+        'لا شيء مستحق عليكم في هذه الأثناء. يمكن إعداد كل ما يخص هذه الفعالية الآن؛ والتقديم وحده ينتظر تسجيل المؤسسة.',
+      buttonEn: 'Open the organization',
+      buttonAr: 'فتح المؤسسة',
+    };
+  }
+
+  // A missing document is not always something you ATTACH: the plan and the compliance
+  // form are completed on the platform. Naming the wrong verb sends the organizer to a
+  // screen with no control on it.
+  const missingKeys = blockers.filter((b) => b.kind === 'documentMissing').map((b) => b.docKey);
+  const attachable = missingKeys.filter(
+    (k) => (attachmentsCatalog.documents as CatalogDocument[]).find((d) => d.key === k)?.attach === true,
+  ).length;
+  if (attachable > 0) {
+    return {
+      kind: 'documents',
+      href: 'requirements',
+      tone: 'accent',
+      titleEn: attachable === 1 ? 'Attach the outstanding document' : `Attach the ${attachable} outstanding documents`,
+      titleAr: attachable === 1 ? 'أرفقوا المستند غير المقدَّم' : `أرفقوا المستندات غير المقدَّمة (${attachable})`,
+      bodyEn:
+        'Everything else on this event can wait. The submission cannot be filed until these are attached.',
+      bodyAr:
+        'كل ما عدا ذلك في هذه الفعالية يمكن أن ينتظر. ولا يمكن تقديم الملف قبل إرفاقها.',
+      buttonEn: 'Open the documents',
+      buttonAr: 'فتح المستندات',
+    };
+  }
+
+  if (missingKeys.includes('plan')) {
+    return {
+      kind: 'plan',
+      href: 'plan',
+      tone: 'accent',
+      titleEn: 'Write the event health and medical plan',
+      titleAr: 'اكتبوا الخطة الصحية والطبية للفعالية',
+      bodyEn:
+        'Everything else on this event can wait. Write the plan on the platform or attach one you already hold; the submission cannot be filed without it.',
+      bodyAr:
+        'كل ما عدا ذلك يمكن أن ينتظر. اكتبوا الخطة على المنصة أو أرفقوا خطة تملكونها؛ ولا يمكن تقديم الملف من دونها.',
+      buttonEn: 'Open the plan',
+      buttonAr: 'فتح الخطة',
+    };
+  }
+
+  if (has('directorMissing')) {
+    return {
+      kind: 'director',
+      href: 'requirements',
+      tone: 'accent',
+      titleEn: 'Name the Event Medical Director',
+      titleAr: 'سمّوا المدير الطبي للفعالية',
+      bodyEn:
+        'Everything else on this event can wait. A Level 3 package cannot be filed without a licensed physician named as Event Medical Director.',
+      bodyAr:
+        'كل ما عدا ذلك يمكن أن ينتظر. لا يمكن تقديم ملف المستوى 3 من دون طبيب مرخّص مُسمّى مديراً طبياً للفعالية.',
+      buttonEn: 'Open the named parties',
+      buttonAr: 'فتح الأطراف المُسمّاة',
+    };
+  }
+
+  const waiting = count('providerUnanswered', 'directorUnanswered', 'declarationUnsigned');
+  if (waiting > 0) {
+    return {
+      kind: 'waitingOnOthers',
+      href: 'requirements',
+      tone: 'accent',
+      titleEn:
+        waiting === 1
+          ? 'Wait for the named provider to answer'
+          : 'Wait for the named providers to answer',
+      titleAr: waiting === 1 ? 'انتظروا ردّ الجهة المُسمّاة' : 'انتظروا ردّ الجهات المُسمّاة',
+      bodyEn:
+        'Nothing is owed by you meanwhile. A nomination is not a confirmation, and the submission cannot be filed until each named provider has answered.',
+      bodyAr:
+        'لا شيء مستحق عليكم في هذه الأثناء. فالترشيح ليس تأكيداً، ولا يمكن تقديم الملف قبل أن تُجيب كل جهة مُسمّاة.',
+      buttonEn: 'Open the named providers',
+      buttonAr: 'فتح الجهات المُسمّاة',
+    };
+  }
+
+  if (has('declarationsIncomplete')) {
+    return {
+      kind: 'declarations',
+      href: 'submit',
+      tone: 'accent',
+      titleEn: 'Complete the compliance and submission form',
+      titleAr: 'أكملوا نموذج الامتثال والتقديم',
+      bodyEn:
+        'Everything else on this event is in place. The form is completed on the platform, not attached.',
+      bodyAr:
+        'كل ما عدا ذلك في هذه الفعالية مستوفى. ويُستكمل النموذج على المنصة ولا يُرفَق.',
+      buttonEn: 'Open the form',
+      buttonAr: 'فتح النموذج',
+    };
+  }
+
+  return {
+    kind: 'ready',
+    href: 'submit',
+    tone: 'brand',
+    titleEn: 'File the submission',
+    titleAr: 'قدّموا الملف',
+    bodyEn: 'Everything the level requires is in place.',
+    bodyAr: 'كل ما يقتضيه المستوى مستوفى.',
+    buttonEn: 'Open the submission package',
+    buttonAr: 'فتح حزمة التقديم',
+  };
+}
+
+/** The certify-to rows, split the way a reader needs them: what always applies, and what this level added. */
+export function certifyRowGroups(rows: readonly RequirementRow[]): {
+  everyLevel: RequirementRow[];
+  addedOrRaised: RequirementRow[];
+} {
+  return {
+    everyLevel: rows.filter((r) => !r.raised),
+    addedOrRaised: rows.filter((r) => r.raised),
+  };
 }

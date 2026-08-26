@@ -6,10 +6,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   applicableDeclarations,
+  certifyRowGroups,
   declarationsAreComplete,
+  nextAction,
   planIsComplete,
   type PlanShape,
+  type SubmissionBlocker,
 } from '../lib/rules/submission';
+import { requirementsForLevel } from '../lib/rules/requirements';
 import { seriousIncidentGate } from '../lib/rules/gates';
 import { facilityLedger, type LedgerInputs } from '../lib/rules/facility';
 import { effectiveCycles } from '../lib/rules/ministry';
@@ -251,5 +255,76 @@ describe('the public register never invents a level', () => {
     );
     expect(out.exists).toBe(true);
     expect(out.level).toBeNull();
+  });
+});
+
+describe('the event record names ONE next action, from the gate\'s own blockers', () => {
+  const b = (kind: SubmissionBlocker['kind'], docKey?: string): SubmissionBlocker =>
+    docKey
+      ? { kind, docKey, itemEn: 'x', itemAr: 'x' }
+      : { kind, itemEn: 'x', itemAr: 'x' };
+
+  it('nothing outstanding is the invitation to file', () => {
+    const a = nextAction([]);
+    expect(a.kind).toBe('ready');
+    expect(a.tone).toBe('brand');
+    expect(a.href).toBe('submit');
+    expect(a.titleEn).toBe('File the submission');
+    expect(a.bodyEn).toBe('Everything the level requires is in place.');
+  });
+
+  it('an attachable document asks for an attachment; the plan asks to be written', () => {
+    expect(nextAction([b('documentMissing', 'siteMap')]).kind).toBe('documents');
+    expect(nextAction([b('documentMissing', 'siteMap')]).titleEn).toBe('Attach the outstanding document');
+    // The plan and the compliance form are completed ON the platform: telling the
+    // organizer to "attach" them would send them to a screen with no such control.
+    const planAction = nextAction([b('documentMissing', 'plan')]);
+    expect(planAction.kind).toBe('plan');
+    expect(planAction.href).toBe('plan');
+  });
+
+  it('waiting on somebody else says so, and says nothing is owed meanwhile', () => {
+    const a = nextAction([b('providerUnanswered')]);
+    expect(a.kind).toBe('waitingOnOthers');
+    expect(a.titleEn).toBe('Wait for the named provider to answer');
+    expect(a.bodyEn).toContain('Nothing is owed by you meanwhile');
+    expect(a.bodyEn).toContain('A nomination is not a confirmation');
+  });
+
+  it('the organizer\'s own work outranks waiting on others', () => {
+    // A page full of amber must lead with the thing the organizer can actually do.
+    expect(nextAction([b('providerUnanswered'), b('documentMissing', 'siteMap')]).kind).toBe('documents');
+    expect(nextAction([b('providerUnanswered'), b('directorMissing')]).kind).toBe('director');
+  });
+
+  it('a pending organization outranks everything: nothing else unblocks filing', () => {
+    const a = nextAction([b('organizationPending'), b('documentMissing', 'siteMap')]);
+    expect(a.kind).toBe('organizationPending');
+    expect(a.href).toBe('organization');
+  });
+
+  it('every state carries both languages and a button', () => {
+    for (const blockers of [[], [b('documentMissing', 'siteMap')], [b('documentMissing', 'plan')], [b('providerUnanswered')], [b('directorMissing')], [b('declarationsIncomplete')], [b('organizationPending')]]) {
+      const a = nextAction(blockers);
+      for (const s of [a.titleEn, a.titleAr, a.bodyEn, a.bodyAr, a.buttonEn, a.buttonAr]) {
+        expect(s.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+describe('the certify-to rows group by what the level added', () => {
+  it('every row lands in exactly one group, and the counts derive', () => {
+    for (const level of [1, 2, 3] as const) {
+      const rows = requirementsForLevel(level);
+      const g = certifyRowGroups(rows);
+      expect(g.everyLevel.length + g.addedOrRaised.length).toBe(rows.length);
+      expect(g.everyLevel.some((r) => r.raised)).toBe(false);
+      expect(g.addedOrRaised.every((r) => r.raised)).toBe(true);
+    }
+  });
+
+  it('Level 1 adds nothing -- there is no level below it', () => {
+    expect(certifyRowGroups(requirementsForLevel(1)).addedOrRaised).toEqual([]);
   });
 });

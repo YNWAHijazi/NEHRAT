@@ -21,7 +21,7 @@ import {
   DOMAIN_COUNT,
   MAX_SCORE_PER_DOMAIN,
   eventFilingDeadline,
-  eventMedicalDirectorGate, eventStage, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
+  eventMedicalDirectorGate, eventStage, nextAction, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
   materialChangeGate, seriousIncidentGate,
   postEventReportGate,
   type EventGateContext,
@@ -211,6 +211,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   // figure IS the submit gate's blocker count, not a separate arithmetic.
   const gate = submissionGateFor(account.id, id);
   const outstanding = gate.blockers.length;
+  const action = nextAction(gate.blockers);
 
   // The six-stage rail, from the record's own state. Stage 1 follows the organization's
   // real status; stage 6 is level-gated: at Level 3 it is coming (todo), below it is not
@@ -274,43 +275,63 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        {/* ONE next action, above the rail: what to do, why the rest can wait, one
+            button. Derived from the SAME blockers the Submit gate names, so the panel
+            and the screen it opens can never disagree. The waiting state is the one
+            that matters -- amber that is somebody else's move says so. */}
+        {!event.filed ? (
+          <Link
+            href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
+            data-region="next-action"
+            data-next-action={action.kind}
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 20,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '22px 26px',
+              border: `1px solid ${action.tone === 'brand' ? 'var(--brand)' : 'var(--accent)'}`,
+              background: action.tone === 'brand' ? 'var(--brand-soft)' : 'var(--accent-soft)',
+              borderRadius: 14,
+              marginBlockEnd: 20,
+              color: 'var(--ink)',
+              textDecoration: 'none',
+            }}
+          >
+            <span style={{ flex: 1, minWidth: 280 }}>
+              <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: action.tone === 'brand' ? 'var(--brand)' : 'var(--accent-ink)', marginBlockEnd: 6 }}>
+                <L en="Your next action" ar="إجراؤكم التالي" />
+              </span>
+              <span style={{ display: 'block', fontSize: 17, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 6 }}>
+                <L en={action.titleEn} ar={action.titleAr} />
+              </span>
+              <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '72ch' }}>
+                <L en={action.bodyEn} ar={action.bodyAr} />
+              </span>
+            </span>
+            <span
+              style={{
+                flex: 'none',
+                height: 44,
+                paddingInline: 22,
+                borderRadius: 22,
+                background: action.tone === 'brand' ? 'var(--brand)' : 'var(--bg)',
+                color: action.tone === 'brand' ? 'var(--bg)' : 'var(--ink)',
+                border: action.tone === 'brand' ? '0' : '1px solid var(--line)',
+                fontSize: '14.5px',
+                fontWeight: 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              <L en={action.buttonEn} ar={action.buttonAr} />
+            </span>
+          </Link>
+        ) : null}
+
         <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
-        {/* The master filing control, on the record itself: never buried at the foot
-            of another screen. Ready files in one step; blocked names the count and
-            opens the package where every item is listed. */}
-        {!event.filed ? (
-          gate.canFile ? (
-            <Link
-              href={`/events/${event.id}/submit`}
-              data-region="master-submit"
-              style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 26px', background: 'var(--brand)', color: 'var(--bg)', borderRadius: 14, marginBlockEnd: 28, textDecoration: 'none' }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 600 }}>
-                <L en="Everything is in place — file the submission" ar="كل شيء مستوفى — قدّموا الملف" />
-              </span>
-              <span style={{ fontSize: '13.5px', opacity: 0.85 }}>
-                <L en="Open the submission package to certify and file" ar="افتحوا حزمة التقديم للتصديق والتقديم" />
-              </span>
-            </Link>
-          ) : (
-            <Link
-              href={`/events/${event.id}/submit`}
-              data-region="master-submit"
-              style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 28, color: 'var(--ink)', textDecoration: 'none' }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 600 }}>
-                <L
-                  en={`Submission package — ${outstanding} ${outstanding === 1 ? 'item' : 'items'} outstanding`}
-                  ar={`حزمة التقديم — ${outstanding} ${outstanding === 1 ? 'بند غير مستوفى' : 'بنود غير مستوفاة'}`}
-                />
-              </span>
-              <span style={{ fontSize: '13.5px', color: 'var(--accent-ink)' }}>
-                <L en="Open the package — every outstanding item is named there" ar="افتحوا الحزمة — كل بند غير مستوفى مُسمّى هناك" />
-              </span>
-            </Link>
-          )
-        ) : null}
         {/* Identity header, from the reference */}
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>

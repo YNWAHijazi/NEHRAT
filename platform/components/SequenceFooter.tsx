@@ -57,16 +57,18 @@ export function SequenceFooter({
           <Link
             key={step.href}
             href={step.href}
+            // A route onward, not a choice to make: transparent ground and a muted
+            // label. Full-strength ink on a filled card read as "selected".
             style={{
               textAlign: 'start',
               padding: '22px 24px',
-              background: 'var(--surface)',
-              border: `1px solid ${step.primary ? 'var(--brand)' : 'var(--line)'}`,
+              background: 'transparent',
+              border: '1px solid var(--line)',
               borderRadius: 14,
               display: 'flex',
               gap: 14,
               alignItems: 'start',
-              color: step.primary ? 'var(--brand)' : 'var(--ink)',
+              color: 'var(--muted)',
             }}
           >
             <svg
@@ -91,6 +93,7 @@ export function SequenceFooter({
                   fontSize: 16,
                   fontWeight: 500,
                   lineHeight: 1.4,
+                  color: 'var(--ink)',
                 }}
               >
                 <L en={step.en} ar={step.ar} />
