@@ -7,13 +7,14 @@
     "dev": "next dev",
     "build": "npm run verify && next build",
     "start": "next start",
-    "verify": "tsc --noEmit && vitest run && playwright test --project=reference && playwright test --project=app",
+    "verify": "tsc --noEmit && vitest run && npm run preflight && playwright test --project=reference && playwright test --project=app",
     "test": "vitest run",
     "test:watch": "vitest",
     "rules:regenerate": "python3 scripts/extract-reference.py",
-    "test:e2e": "playwright test --project=reference && playwright test --project=app",
+    "test:e2e": "npm run preflight && playwright test --project=reference && playwright test --project=app",
     "e2e:install": "playwright install chromium",
-    "dev:e2e": "rm -f var/e2e.db* && next dev"
+    "dev:e2e": "rm -f var/e2e.db* && next dev",
+    "preflight": "node scripts/preflight.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
