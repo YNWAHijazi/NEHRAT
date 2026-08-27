@@ -213,12 +213,25 @@
     },
     {
       "n": 3,
-      "key": "designations",
-      "en": "Designate remote or difficult-access facilities, or other individual facilities",
-      "ar": "تحديد المنشآت النائية أو صعبة الوصول أو منشآت فردية أخرى",
+      "key": "designationsRemote",
+      "en": "Designate remote or difficult-access facilities",
+      "ar": "تحديد المنشآت النائية أو صعبة الوصول",
       "kind": "act",
       "actNoteEn": "Works by individual designation. Nothing is in force against a facility until it is designated and its operator notified. Recorded designations are listed here as they are made.",
-      "actNoteAr": "يعمل بالتحديد الفردي. ولا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها. وتُدرَج التحديدات المسجَّلة هنا فور صدورها."
+      "actNoteAr": "يعمل بالتحديد الفردي. ولا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها. وتُدرَج التحديدات المسجَّلة هنا فور صدورها.",
+      "limbEn": "Limb one of power 3. PAD 11.3 is a single power with two limbs -- remote or difficult-access facilities, and other individual facilities. It is shown as two rows because they are exercised separately; the numbering stays 3 for both, so eleven rows still reconcile to the source’s ten powers.",
+      "limbAr": "الشق الأول من الصلاحية 3. فالمادة 11.3 صلاحية واحدة بشقّين — المنشآت النائية أو صعبة الوصول، والمنشآت الفردية الأخرى. وتُعرض في صفّين لأنهما يُمارَسان منفصلين؛ ويبقى الرقم 3 لكليهما، فتتوافق الصفوف الأحد عشر مع صلاحيات المصدر العشر."
+    },
+    {
+      "n": 3,
+      "key": "designationsIndividual",
+      "en": "Designate other individual facilities",
+      "ar": "تحديد منشآت فردية أخرى",
+      "kind": "act",
+      "actNoteEn": "The catch-all limb. Nothing is in force against a facility until it is designated and its operator notified.",
+      "actNoteAr": "الشق الجامع. ولا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها.",
+      "limbEn": "Limb two of power 3. The catch-all, for a facility no category reaches. See limb one for why the numbering repeats.",
+      "limbAr": "الشق الثاني من الصلاحية 3. وهو الشق الجامع، لمنشأة لا تصلها أي فئة. انظروا الشق الأول لسبب تكرار الرقم."
     },
     {
       "n": 4,
@@ -240,7 +253,32 @@
       "valueLabelEn": "Reporting submission timeframe (days after the incident)",
       "valueLabelAr": "مهلة تقديم الإبلاغ (أيام بعد الحادثة)",
       "unsetNoteEn": "The dataset and incident forms state that the reporting timeframe is set by the Ministry. Until it is set and published, no due date is computed on any report.",
-      "unsetNoteAr": "تنص نماذج البيانات والحوادث على أن الوزارة تحدد مهلة الإبلاغ. وقبل تحديدها ونشرها، لا يُحتسب أي تاريخ استحقاق على أي تقرير."
+      "unsetNoteAr": "تنص نماذج البيانات والحوادث على أن الوزارة تحدد مهلة الإبلاغ. وقبل تحديدها ونشرها، لا يُحتسب أي تاريخ استحقاق على أي تقرير.",
+      "valueKeys": [
+        "reportingProcedures",
+        "checkCycleDays",
+        "lapseWindowDays"
+      ],
+      "valueLabels": {
+        "reportingProcedures": {
+          "en": "Reporting submission timeframe (days after the incident)",
+          "ar": "مهلة تقديم الإبلاغ (أيام بعد الحادثة)"
+        },
+        "checkCycleDays": {
+          "en": "Device-check cadence (days)",
+          "ar": "وتيرة فحص الأجهزة (أيام)"
+        },
+        "lapseWindowDays": {
+          "en": "Lapse window (days)",
+          "ar": "نافذة الانتهاء (أيام)"
+        }
+      },
+      "outsideTheTen": [
+        "checkCycleDays",
+        "lapseWindowDays"
+      ],
+      "outsideTheTenEn": "Not one of the ten. PAD 11 names ten powers and a device-check cadence is not among them; the policy nowhere states a cycle or a lapse window. These two are a platform cadence for the validity ledger, grouped under this power because establishing a reporting procedure is the power a cadence would be established under. Recorded for the Ministry to place or remove.",
+      "outsideTheTenAr": "ليست من الصلاحيات العشر. فالمادة 11 تسمّي عشر صلاحيات وليست وتيرة فحص الأجهزة منها؛ ولا تنص السياسة في أي موضع على دورة أو نافذة انتهاء. وهاتان قيمتان من وضع المنصة لسجل الصلاحية، جُمعتا تحت هذه الصلاحية لأن اعتماد إجراء الإبلاغ هو الصلاحية التي تُعتمد تحتها أي وتيرة. مسجَّل للوزارة لتضعه أو تحذفه."
     },
     {
       "n": 6,
@@ -285,15 +323,9 @@
       "key": "readinessRequests",
       "en": "Request readiness confirmation and require corrective action where deficiencies are identified",
       "ar": "طلب تأكيد الجاهزية واشتراط الإجراء التصحيحي عند اكتشاف قصور",
-      "kind": "value",
-      "valueLabelEn": "Readiness cycles — device-check cadence (days) and lapse window (days)",
-      "valueLabelAr": "دورات الجاهزية — وتيرة فحص الأجهزة (أيام) ونافذة الانتهاء (أيام)",
-      "valueKeys": [
-        "checkCycleDays",
-        "lapseWindowDays"
-      ],
-      "unsetNoteEn": "The validity ledger runs on provisional cycles until these are set and published; publishing replaces the provisional figures everywhere they are used. Their placement under this power is the build's, recorded for the Ministry.",
-      "unsetNoteAr": "يعمل سجل الصلاحية بدورات مؤقتة إلى أن تُحدَّد هذه القيم وتُنشر؛ والنشر يستبدل الأرقام المؤقتة أينما استُخدمت. ووضعها تحت هذه الصلاحية اجتهاد من البناء، مسجَّل للوزارة."
+      "kind": "act",
+      "actNoteEn": "Exercised on Facility oversight: a readiness confirmation is requested of an operator, and a corrective action is raised where a deficiency is identified. The device-check cadence formerly shown here has moved to power 5, where it is marked as not one of the ten.",
+      "actNoteAr": "تُمارَس في الرقابة على المرافق: يُطلب تأكيد الجاهزية من المشغّل، ويُثار إجراء تصحيحي عند اكتشاف قصور. أما وتيرة فحص الأجهزة التي كانت تظهر هنا فقد نُقلت إلى الصلاحية 5، حيث وُسمت بأنها ليست من العشر."
     }
   ],
   "publicationStates": {

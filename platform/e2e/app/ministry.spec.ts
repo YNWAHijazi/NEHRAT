@@ -66,13 +66,14 @@ test.describe('internal states and determinations', () => {
     // Never approved, never rejected.
     await expect(queue).not.toContainText(/approved|rejected/i);
 
-    // The grey internal state is asserted where the demonstration set can still show
-    // one -- on the submission itself. The queue cannot: the reference's in-progress
-    // row is Beirut Coastal 12K, and the two prototype files disagree about that event
-    // (the Ministry file has it FILED and in progress; the Organizer Journey has it at
-    // stage 3, requirements and attachments, with no reference number). The organizer
-    // file governs the organizer's own record, so EV-0418 stays unfiled and the
-    // demonstration set has no filed-and-unreviewed submission. Reported, not invented.
+    // And the grey internal state, in the queue, on the one filed submission with no
+    // determination against it (EV-0455). It is demonstration data rather than a
+    // prototype match: the reference's in-progress row is Beirut Coastal 12K, and the
+    // two prototype files disagree about that event -- the Ministry file has it FILED
+    // and in progress, the Organizer Journey has it at stage 3 with no reference number
+    // -- so EV-0418 stays unfiled and this fifth event carries the state instead.
+    await expect(queue).toContainText('In queue');
+
     await page.goto('/ministry/submissions/EV-0362');
     const state = page.locator('[data-region="review-state"]');
     await expect(state).toBeVisible();
@@ -139,8 +140,12 @@ test.describe('cardiac configuration', () => {
     await expect(body).toContainText('Not set — nothing is in force under this value');
     await expect(body).toContainText('provisional figure');
 
-    // Set and publish the corrective-action timeline.
-    const power6 = page.locator('[data-region="powers"] > div').nth(5);
+    // Set and publish the corrective-action timeline. Selected by the power's own text,
+    // not by row index: the rows are eleven for ten powers (11.3 renders as its two
+    // limbs), so an index silently addressed the wrong power the moment that changed.
+    const power6 = page
+      .locator('[data-region="powers"] > div')
+      .filter({ hasText: 'Set corrective-action timelines' });
     await power6.locator('input[name="value"]').fill('30');
     await power6.locator('input[name="effective"]').fill('2026-10-01');
     await power6.locator('button:has-text("Set and publish")').click();

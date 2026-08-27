@@ -10,6 +10,28 @@
  *
  * The allowlist below is EMPTY and stays empty. An export that loses its last caller
  * fails the build as an "unwired rule" -- delete it or wire it, never allowlist it.
+ *
+ * WHAT THIS GUARD CANNOT SEE -- read this before trusting a pass.
+ *
+ * It matches the export's NAME against non-import lines. So a rule imported under a
+ * different name is invisible to it:
+ *
+ *     import { AUTH_POLICY as authPolicy } from './rules';   // the only mention
+ *     const p = authPolicy.password;                          // never matches AUTH_POLICY
+ *
+ * That is a false POSITIVE -- a genuinely wired rule reported unwired -- which is the
+ * safe direction to fail, and it is how this was found: AUTH_POLICY was aliased in
+ * lib/password.ts and the guard called it unwired. The alias was removed rather than the
+ * guard loosened, because loosening it to follow aliases would mean parsing imports, and
+ * a guard that resolves aliases is a guard that can be fooled by one.
+ *
+ * The corollary matters more: DO NOT ALIAS A RULES IMPORT to satisfy something else. If
+ * a name collides, rename the local variable, not the rule. An aliased import is a use
+ * this guard cannot see, and if the alias were ever the only reference the rule would
+ * pass as wired while nothing called it under its own name.
+ *
+ * It also matches on plain text, so a rule named in a comment counts as a use. Comments
+ * naming a rule you have just deleted will keep it looking wired.
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';

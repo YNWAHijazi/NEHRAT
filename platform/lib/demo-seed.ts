@@ -134,6 +134,23 @@ export function seedDemonstration(db: DatabaseSync): void {
     JSON.stringify(['done', 'done', 'done', 'done', 'done', 'na']), 90, 2,
     d('2026-06-02'),
   );
+  // DEMONSTRATION DATA, NOT A PROTOTYPE MATCH. The reference queue's in-progress row is
+  // Beirut Coastal 12K, but the two prototype files disagree about that event: the
+  // Ministry file has it filed and in progress, the Organizer Journey has it at stage 3
+  // with no reference number. The organizer file governs the organizer's own record, so
+  // EV-0418 stays unfiled -- and without this row the demonstration set would contain no
+  // filed-and-unreviewed submission at all, so a Ministry walking the console could never
+  // see a grey internal state. Inventing it on EV-0418 would only move the contradiction.
+  // This is a fifth event, filed with NO determination, sitting in the queue.
+  insertEvent.run(
+    'EV-0455', organizer, 'Byblos Harbour Swim', 'سباحة مرفأ جبيل',
+    d('2026-10-17'), d('2026-10-17'), 'MOPH-EV-2026-0455', 1,
+    'With the Ministry', 'لدى الوزارة',
+    d('2026-10-17'), 'Event date', 'تاريخ الفعالية',
+    5, 'Ministry review', 'مراجعة الوزارة',
+    JSON.stringify(['done', 'done', 'done', 'done', 'current', 'na']), 60, 2,
+    d('2026-07-14'),
+  );
   insertEvent.run(
     // Held 2026-08-09, as every reference file has it (the Ministry queue's eventDate,
     // the post-event screen's "held 2026-08-09", both notification templates). The seed
@@ -520,6 +537,13 @@ export function seedDemonstration(db: DatabaseSync): void {
     'EV-0244',
     JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
     'R. Haddad', d('2026-07-05'), 'MOPH-EV-2026-0244',
+  );
+  // The filed-and-unreviewed one. No determination is recorded against it, so the queue
+  // shows its GREY internal state -- which is the whole reason it exists.
+  insertPlainSubmission.run(
+    'EV-0455',
+    JSON.stringify(Object.fromEntries(Array.from({ length: 8 }, (_, i) => [String(i), true]))),
+    'R. Haddad', d('2026-08-11'), 'MOPH-EV-2026-0455',
   );
 
   // Internal workflow states are grey and are not determinations. The recorded

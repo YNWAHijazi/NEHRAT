@@ -94,8 +94,38 @@ describe('the outcome gate', () => {
 
 describe('the configuration values', () => {
   it('carries the ten powers, per the source', () => {
-    expect(MINISTRY_CONTENT.cardiacPowers).toHaveLength(10);
-    expect(MINISTRY_CONTENT.cardiacPowers.map((p) => p.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    // ELEVEN ROWS, TEN POWERS. PAD 11 names ten. Power 3 is one power with two limbs
+    // -- remote or difficult-access facilities, and other individual facilities --
+    // exercised separately, so it renders as two rows BOTH NUMBERED 3. The count that
+    // matters is the number of distinct powers, not the number of rows, and the source
+    // is the authority on it.
+    expect(MINISTRY_CONTENT.cardiacPowers).toHaveLength(11);
+    expect([...new Set(MINISTRY_CONTENT.cardiacPowers.map((p) => p.n))]).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ]);
+    expect(MINISTRY_CONTENT.cardiacPowers.filter((p) => p.n === 3)).toHaveLength(2);
+  });
+
+  it('carries the readiness cycles under power 5, labelled as not one of the ten', () => {
+    // The cycles used to hang off power 10, which read as though the source named a
+    // device-check cadence. It does not: PAD 11 lists ten powers and no cadence is
+    // among them, and the policy states no cycle or lapse window anywhere. They sit
+    // under power 5 -- establishing a reporting procedure is the power a cadence would
+    // be established under -- and the screen SAYS they are not one of the ten.
+    const five = MINISTRY_CONTENT.cardiacPowers.find((p) => p.key === 'reportingProcedures');
+    expect(five, 'power 5 exists').toBeDefined();
+    const keys = (five as { valueKeys?: string[] }).valueKeys ?? [];
+    expect(keys).toContain('checkCycleDays');
+    expect(keys).toContain('lapseWindowDays');
+    const outside = (five as { outsideTheTen?: string[] }).outsideTheTen ?? [];
+    expect(outside).toEqual(['checkCycleDays', 'lapseWindowDays']);
+    const note = (five as { outsideTheTenEn?: string }).outsideTheTenEn ?? '';
+    expect(note).toMatch(/not one of the ten/i);
+
+    // Power 10 is restored to what the source says it is: an act, not a value.
+    const ten = MINISTRY_CONTENT.cardiacPowers.find((p) => p.key === 'readinessRequests');
+    expect(ten?.kind).toBe('act');
+    expect(ten && 'valueKeys' in ten).toBe(false);
   });
 
   it('provisional cycles yield to published configuration', () => {

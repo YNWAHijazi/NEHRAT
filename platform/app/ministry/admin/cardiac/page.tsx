@@ -9,8 +9,16 @@ import { publishConfigAction } from '../../../ministry-actions';
  * Cardiac-arrest configuration: the ten Ministry powers from the source, each
  * carrying the values operators are told they are waiting for. A value's unset
  * state is a first-class answer; set-and-publish records it with an effective
- * date and notifies the operators it reaches. The Slice 4 provisional cycles
- * live under power ten and yield to published values.
+ * date and notifies the operators it reaches.
+ *
+ * ELEVEN ROWS, TEN POWERS. PAD 11.3 is one power with two limbs -- remote or
+ * difficult-access facilities, and other individual facilities -- exercised
+ * separately, so it renders as two rows carrying the same number 3.
+ *
+ * The Slice 4 provisional cycles sat under power ten, which was wrong: PAD 11
+ * does not name a device-check cadence, and the policy states no cycle or lapse
+ * window anywhere. They now sit under power 5 and are LABELLED as not one of
+ * the ten, from the data -- never from a number in this file.
  */
 export default async function CardiacConfigPage({
   searchParams,
@@ -25,13 +33,30 @@ export default async function CardiacConfigPage({
 
   const valueKeysOf = (p: (typeof powers)[number]): string[] =>
     ('valueKeys' in p && Array.isArray(p.valueKeys) ? (p.valueKeys as string[]) : [p.key]);
+  /** The keys this power carries that are NOT among the source's ten. From the data. */
+  const outsideOf = (p: (typeof powers)[number]): string[] =>
+    'outsideTheTen' in p && Array.isArray(p.outsideTheTen) ? (p.outsideTheTen as string[]) : [];
+  /** A key running on a provisional figure until the Ministry publishes one. */
+  const isProvisional = (key: string): boolean =>
+    key === 'checkCycleDays' || key === 'lapseWindowDays';
+  const labelFor = (p: (typeof powers)[number], key: string): { en: string; ar: string } => {
+    const labels = ('valueLabels' in p ? p.valueLabels : undefined) as
+      | Record<string, { en: string; ar: string }>
+      | undefined;
+    if (labels?.[key]) return labels[key];
+    return {
+      en: ('valueLabelEn' in p ? p.valueLabelEn : '') as string,
+      ar: ('valueLabelAr' in p ? p.valueLabelAr : '') as string,
+    };
+  };
   const stateOf = (p: (typeof powers)[number]) => {
     if (p.kind === 'act') return { ...pub.caseByCase, bg: 'var(--surface2)', color: 'var(--muted)' };
     const keys = valueKeysOf(p);
     const set = keys.filter((k) => config.has(k)).length;
     if (set === keys.length) return { ...pub.published, bg: 'var(--brand-soft)', color: 'var(--brand)' };
     if (set > 0) return { ...pub.part, bg: 'var(--accent-soft)', color: 'var(--accent-ink)' };
-    if (p.n === 10) return { ...pub.provisional, bg: 'var(--accent-soft)', color: 'var(--accent-ink)' };
+    // Provisional, not merely unset: a figure IS in use until the Ministry publishes one.
+    if (keys.some(isProvisional)) return { ...pub.provisional, bg: 'var(--accent-soft)', color: 'var(--accent-ink)' };
     return { ...pub.unset, bg: 'var(--accent-soft)', color: 'var(--accent-ink)' };
   };
   const values = powers.filter((p) => p.kind === 'value');
@@ -104,6 +129,13 @@ export default async function CardiacConfigPage({
                 </span>
               </div>
 
+              {/* Why this row repeats a number: one power, two limbs (PAD 11.3). */}
+              {'limbEn' in p ? (
+                <div style={{ marginInlineStart: 30, marginBlockEnd: 10, fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '80ch', paddingInlineStart: 12, borderInlineStart: '2px solid var(--line)' }}>
+                  <L en={(p.limbEn ?? '') as string} ar={(('limbAr' in p ? p.limbAr : '') ?? '') as string} />
+                </div>
+              ) : null}
+
               {p.kind === 'act' ? (
                 <div style={{ marginInlineStart: 30, fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
                   <L en={('actNoteEn' in p ? p.actNoteEn : '') as string} ar={('actNoteAr' in p ? p.actNoteAr : '') as string} />
@@ -119,12 +151,13 @@ export default async function CardiacConfigPage({
                       return (
                         <div key={key} style={{ padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10 }}>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: row ? 0 : 10 }}>
-                            <span style={{ fontSize: '13.5px' }}>
-                              {keys.length > 1 ? (
-                                key === 'checkCycleDays' ? <L en="Device-check cadence (days)" ar="وتيرة فحص الأجهزة (أيام)" /> : <L en="Lapse window (days)" ar="نافذة الانتهاء (أيام)" />
-                              ) : (
-                                <L en={('valueLabelEn' in p ? p.valueLabelEn : '') as string} ar={('valueLabelAr' in p ? p.valueLabelAr : '') as string} />
-                              )}
+                            <span style={{ fontSize: '13.5px', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                              <L en={labelFor(p, key).en} ar={labelFor(p, key).ar} />
+                              {outsideOf(p).includes(key) ? (
+                                <span style={{ flex: 'none', padding: '2px 8px', borderRadius: 3, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                                  <L en="Not one of the ten" ar="ليست من العشر" />
+                                </span>
+                              ) : null}
                             </span>
                             {row ? (
                               <span style={{ fontSize: '13.5px', fontVariantNumeric: 'tabular-nums' }}>
@@ -132,7 +165,7 @@ export default async function CardiacConfigPage({
                               </span>
                             ) : (
                               <span style={{ fontSize: '12.5px', color: 'var(--accent-ink)' }}>
-                                {p.n === 10 ? (
+                                {isProvisional(key) ? (
                                   <L
                                     en={`Not set — the provisional figure ${key === 'checkCycleDays' ? provisionalCycles.checkCycleDays : provisionalCycles.lapseWindowDays} days is in use`}
                                     ar={`غير محددة — الرقم المؤقت ${key === 'checkCycleDays' ? provisionalCycles.checkCycleDays : provisionalCycles.lapseWindowDays} يوماً مستخدم`}
@@ -167,6 +200,12 @@ export default async function CardiacConfigPage({
                       );
                     })}
                   </div>
+                  {/* Values grouped here that the source does not name as a power. */}
+                  {outsideOf(p).length > 0 ? (
+                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginBlockStart: 10, lineHeight: 1.65, maxWidth: '80ch', padding: '10px 14px', background: 'var(--surface2)', borderRadius: 8 }}>
+                      <L en={(('outsideTheTenEn' in p ? p.outsideTheTenEn : '') ?? '') as string} ar={(('outsideTheTenAr' in p ? p.outsideTheTenAr : '') ?? '') as string} />
+                    </div>
+                  ) : null}
                   <div style={{ fontSize: '12px', color: 'var(--muted)', marginBlockStart: 8, lineHeight: 1.6 }}>
                     <L en={MINISTRY_CONTENT.setAndPublish.notifyEn} ar={MINISTRY_CONTENT.setAndPublish.notifyAr} />
                   </div>
