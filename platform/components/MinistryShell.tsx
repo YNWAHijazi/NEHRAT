@@ -90,7 +90,7 @@ export function MinistryFooter({
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12 }}>
         {steps.map((s) => (
-          <Link key={s.href} href={s.href} style={{ padding: '16px 20px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)' }}>
+          <Link key={s.href} href={s.href} style={{ padding: '16px 20px', background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>
             <div style={{ fontSize: 15, fontWeight: 600, marginBlockEnd: 4 }}>
               <L en={s.en} ar={s.ar} />
             </div>

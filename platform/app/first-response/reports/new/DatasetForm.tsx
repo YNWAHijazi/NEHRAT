@@ -73,7 +73,7 @@ export function DatasetForm() {
 
   return (
     <div>
-      <div data-region="routes" style={{ padding: '24px 28px', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 16 }}>
+      <div data-region="routes" style={{ padding: '24px 28px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
           <L en="How to submit" ar="كيفية التقديم" />
         </div>
@@ -89,7 +89,7 @@ export function DatasetForm() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setRoute(r.key as 'platform' | 'attach')}
-                style={{ height: 42, paddingInline: 20, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--bg)', color: on ? 'var(--brand)' : 'var(--ink)', borderRadius: 22, fontSize: 14, cursor: 'pointer' }}
+                style={{ height: 42, paddingInline: 20, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--bg)', color: on ? 'var(--brand)' : 'var(--ink)', borderRadius: 21, fontSize: 14, cursor: 'pointer' }}
               >
                 <L en={r.en} ar={r.ar} />
               </button>
@@ -99,7 +99,7 @@ export function DatasetForm() {
       </div>
 
       {route === 'attach' ? (
-        <div data-region="attach" style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 16 }}>
+        <div data-region="attach" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'end', marginBlockEnd: 18 }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 260 }}>
               <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -123,7 +123,7 @@ export function DatasetForm() {
         {content.datasetSections.map((s, si) => {
           const isCovered = route === 'attach' && Boolean(covered[s.key]);
           return (
-            <div key={s.key} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, overflow: 'hidden' }}>
+            <div key={s.key} style={{ background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, overflow: 'hidden' }}>
               <div style={{ padding: '20px 24px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ display: 'flex', gap: 14, alignItems: 'baseline', flex: 1, minWidth: 240 }}>
                   <span style={{ flex: 'none', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 16 }}>{si + 1}</span>
@@ -187,7 +187,7 @@ export function DatasetForm() {
                                   type="button"
                                   aria-pressed={on}
                                   onClick={() => set(key)(o.k)}
-                                  style={{ padding: '6px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 14, fontSize: 13, cursor: 'pointer' }}
+                                  style={{ padding: '6px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 16, fontSize: 13, cursor: 'pointer' }}
                                 >
                                   <L en={o.en} ar={o.ar} />
                                 </button>

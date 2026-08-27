@@ -63,7 +63,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
 
   return (
     <form action={registerVenueAction}>
-      <div data-region="registration-form" style={{ padding: 28, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20 }}>
+      <div data-region="registration-form" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
           {fields.flatMap((f) => {
             const base = (
@@ -111,7 +111,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
       </div>
 
       {!eligible && !answered ? null : eligible ? (
-        <div style={{ padding: '26px 30px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 14, marginBlockEnd: 20 }}>
+        <div style={{ padding: '26px 30px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
           <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>
             <L en="This venue completes the annual assessment." ar="يستكمل هذا الموقع التقييم السنوي." />
           </div>
@@ -129,7 +129,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
           </button>
         </div>
       ) : (
-        <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 14 }}>
+        <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: 16, lineHeight: 1.65, marginBlockEnd: 12 }}>
             <L
               en="On these details the venue falls outside the annual assessment. The Ministry determines applicability where it is uncertain, so this is not a determination that the venue is outside the process."

@@ -21,7 +21,7 @@ export default async function ChangesPage() {
       </p>
       <div data-region="changes" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((c) => (
-          <Link key={`${c.kind}-${c.eventId}-${c.when}`} href={`/ministry/submissions/${c.eventId}`} style={{ padding: '15px 20px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${c.kind === 'declined' ? 'var(--bad)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', color: 'var(--ink)' }}>
+          <Link key={`${c.kind}-${c.eventId}-${c.when}`} href={`/ministry/submissions/${c.eventId}`} style={{ padding: '15px 20px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.kind === 'declined' ? 'var(--bad)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', color: 'var(--ink)' }}>
           <span style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
             <L en={`${c.eventEn} — ${c.detailEn}`} ar={`${c.eventAr} — ${c.detailAr}`} />
           </span>

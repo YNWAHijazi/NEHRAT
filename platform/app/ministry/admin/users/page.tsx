@@ -30,7 +30,7 @@ export default async function UsersPage() {
           const suspended = u.role === 'order' && !laneActive;
           const label = roleLabels[u.role] ?? { en: u.role, ar: u.role };
           return (
-            <div key={u.login} style={{ padding: '14px 20px', border: '1px solid var(--line)', borderInlineStart: `3px ${suspended ? 'dashed var(--bad)' : 'solid var(--line)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={u.login} style={{ padding: '14px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${suspended ? 'dashed var(--bad)' : 'solid var(--line)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span>
               <span style={{ fontSize: 15, fontWeight: 500 }}>{u.displayName}</span>
               <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
@@ -38,11 +38,11 @@ export default async function UsersPage() {
               </span>
             </span>
             {suspended ? (
-              <span style={{ padding: '3px 9px', borderRadius: 4, background: 'var(--bad-soft)', color: 'var(--bad)', fontSize: '12.5px' }}>
+              <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--bad-soft)', color: 'var(--bad)', fontSize: '12.5px' }}>
                 <L en="Suspended — the lane is off" ar="موقوف — المسار مطفأ" />
               </span>
             ) : (
-              <span style={{ padding: '3px 9px', borderRadius: 4, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px' }}>
+              <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px' }}>
                 <L en="Active" ar="نشط" />
               </span>
             )}
@@ -51,7 +51,7 @@ export default async function UsersPage() {
         })}
       </div>
       {!laneActive ? (
-        <div data-region="order-suspension" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 32, fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
+        <div data-region="order-suspension" style={{ padding: '14px 18px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
           <L en={MINISTRY_CONTENT.orderSuspension.en} ar={MINISTRY_CONTENT.orderSuspension.ar} />
         </div>
       ) : null}

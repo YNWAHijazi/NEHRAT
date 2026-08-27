@@ -51,14 +51,14 @@ export default async function ParticipationPage({
             <L en="Event participation — Level 2" ar="المشاركة في الفعالية — المستوى 2" />
           </h1>
 
-          <div data-region="l2-intro" style={{ padding: '24px 28px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 14, marginBlockEnd: 32, maxWidth: '76ch' }}>
+          <div data-region="l2-intro" style={{ padding: '24px 28px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32, maxWidth: '76ch' }}>
             <div style={{ fontSize: 16, lineHeight: 1.65 }}>
               <L en={content.level2Intro.en} ar={content.level2Intro.ar} />
             </div>
           </div>
 
           <form action={saveOpsDetailAction.bind(null, invitation.token)}>
-            <div data-region="ops-detail" style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="ops-detail" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Operational detail for the organizer" ar="التفاصيل التشغيلية للمنظّم" />
               </div>
@@ -68,13 +68,13 @@ export default async function ParticipationPage({
                     <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.4 }}>
                       <L en={f.en} ar={f.ar} />
                     </span>
-                    <input name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15 }} />
+                    <input name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
                   </label>
                 ))}
               </div>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-              <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
+              <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
                 <L en="Confirm participation and send to the organizer" ar="تأكيد المشاركة وإرسالها إلى المنظّم" />
               </button>
             </div>

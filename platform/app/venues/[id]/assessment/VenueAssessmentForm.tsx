@@ -106,7 +106,7 @@ export function VenueAssessmentForm({
         <L en="The same nine domains as the event assessment, assessed once each year." ar="المجالات التسعة نفسها المستخدمة في تقييم الفعاليات، تُقيَّم مرة كل سنة." />
       </p>
 
-      <div data-region="session-callout" style={{ padding: '26px 30px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 44 }}>
+      <div data-region="session-callout" style={{ padding: '26px 30px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 44 }}>
         <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
           <L
             en="Assess one routine operating session — not a specific event, and not the venue's busiest day."
@@ -123,7 +123,7 @@ export function VenueAssessmentForm({
         </div>
       </div>
 
-      <div style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 44 }}>
+      <div style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 380 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
             <L en="Expected maximum simultaneous attendance during a routine operating session" ar="الحد الأقصى المتوقع للحضور المتزامن خلال فترة تشغيل اعتيادية" />
@@ -138,7 +138,7 @@ export function VenueAssessmentForm({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
-          <div key={domain.number} style={{ padding: 26, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+          <div key={domain.number} style={{ padding: 26, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -170,7 +170,7 @@ export function VenueAssessmentForm({
         ))}
       </div>
 
-      <div data-region="classification" style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div data-region="classification" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
           <L en="Total score from your answers" ar="المجموع من أجوبتكم" />
         </div>
@@ -303,7 +303,7 @@ export function VenueAssessmentForm({
         </div>
       </div>
 
-      <div data-region="declaration" style={{ padding: 28, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}>
+      <div data-region="declaration" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Operator declaration" ar="إقرار الجهة المشغّلة" />
         </div>

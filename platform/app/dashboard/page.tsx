@@ -66,10 +66,9 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
       style={{
         textAlign: 'start',
         padding: '24px 26px',
-        background: 'var(--surface)',
-        border: '1px solid var(--line)',
+        background: 'var(--surface2)',
         borderInlineStart: `3px solid ${color}`,
-        borderRadius: 14,
+        borderRadius: 16,
         display: 'grid',
         gridTemplateColumns: 'minmax(200px,2fr) 1fr 1fr auto',
         gap: 20,
@@ -110,7 +109,7 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
               style={{
                 display: 'inline-block',
                 padding: '2px 8px',
-                borderRadius: 3,
+                borderRadius: 999,
                 borderInlineStart: `2px solid var(--l${level})`,
                 background: `var(--l${level}s)`,
                 color: 'var(--ink)',
@@ -248,7 +247,7 @@ export default async function DashboardPage() {
         </div>
 
         {organization && organization.status === 'pending' ? (
-          <Link href="/organization" style={{ display: 'block', padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, marginBlockEnd: 16, color: 'var(--ink)', textDecoration: 'none' }}>
+          <Link href="/organization" style={{ display: 'block', padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 16, color: 'var(--ink)', textDecoration: 'none' }}>
             <div style={{ maxWidth: '70ch' }}>
               <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 5 }}>
                 <L en="Organization registration is with the Ministry" ar="تسجيل المؤسسة لدى الوزارة" />
@@ -264,7 +263,7 @@ export default async function DashboardPage() {
         ) : null}
 
         {returned ? (
-          <div style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
+          <div style={{ padding: '22px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Awaiting your response" ar="بانتظار ردكم" />
             </div>
@@ -363,7 +362,7 @@ export default async function DashboardPage() {
                         key={f.id}
                         href={`/facilities/${f.id}`}
                         data-stack=""
-                        style={{ textAlign: 'start', padding: '24px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${color}`, borderRadius: 14, display: 'grid', gridTemplateColumns: 'minmax(200px,1.7fr) 1fr 1fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}
+                        style={{ textAlign: 'start', padding: '24px 26px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.7fr) 1fr 1fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}
                       >
                         <div>
                           <div style={{ fontSize: '17.5px', fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
@@ -444,7 +443,7 @@ export default async function DashboardPage() {
                         </div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: 15, fontVariantNumeric: 'tabular-nums', color: state.color }}>{v.validUntil}</div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '13.5px' }}>
-                          <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 4, background: state.chipBg, color: state.color }}>
+                          <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: state.chipBg, color: state.color }}>
                             <L en={state.en} ar={state.ar} />
                           </span>
                         </div>

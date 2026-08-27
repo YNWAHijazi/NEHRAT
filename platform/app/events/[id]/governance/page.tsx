@@ -71,12 +71,12 @@ export default async function GovernancePage({
               {content.govSections.map((g) => {
                 const s = stateOf(g.key);
                 return (
-                  <div key={g.key} style={{ padding: '28px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 14 }}>
+                  <div key={g.key} style={{ padding: '28px 32px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 16 }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 12 }}>
                       <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em', flex: 1, minWidth: 240 }}>
                         <L en={g.en} ar={g.ar} />
                       </h2>
-                      <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: s.bg, color: s.color, fontSize: 13 }}>
+                      <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 13 }}>
                         <L en={s.en} ar={s.ar} />
                       </span>
                     </div>
@@ -96,7 +96,7 @@ export default async function GovernancePage({
                 );
               })}
             </div>
-            <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
+            <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
               <L en="Save — the organizer's plan reads this" ar="حفظ — تقرأ خطة المنظّم هذا" />
             </button>
           </form>

@@ -45,7 +45,7 @@ export default async function ArrestLocationsPage({
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }}>
         <div data-region="groups" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {groups.map((g) => (
-            <div key={g.placeEn} style={{ padding: '16px 20px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${g.count >= 3 ? 'var(--bad)' : g.count === 2 ? 'var(--accent-ink)' : 'var(--muted)'}`, borderRadius: 10 }}>
+            <div key={g.placeEn} style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px solid ${g.count >= 3 ? 'var(--bad)' : g.count === 2 ? 'var(--accent-ink)' : 'var(--muted)'}`, borderRadius: 10 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>
                   <span style={{ fontSize: 15, fontWeight: 500 }}>
@@ -57,7 +57,7 @@ export default async function ArrestLocationsPage({
                 </span>
                 <span style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 'none' }}>
                   <span style={{ fontSize: 20, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: g.count >= 3 ? 'var(--bad)' : g.count === 2 ? 'var(--accent-ink)' : 'var(--muted)' }}>{g.count}</span>
-                  <span style={{ padding: '3px 9px', borderRadius: 4, background: g.designated ? 'var(--brand-soft)' : 'var(--surface2)', color: g.designated ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px' }}>
+                  <span style={{ padding: '3px 9px', borderRadius: 999, background: g.designated ? 'var(--brand-soft)' : 'var(--surface2)', color: g.designated ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px' }}>
                     {g.designated ? <L en="Already a covered facility" ar="مرفق مشمول أصلاً" /> : <L en="Not currently covered" ar="غير مشمول حالياً" />}
                   </span>
                   {mayDesignate && !g.designated ? (

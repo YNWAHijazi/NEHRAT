@@ -42,9 +42,9 @@ export default async function MasterAdminPage({
 
       <div data-region="flags" style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 860, marginBlockEnd: 32 }}>
         {ALL_FLAGS.map((flag) => (
-          <div key={flag} style={{ padding: '14px 20px', border: '1px solid var(--line)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={flag} style={{ padding: '14px 20px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{flag}</span>
-            <span style={{ padding: '3px 10px', borderRadius: 4, background: featureEnabled(flag) ? 'var(--brand-soft)' : 'var(--surface2)', color: featureEnabled(flag) ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px', letterSpacing: '.04em' }}>
+            <span style={{ padding: '3px 10px', borderRadius: 999, background: featureEnabled(flag) ? 'var(--brand-soft)' : 'var(--surface2)', color: featureEnabled(flag) ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px', letterSpacing: '.04em' }}>
               {featureEnabled(flag) ? <L en="ON" ar="مشغّل" /> : <L en="OFF" ar="مطفأ" />}
             </span>
           </div>

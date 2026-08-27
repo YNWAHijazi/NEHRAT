@@ -47,7 +47,7 @@ export function RespondForm({
 
   return (
     <form action={respondToInvitationAction.bind(null, token)}>
-      <div data-region="respond" style={{ padding: '28px 32px', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="respond" style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Respond to the nomination" ar="الردّ على الترشيح" />
         </div>
@@ -112,7 +112,7 @@ export function RespondForm({
       ) : null}
 
       {!signedIn && picked ? (
-        <div data-region="account-setup" style={{ padding: 32, border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+        <div data-region="account-setup" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
           <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Set up your account" ar="إعداد حسابكم" />
           </h2>

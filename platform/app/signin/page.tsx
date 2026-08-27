@@ -114,7 +114,7 @@ export default async function SignInPage({
       <Header account={null} organization={null} unreadCount={0} showBack={false} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
-          <div style={{ padding: 34, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16 }}>
+          <div style={{ padding: 34, background: 'var(--surface2)', borderRadius: 16 }}>
             {/* Mode chips: the reference shows sign-in as active for both signin and reset. */}
             <div style={{ display: 'flex', gap: 6, marginBlockEnd: 22 }}>
               <Link href="/signin" aria-pressed={mode !== 'signup'} style={modeChipStyle(mode !== 'signup')}>
@@ -173,7 +173,7 @@ export default async function SignInPage({
               ) : null}
 
               {mode === 'reset' ? (
-                <div style={{ padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
+                <div style={{ padding: '18px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
                   <L
                     en="Enter the email address on the account. A reset link is sent to it, expires after one hour, and can be used once."
                     ar="أدخلوا البريد الإلكتروني المسجَّل على الحساب. ويُرسل إليه رابط إعادة التعيين، تنتهي صلاحيته بعد ساعة ويُستخدم مرة واحدة."
@@ -199,7 +199,7 @@ export default async function SignInPage({
 
               <button
                 type="submit"
-                style={{ height: 48, width: '100%', border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+                style={{ height: 48, width: '100%', border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
               >
                 {mode === 'signup' ? (
                   <L en="Create the account" ar="إنشاء الحساب" />
@@ -242,7 +242,7 @@ export default async function SignInPage({
               the same guard that forces the seeder off in production (lib/db.ts).
               A production sign-in shows no demonstration accounts. */}
           {process.env.NODE_ENV !== 'production' ? (
-          <div style={{ padding: 34, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16 }}>
+          <div style={{ padding: 34, background: 'var(--surface2)', borderRadius: 16 }}>
             <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en="Demonstration accounts" ar="حسابات العرض التوضيحي" />
             </h2>

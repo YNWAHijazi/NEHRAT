@@ -79,14 +79,14 @@ export function DirectorEventView({
         </p>
 
         <div data-region="counters" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBlockEnd: 40 }}>
-          <div style={{ flex: 1, minWidth: 230, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${openCount > 0 ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 12 }}>
+          <div style={{ flex: 1, minWidth: 230, padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: `3px solid ${openCount > 0 ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 12 }}>
             <div style={{ fontSize: 30, fontWeight: 600, color: openCount > 0 ? 'var(--bad)' : 'var(--brand)' }}>{openCount}</div>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
               <L en="requirements left to address" ar="متطلباً بقي معالجته" />
             </div>
           </div>
           {fileBy ? (
-            <div style={{ flex: 1, minWidth: 230, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
+            <div style={{ flex: 1, minWidth: 230, padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
               <div style={{ fontSize: 18, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'var(--accent-ink)', marginBlockStart: 6 }}>{fileBy}</div>
               <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 6 }}>
                 <L en="organizer files by this date and cannot file until these are addressed" ar="يقدّم المنظّم بحلول هذا التاريخ ولا يمكنه التقديم قبل معالجتها" />
@@ -114,7 +114,7 @@ export function DirectorEventView({
                       <L en={`Level 3: ${r.valueEn}`} ar={`المستوى 3: ${r.valueAr}`} />
                     </div>
                   </div>
-                  <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: chip.bg, color: chip.color, fontSize: 13 }}>
+                  <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: 13 }}>
                     <L en={chip.en} ar={chip.ar} />
                   </span>
                 </div>
@@ -157,7 +157,7 @@ export function DirectorEventView({
           })}
         </div>
 
-        <div data-region="certified-about" style={{ padding: '24px 28px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: '82ch' }}>
+        <div data-region="certified-about" style={{ padding: '24px 28px', background: 'var(--surface2)', borderRadius: 12, maxWidth: '82ch' }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             <L en="Certified about you by others" ar="ما يُصدَّق عنكم من الآخرين" />
           </div>

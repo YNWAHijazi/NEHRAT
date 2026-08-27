@@ -62,7 +62,7 @@ export default async function IncidentsPage() {
               const t = sinTypes[r.incidentType];
               const inWindow = withinWindow(r.occurredAt, r.notifiedAt);
               return (
-                <a key={`${r.eventId}-${r.notifiedAt}`} href={`/ministry/submissions/${r.eventId}`} style={{ padding: '12px 16px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${inWindow ? 'var(--brand)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline', textDecoration: 'none', color: 'var(--ink)' }}>
+                <a key={`${r.eventId}-${r.notifiedAt}`} href={`/ministry/submissions/${r.eventId}`} style={{ padding: '12px 16px', background: 'var(--surface2)', borderInlineStart: `3px solid ${inWindow ? 'var(--brand)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline', textDecoration: 'none', color: 'var(--ink)' }}>
                   <span style={{ fontWeight: 500 }}>
                     <L en={t?.en ?? r.incidentType} ar={t?.ar ?? r.incidentType} />
                   </span>
@@ -76,7 +76,7 @@ export default async function IncidentsPage() {
                   <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
                     <L en={`notified ${r.notifiedAt.slice(0, 16)}`} ar={`أُبلغ في ⁦${r.notifiedAt.slice(0, 16)}⁩`} />
                   </span>
-                  <span style={{ flex: 'none', padding: '2px 9px', borderRadius: 4, fontSize: 12, background: inWindow ? 'var(--brand-soft)' : 'var(--bad-soft)', color: inWindow ? 'var(--brand)' : 'var(--bad)' }}>
+                  <span style={{ flex: 'none', padding: '2px 9px', borderRadius: 999, fontSize: 12, background: inWindow ? 'var(--brand-soft)' : 'var(--bad-soft)', color: inWindow ? 'var(--brand)' : 'var(--bad)' }}>
                     {inWindow ? <L en={`Within ${windowHours} hours`} ar={`ضمن ${windowHours} ساعة`} /> : <L en={`Outside ${windowHours} hours`} ar={`خارج ${windowHours} ساعة`} />}
                   </span>
                 </a>
@@ -96,14 +96,14 @@ export default async function IncidentsPage() {
               const flagged = Object.values(significant).some(Boolean);
               const complete = Boolean(r.organizer_signed_at) && Boolean(r.director_signed_at);
               return (
-                <div key={r.id} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${flagged ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
+                <div key={r.id} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px solid ${flagged ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '14.5px' }}>
                     <L en={r.name_en} ar={r.name_ar} />
                     <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
                       <L en={`Held ${r.end_date ?? ''}`} ar={`أُقيمت في ⁦${r.end_date ?? ''}⁩`} />
                     </span>
                   </span>
-                  <span style={{ padding: '3px 9px', borderRadius: 4, background: complete ? 'var(--brand-soft)' : 'var(--accent-soft)', color: complete ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px', alignSelf: 'center' }}>
+                  <span style={{ padding: '3px 9px', borderRadius: 999, background: complete ? 'var(--brand-soft)' : 'var(--accent-soft)', color: complete ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px', alignSelf: 'center' }}>
                     {complete ? <L en="Both signatures recorded" ar="سُجّل التوقيعان" /> : <L en="Signatures incomplete" ar="التواقيع غير مكتملة" />}
                   </span>
                 </div>
@@ -124,7 +124,7 @@ export default async function IncidentsPage() {
             {facilityIncidents.map((r, i) => {
               const payload = JSON.parse(r.payload) as Record<string, string>;
               return (
-                <div key={`f-${i}`} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10, fontSize: '14.5px' }}>
+                <div key={`f-${i}`} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10, fontSize: '14.5px' }}>
                   <L en={`Facility incident report — ${r.name_en}`} ar={`تقرير حادثة مرفق — ${r.name_ar}`} />
                   <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>{payload['date'] ?? r.created_at.slice(0, 10)}</span>
                 </div>
@@ -133,7 +133,7 @@ export default async function IncidentsPage() {
             {frReports.map((r, i) => {
               const payload = JSON.parse(r.payload) as Record<string, string>;
               return (
-                <div key={`u-${i}`} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10, fontSize: '14.5px' }}>
+                <div key={`u-${i}`} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10, fontSize: '14.5px' }}>
                   <L
                     en={`First-response dataset report${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · own patient-care report attached' : ''}`}
                     ar={`تقرير بيانات استجابة أولية${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · أُرفق تقرير رعاية المرضى الخاص' : ''}`}

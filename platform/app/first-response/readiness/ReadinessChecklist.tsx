@@ -75,7 +75,7 @@ export function ReadinessChecklist({
                         [g.key]: (prev[g.key] ?? []).map((v, j) => (j === i ? !v : v)),
                       }))
                     }
-                    style={{ textAlign: 'start', padding: '16px 20px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${on ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                    style={{ textAlign: 'start', padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px solid ${on ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
                   >
                     <span style={{ display: 'flex', gap: 14, alignItems: 'baseline', flex: 1, minWidth: 240 }}>
                       <span style={{ flex: 'none', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 16 }}>{i + 1}</span>
@@ -83,7 +83,7 @@ export function ReadinessChecklist({
                         <L en={item.en} ar={item.ar} />
                       </span>
                     </span>
-                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: on ? 'var(--brand-soft)' : 'var(--surface2)', color: on ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px' }}>
+                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: on ? 'var(--brand-soft)' : 'var(--surface2)', color: on ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px' }}>
                       {on ? <L en="Confirmed" ar="مؤكَّد" /> : <L en="Not confirmed" ar="غير مؤكَّد" />}
                     </span>
                   </button>

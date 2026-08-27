@@ -64,7 +64,7 @@ export default async function DeclarationPage({
             />
           </p>
 
-          <div data-region="responsibility" style={{ padding: '26px 30px', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20, maxWidth: '80ch' }}>
+          <div data-region="responsibility" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '80ch' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
               <L en="What your agency is accepting" ar="ما تقبله جهتكم" />
             </div>
@@ -74,7 +74,7 @@ export default async function DeclarationPage({
           </div>
 
           <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBlockEnd: 32 }}>
-            <div style={{ padding: '24px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+            <div style={{ padding: '24px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="Event Medical Director — for item 7" ar="المدير الطبي للفعالية — للبند 7" />
               </div>
@@ -91,14 +91,14 @@ export default async function DeclarationPage({
                 </div>
               )}
             </div>
-            <div style={{ padding: '24px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+            <div style={{ padding: '24px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="Major-incident and mass-casualty plan — for item 10" ar="خطة الحوادث الجسيمة وحوادث الإصابات الجماعية — للبند 10" />
               </div>
               <div style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 14 }}>
                 <L en="From the organizer's submission" ar="من ملف المنظّم" />
               </div>
-              <a href={`/events/${id}/documents`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
+              <a href={`/events/${id}/documents`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
                 <L en="Open the shared documents" ar="فتح المستندات المشتركة" />
               </a>
             </div>

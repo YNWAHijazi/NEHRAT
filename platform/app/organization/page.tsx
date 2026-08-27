@@ -48,7 +48,7 @@ export default async function OrganizationPage({
           </p>
 
           {organization ? (
-            <div style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 36 }}>
+            <div style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 36 }}>
               <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 3 }}>
@@ -63,11 +63,11 @@ export default async function OrganizationPage({
                     <L en="Registration" ar="التسجيل" />
                   </div>
                   {organization.status === 'recorded' ? (
-                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 4, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13.5px' }}>
+                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13.5px' }}>
                       <L en="Recorded by the Ministry" ar="مسجّلة لدى الوزارة" />
                     </span>
                   ) : (
-                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 4, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: '13.5px' }}>
+                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: '13.5px' }}>
                       <L en="Pending Ministry recording" ar="بانتظار تسجيل الوزارة" />
                     </span>
                   )}
@@ -83,7 +83,7 @@ export default async function OrganizationPage({
               ) : null}
             </div>
           ) : (
-            <form action={registerOrganizationAction} style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 36 }}>
+            <form action={registerOrganizationAction} style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 36 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
                 <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>

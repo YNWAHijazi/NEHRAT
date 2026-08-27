@@ -78,7 +78,7 @@ export default async function DirectorReportPage({
           </p>
 
           {due ? (
-            <div data-region="due" style={{ padding: '26px 30px', border: `2px solid ${directorSigned ? 'var(--brand)' : 'var(--bad)'}`, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', borderRadius: 14, marginBlockEnd: 20 }}>
+            <div data-region="due" style={{ padding: '26px 30px', border: `2px solid ${directorSigned ? 'var(--brand)' : 'var(--bad)'}`, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: 19, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>
                 {/* Order-independent co-signature (reviewer ruling): either party may sign
                     first; complete only when BOTH have; and no claim that the other
@@ -105,7 +105,7 @@ export default async function DirectorReportPage({
           ) : null}
 
           {report ? (
-            <div data-region="figures" style={{ padding: '28px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20 }}>
+            <div data-region="figures" style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="The report as prepared — entered by the organizer" ar="التقرير كما أُعدّ — أدخله المنظّم" />
               </div>
@@ -144,37 +144,37 @@ export default async function DirectorReportPage({
               </div>
             </div>
           ) : (
-            <div style={{ padding: '26px 30px', border: '1px dashed var(--line)', borderRadius: 14, marginBlockEnd: 20, fontSize: 15, color: 'var(--muted)', lineHeight: 1.65 }}>
+            <div style={{ padding: '26px 30px', border: '1px dashed var(--line)', borderRadius: 16, marginBlockEnd: 20, fontSize: 15, color: 'var(--muted)', lineHeight: 1.65 }}>
               <L en="The organizer has not started the report yet. Your signature becomes available once it is prepared." ar="لم يبدأ المنظّم التقرير بعد. يصبح توقيعكم متاحاً بعد إعداده." />
             </div>
           )}
 
           {report ? (
-            <div data-region="signatures" style={{ padding: '28px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 20 }}>
+            <div data-region="signatures" style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Signatures" ar="التواقيع" />
               </div>
               {POST_EVENT_CERTIFICATION_STATEMENT ? (
-                <div data-region="certification-statement" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+                <div data-region="certification-statement" style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
                   <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
                 </div>
               ) : null}
               <div style={{ display: 'contents' }}>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 22 }}>
-                <div style={{ padding: '16px 20px', border: '1px solid var(--line)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 15, fontWeight: 500 }}>
                     <L en="Organizer representative" ar="ممثل المنظّم" />
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: organizerSigned ? 'var(--brand-soft)' : 'var(--surface2)', color: organizerSigned ? 'var(--brand)' : 'var(--muted)', fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: organizerSigned ? 'var(--brand-soft)' : 'var(--surface2)', color: organizerSigned ? 'var(--brand)' : 'var(--muted)', fontSize: 13 }}>
                     {organizerSigned ? <L en="Signed" ar="وُقّع" /> : <L en="Not yet signed" ar="لم يُوقَّع بعد" />}
                   </span>
                 </div>
-                <div style={{ padding: '16px 20px', border: '1px solid var(--line)', borderInlineStart: `3px ${directorSigned ? 'solid var(--brand)' : 'dashed var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${directorSigned ? 'solid var(--brand)' : 'dashed var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 15, fontWeight: 500 }}>
                     <L en="Event Medical Director" ar="المدير الطبي للفعالية" />
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', color: directorSigned ? 'var(--brand)' : 'var(--bad)', fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', color: directorSigned ? 'var(--brand)' : 'var(--bad)', fontSize: 13 }}>
                     {directorSigned ? <L en="Signed" ar="وُقّع" /> : <L en="Awaiting your signature" ar="بانتظار توقيعكم" />}
                   </span>
                 </div>

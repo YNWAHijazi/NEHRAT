@@ -87,7 +87,7 @@ export function StartServiceMenu() {
             maxWidth: '86vw',
             background: 'var(--bg)',
             border: '1px solid var(--line)',
-            borderRadius: 14,
+            borderRadius: 16,
             boxShadow: '0 18px 44px rgba(0,0,0,.16)',
             overflow: 'hidden',
           }}
@@ -102,9 +102,8 @@ export function StartServiceMenu() {
                 width: '100%',
                 height: 40,
                 paddingInline: 12,
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: 8,
+                background: 'var(--surface2)',
+                borderRadius: 20,
                 fontSize: '14.5px',
               }}
             />

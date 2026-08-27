@@ -184,7 +184,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div data-region="rail" style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+        <div data-region="rail" style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
             <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
               <L en="Where this venue stands" ar="موضع هذا الموقع" />
@@ -200,7 +200,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
                 <div key={i} style={{ paddingBlockStart: 12, borderBlockStart: `3px ${st.edge} ${st.color}` }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBlockEnd: 6 }}>
                     <span style={{ fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
-                    <span style={{ padding: '2px 7px', borderRadius: 3, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
+                    <span style={{ padding: '2px 7px', borderRadius: 999, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
                       <L en={st.lblEn} ar={st.lblAr} />
                     </span>
                   </div>
@@ -280,7 +280,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
               <div style={{ ...upLabel, marginBlockEnd: 6 }}>
                 <L en="State" ar="الحالة" />
               </div>
-              <div style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 4, background: state.chipBg, color: state.color, fontSize: 14 }}>
+              <div style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 999, background: state.chipBg, color: state.color, fontSize: 14 }}>
                 <L en={state.en} ar={state.ar} />
               </div>
             </div>
@@ -290,7 +290,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
         {/* The floor note, at reviewer instruction: where an organizer could mistake the
             classification for an event certification. Not in the reference. */}
         {classified ? (
-          <div data-region="floor-note" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32, fontSize: 15, lineHeight: 1.65, maxWidth: '86ch' }}>
+          <div data-region="floor-note" style={{ padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32, fontSize: 15, lineHeight: 1.65, maxWidth: '86ch' }}>
             <L en={VENUE_FLOOR_NOTE.en} ar={VENUE_FLOOR_NOTE.ar} />
           </div>
         ) : null}
@@ -308,13 +308,13 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
         {classified ? (
           <>
             <div data-region="counters" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBlockEnd: 32 }}>
-              <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12 }}>
+              <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12 }}>
                 <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--brand)' }}>{requirements.length}</div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
                   <L en="requirements apply at this level" ar="متطلباً ينطبق على هذا المستوى" />
                 </div>
               </div>
-              <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
+              <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
                 <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
                   <L en="attachments outstanding" ar="مرفقات غير مقدَّمة" />
@@ -333,7 +333,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
             </p>
             <div data-region="requirements" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
               {requirements.map((r) => (
-                <div key={r.n} style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px ${r.ems ? 'dashed' : 'solid'} ${r.ems ? 'var(--muted)' : 'var(--brand)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={r.n} style={{ padding: '18px 22px', background: 'var(--surface2)', borderInlineStart: `3px ${r.ems ? 'dashed' : 'solid'} ${r.ems ? 'var(--muted)' : 'var(--brand)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'start', minWidth: 280, flex: 1 }}>
                     <span style={{ flex: 'none', width: 8, height: 8, borderRadius: '50%', background: r.ems ? 'var(--muted)' : 'var(--brand)', marginBlockStart: 9 }} />
                     <span>

@@ -76,7 +76,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
             </p>
           </div>
         ) : (
-          <div data-wallcard="" style={{ maxWidth: 820, marginBlock: 34, padding: '56px 60px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 4, boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
+          <div data-wallcard="" style={{ maxWidth: 820, marginBlock: 34, padding: '56px 60px', background: 'var(--surface2)', borderRadius: 999, boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center', paddingBlockEnd: 26, borderBlockEnd: '2px solid var(--brand)' }}>
               <span style={{ display: 'grid', placeItems: 'center', width: 44, height: 44, border: '1.25px solid var(--brand)', borderRadius: '50%', flex: 'none' }}>
                 <span style={{ display: 'block', width: 17, height: 17, background: 'var(--brand)', clipPath: 'polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)' }} />
@@ -147,7 +147,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
                 <L en="Current Ministry status" ar="الحالة الحالية لدى الوزارة" />
               </div>
               {/* Grey and quiet: an internal workflow state, not a determination. */}
-              <div style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 4, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 16, fontWeight: 500, lineHeight: 1.45 }}>
+              <div style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 16, fontWeight: 500, lineHeight: 1.45 }}>
                 <L en="In queue for review" ar="في قائمة انتظار المراجعة" />
               </div>
             </div>

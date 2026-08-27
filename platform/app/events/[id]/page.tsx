@@ -117,7 +117,7 @@ const STAGE_STYLE: Record<StageKind, { color: string; edge: string; ink: string;
 
 function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn: string; noteAr: string }) {
   return (
-    <div data-region="rail" style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+    <div data-region="rail" style={{ marginBlockEnd: 28, padding: '22px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
         <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
           <L en="Where this event stands" ar="موضع هذه الفعالية" />
@@ -133,7 +133,7 @@ function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn
             <div key={i} style={{ paddingBlockStart: 12, borderBlockStart: `3px ${st.edge} ${st.color}` }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBlockEnd: 6 }}>
                 <span style={{ fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
-                <span style={{ padding: '2px 7px', borderRadius: 3, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
+                <span style={{ padding: '2px 7px', borderRadius: 999, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
                   <L en={st.lblEn} ar={st.lblAr} />
                 </span>
               </div>
@@ -293,7 +293,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
               padding: '22px 26px',
               border: `1px solid ${action.tone === 'brand' ? 'var(--brand)' : 'var(--accent)'}`,
               background: action.tone === 'brand' ? 'var(--brand-soft)' : 'var(--accent-soft)',
-              borderRadius: 14,
+              borderRadius: 16,
               marginBlockEnd: 20,
               color: 'var(--ink)',
               textDecoration: 'none',
@@ -401,7 +401,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
 
         {/* The derivation: both results, and which governed. Never the final level alone. */}
         {derivation ? (
-          <div data-region="derivation" style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40 }}>
+          <div data-region="derivation" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 40 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 18 }}>
               <L en="How the level was determined" ar="كيف تحدد المستوى" />
             </div>
@@ -430,7 +430,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {derivation.triggeredConditions.map((c) => (
                       <div key={c.key} style={{ fontSize: '13.5px', lineHeight: 1.5 }}>
-                        <span style={{ display: 'inline-block', padding: '1px 7px', borderRadius: 3, background: `var(--l${c.level}s)`, borderInlineStart: `2px solid var(--l${c.level})`, marginInlineEnd: 7 }}>
+                        <span style={{ display: 'inline-block', padding: '1px 7px', borderRadius: 999, background: `var(--l${c.level}s)`, borderInlineStart: `2px solid var(--l${c.level})`, marginInlineEnd: 7 }}>
                           <L en={`Level ${c.level}`} ar={`المستوى ${c.level}`} />
                         </span>
                         <L en={c.en} ar={c.ar} />
@@ -472,7 +472,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
         ) : null}
 
         {/* The requirements counters and routes, from the reference record. */}
-        <div data-region="counters" style={{ padding: '26px 30px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
+        <div data-region="counters" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: 30, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
@@ -515,7 +515,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
         {/* Level 3 requirements note: present ONLY at Level 3. At Level 2 this block is
             absent -- no greyed row, no mention (non-negotiable #10). */}
         {emdGate.behaviour !== 'absent' && level === 3 ? (
-          <div style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--l3)', borderRadius: 12, marginBlockEnd: 40 }}>
+          <div style={{ padding: '22px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--l3)', borderRadius: 12, marginBlockEnd: 40 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Level 3 requirement" ar="متطلب المستوى 3" />
             </div>

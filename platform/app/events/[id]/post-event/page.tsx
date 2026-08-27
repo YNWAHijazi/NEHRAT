@@ -100,8 +100,8 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
               ar={`${event.nameAr}، أُجريت في ⁦${event.endDate ?? ''}⁩. مستحق خلال سبعة أيام من الفعالية.`}
             />
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '14px 20px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
-            <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '14px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
+            <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
               <L en="Required" ar="مطلوب" />
             </span>
             <span style={{ lineHeight: 1.6 }}>
@@ -112,7 +112,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             </span>
           </div>
 
-          <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+          <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden' }}>
             {identity.map((f) => (
               <div key={f.en} style={{ padding: '14px 18px', borderInlineEnd: '1px solid var(--line)' }}>
                 <dt style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
@@ -133,7 +133,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
 
           {/* Two obligations, same event, never merged. */}
           <div data-wide="" data-region="obligations" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBlockEnd: 40 }}>
-            <div style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 14, background: 'var(--bad-soft)' }}>
+            <div style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 16, background: 'var(--bad-soft)' }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--bad)', marginBlockEnd: 10 }}>
                 <L en="Separate obligation — 24 hours" ar="موجب منفصل — 24 ساعة" />
               </div>
@@ -151,12 +151,12 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
                   <L en={`Notified ${notifiedAt.slice(0, 10)}`} ar={`أُبلغ في ⁦${notifiedAt.slice(0, 10)}⁩`} />
                 </span>
               ) : null}
-              <a href={`/events/${id}/incident`} style={{ display: 'inline-block', height: 40, lineHeight: '40px', paddingInline: 18, borderRadius: 22, background: 'var(--bad)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
+              <a href={`/events/${id}/incident`} style={{ display: 'inline-block', height: 40, lineHeight: '40px', paddingInline: 18, borderRadius: 20, background: 'var(--bad)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>
                 {/* The reference's own wording, copied not improved: "Notify now". */}
                 <L en="Notify now" ar="الإبلاغ الآن" />
               </a>
             </div>
-            <div style={{ padding: '26px 28px', border: '1px solid var(--line)', borderRadius: 14 }}>
+            <div style={{ padding: '26px 28px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="This obligation — 7 days" ar="هذا الموجب — 7 أيام" />
               </div>

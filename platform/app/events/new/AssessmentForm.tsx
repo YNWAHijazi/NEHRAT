@@ -65,7 +65,7 @@ function SectionHeading({ en, ar, noteEn, noteAr }: { en: string; ar: string; no
 function SourceNote({ note }: { note: ArabicOnlyNote }) {
   return (
     <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-      <span style={{ display: 'inline-block', padding: '1px 7px', marginInlineEnd: 7, border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+      <span style={{ display: 'inline-block', padding: '1px 7px', marginInlineEnd: 7, border: '1px solid var(--line)', borderRadius: 999, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
         <L en="Arabic issue" ar="الإصدار العربي" />
       </span>
       <L en={note.en} ar={note.ar} />
@@ -359,7 +359,7 @@ export function AssessmentForm({
       />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
-          <div key={domain.number} style={{ padding: 26, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14 }}>
+          <div key={domain.number} style={{ padding: 26, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -404,7 +404,7 @@ export function AssessmentForm({
       </div>
 
       <SectionHeading en="Part 4 — Classification" ar="الجزء 4 — التصنيف" />
-      <div style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
           <L en="Total score from your answers" ar="المجموع من أجوبتكم" />
         </div>

@@ -27,7 +27,7 @@ export function PrintButton() {
       type="button"
       data-noprint=""
       onClick={() => window.print()}
-      style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'none', borderRadius: 18, fontSize: '13.5px', cursor: 'pointer' }}
+      style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'none', borderRadius: 19, fontSize: '13.5px', cursor: 'pointer' }}
     >
       <L en="Print for the AED cabinet" ar="اطبعها لخزانة الجهاز" />
     </button>
@@ -56,7 +56,7 @@ export function PersonsForm({ facilityId, persons }: { facilityId: string; perso
       })}
       <button
         type="submit"
-        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer', alignSelf: 'start' }}
+        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 21, fontSize: 14, cursor: 'pointer', alignSelf: 'start' }}
       >
         <L en="Review and record the details" ar="مراجعة البيانات وتسجيلها" />
       </button>
@@ -80,7 +80,7 @@ export function PlanConfirmation({
     <form
       action={saveFacilityPlanAction.bind(null, facilityId)}
       data-region="plan-confirmation"
-      style={{ padding: '30px 34px', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 44 }}
+      style={{ padding: '30px 34px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 8 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' }}>
@@ -140,7 +140,7 @@ export function PlanConfirmation({
       </div>
       <button
         type="submit"
-        style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+        style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
       >
         <L en="Record the readiness confirmation" ar="تسجيل تأكيد الجاهزية" />
       </button>

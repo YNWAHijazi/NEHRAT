@@ -69,7 +69,7 @@ export default async function NotificationsPage({
                 border: `1px solid ${active === f.key ? 'var(--brand)' : 'var(--line)'}`,
                 background: active === f.key ? 'var(--brand-soft)' : 'var(--bg)',
                 color: active === f.key ? 'var(--brand)' : 'var(--ink)',
-                borderRadius: 18,
+                borderRadius: 17,
                 fontSize: '13.5px',
               }}
             >
@@ -125,7 +125,7 @@ export default async function NotificationsPage({
                   <span
                     style={{
                       padding: '2px 9px',
-                      borderRadius: 4,
+                      borderRadius: 999,
                       fontSize: 11,
                       letterSpacing: '.04em',
                       textTransform: 'uppercase',

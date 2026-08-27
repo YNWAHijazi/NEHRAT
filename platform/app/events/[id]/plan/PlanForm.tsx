@@ -141,13 +141,13 @@ export function PlanForm({
     bodyEn: string,
     bodyAr: string,
   ) => (
-    <div style={{ padding: '26px 30px', border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 14, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: '26px 30px', border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 16, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 10 }}>
         <span style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.02em' }}>
           <L en={titleEn} ar={titleAr} />
         </span>
         {mode === which ? (
-          <span style={{ padding: '3px 9px', borderRadius: 3, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px' }}>
+          <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px' }}>
             <L en="In use" ar="مُستخدم" />
           </span>
         ) : null}
@@ -158,7 +158,7 @@ export function PlanForm({
       <button
         type="button"
         onClick={() => setMode(which)}
-        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer', alignSelf: 'start', marginBlockStart: 'auto' }}
+        style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 21, fontSize: 14, cursor: 'pointer', alignSelf: 'start', marginBlockStart: 'auto' }}
       >
         <L en="Use this route" ar="اعتماد هذا المسار" />
       </button>
@@ -181,7 +181,7 @@ export function PlanForm({
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
-            style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer' }}
+            style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 21, fontSize: 14, cursor: 'pointer' }}
           >
             {collapsed ? <L en="Show the sixteen sections anyway" ar="إظهار البنود الستة عشر رغم ذلك" /> : <L en="Collapse the sixteen sections" ar="طي البنود الستة عشر" />}
           </button>
@@ -194,7 +194,7 @@ export function PlanForm({
       </div>
 
       {mode === 'attach' ? (
-        <div style={{ padding: '28px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 44 }}>
+        <div style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
             <div style={{ flex: 1, minWidth: 240 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
@@ -223,8 +223,8 @@ export function PlanForm({
       ) : null}
 
       {/* Guidance is guidance: tagged, and creates no requirements. */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '16px 20px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 20, maxWidth: '84ch' }}>
-        <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '16px 20px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, maxWidth: '84ch' }}>
+        <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
           <L en="Guidance" ar="إرشاد" />
         </span>
         <span style={{ fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)', flex: 1, minWidth: 240 }}>
@@ -236,9 +236,9 @@ export function PlanForm({
       </div>
 
       {/* The eight-step planning workflow: Guidance, non-binding. */}
-      <div data-region="workflow" style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden', marginBlockEnd: 20 }}>
+      <div data-region="workflow" style={{ background: 'var(--surface2)', borderRadius: 16, overflow: 'hidden', marginBlockEnd: 20 }}>
         <div style={{ padding: '14px 22px', background: 'var(--surface2)', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             <L en="Guidance" ar="إرشاد" />
           </span>
           <span style={{ fontSize: 14, fontWeight: 500 }}>
@@ -262,9 +262,9 @@ export function PlanForm({
       </div>
 
       {/* Planning depth by level: Guidance, non-binding. */}
-      <div data-region="depth" style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden', marginBlockEnd: 52 }}>
+      <div data-region="depth" style={{ background: 'var(--surface2)', borderRadius: 16, overflow: 'hidden', marginBlockEnd: 52 }}>
         <div style={{ padding: '14px 22px', background: 'var(--surface2)', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             <L en="Guidance" ar="إرشاد" />
           </span>
           <span style={{ fontSize: 14, fontWeight: 500 }}>
@@ -305,9 +305,9 @@ export function PlanForm({
       </div>
 
       {/* The fourteen-section template: non-binding structure, labelled as such. */}
-      <div style={{ border: '1px solid var(--line)', borderRadius: 14, overflow: 'hidden', marginBlockEnd: 52 }}>
+      <div style={{ background: 'var(--surface2)', borderRadius: 16, overflow: 'hidden', marginBlockEnd: 52 }}>
         <div style={{ padding: '14px 22px', background: 'var(--surface2)', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+          <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             <L en="Guidance" ar="إرشاد" />
           </span>
           <span style={{ fontSize: 14, fontWeight: 500 }}>
@@ -359,7 +359,7 @@ export function PlanForm({
                 detailEn: facility.nextLapse ?? '—', detailAr: facility.nextLapse ?? '—',
               },
             ].map((r) => (
-              <div key={r.en} style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={r.en} style={{ padding: '18px 22px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1, minWidth: 240 }}>
                   <div style={{ fontSize: '15.5px', lineHeight: 1.45 }}>
                     <L en={r.en} ar={r.ar} />
@@ -368,7 +368,7 @@ export function PlanForm({
                     <L en={r.detailEn} ar={r.detailAr} />
                   </div>
                 </div>
-                <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
+                <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
                   <L en="Referenced" ar="مُحال إليه" />
                 </span>
               </div>
@@ -378,7 +378,7 @@ export function PlanForm({
             type="button"
             aria-pressed={refConfirmed}
             onClick={() => setRefConfirmed((v) => !v)}
-            style={{ textAlign: 'start', width: '100%', display: 'flex', gap: 16, alignItems: 'start', padding: '22px 26px', background: refConfirmed ? 'var(--brand-soft)' : 'var(--surface)', border: `1px solid ${refConfirmed ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 14, cursor: 'pointer' }}
+            style={{ textAlign: 'start', width: '100%', display: 'flex', gap: 16, alignItems: 'start', padding: '22px 26px', background: refConfirmed ? 'var(--brand-soft)' : 'var(--surface)', border: `1px solid ${refConfirmed ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 16, cursor: 'pointer' }}
           >
             <span style={{ flex: 'none', width: 20, height: 20, border: `1.5px solid ${refConfirmed ? 'var(--brand)' : 'var(--muted)'}`, background: refConfirmed ? 'var(--brand)' : 'transparent', borderRadius: 4, marginBlockStart: 3 }} />
             <span>
@@ -441,7 +441,7 @@ export function PlanForm({
                         <L en={def.bodyEn} ar={def.bodyAr} />
                       </div>
                     </div>
-                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent-ink)', fontSize: 13 }}>
+                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent-ink)', fontSize: 13 }}>
                       <L en={FACILITY_CONTENT.reference.chips.short.en} ar={FACILITY_CONTENT.reference.chips.short.ar} />
                     </span>
                   </div>
@@ -474,7 +474,7 @@ export function PlanForm({
               const c = chip(done ? 'done' : 'open');
               const isOpen = open === s.n;
               return (
-                <div key={s.n} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${c.color}`, borderRadius: 12, overflow: 'hidden' }}>
+                <div key={s.n} style={{ background: 'var(--surface2)', borderInlineStart: `3px solid ${c.color}`, borderRadius: 12, overflow: 'hidden' }}>
                   <button
                     type="button"
                     aria-expanded={isOpen}
@@ -487,14 +487,14 @@ export function PlanForm({
                         <L en={s.en} ar={s.ar} />
                       </span>
                     </span>
-                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: c.bg, color: c.color, fontSize: 13 }}>
+                    <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: c.bg, color: c.color, fontSize: 13 }}>
                       <L en={c.en} ar={c.ar} />
                     </span>
                   </button>
                   {isOpen ? (
                     <div style={{ padding: '0 22px 20px' }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'start', padding: '14px 18px', background: 'var(--bg)', borderRadius: 10, marginBlockEnd: 16 }}>
-                        <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                        <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
                           <L en="Guidance" ar="إرشاد" />
                         </span>
                         <span style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--muted)', flex: 1, minWidth: 240 }}>

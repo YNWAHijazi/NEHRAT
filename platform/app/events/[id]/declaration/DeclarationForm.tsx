@@ -99,7 +99,7 @@ export function DeclarationForm({
         })}
       </div>
 
-      <div data-region="certification" style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="certification" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="EMS provider certification" ar="تصديق مزوّد الإسعاف" />
         </div>
@@ -126,7 +126,7 @@ export function DeclarationForm({
         </div>
       </div>
 
-      <div data-region="draft-state" style={{ padding: '16px 20px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14, lineHeight: 1.6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+      <div data-region="draft-state" style={{ padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14, lineHeight: 1.6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
         <span>
           {signed ? (
             <L en={content.draftNote.signedEn} ar={content.draftNote.signedAr} />
@@ -134,7 +134,7 @@ export function DeclarationForm({
             <L en={content.draftNote.draftEn} ar={content.draftNote.draftAr} />
           )}
         </span>
-        <span style={{ padding: '4px 10px', borderRadius: 4, background: signed ? 'var(--brand-soft)' : 'var(--accent-soft)', color: signed ? 'var(--brand)' : 'var(--accent-ink)', fontSize: 13 }}>
+        <span style={{ padding: '4px 10px', borderRadius: 999, background: signed ? 'var(--brand-soft)' : 'var(--accent-soft)', color: signed ? 'var(--brand)' : 'var(--accent-ink)', fontSize: 13 }}>
           {signed ? <L en="Signed" ar="موقّع" /> : <L en="Draft" ar="مسودة" />}
         </span>
       </div>
@@ -145,7 +145,7 @@ export function DeclarationForm({
             type="button"
             onClick={() => persist(true)}
             disabled={!gate.canSign || pending}
-            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 22, background: gate.canSign ? 'var(--brand)' : 'var(--surface2)', color: gate.canSign ? 'var(--bg)' : 'var(--muted)', fontSize: 15, fontWeight: 500, cursor: gate.canSign ? 'pointer' : 'not-allowed' }}
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: gate.canSign ? 'var(--brand)' : 'var(--surface2)', color: gate.canSign ? 'var(--bg)' : 'var(--muted)', fontSize: 15, fontWeight: 500, cursor: gate.canSign ? 'pointer' : 'not-allowed' }}
           >
             <L en="Sign the declaration" ar="توقيع الإقرار" />
           </button>
@@ -192,7 +192,7 @@ export function DeclarationForm({
               <span>
                 <L en="Status on the organizer's side" ar="الحالة لدى المنظّم" />
               </span>
-              <span style={{ padding: '3px 9px', borderRadius: 4, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
+              <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
                 <L en="Provided" ar="مُقدَّم" />
               </span>
             </div>

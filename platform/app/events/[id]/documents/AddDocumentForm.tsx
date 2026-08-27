@@ -26,18 +26,18 @@ export function AddDocumentForm({ token }: { token: string }) {
     );
   }
   return (
-    <form action={addSharedDocumentAction.bind(null, token)} style={{ padding: '22px 26px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, alignItems: 'end' }}>
+    <form action={addSharedDocumentAction.bind(null, token)} style={{ padding: '22px 26px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, alignItems: 'end' }}>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
           <L en="Document name" ar="اسم المستند" />
         </span>
-        <input name="name" required style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15 }} />
+        <input name="name" required style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
       </label>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
           <L en="File name" ar="اسم الملف" />
         </span>
-        <input name="fileName" style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15 }} />
+        <input name="fileName" style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
       </label>
       <button type="submit" style={{ height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}>
         <L en="Add" ar="إضافة" />
