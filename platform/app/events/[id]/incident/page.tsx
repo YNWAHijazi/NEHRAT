@@ -121,7 +121,7 @@ export default async function IncidentPage({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {rows.map((r) => (
-                <div key={`${r.notifiedAt}-${r.occurredAt}`} style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline' }}>
+                <div key={`${r.notifiedAt}-${r.occurredAt}`} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline' }}>
                   <span style={{ fontWeight: 500 }}>
                     <L en={typeByKey[r.incidentType]?.en ?? r.incidentType} ar={typeByKey[r.incidentType]?.ar ?? r.incidentType} />
                   </span>

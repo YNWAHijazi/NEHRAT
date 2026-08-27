@@ -65,7 +65,7 @@ export default async function ReviewQueuePage() {
             </div>,
             <div key={`${r.eventId}-b`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14 }}>
               {r.level !== null ? (
-                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, borderInlineStart: `2px solid var(--l${r.level})`, background: `var(--l${r.level}s)` }}>
+                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, borderInlineStart: `2px solid var(--l${r.level})`, background: `var(--l${r.level}s)` }}>
                   <L en={`Level ${r.level}`} ar={`المستوى ${r.level}`} />
                 </span>
               ) : (
@@ -84,12 +84,12 @@ export default async function ReviewQueuePage() {
             </div>,
             <div key={`${r.eventId}-e`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: '12.5px' }}>
               {outcome ? (
-                <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 999, background: r.outcome === 'satisfied' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: r.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent-ink)', lineHeight: 1.4 }}>
+                <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 13, background: r.outcome === 'satisfied' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: r.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent-ink)', lineHeight: 1.4 }}>
                   <L en={outcome.en} ar={outcome.ar} />
                 </span>
               ) : (
                 // Internal workflow state: grey, quiet, not a determination.
-                <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)' }}>
+                <span style={{ display: 'inline-block', padding: '4px 9px', borderRadius: 13, background: 'var(--surface2)', color: 'var(--muted)' }}>
                   <L en={internal.en} ar={internal.ar} />
                 </span>
               )}

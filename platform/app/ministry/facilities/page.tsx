@@ -48,7 +48,7 @@ export default async function FacilityOversightPage({
 
       <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
         {facilities.map((f) => (
-          <div key={f.id} style={{ padding: '15px 20px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={f.id} style={{ paddingBlock: '16px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span>
               <span style={{ fontSize: 15, fontWeight: 500 }}>
                 <L en={f.nameEn} ar={f.nameAr} />
@@ -76,7 +76,7 @@ export default async function FacilityOversightPage({
       </p>
       <div data-region="corrective" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
         {corrective.map((c) => (
-          <div key={c.id} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={c.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 260 }}>
               <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
               <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>

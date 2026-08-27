@@ -109,7 +109,7 @@ export function RegisterFacilityForm({
               ar="يُسجَّل مرة واحدة. ويقرأ منه كل سجل جهاز وخطة الاستجابة؛ ولا يُطلب شيء منه مجدداً."
             />
           </p>
-          <div data-region="profile-form" style={{ padding: '30px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
+          <div data-region="profile-form" style={{ padding: '31px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
             {content.profileFields.flatMap((f) => {
               const base = field(f.key, f.en, f.ar);
               if (!('bilingual' in f) || !f.bilingual) return [base];
@@ -272,12 +272,12 @@ export function RegisterFacilityForm({
               ar="اسم أو مسمى وظيفي — كلاهما مقبول، فيمكن للمنشأة أن تسمّي وظيفة بدل شخص."
             />
           </p>
-          <div style={{ padding: '20px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+          <div style={{ padding: '21px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
             <L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} />
           </div>
           <div data-region="persons" style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBlockEnd: 24 }}>
             {content.persons.map((p, i) => (
-              <div key={p.key} style={{ padding: '26px 28px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i === 0 ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 16 }}>
+              <div key={p.key} style={{ paddingBlock: '27px', paddingInlineStart: '28px', paddingInlineEnd: '29px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i === 0 ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 16 }}>
                 <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 4 }}>
                   <L en={p.en} ar={p.ar} />
                 </div>

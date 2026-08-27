@@ -50,7 +50,7 @@ export default async function ProfilePage({
           </p>
 
           <form action={saveRoleProfileAction}>
-            <div data-region="profile-form" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="profile-form" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
                 {fields.map((f) => (
                   <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -68,7 +68,7 @@ export default async function ProfilePage({
           </form>
 
           {isEms ? (
-            <div data-region="shared-note" style={{ marginBlockStart: 20, padding: '22px 26px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
+            <div data-region="shared-note" style={{ marginBlockStart: 20, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
               <L en={ROLES_CONTENT.ems.profileSharedNote.en} ar={ROLES_CONTENT.ems.profileSharedNote.ar} />
             </div>
           ) : null}

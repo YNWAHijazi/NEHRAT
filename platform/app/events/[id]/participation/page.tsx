@@ -58,7 +58,7 @@ export default async function ParticipationPage({
           </div>
 
           <form action={saveOpsDetailAction.bind(null, invitation.token)}>
-            <div data-region="ops-detail" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="ops-detail" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Operational detail for the organizer" ar="التفاصيل التشغيلية للمنظّم" />
               </div>

@@ -28,7 +28,7 @@ export function ChangeForm({ eventId, aspects }: { eventId: string; aspects: Asp
 
   return (
     <form action={reportMaterialChangeAction.bind(null, eventId)}>
-      <div data-region="aspects-card" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="aspects-card" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="What changed" ar="ما الذي تغيّر" />
         </div>
@@ -85,7 +85,7 @@ export function ChangeForm({ eventId, aspects }: { eventId: string; aspects: Asp
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {impacts.map((i) => (
-              <div key={i.key} style={{ padding: '18px 22px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i.levelMayChange ? 'var(--accent)' : 'var(--line)'}`, borderRadius: 12 }}>
+              <div key={i.key} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i.levelMayChange ? 'var(--accent)' : 'var(--line)'}`, borderRadius: 12 }}>
                 <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 4 }}>
                   <L en={i.en} ar={i.ar} />
                 </div>

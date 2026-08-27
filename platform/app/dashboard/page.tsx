@@ -65,7 +65,7 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
       href={`/events/${event.id}`}
       style={{
         textAlign: 'start',
-        padding: '24px 26px',
+        paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px',
         background: 'var(--surface2)',
         borderInlineStart: `3px solid ${color}`,
         borderRadius: 16,
@@ -270,7 +270,7 @@ export default async function DashboardPage() {
         ) : null}
 
         {returned ? (
-          <div style={{ padding: '22px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
+          <div style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Awaiting your response" ar="بانتظار ردكم" />
             </div>
@@ -369,7 +369,7 @@ export default async function DashboardPage() {
                         key={f.id}
                         href={`/facilities/${f.id}`}
                         data-stack=""
-                        style={{ textAlign: 'start', padding: '24px 26px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.7fr) 1fr 1fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}
+                        style={{ textAlign: 'start', paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.7fr) 1fr 1fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}
                       >
                         <div>
                           <div style={{ fontSize: '17.5px', fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>

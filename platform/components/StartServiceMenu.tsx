@@ -104,8 +104,7 @@ export function StartServiceMenu() {
                 paddingInline: 12,
                 background: 'var(--surface2)',
                 borderRadius: 20,
-                fontSize: '14.5px',
-              }}
+                fontSize: '14.5px', padding: 1 }}
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)' }}>

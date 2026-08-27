@@ -63,7 +63,7 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
 
   return (
     <form action={registerVenueAction}>
-      <div data-region="registration-form" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="registration-form" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
           {fields.flatMap((f) => {
             const base = (

@@ -78,7 +78,7 @@ export function PostEventForm({
 
   return (
     <div style={{ maxWidth: 900 }}>
-      <div data-region="counts" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div data-region="counts" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 18 }}>
           <L en="Counts" ar="الأعداد" />
         </div>
@@ -99,7 +99,7 @@ export function PostEventForm({
         </div>
       </div>
 
-      <div style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="Significant events" ar="الوقائع المهمة" />
         </div>
@@ -130,7 +130,7 @@ export function PostEventForm({
         </div>
       </div>
 
-      <div style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="Lessons and corrective actions" ar="الدروس والإجراءات التصحيحية" />
         </div>
@@ -168,12 +168,12 @@ export function PostEventForm({
 
       {/* Signatures: the organizer's here; the Director's own signature arrives on their
           surface. At Level 3 the report is not complete with one. */}
-      <div style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="Signatures" ar="التواقيع" />
         </div>
         {POST_EVENT_CERTIFICATION_STATEMENT ? (
-          <div data-region="certification-statement" style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+          <div data-region="certification-statement" style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
             <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
           </div>
         ) : null}

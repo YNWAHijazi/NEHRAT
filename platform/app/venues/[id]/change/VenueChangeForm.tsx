@@ -45,7 +45,7 @@ export function VenueChangeForm({
 
   return (
     <form action={action}>
-      <div data-region="change-form" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="change-form" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="What changed" ar="ما الذي تغيّر" />
         </div>
@@ -104,7 +104,7 @@ export function VenueChangeForm({
               {aspects
                 .filter((a) => selected.has(a.key))
                 .map((a) => (
-                  <div key={a.key} style={{ padding: '18px 22px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent-ink)', borderRadius: 12 }}>
+                  <div key={a.key} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent-ink)', borderRadius: 12 }}>
                     <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 4 }}>
                       <L en={a.en} ar={a.ar} />
                     </div>
@@ -150,7 +150,7 @@ export function VenueChangeForm({
         </div>
       ) : null}
 
-      <div data-region="revision-footnote" style={{ padding: '22px 26px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: 15, lineHeight: 1.65, color: 'var(--muted)' }}>
+      <div data-region="revision-footnote" style={{ padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: 15, lineHeight: 1.65, color: 'var(--muted)' }}>
         <L
           en="The Ministry may require a revised risk assessment, a revised compliance form, or revised documentation."
           ar="قد تطلب الوزارة تقييماً منقّحاً أو نموذج امتثال منقّحاً أو مستندات منقّحة."

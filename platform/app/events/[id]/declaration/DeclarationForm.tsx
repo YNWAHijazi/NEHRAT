@@ -99,7 +99,7 @@ export function DeclarationForm({
         })}
       </div>
 
-      <div data-region="certification" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+      <div data-region="certification" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
           <L en="EMS provider certification" ar="تصديق مزوّد الإسعاف" />
         </div>
@@ -126,7 +126,7 @@ export function DeclarationForm({
         </div>
       </div>
 
-      <div data-region="draft-state" style={{ padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14, lineHeight: 1.6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+      <div data-region="draft-state" style={{ padding: '17px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14, lineHeight: 1.6, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
         <span>
           {signed ? (
             <L en={content.draftNote.signedEn} ar={content.draftNote.signedAr} />

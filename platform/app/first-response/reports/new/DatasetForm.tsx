@@ -73,7 +73,7 @@ export function DatasetForm() {
 
   return (
     <div>
-      <div data-region="routes" style={{ padding: '24px 28px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
+      <div data-region="routes" style={{ padding: '25px 29px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
           <L en="How to submit" ar="كيفية التقديم" />
         </div>
@@ -99,7 +99,7 @@ export function DatasetForm() {
       </div>
 
       {route === 'attach' ? (
-        <div data-region="attach" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
+        <div data-region="attach" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 16 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'end', marginBlockEnd: 18 }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 260 }}>
               <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -123,7 +123,7 @@ export function DatasetForm() {
         {content.datasetSections.map((s, si) => {
           const isCovered = route === 'attach' && Boolean(covered[s.key]);
           return (
-            <div key={s.key} style={{ background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, overflow: 'hidden' }}>
+            <div key={s.key} style={{ background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, overflow: 'hidden', paddingBlock: 1, paddingInlineEnd: 1 }}>
               <div style={{ padding: '20px 24px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ display: 'flex', gap: 14, alignItems: 'baseline', flex: 1, minWidth: 240 }}>
                   <span style={{ flex: 'none', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 16 }}>{si + 1}</span>

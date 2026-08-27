@@ -138,7 +138,7 @@ export default async function MinistryDashboardPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {changes.slice(0, 3).map((c) => (
-              <div key={`${c.kind}-${c.eventId}-${c.when}`} style={{ padding: '14px 16px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.kind === 'declined' ? 'var(--bad)' : 'var(--accent)'}`, borderRadius: 10 }}>
+              <div key={`${c.kind}-${c.eventId}-${c.when}`} style={{ paddingBlock: '15px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.kind === 'declined' ? 'var(--bad)' : 'var(--accent)'}`, borderRadius: 10 }}>
                 <div style={{ fontSize: 14, lineHeight: 1.45 }}>
                   <L en={`${c.detailEn} — ${c.eventEn}`} ar={`${c.detailAr} — ${c.eventAr}`} />
                 </div>
@@ -192,7 +192,7 @@ export default async function MinistryDashboardPage() {
           <div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
               {facilities.map((f) => (
-                <div key={f.id} style={{ padding: '13px 16px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: '13.5px' }}>
+                <div key={f.id} style={{ paddingBlock: '14px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: '13.5px' }}>
                   <span>
                     <L en={`${f.nameEn} · ${shortEn(f.categoryKey)} · ${f.municipality}`} ar={`${f.nameAr} · ${shortAr(f.categoryKey)} · ${f.municipality}`} />
                   </span>
@@ -212,7 +212,7 @@ export default async function MinistryDashboardPage() {
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
               {repeatArrests.map((a) => (
-                <div key={a.placeEn} style={{ padding: '13px 16px', background: 'var(--surface2)', borderInlineStart: `3px solid ${a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={a.placeEn} style={{ paddingBlock: '14px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px solid ${a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
                     <L en={a.placeEn} ar={a.placeAr} />
                   </span>

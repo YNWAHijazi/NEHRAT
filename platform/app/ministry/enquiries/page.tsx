@@ -31,7 +31,7 @@ export default async function EnquiriesPage({
       </p>
       <div data-region="enquiries" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((e) => (
-          <div key={e.id} style={{ padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.repliedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12 }}>
+          <div key={e.id} style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.repliedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 10 }}>
               <span style={{ fontSize: 15, fontWeight: 600 }}>
                 <L en={e.eventEn} ar={e.eventAr} />

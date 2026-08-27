@@ -26,7 +26,7 @@ export function AddDocumentForm({ token }: { token: string }) {
     );
   }
   return (
-    <form action={addSharedDocumentAction.bind(null, token)} style={{ padding: '22px 26px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, alignItems: 'end' }}>
+    <form action={addSharedDocumentAction.bind(null, token)} style={{ padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14, alignItems: 'end' }}>
       <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
           <L en="Document name" ar="اسم المستند" />

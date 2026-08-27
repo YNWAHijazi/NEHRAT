@@ -80,7 +80,7 @@ export function PlanConfirmation({
     <form
       action={saveFacilityPlanAction.bind(null, facilityId)}
       data-region="plan-confirmation"
-      style={{ padding: '30px 34px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}
+      style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 8 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' }}>

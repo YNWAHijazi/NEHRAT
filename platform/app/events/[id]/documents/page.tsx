@@ -65,7 +65,7 @@ export default async function SharedDocumentsPage({
             {docs.map((d) => {
               const s = STATE_STYLE[d.source];
               return (
-                <div key={d.id} style={{ padding: '18px 22px', background: 'var(--surface2)', borderInlineStart: `3px ${s.edge} ${s.color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={d.id} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${s.edge} ${s.color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ flex: 1, minWidth: 260 }}>
                     <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                       <L en={d.nameEn} ar={d.nameAr} />

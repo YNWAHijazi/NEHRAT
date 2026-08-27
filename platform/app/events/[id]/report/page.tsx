@@ -105,7 +105,7 @@ export default async function DirectorReportPage({
           ) : null}
 
           {report ? (
-            <div data-region="figures" style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="figures" style={{ padding: '29px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="The report as prepared — entered by the organizer" ar="التقرير كما أُعدّ — أدخله المنظّم" />
               </div>
@@ -150,19 +150,19 @@ export default async function DirectorReportPage({
           )}
 
           {report ? (
-            <div data-region="signatures" style={{ padding: '28px 32px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="signatures" style={{ padding: '29px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Signatures" ar="التواقيع" />
               </div>
               {POST_EVENT_CERTIFICATION_STATEMENT ? (
-                <div data-region="certification-statement" style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+                <div data-region="certification-statement" style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
                   <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
                 </div>
               ) : null}
               <div style={{ display: 'contents' }}>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 22 }}>
-                <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 15, fontWeight: 500 }}>
                     <L en="Organizer representative" ar="ممثل المنظّم" />
                   </div>
@@ -170,7 +170,7 @@ export default async function DirectorReportPage({
                     {organizerSigned ? <L en="Signed" ar="وُقّع" /> : <L en="Not yet signed" ar="لم يُوقَّع بعد" />}
                   </span>
                 </div>
-                <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${directorSigned ? 'solid var(--brand)' : 'dashed var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${directorSigned ? 'solid var(--brand)' : 'dashed var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 15, fontWeight: 500 }}>
                     <L en="Event Medical Director" ar="المدير الطبي للفعالية" />
                   </div>

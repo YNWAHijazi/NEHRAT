@@ -134,7 +134,7 @@ export function DeviceRegistry({
       </div>
 
       <form action={saveFacilityDeviceAction.bind(null, facilityId)}>
-        <div data-region="device-card" style={{ maxWidth: 620, padding: 30, background: 'var(--surface2)', borderRadius: 16 }}>
+        <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
               <L en="New device record" ar="سجل جهاز جديد" />

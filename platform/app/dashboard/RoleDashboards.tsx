@@ -152,7 +152,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
           </div>
         ) : null}
         {outstanding.map((e) => (
-          <Link key={e.key} href={e.href} data-stack="" style={{ textAlign: 'start', padding: '24px 26px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+          <Link key={e.key} href={e.href} data-stack="" style={{ textAlign: 'start', paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
                 <L en={e.nameEn} ar={e.nameAr} />
@@ -217,7 +217,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
           </div>
         ) : null}
         {complete.map((e) => (
-          <Link key={e.key} href={e.href} data-stack="" style={{ padding: '22px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+          <Link key={e.key} href={e.href} data-stack="" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
                 <L en={e.nameEn} ar={e.nameAr} />

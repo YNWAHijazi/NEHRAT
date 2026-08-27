@@ -45,7 +45,7 @@ export default async function ArrestLocationsPage({
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }}>
         <div data-region="groups" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {groups.map((g) => (
-            <div key={g.placeEn} style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px solid ${g.count >= 3 ? 'var(--bad)' : g.count === 2 ? 'var(--accent-ink)' : 'var(--muted)'}`, borderRadius: 10 }}>
+            <div key={g.placeEn} style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${g.count >= 3 ? 'var(--bad)' : g.count === 2 ? 'var(--accent-ink)' : 'var(--muted)'}`, borderRadius: 10 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>
                   <span style={{ fontSize: 15, fontWeight: 500 }}>

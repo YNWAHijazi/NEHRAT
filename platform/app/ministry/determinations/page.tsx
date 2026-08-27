@@ -40,7 +40,7 @@ export default async function DeterminationsPage() {
             {determinations.map((d, i) => {
               const def = MINISTRY_CONTENT.outcomes.find((o) => o.key === d.outcome);
               return (
-                <Link key={i} href={`/ministry/submissions/${d.event_id}`} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, color: 'var(--ink)' }}>
+                <Link key={i} href={`/ministry/submissions/${d.event_id}`} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, color: 'var(--ink)' }}>
                   <div style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                     <L en={`${d.name_en} — ${def?.en ?? d.outcome}`} ar={`${d.name_ar} — ${def?.ar ?? d.outcome}`} />
                   </div>
@@ -63,7 +63,7 @@ export default async function DeterminationsPage() {
           </h2>
           <div data-region="designation-register" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {designations.map((d, i) => (
-              <div key={i} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10 }}>
+              <div key={i} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10 }}>
                 <div style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                   <L en={d.name_en} ar={d.name_ar} />
                 </div>

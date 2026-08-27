@@ -99,7 +99,7 @@ export default async function InvitationPage({
             </p>
           ) : null}
 
-          <div data-region="invite-facts" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
+          <div data-region="invite-facts" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {facts.map((f) => (
                 <div key={f.en} style={{ background: 'var(--bg)', padding: '16px 18px' }}>

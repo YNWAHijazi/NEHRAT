@@ -37,7 +37,7 @@ export default async function OrganizationsPage({
       </p>
       <div data-region="orgs" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((o) => (
-          <div key={o.id} style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: `3px ${o.status === 'recorded' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={o.id} style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${o.status === 'recorded' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 15 }}>
               <L en={o.nameEn} ar={o.nameAr} />
             </span>

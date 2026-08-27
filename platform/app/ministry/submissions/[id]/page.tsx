@@ -86,12 +86,12 @@ export default async function SubmissionReviewPage({
           </h1>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockStart: 10 }}>
             {review.level !== null ? (
-              <span style={{ padding: '3px 9px', borderRadius: 999, borderInlineStart: `2px solid var(--l${review.level})`, background: `var(--l${review.level}s)`, fontSize: 13 }}>
+              <span style={{ padding: '3px 9px', borderRadius: 13, borderInlineStart: `2px solid var(--l${review.level})`, background: `var(--l${review.level}s)`, fontSize: 13 }}>
                 <L en={`Level ${review.level}`} ar={`المستوى ${review.level}`} />
               </span>
             ) : null}
             {/* Internal workflow state: grey, quiet, not a determination. */}
-            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
+            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
               <L en={internal.en} ar={internal.ar} />
               {review.reviewer ? ` · ${review.reviewer}` : null}
             </span>
@@ -109,7 +109,7 @@ export default async function SubmissionReviewPage({
 
       {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --
           never a bare level chip. A seeded submission without stored answers says so. */}
-      <div data-region="derivation" style={{ padding: '18px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24 }}>
+      <div data-region="derivation" style={{ padding: '19px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
           <L en="How the level was determined" ar="كيف تحدد المستوى" />
         </div>
@@ -184,7 +184,7 @@ export default async function SubmissionReviewPage({
             {review.providers.map((p) => {
               const chip = DECL_CHIP[p.declaration] ?? DECL_CHIP['none']!;
               return (
-                <div key={p.nameEn} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px ${p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={p.nameEn} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14.5px' }}>
                     <L en={p.nameEn} ar={p.nameAr} />
                   </span>
@@ -217,7 +217,7 @@ export default async function SubmissionReviewPage({
           </p>
           <div data-region="inspections" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {inspections.map((i) => (
-              <div key={i.id} style={{ padding: '16px 18px', background: 'var(--surface2)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
+              <div key={i.id} style={{ paddingBlock: '17px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: i.findings || mayInspect ? 10 : 0 }}>
                   <span style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                     <L en={i.titleEn} ar={i.titleAr} />
@@ -280,7 +280,7 @@ export default async function SubmissionReviewPage({
             {measures.map((m) => {
               const doc = catalog.find((d) => d.key === m.catalogKey);
               return (
-                <div key={m.id} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px solid ${m.clearedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={m.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${m.clearedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 240 }}>
                     <L en={doc?.en ?? m.catalogKey} ar={doc?.ar ?? m.catalogKey} />
                     {m.note ? <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>{m.note}</span> : null}
@@ -329,7 +329,7 @@ export default async function SubmissionReviewPage({
 
         <div>
           {mayRecord ? (
-            <div data-region="outcome" style={{ padding: 24, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
+            <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en="Record an outcome" ar="تسجيل نتيجة" />
               </h2>
@@ -393,7 +393,7 @@ export default async function SubmissionReviewPage({
             {determinations.map((d, i) => {
               const def = MINISTRY_CONTENT.outcomes.find((o) => o.key === d.outcome);
               return (
-                <div key={i} style={{ padding: '14px 18px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10 }}>
+                <div key={i} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10 }}>
                   <div style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                     <L en={def?.en ?? d.outcome} ar={def?.ar ?? d.outcome} />
                   </div>

@@ -123,7 +123,7 @@ export function VenueAssessmentForm({
         </div>
       </div>
 
-      <div style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
+      <div style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 380 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
             <L en="Expected maximum simultaneous attendance during a routine operating session" ar="الحد الأقصى المتوقع للحضور المتزامن خلال فترة تشغيل اعتيادية" />
@@ -138,7 +138,7 @@ export function VenueAssessmentForm({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
-          <div key={domain.number} style={{ padding: 26, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -170,7 +170,7 @@ export function VenueAssessmentForm({
         ))}
       </div>
 
-      <div data-region="classification" style={{ padding: 32, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div data-region="classification" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
           <L en="Total score from your answers" ar="المجموع من أجوبتكم" />
         </div>
@@ -303,7 +303,7 @@ export function VenueAssessmentForm({
         </div>
       </div>
 
-      <div data-region="declaration" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+      <div data-region="declaration" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Operator declaration" ar="إقرار الجهة المشغّلة" />
         </div>

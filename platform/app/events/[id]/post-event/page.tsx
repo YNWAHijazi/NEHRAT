@@ -100,7 +100,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
               ar={`${event.nameAr}، أُجريت في ⁦${event.endDate ?? ''}⁩. مستحق خلال سبعة أيام من الفعالية.`}
             />
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '14px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
             <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
               <L en="Required" ar="مطلوب" />
             </span>
@@ -112,7 +112,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             </span>
           </div>
 
-          <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden' }}>
+          <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', padding: 1 }}>
             {identity.map((f) => (
               <div key={f.en} style={{ padding: '14px 18px', borderInlineEnd: '1px solid var(--line)' }}>
                 <dt style={{ fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
@@ -156,7 +156,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
                 <L en="Notify now" ar="الإبلاغ الآن" />
               </a>
             </div>
-            <div style={{ padding: '26px 28px', background: 'var(--surface2)', borderRadius: 16 }}>
+            <div style={{ padding: '27px 29px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="This obligation — 7 days" ar="هذا الموجب — 7 أيام" />
               </div>

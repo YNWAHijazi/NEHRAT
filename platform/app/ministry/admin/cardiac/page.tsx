@@ -107,7 +107,7 @@ export default async function CardiacConfigPage({
         ))}
       </div>
 
-      <div data-region="in-force-note" style={{ padding: '14px 18px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
+      <div data-region="in-force-note" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
         <L en={MINISTRY_CONTENT.inForceWithoutValue.en} ar={MINISTRY_CONTENT.inForceWithoutValue.ar} />
       </div>
 
@@ -116,7 +116,7 @@ export default async function CardiacConfigPage({
           const s = stateOf(p);
           const keys = valueKeysOf(p);
           return (
-            <div key={p.key} style={{ padding: '20px 24px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 12 }}>
+            <div key={p.key} style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 12 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 10 }}>
                 <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 280 }}>
                   <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 18 }}>{p.n}</span>
@@ -149,7 +149,7 @@ export default async function CardiacConfigPage({
                     {keys.map((key) => {
                       const row = config.get(key);
                       return (
-                        <div key={key} style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 10 }}>
+                        <div key={key} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10 }}>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: row ? 0 : 10 }}>
                             <span style={{ fontSize: '13.5px', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
                               <L en={labelFor(p, key).en} ar={labelFor(p, key).ar} />

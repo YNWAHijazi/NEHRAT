@@ -64,7 +64,7 @@ export default async function DeclarationPage({
             />
           </p>
 
-          <div data-region="responsibility" style={{ padding: '26px 30px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '80ch' }}>
+          <div data-region="responsibility" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '80ch' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
               <L en="What your agency is accepting" ar="ما تقبله جهتكم" />
             </div>
@@ -74,7 +74,7 @@ export default async function DeclarationPage({
           </div>
 
           <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBlockEnd: 32 }}>
-            <div style={{ padding: '24px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
+            <div style={{ padding: '25px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="Event Medical Director — for item 7" ar="المدير الطبي للفعالية — للبند 7" />
               </div>
@@ -91,7 +91,7 @@ export default async function DeclarationPage({
                 </div>
               )}
             </div>
-            <div style={{ padding: '24px 26px', background: 'var(--surface2)', borderRadius: 16 }}>
+            <div style={{ padding: '25px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                 <L en="Major-incident and mass-casualty plan — for item 10" ar="خطة الحوادث الجسيمة وحوادث الإصابات الجماعية — للبند 10" />
               </div>

@@ -124,7 +124,7 @@ export default async function FacilityPlanPage({
           </div>
         </div>
 
-        <div data-region="derived" style={{ padding: '30px 34px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+        <div data-region="derived" style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 8 }}>
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en="Defibrillator information" ar="معلومات جهاز إزالة الرجفان الخارجي الآلي" />
@@ -157,7 +157,7 @@ export default async function FacilityPlanPage({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 24, marginBlockEnd: 44 }}>
-          <div data-region="plan-profile" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div data-region="plan-profile" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16 }}>
             <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
               <L en="Facility information" ar="معلومات المرفق" />
             </h3>
@@ -175,7 +175,7 @@ export default async function FacilityPlanPage({
             </div>
           </div>
 
-          <div data-region="plan-persons" id="persons" style={{ padding: 28, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div data-region="plan-persons" id="persons" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16 }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600 }}>
               <L en="Responsible persons" ar="الأشخاص المسؤولون" />
             </h3>
