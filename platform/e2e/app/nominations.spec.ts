@@ -134,3 +134,84 @@ test.describe('cancellation and postponement', () => {
     await expect(lane).toContainText('The event will not be held.');
   });
 });
+
+test.describe('creation to determination, end to end', () => {
+  // THE PLAIN-ANSWER PROOF: an organizer takes an event from nothing to filed, and
+  // the Ministry records every outcome the regulation gives it, all through the
+  // screens -- on a fresh record, so nothing seeded is disturbed.
+  test('an event is created, filed, and carries all three outcomes in turn', async ({ page }) => {
+    test.setTimeout(180_000);
+    await signInAs(page, 'test_organizer');
+    await page.goto('/events/new');
+    const fill = async (label: string, value: string) => {
+      await page.locator('label', { hasText: label }).first().locator('input').fill(value);
+    };
+    await fill('Event name (English)', 'Batroun Heritage Walk');
+    await fill('Event name (Arabic)', 'مسيرة تراث البترون');
+    await fill('Start date', '2026-11-21');
+    await fill('End date', '2026-11-21');
+    await fill('Event type', 'Guided community walk');
+    await fill('Venue, route, or location', 'Batroun old town');
+    await fill('Municipality or municipalities', 'Batroun');
+    await fill('Opening time', '09:00');
+    await fill('Closing time', '13:00');
+    await fill('Expected participants', '90');
+    await fill('Expected spectators or attendees', '30');
+    await fill('Expected staff, performers, contractors, and volunteers', '10');
+    await fill('Expected maximum simultaneous attendance', '130');
+    const noPills = page.locator('button[data-yesno="no"]');
+    await noPills.nth(0).click();
+    await noPills.nth(1).click();
+    const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+    const count = await zeros.count();
+    for (let i = 0; i < count; i += 1) await zeros.nth(i).click();
+    await page.locator('button:has-text("Save the assessment and open the event record")').click();
+    await page.waitForURL(/\/events\/EV-\d+$/);
+    const eventId = new URL(page.url()).pathname.split('/')[2]!;
+
+    // Level 1 package: attach the arrangements, declare six, file.
+    await page.goto(`/events/${eventId}/requirements`);
+    const attach = page.locator('form:has(input[name="docKey"])').first();
+    await attach.locator('input[type="file"]').setInputFiles({
+      name: 'arrangements.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
+    });
+    await attach.locator('button:has-text("Attach")').click();
+    await page.waitForLoadState('networkidle');
+    await page.goto(`/events/${eventId}/submit`);
+    for (let i = 0; i < 6; i += 1) {
+      await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
+    }
+    await page.locator('button:has-text("Save the form")').click();
+    await expect(page.locator('text=Saved.')).toBeVisible();
+    const fileBtn = page.locator('button:has-text("File the submission")');
+    await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
+    await fileBtn.click();
+    await page.waitForURL(/acknowledgment/);
+    await expect(page.locator('body')).toContainText(/MOPH-EV-\d{4}-\d{4}/);
+
+    // The Ministry records each of the three outcomes in turn, through the screen.
+    await signInAs(page, 'test_moph');
+    const review = `/ministry/submissions/${eventId}`;
+    const record = async (value: string, expected: string) => {
+      await page.goto(review);
+      const outcome = page.locator('[data-region="outcome"]');
+      await outcome.locator(`input[type="radio"][value="${value}"]`).check();
+      await outcome.locator('textarea, input[name="note"]').first().fill(`Recorded in the completion walk — ${value}.`);
+      await outcome.locator('button:has-text("Record the outcome")').click();
+      await page.waitForURL(`**${review}**`);
+      await expect(page.locator('[data-region="determinations"]')).toContainText(expected);
+    };
+    await record('incomplete', 'Submission received but incomplete');
+    await record('revision', 'Additional information or revision required');
+    // A Level 1 submission: no attestations apply, no inspection blocks -- the
+    // satisfied outcome is open, and recording it completes the chain.
+    await record('satisfied', 'Health and medical preparedness requirements satisfied');
+
+    // And the organizer reads the determination on their own record.
+    await signInAs(page, 'test_organizer');
+    await page.goto('/dashboard');
+    await expect(page.locator('body')).toContainText('Batroun Heritage Walk');
+    await page.goto(`/events/${eventId}`);
+    await expect(page.locator('body')).toContainText('Health and medical preparedness requirements satisfied');
+  });
+});
