@@ -5,6 +5,7 @@ import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { AddDocumentForm } from './AddDocumentForm';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, sharedDocumentsFor, unreadCountFor } from '../../../../lib/queries';
+import { answerDocumentRequestAction } from '../../../actions';
 import { ROLES_CONTENT } from '../../../../lib/rules';
 
 /**
@@ -74,10 +75,18 @@ export default async function SharedDocumentsPage({
                       <L en={d.metaEn} ar={d.metaAr} />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none', flexWrap: 'wrap' }}>
                     <span style={{ padding: '4px 10px', borderRadius: 999, background: s.chipBg, color: s.color, fontSize: 13 }}>
                       <L en={s.en} ar={s.ar} />
                     </span>
+                    {d.source === 'requested' || d.source === 'missing' ? (
+                      <form action={answerDocumentRequestAction.bind(null, invitation.token, d.id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input type="file" name="file" required aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
+                        <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                          <L en={s.ctaEn} ar={s.ctaAr} />
+                        </button>
+                      </form>
+                    ) : null}
                   </div>
                 </div>
               );

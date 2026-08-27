@@ -31,6 +31,8 @@ const PART_CHIP: Record<string, { en: string; ar: string; bg: string; color: str
   nominated: { en: 'Nominated', ar: 'مُرشَّح', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
   confirmed: { en: 'Participation confirmed', ar: 'تأكدت المشاركة', bg: 'var(--brand-soft)', color: 'var(--brand)' },
   declined: { en: 'Declined', ar: 'معتذَر عنه', bg: 'var(--bad-soft)', color: 'var(--bad)' },
+  withdrawn: { en: 'Withdrawn by the organizer', ar: 'سحبه المنظّم', bg: 'var(--surface2)', color: 'var(--muted)' },
+  removed: { en: 'Removed by the organizer', ar: 'أزاله المنظّم', bg: 'var(--surface2)', color: 'var(--muted)' },
 };
 
 function fileBy(inv: InvitationDetail): string {
@@ -45,7 +47,8 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
       const level = inv.eventLevel;
       const isL3 = level === 3;
       const opsSupplied = Object.keys(inv.opsDetail).length > 0;
-      const done = isL3 ? inv.declaration === 'signed' : opsSupplied;
+      const closed = inv.status === 'removed' || inv.status === 'withdrawn';
+      const done = closed || (isL3 ? inv.declaration === 'signed' : opsSupplied);
       const chips = [PART_CHIP[inv.status] ?? PART_CHIP['nominated']!];
       if (isL3) {
         chips.push(
@@ -70,8 +73,13 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
         byAr: isL3 ? `⁦${fileBy(inv)}⁩` : 'لخطة المنظّم',
         color: isL3 ? 'var(--bad)' : 'var(--accent-ink)',
         done,
-        ...(done && inv.signedAt ? { doneChipEn: `Signed ${inv.signedAt.slice(0, 10)}`, doneChipAr: `وُقّع ⁦${inv.signedAt.slice(0, 10)}⁩` } : {}),
-        ...(done && !inv.signedAt ? { doneChipEn: 'Detail supplied', doneChipAr: 'قُدّمت التفاصيل' } : {}),
+        ...(closed
+          ? { doneChipEn: 'Removed by the organizer — nothing owed', doneChipAr: 'أزالها المنظّم — لا شيء مستحق' }
+          : done && inv.signedAt
+            ? { doneChipEn: `Signed ${inv.signedAt.slice(0, 10)}`, doneChipAr: `وُقّع ⁦${inv.signedAt.slice(0, 10)}⁩` }
+            : done
+              ? { doneChipEn: 'Detail supplied', doneChipAr: 'قُدّمت التفاصيل' }
+              : {}),
       };
     });
 }
@@ -84,12 +92,15 @@ export function directorRows(
 ): RowShape[] {
   return invitations
     .filter((i) => i.kind === 'director' && i.status !== 'declined')
+    // Withdrawn-before-answer rows without an account never reach this list; removed
+    // ones do, and render closed below.
     .map((inv) => {
       const held = inv.eventEnd !== null && inv.eventEnd < today;
       const report = reportState.get(inv.eventId);
       const govDone = governanceState.get(inv.eventId) ?? 0;
-      const reportOwed = held && report !== undefined && !report.directorSigned;
-      const done = held ? (report?.directorSigned ?? false) : false;
+      const closed = inv.status === 'removed' || inv.status === 'withdrawn';
+      const reportOwed = !closed && held && report !== undefined && !report.directorSigned;
+      const done = closed || (held ? (report?.directorSigned ?? false) : false);
       const reportDue = inv.eventEnd ? addDaysIso(inv.eventEnd, POST_EVENT_REPORT.windowDays) : '';
       return {
         key: inv.token,
@@ -108,6 +119,7 @@ export function directorRows(
           : govDone >= 3
             ? 'لا موجب قائماً قبل الفعالية'
             : 'وظيفة القيادة الطبية للفعالية، ودوركم في خطة الحوادث الجسيمة',
+        ...(closed ? { doneChipEn: 'Removed by the organizer — nothing owed', doneChipAr: 'أزالها المنظّم — لا شيء مستحق' } : {}),
         byLabelEn: reportOwed ? 'Report due' : 'Organizer files by',
         byLabelAr: reportOwed ? 'التقرير مستحق' : 'يقدّم المنظّم بحلول',
         byEn: reportOwed ? reportDue : fileBy(inv),

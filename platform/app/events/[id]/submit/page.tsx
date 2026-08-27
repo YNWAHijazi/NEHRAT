@@ -102,16 +102,34 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
                   <span style={{ fontSize: 16 }}>
                     <L en={d.en} ar={d.ar} />
                   </span>
-                  <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
-                    {done ? (
-                      <L en="Complete" ar="مكتمل" />
-                    ) : d.thirdParty ? (
-                      <L en={`${signedCount} of ${providers.length} signed`} ar={`وُقّع ${signedCount} من ${providers.length}`} />
-                    ) : d.system ? (
-                      <L en="Generated" ar="مُنشأ" />
-                    ) : (
-                      <L en="Awaiting you" ar="بانتظاركم" />
-                    )}
+                  <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', flex: 'none' }}>
+                    <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
+                      {done ? (
+                        <L en="Complete" ar="مكتمل" />
+                      ) : d.thirdParty ? (
+                        <L en={`${signedCount} of ${providers.length} signed`} ar={`وُقّع ${signedCount} من ${providers.length}`} />
+                      ) : d.system ? (
+                        <L en="Generated" ar="مُنشأ" />
+                      ) : (
+                        <L en="Awaiting you" ar="بانتظاركم" />
+                      )}
+                    </span>
+                    {/* "Awaiting you" without the control that answers it is a corridor:
+                        each incomplete row links to where it completes. */}
+                    {!done && !d.system && !d.thirdParty ? (
+                      <a
+                        href={d.key === 'plan' ? `/events/${id}/plan` : d.key === 'complianceForm' ? '#compliance' : `/events/${id}/requirements`}
+                        style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+                      >
+                        {d.key === 'plan' ? (
+                          <L en="Open the plan" ar="فتح الخطة" />
+                        ) : d.key === 'complianceForm' ? (
+                          <L en="Complete it below" ar="أكملوه أدناه" />
+                        ) : (
+                          <L en="Attach on the requirements screen" ar="الإرفاق في شاشة المتطلبات" />
+                        )}
+                      </a>
+                    ) : null}
                   </span>
                 </div>
               );

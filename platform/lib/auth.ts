@@ -35,8 +35,10 @@ export interface Organization {
   id: number;
   nameEn: string;
   nameAr: string;
-  status: 'none' | 'pending' | 'recorded';
+  status: 'none' | 'pending' | 'recorded' | 'returned';
   recordedAt: string | null;
+  /** The Ministry's return or reversal reason, verbatim, when status is returned. */
+  returnReason: string | null;
 }
 
 interface AccountRow {
@@ -65,8 +67,11 @@ export async function currentAccount(): Promise<Account | null> {
   if (!token) return null;
   const row = getDb()
     .prepare(
+      // suspended = 0: a suspended account's session stops answering on the next
+      // request -- suspension is immediate, not deferred to the next sign-in.
       `SELECT a.id, a.login, a.display_name, a.initials, a.role, a.is_demo
-       FROM sessions s JOIN accounts a ON a.id = s.account_id WHERE s.token = ?`,
+       FROM sessions s JOIN accounts a ON a.id = s.account_id
+       WHERE s.token = ? AND a.suspended = 0`,
     )
     .get(token) as AccountRow | undefined;
   return row ? toAccount(row) : null;
@@ -75,13 +80,13 @@ export async function currentAccount(): Promise<Account | null> {
 export function organizationFor(accountId: number): Organization | null {
   const row = getDb()
     .prepare(
-      `SELECT id, name_en, name_ar, status, recorded_at FROM organizations WHERE account_id = ?`,
+      `SELECT id, name_en, name_ar, status, recorded_at, return_reason FROM organizations WHERE account_id = ?`,
     )
     .get(accountId) as
-    | { id: number; name_en: string; name_ar: string; status: Organization['status']; recorded_at: string | null }
+    | { id: number; name_en: string; name_ar: string; status: Organization['status']; recorded_at: string | null; return_reason: string | null }
     | undefined;
   return row
-    ? { id: row.id, nameEn: row.name_en, nameAr: row.name_ar, status: row.status, recordedAt: row.recorded_at }
+    ? { id: row.id, nameEn: row.name_en, nameAr: row.name_ar, status: row.status, recordedAt: row.recorded_at, returnReason: row.return_reason }
     : null;
 }
 

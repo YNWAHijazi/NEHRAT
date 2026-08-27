@@ -3,7 +3,7 @@ import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { organizationsForReview } from '../../../lib/queries';
 import { can } from '../../../lib/rules';
-import { recordOrganizationAction } from '../../ministry-actions';
+import { recordOrganizationAction, returnOrganizationAction, reverseOrganizationRecordingAction } from '../../ministry-actions';
 
 /**
  * Organizations. Recording is the act that opens filing for the organizer --
@@ -46,6 +46,10 @@ export default async function OrganizationsPage({
                 <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
                   <L en={`Recorded${o.recordedAt ? ` ${o.recordedAt.slice(0, 10)}` : ''}`} ar={`مسجَّلة${o.recordedAt ? ` ⁦${o.recordedAt.slice(0, 10)}⁩` : ''}`} />
                 </span>
+              ) : o.status === 'returned' ? (
+                <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--bad-soft)', color: 'var(--bad)', fontSize: '12.5px' }}>
+                  <L en="Returned — with the organizer" ar="مُعادة — لدى المنظّم" />
+                </span>
               ) : (
                 <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: '12.5px' }}>
                   <L en="Awaiting recording" ar="بانتظار التسجيل" />
@@ -59,6 +63,36 @@ export default async function OrganizationsPage({
                 </form>
               ) : null}
             </span>
+            {mayRecord && o.status === 'pending' ? (
+              <details style={{ flexBasis: '100%' }}>
+                <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                  <span style={{ textDecoration: 'underline' }}>
+                    <L en="Return with a reason" ar="إعادة مع سبب" />
+                  </span>
+                </summary>
+                <form action={returnOrganizationAction.bind(null, o.id)} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBlockStart: 8 }}>
+                  <input name="reason" required aria-label="Return reason" placeholder="" style={{ flex: 1, minWidth: 240, height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
+                  <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                    <L en="Return to the organizer — sent as written" ar="إعادة إلى المنظّم — تُرسل كما هي" />
+                  </button>
+                </form>
+              </details>
+            ) : null}
+            {mayRecord && o.status === 'recorded' ? (
+              <details style={{ flexBasis: '100%' }}>
+                <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                  <span style={{ textDecoration: 'underline' }}>
+                    <L en="Reverse the recording" ar="عكس التسجيل" />
+                  </span>
+                </summary>
+                <form action={reverseOrganizationRecordingAction.bind(null, o.id)} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBlockStart: 8 }}>
+                  <input name="reason" required aria-label="Reversal reason" style={{ flex: 1, minWidth: 240, height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
+                  <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                    <L en="Reverse — back to pending; the organizer is notified" ar="عكس — تعود معلّقة؛ ويُبلَّغ المنظّم" />
+                  </button>
+                </form>
+              </details>
+            ) : null}
           </div>
         ))}
         {rows.length === 0 ? (

@@ -17,7 +17,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { YesNoPair } from '../../../components/YesNoPair';
-import { createEventAction } from '../../actions';
+import { createEventAction, reassessAction } from '../../actions';
 import type { ArabicOnlyNote, Band, Domain, MinimumCondition } from '../../../lib/rules/load';
 import { deriveLevel, bandForScore } from '../../../lib/rules/derive';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
@@ -79,12 +79,19 @@ export function AssessmentForm({
   bands,
   maxScore,
   arabicOnlyNotes,
+  reassess,
 }: {
   domains: Domain[];
   conditions: MinimumCondition[];
   bands: Band[];
   maxScore: number;
   arabicOnlyNotes: ArabicOnlyNote[];
+  /**
+   * Re-running the assessment on an EXISTING event: prefilled from the latest
+   * version, saved as a NEW version with every earlier one kept readable. The
+   * event-information fields do not render -- the record already holds them.
+   */
+  reassess?: { eventId: string; answers: (0 | 1 | 2 | null)[]; inputs: MinimumConditionInputs };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -100,15 +107,23 @@ export function AssessmentForm({
   });
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
-  const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(Array(9).fill(null));
-  const [attendance, setAttendance] = useState('');
-  const [disciplines, setDisciplines] = useState<string[]>([]);
-  const [courseKm, setCourseKm] = useState('');
-  const [capacity, setCapacity] = useState('');
+  const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(
+    reassess ? reassess.answers : Array(9).fill(null),
+  );
+  const [attendance, setAttendance] = useState(
+    reassess?.inputs.expectedMaxSimultaneousAttendance != null ? String(reassess.inputs.expectedMaxSimultaneousAttendance) : '',
+  );
+  const [disciplines, setDisciplines] = useState<string[]>(reassess ? [...reassess.inputs.eventDisciplines] : []);
+  const [courseKm, setCourseKm] = useState(
+    reassess?.inputs.courseDistanceKm != null ? String(reassess.inputs.courseDistanceKm) : '',
+  );
+  const [capacity, setCapacity] = useState(
+    reassess?.inputs.venueLicensedCapacity != null ? String(reassess.inputs.venueLicensedCapacity) : '',
+  );
   // Unanswered, not false: a seeded false asserts an answer nobody gave, and the two
   // venue floors could then never report "incomplete" naming the field (non-negotiable 0).
-  const [nightclub, setNightclub] = useState<boolean | null>(null);
-  const [regularVenue, setRegularVenue] = useState<boolean | null>(null);
+  const [nightclub, setNightclub] = useState<boolean | null>(reassess ? reassess.inputs.venueIsNightclubOrDanceVenue : null);
+  const [regularVenue, setRegularVenue] = useState<boolean | null>(reassess ? reassess.inputs.venueRegularlyHostsOrganizedEvents : null);
   const [error, setError] = useState<string | null>(null);
 
   const inputs: MinimumConditionInputs = useMemo(
@@ -155,6 +170,15 @@ export function AssessmentForm({
   const submit = () => {
     setError(null);
     startTransition(async () => {
+      if (reassess) {
+        const result = await reassessAction(reassess.eventId, {
+          answers: answers as DomainAnswers,
+          inputs,
+        });
+        if ('error' in result) setError(result.error);
+        else router.push(`/events/${reassess.eventId}?notice=reassessed`);
+        return;
+      }
       const result = await createEventAction({
         nameEn,
         nameAr,
@@ -180,12 +204,21 @@ export function AssessmentForm({
         <L en="Applicability and assessment" ar="الانطباق والتقييم" />
       </h1>
       <p style={{ margin: '0 0 48px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '70ch' }}>
-        <L
-          en="The national risk assessment, in the order the tool sets. Complete it in one pass or return to it. Nothing is filed from this page."
-          ar="التقييم الوطني للمخاطر، بترتيبه الأصلي. أكملوه بمرة واحدة أو عودوا إليه. لا يُقدَّم شيء من هذه الصفحة."
-        />
+        {reassess ? (
+          <L
+            en="Re-running the assessment saves a NEW version; every earlier version stays readable on the event record. The level re-derives from these answers -- it is never chosen."
+            ar="إعادة التقييم تحفظ نسخة جديدة؛ وتبقى كل نسخة سابقة قابلة للقراءة على سجل الفعالية. ويُستنتج المستوى من هذه الأجوبة من جديد — ولا يُختار أبداً."
+          />
+        ) : (
+          <L
+            en="The national risk assessment, in the order the tool sets. Complete it in one pass or return to it. Nothing is filed from this page."
+            ar="التقييم الوطني للمخاطر، بترتيبه الأصلي. أكملوه بمرة واحدة أو عودوا إليه. لا يُقدَّم شيء من هذه الصفحة."
+          />
+        )}
       </p>
 
+      {reassess ? null : (
+        <>
       <SectionHeading en="Part 1 — The event" ar="الجزء 1 — الفعالية" />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 40 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -261,6 +294,9 @@ export function AssessmentForm({
           );
         })}
       </div>
+
+        </>
+      )}
 
       <SectionHeading
         en="Part 2 — Figures the classification depends on"
@@ -560,7 +596,11 @@ export function AssessmentForm({
         onClick={submit}
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete ? 'pointer' : 'not-allowed' }}
       >
-        <L en="Save the assessment and open the event record" ar="حفظ التقييم وفتح سجل الفعالية" />
+        {reassess ? (
+          <L en="Save as a new assessment version" ar="حفظ كنسخة تقييم جديدة" />
+        ) : (
+          <L en="Save the assessment and open the event record" ar="حفظ التقييم وفتح سجل الفعالية" />
+        )}
       </button>
       {!derivation.complete ? (
         <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>

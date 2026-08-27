@@ -1,7 +1,7 @@
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
-import { ministryConfig } from '../../../../lib/queries';
+import { designationsForReview, ministryConfig } from '../../../../lib/queries';
 import { FACILITY_CONTENT, MINISTRY_CONTENT } from '../../../../lib/rules';
 import { publishConfigAction } from '../../../ministry-actions';
 
@@ -28,6 +28,7 @@ export default async function CardiacConfigPage({
   const account = await requireMinistryPage('configureCardiac');
   const { notice, error } = await searchParams;
   const config = ministryConfig();
+  const designations = designationsForReview(account.isDemo);
   const powers = MINISTRY_CONTENT.cardiacPowers;
   const pub = MINISTRY_CONTENT.publicationStates;
 
@@ -98,12 +99,14 @@ export default async function CardiacConfigPage({
           { n: unsetCount, en: pub.unset.en, ar: pub.unset.ar, color: 'var(--accent-ink)' },
           { n: powers.length - values.length, en: pub.caseByCase.en, ar: pub.caseByCase.ar, color: 'var(--muted)' },
         ].map((c) => (
-          <div key={c.en} style={{ background: 'var(--bg)', padding: '16px 18px' }}>
+          // Each counter is a link into the rows it counts -- a counter naming
+          // outstanding publication with no control in reach was a dead end.
+          <a key={c.en} href="#powers" style={{ background: 'var(--bg)', padding: '16px 18px', color: 'var(--ink)' }}>
             <div style={{ fontSize: 26, fontWeight: 600, color: c.color }}>{c.n}</div>
             <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
               <L en={c.en} ar={c.ar} />
             </div>
-          </div>
+          </a>
         ))}
       </div>
 
@@ -111,7 +114,7 @@ export default async function CardiacConfigPage({
         <L en={MINISTRY_CONTENT.inForceWithoutValue.en} ar={MINISTRY_CONTENT.inForceWithoutValue.ar} />
       </div>
 
-      <div data-region="powers" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div data-region="powers" id="powers" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {powers.map((p) => {
           const s = stateOf(p);
           const keys = valueKeysOf(p);
@@ -137,8 +140,34 @@ export default async function CardiacConfigPage({
               ) : null}
 
               {p.kind === 'act' ? (
-                <div style={{ marginInlineStart: 30, fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-                  <L en={('actNoteEn' in p ? p.actNoteEn : '') as string} ar={('actNoteAr' in p ? p.actNoteAr : '') as string} />
+                <div style={{ marginInlineStart: 30 }}>
+                  <div style={{ fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
+                    <L en={('actNoteEn' in p ? p.actNoteEn : '') as string} ar={('actNoteAr' in p ? p.actNoteAr : '') as string} />
+                  </div>
+                  {/* The note above promises recorded designations are listed here.
+                      For the two power-3 limbs, they now are -- from the same table
+                      the arrests screen writes. */}
+                  {p.n === 3 ? (
+                    <div style={{ marginBlockStart: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {designations.map((dz) => (
+                        <div key={`${dz.nameEn}-${dz.designatedAt}`} style={{ padding: '10px 14px', background: 'var(--surface)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', fontSize: '12.5px' }}>
+                          <span>
+                            <L en={dz.nameEn} ar={dz.nameAr} />
+                            {dz.municipality ? <span style={{ color: 'var(--muted)' }}> · {dz.municipality}</span> : null}
+                            {dz.facilityId ? <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}> · {dz.facilityId}</span> : null}
+                          </span>
+                          <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                            <L en={`Designated ${dz.designatedAt} by ${dz.designatedBy}`} ar={`حُدِّد في ⁦${dz.designatedAt}⁩ من ${dz.designatedBy}`} />
+                          </span>
+                        </div>
+                      ))}
+                      {designations.length === 0 ? (
+                        <div style={{ padding: '10px 14px', border: '1px dashed var(--line)', borderRadius: 8, fontSize: '12.5px', color: 'var(--muted)' }}>
+                          <L en="No designations recorded. They are recorded from Reported arrest locations." ar="لا تحديدات مسجَّلة. تُسجَّل من مواقع الحوادث المبلَّغة." />
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div style={{ marginInlineStart: 30 }}>
@@ -176,8 +205,10 @@ export default async function CardiacConfigPage({
                               </span>
                             )}
                           </div>
-                          {!row ? (
-                            <form action={publishConfigAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
+                          {/* Publishing is repeatable: a value in force is revised by
+                              publishing a new value with its own effective date --
+                              the form must not vanish with the first publication. */}
+                          <form action={publishConfigAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end', marginBlockStart: row ? 10 : 0 }}>
                               <input type="hidden" name="key" value={key} />
                               <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 160 }}>
                                 <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
@@ -192,10 +223,13 @@ export default async function CardiacConfigPage({
                                 <input name="effective" type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
                               </label>
                               <button type="submit" style={{ height: 34, paddingInline: 14, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
-                                <L en={MINISTRY_CONTENT.setAndPublish.en} ar={MINISTRY_CONTENT.setAndPublish.ar} />
+                                {row ? (
+                                  <L en="Revise and publish" ar="تنقيح ونشر" />
+                                ) : (
+                                  <L en={MINISTRY_CONTENT.setAndPublish.en} ar={MINISTRY_CONTENT.setAndPublish.ar} />
+                                )}
                               </button>
                             </form>
-                          ) : null}
                         </div>
                       );
                     })}

@@ -39,8 +39,10 @@ export interface EventGateContext {
   eventEndDate: string | null;
   eventStartDate: string | null;
   filed: boolean;
-  organizationStatus: 'none' | 'pending' | 'recorded';
+  organizationStatus: 'none' | 'pending' | 'recorded' | 'returned';
   now: Date;
+  /** Cancellation closes the record; the report is not owed. Defaults to active. */
+  lifecycle?: EventLifecycle;
 }
 
 function endInstant(eventEndDate: string): Date {
@@ -56,6 +58,12 @@ function endInstant(eventEndDate: string): Date {
  * with its date").
  */
 export function postEventReportGate(ctx: EventGateContext): Gate {
+  // A cancelled event owes no report -- the gate is ABSENT, not merely shut, and the
+  // record's cancellation band is the stated reason. Postponement changes nothing
+  // here: the original date's obligations stand until a revised filing replaces them.
+  if (!lifecyclePermits(ctx.lifecycle ?? 'active').postEventReport) {
+    return { behaviour: 'absent' };
+  }
   if (ctx.eventEndDate === null) {
     return { behaviour: 'disabled', reasonKey: 'gate.postEventNeedsEventDate' };
   }
@@ -199,3 +207,33 @@ export type StateChip =
   | 'partlyInForce'
   | 'awaitingMinistryValue'
   | 'determinedByReview';
+
+/* ---------------- cancellation and postponement ---------------- */
+
+import lifecycleJson from './data/lifecycle.json';
+
+export const LIFECYCLE_CONTENT = lifecycleJson;
+
+export type EventLifecycle = 'active' | 'cancelled' | 'postponed';
+
+/**
+ * What a lifecycle state permits. Cancellation closes the record: nothing further
+ * files, the post-event report is not owed, the serious-incident route stays (an
+ * incident before the cancellation may still need notifying inside its 24 hours).
+ * Postponement leaves filing OPEN -- the revised submission for the new date is
+ * filed through the normal route -- and the determination note rides wherever a
+ * recorded determination shows.
+ */
+export function lifecyclePermits(lifecycle: EventLifecycle): {
+  filing: boolean;
+  postEventReport: boolean;
+  determinationCarries: boolean;
+} {
+  if (lifecycle === 'cancelled') {
+    return { filing: false, postEventReport: false, determinationCarries: true };
+  }
+  if (lifecycle === 'postponed') {
+    return { filing: true, postEventReport: true, determinationCarries: false };
+  }
+  return { filing: true, postEventReport: true, determinationCarries: true };
+}

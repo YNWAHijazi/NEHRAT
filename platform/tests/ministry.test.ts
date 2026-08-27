@@ -34,12 +34,21 @@ describe('the permission matrix', () => {
     expect(can('inspector', 'configureCardiac')).toBe(false);
   });
 
-  it('an administrator configures and never determines', () => {
+  it('an administrator works the queue and never determines (reviewer ruling, 2026-08-27)', () => {
     expect(can('ministry_admin', 'configureCardiac')).toBe(true);
     expect(can('ministry_admin', 'configureMassGathering')).toBe(true);
     expect(can('ministry_admin', 'manageUsers')).toBe(true);
-    expect(can('ministry_admin', 'requireMeasures')).toBe(false);
-    expect(can('ministry_admin', 'recordCorrective')).toBe(false);
+    // The administrator was a dead end on every screen it could read: a pending
+    // organization with no button, an enquiry with no reply box. The reviewer granted
+    // the WORKING actions; the three determinations stay the reviewer's alone, and
+    // that line is the one the first assertion in this file pins.
+    expect(can('ministry_admin', 'assignReview')).toBe(true);
+    expect(can('ministry_admin', 'recordOrganization')).toBe(true);
+    expect(can('ministry_admin', 'respondEnquiry')).toBe(true);
+    expect(can('ministry_admin', 'recordCorrective')).toBe(true);
+    expect(can('ministry_admin', 'requireMeasures')).toBe(true);
+    expect(can('ministry_admin', 'recordOutcome')).toBe(false);
+    expect(can('ministry_admin', 'recordAttestation')).toBe(false);
   });
 
   it('a Ministry administrator cannot reach the platform-owner surfaces', () => {

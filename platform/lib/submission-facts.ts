@@ -48,14 +48,23 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
 
   const gate = submissionGate({
     level,
+    lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
     documentState,
+    // Withdrawn and removed parties are HISTORY, not parties: they neither block
+    // filing nor count toward a level's requirements. This is the way out of the
+    // trap where one confirmed provider and one unanswered nomination blocked filing
+    // with nothing the organizer could do -- withdrawing the unanswered one leaves
+    // the confirmed one, and the gate derives from who remains.
     providers: invitations
-      .filter((i) => i.kind === 'ems')
+      .filter((i) => i.kind === 'ems' && i.status !== 'withdrawn' && i.status !== 'removed')
       .map((i) => ({ name: i.nameEn, status: i.status, declaration: i.declaration })),
-    // A declined Director is not the record's Director: the blocker must say "name
-    // one", not "has not accepted".
-    director: invitations.find((i) => i.kind === 'director' && i.status !== 'declined') ?? null,
+    // A declined, withdrawn or removed Director is not the record's Director: the
+    // blocker must say "name one", not "has not accepted".
+    director:
+      invitations.find(
+        (i) => i.kind === 'director' && (i.status === 'nominated' || i.status === 'confirmed'),
+      ) ?? null,
     declarationsComplete,
     today: beirutToday(),
     filingDeadline: deadline?.date ?? null,

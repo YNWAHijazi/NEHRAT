@@ -5,7 +5,7 @@ import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, unreadCountFor } from '../../../../lib/queries';
 import { ROLES_CONTENT } from '../../../../lib/rules';
-import { saveOpsDetailAction } from '../../../actions';
+import { saveOpsDetailAction, withdrawParticipationAction } from '../../../actions';
 import { DeclineBlock } from './DeclineBlock';
 
 /**
@@ -48,7 +48,10 @@ export default async function ParticipationPage({
             />
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-            <L en="Event participation — Level 2" ar="المشاركة في الفعالية — المستوى 2" />
+            <L
+              en={`Event participation — Level ${invitation.eventLevel ?? ''}`}
+              ar={`المشاركة في الفعالية — المستوى ${invitation.eventLevel ?? ''}`}
+            />
           </h1>
 
           <div data-region="l2-intro" style={{ padding: '24px 28px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32, maxWidth: '76ch' }}>
@@ -56,6 +59,28 @@ export default async function ParticipationPage({
               <L en={content.level2Intro.en} ar={content.level2Intro.ar} />
             </div>
           </div>
+
+          {invitation.status === 'confirmed' ? (
+            <details style={{ marginBlockEnd: 24 }}>
+              <summary style={{ cursor: 'pointer', fontSize: '13.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                <span style={{ textDecoration: 'underline' }}>
+                  <L en="Withdraw from this event" ar="الانسحاب من هذه الفعالية" />
+                </span>
+              </summary>
+              <form action={withdrawParticipationAction.bind(null, invitation.token)} style={{ marginBlockStart: 10, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <span style={{ flex: 1, minWidth: 260, fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
+                  <L
+                    en="Withdrawing after confirming is a material change on the organizer's record: they are notified with your reason as written, and where their submission is filed they must report the change and name another provider."
+                    ar="الانسحاب بعد التأكيد تغيير جوهري في سجل المنظّم: يُبلَّغ بسببكم كما كُتب، وحيث يكون ملفه مقدَّماً عليه الإبلاغ عن التغيير وتسمية مزوّد آخر."
+                  />
+                </span>
+                <input name="reason" required aria-label="Reason" style={{ flexBasis: '100%', height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
+                <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                  <L en="Withdraw — a material change" ar="الانسحاب — تغيير جوهري" />
+                </button>
+              </form>
+            </details>
+          ) : null}
 
           <form action={saveOpsDetailAction.bind(null, invitation.token)}>
             <div data-region="ops-detail" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>

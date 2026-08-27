@@ -5,7 +5,9 @@ import { MinistryFooter, MinistryShell } from '../../../../components/MinistrySh
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import {
   addedMeasuresFor,
+  attachmentsForReview,
   attestationRecordsFor,
+  submissionVersionsFor,
   planForReview,
   determinationsFor,
   inspectionsFor,
@@ -23,6 +25,7 @@ import {
   attestationSummary,
   attestationsApplyAt,
   can,
+  catalogueEntry,
   documentsForLevel,
   outcomeAvailability,
   type Level,
@@ -30,7 +33,9 @@ import {
 import {
   assignReviewAction,
   clearMeasureAction,
+  createInspectionAction,
   outcomeBlockersFor,
+  setInspectionBlockingAction,
   recordAttestationAction,
   recordInspectionAction,
   recordOutcomeAction,
@@ -76,6 +81,8 @@ export default async function SubmissionReviewPage({
   const RP = MINISTRY_CONTENT.reviewPlan;
   // The confirmed director, read directly: the review query's providers are the EMS
   // lane, and invitationForEvent is scoped to the counterparty's own account.
+  const attachments = attachmentsForReview(id);
+  const versions = submissionVersionsFor(id);
   const director = getDb()
     .prepare(
       `SELECT name_en, name_ar FROM invitations WHERE event_id = ? AND kind = 'director' AND status = 'confirmed' LIMIT 1`,
@@ -94,6 +101,13 @@ export default async function SubmissionReviewPage({
   const mayInspect = can(account.role, 'scheduleInspection');
   const catalog = review.level ? documentsForLevel(review.level) : [];
 
+  const STATUS_CHIP: Record<string, { en: string; ar: string; bg: string; color: string }> = {
+    nominated: { en: 'Nominated — unanswered', ar: 'مُسمّى — دون إجابة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+    confirmed: { en: 'Confirmed', ar: 'مؤكَّد', bg: 'var(--brand-soft)', color: 'var(--brand)' },
+    declined: { en: 'Declined', ar: 'معتذِر', bg: 'var(--bad-soft)', color: 'var(--bad)' },
+    withdrawn: { en: 'Withdrawn by the organizer', ar: 'سحبه المنظّم', bg: 'var(--surface)', color: 'var(--muted)' },
+    removed: { en: 'Removed by the organizer', ar: 'أزاله المنظّم', bg: 'var(--surface)', color: 'var(--muted)' },
+  };
   const DECL_CHIP: Record<string, { en: string; ar: string; bg: string; color: string }> = {
     none: { en: 'No declaration', ar: 'لا إقرار', bg: 'var(--surface2)', color: 'var(--muted)' },
     draft: { en: 'Draft — not signed', ar: 'مسودة — غير موقّعة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
@@ -225,13 +239,20 @@ export default async function SubmissionReviewPage({
           <div data-region="providers" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {review.providers.map((p) => {
               const chip = DECL_CHIP[p.declaration] ?? DECL_CHIP['none']!;
+              // Every state, DISTINCT: a declined or removed party must not render
+              // like a confirmed one -- the reviewer reads who actually stands.
+              const st = STATUS_CHIP[p.status] ?? STATUS_CHIP['nominated']!;
+              const closed = p.status === 'withdrawn' || p.status === 'removed' || p.status === 'declined';
               return (
-                <div key={p.nameEn} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '14.5px' }}>
+                <div key={p.nameEn} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${closed ? 'dashed var(--line)' : p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '14.5px', color: closed ? 'var(--muted)' : 'var(--ink)' }}>
                     <L en={p.nameEn} ar={p.nameAr} />
                   </span>
                   <span style={{ display: 'flex', gap: 8, flex: 'none', alignItems: 'center' }}>
-                    {review.level === 3 ? (
+                    <span style={{ padding: '3px 9px', borderRadius: 999, background: st.bg, color: st.color, fontSize: '12.5px' }}>
+                      <L en={st.en} ar={st.ar} />
+                    </span>
+                    {review.level === 3 && !closed ? (
                       <span style={{ padding: '3px 9px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
                         <L en={chip.en} ar={chip.ar} />
                         {p.signedAt ? <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {p.signedAt}</span> : null}
@@ -247,6 +268,58 @@ export default async function SubmissionReviewPage({
               </div>
             ) : null}
           </div>
+
+          {/* What was ATTACHED. Name-only records by recorded decision: document
+              storage is a deployment decision; until then the name and its date are
+              the record, and the screen says exactly that rather than faking a file. */}
+          <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+            <L en="Attached documents" ar="المستندات المرفقة" />
+          </h2>
+          <div data-region="review-attachments" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 10 }}>
+            {attachments.map((a) => {
+              const doc = catalogueEntry(a.docKey);
+              return (
+                <div key={a.docKey} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontSize: '13.5px' }}>{doc ? <L en={doc.en} ar={doc.ar} /> : a.docKey}</span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{a.fileName} · {a.attachedAt}</span>
+                </div>
+              );
+            })}
+            {attachments.length === 0 ? (
+              <div style={{ background: 'var(--bg)', padding: '12px 16px', fontSize: '13.5px', color: 'var(--muted)' }}>
+                <L en="Nothing attached." ar="لا مرفقات." />
+              </div>
+            ) : null}
+          </div>
+          <p style={{ margin: '0 0 28px', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
+            <L
+              en="These are name-and-date records: document storage is a recorded deployment decision, and no file sits behind a name until the Ministry takes it."
+              ar="هذه سجلات بالاسم والتاريخ: تخزين المستندات قرار نشر مسجَّل، ولا ملف خلف أي اسم قبل أن تعتمده الوزارة."
+            />
+          </p>
+
+          {/* The filing history: each archived version, readable at a glance. */}
+          {versions.length > 0 ? (
+            <div data-region="review-versions" style={{ marginBlockEnd: 28 }}>
+              <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+                <L en="Filing history" ar="سجل التقديمات" />
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                {versions.map((v) => (
+                  <div key={v.version} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: '13.5px' }}>
+                      <L en={`Version ${v.version} — superseded`} ar={`النسخة ${v.version} — استُبدلت`} />
+                      <span style={{ color: 'var(--muted)' }}> · {v.representative}</span>
+                    </span>
+                    <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{v.archivedAt}</span>
+                  </div>
+                ))}
+                <div style={{ background: 'var(--bg)', padding: '12px 16px', fontSize: '13.5px' }}>
+                  <L en={`Version ${review.version} — current${review.filedAt ? `, filed ${review.filedAt}` : ''}`} ar={`النسخة ${review.version} — الحالية${review.filedAt ? `، قُدّمت في ⁦${review.filedAt}⁩` : ''}`} />
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {/* The plan the outcome concerns -- the OTHER panel the same Slice 6
               exception hid. Read-only; nothing the Ministry can edit. */}
@@ -522,12 +595,54 @@ export default async function SubmissionReviewPage({
                     </button>
                   </form>
                 ) : null}
+                {mayInspect && i.state !== 'recorded' ? (
+                  <form action={setInspectionBlockingAction.bind(null, i.id)} style={{ marginBlockStart: 8 }}>
+                    <input type="hidden" name="blocking" value={i.blocking ? '0' : '1'} />
+                    <button type="submit" style={{ height: 30, paddingInline: 12, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 15, fontSize: 12, color: i.blocking ? 'var(--muted)' : 'var(--accent-ink)', cursor: 'pointer' }}>
+                      {i.blocking ? (
+                        <L en="Stop blocking the satisfied outcome" ar="إيقاف حجب نتيجة الاستيفاء" />
+                      ) : (
+                        <L en="Make it block the satisfied outcome" ar="جعله يحجب نتيجة الاستيفاء" />
+                      )}
+                    </button>
+                  </form>
+                ) : null}
               </div>
             ))}
             {inspections.length === 0 ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
                 <L en="No inspections on this submission." ar="لا تفتيشات على هذا التقديم." />
               </div>
+            ) : null}
+            {mayInspect ? (
+              <details data-region="new-inspection">
+                <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none', paddingBlock: 6 }}>
+                  <span style={{ textDecoration: 'underline' }}>
+                    <L en="Schedule a new inspection" ar="جدولة تفتيش جديد" />
+                  </span>
+                </summary>
+                <form action={createInspectionAction.bind(null, id)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end', padding: '12px 16px', background: 'var(--surface2)', borderRadius: 10 }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Title (English)" ar="العنوان (بالإنكليزية)" /></span>
+                    <input name="titleEn" required style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Title (Arabic)" ar="العنوان (بالعربية)" /></span>
+                    <input name="titleAr" dir="rtl" required style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Date" ar="التاريخ" /></span>
+                    <input name="date" type="date" style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+                  </label>
+                  <label style={{ display: 'flex', gap: 8, alignItems: 'center', height: 36 }}>
+                    <input type="checkbox" name="blocking" value="1" />
+                    <span style={{ fontSize: '12.5px' }}><L en="Blocks the satisfied outcome" ar="يحجب نتيجة الاستيفاء" /></span>
+                  </label>
+                  <button type="submit" style={{ height: 36, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, cursor: 'pointer' }}>
+                    <L en="Schedule" ar="جدولة" />
+                  </button>
+                </form>
+              </details>
             ) : null}
           </div>
 

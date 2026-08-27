@@ -14,14 +14,16 @@ import {
   unreadCountFor,
   governanceFor,
   inspectionsFor,
+  addedMeasuresFor,
 } from '../../../../lib/queries';
 import {
   documentsForLevel,
+  catalogueEntry,
   certifyRowGroups,
   commandFunctionRow, requirementsForLevel,
   type Level,
 } from '../../../../lib/rules';
-import { attachDocumentAction } from '../../../actions';
+import { attachDocumentAction, removeAttachmentAction, removeProviderAction, withdrawNominationAction } from '../../../actions';
 
 const upLabel: React.CSSProperties = {
   fontSize: '11.5px',
@@ -101,7 +103,18 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
   const fileNames = Object.fromEntries(attachments.map((a) => [a.docKey, a.fileName]));
   const invitations = invitationsFor(account.id, id);
   const providers = invitations.filter((i) => i.kind === 'ems');
-  const director = invitations.find((i) => i.kind === 'director') ?? null;
+  // Ministry-required measures land HERE -- the screen their notification links to.
+  // Until this panel existed the link arrived on a page that never mentioned them.
+  const ministryMeasures = addedMeasuresFor(id).filter((m) => !m.clearedAt);
+  // The ACTIVE director: a declined, withdrawn or removed one is history, and
+  // history must not hide the invite form -- a declined director with no way to
+  // name a replacement was a dead end.
+  const directorRows = invitations.filter((i) => i.kind === 'director');
+  const director =
+    directorRows.find((i) => i.status === 'nominated' || i.status === 'confirmed') ?? null;
+  const pastDirectors = directorRows.filter(
+    (i) => i.status === 'declined' || i.status === 'withdrawn' || i.status === 'removed',
+  );
 
   // Only what is genuinely ATTACHED counts here. The plan and the compliance form are
   // completed on the platform, and counting them as documents-left-to-attach made this
@@ -130,6 +143,8 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
     nominated: { en: 'Nominated', ar: 'مُسمّاة', bg: 'var(--surface2)', color: 'var(--muted)', noteEn: 'Has not answered yet', noteAr: 'لم تُجب بعد' },
     confirmed: { en: 'Confirmed', ar: 'مؤكِّدة', bg: 'var(--brand-soft)', color: 'var(--brand)', noteEn: 'Accepted and operational detail supplied', noteAr: 'قبلت وقدّمت التفاصيل التشغيلية' },
     declined: { en: 'Declined', ar: 'معتذرة', bg: 'var(--bad-soft)', color: 'var(--bad)', noteEn: 'A material change you must notify to the Ministry', noteAr: 'تغيير جوهري عليكم إبلاغ الوزارة به' },
+    withdrawn: { en: 'Withdrawn', ar: 'مسحوبة', bg: 'var(--surface)', color: 'var(--muted)', noteEn: 'You withdrew the nomination before an answer — no change report owed', noteAr: 'سحبتم الترشيح قبل الإجابة — لا إبلاغ عن تغيير مستحق' },
+    removed: { en: 'Removed', ar: 'مُزالة', bg: 'var(--surface)', color: 'var(--muted)', noteEn: 'You removed this confirmed party — a material change', noteAr: 'أزلتم هذا الطرف المؤكَّد — تغيير جوهري' },
   } as const;
   const declChip = {
     none: { en: 'No declaration', ar: 'لا إقرار', bg: 'var(--surface2)', color: 'var(--muted)' },
@@ -170,6 +185,40 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
             </div>
           </div>
         </div>
+
+        {ministryMeasures.length > 0 ? (
+          <div data-region="ministry-measures" style={{ marginBlockEnd: 40 }}>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
+              <L en="Required by the Ministry" ar="مطلوب من الوزارة" />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {ministryMeasures.map((m) => {
+                const doc = catalogueEntry(m.catalogKey);
+                return (
+                  <div key={m.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--accent-soft)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10 }}>
+                    <div style={{ fontSize: '14.5px', lineHeight: 1.5, marginBlockEnd: m.note ? 4 : 0 }}>
+                      {doc ? <L en={doc.en} ar={doc.ar} /> : m.catalogKey}
+                      {m.blocking ? (
+                        <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '1px 7px', border: '1px solid var(--accent)', borderRadius: 999, fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--accent-ink)' }}>
+                          <L en="Blocks the satisfied outcome" ar="يحجب نتيجة الاستيفاء" />
+                        </span>
+                      ) : null}
+                    </div>
+                    {m.note ? (
+                      <div style={{ fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>{m.note}</div>
+                    ) : null}
+                    <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 6, lineHeight: 1.55 }}>
+                      <L
+                        en={`Required ${m.recordedAt} by ${m.recordedBy}. Attach or revise the named document below; the Ministry clears the requirement on review.`}
+                        ar={`طُلب في ⁦${m.recordedAt}⁩ من ${m.recordedBy}. أرفقوا المستند المُسمّى أدناه أو نقّحوه؛ وتُقفل الوزارة المتطلب عند المراجعة.`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         {/* Group 1 — Documents to attach */}
         <div data-region="g1">
@@ -243,6 +292,40 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                       </button>
                     </form>
                   ) : null}
+                  {/* An attached document can be REPLACED (the revision loop the change
+                      screen promises) and, while nothing is filed, REMOVED. After
+                      filing, removal would falsify the filed record -- replacing is
+                      the honest correction, so only Replace remains. */}
+                  {doc.attach && done ? (
+                    <details>
+                      <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                        <span style={{ textDecoration: 'underline' }}>
+                          <L en="Replace or remove" ar="استبدال أو إزالة" />
+                        </span>
+                      </summary>
+                      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 8 }}>
+                        <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input type="hidden" name="docKey" value={doc.key} />
+                          <input type="file" name="file" required aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 230 }} />
+                          <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                            <L en="Replace" ar="استبدال" />
+                          </button>
+                        </form>
+                        {!event.filed ? (
+                          <form action={removeAttachmentAction.bind(null, id)}>
+                            <input type="hidden" name="docKey" value={doc.key} />
+                            <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                              <L en="Remove" ar="إزالة" />
+                            </button>
+                          </form>
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                            <L en="Filed submissions correct by replacement, never removal." ar="الملفات المقدَّمة تُصحَّح بالاستبدال لا بالإزالة." />
+                          </span>
+                        )}
+                      </div>
+                    </details>
+                  ) : null}
                 </div>
               </div>
             );
@@ -264,7 +347,14 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
             const part = partChip[p.status];
             const decl = declChip[p.declaration];
             const edge = p.status === 'confirmed' ? 'solid' : 'dashed';
-            const color = p.status === 'declined' ? 'var(--bad)' : p.status === 'nominated' ? 'var(--accent-ink)' : 'var(--brand)';
+            const closed = p.status === 'withdrawn' || p.status === 'removed';
+            const color = closed
+              ? 'var(--line)'
+              : p.status === 'declined'
+                ? 'var(--bad)'
+                : p.status === 'nominated'
+                  ? 'var(--accent-ink)'
+                  : 'var(--brand)';
             return (
               <div key={p.token} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${edge} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1, minWidth: 240 }}>
@@ -272,8 +362,22 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     <L en={p.nameEn} ar={p.nameAr} />
                   </div>
                   <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
-                    <L en={part.noteEn} ar={part.noteAr} />
+                    {p.status === 'declined' && !event.filed ? (
+                      // Nothing is filed: no change report is owed on a decline --
+                      // the fixed chip note claimed one regardless, wrongly.
+                      <L en="Declined. Nothing is filed yet, so no change report is owed — name another party." ar="اعتُذر. لا شيء مقدَّماً بعد، فلا إبلاغ عن تغيير مستحق — سمّوا طرفاً آخر." />
+                    ) : (
+                      <L en={part.noteEn} ar={part.noteAr} />
+                    )}
                   </div>
+                  {p.status === 'nominated' && p.responseNote ? (
+                    <div style={{ fontSize: '12.5px', color: 'var(--accent-ink)', marginBlockStart: 6, lineHeight: 1.55 }}>
+                      <L
+                        en={`Modification requested, as written: “${p.responseNote}”. The nomination stays open — answer by adjusting the event, or withdraw and renominate.`}
+                        ar={`طُلب تعديل، كما كُتب: «${p.responseNote}». يبقى الترشيح قائماً — أجيبوا بتعديل الفعالية، أو اسحبوا ورشّحوا من جديد.`}
+                      />
+                    </div>
+                  ) : null}
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 'none' }}>
                   <span style={{ padding: '4px 10px', borderRadius: 999, background: part.bg, color: part.color, fontSize: 13 }}>
@@ -286,6 +390,39 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                   ) : null}
                 </div>
                 {p.status === 'nominated' ? <InvitationLinkBlock token={p.token} /> : null}
+                {p.status === 'nominated' ? (
+                  <form action={withdrawNominationAction.bind(null, id)} style={{ flexBasis: '100%', display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                    <input type="hidden" name="token" value={p.token} />
+                    <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                      <L en="Withdraw the nomination" ar="سحب الترشيح" />
+                    </button>
+                    <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
+                      <L en="The invitation link stops working. Nothing was confirmed, so no change report is owed." ar="يتوقف رابط الدعوة عن العمل. لم يُؤكَّد شيء، فلا إبلاغ عن تغيير مستحق." />
+                    </span>
+                  </form>
+                ) : null}
+                {p.status === 'confirmed' ? (
+                  <details style={{ flexBasis: '100%' }}>
+                    <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                      <span style={{ textDecoration: 'underline' }}>
+                        <L en="Remove this provider" ar="إزالة هذا المزوّد" />
+                      </span>
+                    </summary>
+                    <form action={removeProviderAction.bind(null, id)} style={{ marginBlockStart: 10, padding: '12px 16px', background: 'var(--accent-soft)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                      <input type="hidden" name="token" value={p.token} />
+                      <span style={{ flex: 1, minWidth: 240, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
+                        {event.filed ? (
+                          <L en="Removing a confirmed party is a material change, and your submission is filed: the party will be notified, and a change report to the Ministry is required." ar="إزالة طرف مؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ الطرف، ويلزم إبلاغ الوزارة عن التغيير." />
+                        ) : (
+                          <L en="Removing a confirmed party is a material change: the party will be notified. Nothing is filed yet, so no change report is owed." ar="إزالة طرف مؤكَّد تغيير جوهري: سيُبلَّغ الطرف. لا شيء مقدَّم بعد، فلا إبلاغ عن تغيير مستحق." />
+                        )}
+                      </span>
+                      <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                        <L en="Remove — a material change" ar="إزالة — تغيير جوهري" />
+                      </button>
+                    </form>
+                  </details>
+                ) : null}
               </div>
             );
           })}
@@ -329,10 +466,51 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                   <L en={partChip[director.status].en} ar={partChip[director.status].ar} />
                 </span>
                 {director.status === 'nominated' ? <InvitationLinkBlock token={director.token} /> : null}
+                {director.status === 'nominated' ? (
+                  <form action={withdrawNominationAction.bind(null, id)} style={{ flexBasis: '100%', display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                    <input type="hidden" name="token" value={director.token} />
+                    <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                      <L en="Withdraw the nomination" ar="سحب الترشيح" />
+                    </button>
+                    <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
+                      <L en="The invitation link stops working. Nothing was confirmed, so no change report is owed." ar="يتوقف رابط الدعوة عن العمل. لم يُؤكَّد شيء، فلا إبلاغ عن تغيير مستحق." />
+                    </span>
+                  </form>
+                ) : null}
+                {director.status === 'confirmed' ? (
+                  <details style={{ flexBasis: '100%' }}>
+                    <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                      <span style={{ textDecoration: 'underline' }}>
+                        <L en="Remove the Event Medical Director" ar="إزالة المدير الطبي للفعالية" />
+                      </span>
+                    </summary>
+                    <form action={removeProviderAction.bind(null, id)} style={{ marginBlockStart: 10, padding: '12px 16px', background: 'var(--accent-soft)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                      <input type="hidden" name="token" value={director.token} />
+                      <span style={{ flex: 1, minWidth: 240, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
+                        {event.filed ? (
+                          <L en="Removing the confirmed Director is a material change, and your submission is filed: they will be notified, a change report is required, and the Level 3 package cannot be re-filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ، ويلزم إبلاغ عن التغيير، ولا يمكن إعادة تقديم ملف المستوى 3 دون مدير." />
+                        ) : (
+                          <L en="Removing the confirmed Director is a material change: they will be notified. The Level 3 package cannot be filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري: سيُبلَّغ. ولا يمكن تقديم ملف المستوى 3 دون مدير." />
+                        )}
+                      </span>
+                      <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                        <L en="Remove — a material change" ar="إزالة — تغيير جوهري" />
+                      </button>
+                    </form>
+                  </details>
+                ) : null}
               </div>
             ) : (
               <InviteForm eventId={id} kind="director" />
             )}
+            {pastDirectors.map((d) => (
+              <div key={d.token} style={{ padding: '12px 18px', background: 'var(--surface)', borderInlineStart: '3px dashed var(--line)', borderRadius: 10, marginBlockStart: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', fontSize: '13.5px', color: 'var(--muted)' }}>
+                <span><L en={d.nameEn} ar={d.nameAr} /></span>
+                <span style={{ padding: '3px 9px', borderRadius: 999, background: partChip[d.status].bg, color: partChip[d.status].color, fontSize: 12 }}>
+                  <L en={partChip[d.status].en} ar={partChip[d.status].ar} />
+                </span>
+              </div>
+            ))}
             <div style={{ marginBlockEnd: 52 }} />
           </>
         ) : null}

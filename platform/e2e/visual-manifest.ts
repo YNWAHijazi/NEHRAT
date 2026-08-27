@@ -94,6 +94,12 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
   },
   {
     id: 'organizer-dashboard',
+    // Held at 5%: the returned panel now shows the Ministry's RECORDED note
+    // verbatim where the reference hard-codes a demonstration demand -- the
+    // dead-end directive's fix (the panel used to state requirements nobody
+    // recorded). The note's text is asserted verbatim in e2e/app/ministry.spec.ts;
+    // everything else on the page still compares inside the hold.
+    threshold: 0.05,
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Dashboard',
     builtRoute: '/dashboard',
@@ -244,10 +250,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'package-docs',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'headingBlock', text: 'Submission package' },
         builtSelector: '[data-region="package-docs"]',
-        note: 'The package document rows and their states. Held at 2%.',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): each incomplete row now carries the control that answers it -- Open the plan, Complete it below, Attach on the requirements screen -- where the reference shows a chip with nothing to act on. 'Awaiting you' with no control in reach was a corridor. Row titles and chip states are unchanged and exercised by the filing e2e; UNVERIFIED as to pixels since the flip.",
       },
     ],
   },
@@ -421,10 +427,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'counters',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'requirements apply at this level', container: 'display: flex' },
         builtSelector: '[data-region="counters"]',
-        note: 'The two counter cards. Held at 2%. The attachments figure derives from the requirements matrix on the built side; the reference reuses its event fixture for the same number.',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): the reference's counter reads 'attachments outstanding' on a record with no attach mechanism anywhere -- a counter claiming work that could not be done. The built counter names what it counts and links to the annual assessment, where the documents actually travel. UNVERIFIED as to pixels since the flip.",
       },
       {
         name: 'requirements',
@@ -534,10 +540,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'ministry-request',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Requested by the Ministry', container: 'border-radius: 14px' },
         builtSelector: '[data-region="ministry-request"]',
-        note: 'The corrective-action request, recorded by the Ministry and displayed here. Held at 2%.',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): the request now carries its status chip, its due date or the named reason none is computed, the Ministry's close note where closed, and a link to the control that answers it. The reference shows body text and a link to /notifications, where nothing could be done. UNVERIFIED as to pixels since the flip.",
       },
     ],
   },
@@ -773,10 +779,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'doc-list',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Event health and medical plan — version 3', container: 'flex-direction: column' },
         builtSelector: '[data-region="doc-list"]',
-        note: 'The five rows, one per state, dates pinned by the review clock. Held at 2%.',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): rows in 'Awaiting you' and 'Missing' states now carry a working add-the-file control; the reference defines CTAs in its state map and never renders one. UNVERIFIED as to pixels since the flip.",
       },
     ],
   },

@@ -6,7 +6,7 @@ import { StartServiceMenu } from '../../components/StartServiceMenu';
 import { SequenceFooter, type SequenceStep } from '../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
-import { invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
+import { determinationsFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
 import { REASSESSMENT_WINDOW, landingRouteFor, usesOrganizerSurface } from '../../lib/rules';
 import {
@@ -161,9 +161,14 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
   );
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ notice?: string }>;
+}) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
+  const notice = (await searchParams)?.notice;
   // This surface belongs to the organizer, the EMS provider and the Director. Every
   // other role is REFUSED here, the same way every unpermitted surface refuses: a 404,
   // indistinguishable from non-existence, so a role cannot map what sits above its
@@ -235,6 +240,7 @@ export default async function DashboardPage() {
   const returned = events.find(
     (e) => e.outcome === 'revision' || e.stateEn === 'Information required',
   );
+  const returnedNote = returned ? (determinationsFor(returned.id)[0]?.note ?? '') : '';
   const empty = events.length === 0 && venues.length === 0 && facilities.length === 0;
 
   return (
@@ -269,16 +275,38 @@ export default async function DashboardPage() {
           </Link>
         ) : null}
 
+        {notice === 'interest' ? (
+          <div data-region="interest-notice" style={{ padding: '18px 24px', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
+            <L
+              en="Interest recorded. No obligation is in force for that category until the Ministry publishes its value; you are notified when it does, and registration opens then."
+              ar="سُجّل الاهتمام. لا يسري أي موجب على تلك الفئة قبل نشر الوزارة قيمتها؛ وتُبلَّغون عند نشرها، ويُفتح التسجيل حينها."
+            />
+          </div>
+        ) : null}
+        {notice === 'draft-deleted' ? (
+          <div style={{ padding: '18px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
+            <L en="The draft was deleted. Nothing had been filed, so nothing is owed by anyone." ar="حُذفت المسودة. لم يكن شيء قد قُدّم، فلا شيء مستحقاً على أحد." />
+          </div>
+        ) : null}
         {returned ? (
           <div style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Awaiting your response" ar="بانتظار ردكم" />
             </div>
             <div style={{ fontSize: 16, lineHeight: 1.6 }}>
-              <L
-                en={`${returned.nameEn} — the Ministry requires the medical deployment map and one EMS Readiness Declaration. Respond by ${returned.due ?? ''}.`}
-                ar={`${returned.nameAr} — تطلب الوزارة خريطة الانتشار الطبي وإقرار جاهزية واحد. الرد بحلول \u2066${returned.due ?? ''}\u2069.`}
-              />
+              {/* The Ministry's ACTUAL note, verbatim -- this panel used to hard-code
+                  a demonstration demand regardless of what was recorded. */}
+              {returnedNote ? (
+                <L
+                  en={`${returned.nameEn} — the Ministry's note, as written: “${returnedNote}”${returned.due ? ` Respond by ${returned.due}.` : ''}`}
+                  ar={`${returned.nameAr} — ملاحظة الوزارة كما كُتبت: «${returnedNote}»${returned.due ? ` الرد بحلول \u2066${returned.due}\u2069.` : ''}`}
+                />
+              ) : (
+                <L
+                  en={`${returned.nameEn} — the Ministry requires additional information or revision. Open the record for the details.${returned.due ? ` Respond by ${returned.due}.` : ''}`}
+                  ar={`${returned.nameAr} — تطلب الوزارة معلومات إضافية أو تعديلاً. افتحوا السجل للتفاصيل.${returned.due ? ` الرد بحلول \u2066${returned.due}\u2069.` : ''}`}
+                />
+              )}
             </div>
           </div>
         ) : null}

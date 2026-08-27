@@ -179,7 +179,12 @@
       "configureMassGathering",
       "configureCardiac",
       "manageUsers",
-      "viewRegistry"
+      "viewRegistry",
+      "assignReview",
+      "recordOrganization",
+      "respondEnquiry",
+      "recordCorrective",
+      "requireMeasures"
     ],
     "order": [
       "orderVerify"

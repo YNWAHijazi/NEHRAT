@@ -104,7 +104,17 @@ export default async function IncidentsPage() {
                     </span>
                   </span>
                   <span style={{ padding: '3px 9px', borderRadius: 999, background: complete ? 'var(--brand-soft)' : 'var(--accent-soft)', color: complete ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px', alignSelf: 'center' }}>
-                    {complete ? <L en="Both signatures recorded" ar="سُجّل التوقيعان" /> : <L en="Signatures incomplete" ar="التواقيع غير مكتملة" />}
+                    {/* WHO is missing, named -- an outstanding state whose owner the
+                        viewer cannot act on must at least name the owner. */}
+                    {complete ? (
+                      <L en="Both signatures recorded" ar="سُجّل التوقيعان" />
+                    ) : !r.organizer_signed_at && !r.director_signed_at ? (
+                      <L en="Awaiting both signatures — the organizer's and the Director's" ar="بانتظار التوقيعين — توقيع المنظّم وتوقيع المدير" />
+                    ) : !r.organizer_signed_at ? (
+                      <L en="Awaiting the organizer's signature" ar="بانتظار توقيع المنظّم" />
+                    ) : (
+                      <L en="Awaiting the Event Medical Director's signature" ar="بانتظار توقيع المدير الطبي للفعالية" />
+                    )}
                   </span>
                 </div>
               );

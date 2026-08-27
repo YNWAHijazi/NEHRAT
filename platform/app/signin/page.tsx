@@ -91,8 +91,8 @@ const DEMO_LOGINS: DemoLogin[] = [
   },
   {
     login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة',
-    canEn: 'Configure the instrument and the cardiac policy, manage users, view the registry.',
-    canAr: 'ضبط الإطار وسياسة توقف القلب، وإدارة المستخدمين، والاطلاع على السجل.',
+    canEn: 'Configure the instrument and the cardiac policy, manage users, record organizations, answer enquiries, assign submissions, require measures and record corrective actions.',
+    canAr: 'ضبط الإطار وسياسة توقف القلب، وإدارة المستخدمين، وتثبيت المؤسسات، والرد على الاستفسارات، وإسناد التقديمات، واشتراط التدابير، وتسجيل الإجراءات التصحيحية.',
     cannotEn: 'Record any outcome. Use the reviewer above for determinations.',
     cannotAr: 'تسجيل أي نتيجة. استخدموا المراجع أعلاه للقرارات.',
   },

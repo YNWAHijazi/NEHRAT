@@ -10,6 +10,7 @@
 
 import attachmentsCatalog from './data/attachments-catalog.json';
 import complianceJson from './data/compliance-form.json';
+import lifecycleJson from './data/lifecycle.json';
 import planJson from './data/plan.json';
 import type { Level } from './types';
 import type { RequirementRow } from './requirements';
@@ -90,13 +91,15 @@ export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
 
 export interface SubmissionFacts {
   level: Level;
-  organizationStatus: 'none' | 'pending' | 'recorded';
+  /** 'cancelled' closes the record: nothing further files. Defaults to active. */
+  lifecycle?: 'active' | 'cancelled' | 'postponed';
+  organizationStatus: 'none' | 'pending' | 'recorded' | 'returned';
   /** doc_key -> attached (system and platform docs report their own completeness). */
   documentState: Record<string, boolean>;
   /** Named EMS providers and their answers. */
-  providers: { name: string; status: 'nominated' | 'confirmed' | 'declined'; declaration: 'none' | 'draft' | 'signed' }[];
+  providers: { name: string; status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed'; declaration: 'none' | 'draft' | 'signed' }[];
   /** The Event Medical Director invitation, when the level requires one. */
-  director: { status: 'nominated' | 'confirmed' | 'declined' } | null;
+  director: { status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed' } | null;
   /** All eight applicable declarations ticked on the compliance form. */
   declarationsComplete: boolean;
   /** Today vs the filing deadline (Asia/Beirut dates, YYYY-MM-DD). */
@@ -111,7 +114,8 @@ export type BlockerKind =
   | 'declarationUnsigned'
   | 'directorMissing'
   | 'directorUnanswered'
-  | 'declarationsIncomplete';
+  | 'declarationsIncomplete'
+  | 'eventCancelled';
 
 export interface SubmissionBlocker {
   kind: BlockerKind;
@@ -135,6 +139,13 @@ export interface SubmissionGate {
 
 export function submissionGate(facts: SubmissionFacts): SubmissionGate {
   const blockers: SubmissionBlocker[] = [];
+  if (facts.lifecycle === 'cancelled') {
+    blockers.push({
+      kind: 'eventCancelled',
+      itemEn: lifecycleJson.blockerCancelledEn,
+      itemAr: lifecycleJson.blockerCancelledAr,
+    });
+  }
 
   if (facts.organizationStatus !== 'recorded') {
     blockers.push({
@@ -370,4 +381,15 @@ export function certifyRowGroups(rows: readonly RequirementRow[]): {
     everyLevel: rows.filter((r) => !r.raised),
     addedOrRaised: rows.filter((r) => r.raised),
   };
+}
+
+/**
+ * One catalogue entry by key, for surfaces that name a document outside a level's
+ * own list -- a Ministry-required measure may name any catalogue document.
+ */
+export function catalogueEntry(key: string): { key: string; en: string; ar: string } | null {
+  const doc = (attachmentsCatalog.documents as { key: string; en: string; ar: string }[]).find(
+    (d) => d.key === key,
+  );
+  return doc ? { key: doc.key, en: doc.en, ar: doc.ar } : null;
 }

@@ -174,12 +174,18 @@ export default async function DirectorReportPage({
                   <div style={{ fontSize: 15, fontWeight: 500 }}>
                     <L en="Event Medical Director" ar="المدير الطبي للفعالية" />
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: 999, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', color: directorSigned ? 'var(--brand)' : 'var(--bad)', fontSize: 13 }}>
-                    {directorSigned ? <L en="Signed" ar="وُقّع" /> : <L en="Awaiting your signature" ar="بانتظار توقيعكم" />}
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: directorSigned ? 'var(--brand-soft)' : report?.directorReturnedAt ? 'var(--accent-soft)' : 'var(--bad-soft)', color: directorSigned ? 'var(--brand)' : report?.directorReturnedAt ? 'var(--accent-ink)' : 'var(--bad)', fontSize: 13 }}>
+                    {directorSigned ? (
+                      <L en="Signed" ar="وُقّع" />
+                    ) : report?.directorReturnedAt ? (
+                      <L en={`Returned ${report.directorReturnedAt} — with the organizer for revision`} ar={`أُعيد في ⁦${report.directorReturnedAt}⁩ — لدى المنظّم للتنقيح`} />
+                    ) : (
+                      <L en="Awaiting your signature" ar="بانتظار توقيعكم" />
+                    )}
                   </span>
                 </div>
               </div>
-              {!directorSigned ? (
+              {!directorSigned && !report?.directorReturnedAt ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                   <form action={signPostEventReportAction.bind(null, id)}>
                     <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>

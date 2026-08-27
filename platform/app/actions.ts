@@ -174,7 +174,11 @@ export async function registerOrganizationAction(formData: FormData): Promise<vo
     .prepare(
       `INSERT INTO organizations (account_id, name_en, name_ar, status, is_demo)
        VALUES (?, ?, ?, 'pending', ?)
-       ON CONFLICT (account_id) DO UPDATE SET name_en = excluded.name_en, name_ar = excluded.name_ar`,
+       ON CONFLICT (account_id) DO UPDATE SET name_en = excluded.name_en, name_ar = excluded.name_ar,
+         -- Re-submitting a RETURNED filing sets it pending again; a recorded one is
+         -- untouched (the guard below never routes a recorded org here).
+         status = CASE WHEN organizations.status = 'returned' THEN 'pending' ELSE organizations.status END,
+         return_reason = CASE WHEN organizations.status = 'returned' THEN NULL ELSE organizations.return_reason END`,
     )
     .run(account.id, nameEn, nameAr, account.isDemo ? 1 : 0);
   revalidatePath('/organization');
@@ -528,7 +532,10 @@ export async function savePostEventReportAction(eventId: string, payload: PostEv
        VALUES (?, ?, ?, ?, ?)
        ON CONFLICT (event_id) DO UPDATE SET
          activity = excluded.activity, significant = excluded.significant,
-         lessons_none = excluded.lessons_none, lessons_text = excluded.lessons_text`,
+         lessons_none = excluded.lessons_none, lessons_text = excluded.lessons_text,
+         -- Revising the report ANSWERS a Director's return: the returned state
+         -- clears, and the Director signs the revised version.
+         director_returned_at = NULL, director_return_note = NULL`,
     )
     .run(eventId, JSON.stringify(payload.activity), JSON.stringify(payload.significant), payload.lessonsNone ? 1 : 0, payload.lessonsText);
   revalidatePath(`/events/${eventId}/post-event`);
@@ -832,9 +839,9 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   }
 
   db.prepare(
-    `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative)
-     VALUES (?, ?, ?, ?)`,
-  ).run(facilityId, label, purpose, s('representative'));
+    `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative, reason)
+     VALUES (?, ?, ?, ?, NULLIF(?, ''))`,
+  ).run(facilityId, label, purpose, s('representative'), s('reason'));
   revalidatePath(`/facilities/${facilityId}/devices`);
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}/devices?notice=saved`);
@@ -858,6 +865,15 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
       String(formData.get('coordinator') ?? '').trim(),
       String(formData.get('position') ?? '').trim(),
     );
+  // Recording the confirmation ANSWERS any open Ministry readiness-confirmation
+  // request -- the request closes itself, with the closure naming this recording.
+  getDb()
+    .prepare(
+      `UPDATE facility_requests SET status = 'corrected', corrected_at = now_stamp(),
+         close_note = 'Closed by the operator recording the readiness confirmation.', closed_by = ?
+       WHERE facility_id = ? AND status = 'open' AND kind = 'confirmation'`,
+    )
+    .run(account.displayName, facilityId);
   revalidatePath(`/facilities/${facilityId}/plan`);
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}?notice=confirmed`);
@@ -929,6 +945,95 @@ function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string
 }
 
 /**
+ * The organizer's side of an open nomination: withdraw it, or remove a confirmed
+ * party. Two different acts with two different weights, and the screen says which
+ * is which BEFORE the click:
+ *
+ *  - WITHDRAW an unanswered nomination. Available at every level. The token dies
+ *    for registration, the nominee's page shows it withdrawn rather than pending,
+ *    and NO material change arises -- nothing was ever confirmed. This closes the
+ *    trap where one confirmed provider and one unanswered nomination blocked
+ *    filing with nothing the organizer could do.
+ *
+ *  - REMOVE a confirmed party. Available at every level, and a MATERIAL CHANGE:
+ *    the party is notified, and if the submission is already filed the organizer
+ *    owes a change report -- the same rule the decline path already applies.
+ */
+export async function withdrawNominationAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const token = String(formData.get('token') ?? '');
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
+    .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
+  // Only an UNANSWERED nomination withdraws; anything else is not this act.
+  if (!inv || inv.status !== 'nominated') redirect(`/events/${eventId}/requirements`);
+  db.prepare(`UPDATE invitations SET status = 'withdrawn', closed_at = now_stamp() WHERE token = ?`).run(token);
+  // A modification-requested nominee holds an account already; they are told, for
+  // information -- there is nothing for them to do.
+  if (inv.account_id !== null) {
+    const ev = db.prepare(`SELECT name_en, name_ar, is_demo FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; is_demo: number };
+    db.prepare(
+      `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+       VALUES (?, 'for_information', ?, ?, ?, ?, '/profile', now_stamp(), ?)`,
+    ).run(
+      inv.account_id,
+      `Nomination withdrawn — ${ev.name_en}`, `سُحب الترشيح — ${ev.name_ar}`,
+      'The organizer has withdrawn the nomination before it was answered. No action is owed.',
+      'سحب المنظّم الترشيح قبل الإجابة عليه. لا إجراء مستحق.',
+      ev.is_demo,
+    );
+  }
+  redirect(`/events/${eventId}/requirements?notice=withdrawn`);
+}
+
+export async function removeProviderAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const token = String(formData.get('token') ?? '');
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
+    .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
+  // Only a CONFIRMED party removes; an unanswered one withdraws instead.
+  if (!inv || inv.status !== 'confirmed') redirect(`/events/${eventId}/requirements`);
+  db.prepare(`UPDATE invitations SET status = 'removed', closed_at = now_stamp() WHERE token = ?`).run(token);
+
+  const ev = db.prepare(`SELECT name_en, name_ar, filed, is_demo FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; filed: number; is_demo: number };
+  const roleEn = inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director';
+  const roleAr = inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ الطبية' : 'المدير الطبي للفعالية';
+  // The removed party is told. Their record of the event closes with this.
+  if (inv.account_id !== null) {
+    db.prepare(
+      `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+       VALUES (?, 'for_information', ?, ?, ?, ?, '/profile', now_stamp(), ?)`,
+    ).run(
+      inv.account_id,
+      `Removed as ${roleEn} — ${ev.name_en}`, `إزالة بصفة ${roleAr} — ${ev.name_ar}`,
+      `The organizer has removed your organization from this event. Your participation record is closed; nothing further is owed on it.`,
+      'أزال المنظّم مؤسستكم من هذه الفعالية. أُغلق سجل مشاركتكم، ولا شيء مستحق عليه بعد الآن.',
+      ev.is_demo,
+    );
+  }
+  // Filed: the change report is owed, and the obligation is put in writing -- the
+  // same weight the decline path gives it.
+  if (ev.filed === 1) {
+    notifyOrganizerOf(
+      eventId,
+      `Change report owed — ${ev.name_en}`, `إبلاغ عن تغيير مستحق — ${ev.name_ar}`,
+      `You removed the confirmed ${roleEn}. This is a material change to your filed submission: report it to the Ministry and, where the level requires one, name another party.`,
+      `أزلتم ${roleAr} المؤكَّد. هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به، وسمّوا طرفاً آخر حيث يقتضي المستوى ذلك.`,
+      `/events/${eventId}/change`,
+    );
+    redirect(`/events/${eventId}/change?notice=provider-removed`);
+  }
+  redirect(`/events/${eventId}/requirements?notice=removed`);
+}
+
+/**
  * The nomination response. The token is the credential (rule 6): the holder responds
  * to this one nomination and sees nothing else. Accepting links the session's
  * account; declining requires a reason and is a material change the organizer must
@@ -937,6 +1042,11 @@ function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string
 export async function respondToInvitationAction(token: string, formData: FormData): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
+  // A withdrawn or removed nomination is dead for responding AND for registering:
+  // the token page shows the closed state; nothing can be done against it.
+  if (inv.status === 'withdrawn' || inv.status === 'removed') {
+    redirect(`/invitations/${token}`);
+  }
   let account = await currentAccount();
   if (!account) {
     // Self-registration AGAINST the invitation (rule 6): the account is created from
@@ -1226,6 +1336,11 @@ export async function returnPostEventReportAction(eventId: string, formData: For
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
   const reason = String(formData.get('reason') ?? '').trim();
+  // RECORDED on the report row, not just notified: the Director's own screen shows
+  // the returned state, and the organizer's screen shows the reason verbatim.
+  getDb()
+    .prepare(`UPDATE post_event_reports SET director_returned_at = now_stamp(), director_return_note = ? WHERE event_id = ?`)
+    .run(reason, eventId);
   const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string };
   notifyOrganizerOf(
     eventId,
@@ -1240,4 +1355,226 @@ export async function returnPostEventReportAction(eventId: string, formData: For
     `/events/${eventId}/post-event`,
   );
   redirect(`/events/${eventId}/report?notice=returned`);
+}
+
+/**
+ * Cancellation and postponement (Protocol 8.5 / 9(vii)). A lifecycle, never a
+ * deletion: the record and any reference number survive readable. Cancelling
+ * closes every remaining obligation; postponing leaves the record open and the
+ * recorded determination DOES NOT CARRY to a new date -- the screens say so.
+ * The Ministry reads both in its changes lane, from the event row itself.
+ */
+export async function cancelEventAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const reason = String(formData.get('reason') ?? '').trim();
+  if (!reason) redirect(`/events/${eventId}/lifecycle?error=reason`);
+  const db = getDb();
+  const ev = db.prepare(`SELECT lifecycle FROM events WHERE id = ?`).get(eventId) as { lifecycle: string };
+  // A POSTPONED event can still be cancelled -- refusing that was a dead end of this
+  // action's own making. Only an already-cancelled record refuses.
+  if (ev.lifecycle === 'cancelled') redirect(`/events/${eventId}`);
+  db.prepare(
+    `UPDATE events SET lifecycle = 'cancelled', lifecycle_at = now_stamp(), lifecycle_note = ? WHERE id = ?`,
+  ).run(reason, eventId);
+  redirect(`/events/${eventId}?notice=cancelled`);
+}
+
+export async function postponeEventAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const reason = String(formData.get('reason') ?? '').trim();
+  const newDate = String(formData.get('newDate') ?? '').trim();
+  if (!reason) redirect(`/events/${eventId}/lifecycle?error=reason`);
+  const db = getDb();
+  const ev = db.prepare(`SELECT lifecycle FROM events WHERE id = ?`).get(eventId) as { lifecycle: string };
+  // Recording the new date LATER re-runs this action on an already-postponed event.
+  if (ev.lifecycle === 'cancelled') redirect(`/events/${eventId}`);
+  db.prepare(
+    `UPDATE events SET lifecycle = 'postponed', lifecycle_at = COALESCE(lifecycle_at, now_stamp()), lifecycle_note = ?, postponed_to = ? WHERE id = ?`,
+  ).run(reason, newDate || null, eventId);
+  redirect(`/events/${eventId}?notice=postponed`);
+}
+
+/**
+ * Remove an attachment -- ONLY while nothing is filed. A filed submission's record
+ * corrects by replacement, never by removal: taking a document out of a filed
+ * package would silently falsify what the Ministry received.
+ */
+export async function removeAttachmentAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const docKey = String(formData.get('docKey') ?? '');
+  const db = getDb();
+  const ev = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number };
+  if (ev.filed === 1) redirect(`/events/${eventId}/requirements`);
+  db.prepare(`DELETE FROM event_attachments WHERE event_id = ? AND doc_key = ?`).run(eventId, docKey);
+  redirect(`/events/${eventId}/requirements`);
+}
+
+/**
+ * Edit the DESCRIPTIVE details of an event: names, venue or route, municipalities,
+ * times. The figures the classification depends on are deliberately NOT here --
+ * they change through a reassessment, where the level re-derives. Dates ARE here:
+ * a date change on a filed event is a material change, and the screen says so.
+ */
+export async function editEventDetailsAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const nameEn = String(formData.get('nameEn') ?? '').trim();
+  const nameAr = String(formData.get('nameAr') ?? '').trim();
+  const startDate = String(formData.get('startDate') ?? '').trim();
+  const endDate = String(formData.get('endDate') ?? '').trim();
+  const venueRoute = String(formData.get('venueRoute') ?? '').trim();
+  const municipalities = String(formData.get('municipalities') ?? '').trim();
+  if (!nameEn || !nameAr || !startDate || !endDate) redirect(`/events/${eventId}/edit?error=required`);
+  getDb()
+    .prepare(
+      `UPDATE events SET name_en = ?, name_ar = ?, start_date = ?, end_date = ?, venue_route = ?, municipalities = ? WHERE id = ?`,
+    )
+    .run(nameEn, nameAr, startDate, endDate, venueRoute, municipalities, eventId);
+  redirect(`/events/${eventId}?notice=details-saved`);
+}
+
+/**
+ * Delete a DRAFT -- a never-filed event only. Once filed, the record is the
+ * Ministry's too and closes through cancellation, never deletion. Nominated
+ * parties who already hold accounts are told the record is gone.
+ */
+export async function deleteDraftEventAction(eventId: string): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  const db = getDb();
+  const ev = db.prepare(`SELECT filed, name_en, name_ar, is_demo FROM events WHERE id = ?`).get(eventId) as { filed: number; name_en: string; name_ar: string; is_demo: number };
+  if (ev.filed === 1) redirect(`/events/${eventId}`);
+  const holders = db
+    .prepare(`SELECT DISTINCT account_id FROM invitations WHERE event_id = ? AND account_id IS NOT NULL`)
+    .all(eventId) as { account_id: number }[];
+  for (const h of holders) {
+    db.prepare(
+      `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+       VALUES (?, 'for_information', ?, ?, ?, ?, '/profile', now_stamp(), ?)`,
+    ).run(
+      h.account_id,
+      `Draft event deleted — ${ev.name_en}`, `حُذفت مسودة الفعالية — ${ev.name_ar}`,
+      'The organizer deleted this draft before anything was filed. Nothing is owed by anyone.',
+      'حذف المنظّم هذه المسودة قبل تقديم أي شيء. لا شيء مستحق على أحد.',
+      ev.is_demo,
+    );
+  }
+  for (const table of ['attestations', 'invitations', 'event_attachments', 'assessments', 'plans', 'plan_versions', 'submissions', 'submission_versions', 'enquiries', 'material_changes']) {
+    db.prepare(`DELETE FROM ${table} WHERE event_id = ?`).run(eventId);
+  }
+  db.prepare(`DELETE FROM events WHERE id = ?`).run(eventId);
+  redirect('/dashboard?notice=draft-deleted');
+}
+
+/**
+ * The PROVIDER's own withdrawal after confirming -- the counterpart of the
+ * organizer's remove. It rides the decline machinery deliberately: a
+ * post-confirmation withdrawal is the provider declining to serve, it carries a
+ * reason verbatim, and it is a material change on the organizer's record with
+ * the same filed/unfiled consequence the decline path already states.
+ */
+export async function withdrawParticipationAction(token: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const reason = String(formData.get('reason') ?? '').trim();
+  if (!reason) redirect('/dashboard');
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT token, event_id, kind, status FROM invitations WHERE token = ? AND account_id = ?`)
+    .get(token, account.id) as { token: string; event_id: string; kind: 'ems' | 'director'; status: string } | undefined;
+  if (!inv || inv.status !== 'confirmed') redirect('/dashboard');
+  db.prepare(
+    `UPDATE invitations SET status = 'declined', response_note = ?, answered_at = now_stamp() WHERE token = ?`,
+  ).run(reason, token);
+  const ev = db.prepare(`SELECT name_en, name_ar, filed FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string; filed: number };
+  const evFiled = ev.filed === 1;
+  notifyOrganizerOf(
+    inv.event_id,
+    `A confirmed party has withdrawn — ${ev.name_en}`,
+    `انسحب طرف مؤكَّد — ${ev.name_ar}`,
+    evFiled
+      ? `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
+      : `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
+    evFiled
+      ? `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
+      : `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
+    evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
+  );
+  redirect('/dashboard?notice=withdrawn');
+}
+
+/**
+ * Re-open a signed declaration after a material change. The signature attested
+ * to the event as it was; a change reported after it returns the declaration to
+ * DRAFT with the ten confirmations kept -- the provider reviews each against the
+ * changed event and signs again. The organizer is told the declaration is no
+ * longer signed, because their Level 3 gate just closed.
+ */
+export async function reopenDeclarationAction(token: string): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT token, event_id, signed_at FROM invitations WHERE token = ? AND account_id = ? AND declaration = 'signed'`)
+    .get(token, account.id) as { token: string; event_id: string; signed_at: string | null } | undefined;
+  if (!inv) redirect('/dashboard');
+  // Only a change dated after the signature re-opens; the control renders only
+  // then, and the action re-checks rather than trusting the screen.
+  const change = db
+    .prepare(`SELECT id FROM material_changes WHERE event_id = ? AND reported_at > ? LIMIT 1`)
+    .get(inv.event_id, inv.signed_at ?? '') as { id: number } | undefined;
+  if (!change) redirect(`/events/${inv.event_id}/declaration`);
+  db.prepare(`UPDATE invitations SET declaration = 'draft', signed_at = NULL WHERE token = ?`).run(token);
+  const ev = db.prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
+  notifyOrganizerOf(
+    inv.event_id,
+    `A readiness declaration was re-opened — ${ev.name_en}`,
+    `أُعيد فتح إقرار جاهزية — ${ev.name_ar}`,
+    'Following your reported material change, a named provider has re-opened their signed readiness declaration to review it against the changed event. The Level 3 package waits on their new signature.',
+    'بعد إبلاغكم عن تغيير جوهري، أعاد مزوّد مُسمّى فتح إقرار جاهزيته الموقَّع لمراجعته على الفعالية المتغيّرة. وينتظر ملف المستوى 3 توقيعه الجديد.',
+    `/events/${inv.event_id}/requirements`,
+  );
+  redirect(`/events/${inv.event_id}/declaration?notice=reopened`);
+}
+
+/** The Director maintains the credential record the Order verifies against. */
+export async function saveCredentialAction(formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (account.role !== 'director') redirect('/dashboard');
+  const licence = String(formData.get('licence') ?? '').trim();
+  getDb().prepare(`UPDATE accounts SET credential_licence = ? WHERE id = ?`).run(licence, account.id);
+  revalidatePath('/credentials');
+  redirect('/credentials?notice=saved');
+}
+
+/**
+ * The counterparty answers a document request on the shared list. Name-only
+ * storage, like every attachment (recorded deployment decision); adding turns the
+ * row to the provider's, and the organizer sees it on the same shared list.
+ */
+export async function answerDocumentRequestAction(token: string, docId: number, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT token FROM invitations WHERE token = ? AND account_id = ?`)
+    .get(token, account.id) as { token: string } | undefined;
+  if (!inv) redirect('/dashboard');
+  const file = formData.get('file');
+  const fileName = file instanceof File ? file.name : '';
+  if (!fileName) redirect('/dashboard');
+  db.prepare(
+    `UPDATE shared_documents SET source = 'provider', file_name = ?, meta_en = ?, meta_ar = ?, added_at = now_stamp()
+     WHERE id = ? AND invitation_token = ?`,
+  ).run(fileName, `Added by you · ${fileName}`, `أضفتموه · ${fileName}`, docId, token);
+  redirect(`/events/${(db.prepare(`SELECT event_id FROM invitations WHERE token = ?`).get(token) as { event_id: string }).event_id}/documents`);
 }

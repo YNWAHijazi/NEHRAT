@@ -116,8 +116,12 @@ function migrate(d: DatabaseSync): void {
       name_en TEXT NOT NULL,
       name_ar TEXT NOT NULL,
       -- none: nothing filed. pending: filed, awaiting Ministry recording. recorded.
-      status TEXT NOT NULL DEFAULT 'none' CHECK (status IN ('none','pending','recorded')),
+      -- returned: the Ministry returned it with a reason; the organizer edits and
+      -- re-submits, which sets pending again.
+      status TEXT NOT NULL DEFAULT 'none' CHECK (status IN ('none','pending','recorded','returned')),
       recorded_at TEXT,
+      return_reason TEXT,
+      returned_at TEXT,
       is_demo INTEGER NOT NULL DEFAULT 0
     );
 
@@ -186,7 +190,12 @@ function migrate(d: DatabaseSync): void {
       name_en TEXT NOT NULL,
       name_ar TEXT NOT NULL DEFAULT '',
       email TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'nominated' CHECK (status IN ('nominated','confirmed','declined')),
+      -- 'withdrawn': the organizer pulled an UNANSWERED nomination -- the token dies
+      -- for registration, the nominee's page shows it withdrawn, and no material
+      -- change arises because nothing was ever confirmed. 'removed': the organizer
+      -- removed a CONFIRMED party -- a material change, the party is notified, and a
+      -- filed submission owes a change report.
+      status TEXT NOT NULL DEFAULT 'nominated' CHECK (status IN ('nominated','confirmed','declined','withdrawn','removed')),
       declaration TEXT NOT NULL DEFAULT 'none' CHECK (declaration IN ('none','draft','signed')),
       -- Slice 5: the counterparty's side of the nomination. The account links on
       -- acceptance; a decline carries its reason (a material change the organizer
@@ -198,7 +207,8 @@ function migrate(d: DatabaseSync): void {
       certification TEXT NOT NULL DEFAULT '{}',   -- JSON: the provider certification block
       signed_at TEXT,
       invited_at TEXT NOT NULL DEFAULT (datetime('now')),
-      answered_at TEXT
+      answered_at TEXT,
+      closed_at TEXT                   -- when withdrawn or removed, by the organizer
     );
 
     -- Shared documents between the organizer and ONE named provider: one list,
@@ -494,6 +504,25 @@ function migrate(d: DatabaseSync): void {
       is_demo INTEGER NOT NULL DEFAULT 0
     );
 
+    -- Applicability (Protocol 3): referrals logged from outside, and the Ministry's
+    -- in-scope / out-of-scope determination with its reasons. An in-scope
+    -- determination may DESIGNATE the event -- the instrument's mechanism for
+    -- bringing an unregistered mass gathering into the process. The record is the
+    -- Ministry's own: no organizer account exists yet, so nothing here scopes to one.
+    CREATE TABLE IF NOT EXISTS applicability_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_name TEXT NOT NULL,
+      source TEXT NOT NULL DEFAULT '',       -- who referred it (municipality, authority)
+      note TEXT NOT NULL DEFAULT '',
+      determination TEXT NOT NULL DEFAULT 'undetermined' CHECK (determination IN ('undetermined','in_scope','out_of_scope')),
+      reasons TEXT NOT NULL DEFAULT '',
+      designated INTEGER NOT NULL DEFAULT 0,
+      recorded_by TEXT NOT NULL DEFAULT '',
+      determined_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      is_demo INTEGER NOT NULL DEFAULT 0
+    );
+
     -- Record an interest: the end of the journey for a category awaiting a Ministry
     -- value. The operator is notified when the value activates.
     CREATE TABLE IF NOT EXISTS facility_interests (
@@ -643,6 +672,90 @@ function migrate(d: DatabaseSync): void {
   // the generic 'major' kind rather than crashing every screen that lists them.
   addColumn('serious_incident_notifications', 'incident_type', "incident_type TEXT NOT NULL DEFAULT 'major'");
   addColumn('serious_incident_notifications', 'occurred_at', "occurred_at TEXT NOT NULL DEFAULT ''");
+  addColumn('invitations', 'closed_at', 'closed_at TEXT');
+  // Cancellation and postponement (Protocol 8.5 / 9(vii)): a lifecycle on the event,
+  // not a deletion -- the record and its reference survive; obligations stop or wait.
+  addColumn('events', 'lifecycle', "lifecycle TEXT NOT NULL DEFAULT 'active'");
+  addColumn('events', 'lifecycle_at', 'lifecycle_at TEXT');
+  addColumn('events', 'lifecycle_note', 'lifecycle_note TEXT');
+  addColumn('events', 'postponed_to', 'postponed_to TEXT');
+  addColumn('organizations', 'return_reason', 'return_reason TEXT');
+  // Suspension: access off, record intact. currentAccount refuses a suspended
+  // session, so suspension takes effect on the next request, not the next sign-in.
+  addColumn('accounts', 'suspended', 'suspended INTEGER NOT NULL DEFAULT 0');
+  addColumn('facility_requests', 'close_note', 'close_note TEXT');
+  addColumn('facility_requests', 'closed_by', 'closed_by TEXT');
+  // 'corrective' (the default) or 'confirmation' -- a readiness-confirmation request
+  // closes when the operator records the annual confirmation.
+  addColumn('facility_requests', 'kind', "kind TEXT NOT NULL DEFAULT 'corrective'");
+  // The Director's return of the post-event report, RECORDED -- not just notified.
+  addColumn('post_event_reports', 'director_returned_at', 'director_returned_at TEXT');
+  addColumn('post_event_reports', 'director_return_note', 'director_return_note TEXT');
+  // The Director's credential record: licence number, self-maintained. Verification
+  // (the Order's, lane-gated) reads it; it never verifies itself.
+  addColumn('accounts', 'credential_licence', 'credential_licence TEXT');
+  addColumn('facility_device_updates', 'reason', 'reason TEXT');
+  addColumn('organizations', 'returned_at', 'returned_at TEXT');
+
+  // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.
+  const orgSql = (d
+    .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'organizations'`)
+    .get() as { sql: string } | undefined)?.sql ?? '';
+  if (orgSql !== '' && !orgSql.includes("'returned'")) {
+    d.exec(`
+      BEGIN;
+      CREATE TABLE organizations_next (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        account_id INTEGER NOT NULL UNIQUE REFERENCES accounts(id),
+        name_en TEXT NOT NULL,
+        name_ar TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'none' CHECK (status IN ('none','pending','recorded','returned')),
+        recorded_at TEXT,
+        return_reason TEXT,
+        returned_at TEXT,
+        is_demo INTEGER NOT NULL DEFAULT 0
+      );
+      INSERT INTO organizations_next SELECT id, account_id, name_en, name_ar, status, recorded_at, return_reason, returned_at, is_demo FROM organizations;
+      DROP TABLE organizations;
+      ALTER TABLE organizations_next RENAME TO organizations;
+      COMMIT;
+    `);
+  }
+
+  // The invitations CHECK gained two statuses (withdrawn, removed). SQLite cannot
+  // widen a CHECK in place, so a pre-migration database is rebuilt once -- detected
+  // from the stored schema text, copied column-for-column, constraint order intact.
+  const invSql = (d
+    .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'invitations'`)
+    .get() as { sql: string } | undefined)?.sql ?? '';
+  if (invSql !== '' && !invSql.includes("'withdrawn'")) {
+    d.exec(`
+      BEGIN;
+      CREATE TABLE invitations_next (
+        token TEXT PRIMARY KEY,
+        event_id TEXT NOT NULL REFERENCES events(id),
+        kind TEXT NOT NULL CHECK (kind IN ('ems','director')),
+        name_en TEXT NOT NULL,
+        name_ar TEXT NOT NULL DEFAULT '',
+        email TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'nominated' CHECK (status IN ('nominated','confirmed','declined','withdrawn','removed')),
+        declaration TEXT NOT NULL DEFAULT 'none' CHECK (declaration IN ('none','draft','signed')),
+        account_id INTEGER REFERENCES accounts(id),
+        response_note TEXT NOT NULL DEFAULT '',
+        ops_detail TEXT NOT NULL DEFAULT '{}',
+        declaration_items TEXT NOT NULL DEFAULT '[]',
+        certification TEXT NOT NULL DEFAULT '{}',
+        signed_at TEXT,
+        invited_at TEXT NOT NULL DEFAULT (datetime('now')),
+        answered_at TEXT,
+        closed_at TEXT
+      );
+      INSERT INTO invitations_next SELECT token, event_id, kind, name_en, name_ar, email, status, declaration, account_id, response_note, ops_detail, declaration_items, certification, signed_at, invited_at, answered_at, closed_at FROM invitations;
+      DROP TABLE invitations;
+      ALTER TABLE invitations_next RENAME TO invitations;
+      COMMIT;
+    `);
+  }
 }
 
 /** Next EV-nnnn style identifier. Sequential by design -- correct inside a session. */

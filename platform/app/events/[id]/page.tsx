@@ -22,7 +22,7 @@ import {
   MAX_SCORE_PER_DOMAIN,
   eventFilingDeadline,
   eventMedicalDirectorGate, eventStage, nextAction, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
-  materialChangeGate, seriousIncidentGate,
+  LIFECYCLE_CONTENT, materialChangeGate, seriousIncidentGate,
   postEventReportGate,
   type EventGateContext,
   type Gate,
@@ -194,6 +194,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
     eventEndDate: event.endDate,
     eventStartDate: event.startDate,
     filed: event.filed,
+    lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
     now: clockNow(),
   };
@@ -275,11 +276,32 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        {/* The lifecycle band beats everything: a cancelled or postponed record says
+            so before anything else, with the consequence stated. */}
+        {event.lifecycle === 'cancelled' ? (
+          <div data-region="lifecycle-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7 }}>
+            <L
+              en={LIFECYCLE_CONTENT.cancel.bandEn.replace('{date}', event.lifecycleAt ?? '')}
+              ar={LIFECYCLE_CONTENT.cancel.bandAr.replace('{date}', event.lifecycleAt ? `⁦${event.lifecycleAt}⁩` : '')}
+            />
+          </div>
+        ) : null}
+        {event.lifecycle === 'postponed' ? (
+          <div data-region="lifecycle-band" style={{ padding: '20px 26px', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--accent-ink)' }}>
+            <L
+              en={(event.postponedTo ? LIFECYCLE_CONTENT.postpone.bandDateEn.replace('{newDate}', event.postponedTo) : LIFECYCLE_CONTENT.postpone.bandNoDateEn).replace('{date}', event.lifecycleAt ?? '')}
+              ar={(event.postponedTo ? LIFECYCLE_CONTENT.postpone.bandDateAr.replace('{newDate}', `⁦${event.postponedTo}⁩`) : LIFECYCLE_CONTENT.postpone.bandNoDateAr).replace('{date}', event.lifecycleAt ? `⁦${event.lifecycleAt}⁩` : '')}
+            />{' '}
+            <Link href={`/events/${event.id}/lifecycle`} style={{ fontSize: '13.5px' }}>
+              <L en="Open cancellation and postponement" ar="فتح الإلغاء والتأجيل" />
+            </Link>
+          </div>
+        ) : null}
         {/* ONE next action, above the rail: what to do, why the rest can wait, one
             button. Derived from the SAME blockers the Submit gate names, so the panel
             and the screen it opens can never disagree. The waiting state is the one
             that matters -- amber that is somebody else's move says so. */}
-        {!event.filed ? (
+        {!event.filed && event.lifecycle === 'active' ? (
           <Link
             href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
             data-region="next-action"
@@ -552,7 +574,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
             <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en="Assessment versions" ar="إصدارات التقييم" />
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 40 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 16 }}>
               {versions.map((v) => (
                 <div key={v.version} style={{ background: 'var(--bg)', padding: '16px 20px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '14.5px' }}>
@@ -561,6 +583,12 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                       <span style={{ color: 'var(--muted)' }}>
                         {' · '}
                         <L en={`Level ${v.derivation.finalLevel}`} ar={`المستوى ${v.derivation.finalLevel}`} />
+                        {v.derivation.scoreTotal !== null ? (
+                          <>
+                            {' · '}
+                            <L en={`score ${v.derivation.scoreTotal}`} ar={`المجموع ${v.derivation.scoreTotal}`} />
+                          </>
+                        ) : null}
                       </span>
                     ) : null}
                   </span>
@@ -568,9 +596,31 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                 </div>
               ))}
             </div>
+            {event.lifecycle !== 'cancelled' ? (
+              <div style={{ marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
+                <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>
+                  <L en="Run the assessment again" ar="إعادة إجراء التقييم" />
+                </Link>
+                {event.filed ? (
+                  <span style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '58ch' }}>
+                    <L en="Your submission is filed: a changed assessment is a material change — report it alongside." ar="ملفكم مقدَّم: التقييم المتغيّر تغيير جوهري — أبلغوا عنه أيضاً." />
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
           </>
         ) : null}
 
+                {event.lifecycle !== 'cancelled' ? (
+          <div style={{ marginBlockEnd: 28 }}>
+            <Link href={`/events/${event.id}/edit`} style={{ fontSize: '13.5px', color: 'var(--muted)', textDecoration: 'underline', marginInlineEnd: 20 }}>
+              <L en="Edit event details" ar="تعديل تفاصيل الفعالية" />
+            </Link>
+            <Link href={`/events/${event.id}/lifecycle`} style={{ fontSize: '13.5px', color: 'var(--muted)', textDecoration: 'underline' }}>
+              <L en={LIFECYCLE_CONTENT.control.linkEn} ar={LIFECYCLE_CONTENT.control.linkAr} />
+            </Link>
+          </div>
+        ) : null}
         <SequenceFooter
           labelEn="Where this record leads"
           labelAr="إلى أين يقود هذا السجل"

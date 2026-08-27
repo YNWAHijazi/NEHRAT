@@ -66,6 +66,10 @@ export default async function OrganizationPage({
                     <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13.5px' }}>
                       <L en="Recorded by the Ministry" ar="مسجّلة لدى الوزارة" />
                     </span>
+                  ) : organization.status === 'returned' ? (
+                    <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--bad-soft)', color: 'var(--bad)', fontSize: '13.5px' }}>
+                      <L en="Returned by the Ministry — yours to correct" ar="أعادتها الوزارة — تصحيحها عليكم" />
+                    </span>
                   ) : (
                     <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: '13.5px' }}>
                       <L en="Pending Ministry recording" ar="بانتظار تسجيل الوزارة" />
@@ -80,6 +84,42 @@ export default async function OrganizationPage({
                     ar="تُبلَّغون عندما تسجّل الوزارة المؤسسة. ويُفتح التقديم حينها."
                   />
                 </p>
+              ) : null}
+              {organization.status === 'returned' && organization.returnReason ? (
+                <div style={{ margin: '18px 0 0', padding: '14px 18px', background: 'var(--bad-soft)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.65 }}>
+                  <span style={{ display: 'block', fontWeight: 500, marginBlockEnd: 4, color: 'var(--bad)' }}>
+                    <L en="The Ministry's reason, as written" ar="سبب الوزارة، كما كُتب" />
+                  </span>
+                  {organization.returnReason}
+                </div>
+              ) : null}
+              {/* Editable while pending or returned: the same form, prefilled, and
+                  re-submitting sets it pending again. Once recorded it is the
+                  Ministry's record -- corrections go through the Ministry. */}
+              {organization.status === 'pending' || organization.status === 'returned' ? (
+                <form action={registerOrganizationAction} style={{ marginBlockStart: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+                      <L en="Organization name (English)" ar="اسم المؤسسة (بالإنكليزية)" />
+                    </span>
+                    <input name="nameEn" required defaultValue={organization.nameEn} style={inputStyle} />
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+                      <L en="Organization name (Arabic)" ar="اسم المؤسسة (بالعربية)" />
+                    </span>
+                    <input name="nameAr" dir="rtl" required defaultValue={organization.nameAr} style={inputStyle} />
+                  </label>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <button type="submit" style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer' }}>
+                      {organization.status === 'returned' ? (
+                        <L en="Re-submit for recording" ar="إعادة التقديم للتسجيل" />
+                      ) : (
+                        <L en="Save the corrected details" ar="حفظ البيانات المصحَّحة" />
+                      )}
+                    </button>
+                  </div>
+                </form>
               ) : null}
             </div>
           ) : (

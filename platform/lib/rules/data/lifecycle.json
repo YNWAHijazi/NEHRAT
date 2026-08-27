@@ -1,0 +1,58 @@
+{
+  "$comment": "Cancellation and postponement (Protocol 8.5 / 9(vii); required by three instruments and previously absent from the build). A lifecycle on the event, never a deletion: the record and any Ministry reference survive. A cancelled event files nothing further. A postponed event's recorded determination DOES NOT CARRY to the new date -- the screen says so wherever the determination or the postponement shows.",
+  "states": {
+    "active": { "en": "Active", "ar": "قائمة" },
+    "cancelled": { "en": "Cancelled", "ar": "ملغاة" },
+    "postponed": { "en": "Postponed", "ar": "مؤجَّلة" }
+  },
+  "cancel": {
+    "titleEn": "Cancel the event",
+    "titleAr": "إلغاء الفعالية",
+    "bodyEn": "Cancelling notifies the Ministry and closes every remaining obligation on this record. The record and any reference number remain readable; nothing further can be filed on it.",
+    "bodyAr": "الإلغاء يُبلغ الوزارة ويُغلق كل الموجبات المتبقية على هذا السجل. يبقى السجل وأي رقم مرجعي قابلَين للقراءة؛ ولا يمكن تقديم أي شيء إضافي عليه.",
+    "reasonLabelEn": "Reason, sent to the Ministry as written",
+    "reasonLabelAr": "السبب، يُرسل إلى الوزارة كما هو",
+    "buttonEn": "Cancel the event — this closes the record",
+    "buttonAr": "إلغاء الفعالية — هذا يغلق السجل",
+    "bandEn": "This event was cancelled on {date}. The Ministry has been notified. The record remains readable; nothing further can be filed on it.",
+    "bandAr": "أُلغيت هذه الفعالية في {date}. وأُبلغت الوزارة. يبقى السجل قابلاً للقراءة؛ ولا يمكن تقديم أي شيء إضافي عليه."
+  },
+  "postpone": {
+    "titleEn": "Postpone the event",
+    "titleAr": "تأجيل الفعالية",
+    "bodyEn": "Postponing notifies the Ministry. A new date is not required to postpone; you can record it later. Any determination recorded on this submission applies to the filed date and does not carry to a new date — a revised submission is required for the new date.",
+    "bodyAr": "التأجيل يُبلغ الوزارة. التاريخ الجديد ليس شرطاً للتأجيل ويمكن تسجيله لاحقاً. وأي نتيجة مسجَّلة على هذا التقديم تخص التاريخ المقدَّم ولا تنسحب على تاريخ جديد — يلزم تقديم منقَّح للتاريخ الجديد.",
+    "dateLabelEn": "New date, if known (optional)",
+    "dateLabelAr": "التاريخ الجديد إن عُرف (اختياري)",
+    "reasonLabelEn": "Reason, sent to the Ministry as written",
+    "reasonLabelAr": "السبب، يُرسل إلى الوزارة كما هو",
+    "buttonEn": "Postpone the event",
+    "buttonAr": "تأجيل الفعالية",
+    "bandNoDateEn": "This event was postponed on {date}, with no new date recorded yet. The Ministry has been notified. Record the new date here when it is set; any recorded determination does not carry to a new date.",
+    "bandNoDateAr": "أُجّلت هذه الفعالية في {date} دون تسجيل تاريخ جديد بعد. وأُبلغت الوزارة. سجّلوا التاريخ الجديد هنا عند تحديده؛ وأي نتيجة مسجَّلة لا تنسحب على تاريخ جديد.",
+    "bandDateEn": "This event was postponed on {date} to {newDate}. The Ministry has been notified. Any recorded determination applies to the original filing and does not carry to the new date — file a revised submission for it.",
+    "bandDateAr": "أُجّلت هذه الفعالية في {date} إلى {newDate}. وأُبلغت الوزارة. أي نتيجة مسجَّلة تخص التقديم الأصلي ولا تنسحب على التاريخ الجديد — قدّموا تقديماً منقَّحاً له."
+  },
+  "control": {
+    "linkEn": "Cancel or postpone this event",
+    "linkAr": "إلغاء هذه الفعالية أو تأجيلها"
+  },
+  "blockerCancelledEn": "Event cancelled — nothing further can be filed on this record",
+  "blockerCancelledAr": "فعالية ملغاة — لا يمكن تقديم أي شيء إضافي على هذا السجل",
+  "determinationNoteEn": "Recorded before the postponement: this determination does not carry to a new date.",
+  "determinationNoteAr": "سُجّلت قبل التأجيل: لا تنسحب هذه النتيجة على تاريخ جديد.",
+  "ministryLane": {
+    "titleEn": "Cancellations and postponements",
+    "titleAr": "الإلغاءات والتأجيلات",
+    "emptyEn": "None reported.",
+    "emptyAr": "لا شيء مبلَّغ عنه.",
+    "cancelledRowEn": "Cancelled {date}",
+    "cancelledRowAr": "أُلغيت في {date}",
+    "postponedRowEn": "Postponed {date}",
+    "postponedRowAr": "أُجّلت في {date}",
+    "toEn": "to {newDate}",
+    "toAr": "إلى {newDate}",
+    "noDateEn": "no new date yet",
+    "noDateAr": "لا تاريخ جديداً بعد"
+  }
+}

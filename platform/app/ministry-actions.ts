@@ -185,9 +185,25 @@ export async function respondEnquiryAction(enquiryId: number, formData: FormData
   const actor = await requireMinistry('respondEnquiry');
   const reply = String(formData.get('reply') ?? '').trim();
   if (!reply) redirect('/ministry/enquiries');
-  getDb()
-    .prepare(`UPDATE enquiries SET reply = ?, replied_by = ?, replied_at = now_stamp() WHERE id = ?`)
+  const db = getDb();
+  db.prepare(`UPDATE enquiries SET reply = ?, replied_by = ?, replied_at = now_stamp() WHERE id = ?`)
     .run(reply, actor.displayName, enquiryId);
+  // The field is labelled "sent to the organizer as written" -- so send it. The reply
+  // lands on the event owner's notifications, verbatim.
+  const enq = db.prepare(`SELECT event_id FROM enquiries WHERE id = ?`).get(enquiryId) as { event_id: string } | undefined;
+  if (enq) {
+    const ev = db.prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(enq.event_id) as { name_en: string; name_ar: string } | undefined;
+    if (ev) {
+      notifyEventOwner(
+        enq.event_id,
+        `Ministry response to your enquiry — ${ev.name_en}`,
+        `رد الوزارة على استفساركم — ${ev.name_ar}`,
+        `The Ministry has answered your enquiry. The response, as written: “${reply}”.`,
+        `أجابت الوزارة على استفساركم. والرد كما كُتب: «${reply}».`,
+        `/events/${enq.event_id}`,
+      );
+    }
+  }
   revalidatePath('/ministry/enquiries');
   redirect('/ministry/enquiries?notice=responded');
 }
@@ -240,11 +256,56 @@ export async function recordFacilityCorrectiveAction(formData: FormData): Promis
   redirect('/ministry/facilities?notice=raised');
 }
 
-export async function markCorrectiveDoneAction(requestId: number): Promise<void> {
-  await requireMinistry('recordCorrective');
-  getDb().prepare(`UPDATE facility_requests SET status = 'corrected', corrected_at = now_stamp() WHERE id = ?`).run(requestId);
+export async function markCorrectiveDoneAction(requestId: number, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordCorrective');
+  // Closing records WHAT was verified, not just that a status flipped: the note is
+  // the record of the correction, and the operator's panel shows it.
+  const note = String(formData.get('note') ?? '').trim();
+  if (!note) redirect('/ministry/facilities?error=close-note');
+  getDb()
+    .prepare(`UPDATE facility_requests SET status = 'corrected', corrected_at = now_stamp(), close_note = ?, closed_by = ? WHERE id = ?`)
+    .run(note, actor.displayName, requestId);
   revalidatePath('/ministry/facilities');
-  redirect('/ministry/facilities');
+  redirect('/ministry/facilities?notice=closed');
+}
+
+/**
+ * Request readiness confirmation from an operator (power ten, an act). The
+ * request lands as an OPEN row on the facility's readiness screen pointing at
+ * the confirmation control, and as a notification. It closes when the operator
+ * records the annual confirmation, or when the Ministry closes it with a note.
+ */
+export async function requestReadinessConfirmationAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordCorrective');
+  const facilityId = String(formData.get('facilityId') ?? '');
+  if (!facilityId) redirect('/ministry/facilities');
+  const db = getDb();
+  const fac = db.prepare(`SELECT account_id, is_demo, name_en, name_ar FROM facilities WHERE id = ?`).get(facilityId) as
+    | { account_id: number; is_demo: number; name_en: string; name_ar: string }
+    | undefined;
+  if (!fac) redirect('/ministry/facilities');
+  db.prepare(
+    `INSERT INTO facility_requests (facility_id, body_en, body_ar, status, raised_by, kind, is_demo)
+     VALUES (?, ?, ?, 'open', ?, 'confirmation', ?)`,
+  ).run(
+    facilityId,
+    'The Ministry requests readiness confirmation for this facility. Record the confirmation from the response-plan screen.',
+    'تطلب الوزارة تأكيد الجاهزية لهذا المرفق. سجّلوا التأكيد من شاشة خطة الاستجابة.',
+    actor.displayName, fac.is_demo,
+  );
+  db.prepare(
+    `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
+  ).run(
+    fac.account_id,
+    `Readiness confirmation requested — ${fac.name_en}`,
+    `طُلب تأكيد الجاهزية — ${fac.name_ar}`,
+    'The Ministry requests readiness confirmation. Record it from the response-plan screen; the request closes when it is recorded.',
+    'تطلب الوزارة تأكيد الجاهزية. سجّلوه من شاشة خطة الاستجابة؛ ويُقفل الطلب عند تسجيله.',
+    `/facilities/${facilityId}/plan`, fac.is_demo,
+  );
+  revalidatePath('/ministry/facilities');
+  redirect('/ministry/facilities?notice=confirmation-requested');
 }
 
 /**
@@ -423,4 +484,193 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
   }
   revalidatePath(`/ministry/submissions/${eventId}`);
   redirect(`/ministry/submissions/${eventId}`);
+}
+
+/**
+ * Return an organization filing with a reason, and reverse a recording. A returned
+ * filing goes back to the organizer EDITABLE, with the reason on their screen
+ * verbatim; re-submitting sets it pending again. Reversing a recording is the
+ * correction path for a recording made in error -- back to pending, never silently
+ * deleted, and the organizer is told. Submission stays blocked while not recorded
+ * (non-negotiable 9), which is exactly why both acts notify.
+ */
+export async function returnOrganizationAction(orgId: number, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordOrganization');
+  const reason = String(formData.get('reason') ?? '').trim();
+  if (!reason) redirect('/ministry/organizations?error=reason');
+  const db = getDb();
+  const org = db.prepare(`SELECT account_id, name_en, name_ar, is_demo, status FROM organizations WHERE id = ?`).get(orgId) as
+    | { account_id: number; name_en: string; name_ar: string; is_demo: number; status: string }
+    | undefined;
+  if (!org || org.status !== 'pending') redirect('/ministry/organizations');
+  db.prepare(`UPDATE organizations SET status = 'returned', return_reason = ?, returned_at = now_stamp() WHERE id = ?`).run(reason, orgId);
+  db.prepare(
+    `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+     VALUES (?, 'needs_action', ?, ?, ?, ?, '/organization', now_stamp(), ?)`,
+  ).run(
+    org.account_id,
+    `Organization returned — ${org.name_en}`, `أُعيدت المؤسسة — ${org.name_ar}`,
+    `The Ministry has returned your organization registration. The reason, as written: “${reason}”. Edit the details and re-submit; filing stays blocked until the organization is recorded.`,
+    `أعادت الوزارة تسجيل مؤسستكم. والسبب كما كُتب: «${reason}». عدّلوا البيانات وأعيدوا التقديم؛ ويبقى تقديم الملفات محجوباً حتى تُسجَّل المؤسسة.`,
+    org.is_demo,
+  );
+  void actor;
+  revalidatePath('/ministry/organizations');
+  redirect('/ministry/organizations?notice=returned');
+}
+
+export async function reverseOrganizationRecordingAction(orgId: number, formData: FormData): Promise<void> {
+  await requireMinistry('recordOrganization');
+  const reason = String(formData.get('reason') ?? '').trim();
+  if (!reason) redirect('/ministry/organizations?error=reason');
+  const db = getDb();
+  const org = db.prepare(`SELECT account_id, name_en, name_ar, is_demo, status FROM organizations WHERE id = ?`).get(orgId) as
+    | { account_id: number; name_en: string; name_ar: string; is_demo: number; status: string }
+    | undefined;
+  if (!org || org.status !== 'recorded') redirect('/ministry/organizations');
+  db.prepare(`UPDATE organizations SET status = 'pending', recorded_at = NULL, return_reason = ?, returned_at = now_stamp() WHERE id = ?`).run(reason, orgId);
+  db.prepare(
+    `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+     VALUES (?, 'needs_action', ?, ?, ?, ?, '/organization', now_stamp(), ?)`,
+  ).run(
+    org.account_id,
+    `Organization recording reversed — ${org.name_en}`, `عُكس تسجيل المؤسسة — ${org.name_ar}`,
+    `The Ministry has reversed the recording of your organization, pending review. The reason, as written: “${reason}”. New filings are blocked until it is recorded again; anything already filed stands.`,
+    `عكست الوزارة تسجيل مؤسستكم ريثما تُراجَع. والسبب كما كُتب: «${reason}». تُحجب التقديمات الجديدة حتى تُسجَّل من جديد؛ ويبقى ما قُدّم قائماً.`,
+    org.is_demo,
+  );
+  revalidatePath('/ministry/organizations');
+  redirect('/ministry/organizations?notice=reversed');
+}
+
+/**
+ * User administration: add a Ministry account, change a role, suspend or lift.
+ * Guard rails, each stated on the screen too: only Ministry-side roles are
+ * assignable here (organizer-side accounts are made by registration and
+ * nomination, never by an administrator); nobody edits their own row, so the
+ * console cannot lock itself out or promote itself; a created account signs in
+ * by email once credentials are issued out of band.
+ */
+const ASSIGNABLE_ROLES = ['reviewer', 'inspector', 'ministry_admin', 'order'] as const;
+
+export async function addMinistryUserAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageUsers');
+  const name = String(formData.get('name') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const role = String(formData.get('role') ?? '');
+  if (!name || !email || !(ASSIGNABLE_ROLES as readonly string[]).includes(role)) {
+    redirect('/ministry/admin/users?error=fields');
+  }
+  const db = getDb();
+  if (db.prepare(`SELECT id FROM accounts WHERE email = ?`).get(email)) {
+    redirect('/ministry/admin/users?error=email-taken');
+  }
+  const initials = name.split(/\s+/).map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase();
+  // Demo isolation is symmetric: a demonstration administrator makes demonstration
+  // accounts; a real one makes real accounts.
+  db.prepare(
+    `INSERT INTO accounts (login, email, display_name, initials, role, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(`moph_${Date.now().toString(36)}`, email, name, initials, role, actor.isDemo ? 1 : 0);
+  revalidatePath('/ministry/admin/users');
+  redirect('/ministry/admin/users?notice=added');
+}
+
+export async function changeUserRoleAction(login: string, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageUsers');
+  const role = String(formData.get('role') ?? '');
+  if (!(ASSIGNABLE_ROLES as readonly string[]).includes(role)) redirect('/ministry/admin/users');
+  const db = getDb();
+  const target = db.prepare(`SELECT id, login, role FROM accounts WHERE login = ?`).get(login) as { id: number; login: string; role: string } | undefined;
+  // Never your own row, and never the platform owner's -- that seat is above this console.
+  if (!target || target.id === actor.id || target.role === 'platform_owner') redirect('/ministry/admin/users');
+  db.prepare(`UPDATE accounts SET role = ? WHERE id = ?`).run(role, target.id);
+  revalidatePath('/ministry/admin/users');
+  redirect('/ministry/admin/users?notice=role-changed');
+}
+
+export async function setUserSuspensionAction(login: string, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageUsers');
+  const suspend = String(formData.get('suspend') ?? '') === '1';
+  const db = getDb();
+  const target = db.prepare(`SELECT id, role FROM accounts WHERE login = ?`).get(login) as { id: number; role: string } | undefined;
+  if (!target || target.id === actor.id || target.role === 'platform_owner') redirect('/ministry/admin/users');
+  db.prepare(`UPDATE accounts SET suspended = ? WHERE id = ?`).run(suspend ? 1 : 0, target.id);
+  revalidatePath('/ministry/admin/users');
+  redirect(`/ministry/admin/users?notice=${suspend ? 'suspended' : 'reinstated'}`);
+}
+
+/**
+ * CREATE an inspection on a submission. Until this existed the only INSERT was the
+ * seeder: on any non-demonstration submission the "schedule" control mutated rows
+ * that could never exist. Blocking is set at creation and toggleable after --
+ * whether an inspection gates the satisfied outcome is the scheduler's call.
+ */
+export async function createInspectionAction(eventId: string, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('scheduleInspection');
+  const titleEn = String(formData.get('titleEn') ?? '').trim();
+  const titleAr = String(formData.get('titleAr') ?? '').trim();
+  const date = String(formData.get('date') ?? '').trim();
+  const blocking = String(formData.get('blocking') ?? '') === '1';
+  if (!titleEn || !titleAr) redirect(`/ministry/submissions/${eventId}?error=inspection-titles`);
+  const db = getDb();
+  const ev = db.prepare(`SELECT is_demo FROM events WHERE id = ?`).get(eventId) as { is_demo: number } | undefined;
+  if (!ev) redirect('/ministry/queue');
+  db.prepare(
+    `INSERT INTO inspections (event_id, title_en, title_ar, inspector, state, date, blocking, is_demo)
+     VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), ?, ?)`,
+  ).run(eventId, titleEn, titleAr, actor.displayName, date ? 'scheduled' : 'none', date, blocking ? 1 : 0, ev.is_demo);
+  revalidatePath(`/ministry/submissions/${eventId}`);
+  redirect(`/ministry/submissions/${eventId}`);
+}
+
+/** Toggle whether an inspection blocks the satisfied outcome. */
+export async function setInspectionBlockingAction(inspectionId: number, formData: FormData): Promise<void> {
+  await requireMinistry('scheduleInspection');
+  const blocking = String(formData.get('blocking') ?? '') === '1';
+  const db = getDb();
+  const row = db.prepare(`SELECT event_id FROM inspections WHERE id = ?`).get(inspectionId) as { event_id: string } | undefined;
+  if (!row) redirect('/ministry/queue');
+  db.prepare(`UPDATE inspections SET blocking = ? WHERE id = ?`).run(blocking ? 1 : 0, inspectionId);
+  revalidatePath(`/ministry/submissions/${row.event_id}`);
+  redirect(`/ministry/submissions/${row.event_id}`);
+}
+
+/**
+ * Applicability (Protocol 3): log a referral, determine it in or out of scope
+ * with reasons, designate an in-scope event. Determination of applicability is
+ * a Ministry act on its own record -- no organizer account exists yet, and the
+ * record says what happens next in either direction.
+ */
+export async function logReferralAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('respondEnquiry');
+  const eventName = String(formData.get('eventName') ?? '').trim();
+  const source = String(formData.get('source') ?? '').trim();
+  const note = String(formData.get('note') ?? '').trim();
+  if (!eventName) redirect('/ministry/applicability?error=name');
+  getDb()
+    .prepare(
+      `INSERT INTO applicability_records (event_name, source, note, recorded_by, is_demo)
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+    .run(eventName, source, note, actor.displayName, actor.isDemo ? 1 : 0);
+  revalidatePath('/ministry/applicability');
+  redirect('/ministry/applicability?notice=logged');
+}
+
+export async function determineApplicabilityAction(recordId: number, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordOutcome');
+  const determination = String(formData.get('determination') ?? '');
+  const reasons = String(formData.get('reasons') ?? '').trim();
+  const designated = String(formData.get('designated') ?? '') === '1';
+  if (!['in_scope', 'out_of_scope'].includes(determination) || !reasons) {
+    redirect('/ministry/applicability?error=reasons');
+  }
+  getDb()
+    .prepare(
+      `UPDATE applicability_records SET determination = ?, reasons = ?, designated = ?, recorded_by = ?, determined_at = now_stamp() WHERE id = ?`,
+    )
+    .run(determination, reasons, determination === 'in_scope' && designated ? 1 : 0, actor.displayName, recordId);
+  revalidatePath('/ministry/applicability');
+  redirect('/ministry/applicability?notice=determined');
 }

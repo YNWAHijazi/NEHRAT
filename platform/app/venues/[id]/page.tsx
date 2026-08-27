@@ -317,8 +317,18 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
               <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
                 <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                  <L en="attachments outstanding" ar="مرفقات غير مقدَّمة" />
+                  <L en="document requirements not yet on file" ar="متطلبات مستندية ليست في الملف بعد" />
                 </div>
+                {/* Where the count acts: venue documents travel with the assessment,
+                    not with this record -- a counter with no control here was a dead
+                    end, so the counter says where its work is done. */}
+                {attachOutstanding > 0 ? (
+                  <div style={{ fontSize: '12.5px', marginBlockStart: 8 }}>
+                    <Link href={`/venues/${venue.id}/assessment`} style={{ textDecoration: 'underline' }}>
+                      <L en="Provided with the annual assessment" ar="تُقدَّم مع التقييم السنوي" />
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             </div>
 

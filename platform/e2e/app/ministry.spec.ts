@@ -206,6 +206,9 @@ test.describe('the organizer reads the same determination', () => {
     const body = page.locator('body');
     // EV-0362 carries a recorded revision; the seeded 'Information required' must not show.
     await expect(body).toContainText('Additional information or revision required');
+    // The awaiting-your-response panel shows the RECORDED note verbatim -- it used to
+    // hard-code a demonstration demand regardless of what the reviewer wrote.
+    await expect(body).toContainText('The medical deployment map has not been attached');
     // EV-0244 (Tripoli Marathon) carries a recorded satisfied outcome; EV-0301
     // (Saida Night Run) carries incomplete. Both are the organizer's own records.
     await expect(body).toContainText('Health and medical preparedness requirements satisfied');

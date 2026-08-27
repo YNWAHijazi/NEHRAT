@@ -245,9 +245,11 @@ export default async function FacilityReadinessPage({
           {devices.map((d) => {
             const until = [d.padExpiry, d.batteryExpiry].filter((x): x is string => x !== null);
             const min = until.length ? until.reduce((a, b) => (a < b ? a : b)) : null;
-            const st = STATUS_STYLE[
-              !d.accessibleHours ? 'lapsed' : min === null ? 'notRecorded' : min < asOfDate ? 'lapsed' : addDaysIso(asOfDate, days) >= min ? 'lapsing' : 'current'
-            ];
+            const st = !d.operational
+              ? { ...STATUS_STYLE['lapsed'], en: 'Out of service — reported', ar: 'خارج الخدمة — مبلَّغ عنه' }
+              : STATUS_STYLE[
+                  !d.accessibleHours ? 'lapsed' : min === null ? 'notRecorded' : min < asOfDate ? 'lapsed' : addDaysIso(asOfDate, days) >= min ? 'lapsing' : 'current'
+                ];
             return (
               <Link
                 key={d.label}
@@ -280,13 +282,43 @@ export default async function FacilityReadinessPage({
               <L en="Requested by the Ministry" ar="مطلوب من الوزارة" />
             </div>
             {requests.map((r) => (
-              <div key={r.id} style={{ fontSize: 16, lineHeight: 1.6, marginBlockEnd: 8 }}>
-                <L en={r.bodyEn} ar={r.bodyAr} />
+              <div key={r.id} style={{ marginBlockEnd: 12 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'baseline' }}>
+                  <span style={{ fontSize: 16, lineHeight: 1.6, flex: 1, minWidth: 240 }}>
+                    <L en={r.bodyEn} ar={r.bodyAr} />
+                  </span>
+                  {r.status === 'corrected' ? (
+                    <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
+                      <L en={`Closed${r.correctedAt ? ` ${r.correctedAt}` : ''}`} ar={`أُقفل${r.correctedAt ? ` ⁦${r.correctedAt}⁩` : ''}`} />
+                    </span>
+                  ) : (
+                    <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: '12.5px' }}>
+                      {r.due ? (
+                        <L en={`Open — due ${r.due}`} ar={`قائم — يُستحق في ⁦${r.due}⁩`} />
+                      ) : (
+                        <L en="Open — no due date until the Ministry publishes a corrective timeline" ar="قائم — لا تاريخ استحقاق قبل نشر الوزارة مهلة تصحيحية" />
+                      )}
+                    </span>
+                  )}
+                </div>
+                {r.status === 'corrected' && r.closeNote ? (
+                  <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.6 }}>
+                    <L en={`Closed by the Ministry: “${r.closeNote}”`} ar={`أقفلته الوزارة: «${r.closeNote}»`} />
+                  </div>
+                ) : null}
+                {r.status === 'open' ? (
+                  // The link goes to the CONTROL that answers it -- the confirmation
+                  // sits on the response-plan screen, a device fix on the registry.
+                  <Link href={r.kind === 'confirmation' ? `/facilities/${facility.id}/plan` : `/facilities/${facility.id}/devices`} style={{ fontSize: '13.5px' }}>
+                    {r.kind === 'confirmation' ? (
+                      <L en="Record the readiness confirmation" ar="تسجيل تأكيد الجاهزية" />
+                    ) : (
+                      <L en="Open the device records to correct it" ar="فتح سجلات الأجهزة لتصحيحه" />
+                    )}
+                  </Link>
+                ) : null}
               </div>
             ))}
-            <Link href="/notifications" style={{ fontSize: '14.5px' }}>
-              <L en="Respond to the request" ar="الرد على الطلب" />
-            </Link>
           </div>
         ) : null}
 

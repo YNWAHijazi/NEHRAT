@@ -5,7 +5,7 @@ import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { correctiveActions, facilitiesForOversight } from '../../../lib/queries';
 import { FACILITY_CONTENT, can } from '../../../lib/rules';
 import { ministryConfig } from '../../../lib/queries';
-import { markCorrectiveDoneAction, recordFacilityCorrectiveAction } from '../../ministry-actions';
+import { markCorrectiveDoneAction, recordFacilityCorrectiveAction, requestReadinessConfirmationAction } from '../../ministry-actions';
 
 /**
  * Facility oversight -- the cardiac lane, carrying no event outcome. Corrective
@@ -58,7 +58,7 @@ export default async function FacilityOversightPage({
               </span>
             </span>
             <span style={{ padding: '3px 9px', borderRadius: 999, background: f.standingKind === 'met' ? 'var(--brand-soft)' : f.standingKind === 'lapsing' ? 'var(--accent-soft)' : 'var(--bad-soft)', color: f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent-ink)' : 'var(--bad)', fontSize: '12.5px' }}>
-              {f.standingKind === 'met' ? <L en="Obligations being met" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Items lapsing" ar="بنود تقترب من الانتهاء" /> : <L en="Obligations not being met" ar="الموجبات غير مستوفاة" />}
+              {f.standingKind === 'met' ? <L en="Obligations being met" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Items lapsing — the operator's to renew" ar="بنود تقترب من الانتهاء — تجديدها على المشغّل" /> : <L en="Obligations not being met — the operator's to correct" ar="الموجبات غير مستوفاة — تصحيحها على المشغّل" />}
             </span>
           </div>
         ))}
@@ -87,17 +87,44 @@ export default async function FacilityOversightPage({
               <span style={{ padding: '3px 9px', borderRadius: 999, background: c.status === 'open' ? 'var(--bad-soft)' : 'var(--brand-soft)', color: c.status === 'open' ? 'var(--bad)' : 'var(--brand)', fontSize: '12.5px' }}>
                 {c.status === 'open' ? <L en="Open" ar="مفتوح" /> : <L en={`Corrected ${c.correctedAt ?? ''}`} ar={`صُحّح ⁦${c.correctedAt ?? ''}⁩`} />}
               </span>
-              {mayCorrect && c.status === 'open' ? (
-                <form action={markCorrectiveDoneAction.bind(null, c.id)}>
-                  <button type="submit" style={{ height: 32, paddingInline: 12, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
-                    <L en="Mark corrected" ar="اعتباره مصحَّحاً" />
-                  </button>
-                </form>
-              ) : null}
             </span>
+            {mayCorrect && c.status === 'open' ? (
+              <form action={markCorrectiveDoneAction.bind(null, c.id)} style={{ flexBasis: '100%', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <input
+                  name="note"
+                  required
+                  aria-label="What was verified"
+                  placeholder=""
+                  style={{ flex: 1, minWidth: 240, height: 32, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }}
+                />
+                <button type="submit" style={{ height: 32, paddingInline: 12, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                  <L en="Close — record what was verified" ar="إقفال — تسجيل ما جرى التحقق منه" />
+                </button>
+              </form>
+            ) : null}
           </div>
         ))}
       </div>
+      {mayCorrect ? (
+        <div data-region="readiness-request" style={{ marginBlockEnd: 24 }}>
+          <form action={requestReadinessConfirmationAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                <L en="Request readiness confirmation (power ten)" ar="طلب تأكيد الجاهزية (الصلاحية العاشرة)" />
+              </span>
+              <select name="facilityId" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
+                <option value="">—</option>
+                {facilities.map((f) => (
+                  <option key={f.id} value={f.id}>{f.nameEn}</option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer' }}>
+              <L en="Request confirmation — the operator is notified" ar="طلب التأكيد — يُبلَّغ المشغّل" />
+            </button>
+          </form>
+        </div>
+      ) : null}
       {mayCorrect ? (
         <form action={recordFacilityCorrectiveAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

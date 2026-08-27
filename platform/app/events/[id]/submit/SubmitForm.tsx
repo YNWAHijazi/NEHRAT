@@ -264,14 +264,34 @@ export function SubmitForm({
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {blockers.map((b) => (
-                  <div key={b.itemEn} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'baseline', fontSize: '14.5px', lineHeight: 1.55 }}>
-                    <span style={{ flex: 'none', color: 'var(--accent-ink)' }}>·</span>
-                    <span style={{ flex: 1 }}>
-                      <L en={b.itemEn} ar={b.itemAr} />
-                    </span>
-                  </div>
-                ))}
+                {blockers.map((b) => {
+                  // Each blocker links to the screen that clears it -- a named item
+                  // the organizer cannot act on from here is a corridor, not a gate.
+                  const href =
+                    b.kind === 'organizationPending'
+                      ? '/organization'
+                      : b.kind === 'declarationsIncomplete' || b.kind === 'eventCancelled'
+                        ? null
+                        : b.kind === 'documentMissing' && b.docKey === 'plan'
+                          ? `/events/${eventId}/plan`
+                          : b.kind === 'documentMissing' && b.docKey === 'complianceForm'
+                            ? null // completed on THIS screen -- a link would loop
+                            : `/events/${eventId}/requirements`;
+                  return (
+                    <div key={b.itemEn} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'baseline', fontSize: '14.5px', lineHeight: 1.55 }}>
+                      <span style={{ flex: 'none', color: 'var(--accent-ink)' }}>·</span>
+                      <span style={{ flex: 1 }}>
+                        {href ? (
+                          <a href={href} style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                            <L en={b.itemEn} ar={b.itemAr} />
+                          </a>
+                        ) : (
+                          <L en={b.itemEn} ar={b.itemAr} />
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ) : null}

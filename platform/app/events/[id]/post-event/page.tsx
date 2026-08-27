@@ -50,6 +50,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
     eventEndDate: event.endDate,
     eventStartDate: event.startDate,
     filed: event.filed,
+    lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
     now: clockNow(),
   };
@@ -112,6 +113,14 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             </span>
           </div>
 
+          {report?.directorReturnedAt ? (
+            <div data-region="director-return" style={{ padding: '16px 22px', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14px', lineHeight: 1.65, color: 'var(--accent-ink)', maxWidth: '80ch' }}>
+              <L
+                en={`The Event Medical Director returned this report on ${report.directorReturnedAt} rather than signing it${report.directorReturnNote ? ` — the reason, as written: “${report.directorReturnNote}”` : ''}. Revise the report below; saving clears the return and the Director signs the revised version.`}
+                ar={`أعاد المدير الطبي هذا التقرير في ⁦${report.directorReturnedAt}⁩ بدل توقيعه${report.directorReturnNote ? ` — والسبب كما كُتب: «${report.directorReturnNote}»` : ''}. نقّحوا التقرير أدناه؛ والحفظ يزيل الإعادة ويوقّع المدير النسخة المنقّحة.`}
+              />
+            </div>
+          ) : null}
           <dl data-region="report-identity" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 0, margin: '0 0 32px', background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', padding: 1 }}>
             {identity.map((f) => (
               <div key={f.en} style={{ padding: '14px 18px', borderInlineEnd: '1px solid var(--line)' }}>

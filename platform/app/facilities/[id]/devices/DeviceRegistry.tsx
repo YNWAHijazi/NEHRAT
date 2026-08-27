@@ -64,6 +64,12 @@ export function DeviceRegistry({
   const days = content.ledger.cycles.lapseWindowDays;
 
   const statusOf = (d: FacilityDevice): { en: string; ar: string; color: string; chipBg: string } => {
+    // Out of service beats every date state: a device reported non-operational is
+    // not ready whatever its expiry dates say. Until this branch existed, saving a
+    // status change with Operational = No changed NOTHING anywhere on the screen.
+    if (!d.operational) {
+      return { en: 'Out of service — reported', ar: 'خارج الخدمة — مبلَّغ عنه', color: 'var(--bad)', chipBg: 'var(--bad-soft)' };
+    }
     if (!d.accessibleHours) {
       return { en: 'Not accessible', ar: 'غير متاح للوصول', color: 'var(--bad)', chipBg: 'var(--bad-soft)' };
     }

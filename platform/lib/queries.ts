@@ -16,7 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, POST_EVENT_STAGE, type AttestationRecord } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 
@@ -43,6 +43,11 @@ export interface EventRow {
   span: number;
   createdAt: string;
   venueFacilityId: string | null;
+  /** Cancellation and postponement -- a lifecycle, never a deletion. */
+  lifecycle: 'active' | 'cancelled' | 'postponed';
+  lifecycleAt: string | null;
+  lifecycleNote: string | null;
+  postponedTo: string | null;
 }
 
 export interface AssessmentVersion {
@@ -58,6 +63,10 @@ interface EventDbRow {
   name_en: string;
   name_ar: string;
   start_date: string | null;
+  lifecycle?: string | null;
+  lifecycle_at?: string | null;
+  lifecycle_note?: string | null;
+  postponed_to?: string | null;
   end_date: string | null;
   moph_reference: string | null;
   filed: number;
@@ -161,8 +170,18 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     filed: row.filed === 1,
     level,
     outcome,
-    stateEn: outcome ? derivedState.en : (row.demo_state_en ?? derivedState.en),
-    stateAr: outcome ? derivedState.ar : (row.demo_state_ar ?? derivedState.ar),
+    stateEn:
+      (row.lifecycle ?? 'active') !== 'active'
+        ? LIFECYCLE_CONTENT.states[(row.lifecycle ?? 'active') as 'cancelled' | 'postponed'].en
+        : outcome
+          ? derivedState.en
+          : (row.demo_state_en ?? derivedState.en),
+    stateAr:
+      (row.lifecycle ?? 'active') !== 'active'
+        ? LIFECYCLE_CONTENT.states[(row.lifecycle ?? 'active') as 'cancelled' | 'postponed'].ar
+        : outcome
+          ? derivedState.ar
+          : (row.demo_state_ar ?? derivedState.ar),
     due: row.demo_due ?? derivedDue,
     dueLabelEn: row.demo_due_label_en ?? 'File by',
     dueLabelAr: row.demo_due_label_ar ?? 'التقديم بحلول',
@@ -173,12 +192,17 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     span: row.demo_span ?? 60,
     createdAt: row.created_at,
     venueFacilityId: row.venue_facility_id,
+    lifecycle: (row.lifecycle ?? 'active') as EventRow['lifecycle'],
+    lifecycleAt: row.lifecycle_at ? row.lifecycle_at.slice(0, 10) : null,
+    lifecycleNote: row.lifecycle_note ?? null,
+    postponedTo: row.postponed_to ?? null,
   };
 }
 
 const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, moph_reference, filed,
    demo_state_en, demo_state_ar, demo_due, demo_due_label_en, demo_due_label_ar,
-   demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id`;
+   demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id,
+   lifecycle, lifecycle_at, lifecycle_note, postponed_to`;
 
 function orgRecordedFor(accountId: number): boolean {
   const r = getDb()
@@ -449,14 +473,26 @@ export function facilityPlanConfirmation(facilityId: string): FacilityPlanConfir
 }
 
 export interface FacilityRequestRow {
-  id: number; bodyEn: string; bodyAr: string; due: string | null;
+  id: number;
+  bodyEn: string;
+  bodyAr: string;
+  due: string | null;
+  status: 'open' | 'corrected';
+  kind: 'corrective' | 'confirmation';
+  correctedAt: string | null;
+  closeNote: string | null;
 }
 
 export function facilityRequests(facilityId: string): FacilityRequestRow[] {
   const rows = getDb()
-    .prepare(`SELECT id, body_en, body_ar, due FROM facility_requests WHERE facility_id = ? ORDER BY created_at DESC`)
-    .all(facilityId) as unknown as { id: number; body_en: string; body_ar: string; due: string | null }[];
-  return rows.map((r) => ({ id: r.id, bodyEn: r.body_en, bodyAr: r.body_ar, due: r.due }));
+    .prepare(`SELECT id, body_en, body_ar, due, status, kind, corrected_at, close_note FROM facility_requests WHERE facility_id = ? ORDER BY created_at DESC`)
+    .all(facilityId) as unknown as { id: number; body_en: string; body_ar: string; due: string | null; status: 'open' | 'corrected'; kind: string; corrected_at: string | null; close_note: string | null }[];
+  return rows.map((r) => ({
+    id: r.id, bodyEn: r.body_en, bodyAr: r.body_ar, due: r.due,
+    status: r.status, kind: r.kind === 'confirmation' ? 'confirmation' as const : 'corrective' as const,
+    correctedAt: r.corrected_at ? r.corrected_at.slice(0, 10) : null,
+    closeNote: r.close_note,
+  }));
 }
 
 export function facilityIncidentCount(facilityId: string): number {
@@ -527,10 +563,12 @@ export interface InvitationRow {
   nameEn: string;
   nameAr: string;
   email: string;
-  status: 'nominated' | 'confirmed' | 'declined';
+  status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed';
   declaration: 'none' | 'draft' | 'signed';
   invitedAt: string;
   answeredAt: string | null;
+  /** A modification request's reason, or a decline's -- verbatim. */
+  responseNote: string;
 }
 
 export function invitationsFor(accountId: number, eventId: string): InvitationRow[] {
@@ -538,17 +576,18 @@ export function invitationsFor(accountId: number, eventId: string): InvitationRo
   if (!owned) return [];
   const rows = getDb()
     .prepare(
-      `SELECT token, kind, name_en, name_ar, email, status, declaration, invited_at, answered_at
+      `SELECT token, kind, name_en, name_ar, email, status, declaration, invited_at, answered_at, response_note
        FROM invitations WHERE event_id = ? ORDER BY invited_at`,
     )
     .all(eventId) as unknown as {
       token: string; kind: 'ems' | 'director'; name_en: string; name_ar: string; email: string;
       status: InvitationRow['status']; declaration: InvitationRow['declaration'];
-      invited_at: string; answered_at: string | null;
+      invited_at: string; answered_at: string | null; response_note: string;
     }[];
   return rows.map((r) => ({
     token: r.token, kind: r.kind, nameEn: r.name_en, nameAr: r.name_ar, email: r.email,
     status: r.status, declaration: r.declaration, invitedAt: r.invited_at, answeredAt: r.answered_at,
+    responseNote: r.response_note,
   }));
 }
 
@@ -628,6 +667,13 @@ export function venueRouteFor(accountId: number, eventId: string): string {
     .prepare(`SELECT venue_route FROM events WHERE id = ? AND account_id = ?`)
     .get(eventId, accountId) as { venue_route: string } | undefined;
   return r?.venue_route ?? '';
+}
+
+export function municipalitiesFor(accountId: number, eventId: string): string {
+  const r = getDb()
+    .prepare(`SELECT municipalities FROM events WHERE id = ? AND account_id = ?`)
+    .get(eventId, accountId) as { municipalities: string } | undefined;
+  return r?.municipalities ?? '';
 }
 
 export function planVersionsFor(accountId: number, eventId: string): PlanVersionRow[] {
@@ -720,15 +766,17 @@ export interface PostEventReportRow {
   organizerSignedAt: string | null;
   directorSignedAt: string | null;
   submittedAt: string | null;
+  directorReturnedAt: string | null;
+  directorReturnNote: string | null;
 }
 
 export function postEventReportFor(accountId: number, eventId: string): PostEventReportRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
   const r = getDb()
-    .prepare(`SELECT activity, significant, lessons_none, lessons_text, organizer_signed_at, director_signed_at, submitted_at FROM post_event_reports WHERE event_id = ?`)
+    .prepare(`SELECT activity, significant, lessons_none, lessons_text, organizer_signed_at, director_signed_at, submitted_at, director_returned_at, director_return_note FROM post_event_reports WHERE event_id = ?`)
     .get(eventId) as
-    | { activity: string; significant: string; lessons_none: number; lessons_text: string; organizer_signed_at: string | null; director_signed_at: string | null; submitted_at: string | null }
+    | { activity: string; significant: string; lessons_none: number; lessons_text: string; organizer_signed_at: string | null; director_signed_at: string | null; submitted_at: string | null; director_returned_at: string | null; director_return_note: string | null }
     | undefined;
   if (!r) return null;
   return {
@@ -739,6 +787,8 @@ export function postEventReportFor(accountId: number, eventId: string): PostEven
     organizerSignedAt: r.organizer_signed_at,
     directorSignedAt: r.director_signed_at,
     submittedAt: r.submitted_at,
+    directorReturnedAt: r.director_returned_at ? r.director_returned_at.slice(0, 10) : null,
+    directorReturnNote: r.director_return_note,
   };
 }
 
@@ -937,7 +987,7 @@ export interface InvitationDetail {
   nameEn: string;
   nameAr: string;
   email: string;
-  status: 'nominated' | 'confirmed' | 'declined';
+  status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed';
   declaration: 'none' | 'draft' | 'signed';
   accountId: number | null;
   responseNote: string;
@@ -1292,10 +1342,66 @@ export function attestationRecordsFor(eventId: string): AttestationRecord[] {
   }));
 }
 
+/** The attached documents on an event, for the review screen. Name-only records
+ * (document storage is a recorded deployment decision); provenance is the name. */
+export function attachmentsForReview(eventId: string): { docKey: string; fileName: string; attachedAt: string }[] {
+  const rows = getDb()
+    .prepare(`SELECT doc_key, file_name, attached_at FROM event_attachments WHERE event_id = ? ORDER BY attached_at`)
+    .all(eventId) as unknown as { doc_key: string; file_name: string; attached_at: string }[];
+  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at.slice(0, 10) }));
+}
+
+/** Archived submission versions, oldest first -- what each earlier filing carried. */
+export function submissionVersionsFor(eventId: string): { version: number; representative: string; archivedAt: string }[] {
+  const rows = getDb()
+    .prepare(`SELECT version, representative, archived_at FROM submission_versions WHERE event_id = ? ORDER BY version`)
+    .all(eventId) as unknown as { version: number; representative: string; archived_at: string }[];
+  return rows.map((r) => ({ version: r.version, representative: r.representative, archivedAt: r.archived_at.slice(0, 10) }));
+}
+
+/** Recorded covered-facility designations (power 3), newest first. */
+export function designationsForReview(viewerIsDemo: boolean): { nameEn: string; nameAr: string; category: string; municipality: string; facilityId: string | null; designatedBy: string; designatedAt: string }[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT name_en, name_ar, category, municipality, facility_id, designated_by, designated_at
+       FROM facility_designations WHERE is_demo = ? ORDER BY designated_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { name_en: string; name_ar: string; category: string; municipality: string; facility_id: string | null; designated_by: string; designated_at: string }[];
+  return rows.map((r) => ({ nameEn: r.name_en, nameAr: r.name_ar, category: r.category, municipality: r.municipality, facilityId: r.facility_id, designatedBy: r.designated_by, designatedAt: r.designated_at.slice(0, 10) }));
+}
+
+export interface ApplicabilityRecordRow {
+  id: number;
+  eventName: string;
+  source: string;
+  note: string;
+  determination: 'undetermined' | 'in_scope' | 'out_of_scope';
+  reasons: string;
+  designated: boolean;
+  recordedBy: string;
+  determinedAt: string | null;
+  createdAt: string;
+}
+
+export function applicabilityRecords(viewerIsDemo: boolean): ApplicabilityRecordRow[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT id, event_name, source, note, determination, reasons, designated, recorded_by, determined_at, created_at
+       FROM applicability_records WHERE is_demo = ? ORDER BY created_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { id: number; event_name: string; source: string; note: string; determination: ApplicabilityRecordRow['determination']; reasons: string; designated: number; recorded_by: string; determined_at: string | null; created_at: string }[];
+  return rows.map((r) => ({
+    id: r.id, eventName: r.event_name, source: r.source, note: r.note,
+    determination: r.determination, reasons: r.reasons, designated: r.designated === 1,
+    recordedBy: r.recorded_by, determinedAt: r.determined_at ? r.determined_at.slice(0, 10) : null,
+    createdAt: r.created_at.slice(0, 10),
+  }));
+}
+
 export interface PendingOrganizationRow {
   id: number;
   nameEn: string; nameAr: string;
-  status: 'none' | 'pending' | 'recorded';
+  status: 'none' | 'pending' | 'recorded' | 'returned';
   recordedAt: string | null;
 }
 
@@ -1307,7 +1413,8 @@ export function organizationsForReview(viewerIsDemo: boolean): PendingOrganizati
 }
 
 export interface MinistryChangeRow {
-  kind: 'material' | 'declined';
+  kind: 'material' | 'declined' | 'lifecycle';
+  linksToReview?: boolean;
   eventId: string;
   eventEn: string; eventAr: string;
   detailEn: string; detailAr: string;
@@ -1318,28 +1425,59 @@ export function changesForReview(viewerIsDemo: boolean): MinistryChangeRow[] {
   const db = getDb();
   const material = db
     .prepare(
-      `SELECT m.event_id, e.name_en, e.name_ar, m.aspects, m.reported_at
+      `SELECT m.event_id, e.name_en, e.name_ar, m.aspects, m.description, m.effective_date, m.reported_at
        FROM material_changes m JOIN events e ON e.id = m.event_id
        WHERE e.is_demo = ? ORDER BY m.reported_at DESC`,
     )
-    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; aspects: string; reported_at: string }[];
-  const declined = db
+    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; aspects: string; description: string; effective_date: string; reported_at: string }[];
+  const parties = db
     .prepare(
-      `SELECT i.event_id, e.name_en, e.name_ar, i.name_en AS party_en, i.name_ar AS party_ar, i.answered_at
+      `SELECT i.event_id, e.name_en, e.name_ar, i.name_en AS party_en, i.name_ar AS party_ar, i.status, i.answered_at, i.closed_at
        FROM invitations i JOIN events e ON e.id = i.event_id
-       WHERE i.status = 'declined' AND e.is_demo = ? ORDER BY i.answered_at DESC`,
+       WHERE i.status IN ('declined', 'removed') AND e.is_demo = ? ORDER BY COALESCE(i.closed_at, i.answered_at) DESC`,
     )
-    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; party_en: string; party_ar: string; answered_at: string | null }[];
+    .all(demoFlag(viewerIsDemo)) as unknown as { event_id: string; name_en: string; name_ar: string; party_en: string; party_ar: string; status: string; answered_at: string | null; closed_at: string | null }[];
+  // Cancellations and postponements read straight off the event rows: the organizer's
+  // act IS the notice, and the lane shows it without a second filing.
+  const lifecycle = db
+    .prepare(
+      `SELECT id, name_en, name_ar, lifecycle, lifecycle_at, lifecycle_note, postponed_to, filed
+       FROM events WHERE lifecycle != 'active' AND is_demo = ? ORDER BY lifecycle_at DESC`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as { id: string; name_en: string; name_ar: string; lifecycle: string; lifecycle_at: string | null; lifecycle_note: string | null; postponed_to: string | null; filed: number }[];
   return [
-    ...material.map((m) => ({
-      kind: 'material' as const, eventId: m.event_id, eventEn: m.name_en, eventAr: m.name_ar,
-      detailEn: 'Material change reported', detailAr: 'أُبلغ عن تغيير جوهري',
-      when: m.reported_at.slice(0, 10),
-    })),
-    ...declined.map((d) => ({
+    ...material.map((m) => {
+      const aspectKeys = (JSON.parse(m.aspects) as string[]).join(', ');
+      return {
+        kind: 'material' as const, eventId: m.event_id, eventEn: m.name_en, eventAr: m.name_ar,
+        // The stored substance, not just the fact of a report: aspects, the
+        // organizer's description verbatim, and the effective date where given.
+        detailEn: `Material change — ${aspectKeys}${m.effective_date ? ` · effective ${m.effective_date}` : ''} · “${m.description}”`,
+        detailAr: `تغيير جوهري — ${aspectKeys}${m.effective_date ? ` · يسري من ⁦${m.effective_date}⁩` : ''} · «${m.description}»`,
+        when: m.reported_at.slice(0, 10),
+        linksToReview: true,
+      };
+    }),
+    ...parties.map((d) => ({
       kind: 'declined' as const, eventId: d.event_id, eventEn: d.name_en, eventAr: d.name_ar,
-      detailEn: `Named party declined — ${d.party_en}`, detailAr: `اعتذر طرف مُسمّى — ${d.party_ar}`,
-      when: d.answered_at?.slice(0, 10) ?? '',
+      detailEn: d.status === 'removed' ? `Confirmed party removed by the organizer — ${d.party_en}` : `Named party declined — ${d.party_en}`,
+      detailAr: d.status === 'removed' ? `أزال المنظّم طرفاً مؤكَّداً — ${d.party_ar}` : `اعتذر طرف مُسمّى — ${d.party_ar}`,
+      when: (d.closed_at ?? d.answered_at)?.slice(0, 10) ?? '',
+      linksToReview: true,
+    })),
+    ...lifecycle.map((e) => ({
+      kind: 'lifecycle' as const, eventId: e.id, eventEn: e.name_en, eventAr: e.name_ar,
+      detailEn:
+        e.lifecycle === 'cancelled'
+          ? `Cancelled${e.lifecycle_note ? ` · “${e.lifecycle_note}”` : ''}`
+          : `Postponed ${e.postponed_to ? `to ${e.postponed_to}` : '— no new date yet'}${e.lifecycle_note ? ` · “${e.lifecycle_note}”` : ''}`,
+      detailAr:
+        e.lifecycle === 'cancelled'
+          ? `أُلغيت${e.lifecycle_note ? ` · «${e.lifecycle_note}»` : ''}`
+          : `أُجّلت ${e.postponed_to ? `إلى ⁦${e.postponed_to}⁩` : '— لا تاريخ جديداً بعد'}${e.lifecycle_note ? ` · «${e.lifecycle_note}»` : ''}`,
+      when: e.lifecycle_at?.slice(0, 10) ?? '',
+      // An unfiled cancelled draft has no submission to open.
+      linksToReview: e.filed === 1,
     })),
   ].sort((a, b) => (a.when < b.when ? 1 : -1));
 }
@@ -1472,18 +1610,19 @@ export interface MinistryUserRow {
   login: string;
   displayName: string;
   role: string;
+  suspended: boolean;
   isDemo: boolean;
 }
 
 export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
   const rows = getDb()
     .prepare(
-      `SELECT login, display_name, role, is_demo FROM accounts
+      `SELECT login, display_name, role, is_demo, suspended FROM accounts
        WHERE role IN ('reviewer','inspector','ministry_admin','order','platform_owner') AND is_demo = ?
        ORDER BY role, display_name`,
     )
-    .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number }[];
-  return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1 }));
+    .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number; suspended: number }[];
+  return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1, suspended: r.suspended === 1 }));
 }
 
 /** Counts only. Nothing here names an organizer, an account, an event or a patient. */

@@ -157,11 +157,14 @@ export default async function MinistryDashboardPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
             {openCorrective.slice(0, 4).map((c) => (
-              <div key={c.id} style={{ background: 'var(--bg)', padding: '13px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: 14 }}>
+              <Link key={c.id} href="/ministry/facilities" style={{ background: 'var(--bg)', padding: '13px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: 14, color: 'var(--ink)' }}>
                 <span style={{ lineHeight: 1.45 }}>
                   <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
                 </span>
-              </div>
+                <span style={{ flex: 'none', fontSize: '12.5px', color: 'var(--muted)' }}>
+                  <L en="Open the lane" ar="فتح المسار" />
+                </span>
+              </Link>
             ))}
             {openCorrective.length === 0 ? (
               <div style={{ background: 'var(--bg)', padding: '13px 16px', fontSize: 14, color: 'var(--muted)' }}>
@@ -188,11 +191,17 @@ export default async function MinistryDashboardPage() {
           />
         </p>
 
-        <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 20 }}>
-          <div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
+        {/* One coherent band: two EQUAL columns, each a self-contained card with its
+            own heading, its rows filling the card, and its link in the card foot --
+            matched heights, no orphaned buttons, no ocean of white beside one card. */}
+        <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'stretch' }}>
+          <div style={{ background: 'var(--surface2)', borderRadius: 16, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, letterSpacing: '-.015em' }}>
+              <L en={`Covered facilities — ${facilities.length}`} ar={`المرافق المشمولة — ${facilities.length}`} />
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
               {facilities.map((f) => (
-                <div key={f.id} style={{ paddingBlock: '14px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: '13.5px' }}>
+                <div key={f.id} style={{ paddingBlock: '13px', paddingInlineStart: '15px', paddingInlineEnd: '16px', background: 'var(--bg)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: '13.5px' }}>
                   <span>
                     <L en={`${f.nameEn} · ${shortEn(f.categoryKey)} · ${f.municipality}`} ar={`${f.nameAr} · ${shortAr(f.categoryKey)} · ${f.municipality}`} />
                   </span>
@@ -201,24 +210,31 @@ export default async function MinistryDashboardPage() {
                   </span>
                 </div>
               ))}
+              {facilities.length === 0 ? (
+                <div style={{ padding: '13px 16px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: '13.5px', color: 'var(--muted)' }}>
+                  <L en="No covered facilities registered." ar="لا مرافق مشمولة مسجَّلة." />
+                </div>
+              ) : null}
             </div>
-            <Link href="/ministry/facilities" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
-              <L en="Open facility oversight" ar="فتح الرقابة على المرافق" />
-            </Link>
+            <div style={{ marginBlockStart: 14 }}>
+              <Link href="/ministry/facilities" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
+                <L en="Open facility oversight" ar="فتح الرقابة على المرافق" />
+              </Link>
+            </div>
           </div>
-          <div>
+          <div style={{ background: 'var(--surface2)', borderRadius: 16, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, letterSpacing: '-.015em' }}>
-              <L en="Places with repeat reported arrests" ar="أماكن تكررت فيها حوادث مبلَّغة" />
+              <L en={`Places with repeat reported arrests — ${repeatArrests.length}`} ar={`أماكن تكررت فيها حوادث مبلَّغة — ${repeatArrests.length}`} />
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
               {repeatArrests.map((a) => (
-                <div key={a.placeEn} style={{ paddingBlock: '14px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px solid ${a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={a.placeEn} style={{ paddingBlock: '13px', paddingInlineStart: '15px', paddingInlineEnd: '16px', background: 'var(--bg)', borderInlineStart: `3px solid ${a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
                     <L en={a.placeEn} ar={a.placeAr} />
                   </span>
                   <span style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 'none' }}>
                     <span style={{ fontSize: 16, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)' }}>{a.count}</span>
-                    <span style={{ padding: '3px 8px', borderRadius: 999, background: a.designated ? 'var(--brand-soft)' : 'var(--surface2)', color: a.designated ? 'var(--brand)' : 'var(--muted)', fontSize: '11.5px' }}>
+                    <span style={{ padding: '3px 8px', borderRadius: 999, background: a.designated ? 'var(--brand-soft)' : 'var(--bg)', color: a.designated ? 'var(--brand)' : 'var(--muted)', fontSize: '11.5px' }}>
                       {a.designated ? <L en="Already a covered facility" ar="مرفق مشمول أصلاً" /> : <L en="Not currently covered" ar="غير مشمول حالياً" />}
                     </span>
                   </span>
@@ -230,9 +246,11 @@ export default async function MinistryDashboardPage() {
                 </div>
               ) : null}
             </div>
-            <Link href="/ministry/facilities/arrests" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
-              <L en="Open reported arrest locations" ar="فتح مواقع الحوادث المبلَّغة" />
-            </Link>
+            <div style={{ marginBlockStart: 14 }}>
+              <Link href="/ministry/facilities/arrests" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
+                <L en="Open reported arrest locations" ar="فتح مواقع الحوادث المبلَّغة" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -242,6 +260,7 @@ export default async function MinistryDashboardPage() {
           { href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'Filed submissions, their workflow state and their determinations.', descAr: 'التقديمات المقدَّمة وحالاتها الداخلية ونتائجها.' },
           { href: '/ministry/organizations', en: 'Organizations', ar: 'المؤسسات', descEn: 'Recording opens filing for the organizer.', descAr: 'التسجيل يفتح التقديم للمنظّم.' },
           { href: '/ministry/enquiries', en: 'Enquiries', ar: 'الاستفسارات', descEn: 'Questions against a determination. The outcome does not change here.', descAr: 'أسئلة على نتيجة. ولا تتغير النتيجة هنا.' },
+          { href: '/ministry/applicability', en: 'Applicability and referrals', ar: 'الانطباق والإحالات', descEn: 'Events referred from outside, determined in or out of scope with reasons.', descAr: 'فعاليات محالة من الخارج، تُحسم ضمن النطاق أو خارجه مع الأسباب.' },
         ]}
       />
     </MinistryShell>

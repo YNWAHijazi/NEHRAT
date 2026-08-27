@@ -387,8 +387,8 @@ export function PlanForm({
               </span>
               <span style={{ display: 'block', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', marginBlockStart: 6 }}>
                 <L
-                  en="This is yours to confirm for this event. It is not inherited from the facility's registration — a device behind a locked door on the day is not accessible, whatever the facility record says."
-                  ar="هذا التأكيد عليكم لهذه الفعالية. ولا يُورَث من تسجيل المرفق — فالجهاز خلف باب مقفل يوم الفعالية ليس متاحاً، مهما قال سجل المرفق."
+                  en="This is yours to confirm for this event. It is not inherited from the facility's registration — a device behind a locked door on the day is not accessible, whatever the facility record says. Unconfirming and saving WITHDRAWS the reference from your plan; the facility's own record is unchanged."
+                  ar="هذا التأكيد عليكم لهذه الفعالية. ولا يُورَث من تسجيل المرفق — فالجهاز خلف باب مقفل يوم الفعالية ليس متاحاً، مهما قال سجل المرفق. وإلغاء التأكيد مع الحفظ يسحب الإحالة من خطتكم؛ ويبقى سجل المرفق نفسه دون تغيير."
                 />
               </span>
             </span>

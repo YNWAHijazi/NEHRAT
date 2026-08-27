@@ -38,9 +38,27 @@ export default async function InvitationPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={0} showBack={false} />
+      {/* A signed-in counterparty gets the Dashboard pill like everyone else; only
+          the anonymous token view has nowhere to go back to. */}
+      <Header account={account} organization={null} unreadCount={0} showBack={account !== null} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
+          {invitation.status === 'withdrawn' ? (
+            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
+              <L
+                en="This nomination has been withdrawn by the organizer. It was withdrawn before it was answered, so nothing is owed by anyone: this link no longer accepts a response or a registration."
+                ar="سحب المنظّم هذا الترشيح. وقد سُحب قبل الإجابة عليه، فلا شيء مستحق على أحد: لم يعد هذا الرابط يقبل رداً أو تسجيلاً."
+              />
+            </div>
+          ) : null}
+          {invitation.status === 'removed' ? (
+            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
+              <L
+                en="The organizer has removed this confirmed participation — a material change on their submission, which they report to the Ministry. Your record of this event is closed and nothing further is owed on it."
+                ar="أزال المنظّم هذه المشاركة المؤكَّدة — وهو تغيير جوهري في تقديمه يبلّغ الوزارة به. أُغلق سجلكم لهذه الفعالية ولا شيء مستحق عليه بعد الآن."
+              />
+            </div>
+          ) : null}
           {invitation.status === 'declined' || notice === 'declined' ? (
             <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
               <L
@@ -70,11 +88,15 @@ export default async function InvitationPage({
           ) : null}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 14 }}>
-            <span style={{ padding: '4px 11px', borderRadius: 999, background: invitation.status === 'confirmed' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: invitation.status === 'confirmed' ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
+            <span style={{ padding: '4px 11px', borderRadius: 999, background: invitation.status === 'confirmed' ? 'var(--brand-soft)' : invitation.status === 'withdrawn' || invitation.status === 'removed' ? 'var(--surface2)' : 'var(--accent-soft)', color: invitation.status === 'confirmed' ? 'var(--brand)' : invitation.status === 'withdrawn' || invitation.status === 'removed' ? 'var(--muted)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
               {invitation.status === 'confirmed' ? (
                 <L en="Nomination — accepted" ar="ترشيح — مقبول" />
               ) : invitation.status === 'declined' ? (
                 <L en="Nomination — declined" ar="ترشيح — معتذَر عنه" />
+              ) : invitation.status === 'withdrawn' ? (
+                <L en="Nomination — withdrawn by the organizer" ar="ترشيح — سحبه المنظّم" />
+              ) : invitation.status === 'removed' ? (
+                <L en="Participation — removed by the organizer" ar="مشاركة — أزالها المنظّم" />
               ) : (
                 <L en="Nomination — awaiting your response" ar="ترشيح — بانتظار ردّكم" />
               )}

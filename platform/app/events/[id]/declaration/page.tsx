@@ -3,8 +3,9 @@ import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { DeclarationForm } from './DeclarationForm';
+import { reopenDeclarationAction, withdrawParticipationAction } from '../../../actions';
 import { currentAccount } from '../../../../lib/auth';
-import { invitationForEvent, invitationsForAccount, roleProfileFor, unreadCountFor } from '../../../../lib/queries';
+import { invitationForEvent, invitationsForAccount, materialChangesFor, roleProfileFor, unreadCountFor } from '../../../../lib/queries';
 import { getDb } from '../../../../lib/db';
 import { DECLARATION_ITEMS, ROLES_CONTENT, filingDeadline , emsDeclarationGate} from '../../../../lib/rules';
 
@@ -23,6 +24,14 @@ export default async function DeclarationPage({
   if (!account) redirect('/signin');
   const { id } = await params;
   const invitation = invitationForEvent(account.id, id, 'ems');
+  // A material change reported AFTER the signature re-opens the question: the
+  // declaration attests to the event as it was when signed.
+  const changeAfterSigning =
+    invitation && invitation.declaration === 'signed' && invitation.signedAt
+      ? (materialChangesFor(invitation.organizerAccountId, id).find(
+          (c) => c.reportedAt > (invitation.signedAt ?? ''),
+        ) ?? null)
+      : null;
   if (!invitation) notFound();
   // The rule, not this screen's own test (rule 10 and "no screen implements its own
   // gating"). The invitation screen consults the same gate for its accept wording.
@@ -104,6 +113,22 @@ export default async function DeclarationPage({
             </div>
           </div>
 
+          {invitation.declaration === 'signed' && changeAfterSigning ? (
+            <div data-region="declaration-reopen" style={{ padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 20, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+              <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.65 }}>
+                <L
+                  en={`The organizer reported a material change on ${changeAfterSigning.reportedAt.slice(0, 10)}, after you signed. Your declaration attests to the event as it was; re-open it to review the ten items against the changed event, then sign again.`}
+                  ar={`أبلغ المنظّم عن تغيير جوهري في ⁦${changeAfterSigning.reportedAt.slice(0, 10)}⁩ بعد توقيعكم. إقراركم يشهد على الفعالية كما كانت؛ أعيدوا فتحه لمراجعة البنود العشرة على الفعالية المتغيّرة ثم وقّعوا من جديد.`}
+                />
+              </span>
+              <form action={reopenDeclarationAction.bind(null, invitation.token)}>
+                <button type="submit" style={{ height: 36, paddingInline: 16, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 18, fontSize: '13.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                  <L en="Re-open the declaration" ar="إعادة فتح الإقرار" />
+                </button>
+              </form>
+            </div>
+          ) : null}
+
           <DeclarationForm
             token={invitation.token}
             items={[...DECLARATION_ITEMS]}
@@ -117,6 +142,28 @@ export default async function DeclarationPage({
               representative: profile['representative'] ?? '',
             }}
           />
+
+          {invitation.status === 'confirmed' ? (
+            <details style={{ marginBlockStart: 28 }}>
+              <summary style={{ cursor: 'pointer', fontSize: '13.5px', color: 'var(--muted)', listStyle: 'none' }}>
+                <span style={{ textDecoration: 'underline' }}>
+                  <L en="Withdraw from this event" ar="الانسحاب من هذه الفعالية" />
+                </span>
+              </summary>
+              <form action={withdrawParticipationAction.bind(null, invitation.token)} style={{ marginBlockStart: 10, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <span style={{ flex: 1, minWidth: 260, fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
+                  <L
+                    en="Withdrawing after confirming is a material change on the organizer's record: they are notified with your reason as written, the Level 3 package cannot proceed on your declaration, and where their submission is filed they must report the change and name another provider."
+                    ar="الانسحاب بعد التأكيد تغيير جوهري في سجل المنظّم: يُبلَّغ بسببكم كما كُتب، ولا يمضي ملف المستوى 3 على إقراركم، وحيث يكون ملفه مقدَّماً عليه الإبلاغ عن التغيير وتسمية مزوّد آخر."
+                  />
+                </span>
+                <input name="reason" required aria-label="Reason" style={{ flexBasis: '100%', height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
+                <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                  <L en="Withdraw — a material change" ar="الانسحاب — تغيير جوهري" />
+                </button>
+              </form>
+            </details>
+          ) : null}
         </div>
         <SequenceFooter
           labelEn="Next in the sequence"

@@ -1,8 +1,9 @@
 import { L } from '../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
-import { requireMinistryPage } from '../../../lib/ministry-auth';
+import { notFound, redirect } from 'next/navigation';
+import { currentAccount } from '../../../lib/auth';
 import { ministryConfig } from '../../../lib/queries';
-import { orderLaneActive } from '../../../lib/rules';
+import { can, orderLaneActive } from '../../../lib/rules';
 
 /**
  * The Order of Physicians lane, seen from the Ministry side. Configurable,
@@ -10,7 +11,13 @@ import { orderLaneActive } from '../../../lib/rules';
  * lane. With the lane off, the off state is the whole screen.
  */
 export default async function OrderLanePage() {
-  const account = await requireMinistryPage('viewMinistry');
+  // TWO permissions admit here: the console's (a reviewer or administrator reading
+  // the lane state) and the Order's own -- this page is the order role's landing
+  // route, and gating on viewMinistry alone sent that role's sign-in to a 404 of
+  // its own page.
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!can(account.role, 'viewMinistry') && !can(account.role, 'orderVerify')) notFound();
   const config = ministryConfig().get('orderLane');
   const active = config ? config.value === 'on' : orderLaneActive();
 

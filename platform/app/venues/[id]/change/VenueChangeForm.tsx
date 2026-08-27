@@ -140,12 +140,12 @@ export function VenueChangeForm({
                 ar={`الموقع مصنَّف حالياً في المستوى ${level ?? '—'}. ويحمل التصنيف الجديد تاريخي سريان وانتهاء خاصين به. ويبقى التصنيف الحالي سارياً إلى أن يُسجَّل التقييم الجديد، وإبلاغ الوزارة لا يستوفي موجب إعادة التقييم.`}
               />
             </div>
-            <Link
-              href={`/venues/${venueId}/assessment`}
-              style={{ display: 'inline-flex', alignItems: 'center', height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500 }}
-            >
-              <L en="Start the reassessment" ar="بدء إعادة التقييم" />
-            </Link>
+            <div style={{ fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.6, maxWidth: '64ch' }}>
+              <L
+                en="First notify the Ministry of the change below; the reassessment starts from the venue record once the change is on file."
+                ar="أبلغوا الوزارة بالتغيير أدناه أولاً؛ وتبدأ إعادة التقييم من سجل الموقع بعد تسجيل التغيير."
+              />
+            </div>
           </div>
         </div>
       ) : null}
