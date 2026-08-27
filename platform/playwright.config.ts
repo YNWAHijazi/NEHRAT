@@ -117,6 +117,9 @@ export default defineConfig({
           env: {
             REVIEW_CLOCK: '2026-08-13',
             DATABASE_PATH: 'var/e2e.db',
+            // Its own build directory: sharing .next with a dev server the reviewer
+            // has open corrupts both, and the app dies on a missing page chunk.
+            NEXT_DIST_DIR: '.next-e2e',
             // THE ACTUAL CAUSE of every late-sequence "flake" this suite has had:
             // next dev's memory watchdog logged "Server is approaching the used
             // memory threshold, restarting..." mid-run, and the restart window
