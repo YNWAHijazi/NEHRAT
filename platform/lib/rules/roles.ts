@@ -113,3 +113,38 @@ export function declarationGate(confirmed: readonly boolean[]): DeclarationGate 
 export function orderLaneActive(): boolean {
   return rolesJson.lanes.orderOfPhysicians.active === true;
 }
+
+/**
+ * Where a role lands, and which roles the organizer surface belongs to.
+ *
+ * ONE derivation, because there were two and they disagreed. The demonstration
+ * sign-in routed by role; the password sign-in redirected everyone to /dashboard.
+ * So a Ministry administrator signing in with credentials landed on the organizer's
+ * surface -- Events, Venues, Facilities, Start a service, and their own name over an
+ * organizer's dashboard. A reviewer does not organize events, and should never have
+ * been shown the controls for doing so.
+ *
+ * Kept here rather than in ministry.ts because it spans every role, not just the
+ * console's. Both sign-in paths and the dashboard route read it.
+ */
+
+/** The roles the organizer dashboard is FOR. Everyone else is refused there. */
+const ORGANIZER_SURFACE_ROLES = ['organizer', 'ems', 'director'] as const;
+
+export function usesOrganizerSurface(role: string): boolean {
+  return (ORGANIZER_SURFACE_ROLES as readonly string[]).includes(role);
+}
+
+/**
+ * The surface a role lands on after signing in. An unknown role gets the sign-in
+ * screen rather than a guess -- landing somewhere plausible is how this broke.
+ */
+export function landingRouteFor(role: string): string {
+  if (usesOrganizerSurface(role)) return '/dashboard';
+  if (role === 'response') return '/first-response/readiness';
+  if (role === 'reviewer' || role === 'inspector' || role === 'ministry_admin') return '/ministry';
+  if (role === 'order') return '/ministry/order';
+  // Unchanged from what the demonstration sign-in already did.
+  if (role === 'platform_owner') return '/platform/admin';
+  return '/signin';
+}

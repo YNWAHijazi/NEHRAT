@@ -18,16 +18,91 @@ import {
 
 type Mode = 'signin' | 'signup' | 'reset';
 
-const DEMO_LOGINS: { login: string; en: string; ar: string }[] = [
-  { login: 'test_organizer', en: 'Organizer', ar: 'المنظّم' },
-  { login: 'test_organizer_pending', en: 'Organizer — organization pending', ar: 'المنظّم — المؤسسة قيد التسجيل' },
-  { login: 'test_ems', en: 'EMS provider', ar: 'مزوّد خدمات الطوارئ الطبية' },
-  { login: 'test_director', en: 'Event Medical Director', ar: 'المدير الطبي للفعالية' },
-  { login: 'test_response', en: 'First-response unit', ar: 'وحدة الاستجابة الأولية' },
-  { login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة' },
-  { login: 'test_inspector', en: 'Ministry inspector', ar: 'مفتش الوزارة' },
-  { login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة' },
-  { login: 'test_owner', en: 'Platform owner', ar: 'مالك المنصة' },
+/**
+ * The demonstration logins, each stating WHAT IT CAN AND CANNOT DO at the point of
+ * sign-in rather than in a document nobody has open.
+ *
+ * The Ministry reviewer is the primary Ministry login and is marked as such: it is the
+ * only role that records a determination. The administrator configures and manages
+ * users and CANNOT record an outcome -- correct, and confusing to be handed as the one
+ * Ministry account, because the submission screen then shows no outcome block at all
+ * and the feature reads as missing rather than withheld.
+ */
+type DemoLogin = {
+  login: string;
+  en: string;
+  ar: string;
+  canEn: string;
+  canAr: string;
+  cannotEn: string;
+  cannotAr: string;
+  primary?: true;
+};
+
+const DEMO_LOGINS: DemoLogin[] = [
+  {
+    login: 'test_organizer', en: 'Organizer', ar: 'المنظّم',
+    canEn: 'Create events, venues and facilities; assess, attach, name providers and file.',
+    canAr: 'إنشاء الفعاليات والمواقع والمنشآت؛ والتقييم والإرفاق وتسمية المزوّدين والتقديم.',
+    cannotEn: 'Record any outcome, or see another organizer\u2019s records.',
+    cannotAr: 'تسجيل أي نتيجة، أو الاطلاع على سجلات منظّم آخر.',
+  },
+  {
+    login: 'test_organizer_pending', en: 'Organizer — organization pending', ar: 'المنظّم — المؤسسة قيد التسجيل',
+    canEn: 'Everything the organizer can, up to but not including filing.',
+    canAr: 'كل ما يستطيعه المنظّم، حتى التقديم دون أن يشمله.',
+    cannotEn: 'File a submission until the organization is recorded.',
+    cannotAr: 'تقديم أي ملف قبل تسجيل المؤسسة.',
+  },
+  {
+    login: 'test_ems', en: 'EMS provider', ar: 'مزوّد خدمات الطوارئ الطبية',
+    canEn: 'Answer a nomination and supply operational detail; sign the readiness declaration at Level 3.',
+    canAr: 'الرد على التسمية وتقديم التفاصيل التشغيلية؛ وتوقيع إقرار الجاهزية في المستوى 3.',
+    cannotEn: 'See any event it was not named in.',
+    cannotAr: 'الاطلاع على أي فعالية لم يُسمَّ فيها.',
+  },
+  {
+    login: 'test_director', en: 'Event Medical Director', ar: 'المدير الطبي للفعالية',
+    canEn: 'Write the governance text and co-sign the post-event report, on Level 3 events it is named in.',
+    canAr: 'كتابة نص الحوكمة والمشاركة في توقيع التقرير اللاحق، في فعاليات المستوى 3 المُسمّى فيها.',
+    cannotEn: 'See any event it was not named in.',
+    cannotAr: 'الاطلاع على أي فعالية لم يُسمَّ فيها.',
+  },
+  {
+    login: 'test_response', en: 'First-response unit', ar: 'وحدة الاستجابة الأولية',
+    canEn: 'Keep the readiness checklist and file incident reports.',
+    canAr: 'إمساك قائمة الجاهزية وتقديم تقارير الحوادث.',
+    cannotEn: 'See mass-gathering submissions; this is the cardiac lane.',
+    cannotAr: 'الاطلاع على تقديمات الفعاليات الجماهيرية؛ فهذا مسار توقف القلب.',
+  },
+  {
+    login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة', primary: true,
+    canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries.',
+    canAr: 'تسجيل أي من النتائج الثلاث، والإسناد، واشتراط تدابير إضافية، والرد على الاستفسارات.',
+    cannotEn: 'Change configuration or manage users.',
+    cannotAr: 'تغيير الإعدادات أو إدارة المستخدمين.',
+  },
+  {
+    login: 'test_inspector', en: 'Ministry inspector', ar: 'مفتش الوزارة',
+    canEn: 'Schedule inspections, record findings and corrective actions.',
+    canAr: 'جدولة عمليات التفتيش وتسجيل النتائج والإجراءات التصحيحية.',
+    cannotEn: 'Record any outcome — the control is absent, not disabled.',
+    cannotAr: 'تسجيل أي نتيجة — والأداة غائبة لا معطَّلة.',
+  },
+  {
+    login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة',
+    canEn: 'Configure the instrument and the cardiac policy, manage users, view the registry.',
+    canAr: 'ضبط الإطار وسياسة توقف القلب، وإدارة المستخدمين، والاطلاع على السجل.',
+    cannotEn: 'Record any outcome. Use the reviewer above for determinations.',
+    cannotAr: 'تسجيل أي نتيجة. استخدموا المراجع أعلاه للقرارات.',
+  },
+  {
+    login: 'test_owner', en: 'Platform owner', ar: 'مالك المنصة',
+    canEn: 'See counts of platform activity and the state of commercial flags.',
+    canAr: 'الاطلاع على أعداد نشاط المنصة وحالة المفاتيح التجارية.',
+    cannotEn: 'See the contents of any record. Counts only.',
+    cannotAr: 'الاطلاع على مضمون أي سجل. الأعداد فقط.',
+  },
 ];
 
 /** Reference field geometry: 46px inputs, 8px radius. */
@@ -252,14 +327,6 @@ export default async function SignInPage({
                 ar="يفتح كل حساب لوحة دوره مزوّدة بسجلات نموذجية، بحيث يمكن استعراض المنصة دون إنشاء سجلات. هذه السجلات أمثلة ولا تظهر أبداً في حساب حقيقي."
               />
             </p>
-            {params.notice === 'role-later-slice' ? (
-              <p
-                data-dev-only=""
-                style={{ margin: '0 0 16px', padding: '10px 14px', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)', border: '1px dashed var(--line)', borderRadius: 8 }}
-              >
-                Build note: only the organizer surface exists in this review build. The other role dashboards arrive in later slices.
-              </p>
-            ) : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {DEMO_LOGINS.map((demo) => (
                 <form key={demo.login} action={demoSignInAction}>
@@ -269,21 +336,35 @@ export default async function SignInPage({
                     style={{
                       width: '100%',
                       textAlign: 'start',
-                      padding: '12px 16px',
+                      padding: '14px 16px',
                       background: 'var(--bg)',
-                      border: '1px solid var(--line)',
+                      border: `1px solid ${demo.primary ? 'var(--brand)' : 'var(--line)'}`,
                       borderRadius: 10,
                       fontSize: 14,
                       cursor: 'pointer',
                       display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 10,
+                      flexDirection: 'column',
+                      gap: 6,
                     }}
                   >
-                    <span>
-                      <L en={demo.en} ar={demo.ar} />
+                    <span style={{ display: 'flex', justifyContent: 'space-between', gap: 10, width: '100%', alignItems: 'baseline', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                        <L en={demo.en} ar={demo.ar} />
+                        {demo.primary ? (
+                          <span style={{ flex: 'none', padding: '1px 8px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 11 }}>
+                            <L en="Start here for the Ministry" ar="ابدأوا من هنا لمسار الوزارة" />
+                          </span>
+                        ) : null}
+                      </span>
+                      <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', fontSize: '12.5px' }}>{demo.login}</span>
                     </span>
-                    <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{demo.login}</span>
+                    {/* What it can and cannot do, at the point of sign-in. */}
+                    <span style={{ fontSize: '12.5px', lineHeight: 1.55, color: 'var(--muted)', display: 'block' }}>
+                      <L en={`Can: ${demo.canEn}`} ar={`يستطيع: ${demo.canAr}`} />
+                    </span>
+                    <span style={{ fontSize: '12.5px', lineHeight: 1.55, color: 'var(--accent-ink)', display: 'block' }}>
+                      <L en={`Cannot: ${demo.cannotEn}`} ar={`لا يستطيع: ${demo.cannotAr}`} />
+                    </span>
                   </button>
                 </form>
               ))}
