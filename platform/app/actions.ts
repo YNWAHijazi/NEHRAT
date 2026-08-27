@@ -39,7 +39,7 @@ import { forgetSignInFields, rememberSignInFields,
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
   facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
-  declarationGate } from '../lib/rules';
+  declarationGate, landingRouteFor } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -60,16 +60,10 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   const account = findAccountByLogin(login);
   if (!account) redirect('/signin?error=unknown');
   await startSession(account.id);
-  // Each role lands on its own surface.
-  if (account.role === 'organizer' || account.role === 'ems' || account.role === 'director') {
-    redirect('/dashboard');
-  }
-  if (account.role === 'response') redirect('/first-response/readiness');
-  if (account.role === 'reviewer' || account.role === 'inspector' || account.role === 'ministry_admin') {
-    redirect('/ministry');
-  }
-  if (account.role === 'platform_owner') redirect('/platform/admin');
-  redirect('/signin?notice=role-later-slice');
+  // Each role lands on its own surface -- landingRouteFor, the same derivation the
+  // credentialed sign-in uses. This used to be an if-chain here and a bare
+  // /dashboard there, and the two disagreed.
+  redirect(landingRouteFor(account.role));
 }
 
 export async function signInWithPasswordAction(formData: FormData): Promise<void> {
@@ -81,8 +75,8 @@ export async function signInWithPasswordAction(formData: FormData): Promise<void
     redirect('/signin?error=credentials');
   }
   const row = getDb()
-    .prepare(`SELECT id, password_hash FROM accounts WHERE email = ?`)
-    .get(email) as { id: number; password_hash: string | null } | undefined;
+    .prepare(`SELECT id, password_hash, role FROM accounts WHERE email = ?`)
+    .get(email) as { id: number; password_hash: string | null; role: string } | undefined;
   // One failure answer: whether the email exists is not disclosed.
   if (!row?.password_hash || !verifyPassword(password, row.password_hash)) {
     await rememberSignInFields({ email });
@@ -90,7 +84,11 @@ export async function signInWithPasswordAction(formData: FormData): Promise<void
   }
   await forgetSignInFields();
   await startSession(row.id);
-  redirect('/dashboard');
+  // The ROLE's landing route, not a hard-coded /dashboard. This line sent every
+  // credentialed account to the organizer surface, so a Ministry administrator
+  // signing in with an email and password arrived at Events, Venues, Facilities
+  // and Start a service -- controls for a job that role does not do.
+  redirect(landingRouteFor(row.role));
 }
 
 export async function createAccountAction(formData: FormData): Promise<void> {

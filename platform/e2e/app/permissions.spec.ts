@@ -21,13 +21,14 @@ const LOGINS = {
   director: 'test_director',
   response: 'test_response',
   reviewer: 'test_moph',
+  inspector: 'test_inspector',
   admin: 'test_moph_admin',
 } as const;
 
 /**
- * Signs in through the demonstration-login buttons on /signin. Roles whose surfaces are
- * not yet built are bounced back to /signin with a build notice -- their session still
- * exists, which is exactly what these refusal tests need: a signed-in wrong role.
+ * Signs in through the demonstration-login buttons on /signin. Every role now has a
+ * landing route of its own (landingRouteFor), so this waits for any path off /signin
+ * rather than for the organizer dashboard specifically.
  */
 async function signInAs(page: Page, login: string): Promise<void> {
   await page.goto('/signin');
@@ -58,6 +59,37 @@ async function expectRefusal(page: Page, path: string, marker: RegExp): Promise<
  * lacks is worse than a red one. Skipped, with the slice that unskips each. The refusal
  * contract they will enforce is already written.
  */
+test.describe('the organizer surface belongs to the organizer', () => {
+  // A Ministry role signing in used to LAND here: the credentialed sign-in redirected
+  // every account to /dashboard regardless of role, so an administrator arrived at
+  // Events, Venues, Facilities and a Start a service menu -- controls for a job that
+  // role does not do. The refusal and the landing are both asserted, because fixing
+  // one without the other leaves the surface reachable by typing the address.
+  for (const [name, login] of [
+    ['a reviewer', LOGINS.reviewer],
+    ['an inspector', LOGINS.inspector],
+    ['a Ministry administrator', LOGINS.admin],
+  ] as const) {
+    test(`${name} is refused the organizer dashboard`, async ({ page }) => {
+      await signInAs(page, login);
+      await expectRefusal(page, '/dashboard', /Start a service|ابدأ خدمة/i);
+    });
+  }
+
+  test('a Ministry role lands on the console, not on the organizer dashboard', async ({ page }) => {
+    await signInAs(page, LOGINS.reviewer);
+    expect(new URL(page.url()).pathname).toBe('/ministry');
+  });
+
+  test('the Start a service menu does not exist for a Ministry role', async ({ page }) => {
+    await signInAs(page, LOGINS.admin);
+    await page.goto('/ministry');
+    // Not hidden -- unreachable. The menu lives only on the surface they are refused.
+    await expect(page.locator('[data-svc-menu]')).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('Start a service');
+  });
+});
+
 test.describe('platform-owner surfaces are above the Ministry', () => {
   test('a reviewer cannot reach platform activity', async ({ page }) => {
     // Real since Slice 6: the surface exists and a reviewer is refused.

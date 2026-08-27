@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
 import { StartServiceMenu } from '../../components/StartServiceMenu';
@@ -8,7 +8,7 @@ import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
 import { invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
-import { REASSESSMENT_WINDOW } from '../../lib/rules';
+import { REASSESSMENT_WINDOW, landingRouteFor, usesOrganizerSurface } from '../../lib/rules';
 import {
   beirutToday,
   daysBetween,
@@ -164,10 +164,17 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
 export default async function DashboardPage() {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  // One route, one dashboard per role (ROADMAP): the organizer's record lists, the
-  // EMS provider's and the Director's named-events lists. The first-response unit's
-  // surface is its readiness screen.
-  if (account.role === 'response') redirect('/first-response/readiness');
+  // This surface belongs to the organizer, the EMS provider and the Director. Every
+  // other role is REFUSED here, the same way every unpermitted surface refuses: a 404,
+  // indistinguishable from non-existence, so a role cannot map what sits above its
+  // permission. A Ministry reviewer does not organize events, and the Start a service
+  // menu below therefore cannot render for one -- it is unreachable rather than hidden.
+  //
+  // The first-response unit is sent on to its own surface rather than refused -- it has
+  // a landing route here, it just is not this one. That redirect comes FIRST, so the
+  // refusal below never swallows a role that has somewhere to go.
+  if (account.role === 'response') redirect(landingRouteFor(account.role));
+  if (!usesOrganizerSurface(account.role)) notFound();
   if (account.role === 'ems' || account.role === 'director') {
     const invitations = invitationsForAccount(account.id);
     const unreadRole = unreadCountFor(account.id);
