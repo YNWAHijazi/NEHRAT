@@ -13,6 +13,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
 
 /** The demonstration logins from SPEC 3b -- the roles the Ministry walks the platform with. */
 const LOGINS = {
@@ -41,7 +42,7 @@ async function signInAs(page: Page, login: string): Promise<void> {
  * A 200 that renders the surface is the failure.
  */
 async function expectRefusal(page: Page, path: string, marker: RegExp): Promise<void> {
-  const response = await page.goto(path);
+  const response = await gotoRidingRestarts(page, path);
   const status = response?.status() ?? 0;
   const landedOnSignin = page.url().includes('/signin');
   const refusedByStatus = status === 401 || status === 403 || status === 404;

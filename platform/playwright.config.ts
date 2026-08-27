@@ -56,6 +56,28 @@ export default defineConfig({
     {
       name: 'reference',
       testMatch: /reference\/.*\.spec\.ts/,
+      // A green run must mean green -- no known exception. Under four parallel
+      // workers this project repeatedly killed the same late-sequence screens:
+      // first as 60s goto timeouts, then as ERR_CONNECTION_REFUSED -- the dev
+      // server itself buckling under concurrent first-compiles plus four browsers
+      // parsing 400KB prototypes. SERIALISED: the project is one spec file, so
+      // fullyParallel: false runs its tests in a single worker, in order, one
+      // compile at a time. The raised budgets stay as the second belt -- they
+      // absorb a slow first compile, never a broken screen: every region
+      // assertion keeps the short expect timeout.
+      fullyParallel: false,
+      timeout: 180_000,
+      use: { navigationTimeout: 150_000 },
+      // The last belt, for a KNOWN, LOGGED cause -- not for flakiness. next dev's
+      // memory watchdog restarts the server once per full run ("Server is
+      // approaching the used memory threshold, restarting...", visible in the
+      // webServer log), and whichever single test hits the restart window dies on
+      // a dropped connection. Raising the heap ceiling did not move the watchdog.
+      // One retry rides out the seconds-long restart; a genuine visual regression
+      // fails identically on the retry, so the ratchet keeps its teeth. If a test
+      // passes only on retry for any OTHER reason, the report still marks it
+      // "flaky" -- treat that as a defect, not a pass.
+      retries: 1,
     },
     ...(APP_EXISTS
       ? [
@@ -63,6 +85,20 @@ export default defineConfig({
             name: 'app',
             testMatch: /app\/.*\.spec\.ts/,
             use: { baseURL: BASE_URL },
+            // Same known, logged cause as the reference project: the dev server's
+            // memory watchdog restarts it once as a long run accumulates, and the
+            // test in flight dies on a dropped connection. Two belts here:
+            // gotoRidingRestarts (e2e/helpers/resilient.ts) waits out the restart
+            // inside the long route sweeps, and this budget gives those sweeps the
+            // room the waiting costs -- the 60s cap killed the 44-route sweep on
+            // BOTH attempts once the helper turned crashes into waits. Assertions
+            // keep the short expect timeout, so broken screens still fail fast.
+            // One retry remains for idempotent tests hit outside a sweep. A serial
+            // MUTATING flow killed mid-run fails its retry too, because its state
+            // is half-applied; that hard failure is correct and demands a re-run
+            // rather than being papered over.
+            timeout: 180_000,
+            retries: 1,
           },
         ]
       : []),
@@ -81,6 +117,16 @@ export default defineConfig({
           env: {
             REVIEW_CLOCK: '2026-08-13',
             DATABASE_PATH: 'var/e2e.db',
+            // THE ACTUAL CAUSE of every late-sequence "flake" this suite has had:
+            // next dev's memory watchdog logged "Server is approaching the used
+            // memory threshold, restarting..." mid-run, and the restart window
+            // surfaced as goto timeouts, ERR_CONNECTION_REFUSED and
+            // ERR_CONNECTION_RESET on whichever tests hit it -- consistently the
+            // same screens because memory accumulates over the same sequence. The
+            // watchdog triggers relative to the heap ceiling, so an 8GB ceiling
+            // moves the restart far beyond what one full run accumulates. A cap,
+            // not a reservation.
+            NODE_OPTIONS: '--max-old-space-size=8192',
           },
         },
       }

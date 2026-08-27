@@ -16,6 +16,7 @@
  * this test fails, fix the screen, never loosen the matcher.
  */
 import { expect, test, type Page } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
 
 const MARKERS =
   /\b(outstanding|pending|awaiting|not yet|overdue|unanswered|owed|not set|incomplete|missing|blocked while|cannot be certified|awaiting recording|awaiting you|not recorded|not started|lapsed|lapsing|open —)\b/i;
@@ -32,7 +33,7 @@ interface DeadEnd {
 }
 
 async function scan(page: Page, route: string): Promise<DeadEnd[]> {
-  const response = await page.goto(route);
+  const response = await gotoRidingRestarts(page, route);
   if (!response || response.status() >= 400) return [];
   return page.evaluate(
     ({ markerSrc, ownerSrc, waitSrc }) => {
