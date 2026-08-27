@@ -112,7 +112,7 @@ export function SubmitForm({
 
   return (
     <div style={{ maxWidth: 900 }}>
-      <div data-region="form-card" style={{ padding: 28, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}>
+      <div data-region="form-card" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Form header" ar="ترويسة النموذج" />
         </div>
@@ -184,7 +184,7 @@ export function SubmitForm({
           <L en="Organizer certification" ar="تصديق المنظِّم" />
         </div>
         {certificationStatement ? (
-          <div data-region="certification-statement" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 18, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+          <div data-region="certification-statement" style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 18, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
             <L en={certificationStatement.en} ar={certificationStatement.ar} />
           </div>
         ) : null}
@@ -284,7 +284,7 @@ export function SubmitForm({
                 height: 48,
                 paddingInline: 26,
                 border: 0,
-                borderRadius: 22,
+                borderRadius: 24,
                 background: blockers.length > 0 ? 'var(--surface2)' : 'var(--brand)',
                 color: blockers.length > 0 ? 'var(--muted)' : 'var(--bg)',
                 fontSize: 15,

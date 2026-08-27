@@ -157,13 +157,13 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
 
         {/* The two actionable counters, from the reference. */}
         <div data-region="counters" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBlockEnd: 44 }}>
-          <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
+          <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
             <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
               <L en="documents left to attach" ar="مستنداً بقي إرفاقه" />
             </div>
           </div>
-          <div style={{ flex: 1, minWidth: 240, padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${agencyPendColor}`, borderRadius: 12 }}>
+          <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${agencyPendColor}`, borderRadius: 12 }}>
             <div style={{ fontSize: 30, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
               <L en="named agencies yet to answer" ar="جهة مُسمّاة لم تُجب بعد" />
@@ -191,7 +191,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
             const fileNoteEn = doc.system ? doc.noteEn : doc.thirdParty ? `${signedCount} of ${providers.length} signed` : fileNames[doc.key];
             const fileNoteAr = doc.system ? doc.noteAr : doc.thirdParty ? `وُقّع ${signedCount} من ${providers.length}` : fileNames[doc.key];
             return (
-              <div key={doc.key} style={{ padding: '20px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px ${doc.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${doc.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1, minWidth: 240, display: 'flex', gap: 12, alignItems: 'start' }}>
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}>
                     <path d="M6.5 4h8l3.5 3.5V20h-11.5z" />
@@ -209,7 +209,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none', flexWrap: 'wrap' }}>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: chipBg, color, fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
                     <L en={stateEn} ar={stateAr} />
                   </span>
                   {doc.system ? (
@@ -220,7 +220,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                   {doc.platform ? (
                     <a
                       href={doc.key === 'plan' ? `/events/${id}/plan` : `/events/${id}/submit`}
-                      style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+                      style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
                     >
                       {doc.key === 'plan' ? <L en="Open the plan" ar="فتح الخطة" /> : <L en="Open the form" ar="فتح النموذج" />}
                     </a>
@@ -238,7 +238,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                         aria-label="Attach the document"
                         style={{ fontSize: 13, maxWidth: 230 }}
                       />
-                      <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 14, cursor: 'pointer' }}>
+                      <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, cursor: 'pointer' }}>
                         <L en="Attach" ar="إرفاق" />
                       </button>
                     </form>
@@ -266,7 +266,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
             const edge = p.status === 'confirmed' ? 'solid' : 'dashed';
             const color = p.status === 'declined' ? 'var(--bad)' : p.status === 'nominated' ? 'var(--accent-ink)' : 'var(--brand)';
             return (
-              <div key={p.token} style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px ${edge} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={p.token} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${edge} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ flex: 1, minWidth: 240 }}>
                   <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                     <L en={p.nameEn} ar={p.nameAr} />
@@ -276,11 +276,11 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flex: 'none' }}>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: part.bg, color: part.color, fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: part.bg, color: part.color, fontSize: 13 }}>
                     <L en={part.en} ar={part.ar} />
                   </span>
                   {level === 3 ? (
-                    <span style={{ padding: '4px 10px', borderRadius: 4, background: decl.bg, color: decl.color, fontSize: 13 }}>
+                    <span style={{ padding: '4px 10px', borderRadius: 999, background: decl.bg, color: decl.color, fontSize: 13 }}>
                       <L en={decl.en} ar={decl.ar} />
                     </span>
                   ) : null}
@@ -306,7 +306,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
               noteAr="طبيب مرخّص يُرشَّح هنا. وظيفة القيادة الطبية للفعالية له وحده، ولا يمكن تقديم ملف المستوى 3 من دونه."
             />
             {director ? (
-              <div style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${director.status === 'confirmed' ? 'var(--brand)' : director.status === 'declined' ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
+              <div style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${director.status === 'confirmed' ? 'var(--brand)' : director.status === 'declined' ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
                 <div style={{ flex: 1, minWidth: 240 }}>
                   <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                     <L en={director.nameEn} ar={director.nameAr} />
@@ -325,7 +325,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                     </div>
                   ) : null}
                 </div>
-                <span style={{ padding: '4px 10px', borderRadius: 4, background: partChip[director.status].bg, color: partChip[director.status].color, fontSize: 13 }}>
+                <span style={{ padding: '4px 10px', borderRadius: 999, background: partChip[director.status].bg, color: partChip[director.status].color, fontSize: 13 }}>
                   <L en={partChip[director.status].en} ar={partChip[director.status].ar} />
                 </span>
                 {director.status === 'nominated' ? <InvitationLinkBlock token={director.token} /> : null}
@@ -395,7 +395,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                 {/* A plain hairline table: requirement, value, responsible party. No
                     edge, dot or chip -- those are the vocabulary of the actionable
                     groups, and using them here made a read-only list look like work. */}
-                <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                <div style={{ background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', padding: 1 }}>
                   {g.rows.map((r, i) => (
                     <div
                       key={r.n}
@@ -466,7 +466,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
               </p>
             </div>
           ) : (
-            <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', maxWidth: '74ch' }}>
+            <div style={{ background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', maxWidth: '74ch', padding: 1 }}>
               {inspections.map((ins, i) => (
                 <div key={ins.id} style={{ padding: '14px 18px', borderBlockStart: i === 0 ? '0' : '1px solid var(--line)', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ flex: 1, minWidth: 240, fontSize: '15.5px', lineHeight: 1.45 }}>

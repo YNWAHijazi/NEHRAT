@@ -50,25 +50,25 @@ export default async function ProfilePage({
           </p>
 
           <form action={saveRoleProfileAction}>
-            <div data-region="profile-form" style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+            <div data-region="profile-form" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
                 {fields.map((f) => (
                   <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                       <L en={f.en} ar={f.ar} />
                     </span>
-                    <input name={f.key} defaultValue={profile[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15 }} />
+                    <input name={f.key} defaultValue={profile[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
                   </label>
                 ))}
               </div>
             </div>
-            <button type="submit" style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
+            <button type="submit" style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
               <L en="Save the profile" ar="حفظ الملف" />
             </button>
           </form>
 
           {isEms ? (
-            <div data-region="shared-note" style={{ marginBlockStart: 20, padding: '22px 26px', border: '1px solid var(--line)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
+            <div data-region="shared-note" style={{ marginBlockStart: 20, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
               <L en={ROLES_CONTENT.ems.profileSharedNote.en} ar={ROLES_CONTENT.ems.profileSharedNote.ar} />
             </div>
           ) : null}

@@ -48,7 +48,7 @@ export default async function FacilityOversightPage({
 
       <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
         {facilities.map((f) => (
-          <div key={f.id} style={{ padding: '15px 20px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={f.id} style={{ paddingBlock: '16px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span>
               <span style={{ fontSize: 15, fontWeight: 500 }}>
                 <L en={f.nameEn} ar={f.nameAr} />
@@ -57,7 +57,7 @@ export default async function FacilityOversightPage({
                 <L en={`${shortEn(f.categoryKey)} · ${f.municipality} · ${f.devices} devices`} ar={`${shortAr(f.categoryKey)} · ${f.municipality} · ${f.devices} أجهزة`} />
               </span>
             </span>
-            <span style={{ padding: '3px 9px', borderRadius: 4, background: f.standingKind === 'met' ? 'var(--brand-soft)' : f.standingKind === 'lapsing' ? 'var(--accent-soft)' : 'var(--bad-soft)', color: f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent-ink)' : 'var(--bad)', fontSize: '12.5px' }}>
+            <span style={{ padding: '3px 9px', borderRadius: 999, background: f.standingKind === 'met' ? 'var(--brand-soft)' : f.standingKind === 'lapsing' ? 'var(--accent-soft)' : 'var(--bad-soft)', color: f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent-ink)' : 'var(--bad)', fontSize: '12.5px' }}>
               {f.standingKind === 'met' ? <L en="Obligations being met" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Items lapsing" ar="بنود تقترب من الانتهاء" /> : <L en="Obligations not being met" ar="الموجبات غير مستوفاة" />}
             </span>
           </div>
@@ -76,7 +76,7 @@ export default async function FacilityOversightPage({
       </p>
       <div data-region="corrective" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
         {corrective.map((c) => (
-          <div key={c.id} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+          <div key={c.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 260 }}>
               <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
               <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
@@ -84,7 +84,7 @@ export default async function FacilityOversightPage({
               </span>
             </span>
             <span style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 'none' }}>
-              <span style={{ padding: '3px 9px', borderRadius: 4, background: c.status === 'open' ? 'var(--bad-soft)' : 'var(--brand-soft)', color: c.status === 'open' ? 'var(--bad)' : 'var(--brand)', fontSize: '12.5px' }}>
+              <span style={{ padding: '3px 9px', borderRadius: 999, background: c.status === 'open' ? 'var(--bad-soft)' : 'var(--brand-soft)', color: c.status === 'open' ? 'var(--bad)' : 'var(--brand)', fontSize: '12.5px' }}>
                 {c.status === 'open' ? <L en="Open" ar="مفتوح" /> : <L en={`Corrected ${c.correctedAt ?? ''}`} ar={`صُحّح ⁦${c.correctedAt ?? ''}⁩`} />}
               </span>
               {mayCorrect && c.status === 'open' ? (
@@ -104,7 +104,7 @@ export default async function FacilityOversightPage({
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>
               <L en="Facility" ar="المرفق" />
             </span>
-            <select name="facilityId" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+            <select name="facilityId" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
               <option value="">—</option>
               {facilities.map((f) => (
                 <option key={f.id} value={f.id}>{f.nameEn}</option>
@@ -115,7 +115,7 @@ export default async function FacilityOversightPage({
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>
               <L en="What must be corrected, as the operator will read it" ar="ما يجب تصحيحه، كما سيقرأه المشغّل" />
             </span>
-            <input name="body" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+            <input name="body" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }} />
           </label>
           <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer' }}>
             <L en="Raise the corrective action" ar="إثارة الإجراء التصحيحي" />

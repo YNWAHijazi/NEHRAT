@@ -80,8 +80,8 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
               ar={`يستوجب المستوى ${level} المستندات أدناه. يُستكمل نموذج الامتثال والتقديم هنا ولا يُرفَق.`}
             />
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '14px 20px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
-            <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
+            <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
               <L en="Required" ar="مطلوب" />
             </span>
             <span style={{ lineHeight: 1.6 }}>
@@ -98,11 +98,11 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
               const color = done ? 'var(--brand)' : d.thirdParty ? 'var(--bad)' : d.system ? 'var(--muted)' : 'var(--accent-ink)';
               const chipBg = done ? 'var(--brand-soft)' : d.thirdParty ? 'var(--bad-soft)' : 'var(--accent-soft)';
               return (
-                <div key={d.key} style={{ padding: '18px 22px', border: '1px solid var(--line)', borderInlineStart: `3px ${d.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={d.key} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${d.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 16 }}>
                     <L en={d.en} ar={d.ar} />
                   </span>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: chipBg, color, fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
                     {done ? (
                       <L en="Complete" ar="مكتمل" />
                     ) : d.thirdParty ? (

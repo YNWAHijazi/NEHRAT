@@ -122,7 +122,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
                   return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
                 }).filter(Boolean).length;
                 return (
-                  <details key={`${v.version}-${v.savedAt}`} style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '10px 14px', fontSize: '13.5px' }}>
+                  <details key={`${v.version}-${v.savedAt}`} style={{ background: 'var(--surface2)', borderRadius: 10, padding: '11px 15px', fontSize: '13.5px' }}>
                     <summary style={{ cursor: 'pointer', display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: 500 }}>
                         <L en={`Version ${v.version}`} ar={`النسخة ${v.version}`} />

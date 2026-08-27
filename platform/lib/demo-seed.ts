@@ -85,7 +85,23 @@ export function seedDemonstration(db: DatabaseSync): void {
      VALUES (?, ?, ?, 'pending', 1)`,
   ).run(organizerPending, 'Mount Lebanon Trail Association', 'جمعية دروب جبل لبنان');
 
-  // The four demonstration events the reference dashboard shows.
+  // A SECOND recorded organizer, holding exactly one event: the filed-and-unreviewed
+  // submission the console needs so a grey internal state can be walked. It cannot
+  // belong to the showcase organizer -- that account's dashboard is a pixel-compared
+  // surface showing FOUR events, and a fifth pushed everything below it down the page.
+  // The reference's own queue carries three different organizers, so a second one is
+  // closer to it, not further away. This account holds no sign-in button.
+  const organizerQueue = insertAccount.run(
+    'demo_byblos', 'Byblos Municipality', 'BM', 'organizer',
+  ).lastInsertRowid as number;
+  db.prepare(
+    `INSERT INTO organizations (account_id, name_en, name_ar, status, recorded_at, is_demo)
+     VALUES (?, ?, ?, 'recorded', ?, 1)`,
+  ).run(organizerQueue, 'Byblos Municipality', 'بلدية جبيل', d('2026-07-02'));
+
+  // The four demonstration events the reference dashboard shows. EV-0455 below is a
+  // FIFTH event and belongs to the second organizer above, deliberately, so this
+  // dashboard still shows four.
   const insertEvent = db.prepare(
     `INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date,
        moph_reference, filed,
@@ -143,7 +159,7 @@ export function seedDemonstration(db: DatabaseSync): void {
   // see a grey internal state. Inventing it on EV-0418 would only move the contradiction.
   // This is a fifth event, filed with NO determination, sitting in the queue.
   insertEvent.run(
-    'EV-0455', organizer, 'Byblos Harbour Swim', 'سباحة مرفأ جبيل',
+    'EV-0455', organizerQueue, 'Byblos Harbour Swim', 'سباحة مرفأ جبيل',
     d('2026-10-17'), d('2026-10-17'), 'MOPH-EV-2026-0455', 1,
     'With the Ministry', 'لدى الوزارة',
     d('2026-10-17'), 'Event date', 'تاريخ الفعالية',

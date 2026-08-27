@@ -89,7 +89,7 @@ export function HeaderMenus({
               placeItems: 'center',
               background: 'var(--bad)',
               color: 'var(--bg)',
-              borderRadius: 9,
+              borderRadius: 8,
               fontSize: 11,
               fontWeight: 600,
               fontVariantNumeric: 'tabular-nums',

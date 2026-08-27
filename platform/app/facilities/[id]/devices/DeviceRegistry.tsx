@@ -125,7 +125,7 @@ export function DeviceRegistry({
               )}
             </div>,
             <div key={`${d.label}-d`} style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '13.5px' }}>
-              <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 4, background: st.chipBg, color: st.color }}>
+              <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: st.chipBg, color: st.color }}>
                 <L en={st.en} ar={st.ar} />
               </span>
             </div>,
@@ -134,7 +134,7 @@ export function DeviceRegistry({
       </div>
 
       <form action={saveFacilityDeviceAction.bind(null, facilityId)}>
-        <div data-region="device-card" style={{ maxWidth: 620, padding: 30, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16 }}>
+        <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
               <L en="New device record" ar="سجل جهاز جديد" />
@@ -270,7 +270,7 @@ export function DeviceRegistry({
 
           <button
             type="submit"
-            style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+            style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
           >
             <L en={purposeDef.ctaEn} ar={purposeDef.ctaAr} />
           </button>

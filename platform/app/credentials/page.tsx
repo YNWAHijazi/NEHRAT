@@ -44,7 +44,7 @@ export default async function CredentialsPage() {
             </div>
           ) : null}
 
-          <div data-region="non-determinative" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '82ch' }}>
+          <div data-region="non-determinative" style={{ padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '82ch' }}>
             <L en={content.credNonDeterminative.en} ar={content.credNonDeterminative.ar} />
           </div>
         </div>

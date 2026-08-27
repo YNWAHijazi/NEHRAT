@@ -64,7 +64,7 @@ export function SequenceFooter({
               padding: '22px 24px',
               background: 'transparent',
               border: '1px solid var(--line)',
-              borderRadius: 14,
+              borderRadius: 16,
               display: 'flex',
               gap: 14,
               alignItems: 'start',

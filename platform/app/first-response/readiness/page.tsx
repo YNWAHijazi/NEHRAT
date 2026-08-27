@@ -39,7 +39,7 @@ export default async function FirstResponseReadinessPage() {
             ar="تملك وحدة الإنعاش الأساسي أو الاستجابة الأولية المعتمدة المعدات والكفاءة والجهوزية التشغيلية للاستجابة لتوقف القلب، وتعمل بإجراء مكتوب، وتُبلغ عمّا تقوم به."
           />
         </p>
-        <div data-region="different-actor" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+        <div data-region="different-actor" style={{ padding: '21px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
           <L en={content.differentActor.en} ar={content.differentActor.ar} />
         </div>
 
@@ -71,11 +71,11 @@ export default async function FirstResponseReadinessPage() {
             </div>,
           ])}
         </div>
-        <div data-region="non-transport" style={{ padding: '18px 22px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 40, fontSize: '14.5px', lineHeight: 1.7, maxWidth: '80ch' }}>
+        <div data-region="non-transport" style={{ padding: '19px 23px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 40, fontSize: '14.5px', lineHeight: 1.7, maxWidth: '80ch' }}>
           <L en={content.nonTransportRule.en} ar={content.nonTransportRule.ar} />
         </div>
 
-        <div data-region="reports" style={{ padding: '24px 28px', border: '1px solid var(--line)', borderRadius: 14, maxWidth: '80ch' }}>
+        <div data-region="reports" style={{ padding: '25px 29px', background: 'var(--surface2)', borderRadius: 16, maxWidth: '80ch' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>

@@ -31,13 +31,13 @@ export default async function EnquiriesPage({
       </p>
       <div data-region="enquiries" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((e) => (
-          <div key={e.id} style={{ padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${e.repliedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12 }}>
+          <div key={e.id} style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.repliedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 10 }}>
               <span style={{ fontSize: 15, fontWeight: 600 }}>
                 <L en={e.eventEn} ar={e.eventAr} />
                 {e.mophReference ? <span style={{ fontWeight: 400, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}> · {e.mophReference}</span> : null}
               </span>
-              <span style={{ padding: '3px 9px', borderRadius: 4, background: e.repliedAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: e.repliedAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
+              <span style={{ padding: '3px 9px', borderRadius: 999, background: e.repliedAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: e.repliedAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
                 {e.repliedAt ? <L en="Responded" ar="أُجيب عنه" /> : <L en="Awaiting a Ministry response" ar="بانتظار رد الوزارة" />}
               </span>
             </div>

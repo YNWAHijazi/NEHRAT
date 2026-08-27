@@ -42,7 +42,7 @@ export default async function InvitationPage({
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           {invitation.status === 'declined' || notice === 'declined' ? (
-            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 14, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
+            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
               <L
                 en="This nomination has been declined. The organizer has been notified — declining is a material change the organizer must report to the Ministry."
                 ar="اعتُذر عن هذا الترشيح. وأُبلغ المنظّم — فالاعتذار تغيير جوهري على المنظّم إبلاغ الوزارة به."
@@ -70,7 +70,7 @@ export default async function InvitationPage({
           ) : null}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 14 }}>
-            <span style={{ padding: '4px 11px', borderRadius: 4, background: invitation.status === 'confirmed' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: invitation.status === 'confirmed' ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
+            <span style={{ padding: '4px 11px', borderRadius: 999, background: invitation.status === 'confirmed' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: invitation.status === 'confirmed' ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
               {invitation.status === 'confirmed' ? (
                 <L en="Nomination — accepted" ar="ترشيح — مقبول" />
               ) : invitation.status === 'declined' ? (
@@ -99,7 +99,7 @@ export default async function InvitationPage({
             </p>
           ) : null}
 
-          <div data-region="invite-facts" style={{ padding: 32, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20 }}>
+          <div data-region="invite-facts" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {facts.map((f) => (
                 <div key={f.en} style={{ background: 'var(--bg)', padding: '16px 18px' }}>

@@ -38,7 +38,7 @@ export default async function DatasetReportPage() {
             <L en={content.datasetIntro.en} ar={content.datasetIntro.ar} />
           </p>
           <DatasetForm />
-          <div data-region="timeframe" style={{ marginBlockStart: 20, padding: '18px 22px', border: '1px solid var(--line)', borderRadius: 12, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '80ch' }}>
+          <div data-region="timeframe" style={{ marginBlockStart: 20, padding: '19px 23px', background: 'var(--surface2)', borderRadius: 12, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '80ch' }}>
             {timeframe ? (
               <L
                 en={`The Ministry's published reporting timeframe applies: ${timeframe.value}${timeframe.effective ? ` — effective ${timeframe.effective}` : ''}.`}

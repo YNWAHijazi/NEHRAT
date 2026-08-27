@@ -65,7 +65,7 @@ export default async function SharedDocumentsPage({
             {docs.map((d) => {
               const s = STATE_STYLE[d.source];
               return (
-                <div key={d.id} style={{ padding: '18px 22px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px ${s.edge} ${s.color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={d.id} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${s.edge} ${s.color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ flex: 1, minWidth: 260 }}>
                     <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                       <L en={d.nameEn} ar={d.nameAr} />
@@ -75,7 +75,7 @@ export default async function SharedDocumentsPage({
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: 4, background: s.chipBg, color: s.color, fontSize: 13 }}>
+                    <span style={{ padding: '4px 10px', borderRadius: 999, background: s.chipBg, color: s.color, fontSize: 13 }}>
                       <L en={s.en} ar={s.ar} />
                     </span>
                   </div>

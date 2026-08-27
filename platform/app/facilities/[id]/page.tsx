@@ -144,7 +144,7 @@ export default async function FacilityReadinessPage({
                   <Link
                     key={o.v}
                     href={o.v === 0 ? `/facilities/${facility.id}` : `/facilities/${facility.id}?asof=${o.v}`}
-                    style={{ height: 34, paddingInline: 13, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}
+                    style={{ height: 34, paddingInline: 13, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}
                   >
                     <L en={o.en} ar={o.ar} />
                   </Link>
@@ -187,7 +187,7 @@ export default async function FacilityReadinessPage({
         </p>
 
         {catRequirements ? (
-          <div data-region="category-requirements" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
+          <div data-region="category-requirements" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Additional requirements for this category — published by the Ministry" ar="متطلبات إضافية لهذه الفئة — منشورة من الوزارة" />
             </div>
@@ -225,7 +225,7 @@ export default async function FacilityReadinessPage({
                 {row.until ?? '—'}
               </div>,
               <div key={`${row.key}-status`} style={{ background: 'var(--bg)', padding: 18, fontSize: '13.5px' }}>
-                <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 4, background: st.chipBg, color: st.color }}>
+                <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: st.chipBg, color: st.color }}>
                   <L en={statusLabel.en} ar={statusLabel.ar} />
                 </span>
               </div>,
@@ -252,7 +252,7 @@ export default async function FacilityReadinessPage({
               <Link
                 key={d.label}
                 href={`/facilities/${facility.id}/devices`}
-                style={{ textAlign: 'start', padding: 22, background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${st.color}`, borderRadius: 12, color: 'var(--ink)' }}
+                style={{ textAlign: 'start', paddingBlock: 23, paddingInlineStart: 22, paddingInlineEnd: 23, background: 'var(--surface2)', borderInlineStart: `3px solid ${st.color}`, borderRadius: 12, color: 'var(--ink)' }}
               >
                 <div style={{ fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockEnd: 8 }}>
                   {d.label} · {d.identification}
@@ -275,7 +275,7 @@ export default async function FacilityReadinessPage({
         </div>
 
         {requests.length > 0 ? (
-          <div data-region="ministry-request" style={{ padding: '26px 30px', border: '1px solid var(--line)', borderRadius: 14, maxWidth: '88ch', marginBlockEnd: 44 }}>
+          <div data-region="ministry-request" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, maxWidth: '88ch', marginBlockEnd: 44 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
               <L en="Requested by the Ministry" ar="مطلوب من الوزارة" />
             </div>

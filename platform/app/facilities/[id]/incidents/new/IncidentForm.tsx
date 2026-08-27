@@ -73,7 +73,7 @@ function AnswerRow({
               type="button"
               aria-pressed={on}
               onClick={() => onPick(o.k)}
-              style={{ padding: '4px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 14, fontSize: 13, cursor: 'pointer' }}
+              style={{ padding: '4px 12px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', borderRadius: 16, fontSize: 13, cursor: 'pointer' }}
             >
               <L en={o.en} ar={o.ar} />
             </button>
@@ -120,7 +120,7 @@ export function IncidentForm({
 
   return (
     <form action={submit}>
-      <div data-region="no-name" style={{ padding: '24px 28px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 14, marginBlockEnd: 32 }}>
+      <div data-region="no-name" style={{ padding: '24px 28px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 10 }}>
           <L en="Before you start" ar="قبل أن تبدأ" />
         </div>
@@ -298,7 +298,7 @@ export function IncidentForm({
           <button
             type="submit"
             disabled={flagged || pending}
-            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 22, background: flagged ? 'var(--surface2)' : 'var(--brand)', color: flagged ? 'var(--muted)' : 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: flagged ? 'not-allowed' : 'pointer' }}
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: flagged ? 'var(--surface2)' : 'var(--brand)', color: flagged ? 'var(--muted)' : 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: flagged ? 'not-allowed' : 'pointer' }}
           >
             <L en="Submit report" ar="تقديم التقرير" />
           </button>

@@ -109,7 +109,7 @@ export function RegisterFacilityForm({
               ar="يُسجَّل مرة واحدة. ويقرأ منه كل سجل جهاز وخطة الاستجابة؛ ولا يُطلب شيء منه مجدداً."
             />
           </p>
-          <div data-region="profile-form" style={{ padding: '30px 32px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
+          <div data-region="profile-form" style={{ padding: '31px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
             {content.profileFields.flatMap((f) => {
               const base = field(f.key, f.en, f.ar);
               if (!('bilingual' in f) || !f.bilingual) return [base];
@@ -161,7 +161,7 @@ export function RegisterFacilityForm({
                   type="button"
                   aria-pressed={on}
                   onClick={() => setCatKey(c.key)}
-                  style={{ textAlign: 'start', display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', background: on ? 'var(--surface)' : 'transparent', border: `1px solid ${on ? chip.border : 'var(--line)'}`, borderRadius: 14, cursor: 'pointer' }}
+                  style={{ textAlign: 'start', display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', background: on ? 'var(--surface)' : 'transparent', border: `1px solid ${on ? chip.border : 'var(--line)'}`, borderRadius: 16, cursor: 'pointer' }}
                 >
                   <span style={{ display: 'flex', gap: 14, alignItems: 'baseline', flex: 1, minWidth: 220 }}>
                     <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 16 }}>{i + 1}</span>
@@ -169,7 +169,7 @@ export function RegisterFacilityForm({
                       <L en={c.en} ar={c.ar} />
                     </span>
                   </span>
-                  <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 4, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
+                  <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
                     <L en={chip.en} ar={chip.ar} />
                   </span>
                 </button>
@@ -184,7 +184,7 @@ export function RegisterFacilityForm({
                   <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
                     <L en="The applicable rule" ar="القاعدة المنطبقة" />
                   </span>
-                  <span style={{ padding: '4px 10px', borderRadius: 4, background: CHIP[picked.state].bg, color: CHIP[picked.state].color, fontSize: '12.5px' }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: CHIP[picked.state].bg, color: CHIP[picked.state].color, fontSize: '12.5px' }}>
                     <L en={CHIP[picked.state].en} ar={CHIP[picked.state].ar} />
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export function RegisterFacilityForm({
                   <p style={{ margin: '0 0 18px', fontSize: '15.5px', lineHeight: 1.7, maxWidth: '70ch' }}>
                     <L en={content.venueCross.en} ar={content.venueCross.ar} />
                   </p>
-                  <a href="/venues/new" style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
+                  <a href="/venues/new" style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 21, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
                     <L en="Register a recurring venue as well" ar="تسجيل موقع فعاليات متكرر أيضاً" />
                   </a>
                 </div>
@@ -272,12 +272,12 @@ export function RegisterFacilityForm({
               ar="اسم أو مسمى وظيفي — كلاهما مقبول، فيمكن للمنشأة أن تسمّي وظيفة بدل شخص."
             />
           </p>
-          <div style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+          <div style={{ padding: '21px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
             <L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} />
           </div>
           <div data-region="persons" style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBlockEnd: 24 }}>
             {content.persons.map((p, i) => (
-              <div key={p.key} style={{ padding: '26px 28px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${i === 0 ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 14 }}>
+              <div key={p.key} style={{ paddingBlock: '27px', paddingInlineStart: '28px', paddingInlineEnd: '29px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i === 0 ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 16 }}>
                 <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 4 }}>
                   <L en={p.en} ar={p.ar} />
                 </div>

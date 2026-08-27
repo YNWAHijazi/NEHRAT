@@ -86,12 +86,12 @@ export default async function SubmissionReviewPage({
           </h1>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockStart: 10 }}>
             {review.level !== null ? (
-              <span style={{ padding: '3px 9px', borderRadius: 3, borderInlineStart: `2px solid var(--l${review.level})`, background: `var(--l${review.level}s)`, fontSize: 13 }}>
+              <span style={{ padding: '3px 9px', borderRadius: 13, borderInlineStart: `2px solid var(--l${review.level})`, background: `var(--l${review.level}s)`, fontSize: 13 }}>
                 <L en={`Level ${review.level}`} ar={`المستوى ${review.level}`} />
               </span>
             ) : null}
             {/* Internal workflow state: grey, quiet, not a determination. */}
-            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 3, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
+            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
               <L en={internal.en} ar={internal.ar} />
               {review.reviewer ? ` · ${review.reviewer}` : null}
             </span>
@@ -109,7 +109,7 @@ export default async function SubmissionReviewPage({
 
       {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --
           never a bare level chip. A seeded submission without stored answers says so. */}
-      <div data-region="derivation" style={{ padding: '18px 24px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24 }}>
+      <div data-region="derivation" style={{ padding: '19px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
           <L en="How the level was determined" ar="كيف تحدد المستوى" />
         </div>
@@ -184,13 +184,13 @@ export default async function SubmissionReviewPage({
             {review.providers.map((p) => {
               const chip = DECL_CHIP[p.declaration] ?? DECL_CHIP['none']!;
               return (
-                <div key={p.nameEn} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px ${p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={p.nameEn} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14.5px' }}>
                     <L en={p.nameEn} ar={p.nameAr} />
                   </span>
                   <span style={{ display: 'flex', gap: 8, flex: 'none', alignItems: 'center' }}>
                     {review.level === 3 ? (
-                      <span style={{ padding: '3px 9px', borderRadius: 4, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
+                      <span style={{ padding: '3px 9px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
                         <L en={chip.en} ar={chip.ar} />
                         {p.signedAt ? <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {p.signedAt}</span> : null}
                       </span>
@@ -217,17 +217,17 @@ export default async function SubmissionReviewPage({
           </p>
           <div data-region="inspections" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {inspections.map((i) => (
-              <div key={i.id} style={{ padding: '16px 18px', border: '1px solid var(--line)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
+              <div key={i.id} style={{ paddingBlock: '17px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: i.findings || mayInspect ? 10 : 0 }}>
                   <span style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                     <L en={i.titleEn} ar={i.titleAr} />
                     {i.blocking ? (
-                      <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '1px 7px', border: '1px solid var(--accent)', borderRadius: 3, fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--accent-ink)' }}>
+                      <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '1px 7px', border: '1px solid var(--accent)', borderRadius: 999, fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--accent-ink)' }}>
                         <L en="Blocking" ar="حاجب" />
                       </span>
                     ) : null}
                   </span>
-                  <span style={{ padding: '3px 9px', borderRadius: 4, background: i.state === 'recorded' ? 'var(--brand-soft)' : i.state === 'none' ? 'var(--bad-soft)' : 'var(--accent-soft)', color: i.state === 'recorded' ? 'var(--brand)' : i.state === 'none' ? 'var(--bad)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
+                  <span style={{ padding: '3px 9px', borderRadius: 999, background: i.state === 'recorded' ? 'var(--brand-soft)' : i.state === 'none' ? 'var(--bad-soft)' : 'var(--accent-soft)', color: i.state === 'recorded' ? 'var(--brand)' : i.state === 'none' ? 'var(--bad)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
                     {i.state === 'recorded' ? (
                       <L en="Findings recorded" ar="سُجّلت النتائج" />
                     ) : i.state === 'scheduled' ? (
@@ -248,13 +248,13 @@ export default async function SubmissionReviewPage({
                       <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                         <L en="Date" ar="التاريخ" />
                       </span>
-                      <input name="date" type="date" defaultValue={i.date ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                      <input name="date" type="date" defaultValue={i.date ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 18, fontSize: 13 }} />
                     </label>
                     <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 220 }}>
                       <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                         <L en="Findings — recording them closes the item" ar="النتائج — تسجيلها يُقفل البند" />
                       </span>
-                      <input name="findings" style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                      <input name="findings" style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 18, fontSize: 13 }} />
                     </label>
                     <button type="submit" style={{ height: 36, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, cursor: 'pointer' }}>
                       <L en="Save" ar="حفظ" />
@@ -280,13 +280,13 @@ export default async function SubmissionReviewPage({
             {measures.map((m) => {
               const doc = catalog.find((d) => d.key === m.catalogKey);
               return (
-                <div key={m.id} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${m.clearedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={m.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${m.clearedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 240 }}>
                     <L en={doc?.en ?? m.catalogKey} ar={doc?.ar ?? m.catalogKey} />
                     {m.note ? <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>{m.note}</span> : null}
                   </span>
                   <span style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 'none' }}>
-                    <span style={{ padding: '3px 9px', borderRadius: 4, background: m.clearedAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: m.clearedAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
+                    <span style={{ padding: '3px 9px', borderRadius: 999, background: m.clearedAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: m.clearedAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
                       {m.clearedAt ? <L en={`Cleared ${m.clearedAt}`} ar={`أُقفل ⁦${m.clearedAt}⁩`} /> : <L en="Outstanding" ar="قائم" />}
                     </span>
                     {mayMeasure && !m.clearedAt ? (
@@ -307,7 +307,7 @@ export default async function SubmissionReviewPage({
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                   <L en="From the requirement catalogue — nothing outside it attaches" ar="من كتالوغ المتطلبات — لا يُرفق شيء من خارجه" />
                 </span>
-                <select name="catalogKey" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+                <select name="catalogKey" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
                   <option value="">—</option>
                   {catalog.map((d) => (
                     <option key={d.key} value={d.key}>{d.en}</option>
@@ -318,7 +318,7 @@ export default async function SubmissionReviewPage({
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                   <L en="Note (a note, not a requirement)" ar="ملاحظة (ملاحظة لا متطلب)" />
                 </span>
-                <input name="note" style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                <input name="note" style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }} />
               </label>
               <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer' }}>
                 <L en="Require the measure" ar="طلب التدبير" />
@@ -329,7 +329,7 @@ export default async function SubmissionReviewPage({
 
         <div>
           {mayRecord ? (
-            <div data-region="outcome" style={{ padding: 24, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 16 }}>
+            <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en="Record an outcome" ar="تسجيل نتيجة" />
               </h2>
@@ -393,7 +393,7 @@ export default async function SubmissionReviewPage({
             {determinations.map((d, i) => {
               const def = MINISTRY_CONTENT.outcomes.find((o) => o.key === d.outcome);
               return (
-                <div key={i} style={{ padding: '14px 18px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10 }}>
+                <div key={i} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10 }}>
                   <div style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
                     <L en={def?.en ?? d.outcome} ar={def?.ar ?? d.outcome} />
                   </div>

@@ -147,12 +147,12 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
       </div>
       <div data-region="outstanding" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
         {outstanding.length === 0 ? (
-          <div style={{ padding: '24px 26px', border: '1px dashed var(--line)', borderRadius: 14, fontSize: 15, color: 'var(--muted)' }}>
+          <div style={{ padding: '24px 26px', border: '1px dashed var(--line)', borderRadius: 16, fontSize: 15, color: 'var(--muted)' }}>
             <L en="Nothing is outstanding." ar="لا موجب قائماً." />
           </div>
         ) : null}
         {outstanding.map((e) => (
-          <Link key={e.key} href={e.href} data-stack="" style={{ textAlign: 'start', padding: '24px 26px', background: 'var(--surface)', border: '1px solid var(--line)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 14, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+          <Link key={e.key} href={e.href} data-stack="" style={{ textAlign: 'start', paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
                 <L en={e.nameEn} ar={e.nameAr} />
@@ -162,7 +162,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBlockStart: 8 }}>
                 {e.chips.map((c) => (
-                  <span key={c.en} style={{ padding: '3px 8px', borderRadius: 3, background: c.bg, color: c.color, fontSize: 12 }}>
+                  <span key={c.en} style={{ padding: '3px 8px', borderRadius: 999, background: c.bg, color: c.color, fontSize: 12 }}>
                     <L en={c.en} ar={c.ar} />
                   </span>
                 ))}
@@ -174,7 +174,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
               <div style={{ fontSize: 15, fontWeight: 500 }}>
                 {e.level !== null ? (
-                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 3, borderInlineStart: `2px solid var(--l${e.level})`, background: `var(--l${e.level}s)` }}>
+                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, borderInlineStart: `2px solid var(--l${e.level})`, background: `var(--l${e.level}s)` }}>
                     <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
                   </span>
                 ) : (
@@ -212,12 +212,12 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
       </div>
       <div data-region="complete" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {complete.length === 0 ? (
-          <div style={{ padding: '24px 26px', border: '1px dashed var(--line)', borderRadius: 14, fontSize: 15, color: 'var(--muted)' }}>
+          <div style={{ padding: '24px 26px', border: '1px dashed var(--line)', borderRadius: 16, fontSize: 15, color: 'var(--muted)' }}>
             <L en="Nothing is complete yet." ar="لم يُنجز شيء بعد." />
           </div>
         ) : null}
         {complete.map((e) => (
-          <Link key={e.key} href={e.href} data-stack="" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderInlineStart: '3px solid var(--brand)', borderRadius: 14, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+          <Link key={e.key} href={e.href} data-stack="" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
                 <L en={e.nameEn} ar={e.nameAr} />
@@ -227,7 +227,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBlockStart: 8 }}>
                 {e.chips.map((c) => (
-                  <span key={c.en} style={{ padding: '3px 8px', borderRadius: 3, background: c.bg, color: c.color, fontSize: 12 }}>
+                  <span key={c.en} style={{ padding: '3px 8px', borderRadius: 999, background: c.bg, color: c.color, fontSize: 12 }}>
                     <L en={c.en} ar={c.ar} />
                   </span>
                 ))}
@@ -239,7 +239,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
               <div style={{ fontSize: 15, fontWeight: 500 }}>
                 {e.level !== null ? (
-                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 3, borderInlineStart: `2px solid var(--l${e.level})`, background: `var(--l${e.level}s)` }}>
+                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, borderInlineStart: `2px solid var(--l${e.level})`, background: `var(--l${e.level}s)` }}>
                     <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
                   </span>
                 ) : (
@@ -251,7 +251,7 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               <L en={e.owedEn} ar={e.owedAr} />
             </div>
             <div style={{ textAlign: 'end' }}>
-              <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 4, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
+              <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: 13 }}>
                 <L en={e.doneChipEn ?? 'Complete'} ar={e.doneChipAr ?? 'مُنجز'} />
               </span>
             </div>

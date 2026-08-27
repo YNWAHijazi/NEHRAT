@@ -26,7 +26,7 @@ export default async function OrderLanePage() {
         />
       </p>
       {!active ? (
-        <div data-region="lane-off" style={{ padding: '28px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 14, maxWidth: '86ch' }}>
+        <div data-region="lane-off" style={{ padding: '28px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, maxWidth: '86ch' }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
             <L en="Lane not active" ar="المسار غير مفعّل" />
           </div>
@@ -38,7 +38,7 @@ export default async function OrderLanePage() {
           </p>
         </div>
       ) : (
-        <div data-region="lane-on" style={{ padding: '24px 28px', border: '1px solid var(--brand)', borderRadius: 14, maxWidth: '86ch', fontSize: 15, lineHeight: 1.7 }}>
+        <div data-region="lane-on" style={{ padding: '24px 28px', border: '1px solid var(--brand)', borderRadius: 16, maxWidth: '86ch', fontSize: 15, lineHeight: 1.7 }}>
           <L
             en="The lane is active. Assigned Level 3 items reach the Order reviewer, scoped to the assessment, the level, medical staffing, clinical governance and credentials — never the organizer's commercial details, and never the facility lane."
             ar="المسار مفعّل. تصل البنود المسندة من المستوى 3 إلى مراجع النقابة، محصورة بالتقييم والمستوى والملاك الطبي والحوكمة السريرية والمؤهلات — لا التفاصيل التجارية للمنظّم أبداً، ولا مسار المرافق أبداً."

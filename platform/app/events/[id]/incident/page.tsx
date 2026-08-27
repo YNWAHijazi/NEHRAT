@@ -81,7 +81,7 @@ export default async function IncidentPage({
               />
             </div>
           ) : (
-            <form action={notifySeriousIncidentAction.bind(null, id)} style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 14, marginBlockEnd: 28 }}>
+            <form action={notifySeriousIncidentAction.bind(null, id)} style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 16, marginBlockEnd: 28 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--bad)', marginBlockEnd: 14 }}>
                 <L en={`Separate obligation — ${hours} hours`} ar={`موجب منفصل — ${hours} ساعة`} />
               </div>
@@ -97,7 +97,7 @@ export default async function IncidentPage({
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
                   <L en="When it occurred" ar="وقت الوقوع" />
                 </span>
-                <input type="datetime-local" name="occurredAt" required style={{ height: 42, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 14 }} />
+                <input type="datetime-local" name="occurredAt" required style={{ height: 42, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 21, fontSize: 14 }} />
               </label>
               <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 16, maxWidth: '80ch' }}>
                 <L
@@ -121,7 +121,7 @@ export default async function IncidentPage({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {rows.map((r) => (
-                <div key={`${r.notifiedAt}-${r.occurredAt}`} style={{ padding: '12px 16px', border: '1px solid var(--line)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline' }}>
+                <div key={`${r.notifiedAt}-${r.occurredAt}`} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: '13.5px', alignItems: 'baseline' }}>
                   <span style={{ fontWeight: 500 }}>
                     <L en={typeByKey[r.incidentType]?.en ?? r.incidentType} ar={typeByKey[r.incidentType]?.ar ?? r.incidentType} />
                   </span>

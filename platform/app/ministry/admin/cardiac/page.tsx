@@ -107,7 +107,7 @@ export default async function CardiacConfigPage({
         ))}
       </div>
 
-      <div data-region="in-force-note" style={{ padding: '14px 18px', border: '1px solid var(--line)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
+      <div data-region="in-force-note" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
         <L en={MINISTRY_CONTENT.inForceWithoutValue.en} ar={MINISTRY_CONTENT.inForceWithoutValue.ar} />
       </div>
 
@@ -116,7 +116,7 @@ export default async function CardiacConfigPage({
           const s = stateOf(p);
           const keys = valueKeysOf(p);
           return (
-            <div key={p.key} style={{ padding: '20px 24px', border: '1px solid var(--line)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 12 }}>
+            <div key={p.key} style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 12 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 10 }}>
                 <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 280 }}>
                   <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 18 }}>{p.n}</span>
@@ -124,7 +124,7 @@ export default async function CardiacConfigPage({
                     <L en={p.en} ar={p.ar} />
                   </span>
                 </span>
-                <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 4, background: s.bg, color: s.color, fontSize: '12.5px' }}>
+                <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: s.bg, color: s.color, fontSize: '12.5px' }}>
                   <L en={s.en} ar={s.ar} />
                 </span>
               </div>
@@ -149,12 +149,12 @@ export default async function CardiacConfigPage({
                     {keys.map((key) => {
                       const row = config.get(key);
                       return (
-                        <div key={key} style={{ padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10 }}>
+                        <div key={key} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10 }}>
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: row ? 0 : 10 }}>
                             <span style={{ fontSize: '13.5px', display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
                               <L en={labelFor(p, key).en} ar={labelFor(p, key).ar} />
                               {outsideOf(p).includes(key) ? (
-                                <span style={{ flex: 'none', padding: '2px 8px', borderRadius: 3, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase' }}>
+                                <span style={{ flex: 'none', padding: '2px 8px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 11, letterSpacing: '.04em', textTransform: 'uppercase' }}>
                                   <L en="Not one of the ten" ar="ليست من العشر" />
                                 </span>
                               ) : null}
@@ -183,13 +183,13 @@ export default async function CardiacConfigPage({
                                 <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
                                   <L en="Value" ar="القيمة" />
                                 </span>
-                                <input name="value" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                                <input name="value" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }} />
                               </label>
                               <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                 <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
                                   <L en={MINISTRY_CONTENT.setAndPublish.effectiveEn} ar={MINISTRY_CONTENT.setAndPublish.effectiveAr} />
                                 </span>
-                                <input name="effective" type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+                                <input name="effective" type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
                               </label>
                               <button type="submit" style={{ height: 34, paddingInline: 14, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                                 <L en={MINISTRY_CONTENT.setAndPublish.en} ar={MINISTRY_CONTENT.setAndPublish.ar} />
