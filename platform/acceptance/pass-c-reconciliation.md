@@ -230,3 +230,97 @@ The prototypes on disk are still the 2026-08-25 23:02 set. The white variant sti
 facility identities, and `Facility Cardiac Readiness.dc.html` is still present with four
 "Corniche Sports Club" strings. The two retirements described as unblocked cannot be verified
 until the new pack lands; `lib/handoff-pack.ts` is the one line that points at it.
+
+---
+
+## Addendum 3, 2026-08-27 — the attestations built, and the summary-claim audit
+
+**The attestation gate is built.** `lib/rules/attestations.ts`, an `attestations` table, a
+panel on the submission review, and pending items feeding the same blocker list as
+inspections and added measures — which is what `outcomeAvailability`'s docstring had promised
+for a whole slice while nothing computed it. Six items verbatim from the reference, each with
+an assigned authority; two states only, with a deficiency recorded as the reason an item is
+pending, and recordable against a complete item because completion must be correctable. The
+seeded EV-0362 mirrors the reference row for row, and the once-concealing region now carries
+**three authored comparisons** (att-intro, att-summary, att-row-complete), each with a
+reference locator, each holding at a stated threshold with its strings ratcheted verbatim in
+e2e where the hold is loose.
+
+**Open decision 19 — the lane fallback.** Items assigned to the Order of Physicians are
+recordable by the Order while its lane is active; while the lane is off — the default — the
+Ministry records them itself, because a pending item nobody may record would make
+"satisfied" permanently unreachable at Level 3. The prototype shows Order items read-only to
+the Ministry *and* shows the lane off on its own Order screen; both cannot hold. Reported,
+not reconciled; the build ruling is labelled on the row itself. The Order page's own copy —
+mine, not the prototype's — said a reviewer may record any outcome "whether or not Order
+review is complete", which the prototype's gate contradicts; corrected to the prototype's
+rule.
+
+**The plan panel is built.** The same unlocated exception hid a second feature: the review
+screen carried not one word of the plan the outcome concerns — the seeded revision note even
+cited plan content the reviewer could not see. `planForReview` (event-scoped, because the
+reviewer is not the owner) now feeds a read-only panel: the sixteen sections with derived
+states and written content in place, the attached file where one was attached, the Level 3
+director strip, the eleven major-incident items, and the Order footnote. "Partly addressed"
+exists in the reference's showcase and is deliberately not invented — it is not derivable
+from stored data. The panel's Arabic title takes the SPEC §7 glossary form over the
+prototype's drifted one; the banned-terms guard caught the drift before I did.
+
+### The audit: every prototype control and heading, against the build
+
+The directive: any exception claiming a panel is a summary, a duplicate, or covered
+elsewhere gets verified before it stays. Per-region reading would re-trust the region
+boundaries that hid the attestations, so the audit swept wider: **every literal button label
+and section heading in every prototype file, checked for presence anywhere in the build.**
+Classification of everything absent:
+
+**Claims verified FALSE, features built this session:** the attestation gate; the review
+plan panel.
+
+**Features present under different wording (verified by inspection, no action):** outcome
+recording (radios + one button vs three labelled buttons) · inspection scheduling and
+findings · re-filing a revision ("File the revised submission" vs "File version 3") ·
+declining a nomination · the serious-incidents lane · added measures (add/clear vs
+add/remove) · enquiry replies (`respondEnquiryAction`, textarea, permission-gated) ·
+expedited filing · venue reassessment gates.
+
+**Already recorded as open rows or decisions (no new entry):** cancellation and
+postponement (decision 4) · the Slice 0 landing content — every absent heading in Event
+Health Readiness.dc.html is that file (decision 1) · designation and referral controls
+(decision 3) · surveillance/audit/QI exports (decision 12) · "Request confirmation" /
+"Require a correction" consoles (§13 ¶2(c) open row; Annex B §6.2 routes) · the device scan
+panel (absentExpected, sequenced with the AI layer) · per-document revision requests ("Require
+a revised…", the L1 requestable-catalogue open row) · device status-change routes and the
+annual-confirmation purpose (open rows).
+
+**NEW findings, recorded now:**
+
+1. **The configuration console cannot publish a version.** Its own copy says changing a
+   value "is a new version of the instrument's data, reviewed and published; this console
+   reads" — a stated stance, so not silent — but the prototype carries *Publish a version*,
+   *Configuration history*, *Add a permanent requirement* and *Add to the catalogue*. Who
+   may change the instrument's data, and through what workflow, is decision-class; the gap
+   is now recorded rather than implied by the copy.
+2. **The users console cannot create a user or assign a role** (*Create a user*, *Assign
+   role*, *Accounts*). Ministry accounts are minted out of band by
+   `scripts/make-ministry-account.mjs`. Ties to decision 7 (the role model); recorded.
+3. **No audit trail surface** (*Audit trail*). Nothing in the build records or shows an
+   action history for Ministry acts. Determinations and attestations carry who/when;
+   configuration and assignment do not.
+4. **The national registry drill-downs are flat.** The prototype's registry sections read
+   *Organizations and the events they hold*, *EMS providers and the events they are named
+   in*, *Venues and their classifications*, *Facility records*; the build's registry lists
+   id and name rows with no cross-links.
+5. **PAD §12 cross-module reference is unbuilt** (*Reference the facility's registered
+   arrangements*): the instrument says existing registered AEDs, trained responders and
+   cardiac-emergency arrangements *may be referenced in the event health and medical plan*.
+   Instrument-backed, not just prototype-backed — this belongs with the Pass A open rows.
+6. **Small organizer-side gaps:** *Mark all as read* on notifications · *Preview the
+   acknowledgment* before filing · *Replace file* on an attachment (attach-once today) ·
+   resume-progress on a partly answered assessment (*Continue the assessment — 4 of 9
+   domains answered*).
+
+**Prototype sections that are documentation, not features:** *Edge states*, *Empty states*,
+*Quiet states*, *Loading and failed states*, *Form validation*, *Reset example*, *Try
+again* — the prototypes' own QA walls. The states they document are handled; the walls
+themselves are a reviewer's index, like the tab strip, and are not built.

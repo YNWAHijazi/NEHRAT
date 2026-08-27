@@ -38,6 +38,7 @@ export type MinistryAction =
   | 'viewSubmission'
   | 'assignReview'
   | 'recordOutcome'
+  | 'recordAttestation'
   | 'requireMeasures'
   | 'recordOrganization'
   | 'respondEnquiry'

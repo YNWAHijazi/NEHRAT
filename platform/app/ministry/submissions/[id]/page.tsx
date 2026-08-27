@@ -1,19 +1,37 @@
 import { notFound } from 'next/navigation';
+import { getDb } from '../../../../lib/db';
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import {
   addedMeasuresFor,
+  attestationRecordsFor,
+  planForReview,
   determinationsFor,
   inspectionsFor,
   submissionForReview,
   derivationForReview,
 } from '../../../../lib/queries';
-import { MINISTRY_CONTENT, can, documentsForLevel, outcomeAvailability } from '../../../../lib/rules';
+import {
+  ATTESTATIONS_CONTENT,
+  MAJOR_INCIDENT_ITEMS,
+  MINISTRY_CONTENT,
+  PLAN_SECTIONS,
+  NEHRAT_TOOL_VERSION,
+  attestationEmptyBody,
+  attestationRows,
+  attestationSummary,
+  attestationsApplyAt,
+  can,
+  documentsForLevel,
+  outcomeAvailability,
+  type Level,
+} from '../../../../lib/rules';
 import {
   assignReviewAction,
   clearMeasureAction,
   outcomeBlockersFor,
+  recordAttestationAction,
   recordInspectionAction,
   recordOutcomeAction,
   requireMeasureAction,
@@ -43,6 +61,30 @@ export default async function SubmissionReviewPage({
 
   const determinations = determinationsFor(id);
   const measures = addedMeasuresFor(id);
+  // The attestation gate: applicable at the levels the data names; [] below them,
+  // where the screen shows the explicit empty state rather than nothing.
+  const attRows =
+    review.level !== null && attestationsApplyAt(review.level as Level)
+      ? attestationRows(review.level as Level, attestationRecordsFor(id))
+      : [];
+  const attSummary = attRows.length > 0 ? attestationSummary(attRows) : null;
+  const AP = ATTESTATIONS_CONTENT.panel;
+  const mayAttest = can(account.role, 'recordAttestation');
+  // The plan AS SUBMITTED, readable in place. For a slice this screen carried no plan
+  // at all -- the reviewer recorded outcomes about a document they could not see.
+  const plan = planForReview(id);
+  const RP = MINISTRY_CONTENT.reviewPlan;
+  // The confirmed director, read directly: the review query's providers are the EMS
+  // lane, and invitationForEvent is scoped to the counterparty's own account.
+  const director = getDb()
+    .prepare(
+      `SELECT name_en, name_ar FROM invitations WHERE event_id = ? AND kind = 'director' AND status = 'confirmed' LIMIT 1`,
+    )
+    .get(id) as { name_en: string; name_ar: string } | undefined;
+  const sectionAddressed = (n: number): boolean => {
+    const sec = plan?.sections[String(n)];
+    return plan?.mode === 'attach' ? sec?.covered === true : Boolean(sec?.text && sec.text.trim() !== '');
+  };
   const inspections = inspectionsFor(id);
   const blockers = await outcomeBlockersFor(id);
   const outcomes = outcomeAvailability(blockers);
@@ -205,6 +247,225 @@ export default async function SubmissionReviewPage({
               </div>
             ) : null}
           </div>
+
+          {/* The plan the outcome concerns -- the OTHER panel the same Slice 6
+              exception hid. Read-only; nothing the Ministry can edit. */}
+          <div data-region="review-plan" style={{ marginBlockEnd: 28 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+                <L en={RP.titleEn} ar={RP.titleAr} />
+              </h2>
+              {plan ? (
+                <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                  {plan.mode === 'write' ? (
+                    <L
+                      en={RP.versionWrittenEn.replace('{v}', String(plan.version)).replace('{n}', String(PLAN_SECTIONS.length))}
+                      ar={RP.versionWrittenAr.replace('{v}', String(plan.version)).replace('{n}', String(PLAN_SECTIONS.length))}
+                    />
+                  ) : (
+                    <L
+                      en={RP.versionAttachedEn.replace('{v}', String(plan.version))}
+                      ar={RP.versionAttachedAr.replace('{v}', String(plan.version))}
+                    />
+                  )}
+                </span>
+              ) : null}
+            </div>
+            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
+              <L en={RP.introEn} ar={RP.introAr} />
+            </p>
+            {!plan ? (
+              <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
+                <L en={RP.noPlanEn} ar={RP.noPlanAr} />
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
+                  {PLAN_SECTIONS.map((sec) => {
+                    const done = sectionAddressed(sec.n);
+                    const st = done ? RP.states.done : RP.states.open;
+                    const color = done ? 'var(--brand)' : 'var(--bad)';
+                    const text = plan.mode === 'write' ? (plan.sections[String(sec.n)]?.text ?? '').trim() : '';
+                    return (
+                      <div key={sec.n} style={{ background: 'var(--bg)', padding: '12px 16px', borderInlineStart: `3px solid ${color}` }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 220 }}>
+                            <span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 18 }}>{sec.n}</span>
+                            <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
+                              <L en={sec.en} ar={sec.ar} />
+                            </span>
+                          </span>
+                          <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: done ? 'var(--brand-soft)' : 'var(--bad-soft)', color, fontSize: 12 }}>
+                            <L en={st.en} ar={st.ar} />
+                          </span>
+                        </div>
+                        {text !== '' ? (
+                          <div style={{ marginBlockStart: 6, marginInlineStart: 30, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch', whiteSpace: 'pre-wrap' }}>{text}</div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+                {plan.mode === 'attach' && plan.attachedFile ? (
+                  <div style={{ padding: '10px 14px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 16, fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>{plan.attachedFile}</div>
+                ) : null}
+                {review.level === 3 && director ? (
+                  <div style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 16, fontSize: '12.5px', lineHeight: 1.6, maxWidth: '78ch' }}>
+                    <L
+                      en={RP.l3StripEn.replace('{director}', director.name_en)}
+                      ar={RP.l3StripAr.replace('{director}', director.name_ar)}
+                    />
+                  </div>
+                ) : null}
+                <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
+                  <L en={RP.miLabelEn} ar={RP.miLabelAr} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {MAJOR_INCIDENT_ITEMS.map((mi) => {
+                    const covered = plan.majorIncident[String(mi.n)]?.covered === true;
+                    const color = covered ? 'var(--brand)' : 'var(--bad)';
+                    const st = covered ? RP.states.done : RP.states.open;
+                    return (
+                      <div key={mi.n} style={{ background: 'var(--bg)', padding: '12px 16px', borderInlineStart: `3px solid ${color}`, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 220 }}>
+                          <span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 18 }}>{mi.n}</span>
+                          <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
+                            <L en={mi.en} ar={mi.ar} />
+                          </span>
+                        </span>
+                        <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: covered ? 'var(--brand-soft)' : 'var(--bad-soft)', color, fontSize: 12 }}>
+                          <L en={st.en} ar={st.ar} />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ marginBlockStart: 12, fontSize: 12, color: 'var(--muted)', lineHeight: 1.55 }}>
+                  <L en={RP.orderNoteEn} ar={RP.orderNoteAr} />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* The attestation gate -- the panel a Slice 6 exception claimed was a
+              summary of organizer content. It is a blocking gate, per the reference. */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <L en={AP.titleEn} ar={AP.titleAr} />
+            </h2>
+            <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+              <L en={`${AP.versionLabelEn} ${NEHRAT_TOOL_VERSION}`} ar={`${AP.versionLabelAr} ${NEHRAT_TOOL_VERSION}`} />
+            </span>
+          </div>
+          <p data-region="att-intro" style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
+            <L en={AP.notAnOutcomeEn} ar={AP.notAnOutcomeAr} />
+          </p>
+          {attRows.length === 0 && review.level !== null ? (
+            <div data-region="attestations-empty" style={{ borderRadius: 12, overflow: 'hidden', background: 'var(--surface2)', marginBlockEnd: 28 }}>
+              <div style={{ padding: '11px 20px', background: 'var(--surface)', fontSize: 12, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                <L en={ATTESTATIONS_CONTENT.emptyState.eyebrowEn} ar={ATTESTATIONS_CONTENT.emptyState.eyebrowAr} />
+              </div>
+              <div style={{ padding: '30px 28px', maxWidth: '78ch' }}>
+                <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.5, marginBlockEnd: 10 }}>
+                  <L en={ATTESTATIONS_CONTENT.emptyState.headEn} ar={ATTESTATIONS_CONTENT.emptyState.headAr} />
+                </div>
+                <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.75, color: 'var(--muted)' }}>
+                  <L en={attestationEmptyBody(review.level as Level).en} ar={attestationEmptyBody(review.level as Level).ar} />
+                </p>
+                <div style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+                  <L en={ATTESTATIONS_CONTENT.emptyState.footEn} ar={ATTESTATIONS_CONTENT.emptyState.footAr} />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {attRows.length > 0 ? (
+            <div data-region="attestations" style={{ marginBlockEnd: 28 }}>
+              {attSummary ? (
+                <div data-region="att-summary" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, padding: '12px 16px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 14, fontSize: 13, lineHeight: 1.5 }}>
+                  <L en={attSummary.en} ar={attSummary.ar} />
+                </div>
+              ) : null}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {attRows.map((t) => {
+                  const st = ATTESTATIONS_CONTENT.states[t.state];
+                  const auth = ATTESTATIONS_CONTENT.authorities[t.authority];
+                  const color = t.state === 'complete' ? 'var(--brand)' : 'var(--accent-ink)';
+                  return (
+                    <div key={t.key} data-att-item={t.key} style={{ paddingBlock: '15px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px ${t.authority === 'order' ? 'dashed' : 'solid'} ${color}`, borderRadius: 10 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 6 }}>
+                        <span style={{ fontSize: 14, lineHeight: 1.45, flex: 1, minWidth: 220 }}>
+                          <L en={t.en} ar={t.ar} />
+                        </span>
+                        <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: t.state === 'complete' ? 'var(--brand-soft)' : 'var(--accent-soft)', color, fontSize: '12.5px' }}>
+                          <L en={st.en} ar={st.ar} />
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
+                        <L
+                          en={`${auth.en} · ${t.state === 'complete' ? `${AP.attestedByEn} ${t.attestedBy ?? ''} · ${t.attestedAt ?? ''}` : AP.notYetEn}`}
+                          ar={`${auth.ar} · ${t.state === 'complete' ? `${AP.attestedByAr} ${t.attestedBy ?? ''} · ${t.attestedAt ?? ''}` : AP.notYetAr}`}
+                        />
+                      </div>
+                      {t.state === 'pending' && (t.reasonEn || t.reasonAr) ? (
+                        <div style={{ marginBlockStart: 8, padding: '10px 12px', background: 'var(--accent-soft)', borderRadius: 8, fontSize: '12.5px', lineHeight: 1.55, color: 'var(--accent-ink)' }}>
+                          <span style={{ display: 'block', fontWeight: 500, marginBlockEnd: 3 }}>
+                            <L en={AP.pendingBecauseEn} ar={AP.pendingBecauseAr} />
+                          </span>
+                          <L en={t.reasonEn ?? t.reasonAr ?? ''} ar={t.reasonAr ?? t.reasonEn ?? ''} />
+                        </div>
+                      ) : null}
+                      {t.laneFallback ? (
+                        <div style={{ marginBlockStart: 8, fontSize: 12, color: 'var(--muted)', lineHeight: 1.55, maxWidth: '78ch' }}>
+                          <L en={AP.orderFallbackEn} ar={AP.orderFallbackAr} />
+                        </div>
+                      ) : null}
+                      {t.state === 'pending' && t.recordableBy === 'order' ? (
+                        <div style={{ marginBlockStart: 8, fontSize: 12, color: 'var(--muted)', lineHeight: 1.55, maxWidth: '78ch' }}>
+                          <L en={AP.orderHeldEn} ar={AP.orderHeldAr} />
+                        </div>
+                      ) : null}
+                      {/* The recorder's controls. Attest only while pending; the
+                          deficiency control in EITHER state -- a deficiency found after
+                          attestation returns the item to pending. */}
+                      {mayAttest && t.recorder === 'reviewer' ? (
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBlockStart: 10 }}>
+                          {t.state === 'pending' ? (
+                            <form action={recordAttestationAction.bind(null, id)}>
+                              <input type="hidden" name="itemKey" value={t.key} />
+                              <input type="hidden" name="kind" value="attest" />
+                              <button type="submit" style={{ height: 32, paddingInline: 13, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                                <L en={AP.attestEn} ar={AP.attestAr} />
+                              </button>
+                            </form>
+                          ) : null}
+                          <form action={recordAttestationAction.bind(null, id)} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input type="hidden" name="itemKey" value={t.key} />
+                            <input type="hidden" name="kind" value="deficiency" />
+                            <input
+                              name="reason"
+                              required
+                              aria-label="Deficiency"
+                              style={{ height: 32, paddingInline: 10, minWidth: 220, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }}
+                            />
+                            <button type="submit" style={{ height: 32, paddingInline: 13, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                              {t.state === 'pending' ? (
+                                <L en={AP.deficiencyEn} ar={AP.deficiencyAr} />
+                              ) : (
+                                <L en={AP.deficiencyReopenEn} ar={AP.deficiencyReopenAr} />
+                              )}
+                            </button>
+                          </form>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ marginBlockStart: 12, fontSize: 12, color: 'var(--muted)', lineHeight: 1.55 }}>
+                <L en={AP.footnoteEn} ar={AP.footnoteAr} />
+              </div>
+            </div>
+          ) : null}
 
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Inspections" ar="التفتيشات" />

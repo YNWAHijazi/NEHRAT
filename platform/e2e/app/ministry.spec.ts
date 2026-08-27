@@ -18,16 +18,55 @@ async function signInAs(page: Page, login: string): Promise<void> {
 }
 
 test.describe('the outcome gate', () => {
-  // One serial flow: the same record is asserted gated, then unblocked by the
-  // inspector, then asserted open -- two tests on one mutating record would
-  // race across parallel workers.
-  test('satisfied is gated with the blocker named, and opens when findings are recorded', async ({ page }) => {
+  // One serial flow: the same record is asserted gated, then unblocked step by
+  // step, then asserted open -- separate tests on one mutating record would race
+  // across parallel workers. The gate has TWO classes of blocker on this record:
+  // three pending attestations and a blocking inspection. Clearing one class must
+  // NOT open the gate; that partial state is asserted deliberately, because the
+  // attestation class previously existed only in a docstring and a green suite
+  // proved nothing about it.
+  test('satisfied is gated on attestations and findings together, and opens only when both clear', async ({ page }) => {
+    test.setTimeout(120_000);
     await signInAs(page, 'test_moph');
     await page.goto('/ministry/submissions/EV-0362');
+
+    // THE PLAN IS READABLE ON THE REVIEW SCREEN. For a slice it was not: the reviewer
+    // recorded outcomes about a document this screen never showed, and the recorded
+    // revision note even cited plan content the reviewer could not see. The panel is
+    // read-only -- the sixteen sections with their states, the eleven major-incident
+    // items, and the attached file where the organizer attached one.
+    const plan = page.locator('[data-region="review-plan"]');
+    await expect(plan).toContainText('Event health and medical plan');
+    await expect(plan).toContainText('Major-incident and mass-casualty plan — eleven items');
+    // EV-0362's seeded plan addresses all sixteen and confirms all eleven.
+    await expect(plan.locator('text=Not addressed')).toHaveCount(0);
+    // Read-only: no form, no input, nothing the Ministry can edit.
+    await expect(plan.locator('form, input, textarea, button')).toHaveCount(0);
+
+    // The panel, with the reference's own summary line.
+    const att = page.locator('[data-region="attestations"]');
+    await expect(att).toContainText('3 of 6 pending · 2 held by the Ministry, 1 by the Order of Physicians');
+    // A complete row's title and byline, verbatim -- the string half of the att-row
+    // region, whose pixel compare is held for geometry only.
+    await expect(att).toContainText('Major-incident and mass-casualty plan reviewed');
+    await expect(att).toContainText('Attested by L. Nassar · 2026-08-11');
+    // A deficiency renders as the reason an item is pending -- not a third state.
+    await expect(att).toContainText('Pending because');
+    await expect(att).toContainText('the deployment map has not been attached');
+    // The Order-assigned pending item carries the lane fallback, and is therefore
+    // attestable by the reviewer while the lane is off (open decision 19).
+    await expect(att).toContainText('Assigned to the Order of Physicians, whose lane is off');
+
     const outcome = page.locator('[data-region="outcome"]');
     await expect(outcome).toContainText('Record the outcome');
-    // The blocking inspection is named against the gated outcome.
+    // Both blocker classes are named against the gated outcome.
     await expect(outcome).toContainText('Blocking inspection without recorded findings');
+    await expect(outcome).toContainText('Attestation pending');
+    // The gated-state copy, asserted HERE because it renders only while the gate is
+    // shut -- in the vocabulary test it raced this flow clearing the blockers.
+    await expect(outcome).toContainText(
+      'Everything must be complete before a clearance is shown. The other two outcomes stay available.',
+    );
     const radios = outcome.locator('input[type="radio"]');
     await expect(radios.nth(0)).toBeEnabled(); // incomplete
     await expect(radios.nth(1)).toBeEnabled(); // revision
@@ -37,19 +76,64 @@ test.describe('the outcome gate', () => {
       'Authorization of the event remains with the legally competent authority',
     );
 
+    // The reviewer attests the three pending items, the Order-assigned one last.
+    for (const item of ['deploymentMap', 'emsDeclarations', 'clinicalContent']) {
+      const form = att.locator(`form:has(input[name="itemKey"][value="${item}"]):has(input[value="attest"])`);
+      await form.locator('button').click();
+      await page.waitForURL('**/ministry/submissions/EV-0362');
+    }
+    await expect(att).toContainText('All six attestations complete — a clearance may be recorded.');
+
+    // Attestations clear, inspection still open: the gate must STILL be shut.
+    await expect(outcome).toContainText('Blocking inspection without recorded findings');
+    await expect(outcome).not.toContainText('Attestation pending');
+    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeDisabled();
+
     // The inspector records the findings -- an inspector act, not an outcome.
     await signInAs(page, 'test_inspector');
     await page.goto('/ministry/submissions/EV-0362');
+    // And has NO attest control anywhere: recording an attestation is the reviewer's.
+    await expect(page.locator('[data-region="attestations"] form')).toHaveCount(0);
     const blocking = page.locator('[data-region="inspections"] > div').first();
     await blocking.locator('input[name="findings"]').fill('Treatment post and deployment verified as planned.');
     await blocking.locator('button:has-text("Save")').click();
     await page.waitForURL('**/ministry/submissions/EV-0362');
 
-    // The gate opens for the reviewer.
+    // Both classes clear: the gate opens for the reviewer.
     await signInAs(page, 'test_moph');
     await page.goto('/ministry/submissions/EV-0362');
-    // Generous under full-suite dev-compile load; the state itself is instant.
+    // Generous under full-suite dev-compile load; the state itself is instant. The
+    // review screen now compiles the plan and attestation panels too, and 15s was
+    // measured too tight on the full run.
+    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 30_000 });
+
+    // COMPLETION IS CORRECTABLE. A deficiency recorded against a complete item
+    // returns it to pending and shuts the gate again -- an attestation recorded in
+    // error must not stand forever because it was recorded.
+    const attNow = page.locator('[data-region="attestations"]');
+    const reopen = attNow.locator('form:has(input[name="itemKey"][value="deploymentMap"]):has(input[value="deficiency"])');
+    await reopen.locator('input[name="reason"]').fill('The attached map omits the second treatment post.');
+    await reopen.locator('button').click();
+    await page.waitForURL('**/ministry/submissions/EV-0362');
+    await expect(attNow).toContainText('1 of 6 pending');
+    await expect(attNow).toContainText('The attached map omits the second treatment post.');
+    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeDisabled();
+
+    // And re-attesting reopens the gate, leaving the record clean for later tests.
+    const reattest = attNow.locator('form:has(input[name="itemKey"][value="deploymentMap"]):has(input[value="attest"])');
+    await reattest.locator('button').click();
+    await page.waitForURL('**/ministry/submissions/EV-0362');
     await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 15_000 });
+  });
+
+  test('below Level 3 the attestation panel is the explicit empty state, not nothing', async ({ page }) => {
+    await signInAs(page, 'test_moph');
+    // EV-0455, the Level 2 filed-and-unreviewed submission.
+    await page.goto('/ministry/submissions/EV-0455');
+    const empty = page.locator('[data-region="attestations-empty"]');
+    await expect(empty).toContainText('No attestation items apply to this submission.');
+    await expect(empty).toContainText('Level 2');
+    await expect(page.locator('[data-region="attestations"]')).toHaveCount(0);
   });
 });
 
@@ -92,7 +176,6 @@ test.describe('the pinned vocabulary', () => {
     const outcome = page.locator('[data-region="outcome"]');
     await expect(outcome).toContainText('Record an outcome');
     await expect(outcome).toContainText('Three outcomes exist. Nothing else is a determination.');
-    await expect(outcome).toContainText('Everything must be complete before a clearance is shown. The other two outcomes stay available.');
     const limits = page.locator('[data-region="limits"]');
     await expect(limits).toContainText('The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority.');
     await expect(limits).toContainText('This status does not replace any other permit or authorization required under Lebanese law.');

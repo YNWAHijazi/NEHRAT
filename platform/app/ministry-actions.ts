@@ -14,12 +14,17 @@ import { getDb } from '../lib/db';
 import { currentAccount } from '../lib/auth';
 import {
   MINISTRY_CONTENT,
+  attestationBlockers,
+  attestationRows,
+  attestationsApplyAt,
   can,
+  orderLaneActive,
   outcomeAvailability,
+  type Level,
   type MinistryAction,
   type OutcomeBlocker,
 } from '../lib/rules';
-import { addedMeasuresFor, inspectionsFor } from '../lib/queries';
+import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor } from '../lib/queries';
 
 async function requireMinistry(action: MinistryAction): Promise<{ id: number; role: string; displayName: string; isDemo: boolean }> {
   const account = await currentAccount();
@@ -38,9 +43,20 @@ function notifyEventOwner(eventId: string, subjectEn: string, subjectAr: string,
   ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
 }
 
-/** The blocking items gating ONLY the satisfied outcome, each named. */
+/**
+ * The blocking items gating ONLY the satisfied outcome, each named: pending
+ * attestations, blocking added measures, blocking inspections without recorded
+ * findings. Three classes, one list -- which is what outcomeAvailability's
+ * docstring promised for a whole slice while the attestation class had no data,
+ * no table and no computation behind it. It does now.
+ */
 export async function outcomeBlockersFor(eventId: string): Promise<OutcomeBlocker[]> {
   const blockers: OutcomeBlocker[] = [];
+  const level = derivedLevelFor(eventId);
+  if (level !== null && attestationsApplyAt(level as Level)) {
+    const rows = attestationRows(level as Level, attestationRecordsFor(eventId));
+    blockers.push(...attestationBlockers(rows));
+  }
   for (const m of addedMeasuresFor(eventId)) {
     if (m.blocking && !m.clearedAt) {
       blockers.push({
@@ -352,4 +368,59 @@ export async function setOrderLaneAction(formData: FormData): Promise<void> {
   revalidatePath('/platform/admin');
   revalidatePath('/ministry/admin/users');
   redirect('/platform/admin?notice=lane');
+}
+
+/**
+ * Attest one item, or record a deficiency against it. Who may record derives from
+ * lib/rules/attestations.ts (attestationRows.recordableBy), never from this file:
+ * Ministry-assigned items take the reviewer's recordAttestation permission; items
+ * assigned to the Order of Physicians take the Order's own orderVerify while the
+ * lane is active, and fall back to the reviewer while it is off -- the recorded
+ * build ruling (open decision 19), applied here and on the screen from one place.
+ *
+ * A deficiency does not create a third state. The item stays pending; the text is
+ * stored as the reason it is pending, with who raised it and when.
+ */
+export async function recordAttestationAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  const itemKey = String(formData.get('itemKey') ?? '');
+  const kind = String(formData.get('kind') ?? '');
+  const level = derivedLevelFor(eventId);
+  if (level === null || !attestationsApplyAt(level as Level)) redirect(`/ministry/submissions/${eventId}`);
+  const row = attestationRows(level as Level, attestationRecordsFor(eventId)).find((r) => r.key === itemKey);
+  if (!row) redirect(`/ministry/submissions/${eventId}`);
+  // Attesting needs a pending item. A DEFICIENCY does not: discovered after
+  // attestation, it returns the item to pending -- completion is correctable.
+  if (kind === 'attest' && row.state === 'complete') redirect(`/ministry/submissions/${eventId}`);
+
+  const permitted =
+    (row.recorder === 'reviewer' && can(account.role, 'recordAttestation')) ||
+    (row.recorder === 'order' && can(account.role, 'orderVerify') && orderLaneActive());
+  if (!permitted) redirect('/signin?notice=ministry-permission');
+
+  const db = getDb();
+  if (kind === 'attest') {
+    db.prepare(
+      `INSERT INTO attestations (event_id, item_key, state, attested_by, attested_at)
+       VALUES (?, ?, 'complete', ?, now_stamp())
+       ON CONFLICT(event_id, item_key) DO UPDATE SET
+         state = 'complete', attested_by = excluded.attested_by, attested_at = excluded.attested_at`,
+    ).run(eventId, itemKey, account.displayName);
+  } else if (kind === 'deficiency') {
+    const reason = String(formData.get('reason') ?? '').trim();
+    if (!reason) redirect(`/ministry/submissions/${eventId}?error=deficiency-reason`);
+    // Stored in the language it was typed; the row renders it in both columns rather
+    // than inventing a translation for user-entered text.
+    db.prepare(
+      `INSERT INTO attestations (event_id, item_key, state, reason_en, reason_ar, reason_by, reason_at)
+       VALUES (?, ?, 'pending', ?, ?, ?, now_stamp())
+       ON CONFLICT(event_id, item_key) DO UPDATE SET
+         state = 'pending', attested_by = NULL, attested_at = NULL,
+         reason_en = excluded.reason_en, reason_ar = excluded.reason_ar,
+         reason_by = excluded.reason_by, reason_at = excluded.reason_at`,
+    ).run(eventId, itemKey, reason, reason, account.displayName);
+  }
+  revalidatePath(`/ministry/submissions/${eventId}`);
+  redirect(`/ministry/submissions/${eventId}`);
 }

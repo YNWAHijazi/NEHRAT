@@ -22,3 +22,4 @@ export * from './facility';
 export * from './pii';
 export * from './roles';
 export * from './ministry';
+export * from './attestations';

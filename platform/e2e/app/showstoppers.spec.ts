@@ -85,7 +85,8 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await page.locator('button:has-text("Save the form")').click();
     await expect(page.locator('text=Saved.')).toBeVisible();
     const fileBtn = page.locator('button:has-text("File the submission")');
-    await expect(fileBtn).toBeEnabled({ timeout: 15_000 });
+    // 30s: measured too tight at 15 on the full run once the console grew.
+    await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
     await fileBtn.click();
     await page.waitForURL(/acknowledgment/);
     await expect(page.locator('body')).toContainText(/MOPH-EV-\d{4}-\d{4}/);

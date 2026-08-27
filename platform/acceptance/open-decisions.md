@@ -195,3 +195,11 @@ The rest can be answered in any order.
 
 Nine of the eighteen need only a Ministry sentence; the platform changes are small once
 the sentence exists.
+
+19. **The attestation lane fallback** — items assigned to the Order of Physicians while its
+lane is off (the default): the build lets the Ministry record them itself, because a pending
+item nobody may record makes "satisfied" permanently unreachable at Level 3. The
+alternatives — items not in force while the lane is off, or blocking with no recorder — each
+contradict either the gate or the lane's own screen. The prototype holds both sides of the
+contradiction (Order items read-only to the Ministry; the lane off on its own Order screen).
+Who records Order-assigned attestations while the lane is off. *Ministry.*

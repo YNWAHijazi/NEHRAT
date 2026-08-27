@@ -21,8 +21,8 @@ export default async function OrderLanePage() {
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
         <L
-          en="A configurable, non-determinative lane. It informs the Ministry; it never decides. A reviewer may record any of the three outcomes whether or not Order review is complete, and the lane never extends into the facility side."
-          ar="مسار قابل للإعداد وغير حاسم. يُعلم الوزارة ولا يقرر. ويجوز للمراجع تسجيل أي من النتائج الثلاث سواء اكتملت مراجعة النقابة أم لا، ولا يمتد المسار أبداً إلى جانب المرافق."
+          en="A configurable, non-determinative lane. It informs the Ministry; it never records an outcome, and it never extends into the facility side. While the lane is on, its attestations gate only the satisfied outcome — the other two outcomes remain available to the reviewer at all times."
+          ar="مسار قابل للإعداد وغير حاسم. يُعلم الوزارة ولا يسجّل أي نتيجة، ولا يمتد إلى جانب المنشآت. وعند تشغيله، تحجب تصديقاته النتيجة المستوفاة فقط — وتبقى النتيجتان الأخريان متاحتين للمراجع في كل وقت."
         />
       </p>
       {!active ? (

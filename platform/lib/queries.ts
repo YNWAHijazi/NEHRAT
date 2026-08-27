@@ -16,7 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, POST_EVENT_STAGE } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 
@@ -567,6 +567,33 @@ export interface PlanRow {
 export function planFor(accountId: number, eventId: string): PlanRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
+  const r = getDb()
+    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
+    .get(eventId) as
+    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; major_incident: string; version: number; updated_at: string }
+    | undefined;
+  if (!r) return null;
+  return {
+    mode: r.mode,
+    refConfirmed: r.ref_confirmed === 1,
+    refAdmitsChildren: r.ref_admits_children === 1,
+    refTemporaryAreas: r.ref_temporary_areas === 1,
+    sections: JSON.parse(r.sections) as PlanRow['sections'],
+    attachedFile: r.attached_file,
+    majorIncident: JSON.parse(r.major_incident) as PlanRow['majorIncident'],
+    version: r.version,
+    updatedAt: r.updated_at,
+  };
+}
+
+/**
+ * The plan AS SUBMITTED, for the Ministry's review screen -- event-scoped, because the
+ * reviewer is not the owner. The organizer-side planFor stays account-scoped; this
+ * exists so the reviewer can READ the document the submission is about, which for a
+ * whole slice they could not: the review screen carried providers, inspections and an
+ * outcome control, and not one word of the plan the outcome concerns.
+ */
+export function planForReview(eventId: string): PlanRow | null {
   const r = getDb()
     .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
     .get(eventId) as
@@ -1237,6 +1264,31 @@ export function inspectionsFor(eventId: string): InspectionRow[] {
   return rows.map((r) => ({
     id: r.id, titleEn: r.title_en, titleAr: r.title_ar, inspector: r.inspector,
     state: r.state, date: r.date, blocking: r.blocking === 1, findings: r.findings,
+  }));
+}
+
+/**
+ * The stored attestation records for one event. The derivation -- which items apply,
+ * who may record, what blocks -- lives in lib/rules/attestations.ts; this only reads
+ * the rows. An absent row is the pending state, so a fresh submission returns [].
+ */
+export function attestationRecordsFor(eventId: string): AttestationRecord[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT item_key, state, attested_by, attested_at, reason_en, reason_ar, reason_by, reason_at
+       FROM attestations WHERE event_id = ?`,
+    )
+    .all(eventId) as unknown as {
+      item_key: string; state: 'pending' | 'complete';
+      attested_by: string | null; attested_at: string | null;
+      reason_en: string | null; reason_ar: string | null;
+      reason_by: string | null; reason_at: string | null;
+    }[];
+  return rows.map((r) => ({
+    itemKey: r.item_key, state: r.state,
+    attestedBy: r.attested_by, attestedAt: r.attested_at ? r.attested_at.slice(0, 10) : null,
+    reasonEn: r.reason_en, reasonAr: r.reason_ar,
+    reasonBy: r.reason_by, reasonAt: r.reason_at ? r.reason_at.slice(0, 10) : null,
   }));
 }
 

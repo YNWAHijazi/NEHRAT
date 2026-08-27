@@ -585,6 +585,36 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
   insertDetermination.run('EV-0244', 'satisfied', '', 'R. Sfeir', d('2026-07-20'));
 
+  // The attestation gate on EV-0362, mirroring the reference's review screen row for
+  // row: three complete, three pending, each pending with the deficiency recorded as
+  // the reason. The first item was attested by the Order reviewer BEFORE the lane went
+  // off -- a completed record persists; suspension stops new recordings, not history.
+  const insertAttestation = db.prepare(
+    `INSERT INTO attestations (event_id, item_key, state, attested_by, attested_at, reason_en, reason_ar, reason_by, reason_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  insertAttestation.run('EV-0362', 'directorCredential', 'complete', 'Dr Y. Salameh', d('2026-08-12'), null, null, null, null);
+  insertAttestation.run(
+    'EV-0362', 'clinicalContent', 'pending', null, null,
+    'Deficiency raised 2026-08-12 by Dr Y. Salameh — the plan does not state the treatment-post staffing skill mix.',
+    'أُثير قصور في 2026-08-12 من د. ي. سلامة — لا تبيّن الخطة تركيبة مهارات ملاك مركز العلاج.',
+    'Dr Y. Salameh', d('2026-08-12'),
+  );
+  insertAttestation.run('EV-0362', 'insuranceEvidenced', 'complete', 'L. Nassar', d('2026-08-11'), null, null, null, null);
+  insertAttestation.run(
+    'EV-0362', 'emsDeclarations', 'pending', null, null,
+    'Two of three declarations outstanding — Civil Defence Baalbeck-Hermel is in draft, Bekaa Medical Transport has none.',
+    'إقرارَان من ثلاثة غير مقدَّمين — الدفاع المدني بعلبك الهرمل مسودة، والنقل الطبي في البقاع لا إقرار له.',
+    'L. Nassar', d('2026-08-11'),
+  );
+  insertAttestation.run('EV-0362', 'majorIncidentPlan', 'complete', 'L. Nassar', d('2026-08-11'), null, null, null, null);
+  insertAttestation.run(
+    'EV-0362', 'deploymentMap', 'pending', null, null,
+    'Deficiency raised 2026-08-10 by L. Nassar — the deployment map has not been attached.',
+    'أُثير قصور في 2026-08-10 من ل. نصار — لم تُرفق خريطة الانتشار الطبي.',
+    'L. Nassar', d('2026-08-10'),
+  );
+
   // A blocking inspection without recorded findings gates ONLY the satisfied
   // outcome on EV-0362; the recorded one shows what findings look like.
   const insertInspection = db.prepare(

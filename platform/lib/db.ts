@@ -527,6 +527,24 @@ function migrate(d: DatabaseSync): void {
       recorded_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Attestations: the desk-verification gate on a submission (attestations.json).
+    -- One row per (event, item); an ABSENT row is the pending state with no reason,
+    -- so nothing needs seeding for an untouched submission. An attestation is not an
+    -- outcome: it blocks only 'satisfied', through outcomeBlockersFor. A deficiency
+    -- is not a third state -- it is the reason a pending row is pending.
+    CREATE TABLE IF NOT EXISTS attestations (
+      event_id TEXT NOT NULL REFERENCES events(id),
+      item_key TEXT NOT NULL,
+      state TEXT NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','complete')),
+      attested_by TEXT,
+      attested_at TEXT,
+      reason_en TEXT,
+      reason_ar TEXT,
+      reason_by TEXT,
+      reason_at TEXT,
+      PRIMARY KEY (event_id, item_key)
+    );
+
     -- Additional measures: a distinct action, not a fourth outcome. The measure
     -- is a catalogue item (attachments-catalog doc key or requirements-matrix
     -- row) -- nothing outside the catalogue attaches to a submission. The note

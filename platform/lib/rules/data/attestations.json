@@ -1,0 +1,108 @@
+{
+  "$comment": "The attestation gate on the submission review, verbatim from the reference prototype (Ministry Review, review screen). An attestation is NOT an outcome: the three outcomes remain the only determinations, and a pending attestation blocks only 'satisfied'. Two states only -- pending and complete; a deficiency does not create a third state, it is recorded as the reason an item is pending. Items, their levels and their assigned authority are Ministry-configurable (non-negotiable 3): nothing below is hard-coded in a component. THE LANE FALLBACK IS A BUILD RULING AWAITING THE MINISTRY (open decision 19): items assigned to the Order of Physicians are recordable by the Order only while its lane is active; while the lane is off -- the default -- the Ministry may record them, because otherwise no Level 3 submission could ever be satisfied. The prototype shows Order items as read-only to the Ministry AND shows the lane off on its own Order screen; those two cannot both hold, reported not reconciled.",
+  "appliesAtLevels": [
+    3
+  ],
+  "items": [
+    {
+      "key": "directorCredential",
+      "en": "Event Medical Director appointed and physician credential verified",
+      "ar": "تعيين المدير الطبي للفعالية والتحقق من مؤهلات الطبيب",
+      "authority": "order"
+    },
+    {
+      "key": "clinicalContent",
+      "en": "Clinical content of the event health and medical plan reviewed — sections 3 to 9 and 11",
+      "ar": "مراجعة المحتوى السريري للخطة الصحية والطبية للفعالية — البنود 3 إلى 9 و11",
+      "authority": "order"
+    },
+    {
+      "key": "insuranceEvidenced",
+      "en": "Insurance coverage for participants and spectators evidenced",
+      "ar": "إثبات التغطية التأمينية للمشاركين والمتفرجين",
+      "authority": "moph"
+    },
+    {
+      "key": "emsDeclarations",
+      "en": "EMS readiness declaration received from every named provider",
+      "ar": "استلام إقرار الجاهزية من كل مزوّد إسعاف مُسمّى",
+      "authority": "moph"
+    },
+    {
+      "key": "majorIncidentPlan",
+      "en": "Major-incident and mass-casualty plan reviewed",
+      "ar": "مراجعة خطة الحوادث الجسيمة وحوادث الإصابات الجماعية",
+      "authority": "moph"
+    },
+    {
+      "key": "deploymentMap",
+      "en": "Medical deployment map and treatment post arrangements reviewed",
+      "ar": "مراجعة خريطة الانتشار الطبي وترتيبات مراكز العلاج",
+      "authority": "moph"
+    }
+  ],
+  "authorities": {
+    "moph": {
+      "en": "Ministry of Public Health",
+      "ar": "وزارة الصحة العامة"
+    },
+    "order": {
+      "en": "Lebanese Order of Physicians",
+      "ar": "نقابة الأطباء في لبنان"
+    }
+  },
+  "states": {
+    "pending": {
+      "en": "Pending",
+      "ar": "قيد الانتظار"
+    },
+    "complete": {
+      "en": "Complete",
+      "ar": "مكتمل"
+    }
+  },
+  "panel": {
+    "titleEn": "Attestations",
+    "titleAr": "التصديقات",
+    "versionLabelEn": "Regulatory version",
+    "versionLabelAr": "إصدار الإطار",
+    "notAnOutcomeEn": "An attestation is not an outcome. The three outcomes remain the only regulatory determinations and are recorded by the Ministry on the submission as a whole. A clearance cannot be issued while any attestation is pending; the other two outcomes are available at all times.",
+    "notAnOutcomeAr": "التصديق ليس نتيجة. تبقى النتائج الثلاث القرارات التنظيمية الوحيدة وتسجّلها الوزارة على التقديم ككل. ولا يمكن إصدار استيفاء ما دام أي تصديق قيد الانتظار؛ والنتيجتان الأخريان متاحتان في كل وقت.",
+    "allCompleteEn": "All six attestations complete — a clearance may be recorded.",
+    "allCompleteAr": "التصديقات الستة مكتملة — يمكن تسجيل الاستيفاء.",
+    "notYetEn": "Not yet attested",
+    "notYetAr": "لم يُصدَّق بعد",
+    "attestedByEn": "Attested by",
+    "attestedByAr": "صدّقه",
+    "pendingBecauseEn": "Pending because",
+    "pendingBecauseAr": "قيد الانتظار لأن",
+    "attestEn": "Attest",
+    "attestAr": "تصديق",
+    "deficiencyEn": "Record a deficiency — the item stays pending",
+    "deficiencyAr": "تسجيل قصور — يبقى البند قيد الانتظار",
+    "orderHeldEn": "Held by the Order of Physicians — read-only to the Ministry. A Level 3 clearance cannot be issued while it is pending.",
+    "orderHeldAr": "لدى نقابة الأطباء — للقراءة فقط لدى الوزارة. ولا يمكن إصدار استيفاء لمستوى 3 ما دام قيد الانتظار.",
+    "orderFallbackEn": "Assigned to the Order of Physicians, whose lane is off. Until the Ministry turns the lane on, the Ministry records this item itself — recorded as a build ruling awaiting the Ministry.",
+    "orderFallbackAr": "مُسند إلى نقابة الأطباء ومسارها مطفأ. وإلى أن تشغّل الوزارة المسار، تسجّل الوزارة هذا البند بنفسها — مسجَّل كاجتهاد من البناء بانتظار قرار الوزارة.",
+    "footnoteEn": "Six items apply at Level 3. Items and their assigned authority remain configurable under Configuration and versioning. There are two states only — pending and complete. A deficiency does not create a third state; it is recorded as the reason an item is pending.",
+    "footnoteAr": "تنطبق ستة بنود في المستوى 3. وتبقى البنود والجهة المصدِّقة قابلة للإعداد في الإعدادات والإصدارات. وهناك حالتان فقط — قيد الانتظار ومكتمل. والقصور لا يُنشئ حالة ثالثة؛ بل يُسجَّل كسبب بقاء البند قيد الانتظار.",
+    "summaryPendingEn": "{pending} of {total} pending · {moph} held by the Ministry, {order} by the Order of Physicians",
+    "summaryPendingAr": "{pending} من {total} قيد الانتظار · {moph} لدى الوزارة و{order} لدى نقابة الأطباء",
+    "deficiencyReopenEn": "Record a deficiency — the item returns to pending",
+    "deficiencyReopenAr": "تسجيل قصور — يعود البند إلى قيد الانتظار"
+  },
+  "emptyState": {
+    "eyebrowEn": "Submission — no attestation items apply",
+    "eyebrowAr": "التقديم — لا بنود تصديق منطبقة",
+    "headEn": "No attestation items apply to this submission.",
+    "headAr": "لا بنود تصديق تنطبق على هذا التقديم.",
+    "bodyEn": "The six attestation items apply at Level 3 only. This is a Level {level} submission, so nothing is pending and all three outcomes are available — a clearance is gated by attestations only where attestations exist.",
+    "bodyAr": "تنطبق بنود التصديق الستة في المستوى 3 فقط. وهذا تقديم من المستوى {level}، فلا شيء قيد الانتظار والنتائج الثلاث متاحة — ولا يُحجب الاستيفاء بالتصديقات إلا حيث توجد تصديقات.",
+    "footEn": "Items and the levels they apply at are set under Configuration and versioning.",
+    "footAr": "تُحدَّد البنود والمستويات التي تنطبق عليها في الإعدادات والإصدارات."
+  },
+  "blocker": {
+    "prefixEn": "Attestation pending",
+    "prefixAr": "تصديق قيد الانتظار"
+  }
+}

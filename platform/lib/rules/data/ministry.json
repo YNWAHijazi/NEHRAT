@@ -155,6 +155,7 @@
       "viewSubmission",
       "assignReview",
       "recordOutcome",
+      "recordAttestation",
       "requireMeasures",
       "recordOrganization",
       "respondEnquiry",
@@ -390,6 +391,35 @@
     "platform_owner": {
       "en": "Platform owner",
       "ar": "مالك المنصة"
+    }
+  },
+  "reviewPlan": {
+    "$comment": "The plan panel on the submission review, verbatim from the reference. For a slice the review screen carried no plan at all -- the same unlocated exception that hid the attestation gate called this panel a summary of organizer content. The reviewer reads the plan AS SUBMITTED, in place; nothing here is editable. Section states derive from the stored plan: a written section with text, or an attach-mode section the organizer confirmed, is addressed; 'partly addressed' exists in the reference's showcase but is not derivable from stored data and is deliberately not invented.",
+    "titleEn": "Event health and medical plan",
+    "titleAr": "خطة التأهب الصحي والطبي للفعالية",
+    "versionWrittenEn": "Version {v} · written in the platform · {n} sections",
+    "versionWrittenAr": "النسخة {v} · مكتوبة في المنصة · {n} بنداً",
+    "versionAttachedEn": "Version {v} · attached as a document",
+    "versionAttachedAr": "النسخة {v} · مُرفقة كمستند",
+    "introEn": "The plan as submitted, readable in place. Where an organizer attaches a document instead, the sections they confirmed it covers are marked and the file sits alongside.",
+    "introAr": "الخطة كما قُدّمت، مقروءة في مكانها. وحيث يرفق المنظّم مستنداً بدلاً من ذلك، تُوسم البنود التي أكّد تغطيتها ويوضع الملف إلى جانبها.",
+    "noPlanEn": "No plan has been saved on this submission yet.",
+    "noPlanAr": "لم تُحفظ خطة على هذا التقديم بعد.",
+    "l3StripEn": "Level 3 additionally: Event Medical Director {director}. Clinical-governance and event medical-command arrangements are stated in sections 10 and 12.",
+    "l3StripAr": "إضافةً في المستوى 3: المدير الطبي للفعالية {director}. وترتيبات الحوكمة السريرية والقيادة الطبية مذكورة في البندين 10 و12.",
+    "miLabelEn": "Major-incident and mass-casualty plan — eleven items",
+    "miLabelAr": "خطة الحوادث الجسيمة — أحد عشر بنداً",
+    "orderNoteEn": "The Order of Physicians attestation on clinical content reads these sections, not a file.",
+    "orderNoteAr": "يقرأ تصديق نقابة الأطباء على المحتوى السريري هذه البنود لا ملفاً.",
+    "states": {
+      "done": {
+        "en": "Addressed",
+        "ar": "مُعالَج"
+      },
+      "open": {
+        "en": "Not addressed",
+        "ar": "غير مُعالَج"
+      }
     }
   }
 }

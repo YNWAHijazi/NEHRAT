@@ -973,6 +973,58 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: 'The two limit sentences beneath the outcome control, compared pixel-for-pixel in BOTH languages: the vocabulary must not drift. Held at 4%: a 1-2px second-paragraph offset is the measured residual, while a single changed word measures 10%+ -- the ratchet still bites. The EN-only restriction retired in Pass C: the prototype now reads التأهب الصحي والطبي, as the glossary requires.',
       },
       {
+        // The attestation gate's charter paragraph: dataset-independent copy on both
+        // sides, a true pixel compare. This panel existed in the reference for a whole
+        // slice while an unlocated exception called it a summary.
+        name: 'att-intro',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'An attestation is not an outcome', container: 'max-width: 70ch' },
+        builtSelector: '[data-region="att-intro"]',
+        // EN holds at the default 2%. AR measures 4.3% as a uniform baseline offset on
+        // every glyph -- the outlined-everywhere diff of a sub-pixel line shift, the
+        // same residual class the other held-at-5% Arabic paragraphs carry. A CHANGED
+        // WORD in this paragraph measures far above 5%, so the ratchet still bites.
+        threshold: 0.05,
+        note: 'The not-an-outcome paragraph, verbatim from the reference. A clearance cannot be issued while any attestation is pending; the other two outcomes are available at all times.',
+      },
+      {
+        // The one-line summary over the seeded showcase state -- 3 of 6 pending,
+        // grouped by ASSIGNED authority. Counts derive from the rows.
+        name: 'att-summary',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: '3 of 6 pending', container: 'border-radius: 8px' },
+        builtSelector: '[data-region="att-summary"]',
+        // The glyphs match; the measured 7-9% is a width pad at the strip's END -- the
+        // two layouts give the strip different widths, and the pad counts as diff. Held
+        // at 12% for geometry only, and THE CONTENT IS NOT RATCHETED HERE: a changed
+        // digit in this one-line strip would measure under this hold, so the exact
+        // string is asserted verbatim in e2e/app/ministry.spec.ts instead, where a
+        // single changed character fails the build.
+        threshold: 0.12,
+        note: "The summary strip: '3 of 6 pending · 2 held by the Ministry, 1 by the Order of Physicians', derived not stored. Geometry held loosely here; the string itself is e2e-ratcheted.",
+      },
+      {
+        // One COMPLETE Ministry-held row: no controls on either side, so the row is
+        // comparable. The pending rows are not compared as pixels -- the build adds a
+        // working deficiency input the reference does not carry, and the Order rows
+        // carry the lane-fallback ruling where the reference says read-only -- both
+        // recorded divergences, exercised behaviourally in e2e/app/ministry.spec.ts.
+        name: 'att-row-complete',
+        mode: 'compare',
+        reference: { strategy: 'containerOfText', text: 'Major-incident and mass-casualty plan reviewed', container: 'border-inline-start: 3px' },
+        builtSelector: '[data-att-item="majorIncidentPlan"]',
+        // Measured residual 8-10%, three named causes, all deliberate: the reference
+        // shows a static Attest button on this COMPLETE row (its buttons are showcase
+        // furniture; the build's controls act, so Attest renders only while pending);
+        // the deficiency control reads "returns to pending" here because on a complete
+        // row that is what it does; and the right-anchored chip doubles under the
+        // width pad. Held at 13% so gross breakage still fails; the title and the
+        // attested-by line are asserted VERBATIM in e2e/app/ministry.spec.ts, where a
+        // changed character fails the build regardless of this hold.
+        threshold: 0.13,
+        note: 'A complete attestation row: title, state chip, authority and the attested-by line. Geometry held at 13% for the named control divergences; strings e2e-ratcheted.',
+      },
+      {
         name: 'outcome',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="outcome"]',
@@ -982,7 +1034,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'inspections',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="inspections"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The inspector's items; findings are not an outcome. The reference's attestation and plan panels summarize organizer content already compared on the organizer side.",
+        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The inspector's items; findings are not an outcome. THIS NOTE ONCE CLAIMED the reference's attestation panel summarized organizer content already compared on the organizer side -- with no locator, so nothing ever checked it, and it was FALSE: the panel is a blocking gate, six items with an assigned authority, and it concealed a missing feature for a whole slice. The gate is now built (lib/rules/attestations.ts) and carries its own compared regions below. The plan half of the old claim is re-verified in the exceptions audit, not assumed.",
       },
     ],
   },
