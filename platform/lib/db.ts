@@ -665,6 +665,53 @@ function migrate(d: DatabaseSync): void {
       d.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
     }
   };
+
+  /**
+   * Rebuild a table whose CHECK constraint widened. SQLite cannot alter a CHECK in
+   * place, so the table is copied, dropped and renamed -- and the documented
+   * procedure requires foreign_keys OFF *OUTSIDE* the transaction.
+   *
+   * THIS IS WHY THE FIRST VERSION BROKE EVERY EXISTING DATABASE: shared_documents
+   * holds live invitation tokens, so DROP TABLE invitations was itself a foreign-key
+   * violation; the exec threw mid-transaction, the transaction stayed open, and every
+   * later request died on "database is locked" instead of on the real error. The e2e
+   * suite never saw it because it seeds a fresh database, where the rebuild branch
+   * does not run at all -- a migration path no test could reach.
+   *
+   * A failure now rolls back, clears the scratch table and rethrows the REAL error,
+   * so the next request reports the cause rather than a lock.
+   */
+  const rebuildTable = (name: string, createNext: string, columns: string): void => {
+    d.exec('PRAGMA foreign_keys = OFF');
+    try {
+      d.exec(`DROP TABLE IF EXISTS ${name}_next`);
+      d.exec('BEGIN');
+      d.exec(createNext);
+      d.exec(`INSERT INTO ${name}_next SELECT ${columns} FROM ${name}`);
+      d.exec(`DROP TABLE ${name}`);
+      d.exec(`ALTER TABLE ${name}_next RENAME TO ${name}`);
+      const violations = d.prepare('PRAGMA foreign_key_check').all() as unknown[];
+      if (violations.length > 0) {
+        throw new Error(`Rebuild of ${name} would leave ${violations.length} foreign-key violation(s)`);
+      }
+      d.exec('COMMIT');
+    } catch (error) {
+      try {
+        d.exec('ROLLBACK');
+      } catch {
+        // Already rolled back by the failing statement; the rethrow below is the report.
+      }
+      try {
+        d.exec(`DROP TABLE IF EXISTS ${name}_next`);
+      } catch {
+        // Best effort: the scratch table must not block the next attempt.
+      }
+      throw error;
+    } finally {
+      d.exec('PRAGMA foreign_keys = ON');
+    }
+  };
+
   addColumn('submissions', 'version', 'version INTEGER NOT NULL DEFAULT 1');
   addColumn('facilities', 'licensed_capacity', 'licensed_capacity INTEGER');
   // SQLite cannot add a NOT NULL column without a default; the CHECK stays on new
@@ -702,9 +749,9 @@ function migrate(d: DatabaseSync): void {
     .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'organizations'`)
     .get() as { sql: string } | undefined)?.sql ?? '';
   if (orgSql !== '' && !orgSql.includes("'returned'")) {
-    d.exec(`
-      BEGIN;
-      CREATE TABLE organizations_next (
+    rebuildTable(
+      'organizations',
+      `CREATE TABLE organizations_next (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         account_id INTEGER NOT NULL UNIQUE REFERENCES accounts(id),
         name_en TEXT NOT NULL,
@@ -714,12 +761,9 @@ function migrate(d: DatabaseSync): void {
         return_reason TEXT,
         returned_at TEXT,
         is_demo INTEGER NOT NULL DEFAULT 0
-      );
-      INSERT INTO organizations_next SELECT id, account_id, name_en, name_ar, status, recorded_at, return_reason, returned_at, is_demo FROM organizations;
-      DROP TABLE organizations;
-      ALTER TABLE organizations_next RENAME TO organizations;
-      COMMIT;
-    `);
+      )`,
+      'id, account_id, name_en, name_ar, status, recorded_at, return_reason, returned_at, is_demo',
+    );
   }
 
   // The invitations CHECK gained two statuses (withdrawn, removed). SQLite cannot
@@ -729,9 +773,9 @@ function migrate(d: DatabaseSync): void {
     .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'invitations'`)
     .get() as { sql: string } | undefined)?.sql ?? '';
   if (invSql !== '' && !invSql.includes("'withdrawn'")) {
-    d.exec(`
-      BEGIN;
-      CREATE TABLE invitations_next (
+    rebuildTable(
+      'invitations',
+      `CREATE TABLE invitations_next (
         token TEXT PRIMARY KEY,
         event_id TEXT NOT NULL REFERENCES events(id),
         kind TEXT NOT NULL CHECK (kind IN ('ems','director')),
@@ -749,12 +793,9 @@ function migrate(d: DatabaseSync): void {
         invited_at TEXT NOT NULL DEFAULT (datetime('now')),
         answered_at TEXT,
         closed_at TEXT
-      );
-      INSERT INTO invitations_next SELECT token, event_id, kind, name_en, name_ar, email, status, declaration, account_id, response_note, ops_detail, declaration_items, certification, signed_at, invited_at, answered_at, closed_at FROM invitations;
-      DROP TABLE invitations;
-      ALTER TABLE invitations_next RENAME TO invitations;
-      COMMIT;
-    `);
+      )`,
+      'token, event_id, kind, name_en, name_ar, email, status, declaration, account_id, response_note, ops_detail, declaration_items, certification, signed_at, invited_at, answered_at, closed_at',
+    );
   }
 }
 
