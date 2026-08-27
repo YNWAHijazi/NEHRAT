@@ -1,5 +1,5 @@
 /**
- * Creates a CREDENTIALED Ministry account for testing.
+ * Creates a CREDENTIALED account for testing -- any role.
  *
  * Why this is a script and not a screen: Ministry roles are not self-registerable.
  * The only account-creation path in the product is nomination (non-negotiable 6) --
@@ -70,7 +70,22 @@ export function generatePassword() {
   return chars.join('');
 }
 
+/**
+ * Ministry-side roles, which have no other route in: nothing in the console
+ * creates a reviewer, an inspector or an administrator.
+ */
 const MINISTRY_ROLES = ['reviewer', 'inspector', 'ministry_admin', 'platform_owner'];
+
+/**
+ * Counterparty roles, which normally arrive by NOMINATION (non-negotiable 6):
+ * the organizer names a provider or a Director, and they register against an
+ * invitation token. Creating one here is a TESTING convenience only -- it makes
+ * an account that can sign in, and its dashboard is empty until an organizer
+ * nominates that email address and the account accepts the invitation. It does
+ * not, and must not, let anyone self-register into an event.
+ */
+const COUNTERPARTY_ROLES = ['organizer', 'ems', 'director', 'response'];
+const ALL_ROLES = [...MINISTRY_ROLES, ...COUNTERPARTY_ROLES];
 
 function arg(flag, fallback) {
   const i = process.argv.indexOf(flag);
@@ -79,8 +94,8 @@ function arg(flag, fallback) {
 
 function main() {
   const role = arg('--role', 'ministry_admin');
-  if (!MINISTRY_ROLES.includes(role)) {
-    process.stderr.write(`Unknown role "${role}". One of: ${MINISTRY_ROLES.join(', ')}\n`);
+  if (!ALL_ROLES.includes(role)) {
+    process.stderr.write(`Unknown role "${role}". One of: ${ALL_ROLES.join(', ')}\n`);
     process.exit(1);
   }
   const email = arg('--email', `${role}@moph.test`).toLowerCase();
@@ -111,7 +126,16 @@ function main() {
       `    Email     ${email}\n` +
       `    Password  ${password}\n` +
       `    Role      ${role}\n` +
-      `    Demo      no -- sees the real register, not the demonstration rows\n\n` +
+      `    Demo      no -- sees the real register, not the demonstration rows\n` +
+      (COUNTERPARTY_ROLES.includes(role) && role !== 'organizer'
+        ? `    Note      empty until an organizer nominates ${email} and this account\n` +
+          `              accepts the invitation -- nomination, never self-registration.\n`
+        : '') +
+      (role === 'organizer'
+        ? `    Note      register the organization first; filing opens once the Ministry\n` +
+          `              records it. Creating, assessing and drafting work meanwhile.\n`
+        : '') +
+      `\n` +
       `  Sign in at /signin with the email and password. Shown once; not stored anywhere else.\n\n`,
   );
 }

@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import { GovernmentBand } from './Header';
-import { LangToggle } from './HeaderMenus';
+import { LangToggle, SignOutButton } from './HeaderMenus';
 import { L } from './L';
 import type { Account } from '../lib/auth';
 import { MINISTRY_CONTENT } from '../lib/rules';
@@ -67,6 +67,7 @@ export function MinistryShell({
               </div>
             </div>
             <LangToggle />
+            <SignOutButton />
           </div>
         </div>
       </header>

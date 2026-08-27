@@ -198,3 +198,40 @@ export function HeaderMenus({
     </>
   );
 }
+
+/**
+ * A standalone sign-out control, for shells with no account dropdown.
+ *
+ * The Ministry console had NO way out: every /ministry and /platform screen uses
+ * MinistryShell, which showed the signed-in name and role and offered nothing to
+ * act on -- a dead end of exactly the shape the rest of this build has been
+ * clearing, on the one control every session needs.
+ */
+export function SignOutButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => void signOutAction()}
+      style={{
+        height: 34,
+        paddingInline: 14,
+        border: '1px solid var(--line)',
+        background: 'var(--bg)',
+        borderRadius: 17,
+        fontSize: 13,
+        color: 'var(--bad)',
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        flex: 'none',
+      }}
+    >
+      <svg aria-hidden="true" data-flip="" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.5 19.5h-8v-15h8" />
+        <path d="M11 12h9.5M17.5 8.5l3.5 3.5-3.5 3.5" />
+      </svg>
+      <L en="Sign out" ar="تسجيل الخروج" />
+    </button>
+  );
+}
