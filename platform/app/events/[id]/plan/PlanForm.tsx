@@ -12,7 +12,8 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
-import { savePlanAction, type PlanPayload } from '../../../actions';
+import { savePlanAction, uploadPlanFileAction, type PlanPayload } from '../../../actions';
+import { acceptAttribute, acceptHint } from '../../../../lib/rules/uploads';
 import { FACILITY_CONTENT, referenceShortfalls, type ReferenceDeviceFacts , GOVERNANCE_LANDING } from '../../../../lib/rules';
 import type { PlanRow, FacilityRow } from '../../../../lib/queries';
 
@@ -98,6 +99,11 @@ export function PlanForm({
   );
   const [mi, setMi] = useState<Record<string, { covered?: boolean }>>(initial?.majorIncident ?? {});
   const [attachedFile, setAttachedFile] = useState(initial?.attachedFile ?? '');
+  // THE FILE ITSELF is stored, not its name (storage ruling, 2026-08-28), so the
+  // picker uploads on change rather than waiting for Save: the plan payload is JSON
+  // and a document does not travel in JSON. A refusal is shown where the picker is.
+  const [uploadRefusal, setUploadRefusal] = useState<{ en: string; ar: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [refConfirmed, setRefConfirmed] = useState(initial?.refConfirmed ?? false);
   const [refAdmitsChildren, setRefAdmitsChildren] = useState(initial?.refAdmitsChildren ?? false);
   const [refTemporaryAreas, setRefTemporaryAreas] = useState(initial?.refTemporaryAreas ?? false);
@@ -202,10 +208,41 @@ export function PlanForm({
               </div>
               <input
                 type="file"
-                onChange={(e) => setAttachedFile(e.target.files?.[0]?.name ?? '')}
+                accept={acceptAttribute()}
+                disabled={uploading}
+                onChange={(e) => {
+                  const chosen = e.target.files?.[0];
+                  if (!chosen) return;
+                  setUploadRefusal(null);
+                  setUploading(true);
+                  const data = new FormData();
+                  data.set('file', chosen);
+                  startTransition(async () => {
+                    const result = await uploadPlanFileAction(eventId, data);
+                    setUploading(false);
+                    if ('ok' in result) {
+                      setAttachedFile(result.fileName);
+                      router.refresh();
+                    } else {
+                      setAttachedFile('');
+                      setUploadRefusal({ en: result.en, ar: result.ar });
+                    }
+                  });
+                }}
                 aria-label="Attach the plan document"
                 style={{ fontSize: 14, maxWidth: 380 }}
               />
+              <div style={{ marginBlockStart: 6, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+                <L en={acceptHint().en} ar={acceptHint().ar} />
+              </div>
+              {uploadRefusal ? (
+                <div
+                  data-region="plan-upload-refused"
+                  style={{ marginBlockStart: 8, padding: '10px 14px', background: 'var(--bad-soft)', border: '2px solid var(--bad)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.55 }}
+                >
+                  <L en={uploadRefusal.en} ar={uploadRefusal.ar} />
+                </div>
+              ) : null}
               {attachedFile ? (
                 <div style={{ marginBlockStart: 8, fontSize: '13.5px', fontVariantNumeric: 'tabular-nums' }}>
                   <L en={`Attached: ${attachedFile}`} ar={`المرفق: ${attachedFile}`} />

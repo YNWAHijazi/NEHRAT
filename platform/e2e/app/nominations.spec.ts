@@ -8,13 +8,10 @@
  *  - a confirmed provider REMOVES: stated as a material change BEFORE the click,
  *    the party is notified, and a filed submission owes a change report.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
-}
 
 test.describe('the nomination loop', () => {
   // One serial flow on EV-0418 -- the seeded trap state: two confirmed providers and
@@ -24,13 +21,13 @@ test.describe('the nomination loop', () => {
     await signInAs(page, 'test_organizer');
 
     // THE TRAP, asserted: the unanswered nomination blocks filing by name.
-    await page.goto('/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
     await expect(page.locator('body')).toContainText(
       'Coastal Medical Transport — a nomination is not a confirmation',
     );
 
     // WITHDRAW it. The reason-free path: nothing was confirmed, nothing is owed.
-    await page.goto('/events/EV-0418/requirements');
+    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     const row = page.locator('[data-region="g2"] > div > div', { hasText: 'Coastal Medical Transport' });
     await expect(row).toContainText('Withdraw the nomination');
     await expect(row).toContainText('no change report is owed');
@@ -41,19 +38,19 @@ test.describe('the nomination loop', () => {
     ).toContainText('Withdrawn');
 
     // The gate derives from who remains: the blocker is GONE.
-    await page.goto('/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
     await expect(page.locator('body')).not.toContainText(
       'Coastal Medical Transport — a nomination is not a confirmation',
     );
 
     // The token is dead: the nominee's page shows withdrawn and offers no response.
-    await page.goto('/invitations/demo-coastal-medical-0418');
+    await gotoRidingRestarts(page, '/invitations/demo-coastal-medical-0418');
     await expect(page.locator('body')).toContainText('withdrawn by the organizer');
     await expect(page.locator('button:has-text("Accept")')).toHaveCount(0);
     await expect(page.locator('input[type="password"]')).toHaveCount(0);
 
     // REMOVE a confirmed provider. The weight is stated BEFORE the confirming click.
-    await page.goto('/events/EV-0418/requirements');
+    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     const confirmed = page.locator('[data-region="g2"] > div > div', { hasText: 'Civil Defence — Beirut' });
     await confirmed.locator('summary', { hasText: 'Remove this provider' }).click();
     await expect(confirmed).toContainText('Removing a confirmed party is a material change');
@@ -66,11 +63,11 @@ test.describe('the nomination loop', () => {
     ).toContainText('Removed');
 
     // One confirmed provider remains; the provider gate stays satisfied on it alone.
-    await page.goto('/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
     await expect(page.locator('body')).not.toContainText('a nomination is not a confirmation');
 
     // And a replacement can be nominated without touching who remains.
-    await page.goto('/events/EV-0418/requirements');
+    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     await expect(page.locator('[data-region="invite"] form')).toHaveCount(1);
   });
 });
@@ -80,7 +77,7 @@ test.describe('cancellation and postponement', () => {
   test('an event cancels with the consequence stated, and the Ministry reads it', async ({ page }) => {
     test.setTimeout(120_000);
     await signInAs(page, 'test_organizer');
-    await page.goto('/events/new');
+    await gotoRidingRestarts(page, '/events/new');
     const fill = async (label: string, value: string) => {
       await page.locator('label', { hasText: label }).first().locator('input').fill(value);
     };
@@ -108,7 +105,7 @@ test.describe('cancellation and postponement', () => {
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
     // Postpone first -- no new date; the band says the determination cannot carry.
-    await page.goto(`/events/${eventId}/lifecycle`);
+    await gotoRidingRestarts(page, `/events/${eventId}/lifecycle`);
     await page.locator('form:has(button:has-text("Postpone the event")) textarea[name="reason"]').fill('Venue works overrun.');
     await page.locator('button:has-text("Postpone the event")').click();
     await page.waitForURL(`**/events/${eventId}?notice=postponed`);
@@ -116,18 +113,18 @@ test.describe('cancellation and postponement', () => {
     await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('does not carry to a new date');
 
     // Then cancel, with a reason. The record closes; filing is blocked by name.
-    await page.goto(`/events/${eventId}/lifecycle`);
+    await gotoRidingRestarts(page, `/events/${eventId}/lifecycle`);
     await page.locator('form:has(button:has-text("Cancel the event")) textarea[name="reason"]').fill('The event will not be held.');
     await page.locator('button:has-text("Cancel the event — this closes the record")').click();
     await page.waitForURL(`**/events/${eventId}?notice=cancelled`);
     await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('cancelled');
     await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('nothing further can be filed');
-    await page.goto(`/events/${eventId}/submit`);
+    await gotoRidingRestarts(page, `/events/${eventId}/submit`);
     await expect(page.locator('body')).toContainText('Event cancelled — nothing further can be filed on this record');
 
     // The Ministry's changes lane reads it, reason verbatim, without a second filing.
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/changes');
+    await gotoRidingRestarts(page, '/ministry/changes');
     const lane = page.locator('[data-region="changes"]');
     await expect(lane).toContainText('Harbour Cleanup Morning');
     await expect(lane).toContainText('Cancelled');
@@ -142,7 +139,7 @@ test.describe('creation to determination, end to end', () => {
   test('an event is created, filed, and carries all three outcomes in turn', async ({ page }) => {
     test.setTimeout(180_000);
     await signInAs(page, 'test_organizer');
-    await page.goto('/events/new');
+    await gotoRidingRestarts(page, '/events/new');
     const fill = async (label: string, value: string) => {
       await page.locator('label', { hasText: label }).first().locator('input').fill(value);
     };
@@ -170,14 +167,14 @@ test.describe('creation to determination, end to end', () => {
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
     // Level 1 package: attach the arrangements, declare six, file.
-    await page.goto(`/events/${eventId}/requirements`);
+    await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
     const attach = page.locator('form:has(input[name="docKey"])').first();
     await attach.locator('input[type="file"]').setInputFiles({
       name: 'arrangements.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
     });
     await attach.locator('button:has-text("Attach")').click();
     await page.waitForLoadState('networkidle');
-    await page.goto(`/events/${eventId}/submit`);
+    await gotoRidingRestarts(page, `/events/${eventId}/submit`);
     for (let i = 0; i < 6; i += 1) {
       await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
     }
@@ -193,7 +190,7 @@ test.describe('creation to determination, end to end', () => {
     await signInAs(page, 'test_moph');
     const review = `/ministry/submissions/${eventId}`;
     const record = async (value: string, expected: string) => {
-      await page.goto(review);
+      await gotoRidingRestarts(page, review);
       const outcome = page.locator('[data-region="outcome"]');
       await outcome.locator(`input[type="radio"][value="${value}"]`).check();
       await outcome.locator('textarea, input[name="note"]').first().fill(`Recorded in the completion walk — ${value}.`);
@@ -209,9 +206,9 @@ test.describe('creation to determination, end to end', () => {
 
     // And the organizer reads the determination on their own record.
     await signInAs(page, 'test_organizer');
-    await page.goto('/dashboard');
+    await gotoRidingRestarts(page, '/dashboard');
     await expect(page.locator('body')).toContainText('Batroun Heritage Walk');
-    await page.goto(`/events/${eventId}`);
+    await gotoRidingRestarts(page, `/events/${eventId}`);
     await expect(page.locator('body')).toContainText('Health and medical preparedness requirements satisfied');
   });
 });

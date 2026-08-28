@@ -9,18 +9,15 @@
  *    (non-negotiable 7), and clears when the name is replaced;
  *  - a foreign facility id refuses like a missing one, on every facility route.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
-}
 
 test.describe('the category determination', () => {
   test('a school leaves having done everything available to it', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/new');
+    await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
     await page.getByRole('button', { name: /Schools, universities/ }).click();
 
@@ -43,7 +40,7 @@ test.describe('the category determination', () => {
 
   test('a sports facility proceeds, with the recurring-venue cross-reference beside it', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/new');
+    await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
     await page.getByRole('button', { name: /Gyms, fitness centres/ }).click();
 
@@ -56,7 +53,7 @@ test.describe('the category determination', () => {
 
   test('a review category proceeds -- the review states what is required', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/new');
+    await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
     await page.getByRole('button', { name: /cardiac arrest has previously been reported/ }).click();
 
@@ -70,7 +67,7 @@ test.describe('the category determination', () => {
 test.describe('the incident narrative name check', () => {
   test('a personal name blocks submission, and replacing it clears the block', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/FC-0014/incidents/new');
+    await gotoRidingRestarts(page, '/facilities/FC-0014/incidents/new');
 
     const narrative = page.locator('textarea[name="narrative"]');
     await narrative.fill('Mr Haddad collapsed near the pool');
@@ -91,9 +88,9 @@ test.describe("an organizer never sees another organizer's facilities", () => {
   test('a foreign facility id refuses like a missing one, on every facility route', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     for (const suffix of ['', '/devices', '/plan', '/incidents/new']) {
-      const foreign = await page.goto(`/facilities/FC-0001${suffix}`);
+      const foreign = await gotoRidingRestarts(page, `/facilities/FC-0001${suffix}`);
       const foreignStatus = foreign?.status() ?? 0;
-      const missing = await page.goto(`/facilities/FC-9999${suffix}`);
+      const missing = await gotoRidingRestarts(page, `/facilities/FC-9999${suffix}`);
       const missingStatus = missing?.status() ?? 0;
       expect(foreignStatus, `status parity for ${suffix || '/'}`).toBe(missingStatus);
       expect([401, 403, 404]).toContain(foreignStatus);
@@ -104,7 +101,7 @@ test.describe("an organizer never sees another organizer's facilities", () => {
 test.describe('the validity ledger derives', () => {
   test('the ledger shows the reference dates at the review clock, statuses included', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/FC-0014');
+    await gotoRidingRestarts(page, '/facilities/FC-0014');
     const ledger = page.locator('[data-region="ledger"]');
     // Stops-counting dates, derived from the seeded record at REVIEW_CLOCK 2026-08-13.
     await expect(ledger).toContainText('2026-10-02'); // earliest pad expiry
@@ -121,7 +118,7 @@ test.describe('the validity ledger derives', () => {
 
   test('the as-of pills preview the same derivation at a future date', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/facilities/FC-0014?asof=60');
+    await gotoRidingRestarts(page, '/facilities/FC-0014?asof=60');
     // 60 days past the review clock, the annual confirmation (2026-09-12) has lapsed.
     await expect(page.locator('[data-region="standing"]')).toContainText(
       'Obligations are not being met',

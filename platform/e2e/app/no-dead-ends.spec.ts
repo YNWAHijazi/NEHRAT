@@ -17,6 +17,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
 const MARKERS =
   /\b(outstanding|pending|awaiting|not yet|overdue|unanswered|owed|not set|incomplete|missing|blocked while|cannot be certified|awaiting recording|awaiting you|not recorded|not started|lapsed|lapsing|open —)\b/i;
@@ -112,11 +113,6 @@ async function scan(page: Page, route: string): Promise<DeadEnd[]> {
   );
 }
 
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin'));
-}
 
 const WALKS: { login: string; routes: string[] }[] = [
   {

@@ -104,6 +104,39 @@ export function derivationForReview(eventId: string): LevelDerivation | null {
   return latestDerivation(eventId);
 }
 
+/**
+ * THE ANSWERS THEMSELVES, for the review screen -- not the derivation they produce.
+ *
+ * The reviewer could see the score, the triggered conditions and the final level,
+ * and not one of the nine answers behind them. Reading a level without its inputs
+ * is reading a conclusion without evidence, and the ruling that the Ministry sees
+ * documents rather than names applies to answers for the same reason: a reviewer
+ * who cannot check what the organizer declared about spectator numbers cannot
+ * check whether the level is right.
+ *
+ * Returned raw. The screen joins them to DOMAINS for the option text, because the
+ * option text belongs to the rules data and must not be duplicated into a query.
+ */
+export function assessmentAnswersForReview(
+  eventId: string,
+): { answers: DomainAnswers; inputs: MinimumConditionInputs; toolVersion: string; recordedAt: string } | null {
+  const row = getDb()
+    .prepare(
+      `SELECT answers, inputs, nehrat_tool_version, created_at FROM assessments
+       WHERE event_id = ? ORDER BY version DESC, id DESC LIMIT 1`,
+    )
+    .get(eventId) as
+    | { answers: string; inputs: string; nehrat_tool_version: string; created_at: string }
+    | undefined;
+  if (!row) return null;
+  return {
+    answers: JSON.parse(row.answers) as DomainAnswers,
+    inputs: JSON.parse(row.inputs) as MinimumConditionInputs,
+    toolVersion: row.nehrat_tool_version,
+    recordedAt: row.created_at.slice(0, 10),
+  };
+}
+
 /** Latest recorded outcome -- same ordering as the Ministry queue, so the two sides never disagree. */
 export function latestOutcomeFor(eventId: string): OutcomeKey | null {
   const row = getDb()
@@ -598,6 +631,8 @@ export interface PlanRow {
   refTemporaryAreas: boolean;
   sections: Record<string, { text?: string; covered?: boolean }>;
   attachedFile: string | null;
+  /** Whether the platform holds the attached plan document itself, not just its name. */
+  attachedHasFile: boolean;
   majorIncident: Record<string, { covered?: boolean }>;
   version: number;
   updatedAt: string;
@@ -607,9 +642,11 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
   const r = getDb()
-    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
+    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file,
+              (attached_bytes IS NOT NULL AND length(attached_bytes) > 0) AS attached_has_file,
+              major_incident, version, updated_at FROM plans WHERE event_id = ?`)
     .get(eventId) as
-    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; major_incident: string; version: number; updated_at: string }
+    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; attached_has_file: number; major_incident: string; version: number; updated_at: string }
     | undefined;
   if (!r) return null;
   return {
@@ -619,6 +656,7 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
     refTemporaryAreas: r.ref_temporary_areas === 1,
     sections: JSON.parse(r.sections) as PlanRow['sections'],
     attachedFile: r.attached_file,
+    attachedHasFile: r.attached_has_file === 1,
     majorIncident: JSON.parse(r.major_incident) as PlanRow['majorIncident'],
     version: r.version,
     updatedAt: r.updated_at,
@@ -634,9 +672,11 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
  */
 export function planForReview(eventId: string): PlanRow | null {
   const r = getDb()
-    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file, major_incident, version, updated_at FROM plans WHERE event_id = ?`)
+    .prepare(`SELECT mode, ref_confirmed, ref_admits_children, ref_temporary_areas, sections, attached_file,
+              (attached_bytes IS NOT NULL AND length(attached_bytes) > 0) AS attached_has_file,
+              major_incident, version, updated_at FROM plans WHERE event_id = ?`)
     .get(eventId) as
-    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; major_incident: string; version: number; updated_at: string }
+    | { mode: 'write' | 'attach'; ref_confirmed: number; ref_admits_children: number; ref_temporary_areas: number; sections: string; attached_file: string | null; attached_has_file: number; major_incident: string; version: number; updated_at: string }
     | undefined;
   if (!r) return null;
   return {
@@ -646,6 +686,7 @@ export function planForReview(eventId: string): PlanRow | null {
     refTemporaryAreas: r.ref_temporary_areas === 1,
     sections: JSON.parse(r.sections) as PlanRow['sections'],
     attachedFile: r.attached_file,
+    attachedHasFile: r.attached_has_file === 1,
     majorIncident: JSON.parse(r.major_incident) as PlanRow['majorIncident'],
     version: r.version,
     updatedAt: r.updated_at,
@@ -1107,13 +1148,52 @@ export interface SharedDocumentRow {
   source: 'organizer' | 'provider' | 'requested' | 'missing';
   fileName: string | null;
   metaEn: string; metaAr: string;
+  /** Whether the platform holds the file, not just its name. Bytes are never selected here. */
+  hasFile: boolean;
+  contentType: string | null;
 }
 
 export function sharedDocumentsFor(token: string): SharedDocumentRow[] {
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, source, file_name, meta_en, meta_ar FROM shared_documents WHERE invitation_token = ? ORDER BY added_at`)
-    .all(token) as unknown as { id: number; name_en: string; name_ar: string; source: SharedDocumentRow['source']; file_name: string | null; meta_en: string; meta_ar: string }[];
-  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, source: r.source, fileName: r.file_name, metaEn: r.meta_en, metaAr: r.meta_ar }));
+    .prepare(
+      `SELECT id, name_en, name_ar, source, file_name, meta_en, meta_ar, content_type,
+              (bytes IS NOT NULL AND length(bytes) > 0) AS has_file
+       FROM shared_documents WHERE invitation_token = ? ORDER BY added_at`,
+    )
+    .all(token) as unknown as { id: number; name_en: string; name_ar: string; source: SharedDocumentRow['source']; file_name: string | null; meta_en: string; meta_ar: string; content_type: string | null; has_file: number }[];
+  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, source: r.source, fileName: r.file_name, metaEn: r.meta_en, metaAr: r.meta_ar, hasFile: r.has_file === 1, contentType: r.content_type }));
+}
+
+/**
+ * Every document on every counterparty's shared list for one event, for the review
+ * screen. The organizer's own attachments are attachmentsForReview; this is the
+ * OTHER lane -- what a named provider or Director supplied, or was asked for and
+ * has not supplied. A reviewer reading only the organizer's attachments cannot see
+ * that the deployment map was requested from the EMS provider a fortnight ago and
+ * never arrived, which is exactly the kind of gap a determination turns on.
+ */
+export function sharedDocumentsForReview(
+  eventId: string,
+): { id: number; nameEn: string; nameAr: string; source: SharedDocumentRow['source']; fileName: string | null; hasFile: boolean; contentType: string | null; partyEn: string; partyAr: string }[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT d.id, d.name_en, d.name_ar, d.source, d.file_name, d.content_type,
+              (d.bytes IS NOT NULL AND length(d.bytes) > 0) AS has_file,
+              i.name_en AS party_en, i.name_ar AS party_ar
+       FROM shared_documents d
+       JOIN invitations i ON i.token = d.invitation_token
+       WHERE i.event_id = ? ORDER BY i.name_en, d.added_at`,
+    )
+    .all(eventId) as unknown as {
+    id: number; name_en: string; name_ar: string; source: SharedDocumentRow['source'];
+    file_name: string | null; content_type: string | null; has_file: number;
+    party_en: string; party_ar: string;
+  }[];
+  return rows.map((r) => ({
+    id: r.id, nameEn: r.name_en, nameAr: r.name_ar, source: r.source,
+    fileName: r.file_name, hasFile: r.has_file === 1, contentType: r.content_type,
+    partyEn: r.party_en, partyAr: r.party_ar,
+  }));
 }
 
 export interface FrReadinessRow {
@@ -1342,13 +1422,38 @@ export function attestationRecordsFor(eventId: string): AttestationRecord[] {
   }));
 }
 
-/** The attached documents on an event, for the review screen. Name-only records
- * (document storage is a recorded deployment decision); provenance is the name. */
-export function attachmentsForReview(eventId: string): { docKey: string; fileName: string; attachedAt: string }[] {
+/**
+ * The attached documents on an event, for the review screen.
+ *
+ * The BYTES ARE NOT SELECTED HERE and must not be: this feeds a server component
+ * that renders a list, and pulling a 20 MB blob into a page render to display a
+ * file name would be a real cost for no purpose. The reviewer opens a document
+ * through /api/documents, which reads the bytes for exactly the one asked for.
+ *
+ * `hasFile` is what the screen needs: whether an Open control appears at all, or
+ * the row explains that this is a demonstration record with no file behind it.
+ */
+export function attachmentsForReview(
+  eventId: string,
+): { docKey: string; fileName: string; attachedAt: string; hasFile: boolean; contentType: string | null; byteSize: number | null }[] {
   const rows = getDb()
-    .prepare(`SELECT doc_key, file_name, attached_at FROM event_attachments WHERE event_id = ? ORDER BY attached_at`)
-    .all(eventId) as unknown as { doc_key: string; file_name: string; attached_at: string }[];
-  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at.slice(0, 10) }));
+    .prepare(
+      `SELECT doc_key, file_name, attached_at, content_type, byte_size,
+              (bytes IS NOT NULL AND length(bytes) > 0) AS has_file
+       FROM event_attachments WHERE event_id = ? ORDER BY attached_at`,
+    )
+    .all(eventId) as unknown as {
+    doc_key: string; file_name: string; attached_at: string;
+    content_type: string | null; byte_size: number | null; has_file: number;
+  }[];
+  return rows.map((r) => ({
+    docKey: r.doc_key,
+    fileName: r.file_name,
+    attachedAt: r.attached_at.slice(0, 10),
+    hasFile: r.has_file === 1,
+    contentType: r.content_type,
+    byteSize: r.byte_size,
+  }));
 }
 
 /** Archived submission versions, oldest first -- what each earlier filing carried. */

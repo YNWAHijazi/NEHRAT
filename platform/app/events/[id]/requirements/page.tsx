@@ -24,6 +24,17 @@ import {
   type Level,
 } from '../../../../lib/rules';
 import { attachDocumentAction, removeAttachmentAction, removeProviderAction, withdrawNominationAction } from '../../../actions';
+import { UPLOADS_CONTENT, acceptAttribute, acceptHint } from '../../../../lib/rules/uploads';
+
+/** The three ways an upload is refused, each named. Keyed by the action's reason. */
+const UPLOAD_REFUSALS: Record<string, { en: string; ar: string }> = {
+  tooLarge: {
+    en: UPLOADS_CONTENT.copy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel),
+    ar: UPLOADS_CONTENT.copy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel),
+  },
+  wrongType: { en: UPLOADS_CONTENT.copy.wrongTypeEn, ar: UPLOADS_CONTENT.copy.wrongTypeAr },
+  empty: { en: UPLOADS_CONTENT.copy.emptyEn, ar: UPLOADS_CONTENT.copy.emptyAr },
+};
 
 const upLabel: React.CSSProperties = {
   fontSize: '11.5px',
@@ -80,10 +91,24 @@ function InvitationLinkBlock({ token }: { token: string }) {
   );
 }
 
-export default async function RequirementsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RequirementsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
+  // A refused upload comes back NAMED: the organizer is told which mistake they
+  // made -- too large, wrong type, empty -- never just that something failed.
+  // ("Refused", deliberately. The determination vocabulary is reserved, and the
+  // banned-terms sweep caught the other word here as a local identifier and again
+  // in the comment explaining the rename -- which is the sweep working.)
+  const q = await searchParams;
+  const refusal = typeof q['upload'] === 'string' ? q['upload'] : null;
+  const refusedDoc = typeof q['doc'] === 'string' ? q['doc'] : null;
   const event = eventFor(account.id, id);
   if (!event) notFound();
 
@@ -229,6 +254,25 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
           noteEn="Anything attached here appears as complete in the submission package. It is never entered twice."
           noteAr="كل ما يُرفق هنا يظهر مكتملاً في حزمة التقديم. لا يُدخَل مرتين."
         />
+        <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
+          <L en={acceptHint().en} ar={acceptHint().ar} />
+        </p>
+        {refusal ? (
+          <div
+            data-region="upload-refused"
+            style={{ padding: '14px 18px', background: 'var(--bad-soft)', border: '2px solid var(--bad)', borderRadius: 12, marginBlockEnd: 14, fontSize: 14, lineHeight: 1.6, maxWidth: '78ch' }}
+          >
+            <L
+              en={UPLOAD_REFUSALS[refusal]?.en ?? UPLOAD_REFUSALS['wrongType']!.en}
+              ar={UPLOAD_REFUSALS[refusal]?.ar ?? UPLOAD_REFUSALS['wrongType']!.ar}
+            />
+            {refusedDoc && catalogueEntry(refusedDoc) ? (
+              <div style={{ marginBlockStart: 4, fontSize: '12.5px' }}>
+                <L en={catalogueEntry(refusedDoc)!.en} ar={catalogueEntry(refusedDoc)!.ar} />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 52 }}>
           {documents.map((doc) => {
             const done = documentState[doc.key] === true;
@@ -284,6 +328,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                         type="file"
                         name="file"
                         required
+                        accept={acceptAttribute()}
                         aria-label="Attach the document"
                         style={{ fontSize: 13, maxWidth: 230 }}
                       />
@@ -306,7 +351,7 @@ export default async function RequirementsPage({ params }: { params: Promise<{ i
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 8 }}>
                         <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                           <input type="hidden" name="docKey" value={doc.key} />
-                          <input type="file" name="file" required aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 230 }} />
+                          <input type="file" name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 230 }} />
                           <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                             <L en="Replace" ar="استبدال" />
                           </button>

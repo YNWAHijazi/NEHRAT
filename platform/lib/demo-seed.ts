@@ -23,6 +23,8 @@
 
 import type { DatabaseSync } from 'node:sqlite';
 import { beirutToday } from './clock';
+import { demonstrationPdf } from './demo-pdf';
+import { NEHRAT_TOOL_VERSION } from './rules';
 
 /** The prototype's pinned "today". */
 const REFERENCE_TODAY = '2026-08-13';
@@ -47,6 +49,33 @@ export function seedDemonstration(db: DatabaseSync): void {
 
   const shift = shiftDays();
   const d = (ref: string): string => sh(ref, shift);
+
+  /**
+   * Every seeded attachment carries REAL BYTES, because the platform now stores
+   * files and a demonstration name with nothing behind it makes the showcase read
+   * as broken -- the Ministry clicks Open on the route map and is told there is no
+   * route map. The bytes are a generated placeholder PDF that says on its face what
+   * it is, so nobody mistakes it for an operational document.
+   */
+  /** Bytes plus length for a shared-list row, in the column order the insert wants. */
+  const sharedPdf = (title: string, subtitle: string): [number, Buffer] => {
+    const pdf = demonstrationPdf(title, subtitle);
+    return [pdf.length, pdf];
+  };
+
+  const attachWithFile = (
+    eventId: string,
+    docKey: string,
+    fileName: string,
+    title: string,
+    subtitle: string,
+  ): void => {
+    const pdf = demonstrationPdf(title, subtitle);
+    db.prepare(
+      `INSERT INTO event_attachments (event_id, doc_key, file_name, content_type, byte_size, bytes)
+       VALUES (?, ?, ?, 'application/pdf', ?, ?)`,
+    ).run(eventId, docKey, fileName, pdf.length, pdf);
+  };
 
   const insertAccount = db.prepare(
     `INSERT INTO accounts (login, display_name, initials, role, is_demo) VALUES (?, ?, ?, ?, 1)`,
@@ -351,9 +380,7 @@ export function seedDemonstration(db: DatabaseSync): void {
     'Coastal Medical Transport', 'النقل الطبي الساحلي',
     'dispatch@coastalmedical.example.lb', 'nominated', 'none', null,
   );
-  db.prepare(
-    `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)`,
-  ).run('EV-0418', 'siteMap', 'coastal-12k-route.pdf');
+  attachWithFile('EV-0418', 'siteMap', 'coastal-12k-route.pdf', 'Site and route map', 'EV-0418 — Beirut Coastal 12K');
   // The 12K finishes inside the registered covered facility, so the plan's reference
   // block renders for it (ROADMAP 2e).
   db.prepare(`UPDATE events SET venue_facility_id = 'FC-0014' WHERE id = 'EV-0418'`).run();
@@ -373,25 +400,51 @@ export function seedDemonstration(db: DatabaseSync): void {
   // Filed events carry a complete plan row: the refile gate recomputes the FULL
   // package, and a seeded submission that could never refile would contradict the
   // revision path the outcome invites.
-  const seedPlan = db.prepare(
+  const seedPlanRow = db.prepare(
     `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
-       sections, attached_file, major_incident, version)
-     VALUES (?, 'attach', 0, 0, 0, ?, ?, ?, 1)`,
+       sections, attached_file, attached_content_type, attached_byte_size, attached_bytes,
+       major_incident, version)
+     VALUES (?, 'attach', 0, 0, 0, ?, ?, 'application/pdf', ?, ?, ?, 1)`,
   );
+  const seedPlan = (eventId: string, sections: string, fileName: string, mi: string): void => {
+    const pdf = demonstrationPdf('Event health and medical plan', `${eventId} — demonstration record`);
+    seedPlanRow.run(eventId, sections, fileName, pdf.length, pdf, mi);
+  };
   const allSections = JSON.stringify(
     Object.fromEntries(Array.from({ length: 16 }, (_, i) => [String(i + 1), { covered: true }])),
   );
   const allMi = JSON.stringify(
     Object.fromEntries(Array.from({ length: 11 }, (_, i) => [String(i + 1), { covered: true }])),
   );
-  seedPlan.run('EV-0362', allSections, 'baalbeck-plan-v3.pdf', allMi);
-  const seedAttachment = db.prepare(
-    `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)`,
+  seedPlan('EV-0362', allSections, 'baalbeck-plan-v3.pdf', allMi);
+  // THE ANSWERS BEHIND EV-0362's LEVEL. Without these the review screen could show
+  // the level and not one of the nine answers producing it, and said so in an
+  // apologetic empty state. This set is chosen to derive EXACTLY the level the row
+  // is seeded with (3), and to demonstrate the higher-of rule doing visible work:
+  // the score band gives 3, the minimum conditions give 2, and the score governs.
+  db.prepare(
+    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, created_at)
+     VALUES (?, 1, ?, ?, '{}', ?, ?)`,
+  ).run(
+    'EV-0362',
+    JSON.stringify([2, 2, 2, 1, 2, 1, 2, 1, 2]),
+    JSON.stringify({
+      expectedMaxSimultaneousAttendance: 18000,
+      eventDisciplines: ['music'],
+      courseDistanceKm: null,
+      venueLicensedCapacity: 20000,
+      venueIsNightclubOrDanceVenue: false,
+      venueRegularlyHostsOrganizedEvents: true,
+    }),
+    NEHRAT_TOOL_VERSION,
+    d('2026-07-28'),
   );
-  seedAttachment.run('EV-0362', 'siteMap', 'baalbeck-site-map.pdf');
-  seedAttachment.run('EV-0362', 'deploymentMap', 'baalbeck-deployment-map.pdf');
-  seedPlan.run('EV-0301', allSections, 'saida-night-run-plan.pdf', allMi);
-  seedPlan.run('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
+  attachWithFile('EV-0362', 'siteMap', 'baalbeck-site-map.pdf', 'Site and route map', 'EV-0362 — Baalbeck Summer Festival');
+  attachWithFile('EV-0362', 'deploymentMap', 'baalbeck-deployment-map.pdf', 'Deployment map', 'EV-0362 — Baalbeck Summer Festival');
+  attachWithFile('EV-0455', 'siteMap', 'byblos-harbour-site-map.pdf', 'Site and route map', 'EV-0455 — Byblos Harbour Swim');
+  attachWithFile('EV-0455', 'deploymentMap', 'byblos-harbour-deployment-map.pdf', 'Deployment map', 'EV-0455 — Byblos Harbour Swim');
+  seedPlan('EV-0301', allSections, 'saida-night-run-plan.pdf', allMi);
+  seedPlan('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
 
   insertInvitation.run(
     'demo-lrc-baalbeck-0362', 'EV-0362', 'ems',
@@ -471,28 +524,29 @@ export function seedDemonstration(db: DatabaseSync): void {
   // Shared documents between the organizer and the Baalbeck provider: the
   // reference's five rows, one per state.
   const insertDoc = db.prepare(
-    `INSERT INTO shared_documents (invitation_token, name_en, name_ar, source, file_name, meta_en, meta_ar, added_at)
-     VALUES ('demo-lrc-baalbeck-0362', ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO shared_documents (invitation_token, name_en, name_ar, source, file_name,
+       content_type, byte_size, bytes, meta_en, meta_ar, added_at)
+     VALUES ('demo-lrc-baalbeck-0362', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   insertDoc.run(
     'Event health and medical plan — version 3', 'الخطة الصحية والطبية للفعالية — النسخة 3',
-    'organizer', 'baalbeck-plan-v3.pdf', `From the organizer · ${d('2026-08-11')} · PDF`, `من المنظّم · ⁦${d('2026-08-11')}⁩ · PDF`, d('2026-08-11'),
+    'organizer', 'baalbeck-plan-v3.pdf', 'application/pdf', ...sharedPdf('Event health and medical plan', 'EV-0362 — version 3'), `From the organizer · ${d('2026-08-11')} · PDF`, `من المنظّم · ⁦${d('2026-08-11')}⁩ · PDF`, d('2026-08-11'),
   );
   insertDoc.run(
     'Medical deployment map', 'خريطة الانتشار الطبي',
-    'requested', null, `Requested from you by the organizer · ${d('2026-08-12')}`, `طلبها منكم المنظّم · ⁦${d('2026-08-12')}⁩`, d('2026-08-12'),
+    'requested', null, null, null, null, `Requested from you by the organizer · ${d('2026-08-12')}`, `طلبها منكم المنظّم · ⁦${d('2026-08-12')}⁩`, d('2026-08-12'),
   );
   insertDoc.run(
     'Service agreement', 'اتفاقية الخدمة',
-    'provider', 'service-agreement.pdf', `From your organization · ${d('2026-08-13')} · signed both sides`, `من مؤسستكم · ⁦${d('2026-08-13')}⁩ · موقّعة من الطرفين`, d('2026-08-13'),
+    'provider', 'service-agreement.pdf', 'application/pdf', ...sharedPdf('Service agreement', 'EV-0362 — Lebanese Red Cross, Baalbeck'), `From your organization · ${d('2026-08-13')} · signed both sides`, `من مؤسستكم · ⁦${d('2026-08-13')}⁩ · موقّعة من الطرفين`, d('2026-08-13'),
   );
   insertDoc.run(
     'Event site and route map', 'خريطة موقع الفعالية والمسار',
-    'organizer', 'baalbeck-site-map.pdf', `From the organizer · ${d('2026-08-04')} · PDF`, `من المنظّم · ⁦${d('2026-08-04')}⁩ · PDF`, d('2026-08-04'),
+    'organizer', 'baalbeck-site-map.pdf', 'application/pdf', ...sharedPdf('Event site and route map', 'EV-0362 — Baalbeck Summer Festival'), `From the organizer · ${d('2026-08-04')} · PDF`, `من المنظّم · ⁦${d('2026-08-04')}⁩ · PDF`, d('2026-08-04'),
   );
   insertDoc.run(
     'Radio channel and call-sign schedule', 'جدول القنوات ورموز النداء',
-    'missing', null, 'Not yet added by either side', 'لم يُضفه أي من الطرفين بعد', d('2026-08-13'),
+    'missing', null, null, null, null, 'Not yet added by either side', 'لم يُضفه أي من الطرفين بعد', d('2026-08-13'),
   );
 
   // The first-response unit: readiness partly confirmed (the reference's showcase

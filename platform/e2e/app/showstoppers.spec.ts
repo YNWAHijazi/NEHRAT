@@ -11,12 +11,9 @@
  *  6. Saving the plan archives the version it replaced, readable on the screen.
  */
 import { expect, test, type Page } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
-}
 
 const fill = async (page: Page, label: string, value: string): Promise<void> => {
   await page.locator('label', { hasText: label }).first().locator('input').fill(value);
@@ -28,7 +25,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await signInAs(page, 'test_organizer');
 
     // The assessment: everything low-risk, nothing triggering a minimum condition.
-    await page.goto('/events/new');
+    await gotoRidingRestarts(page, '/events/new');
     await fill(page, 'Event name (English)', 'Community Chess Afternoon');
     await fill(page, 'Event name (Arabic)', 'أمسية شطرنج مجتمعية');
     await fill(page, 'Start date', '2026-09-10');
@@ -62,7 +59,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await expect(page.locator('body')).toContainText('Level 1');
 
     // Level 1 package: the assessment (system) and the documented arrangements.
-    await page.goto(`/events/${eventId}/requirements`);
+    await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
     const attach = page.locator('form:has(input[name="docKey"])').first();
     // The control is a real file picker: a document is chosen, never a typed name.
     await attach.locator('input[type="file"]').setInputFiles({
@@ -74,7 +71,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await page.waitForLoadState('networkidle');
 
     // The compliance form renders SIX declarations at Level 1 -- and completes on six.
-    await page.goto(`/events/${eventId}/submit`);
+    await gotoRidingRestarts(page, `/events/${eventId}/submit`);
     const ticks = page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' });
     await expect(ticks).toHaveCount(6);
     for (let i = 0; i < 6; i += 1) {
@@ -96,7 +93,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
 test.describe('showstopper 4 — a revision outcome reopens the submission', () => {
   test('EV-0362 refiles as version 2; the reviewer sees the version; the reference holds', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/events/EV-0362/submit');
+    await gotoRidingRestarts(page, '/events/EV-0362/submit');
     // The revision banner, and the form unlocked despite being filed.
     await expect(page.locator('body')).toContainText('open for revision');
     const refile = page.locator('button:has-text("File the revised submission")');
@@ -106,7 +103,7 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
     await expect(page.locator('body')).toContainText('MOPH-EV-2026-0362');
 
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     await expect(page.locator('body')).toContainText('revised submission, version 2');
   });
 });
@@ -116,7 +113,7 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
     await signInAs(page, 'test_organizer');
     // EV-0244 is held 2026-08-09 and ended before the review clock (2026-08-13):
     // started, filed, notifiable. The occurrence is on the event's own day.
-    await page.goto('/events/EV-0244/incident');
+    await gotoRidingRestarts(page, '/events/EV-0244/incident');
     await page.locator('label:has-text("Major incident") input[type="radio"]').check();
     await page.locator('input[name="occurredAt"]').fill('2026-08-09T21:30');
     await page.locator('button:has-text("Notify the Ministry")').click();
@@ -124,7 +121,7 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
     await expect(page.locator('body')).toContainText('The Ministry has been notified');
 
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/incidents');
+    await gotoRidingRestarts(page, '/ministry/incidents');
     const lane = page.locator('[data-region="serious-incidents"]');
     await expect(lane).toContainText('Major incident');
     await expect(lane).toContainText('hour');
@@ -133,7 +130,7 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
   test('before the event starts, the control is a reason, not a form', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     // EV-0362 starts after the review clock's today.
-    await page.goto('/events/EV-0362/incident');
+    await gotoRidingRestarts(page, '/events/EV-0362/incident');
     await expect(page.locator('body')).toContainText("Available from the event's first day");
     await expect(page.locator('button:has-text("Notify the Ministry")')).toHaveCount(0);
   });
@@ -144,7 +141,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     // Two save-and-reload cycles: generous under full-suite dev-compile load.
     test.setTimeout(90_000);
     await signInAs(page, 'test_organizer');
-    await page.goto('/events/EV-0418/plan');
+    await gotoRidingRestarts(page, '/events/EV-0418/plan');
     // Sections are accordion rows: expand section 1, whose textarea then renders.
     const sectionRow = page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' });
     await sectionRow.click();

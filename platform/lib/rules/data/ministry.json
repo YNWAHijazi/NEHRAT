@@ -445,5 +445,77 @@
       "en": "Additional measures are required by a Ministry reviewer. You cannot add one on this account.",
       "ar": "تُشترط التدابير الإضافية من مراجع في الوزارة. ولا يمكنكم إضافة تدبير على هذا الحساب."
     }
+  },
+  "assessmentAnswers": {
+    "$comment": "The nine answers behind the level, on the review screen. A reviewer reading a level without its inputs is reading a conclusion without evidence.",
+    "titleEn": "Assessment answers",
+    "titleAr": "إجابات التقييم",
+    "introEn": "The nine domains as the organizer answered them, and the structured inputs the minimum conditions derive from. Read-only: the level is derived and is never chosen.",
+    "introAr": "النطاقات التسعة كما أجاب عنها المنظّم، والمدخلات المهيكلة التي تُشتق منها شروط الحد الأدنى. للاطلاع فقط: المستوى مُشتق ولا يُختار أبداً.",
+    "noneEn": "No assessment answers are stored against this record.",
+    "noneAr": "لا إجابات تقييم مخزَّنة على هذا السجل.",
+    "inputsLabelEn": "Structured inputs",
+    "inputsLabelAr": "المدخلات المهيكلة",
+    "unsetEn": "Not set",
+    "unsetAr": "غير محدَّد",
+    "versionLabelEn": "Scored against",
+    "versionLabelAr": "احتُسب وفق",
+    "inputs": {
+      "expectedMaxSimultaneousAttendance": {
+        "en": "Highest expected simultaneous attendance",
+        "ar": "أعلى حضور متزامن متوقَّع"
+      },
+      "eventDisciplines": {
+        "en": "Disciplines",
+        "ar": "الاختصاصات"
+      },
+      "courseDistanceKm": {
+        "en": "Course distance (km)",
+        "ar": "مسافة المسار (كم)"
+      },
+      "venueLicensedCapacity": {
+        "en": "Venue licensed capacity",
+        "ar": "السعة المرخَّصة للموقع"
+      },
+      "venueIsNightclubOrDanceVenue": {
+        "en": "Nightclub or dance venue",
+        "ar": "ملهى ليلي أو صالة رقص"
+      },
+      "venueRegularlyHostsOrganizedEvents": {
+        "en": "Regularly hosts organized events",
+        "ar": "يستضيف فعاليات منظمة بانتظام"
+      }
+    },
+    "yesEn": "Yes",
+    "yesAr": "نعم",
+    "noEn": "No",
+    "noAr": "لا"
+  },
+  "counterpartyDocuments": {
+    "$comment": "The other document lane on the review screen: what a named party supplied, or was asked for and has not.",
+    "titleEn": "Counterparty documents",
+    "titleAr": "مستندات الأطراف المُسمّاة",
+    "introEn": "Documents exchanged between the organizer and each named party. A document requested and not supplied is shown as outstanding against the party it was requested from.",
+    "introAr": "المستندات المتبادلة بين المنظّم وكل طرف مُسمّى. ويظهر المستند المطلوب وغير المقدَّم على أنه قائم بذمّة الطرف المطلوب منه.",
+    "noneEn": "No counterparty documents on this submission.",
+    "noneAr": "لا مستندات أطراف مُسمّاة على هذا التقديم.",
+    "states": {
+      "organizer": {
+        "en": "From the organizer",
+        "ar": "من المنظّم"
+      },
+      "provider": {
+        "en": "From the named party",
+        "ar": "من الطرف المُسمّى"
+      },
+      "requested": {
+        "en": "Requested, not yet supplied",
+        "ar": "مطلوب ولم يُقدَّم بعد"
+      },
+      "missing": {
+        "en": "Not added by either side",
+        "ar": "لم يضفه أي من الطرفين"
+      }
+    }
   }
 }

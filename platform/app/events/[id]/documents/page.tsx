@@ -6,6 +6,8 @@ import { AddDocumentForm } from './AddDocumentForm';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, sharedDocumentsFor, unreadCountFor } from '../../../../lib/queries';
 import { answerDocumentRequestAction } from '../../../actions';
+import { DocumentViewer } from '../../../../components/DocumentViewer';
+import { acceptAttribute } from '../../../../lib/rules/uploads';
 import { ROLES_CONTENT } from '../../../../lib/rules';
 
 /**
@@ -74,6 +76,17 @@ export default async function SharedDocumentsPage({
                     <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 5, fontVariantNumeric: 'tabular-nums' }}>
                       <L en={d.metaEn} ar={d.metaAr} />
                     </div>
+                    {/* An added document is READABLE by both parties. A shared list
+                        where neither side can open what the other supplied shares
+                        nothing but a file name. */}
+                    {d.fileName && d.source !== 'requested' && d.source !== 'missing' ? (
+                      <DocumentViewer
+                        href={`/api/shared-documents/${d.id}`}
+                        hasFile={d.hasFile}
+                        contentType={d.contentType}
+                        label={d.nameEn}
+                      />
+                    ) : null}
                   </div>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none', flexWrap: 'wrap' }}>
                     <span style={{ padding: '4px 10px', borderRadius: 999, background: s.chipBg, color: s.color, fontSize: 13 }}>
@@ -81,7 +94,7 @@ export default async function SharedDocumentsPage({
                     </span>
                     {d.source === 'requested' || d.source === 'missing' ? (
                       <form action={answerDocumentRequestAction.bind(null, invitation.token, d.id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <input type="file" name="file" required aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
+                        <input type="file" name="file" required accept={acceptAttribute()} aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
                         <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                           <L en={s.ctaEn} ar={s.ctaAr} />
                         </button>

@@ -24,6 +24,7 @@ function verbatimQuote(reason: string): string {
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
+import { UPLOADS_CONTENT, maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
 import {
   checkPasswordPolicy,
   hashPassword,
@@ -313,28 +314,85 @@ function ownedEvent(accountId: number, eventId: string): boolean {
   );
 }
 
-/** Records an attachment (review build: the declared file name; storage is deployment). */
-export async function attachDocumentAction(eventId: string, formData: FormData): Promise<void> {
+/**
+ * Stores an attached document -- THE FILE, not its name.
+ *
+ * The deferred storage decision is taken (reviewer ruling, 2026-08-28): the platform
+ * stores the file so the Ministry reviewer can open the route map rather than read
+ * that a route map exists. Acceptance is lib/rules/uploads.ts's judgement, not this
+ * action's, and a refusal comes back named in both languages -- the organizer is
+ * told which mistake they made, never just "invalid".
+ *
+ * The 20 MB ceiling is enforced HERE, on the server, against the buffer's real
+ * length. A client-side accept attribute is a convenience and is not a limit.
+ */
+export async function attachDocumentAction(
+  eventId: string,
+  formData: FormData,
+): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   const docKey = String(formData.get('docKey') ?? '');
-  // A real document is attached, never a typed name: the control is a file picker and
-  // the record carries the chosen file's own name. (Binary storage remains the recorded
-  // deployment decision; the name is what the review build keeps.)
   const file = formData.get('file');
-  const fileName =
-    file instanceof File && file.size >= 0 ? file.name.trim() : String(formData.get('fileName') ?? '').trim();
-  if (docKey && fileName) {
-    getDb()
-      .prepare(
-        `INSERT INTO event_attachments (event_id, doc_key, file_name) VALUES (?, ?, ?)
-         ON CONFLICT (event_id, doc_key) DO UPDATE SET file_name = excluded.file_name, attached_at = now_stamp()`,
-      )
-      .run(eventId, docKey, fileName);
+  if (!docKey || !(file instanceof File)) redirect(`/events/${eventId}/requirements`);
+
+  const refusal = refuseUpload({ type: file.type, size: file.size });
+  if (refusal) {
+    redirect(`/events/${eventId}/requirements?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
   }
+  const bytes = Buffer.from(await file.arrayBuffer());
+  // The buffer is the truth. A declared size can lie; a length cannot.
+  if (bytes.length > maxUploadBytes()) {
+    redirect(`/events/${eventId}/requirements?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO event_attachments (event_id, doc_key, file_name, content_type, byte_size, bytes)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT (event_id, doc_key) DO UPDATE SET
+         file_name = excluded.file_name, content_type = excluded.content_type,
+         byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
+    )
+    .run(eventId, docKey, file.name.trim(), file.type, bytes.length, bytes);
   revalidatePath(`/events/${eventId}/requirements`);
   redirect(`/events/${eventId}/requirements`);
+}
+
+/**
+ * Stores the plan document when the organizer attaches an existing plan rather than
+ * writing one. Separate from savePlanAction because that one carries a JSON payload
+ * from a client component and a file does not travel in JSON.
+ */
+export async function uploadPlanFileAction(
+  eventId: string,
+  formData: FormData,
+): Promise<{ ok: true; fileName: string } | { error: string; en: string; ar: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) return { error: 'not-found', en: '', ar: '' };
+  const file = formData.get('file');
+  if (!(file instanceof File)) return { error: 'no-file', en: '', ar: '' };
+  const refusal = refuseUpload({ type: file.type, size: file.size });
+  if (refusal) return { error: refusal.reason, en: refusal.en, ar: refusal.ar };
+  const bytes = Buffer.from(await file.arrayBuffer());
+  if (bytes.length > maxUploadBytes()) {
+    return { error: 'tooLarge', en: UPLOADS_CONTENT.copy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: UPLOADS_CONTENT.copy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) };
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO plans (event_id, mode, sections, major_incident, attached_file,
+         attached_content_type, attached_byte_size, attached_bytes)
+       VALUES (?, 'attach', '{}', '{}', ?, ?, ?, ?)
+       ON CONFLICT (event_id) DO UPDATE SET
+         attached_file = excluded.attached_file,
+         attached_content_type = excluded.attached_content_type,
+         attached_byte_size = excluded.attached_byte_size,
+         attached_bytes = excluded.attached_bytes`,
+    )
+    .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
+  revalidatePath(`/events/${eventId}/plan`);
+  return { ok: true, fileName: file.name.trim() };
 }
 
 /**
@@ -401,6 +459,14 @@ export async function savePlanAction(eventId: string, payload: PlanPayload): Pro
       payload.refAdmitsChildren ? 1 : 0, payload.refTemporaryAreas ? 1 : 0,
       JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident),
     );
+  // Switching back to writing the plan drops the stored file with the name: a
+  // document nothing points at is a document nobody can account for.
+  if (payload.attachedFile === null) {
+    db.prepare(
+      `UPDATE plans SET attached_content_type = NULL, attached_byte_size = NULL,
+         attached_bytes = NULL WHERE event_id = ?`,
+    ).run(eventId);
+  }
   revalidatePath(`/events/${eventId}/plan`);
   return { ok: true };
 }
@@ -1557,9 +1623,10 @@ export async function saveCredentialAction(formData: FormData): Promise<void> {
 }
 
 /**
- * The counterparty answers a document request on the shared list. Name-only
- * storage, like every attachment (recorded deployment decision); adding turns the
- * row to the provider's, and the organizer sees it on the same shared list.
+ * The counterparty answers a document request on the shared list. THE FILE IS
+ * STORED, on the same terms as every other attachment (storage ruling, 2026-08-28);
+ * adding turns the row to the provider's, and the organizer sees it on the same
+ * shared list -- and can now open it rather than read that it exists.
  */
 export async function answerDocumentRequestAction(token: string, docId: number, formData: FormData): Promise<void> {
   const account = await currentAccount();
@@ -1570,11 +1637,18 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
     .get(token, account.id) as { token: string } | undefined;
   if (!inv) redirect('/dashboard');
   const file = formData.get('file');
-  const fileName = file instanceof File ? file.name : '';
-  if (!fileName) redirect('/dashboard');
+  const eventOf = (): string =>
+    (db.prepare(`SELECT event_id FROM invitations WHERE token = ?`).get(token) as { event_id: string }).event_id;
+  if (!(file instanceof File)) redirect('/dashboard');
+  const refusal = refuseUpload({ type: file.type, size: file.size });
+  if (refusal) redirect(`/events/${eventOf()}/documents?upload=${refusal.reason}`);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  if (bytes.length > maxUploadBytes()) redirect(`/events/${eventOf()}/documents?upload=tooLarge`);
+  const fileName = file.name.trim();
   db.prepare(
-    `UPDATE shared_documents SET source = 'provider', file_name = ?, meta_en = ?, meta_ar = ?, added_at = now_stamp()
+    `UPDATE shared_documents SET source = 'provider', file_name = ?, content_type = ?,
+       byte_size = ?, bytes = ?, meta_en = ?, meta_ar = ?, added_at = now_stamp()
      WHERE id = ? AND invitation_token = ?`,
-  ).run(fileName, `Added by you · ${fileName}`, `أضفتموه · ${fileName}`, docId, token);
+  ).run(fileName, file.type, bytes.length, bytes, `Added by you · ${fileName}`, `أضفتموه · ${fileName}`, docId, token);
   redirect(`/events/${(db.prepare(`SELECT event_id FROM invitations WHERE token = ?`).get(token) as { event_id: string }).event_id}/documents`);
 }

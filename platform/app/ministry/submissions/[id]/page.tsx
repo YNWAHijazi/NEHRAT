@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getDb } from '../../../../lib/db';
 import { L } from '../../../../components/L';
+import { DocumentViewer } from '../../../../components/DocumentViewer';
+import { PLAN_DOC_KEY, humanSize } from '../../../../lib/rules/uploads';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import {
@@ -13,9 +15,12 @@ import {
   inspectionsFor,
   submissionForReview,
   derivationForReview,
+  assessmentAnswersForReview,
+  sharedDocumentsForReview,
 } from '../../../../lib/queries';
 import {
   ATTESTATIONS_CONTENT,
+  DOMAINS,
   MAJOR_INCIDENT_ITEMS,
   MINISTRY_CONTENT,
   PLAN_SECTIONS,
@@ -79,9 +84,13 @@ export default async function SubmissionReviewPage({
   // at all -- the reviewer recorded outcomes about a document they could not see.
   const plan = planForReview(id);
   const RP = MINISTRY_CONTENT.reviewPlan;
+  const AA = MINISTRY_CONTENT.assessmentAnswers;
+  const CD = MINISTRY_CONTENT.counterpartyDocuments;
   // The confirmed director, read directly: the review query's providers are the EMS
   // lane, and invitationForEvent is scoped to the counterparty's own account.
   const attachments = attachmentsForReview(id);
+  const assessment = assessmentAnswersForReview(id);
+  const counterpartyDocs = sharedDocumentsForReview(id);
   const versions = submissionVersionsFor(id);
   const director = getDb()
     .prepare(
@@ -286,19 +295,30 @@ export default async function SubmissionReviewPage({
             ) : null}
           </div>
 
-          {/* What was ATTACHED. Name-only records by recorded decision: document
-              storage is a deployment decision; until then the name and its date are
-              the record, and the screen says exactly that rather than faking a file. */}
+          {/* What was ATTACHED -- THE FILE, not the name. The storage decision is
+              taken: the reviewer opens the route map here. Rows seeded before the
+              ruling carry no bytes and say so, rather than offering a dead link. */}
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Attached documents" ar="المستندات المرفقة" />
           </h2>
-          <div data-region="review-attachments" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 10 }}>
+          <div data-region="review-attachments" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 28 }}>
             {attachments.map((a) => {
               const doc = catalogueEntry(a.docKey);
               return (
-                <div key={a.docKey} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: '13.5px' }}>{doc ? <L en={doc.en} ar={doc.ar} /> : a.docKey}</span>
-                  <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{a.fileName} · {a.attachedAt}</span>
+                <div key={a.docKey} style={{ background: 'var(--bg)', padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: '13.5px' }}>{doc ? <L en={doc.en} ar={doc.ar} /> : a.docKey}</span>
+                    <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                      {a.fileName} · {a.attachedAt}
+                      {a.hasFile && a.byteSize !== null ? ` · ${humanSize(a.byteSize)}` : ''}
+                    </span>
+                  </div>
+                  <DocumentViewer
+                    href={`/api/documents/${id}/${encodeURIComponent(a.docKey)}`}
+                    hasFile={a.hasFile}
+                    contentType={a.contentType}
+                    label={doc ? doc.en : a.docKey}
+                  />
                 </div>
               );
             })}
@@ -308,12 +328,6 @@ export default async function SubmissionReviewPage({
               </div>
             ) : null}
           </div>
-          <p style={{ margin: '0 0 28px', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
-            <L
-              en="These are name-and-date records: document storage is a recorded deployment decision, and no file sits behind a name until the Ministry takes it."
-              ar="هذه سجلات بالاسم والتاريخ: تخزين المستندات قرار نشر مسجَّل، ولا ملف خلف أي اسم قبل أن تعتمده الوزارة."
-            />
-          </p>
 
           {/* The filing history: each archived version, readable at a glance. */}
           {versions.length > 0 ? (
@@ -337,6 +351,140 @@ export default async function SubmissionReviewPage({
               </div>
             </div>
           ) : null}
+
+          {/* THE OTHER DOCUMENT LANE. The organizer's attachments are above; these
+              are the ones exchanged with each named party -- including the ones
+              REQUESTED and never supplied, which the organizer's own list cannot
+              show and which a determination can turn on. */}
+          <div data-region="counterparty-documents" style={{ marginBlockEnd: 28 }}>
+            <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <L en={CD.titleEn} ar={CD.titleAr} />
+            </h2>
+            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
+              <L en={CD.introEn} ar={CD.introAr} />
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+              {counterpartyDocs.map((c) => {
+                const state = (CD.states as Record<string, { en: string; ar: string }>)[c.source];
+                const outstanding = c.source === 'requested' || c.source === 'missing';
+                return (
+                  <div key={c.id} style={{ background: 'var(--bg)', padding: '12px 16px', borderInlineStart: `3px solid ${outstanding ? 'var(--bad)' : 'var(--brand)'}` }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13.5px', flex: 1, minWidth: 220 }}>
+                        <L en={c.nameEn} ar={c.nameAr} />
+                        <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
+                          <L en={c.partyEn} ar={c.partyAr} />
+                        </span>
+                      </span>
+                      <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: outstanding ? 'var(--bad-soft)' : 'var(--brand-soft)', color: outstanding ? 'var(--bad)' : 'var(--brand)', fontSize: 12 }}>
+                        <L en={state?.en ?? c.source} ar={state?.ar ?? c.source} />
+                      </span>
+                    </div>
+                    {c.fileName ? (
+                      <DocumentViewer
+                        href={`/api/shared-documents/${c.id}`}
+                        hasFile={c.hasFile}
+                        contentType={c.contentType}
+                        label={c.nameEn}
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+              {counterpartyDocs.length === 0 ? (
+                <div style={{ background: 'var(--bg)', padding: '12px 16px', fontSize: '13.5px', color: 'var(--muted)' }}>
+                  <L en={CD.noneEn} ar={CD.noneAr} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* THE NINE ANSWERS BEHIND THE LEVEL. The derivation strip above reports
+              the score, the conditions and which governed; this reports what the
+              organizer actually declared. A reviewer checking whether a level is
+              right needs the inputs, not only the conclusion -- the same reason
+              the Ministry now opens documents rather than reading their names. */}
+          <div data-region="assessment-answers" style={{ marginBlockEnd: 28 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+                <L en={AA.titleEn} ar={AA.titleAr} />
+              </h2>
+              {assessment ? (
+                <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                  <L en={`${AA.versionLabelEn} ${assessment.toolVersion}`} ar={`${AA.versionLabelAr} ${assessment.toolVersion}`} />
+                </span>
+              ) : null}
+            </div>
+            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
+              <L en={AA.introEn} ar={AA.introAr} />
+            </p>
+            {!assessment ? (
+              <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
+                <L en={AA.noneEn} ar={AA.noneAr} />
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
+                  {DOMAINS.map((d, i) => {
+                    const score = assessment.answers[i];
+                    const chosen = typeof score === 'number' ? d.options.find((o) => o.score === score) : undefined;
+                    return (
+                      <div key={d.number} style={{ background: 'var(--bg)', padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 220 }}>
+                            <span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 18 }}>{d.number}</span>
+                            <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
+                              <L en={d.en} ar={d.ar} />
+                            </span>
+                          </span>
+                          <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 12, fontVariantNumeric: 'tabular-nums' }}>
+                            {typeof score === 'number' ? `${score} / 2` : <L en={AA.unsetEn} ar={AA.unsetAr} />}
+                          </span>
+                        </div>
+                        {chosen ? (
+                          <div style={{ marginBlockStart: 6, marginInlineStart: 30, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
+                            <L en={chosen.en} ar={chosen.ar} />
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
+                  <L en={AA.inputsLabelEn} ar={AA.inputsLabelAr} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {Object.entries(AA.inputs).map(([key, label]) => {
+                    const raw = (assessment.inputs as unknown as Record<string, unknown>)[key];
+                    const value =
+                      raw === null || raw === undefined
+                        ? null
+                        : Array.isArray(raw)
+                          ? raw.join(', ')
+                          : typeof raw === 'boolean'
+                            ? null
+                            : String(raw);
+                    return (
+                      <div key={key} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ fontSize: '13.5px' }}>
+                          <L en={label.en} ar={label.ar} />
+                        </span>
+                        <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                          {typeof raw === 'boolean' ? (
+                            <L en={raw ? AA.yesEn : AA.noEn} ar={raw ? AA.yesAr : AA.noAr} />
+                          ) : value === null || value === '' ? (
+                            <L en={AA.unsetEn} ar={AA.unsetAr} />
+                          ) : (
+                            value
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
 
           {/* The plan the outcome concerns -- the OTHER panel the same Slice 6
               exception hid. Read-only; nothing the Ministry can edit. */}
@@ -397,7 +545,15 @@ export default async function SubmissionReviewPage({
                   })}
                 </div>
                 {plan.mode === 'attach' && plan.attachedFile ? (
-                  <div style={{ padding: '10px 14px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 16, fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>{plan.attachedFile}</div>
+                  <div style={{ padding: '10px 14px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 16 }}>
+                    <div style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>{plan.attachedFile}</div>
+                    <DocumentViewer
+                      href={`/api/documents/${id}/${PLAN_DOC_KEY}`}
+                      hasFile={plan.attachedHasFile}
+                      contentType={null}
+                      label="the attached plan"
+                    />
+                  </div>
                 ) : null}
                 {review.level === 3 && director ? (
                   <div style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 16, fontSize: '12.5px', lineHeight: 1.6, maxWidth: '78ch' }}>

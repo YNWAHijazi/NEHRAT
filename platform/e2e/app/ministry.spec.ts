@@ -9,13 +9,10 @@
  *    it with an effective date;
  *  - the Order reviewer shows suspended while the lane is off.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
-}
 
 test.describe('the outcome gate', () => {
   // One serial flow: the same record is asserted gated, then unblocked step by
@@ -28,7 +25,7 @@ test.describe('the outcome gate', () => {
   test('satisfied is gated on attestations and findings together, and opens only when both clear', async ({ page }) => {
     test.setTimeout(120_000);
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
 
     // THE PLAN IS READABLE ON THE REVIEW SCREEN. For a slice it was not: the reviewer
     // recorded outcomes about a document this screen never showed, and the recorded
@@ -91,7 +88,7 @@ test.describe('the outcome gate', () => {
 
     // The inspector records the findings -- an inspector act, not an outcome.
     await signInAs(page, 'test_inspector');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     // And has NO attest control anywhere: recording an attestation is the reviewer's.
     await expect(page.locator('[data-region="attestations"] form')).toHaveCount(0);
     const blocking = page.locator('[data-region="inspections"] > div').first();
@@ -101,7 +98,7 @@ test.describe('the outcome gate', () => {
 
     // Both classes clear: the gate opens for the reviewer.
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     // Generous under full-suite dev-compile load; the state itself is instant. The
     // review screen now compiles the plan and attestation panels too, and 15s was
     // measured too tight on the full run.
@@ -129,7 +126,7 @@ test.describe('the outcome gate', () => {
   test('below Level 3 the attestation panel is the explicit empty state, not nothing', async ({ page }) => {
     await signInAs(page, 'test_moph');
     // EV-0455, the Level 2 filed-and-unreviewed submission.
-    await page.goto('/ministry/submissions/EV-0455');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0455');
     const empty = page.locator('[data-region="attestations-empty"]');
     await expect(empty).toContainText('No attestation items apply to this submission.');
     await expect(empty).toContainText('Level 2');
@@ -140,7 +137,7 @@ test.describe('the outcome gate', () => {
 test.describe('internal states and determinations', () => {
   test('the queue distinguishes grey workflow states from recorded outcomes', async ({ page }) => {
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/queue');
+    await gotoRidingRestarts(page, '/ministry/queue');
     const queue = page.locator('[data-region="queue"]');
     // All three seeded filings now carry recorded determinations, matching the
     // reference: EV-0362 revision, EV-0244 satisfied, EV-0301 incomplete.
@@ -158,7 +155,7 @@ test.describe('internal states and determinations', () => {
     // -- so EV-0418 stays unfiled and this fifth event carries the state instead.
     await expect(queue).toContainText('In queue');
 
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     const state = page.locator('[data-region="review-state"]');
     await expect(state).toBeVisible();
     await expect(state).not.toContainText(/approved|rejected/i);
@@ -172,7 +169,7 @@ test.describe('the pinned vocabulary', () => {
   // rides here until the prototype's glossary defect is corrected in Pass C.
   test('the outcome card and the limit sentences read verbatim, in both languages', async ({ page }) => {
     await signInAs(page, 'test_moph');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     const outcome = page.locator('[data-region="outcome"]');
     await expect(outcome).toContainText('Record an outcome');
     await expect(outcome).toContainText('Three outcomes exist. Nothing else is a determination.');
@@ -188,7 +185,7 @@ test.describe('the pinned vocabulary', () => {
 
   test('the cardiac unset state reads verbatim, in both languages', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
-    await page.goto('/ministry/admin/cardiac');
+    await gotoRidingRestarts(page, '/ministry/admin/cardiac');
     const powersRegion = page.locator('[data-region="powers"]');
     await expect(powersRegion).toContainText('Not set — nothing is in force under this value');
     await expect(powersRegion).toContainText('غير محددة — لا يسري شيء بموجب هذه القيمة');
@@ -202,7 +199,7 @@ test.describe('the organizer reads the same determination', () => {
   // dashboard and event screen show -- never a stale seeded presentation string.
   test('the dashboard state and the event rail carry the recorded outcome', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await page.goto('/dashboard');
+    await gotoRidingRestarts(page, '/dashboard');
     const body = page.locator('body');
     // EV-0362 carries a recorded revision; the seeded 'Information required' must not show.
     await expect(body).toContainText('Additional information or revision required');
@@ -212,7 +209,7 @@ test.describe('the organizer reads the same determination', () => {
     // EV-0244 (Tripoli Marathon) carries a recorded satisfied outcome; EV-0301
     // (Saida Night Run) carries incomplete. Both are the organizer's own records.
     await expect(body).toContainText('Health and medical preparedness requirements satisfied');
-    await page.goto('/events/EV-0362');
+    await gotoRidingRestarts(page, '/events/EV-0362');
     // Stage 5 of the rail is the outcome, done, in the compliance form's wording.
     await expect(page.locator('body')).toContainText('Additional information or revision required');
   });
@@ -221,7 +218,7 @@ test.describe('the organizer reads the same determination', () => {
 test.describe('cardiac configuration', () => {
   test('an unset value is a first-class answer, and publishing records the effective date', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
-    await page.goto('/ministry/admin/cardiac');
+    await gotoRidingRestarts(page, '/ministry/admin/cardiac');
     const body = page.locator('body');
     await expect(body).toContainText('Not set — nothing is in force under this value');
     await expect(body).toContainText('provisional figure');
@@ -239,7 +236,7 @@ test.describe('cardiac configuration', () => {
     await expect(power6).toContainText('30 · effective 2026-10-01');
 
     // The facility lane now computes due dates from the published timeline.
-    await page.goto('/ministry/facilities');
+    await gotoRidingRestarts(page, '/ministry/facilities');
     await expect(page.locator('body')).toContainText('Due dates run 30 days');
   });
 });
@@ -247,7 +244,7 @@ test.describe('cardiac configuration', () => {
 test.describe('the Order lane and its reviewer', () => {
   test('the lane off shows the Order reviewer suspended, not active', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
-    await page.goto('/ministry/admin/users');
+    await gotoRidingRestarts(page, '/ministry/admin/users');
     const users = page.locator('[data-region="users"]');
     await expect(users).toContainText('Dr Y. Salameh');
     await expect(users.locator('div', { hasText: 'Dr Y. Salameh' }).last()).toContainText('Suspended — the lane is off');
@@ -257,7 +254,7 @@ test.describe('the Order lane and its reviewer', () => {
 test.describe('platform activity stays counts only', () => {
   test('no organizer, event or facility is named on the activity screen', async ({ page }) => {
     await signInAs(page, 'test_owner');
-    await page.goto('/platform/activity');
+    await gotoRidingRestarts(page, '/platform/activity');
     const body = page.locator('body');
     await expect(body).toContainText('Counts only');
     // The demonstration records' names must not leak into the counts surface.

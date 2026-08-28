@@ -744,6 +744,29 @@ function migrate(d: DatabaseSync): void {
   addColumn('facility_device_updates', 'reason', 'reason TEXT');
   addColumn('organizations', 'returned_at', 'returned_at TEXT');
 
+  // THE PLATFORM STORES THE FILE (reviewer ruling, 2026-08-28). Attachments were a
+  // name and a date; a reviewer who cannot open the route map cannot review the
+  // route. Bytes live in the row: one store, one backup, no orphaned files on a
+  // disk the database knows nothing about. The size ceiling is configuration, in
+  // lib/rules/data/uploads.json, and the accepted types are an allow-list -- see
+  // lib/rules/uploads.ts for why the served type never comes from the upload.
+  //
+  // NULL bytes are legitimate and permanent: every demonstration attachment seeded
+  // before this decision is a name and a date, and the screen says so rather than
+  // offering a link to nothing.
+  addColumn('event_attachments', 'content_type', 'content_type TEXT');
+  addColumn('event_attachments', 'byte_size', 'byte_size INTEGER');
+  addColumn('event_attachments', 'bytes', 'bytes BLOB');
+  addColumn('plans', 'attached_content_type', 'attached_content_type TEXT');
+  addColumn('plans', 'attached_byte_size', 'attached_byte_size INTEGER');
+  addColumn('plans', 'attached_bytes', 'attached_bytes BLOB');
+  // The counterparty lane stores its files on the same terms. Leaving one name-only
+  // lane while the screens say the platform stores documents would be the same shape
+  // of defect as a promise with no delivery behind it.
+  addColumn('shared_documents', 'content_type', 'content_type TEXT');
+  addColumn('shared_documents', 'byte_size', 'byte_size INTEGER');
+  addColumn('shared_documents', 'bytes', 'bytes BLOB');
+
   // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.
   const orgSql = (d
     .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'organizations'`)

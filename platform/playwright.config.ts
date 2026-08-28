@@ -87,7 +87,7 @@ export default defineConfig({
           {
             name: 'app',
             testMatch: /app\/.*\.spec\.ts/,
-            use: { baseURL: BASE_URL },
+            use: { baseURL: BASE_URL, navigationTimeout: 150_000 },
             // Same known, logged cause as the reference project: the dev server's
             // memory watchdog restarts it once as a long run accumulates, and the
             // test in flight dies on a dropped connection. Two belts here:
@@ -101,7 +101,24 @@ export default defineConfig({
             // is half-applied; that hard failure is correct and demands a re-run
             // rather than being papered over.
             timeout: 180_000,
+            // The 60s default is a COMPILATION budget, and it was the wrong size for
+            // this project: a signed-out sweep hitting /facilities/new for the first
+            // time, while three other workers each compile a route of their own, is
+            // not a slow product -- it is `next dev` doing four first-compiles at
+            // once. The reference project was given the same room for the same
+            // reason. Assertions keep the 15s expect timeout, so an absent region
+            // still fails fast; only NAVIGATION gets the longer rope.
+            expect: { timeout: 15_000 },
             retries: 1,
+            // AND SERIALISED WITHIN EACH FILE, for the reason the reference project
+            // was serialised: a green run must mean green. Under fullyParallel the
+            // long mutating journeys -- create, assess, attach, declare, file,
+            // determine -- ran four at a time against ONE dev server, and the loser
+            // of that contention read a page mid-compile. Every such failure passed
+            // in isolation and on retry, which is the signature of load, not of a
+            // defect. Files still run in parallel across workers; only the journeys
+            // inside a file stop competing with each other.
+            fullyParallel: false,
           },
         ]
       : []),

@@ -34,7 +34,8 @@ export type SurfaceKey =
   | 'organizerDashboard'
   | 'emsProviderDashboard'
   | 'medicalDirectorDashboard'
-  | 'notificationsInbox';
+  | 'notificationsInbox'
+  | 'attachedDocument';
 
 export const SURFACE_DEMONSTRATION_POLICY: Record<SurfaceKey, DemonstrationPolicy> = {
   // SYMMETRIC ISOLATION (Slice 6 ruling): every authenticated surface follows the
@@ -55,6 +56,10 @@ export const SURFACE_DEMONSTRATION_POLICY: Record<SurfaceKey, DemonstrationPolic
   emsProviderDashboard: 'matchSession',
   medicalDirectorDashboard: 'matchSession',
   notificationsInbox: 'matchSession',
+  // The bytes follow the record. A real reviewer opening a demonstration route map
+  // would be reading fiction as evidence; a demonstration reviewer opening a real
+  // one would be reading a real organizer's document out of a showcase.
+  attachedDocument: 'matchSession',
 };
 
 export interface SessionContext {

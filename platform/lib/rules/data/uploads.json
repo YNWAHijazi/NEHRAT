@@ -1,0 +1,28 @@
+{
+  "$comment": "Document storage. The Ministry reviewer opens the file itself, not a name -- the deferred storage decision is taken (reviewer ruling, 2026-08-28). Limits and accepted types are configuration, not copy: nothing here is rendered as a fixed number in a sentence.",
+  "maxBytes": 20971520,
+  "maxBytesLabel": "20 MB",
+  "accepted": [
+    { "mime": "application/pdf", "ext": ".pdf", "inline": "frame" },
+    { "mime": "image/png", "ext": ".png", "inline": "image" },
+    { "mime": "image/jpeg", "ext": ".jpg", "inline": "image" },
+    { "mime": "image/webp", "ext": ".webp", "inline": "image" },
+    { "mime": "image/gif", "ext": ".gif", "inline": "image" }
+  ],
+  "copy": {
+    "acceptHintEn": "PDF or image, up to {max}. The Ministry opens the file itself.",
+    "acceptHintAr": "ملف PDF أو صورة، حتى ⁦{max}⁩. تفتح الوزارة الملف نفسه.",
+    "tooLargeEn": "That file is larger than {max}. Attach a smaller file.",
+    "tooLargeAr": "حجم هذا الملف أكبر من ⁦{max}⁩. أرفقوا ملفاً أصغر.",
+    "wrongTypeEn": "That file type is not accepted. Attach a PDF or an image.",
+    "wrongTypeAr": "نوع هذا الملف غير مقبول. أرفقوا ملف PDF أو صورة.",
+    "emptyEn": "That file is empty.",
+    "emptyAr": "هذا الملف فارغ.",
+    "openEn": "Open",
+    "openAr": "فتح",
+    "viewerEn": "Shown below. Open in a new tab for the full document.",
+    "viewerAr": "معروض أدناه. افتحوه في لسان جديد لقراءة المستند كاملاً.",
+    "noBytesEn": "Demonstration record: a name and a date, with no file stored behind it. A real filing stores the file and the Ministry opens it here.",
+    "noBytesAr": "سجل توضيحي: اسم وتاريخ دون ملف مخزَّن خلفه. أما التقديم الحقيقي فيخزّن الملف وتفتحه الوزارة هنا."
+  }
+}

@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 import { test, expect } from '@playwright/test';
+import { gotoRidingRestarts } from '../helpers/resilient';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import {
@@ -231,14 +232,14 @@ for (const mapping of VISUAL_MANIFEST) {
       }
 
       if (mapping.signInAs) {
-        await page.goto(new URL('/signin', base).href);
+        await gotoRidingRestarts(page, new URL('/signin', base).href);
         await page
           .locator(`form:has(input[value="${mapping.signInAs}"]) button`)
           .first()
           .click();
         await page.waitForURL((url) => !url.pathname.includes('/signin'));
       }
-      await page.goto(new URL(mapping.builtRoute, base).href);
+      await gotoRidingRestarts(page, new URL(mapping.builtRoute, base).href);
       if (lang === 'ar') {
         // The built app switches language by its own control; it must land dir=rtl.
         await page.getByRole('button', { name: 'العربية' }).first().click();
@@ -292,7 +293,7 @@ for (const mapping of VISUAL_MANIFEST) {
 
         if (region.mode === 'expectedDivergent') {
           // Earlier compare regions leave the browser on the reference; come back.
-          await page.goto(new URL(mapping.builtRoute, base).href);
+          await gotoRidingRestarts(page, new URL(mapping.builtRoute, base).href);
           await expect(
             page.locator(region.builtSelector ?? 'body'),
             `${tag}: the expected-divergent region is missing from the built page`,
@@ -302,7 +303,7 @@ for (const mapping of VISUAL_MANIFEST) {
         }
 
         // compare
-        await page.goto(new URL(mapping.builtRoute, base).href);
+        await gotoRidingRestarts(page, new URL(mapping.builtRoute, base).href);
         await expect
           .poll(async () => page.evaluate(() => document.documentElement.dir))
           .toBe(lang === 'ar' ? 'rtl' : 'ltr');

@@ -14,7 +14,8 @@
     "test:e2e": "npm run preflight && playwright test --project=reference && playwright test --project=app",
     "e2e:install": "playwright install chromium",
     "dev:e2e": "rm -f var/e2e.db* && next dev",
-    "preflight": "node scripts/preflight.mjs"
+    "preflight": "node scripts/preflight.mjs",
+    "db:reseed": "npx tsx scripts/reseed-dev.ts"
   },
   "dependencies": {
     "next": "^15.5.0",

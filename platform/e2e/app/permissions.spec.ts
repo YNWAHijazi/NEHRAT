@@ -14,6 +14,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { signInAs } from '../helpers/signin';
 
 /** The demonstration logins from SPEC 3b -- the roles the Ministry walks the platform with. */
 const LOGINS = {
@@ -26,16 +27,6 @@ const LOGINS = {
   admin: 'test_moph_admin',
 } as const;
 
-/**
- * Signs in through the demonstration-login buttons on /signin. Every role now has a
- * landing route of its own (landingRouteFor), so this waits for any path off /signin
- * rather than for the organizer dashboard specifically.
- */
-async function signInAs(page: Page, login: string): Promise<void> {
-  await page.goto('/signin');
-  await page.locator(`form:has(input[value="${login}"]) button`).first().click();
-  await page.waitForURL((url) => !url.pathname.includes('/signin') || url.search.includes('notice='));
-}
 
 /**
  * Asserts a navigation was refused: not-found, forbidden, or bounced to sign-in.
@@ -84,7 +75,7 @@ test.describe('the organizer surface belongs to the organizer', () => {
 
   test('the Start a service menu does not exist for a Ministry role', async ({ page }) => {
     await signInAs(page, LOGINS.admin);
-    await page.goto('/ministry');
+    await gotoRidingRestarts(page, '/ministry');
     // Not hidden -- unreachable. The menu lives only on the surface they are refused.
     await expect(page.locator('[data-svc-menu]')).toHaveCount(0);
     await expect(page.locator('body')).not.toContainText('Start a service');
@@ -127,7 +118,7 @@ test.describe('Ministry tiers', () => {
     // The inspector reaches the queue and a submission, and the outcome block is
     // ABSENT there -- not greyed (rule 10). Admin surfaces refuse outright.
     await signInAs(page, 'test_inspector');
-    await page.goto('/ministry/submissions/EV-0362');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     await expect(page.locator('body')).toContainText(/Inspections|التفتيشات/);
     await expect(page.locator('[data-region="outcome"]')).toHaveCount(0);
     await expectRefusal(page, '/ministry/admin/cardiac', /cardiac-arrest configuration|إعدادات الجاهزية/i);
@@ -147,9 +138,9 @@ test.describe('an organizer never sees another organizer\'s records', () => {
     // EV-0001 belongs to no demonstration organizer. Ownership refusal must be
     // indistinguishable from non-existence -- a 403 here and a 404 there would let an
     // attacker map which ids exist.
-    const foreign = await page.goto('/events/EV-0001');
+    const foreign = await gotoRidingRestarts(page, '/events/EV-0001');
     const foreignStatus = foreign?.status() ?? 0;
-    const missing = await page.goto('/events/EV-9999');
+    const missing = await gotoRidingRestarts(page, '/events/EV-9999');
     const missingStatus = missing?.status() ?? 0;
     expect(foreignStatus).toBe(missingStatus);
     expect([401, 403, 404]).toContain(foreignStatus);
@@ -161,9 +152,9 @@ test.describe('an organizer never sees another organizer\'s records', () => {
     // must all be indistinguishable between the two.
     await signInAs(page, LOGINS.organizer);
     for (const suffix of ['', '/assessment', '/change']) {
-      const foreign = await page.goto(`/venues/VN-0001${suffix}`);
+      const foreign = await gotoRidingRestarts(page, `/venues/VN-0001${suffix}`);
       const foreignStatus = foreign?.status() ?? 0;
-      const missing = await page.goto(`/venues/VN-9999${suffix}`);
+      const missing = await gotoRidingRestarts(page, `/venues/VN-9999${suffix}`);
       const missingStatus = missing?.status() ?? 0;
       expect(foreignStatus, `/venues/VN-0001${suffix}`).toBe(missingStatus);
       expect([401, 403, 404]).toContain(foreignStatus);
@@ -196,7 +187,7 @@ test.describe('nominated roles see only what they were named in', () => {
     await signInAs(page, LOGINS.response);
     await expectRefusal(page, '/events/EV-0362/declaration', /Readiness Declaration|إقرار جاهزية/i);
     await signInAs(page, LOGINS.ems);
-    const r = await page.goto('/first-response/readiness');
+    const r = await gotoRidingRestarts(page, '/first-response/readiness');
     const refused = page.url().includes('/signin') || page.url().includes('/dashboard') || [401, 403, 404].includes(r?.status() ?? 0);
     expect(refused, 'the EMS provider account reached the first-response surface').toBe(true);
   });
@@ -207,7 +198,7 @@ test.describe('signed out', () => {
     // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
     // vacuously. Extend this list as slices land.
     for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/first-response/readiness', '/first-response/reports/new', '/events/EV-0362/declaration', '/events/EV-0362/governance', '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/admin/cardiac', '/platform/admin', '/platform/activity']) {
-      const response = await page.goto(path);
+      const response = await gotoRidingRestarts(page, path);
       const refused =
         page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);
       expect(refused, `${path} served content to a signed-out visitor`).toBe(true);
