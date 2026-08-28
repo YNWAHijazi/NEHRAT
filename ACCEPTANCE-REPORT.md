@@ -1,7 +1,10 @@
 # National Health and Medical Readiness — acceptance report
 
 **Ministry of Public Health, Lebanon · Event Health Readiness platform**
-Prepared 28 August 2026.
+Version 1.0 · 29 August 2026 · describes build `6d81562`.
+
+Every figure below is a statement about that build. Cite the version and the build
+together, or the figures mean nothing.
 
 This report answers one question: **is the platform finished enough for the Ministry to
 use, and where is it not?** It is written to be read straight through. Where something
@@ -56,9 +59,18 @@ Everything else in this report is detail behind that answer.
 
 **True.**
 
-Forty-one obligations were taken from the instruments and re-audited against the code as it
-stands today, not against notes. Each names the screen that discharges it and the actor
-who acts there. **All forty-one have a screen that exists.**
+Thirty-seven clauses were taken from the two instruments and their annexes and re-audited
+against the code as it stands today, not against notes. Each names the screen that
+discharges it and the actor who acts there.
+
+**Thirty-five are discharged. Two are partly discharged. None is absent.**
+
+Both partial clauses are the same shape — a power the instrument gives the Ministry rather
+than an obligation it places on anyone, with the missing limb being a publishing surface
+nobody has specified. Protocol §9 lists nine portal capabilities and eight are built; the
+ninth, national surveillance and quality-improvement reporting, has no screen. Protocol
+§14 says the Ministry *may* publish aggregated national findings; nothing prevents it and
+nothing yet performs it. Neither blocks a filing, a review or a determination.
 
 The counts the instruments fix are pinned by tests, so a screen cannot quietly lose an
 item: sixteen plan sections, eleven major-incident items, nine assessment domains, ten
@@ -113,7 +125,7 @@ most useful thing in this report for anyone maintaining the platform afterwards.
 
 ## 3. Pass A — every obligation and where it lives
 
-Forty-one rows, audited against the current code. Each is discharged by a screen that exists.
+Thirty-seven clauses, audited against the current code. Two are marked partial above; the rest are discharged.
 
 | Obligation | Screen | Actor |
 |---|---|---|
@@ -276,6 +288,48 @@ offers a print without something to print fails the build.
   which no account existed, while the screen named that role as the owner. The platform
   now reports, on the administrator's own console, any power the permission matrix
   assigns that no active account holds.
+
+### The closing example: the guard that passed without checking
+
+Everything above was found by a guard, or by a person clicking. This one was found by the
+defect happening *to the guard built to catch it*, and it is the most instructive failure
+in the build.
+
+`tests/rules-wiring.test.ts` exists for exactly one purpose: to fail when a rule in
+`lib/rules` has no production caller. It was the first member of this family ever found,
+and it has caught several since.
+
+A new export named `DEFERRED` was added — the record of what is deliberately not built.
+Nothing called it. **The guard passed.**
+
+It passed because it matches on plain text, and an unrelated file, `lib/rules/uploads.ts`,
+carried the sentence *"THE DEFERRED DECISION IS TAKEN"* in a docstring. A comment in a
+file with no connection to the rule satisfied the check that the rule was wired.
+
+Three things make this worth recording rather than fixing quietly:
+
+1. **The looseness was already written down.** The guard's own header said: *"It also
+   matches on plain text, so a rule named in a comment counts as a use. Comments naming a
+   rule you have just deleted will keep it looking wired."* It was recorded as a known
+   limitation, in the guard's own words, and read by nobody as a live risk — because until
+   an export name collided with English prose, it wasn't one.
+
+2. **A documented limitation is not a mitigated one.** Writing a hole down does not close
+   it. It converts the hole into something a reader is expected to remember, and the
+   reader was me, and I did not.
+
+3. **The failure was silent and correct-looking.** A passing wiring test is what a correctly
+   wired rule looks like. There was no output to read, no state to inspect, nothing that
+   distinguished this from success — which is the definition of the family and the reason
+   it keeps recurring in different clothes.
+
+Comment lines are skipped now: a rule named only in prose is documented, not wired. The
+tightened guard flagged `DEFERRED` on the first run, which is how it came to be rendered
+on the administrator's Configuration tab instead of sitting in a file nothing read.
+
+What remains loose is recorded in the guard, again — a trailing comment on a line of real
+code still counts, and an aliased import is still invisible. Both are narrower than what
+they replace. **Both should be read as risks rather than as notes.**
 
 ---
 
