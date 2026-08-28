@@ -1,0 +1,179 @@
+{
+  "$comment": "Slice 0, the public landing. Copy taken from handoff 5/pages/Event Health Readiness.dc.html -- the reviewer prototype -- rather than written here. Where the prototype and a source document differ the source wins and the difference is recorded, as everywhere else in this build.",
+  "heroEn": "The official national mechanism for health and medical preparedness at events and in designated facilities in Lebanon.",
+  "heroAr": "الآلية الوطنية الرسمية للتأهب الصحي والطبي في الفعاليات وفي المنشآت المحددة في لبنان.",
+  "servicesIntroEn": "One platform carries two regulatory instruments: health and medical preparedness at mass-gathering events, and cardiac-arrest readiness in designated facilities. They share your organization record and your registered assets.",
+  "servicesIntroAr": "تحمل منصة واحدة صكّين تنظيميين: التأهب الصحي والطبي في الفعاليات الحاشدة، والجاهزية لتوقف القلب في المنشآت المحددة. ويتشاركان سجل مؤسستكم وأصولكم المسجّلة.",
+  "regulatedEn": "Regulated processes",
+  "regulatedAr": "العمليات الخاضعة للتنظيم",
+  "regulatedNoteEn": "All three run on one account. Each creates standing obligations of its own.",
+  "regulatedNoteAr": "تعمل الثلاث على حساب واحد. وينشئ كلٌّ منها موجبات مستمرة خاصة به.",
+  "meetEn": "Where the two instruments meet",
+  "meetAr": "حيث يلتقي الصكّان",
+  "meetBodyEn": "A stadium licensed for 1,200 that hosts weekly matches is a covered facility and a recurring venue at once. That is the ordinary case, not an unusual one.",
+  "meetBodyAr": "الملعب المرخص لـ 1,200 شخص والذي يستضيف مباريات أسبوعية هو منشأة مشمولة وموقع متكرر في آن واحد. وهذه هي الحالة الاعتيادية لا الاستثنائية.",
+  "toolsEn": "Public tools",
+  "toolsAr": "الأدوات العامة",
+  "toolsNoteEn": "Open to anyone. No account, and using them creates no obligation.",
+  "toolsNoteAr": "متاحة للجميع. من دون حساب، ولا ينشئ استخدامها أي موجب.",
+  "levelTitleEn": "How an event level is determined",
+  "levelTitleAr": "كيف يُحدَّد مستوى الفعالية",
+  "levelScopeEn": "Mass-gathering events only",
+  "levelScopeAr": "الفعاليات الحاشدة فقط",
+  "levelBodyEn": "Nine domains are scored 0 to 2, giving a total out of 18. Certain event types also carry a minimum level that applies no matter how low the score. The final level is whichever of the two is higher.",
+  "levelBodyAr": "تُقيَّم تسعة نطاقات من 0 إلى 2، فيبلغ المجموع 18. كما تحمل أنواع معيّنة من الفعاليات حداً أدنى للمستوى يسري مهما انخفضت النتيجة. والمستوى النهائي هو الأعلى من الاثنين.",
+  "levelFacilityNoteEn": "Facilities are not scored. They classify by category under the cardiac-arrest instrument.",
+  "levelFacilityNoteAr": "لا تُقيَّم المنشآت بالنتيجة. بل تُصنَّف حسب الفئة بموجب صك الجاهزية لتوقف القلب.",
+  "jurisdictionEn": "This platform records health and medical preparedness. It does not authorize events. Authorization remains with the legally competent authority, and nothing here replaces any other permit or approval required under Lebanese law.",
+  "jurisdictionAr": "تسجّل هذه المنصة التأهب الصحي والطبي. وهي لا ترخّص الفعاليات. ويبقى الترخيص من صلاحية السلطة المختصة قانوناً، ولا يحل أي شيء هنا محل أي إذن أو موافقة أخرى مطلوبة بموجب القانون اللبناني.",
+  "services": [
+    {
+      "k": "certify",
+      "en": "Certify an event",
+      "ar": "اعتماد فعالية",
+      "descEn": "Complete the assessment, meet the requirements your level sets, and file before your deadline.",
+      "descAr": "استكمال التقييم واستيفاء متطلبات مستواكم والتقديم قبل انتهاء المهلة."
+    },
+    {
+      "k": "venue",
+      "en": "Register a recurring venue",
+      "ar": "تسجيل موقع فعاليات متكرر",
+      "descEn": "A venue licensed for 1,000 persons or more that regularly hosts organized events is classified annually.",
+      "descAr": "يُصنَّف سنوياً الموقع المرخص لـ 1,000 شخص أو أكثر ويستضيف بانتظام فعاليات منظّمة."
+    },
+    {
+      "k": "facility",
+      "en": "Register a facility",
+      "ar": "تسجيل منشأة",
+      "descEn": "Covered facilities register the facility, its coordinator and each defibrillator, and keep the response plan current.",
+      "descAr": "تسجّل المنشآت المشمولة المنشأة ومنسّقها وكل جهاز إزالة رجفان، وتحفظ خطة الاستجابة محدّثة."
+    }
+  ],
+  "criteria": [
+    {
+      "en": "The event requires authorization, notification or approval from the Ministry of Interior and Municipalities, a municipality, a Governor, a District Commissioner or another competent authority, and involves an organized sporting event, physical-activity event, performance, festival, exhibition, ceremony or other recreational event",
+      "ar": "تتطلب الفعالية ترخيصاً أو إبلاغاً أو موافقة من وزارة الداخلية والبلديات أو من بلدية أو محافظ أو قائمقام أو أي سلطة مختصة أخرى، وتنطوي على فعالية رياضية منظّمة أو فعالية نشاط بدني أو عرض أو مهرجان أو معرض أو حفل رسمي أو أي فعالية ترفيهية أخرى",
+      "shortEn": "Requires authorization from a competent authority",
+      "shortAr": "تتطلب ترخيصاً من سلطة مختصة"
+    },
+    {
+      "en": "Expected maximum simultaneous attendance is 1,000 persons or more",
+      "ar": "الحضور المتزامن الأقصى المتوقع 1,000 شخص أو أكثر",
+      "shortEn": "Attendance of 1,000 or more",
+      "shortAr": "حضور 1,000 أو أكثر"
+    },
+    {
+      "en": "The event is an organized sporting competition or mass-participation physical activity conducted outside routine facility operations, requiring dedicated medical, EMS, traffic, security or emergency arrangements, using a temporary road, trail, mountain, water, dispersed or multi-site course, or appearing in the minimum event level table",
+      "ar": "الفعالية منافسة رياضية منظّمة أو نشاط بدني بمشاركة جماهيرية يُجرى خارج التشغيل الاعتيادي للمرفق، ويستلزم ترتيبات طبية أو إسعافية أو مرورية أو أمنية أو طارئة مخصصة، ويستخدم مساراً مؤقتاً على الطرق أو الدروب أو الجبال أو المياه أو مساراً متفرقاً أو متعدد المواقع، أو يظهر في جدول الحد الأدنى لمستوى الفعالية",
+      "shortEn": "Organized competition or mass-participation activity",
+      "shortAr": "منافسة منظّمة أو نشاط بمشاركة جماهيرية"
+    },
+    {
+      "en": "The event takes place at a recurring event venue that regularly hosts organized events and has an approved or licensed capacity of 1,000 persons or more",
+      "ar": "تُقام الفعالية في موقع فعاليات متكرر يستضيف بانتظام فعاليات منظّمة وله سعة معتمدة أو مرخصة تبلغ 1,000 شخص أو أكثر",
+      "shortEn": "Recurring event venue, capacity 1,000 or more",
+      "shortAr": "موقع فعاليات متكرر بسعة 1,000 أو أكثر"
+    },
+    {
+      "en": "Any previous edition involved a cardiac arrest, death, major-incident activation, or interruption or termination for medical reasons",
+      "ar": "انطوت أي نسخة سابقة على توقف قلب أو وفاة أو تنشيط استجابة لحادث جسيم أو توقف الفعالية أو إنهائها لأسباب طبية",
+      "shortEn": "Previous edition involved a serious incident",
+      "shortAr": "انطوت نسخة سابقة على حادث جسيم"
+    },
+    {
+      "en": "The Ministry has designated the event, or another competent authority has referred it, because of an identifiable health or medical risk",
+      "ar": "حدّدت الوزارة الفعالية، أو أحالتها سلطة مختصة أخرى، بسبب خطر صحي أو طبي قائم",
+      "shortEn": "Designated by the Ministry or referred",
+      "shortAr": "محددة من الوزارة أو مُحالة"
+    }
+  ],
+  "venueConditions": [
+    {
+      "k": "vHosts",
+      "en": "The venue regularly hosts organized events",
+      "ar": "يستضيف الموقع بانتظام فعاليات منظّمة"
+    },
+    {
+      "k": "vCap",
+      "en": "Approved or licensed capacity of 1,000 persons or more",
+      "ar": "سعة معتمدة أو مرخصة تبلغ 1,000 شخص أو أكثر"
+    },
+    {
+      "k": "vSport",
+      "en": "The venue is a sports, athletic or aquatic facility",
+      "ar": "الموقع منشأة رياضية أو للألعاب أو مائية"
+    }
+  ],
+  "facilityCategories": [
+    {
+      "en": "Sports and aquatic facilities — gyms, fitness centres, sports clubs, stadiums, athletic facilities",
+      "ar": "المنشآت الرياضية والمائية — الصالات ومراكز اللياقة والأندية الرياضية والملاعب والمنشآت الرياضية",
+      "state": "inforce",
+      "ruleEn": "A defibrillator is required, together with the continuing obligations that go with it.",
+      "ruleAr": "يُطلب جهاز إزالة رجفان، مع الموجبات المستمرة المرتبطة به.",
+      "basisEn": "The category carries the requirement on its own. Nothing further has to be decided for it to apply.",
+      "basisAr": "تحمل الفئة المتطلب بنفسها. ولا يلزم البت في شيء آخر ليسري."
+    },
+    {
+      "en": "Schools, universities and educational campuses",
+      "ar": "المدارس والجامعات والحرم التعليمية",
+      "state": "unset",
+      "ruleEn": "A defibrillator is required on the Ministry’s phased schedule.",
+      "ruleAr": "يُطلب جهاز إزالة رجفان وفق الجدول المرحلي الذي تعتمده الوزارة.",
+      "basisEn": "The schedule has not been set. Until the Ministry sets it and activates a phase covering your kind of institution, no requirement is in force against this category.",
+      "basisAr": "لم يُوضع الجدول بعد. وإلى أن تضعه الوزارة وتفعّل مرحلة تشمل نوع مؤسستكم، لا يسري أي متطلب على هذه الفئة.",
+      "missingEn": "The phased schedule",
+      "missingAr": "الجدول المرحلي"
+    },
+    {
+      "en": "Airports, passenger ports, central transport terminals, shopping malls and public venues above a Ministry capacity threshold",
+      "ar": "المطارات وموانئ الركاب ومحطات النقل المركزية والمراكز التجارية والأماكن العامة فوق عتبة سعة تحددها الوزارة",
+      "state": "part",
+      "ruleEn": "Airports, passenger ports and central transport terminals are required. Shopping malls and other public venues are required only above the Ministry capacity threshold.",
+      "ruleAr": "المطارات وموانئ الركاب ومحطات النقل المركزية مطلوبة. أما المراكز التجارية والأماكن العامة الأخرى فمطلوبة فوق عتبة السعة التي تحددها الوزارة فقط.",
+      "basisEn": "If your facility is an airport, passenger port or central transport terminal, the requirement is in force now. If it is a shopping mall or another public venue, whether it applies turns on a figure the Ministry has not published.",
+      "basisAr": "إذا كانت منشأتكم مطاراً أو ميناء ركاب أو محطة نقل مركزية، فالمتطلب سارٍ الآن. وإذا كانت مركزاً تجارياً أو مكاناً عاماً آخر، فسريانه يتوقف على رقم لم تنشره الوزارة.",
+      "missingEn": "The capacity threshold for public venues",
+      "missingAr": "عتبة السعة للأماكن العامة"
+    },
+    {
+      "en": "Remote or difficult-access facilities",
+      "ar": "المنشآت النائية أو صعبة الوصول",
+      "state": "unset",
+      "ruleEn": "A defibrillator is required where the Ministry designates the facility.",
+      "ruleAr": "يُطلب جهاز إزالة رجفان حيث تحدد الوزارة المنشأة.",
+      "basisEn": "This category works by individual designation. Nothing is in force against a facility until the Ministry designates it and notifies the operator.",
+      "basisAr": "تعمل هذه الفئة بالتحديد الفردي. ولا يسري شيء على منشأة قبل أن تحددها الوزارة وتبلّغ المشغّل.",
+      "missingEn": "An individual designation",
+      "missingAr": "تحديد فردي"
+    },
+    {
+      "en": "Fixed facilities where a cardiac arrest has previously been reported and confirmed",
+      "ar": "المنشآت الثابتة التي أُبلغ فيها سابقاً عن توقف قلب وتأكد",
+      "state": "review",
+      "ruleEn": "The facility becomes subject to Ministry review, and the review states what is required.",
+      "ruleAr": "تصبح المنشأة خاضعة لمراجعة الوزارة، وتبيّن المراجعة ما هو مطلوب.",
+      "basisEn": "A confirmed report is the trigger. The requirement comes from the review, not automatically from the category.",
+      "basisAr": "الإبلاغ المؤكد هو المحفّز. ويأتي المتطلب من المراجعة لا تلقائياً من الفئة."
+    },
+    {
+      "en": "Other facilities the Ministry designates",
+      "ar": "منشآت أخرى تحددها الوزارة",
+      "state": "unset",
+      "ruleEn": "Requirements are whatever the designation specifies.",
+      "ruleAr": "المتطلبات هي ما يحدده قرار التحديد.",
+      "basisEn": "This category exists so the Ministry can bring in a facility no other category reaches. Nothing is in force without a designation.",
+      "basisAr": "توجد هذه الفئة لتتمكن الوزارة من إدخال منشأة لا تصلها فئة أخرى. ولا يسري شيء دون تحديد.",
+      "missingEn": "An individual designation",
+      "missingAr": "تحديد فردي"
+    }
+  ],
+  "notRoutinelyEn": [
+    "Routine school, university, workplace, sports-training, healthcare, hospitality, retail, religious, fitness-facility and other ordinary facility operations are not routinely subject unless a criterion above applies. A special event held at such a facility remains subject where a criterion applies.",
+    "Ordinary private family or social gatherings are not routinely subject unless attendance reaches 1,000 persons, the gathering requires authorization by a competent authority, or the Ministry identifies a specific health or medical risk."
+  ],
+  "notRoutinelyAr": [
+    "العمليات الاعتيادية للمدارس والجامعات وأماكن العمل والتدريب الرياضي والرعاية الصحية والضيافة والتجزئة والعبادة ومرافق اللياقة البدنية وغيرها من عمليات المرافق العادية غير خاضعة بصورة اعتيادية إلا إذا انطبق أحد المعايير أعلاه. وتبقى الفعالية الخاصة التي تُقام في مرفق كهذا خاضعة عند انطباق أحد المعايير.",
+    "التجمعات العائلية أو الاجتماعية الخاصة الاعتيادية غير خاضعة بصورة اعتيادية إلا إذا بلغ الحضور 1,000 شخص، أو تطلّب التجمع ترخيصاً من سلطة مختصة، أو حددت الوزارة خطراً صحياً أو طبياً معيناً."
+  ]
+}

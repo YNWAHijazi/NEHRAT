@@ -53,7 +53,9 @@
       "minLevel": 3,
       "attach": true,
       "noteEn": "The certificate or policy itself. The insurance declaration on the compliance form cannot be made without it.",
-      "noteAr": "الشهادة أو البوليصة نفسها. ولا يمكن الإقرار بالتأمين في نموذج الامتثال من دونها."
+      "noteAr": "الشهادة أو البوليصة نفسها. ولا يمكن الإقرار بالتأمين في نموذج الامتثال من دونها.",
+      "effectiveFrom": "2026-08-28",
+      "$commentEffective": "Evidence of insurance became a required attachment on this date; before it, the compliance form asked whether evidence was attached and a typed answer satisfied it. The date is configuration, not the deploy date: a requirement that starts when the software happens to ship is a requirement nobody can plan for."
     },
     {
       "key": "emsDeclarations",
@@ -70,5 +72,6 @@
       "attach": true,
       "optional": true
     }
-  ]
+  ],
+  "$commentEffectiveFrom": "A document with no effectiveFrom has always been required. One with a date applies from that date forward, per the Ministry ruling of 2026-08-29 -- see lib/rules/grandfathering.ts."
 }

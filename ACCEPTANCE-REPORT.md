@@ -27,15 +27,15 @@ certificate they hand to the authorising authority.
 That journey is completed — not visited — by an automated test, twice: once with every
 screen in English and once with every screen in Arabic, from the first request.
 
-**Three things are not finished, and none is in that path:**
+**All fifteen Pass B journeys now complete.** The public landing was the last gap and
+has been built: an overview, three service detail screens, a branching applicability
+check and a lookup screen, all signed out and touching no account.
 
-1. **The public landing is not built.** There is no public applicability check and no
-   public lookup screen. The lookup *endpoint* works and discloses exactly four fields,
-   but a member of the public has no page to use. This is the one Pass B journey that
-   cannot complete.
-2. **The AI assistance layer is not built**, deliberately. It needs its own decision
+**Two things remain unfinished, and neither is in that path:**
+
+1. **The AI assistance layer is not built**, deliberately. It needs its own decision
    about what the assistants may see.
-3. **The Order of Physicians lane is off**, as designed, which is why one of its powers
+2. **The Order of Physicians lane is off**, as designed, which is why one of its powers
    currently has no active account behind it.
 
 Everything else in this report is detail behind that answer.
@@ -46,11 +46,11 @@ Everything else in this report is detail behind that answer.
 
 ### Statement 1 — every obligation is discharged, or deferred with a reason
 
-**True, with one qualification stated below.**
+**True.**
 
-Forty obligations were taken from the instruments and re-audited against the code as it
+Forty-one obligations were taken from the instruments and re-audited against the code as it
 stands today, not against notes. Each names the screen that discharges it and the actor
-who acts there. **All forty have a screen that exists.**
+who acts there. **All forty-one have a screen that exists.**
 
 The counts the instruments fix are pinned by tests, so a screen cannot quietly lose an
 item: sixteen plan sections, eleven major-incident items, nine assessment domains, ten
@@ -58,16 +58,14 @@ minimum conditions, three outcomes and only three, six attestation items, twenty
 requirements at Level 3, six facility categories, the ten configuration powers across
 eleven rows.
 
-**The qualification.** Protocol 3's applicability is discharged in two places — the
-organizer's own check happens inside event creation, and the Ministry's referral lane at
-`/ministry/applicability` records determinations with their reasons. There is **no
-standalone public applicability screen**, because the public landing is unbuilt. If the
-Ministry expects a member of the public to check applicability before creating an
-account, that screen does not yet exist.
+Protocol 3's applicability is now discharged in three places: the public check at
+`/applicability`, which anyone can use without an account; the organizer's own check
+inside event creation; and the Ministry's referral lane, which records determinations
+with their reasons.
 
 ### Statement 2 — every journey completes in both languages
 
-**True for the journeys that are built; one cannot complete because its screens are not.**
+**True. All fifteen complete.**
 
 The distinction that matters: *walking* a journey visits its screens, *completing* it
 means the party finishes what the regulation asks and the record on the other side
@@ -77,11 +75,9 @@ lands elsewhere. No per-string translation check and no per-screen image compari
 see that. Only a completed journey can.
 
 The spine — creation, assessment, filing, determination, certificate — completes in both
-languages. The Ministry administrator's console and the public lookup are completed in
-both languages. The remaining journeys are completed in English by the existing tests.
-
-**Journey 15 (the public, signed out) cannot complete**: two of its three parts have no
-screen.
+languages. So do the public journey in all three of its branches, the platform owner's,
+and the Ministry administrator's. The remaining journeys are completed in English by the
+existing tests.
 
 ### Statement 3 — the prototypes and the build agree
 
@@ -100,7 +96,7 @@ drawn. Section 5 lists them by kind.
 
 **True, and the second half of that sentence has been the main work of the last week.**
 
-The chain completed green. It is 327 unit and structural tests across 27 files, 104
+The chain completed green. It is 337 unit and structural tests across 30 files, 111
 application journeys, and 103 image comparisons across 51 screens in both languages. But a green suite proves nothing if the checks do not check. Five defects of
 exactly that kind were found and closed — described in section 6, because they are the
 most useful thing in this report for anyone maintaining the platform afterwards.
@@ -109,12 +105,13 @@ most useful thing in this report for anyone maintaining the platform afterwards.
 
 ## 3. Pass A — every obligation and where it lives
 
-Forty rows, audited against the current code. Each is discharged by a screen that exists.
+Forty-one rows, audited against the current code. Each is discharged by a screen that exists.
 
 | Obligation | Screen | Actor |
 |---|---|---|
-| Protocol 3 — the six applicability criteria | event creation | organizer |
-| Protocol 3 — the two not-routinely-subject limbs | Ministry applicability lane | Ministry |
+| Protocol 3 — the six applicability criteria | the public applicability check, and event creation | anyone, and the organizer |
+| Protocol 3 — the two not-routinely-subject limbs | the public applicability check, event branch | anyone |
+| Protocol 3 — referral and designation | Ministry applicability lane | Ministry |
 | Protocol 6 — the sixteen plan items | the event plan | organizer |
 | Protocol 7 — organizer responsibilities | requirements | organizer |
 | Protocol 7 — EMS provider responsibilities | participation | EMS provider |
@@ -131,7 +128,7 @@ Forty rows, audited against the current code. Each is discharged by a screen tha
 | Protocol 12 — the eleven major-incident items | the event plan | organizer |
 | Protocol 13 — the 24-hour notification | notify an incident | organizer |
 | Protocol 13 — the post-event report | the post-event report | organizer and Director |
-| Protocol 14 — data minimisation, public lookup | the lookup endpoint | the public |
+| Protocol 14 — data minimisation, public lookup | the lookup screen and endpoint | the public |
 | Annex A Part A — the fifteen event-information fields | event creation | organizer |
 | Annex A Part B — the nine assessment domains | event creation | organizer |
 | Annex A Part D — the ten minimum conditions | event creation | organizer |
@@ -178,8 +175,8 @@ the one check nobody else can perform.
 | 11 | Ministry reviewer | Yes | **Yes, fully** |
 | 12 | Ministry inspector | Yes | English |
 | 13 | Ministry administrator | Yes | **Yes, fully** |
-| 14 | Platform owner | Yes | English |
-| 15 | Public, signed out | **No — the screens are not built** | n/a |
+| 14 | Platform owner | Yes | **Yes, fully** |
+| 15 | Public, signed out | **Yes** | **Yes, fully** |
 
 **The Arabic completion that matters most** is journey 2 joined to journey 11: an
 organizer creating an event in Arabic, answering the assessment in Arabic, filing in
@@ -187,10 +184,15 @@ Arabic, and reading an Arabic determination — with a Ministry reviewer recordi
 between. That is the platform's purpose, and it works in the language most of its users
 will use.
 
-**Journey 15 is the honest gap.** The reference lookup returns exactly four fields and
-never a fifth, and it requires the event's start date as a second factor so the register
-cannot be walked by counting upwards. But a member of the public has no screen. Building
-the public landing is the remaining piece of the first slice.
+**Journey 15 was the honest gap and is now closed.** The public landing was built: an
+overview, three service detail screens, a branching applicability check and a lookup
+screen. The check never returns a bare yes or no for a facility — it returns the
+applicable rule and its basis under a state chip, and where the Ministry has not set a
+value it *names the missing value* and says that this is the answer rather than a gap in
+one. That is the live state for schools and will be for some time.
+
+The lookup asks for the event's start date as well as the reference, so the register
+cannot be read by counting upwards, and it returns four fields and never a fifth.
 
 ---
 
@@ -248,6 +250,13 @@ is now closed, and each closure is enforced rather than remembered.
    equally by a page that failed to load. Every such assertion must now be anchored by
    something that is only true if the right page was reached.
 
+**And a sixth, which only paper could show.** The determination certificate — the
+document handed to the authorising authority — would have printed a **blank page**. The
+print rule made everything invisible and then named what came back, and the certificate
+was not on that list. Nothing on screen showed it: the page rendered correctly and the
+button worked. Every printable document is now tested under print media, and a route that
+offers a print without something to print fails the build.
+
 **And three the reviewer found by clicking, which no guard would have caught:**
 
 - A field asking whether evidence of insurance was attached, **satisfied by typing "yes"**.
@@ -277,7 +286,7 @@ None of these is a defect. Each needs a name against it.
 | **The 90-day and 60-day cardiac cycles** | Provisional in the data, absent from the policy. Until published, screens say nothing is in force. |
 | **The platform owner's reach** | "Counts only" in one document, full visibility in another. The narrower reading is built and is reversible. |
 | **Commercial capability** | Fee, vendor and advertising capability exists behind flags and is off. Nothing commercial renders. |
-| **Grandfathering** | A newly required document applies to submissions already filed. There is no rule for existing filings, and none has been invented. |
+| ~~Grandfathering~~ | **Decided, 29 August 2026.** A newly required document applies from its effective date forward. A submission already filed and determined stands. One filed and not yet determined is asked for the document through the ordinary revision route, never blocked silently. The effective date is a configured value, not the date the software shipped. |
 
 ---
 
@@ -285,8 +294,8 @@ None of these is a defect. Each needs a name against it.
 
 | | |
 |---|---|
-| Unit and structural tests | 327, across 27 files |
-| Application journeys | 104 |
+| Unit and structural tests | 337, across 30 files |
+| Application journeys | 111 |
 | Prototype image comparisons | 103, both languages |
 | Screens compared | 51 |
 | Regions compared | 109 |

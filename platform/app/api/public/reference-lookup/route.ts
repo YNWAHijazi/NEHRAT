@@ -22,6 +22,7 @@ import {
 } from '../../../../lib/rules/public-lookup';
 import type { Level } from '../../../../lib/rules/types';
 import { MINISTRY_CONTENT } from '../../../../lib/rules/ministry';
+import { findSubmissionByReference } from '../../../../lib/queries';
 import { derivedLevelFor, latestOutcomeFor } from '../../../../lib/queries';
 
 // Per-client rate limit: a small fixed window, in memory. The values are deployment
@@ -41,42 +42,6 @@ function rateLimited(clientKey: string): boolean {
   return entry.count > MAX_PER_WINDOW;
 }
 
-function findByReference(reference: string): SubmissionRecord | null {
-  const row = getDb()
-    .prepare(
-      `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
-       FROM events e WHERE e.moph_reference = ?`,
-    )
-    .get(reference) as
-    | {
-        id: string;
-        moph_reference: string;
-        name_en: string;
-        start_date: string | null;
-        is_demo: number;
-        demo_level: number | null;
-        demo_state_en: string | null;
-      }
-    | undefined;
-  if (!row) return null;
-  // The same precedence as the organizer's own screens: a recorded outcome wins,
-  // so the public register never disagrees with the dashboard on the same event.
-  const outcome = latestOutcomeFor(row.id);
-  const outcomeLabel = outcome
-    ? MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome)?.en
-    : undefined;
-  return {
-    referenceNumber: row.moph_reference,
-    eventName: row.name_en,
-    // No derivable level is NOT Level 1 (non-negotiable 0): the register reports the
-    // absence rather than inventing the lowest band.
-    level: derivedLevelFor(row.id),
-    status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
-    isDemo: row.is_demo === 1,
-    eventStartDate: row.start_date ?? '',
-  };
-}
-
 export function GET(request: NextRequest): NextResponse {
   const clientKey =
     request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'local';
@@ -91,7 +56,7 @@ export function GET(request: NextRequest): NextResponse {
 
   const result = resolvePublicLookup(
     eventStartDate ? { referenceNumber: reference, eventStartDate } : { referenceNumber: reference },
-    findByReference,
+    findSubmissionByReference,
   );
   return NextResponse.json(result);
 }

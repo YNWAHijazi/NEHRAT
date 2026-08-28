@@ -10,6 +10,7 @@
 
 import attachmentsCatalog from './data/attachments-catalog.json';
 import { certificationBlockerText } from './certification';
+import { blocksFiling, type GrandfatherFacts } from './grandfathering';
 import complianceJson from './data/compliance-form.json';
 import lifecycleJson from './data/lifecycle.json';
 import planJson from './data/plan.json';
@@ -99,6 +100,8 @@ export interface SubmissionFacts {
   documentState: Record<string, boolean>;
   /** The organizer certification's field values, for the completeness rule. */
   certification: Record<string, string>;
+  /** When this submission was filed and whether it is determined, for the effective-date rule. */
+  grandfather: GrandfatherFacts;
   /** Named EMS providers and their answers. */
   providers: { name: string; status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed'; declaration: 'none' | 'draft' | 'signed' }[];
   /** The Event Medical Director invitation, when the level requires one. */
@@ -161,9 +164,14 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
 
   for (const doc of documentsForLevel(facts.level)) {
     if (doc.optional) continue;
-    if (!facts.documentState[doc.key]) {
-      blockers.push({ kind: 'documentMissing', docKey: doc.key, itemEn: doc.en, itemAr: doc.ar });
-    }
+    if (facts.documentState[doc.key]) continue;
+    // A NEWLY REQUIRED DOCUMENT APPLIES FROM ITS EFFECTIVE DATE FORWARD (Ministry
+    // ruling, 2026-08-29). A submission filed before the requirement existed is never
+    // BLOCKED by it -- a determined one stands, and an undetermined one is asked
+    // through the ordinary revision route. Blocking it here would leave an organizer
+    // holding a filed submission that had silently become unfileable.
+    if (!blocksFiling(doc.key, facts.grandfather)) continue;
+    blockers.push({ kind: 'documentMissing', docKey: doc.key, itemEn: doc.en, itemAr: doc.ar });
   }
 
   for (const p of facts.providers) {

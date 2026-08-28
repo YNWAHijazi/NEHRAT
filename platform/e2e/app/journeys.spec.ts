@@ -23,6 +23,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
 import { LANGUAGES, useLanguage } from '../helpers/language';
 
@@ -145,35 +146,92 @@ for (const lang of LANGUAGES) {
     });
 
     /**
-     * PASS B JOURNEY 15 — the public, signed out.
+     * PASS B JOURNEY 15 — the public, signed out. Applicability in all three branches,
+     * then the reference lookup returning four fields and no more.
      *
-     * IT CANNOT COMPLETE, AND THIS TEST SAYS SO RATHER THAN PRETENDING. The journey
-     * is "applicability in all three branches → reference lookup → four fields", and
-     * Slice 0 -- the public landing, the applicability screen and the lookup screen --
-     * is not built. `/` redirects to sign-in. The only public surface that exists is
-     * the lookup ENDPOINT.
-     *
-     * So what is asserted here is the part that exists: the endpoint returns four
-     * fields and never a fifth, signed out, in either language. The missing screens
-     * are reported as unbuilt in the acceptance report, not covered by a test that
-     * quietly tests something smaller.
+     * IT COULD NOT COMPLETE UNTIL SLICE 0 WAS BUILT. `/` redirected to sign-in, so the
+     * first thing the platform said to a member of the public was "prove who you are".
+     * There was no applicability screen and no lookup screen; only an endpoint.
      */
-    test('the only public surface that exists returns four fields and no more', async ({ page }) => {
-      // The lookup takes a SECOND FACTOR -- the event start date -- because sequential
-      // references plus an unauthenticated lookup would let anyone walk the national
-      // register (non-negotiable 5b). e2e/app/public-lookup.spec.ts is the thorough
-      // test of this endpoint; this asserts only that the public path exists and
-      // discloses four fields, as the journey's surviving half.
-      const response = await page.request.get(
-        '/api/public/reference-lookup?reference=MOPH-EV-2026-0244&eventStartDate=2026-08-09',
+    test('the public reads the overview, checks all three branches, and verifies a reference', async ({ page }) => {
+      // THE OVERVIEW, signed out, without being asked to sign in.
+      await gotoRidingRestarts(page, '/');
+      await expect(page.locator('[data-region="hero"]')).toBeVisible();
+      await expect(page.locator('[data-region="services"] a')).toHaveCount(3);
+      await expect(page.locator('[data-region="public-tools"] a')).toHaveCount(2);
+      // What the platform does NOT do, on the page itself.
+      await expect(page.locator('[data-region="jurisdiction"]')).toContainText(
+        lang === 'ar' ? 'لا ترخّص الفعاليات' : 'It does not authorize events',
       );
-      expect(response.ok()).toBe(true);
-      const payload = (await response.json()) as Record<string, unknown>;
-      expect(Object.keys(payload).sort()).toEqual(['eventName', 'exists', 'level', 'status'].sort());
-      const serialised = JSON.stringify(payload);
-      for (const forbidden of ['@', 'R. Haddad', '+961', 'representative']) {
-        expect(serialised, `${forbidden} must never leave the lookup`).not.toContain(forbidden);
+
+      // BRANCH ONE — an event. Any one criterion is enough.
+      await gotoRidingRestarts(page, '/applicability?subject=event&c=1');
+      const answer = page.locator('[data-region="applicability-answer"]');
+      await expect(answer).toContainText(lang === 'ar' ? 'خاضعة للبروتوكول' : 'Subject to the Protocol');
+      // "What is not routinely subject" renders ONLY here (ROADMAP 1).
+      await expect(page.locator('[data-region="not-routinely-subject"]')).toBeVisible();
+
+      // None selected is NOT "not subject": the Ministry makes the final determination.
+      await gotoRidingRestarts(page, '/applicability?subject=event&c=');
+      await expect(answer).toContainText(
+        lang === 'ar' ? 'تتخذ الوزارة القرار النهائي' : 'The Ministry makes the final determination',
+      );
+
+      // BRANCH TWO — a venue. Both conditions, or it routes to the event branch.
+      await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1&cap=1');
+      await expect(answer).toContainText(lang === 'ar' ? 'موقع فعاليات متكرر' : 'A recurring event venue');
+      await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1');
+      await expect(answer).toContainText(lang === 'ar' ? 'ليس موقع فعاليات متكرر' : 'Not a recurring event venue');
+      await expectAbsent(page, {
+        absent: '[data-region="not-routinely-subject"]',
+        anchor: answer,
+        because: 'what is not routinely subject belongs to the event branch alone',
+      });
+
+      // BRANCH THREE — a facility, which NEVER returns a bare yes or no. The schools
+      // category is the live unset state and the one most likely to look broken.
+      await gotoRidingRestarts(page, '/applicability?subject=facility&cat=1');
+      await expect(answer).toContainText(lang === 'ar' ? 'بانتظار قيمة من الوزارة' : 'Awaiting a Ministry value');
+      const waiting = page.locator('[data-region="waiting-on-ministry"]');
+      await expect(waiting).toBeVisible();
+      await expect(waiting).toContainText(lang === 'ar' ? 'الجدول المرحلي' : 'The phased schedule');
+      // The unset state is the answer, not a gap in it.
+      await expect(waiting).toContainText(
+        lang === 'ar' ? 'هذا هو الجواب' : 'This is the answer, not a gap in it',
+      );
+
+      // THE LOOKUP SCREEN, in front of the endpoint. Four fields and no more.
+      await gotoRidingRestarts(page, '/lookup');
+      await expect(page.locator('[data-region="lookup-form"]')).toBeVisible();
+      await page.locator('input[name="reference"]').fill('MOPH-EV-2026-0244');
+      await page.locator('input[name="eventStartDate"]').fill('2026-08-09');
+      await page.locator('button[type="submit"]').first().click();
+      await page.waitForLoadState('networkidle');
+      const result = page.locator('[data-region="lookup-result"]');
+      await expect(result).toBeVisible();
+      for (const forbidden of ['@', 'R. Haddad', '+961']) {
+        await expect(result, `${forbidden} must never appear in a public lookup`).not.toContainText(forbidden);
       }
+    });
+
+    /**
+     * PASS B JOURNEY 14 — the platform owner. Activity visible, and a Ministry
+     * administrator refused.
+     */
+    test('the platform owner sees counts, and the Ministry administrator cannot', async ({ page }) => {
+      await signInAs(page, 'test_owner');
+      await gotoRidingRestarts(page, '/platform/activity');
+      await expect(page.locator('body')).toContainText(lang === 'ar' ? 'نشاط المنصة' : 'Platform activity');
+      // COUNTS ONLY (SPEC 2c): no organizer, event or facility is named.
+      const body = await page.locator('main').innerText();
+      for (const named of ['Beirut Road Runners', 'Baalbeck', 'EV-0362', 'MOPH-EV']) {
+        expect(body, `${named} is named on a counts-only surface`).not.toContain(named);
+      }
+
+      // And the seat is above the Ministry console, in both directions.
+      await signInAs(page, 'test_moph_admin');
+      const refused = await gotoRidingRestarts(page, '/platform/activity');
+      expect([401, 403, 404]).toContain(refused?.status() ?? 0);
     });
 
     /**

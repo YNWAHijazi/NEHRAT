@@ -24,6 +24,8 @@ import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
 import { can, permissionMatrix, rolesHolding } from './rules/ministry';
 import { COMPLIANCE_DECLARATIONS } from './rules/content';
+import { MINISTRY_CONTENT } from './rules/ministry';
+import type { SubmissionRecord } from './rules/public-lookup';
 import { certificationComplete } from './rules/certification';
 
 export interface EventRow {
@@ -2053,6 +2055,52 @@ export function notificationsForEvent(eventId: string): { id: number; titleEn: s
     createdAt: r.sent_at.slice(0, 16),
   }));
 }
+
+/**
+ * ONE FINDER FOR THE PUBLIC REGISTER, used by the lookup endpoint AND by the lookup
+ * screen in front of it.
+ *
+ * It lived inside the route handler, so building a page for the public would have
+ * meant either calling our own HTTP endpoint from the server or writing the query a
+ * second time. Two queries of the same register is how the page and the API end up
+ * disagreeing about one event.
+ */
+export function findSubmissionByReference(reference: string): SubmissionRecord | null {
+  const row = getDb()
+    .prepare(
+      `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
+       FROM events e WHERE e.moph_reference = ?`,
+    )
+    .get(reference) as
+    | {
+        id: string;
+        moph_reference: string;
+        name_en: string;
+        start_date: string | null;
+        is_demo: number;
+        demo_level: number | null;
+        demo_state_en: string | null;
+      }
+    | undefined;
+  if (!row) return null;
+  // The same precedence as the organizer's own screens: a recorded outcome wins,
+  // so the public register never disagrees with the dashboard on the same event.
+  const outcome = latestOutcomeFor(row.id);
+  const outcomeLabel = outcome
+    ? MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome)?.en
+    : undefined;
+  return {
+    referenceNumber: row.moph_reference,
+    eventName: row.name_en,
+    // No derivable level is NOT Level 1 (non-negotiable 0): the register reports the
+    // absence rather than inventing the lowest band.
+    level: derivedLevelFor(row.id),
+    status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
+    isDemo: row.is_demo === 1,
+    eventStartDate: row.start_date ?? '',
+  };
+}
+
 
 /**
  * EVERY SUBMISSION ON THE PLATFORM, for the administrator's Records tab.

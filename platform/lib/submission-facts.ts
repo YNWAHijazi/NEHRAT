@@ -6,7 +6,7 @@
 
 import { organizationFor } from './auth';
 import { clockNow } from './clock';
-import { beirutToday, documentStateFor, eventFor, invitationsFor, submissionFor, assessmentsFor } from './queries';
+import { beirutToday, documentStateFor, eventFor, invitationsFor, latestOutcomeFor, submissionFor, assessmentsFor } from './queries';
 import { declarationsAreComplete, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
 
 export function submissionGateFor(accountId: number, eventId: string): SubmissionGate & { level: Level | null } {
@@ -54,6 +54,11 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
     // The organizer certification's own fields, from the stored submission. Empty
     // when nothing has been saved, which is correct: an unstarted certification is an
     // incomplete one.
+    grandfather: {
+      today: beirutToday(),
+      filedAt: submission?.filedAt?.slice(0, 10) ?? null,
+      determined: latestOutcomeFor(eventId) !== null,
+    },
     certification: {
       representative: submission?.representative ?? '',
       telephone: submission?.telephone ?? '',
