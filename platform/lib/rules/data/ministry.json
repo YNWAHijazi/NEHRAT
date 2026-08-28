@@ -627,5 +627,110 @@
     "printAr": "طباعة أو حفظ بصيغة PDF",
     "revisedNoteEn": "This determination replaced an earlier one on the same submission. The earlier determination remains on the record.",
     "revisedNoteAr": "استبدلت هذه النتيجة نتيجة سابقة على التقديم نفسه. وتبقى النتيجة السابقة مسجَّلة."
+  },
+  "adminConsole": {
+    "$comment": "The master administrator's overseeing console. It was a reviewer with fewer powers; it is now the profile that can see the whole platform and do anything any Ministry role can do, except act on its own account.",
+    "titleEn": "Master administration",
+    "titleAr": "الإدارة العامة",
+    "recordsTitleEn": "Records",
+    "recordsTitleAr": "السجلات",
+    "recordsIntroEn": "Every event record on the platform, filed or not. The reviewer's queue answers what is waiting; this answers what exists.",
+    "recordsIntroAr": "كل سجل فعالية على المنصة، مقدَّماً كان أم لا. تجيب قائمة المراجع عمّا هو بالانتظار؛ ويجيب هذا عمّا هو موجود.",
+    "filterLevelEn": "Level",
+    "filterLevelAr": "المستوى",
+    "filterStatusEn": "Status",
+    "filterStatusAr": "الحالة",
+    "filterSearchEn": "Event, organization or municipality",
+    "filterSearchAr": "الفعالية أو المؤسسة أو البلدية",
+    "filterApplyEn": "Apply",
+    "filterApplyAr": "تطبيق",
+    "filterClearEn": "Clear",
+    "filterClearAr": "مسح",
+    "anyEn": "Any",
+    "anyAr": "الكل",
+    "statusFiledEn": "Filed",
+    "statusFiledAr": "مقدَّم",
+    "statusUnfiledEn": "Not filed",
+    "statusUnfiledAr": "غير مقدَّم",
+    "statusUndeterminedEn": "Filed, no determination",
+    "statusUndeterminedAr": "مقدَّم دون نتيجة",
+    "countEn": "{n} record(s)",
+    "countAr": "⁦{n}⁩ سجل",
+    "noneEn": "No record matches these filters.",
+    "noneAr": "لا سجل يطابق هذه المرشحات.",
+    "openFileEn": "Open the complete file",
+    "openFileAr": "فتح الملف الكامل",
+    "activityTitleEn": "Activity",
+    "activityTitleAr": "النشاط",
+    "activityIntroEn": "Who did what, and when. Every entry here is the record itself, not a copy written alongside it.",
+    "activityIntroAr": "من فعل ماذا ومتى. وكل قيد هنا هو السجل نفسه لا نسخة مكتوبة إلى جانبه.",
+    "activityNoneEn": "No activity in this scope yet.",
+    "activityNoneAr": "لا نشاط في هذا النطاق بعد.",
+    "kinds": {
+      "determination": {
+        "en": "Determination recorded",
+        "ar": "سُجّلت نتيجة"
+      },
+      "filed": {
+        "en": "Submission filed",
+        "ar": "قُدّم ملف"
+      },
+      "inspection": {
+        "en": "Inspection scheduled",
+        "ar": "جُدول تفتيش"
+      },
+      "account": {
+        "en": "Account created",
+        "ar": "أُنشئ حساب"
+      },
+      "organization": {
+        "en": "Organization recorded",
+        "ar": "سُجّلت مؤسسة"
+      }
+    },
+    "unreachableTitleEn": "Powers no active account holds",
+    "unreachableTitleAr": "صلاحيات لا يملكها أي حساب نشط",
+    "unreachableBodyEn": "These actions are assigned in the permission matrix and no active account in this scope holds them. A power held by nobody reachable is advertised on screens that then refuse everyone — worse than an unassigned power, because it names an owner who does not exist.",
+    "unreachableBodyAr": "هذه الإجراءات مُسندة في مصفوفة الصلاحيات ولا يملكها أي حساب نشط في هذا النطاق. والصلاحية التي لا يملكها أحد يمكن الوصول إليه تُعلَن على شاشات ترفض الجميع بعدها — وهي أسوأ من صلاحية غير مسندة، لأنها تسمّي مالكاً غير موجود.",
+    "unreachableNoneEn": "Every action in the matrix is held by at least one active account in this scope.",
+    "unreachableNoneAr": "كل إجراء في المصفوفة يملكه حساب نشط واحد على الأقل في هذا النطاق.",
+    "printFileEn": "Print the complete file",
+    "printFileAr": "طباعة الملف الكامل",
+    "segmentsTitleEn": "By type",
+    "segmentsTitleAr": "حسب النوع",
+    "segments": {
+      "ministry": {
+        "en": "Ministry staff",
+        "ar": "موظفو الوزارة"
+      },
+      "organizer": {
+        "en": "Organizers",
+        "ar": "المنظّمون"
+      },
+      "ems": {
+        "en": "EMS providers",
+        "ar": "مزوّدو الإسعاف"
+      },
+      "director": {
+        "en": "Medical directors",
+        "ar": "المديرون الطبيون"
+      },
+      "response": {
+        "en": "First-response units",
+        "ar": "وحدات الاستجابة الأولى"
+      },
+      "other": {
+        "en": "Other",
+        "ar": "أخرى"
+      }
+    },
+    "userSearchEn": "Name or email",
+    "userSearchAr": "الاسم أو البريد",
+    "lastSeenEn": "Last seen",
+    "lastSeenAr": "آخر ظهور",
+    "neverSeenEn": "Never signed in",
+    "neverSeenAr": "لم يسجّل الدخول قط",
+    "createdEn": "Created",
+    "createdAr": "أُنشئ"
   }
 }

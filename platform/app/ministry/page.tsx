@@ -12,7 +12,7 @@ import {
   organizationsForReview,
   reviewQueue,
 } from '../../lib/queries';
-import { FACILITY_CONTENT, MINISTRY_CONTENT, addDaysIso } from '../../lib/rules';
+import { FACILITY_CONTENT, MINISTRY_CONTENT, addDaysIso, can } from '../../lib/rules';
 
 /**
  * The operational dashboard. Every count derives from the records -- never a
@@ -66,6 +66,19 @@ export default async function MinistryDashboardPage() {
       <h1 data-sec-h1="" style={{ margin: '0 0 20px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Operational dashboard" ar="اللوحة التشغيلية" />
       </h1>
+
+      {/* THE OVERSEEING CONSOLE, for the profile that holds it. It had no entry
+          point from here at all: its four screens were reachable only by typing the
+          URL or by following a footer link on an unrelated page. */}
+      {can(account.role, 'viewRegistry') ? (
+        <Link
+          href="/ministry/admin/records"
+          data-region="master-admin-entry"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 10, height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)', marginBlockEnd: 24 }}
+        >
+          <L en={MINISTRY_CONTENT.adminConsole.titleEn} ar={MINISTRY_CONTENT.adminConsole.titleAr} />
+        </Link>
+      ) : null}
 
       <div data-region="counters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 32 }}>
         {counters.map((c) => (

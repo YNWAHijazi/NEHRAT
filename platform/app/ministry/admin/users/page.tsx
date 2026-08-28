@@ -1,3 +1,4 @@
+import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -25,11 +26,31 @@ import {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string; error?: string; token?: string }>;
+  searchParams: Promise<{ notice?: string; error?: string; token?: string; seg?: string; q?: string }>;
 }) {
   const account = await requireMinistryPage('manageUsers');
-  const { notice, error, token: issuedToken } = await searchParams;
-  const users = administeredAccounts(account.isDemo);
+  const { notice, error, token: issuedToken, seg, q } = await searchParams;
+  const ACCOUNTS_CONSOLE = MINISTRY_CONTENT.adminConsole;
+  const all = administeredAccounts(account.isDemo);
+
+  // SEGMENTED BY TYPE, because "every account" is a list nobody reads. Ministry staff,
+  // organizers, providers, directors and first-response units are five different
+  // populations with different questions attached to them.
+  const segmentOf = (role: string): string =>
+    ['reviewer', 'inspector', 'ministry_admin', 'platform_owner', 'order'].includes(role)
+      ? 'ministry'
+      : ['organizer', 'ems', 'director', 'response'].includes(role)
+        ? role
+        : 'other';
+  const needle = (q ?? '').trim().toLowerCase();
+  const users = all.filter((u) => {
+    if (seg && seg !== '' && segmentOf(u.role) !== seg) return false;
+    if (needle === '') return true;
+    return `${u.displayName} ${u.email ?? ''}`.toLowerCase().includes(needle);
+  });
+  const segments = bilingualMap(ACCOUNTS_CONSOLE.segments);
+  const segmentCounts = new Map<string, number>();
+  for (const u of all) segmentCounts.set(segmentOf(u.role), (segmentCounts.get(segmentOf(u.role)) ?? 0) + 1);
   const laneConfig = ministryConfig().get('orderLane');
   const laneActive = laneConfig ? laneConfig.value === 'on' : orderLaneActive();
   const matrix = permissionMatrix();
@@ -48,9 +69,34 @@ export default async function UsersPage({
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en={A.titleEn} ar={A.titleAr} />
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
+      <AdminTabs current="/ministry/admin/users" />
+      <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
         <L en={A.introEn} ar={A.introAr} />
       </p>
+
+      {/* Segment and search, as a GET form so a filtered view has a URL. */}
+      <form method="get" data-region="user-filters" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'end', padding: '14px 18px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 18, maxWidth: 860 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+            <L en={ACCOUNTS_CONSOLE.segmentsTitleEn} ar={ACCOUNTS_CONSOLE.segmentsTitleAr} />
+          </span>
+          <select name="seg" defaultValue={seg ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+            <option value="">{`${ACCOUNTS_CONSOLE.anyEn} (${all.length})`}</option>
+            {Object.entries(segments).map(([key, label]) => (
+              <option key={key} value={key}>{`${label.en} (${segmentCounts.get(key) ?? 0})`}</option>
+            ))}
+          </select>
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 220 }}>
+          <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+            <L en={ACCOUNTS_CONSOLE.userSearchEn} ar={ACCOUNTS_CONSOLE.userSearchAr} />
+          </span>
+          <input name="q" defaultValue={q ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+        </label>
+        <button type="submit" style={{ height: 36, paddingInline: 16, border: 0, borderRadius: 18, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+          <L en={ACCOUNTS_CONSOLE.filterApplyEn} ar={ACCOUNTS_CONSOLE.filterApplyAr} />
+        </button>
+      </form>
       {notice ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           {notice === 'invited' ? <L en="Account created. Hand the activation link below to the person it names — they set their own password." ar="أُنشئ الحساب. سلّموا رابط التفعيل أدناه إلى الشخص الذي يسمّيه — فهو يضع كلمة مروره بنفسه." /> : null}
@@ -118,7 +164,15 @@ export default async function UsersPage({
                     register should be unable to answer. Derived, never stored. */}
                 <span data-region="origin" style={{ display: 'block', fontSize: '12px', color: 'var(--muted)', marginBlockStart: 4 }}>
                   <L en={origins[origin]?.en ?? origin} ar={origins[origin]?.ar ?? origin} />
-                  <span> · {u.createdAt}</span>
+                  <span> · <L en={ACCOUNTS_CONSOLE.createdEn} ar={ACCOUNTS_CONSOLE.createdAr} /> {u.createdAt}</span>
+                  <span>
+                    {' · '}
+                    {u.lastSeen ? (
+                      <L en={`${ACCOUNTS_CONSOLE.lastSeenEn} ${u.lastSeen}`} ar={`${ACCOUNTS_CONSOLE.lastSeenAr} ⁦${u.lastSeen}⁩`} />
+                    ) : (
+                      <L en={ACCOUNTS_CONSOLE.neverSeenEn} ar={ACCOUNTS_CONSOLE.neverSeenAr} />
+                    )}
+                  </span>
                 </span>
                 {originNotes[origin] ? (
                   <span style={{ display: 'block', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 4, maxWidth: '74ch' }}>

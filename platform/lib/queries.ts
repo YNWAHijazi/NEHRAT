@@ -23,6 +23,7 @@ import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination
 import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
 import { can, permissionMatrix, rolesHolding } from './rules/ministry';
+import { COMPLIANCE_DECLARATIONS } from './rules/content';
 import { certificationComplete } from './rules/certification';
 
 export interface EventRow {
@@ -1993,6 +1994,244 @@ export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
 }
 
 /**
+ * THE COMPLIANCE FORM AS FILED -- every declaration with whether it was made, and the
+ * certification it was made under.
+ *
+ * submissionForReview carries the review header; this carries the CONTENT. They are
+ * separate because the reviewer's screen needs the first and the complete file needs
+ * both, and merging them would make every queue row read a JSON blob it never uses.
+ */
+export function complianceForReview(
+  eventId: string,
+  level: 1 | 2 | 3,
+): { declarations: { en: string; ar: string; declared: boolean }[]; representative: string; telephone: string; position: string; insurance: Record<string, string> } | null {
+  const r = getDb()
+    .prepare(
+      `SELECT declarations, insurance, representative, telephone, position
+       FROM submissions WHERE event_id = ?`,
+    )
+    .get(eventId) as
+    | { declarations: string; insurance: string; representative: string; telephone: string; position: string }
+    | undefined;
+  if (!r) return null;
+  const ticked = JSON.parse(r.declarations) as Record<string, boolean>;
+  return {
+    declarations: COMPLIANCE_DECLARATIONS.filter((d) => d.minLevel <= level).map((d, i) => ({
+      en: d.en,
+      ar: d.ar,
+      declared: ticked[String(i)] === true,
+    })),
+    representative: r.representative,
+    telephone: r.telephone,
+    position: r.position,
+    insurance: JSON.parse(r.insurance) as Record<string, string>,
+  };
+}
+
+/**
+ * EVERY NOTIFICATION THE PLATFORM SENT ABOUT ONE RECORD.
+ *
+ * What a party was actually told, and when. Matched on the record route the
+ * notification carries, which is how the notification already identifies its subject
+ * -- no second field to keep in step with the first.
+ */
+export function notificationsForEvent(eventId: string): { id: number; titleEn: string; titleAr: string; bodyEn: string; bodyAr: string; createdAt: string }[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT id, subject_en, subject_ar, body_en, body_ar, sent_at
+       FROM notifications WHERE record_route LIKE ? ORDER BY sent_at DESC, id DESC`,
+    )
+    .all(`%/events/${eventId}%`) as unknown as {
+    id: number; subject_en: string; subject_ar: string; body_en: string; body_ar: string; sent_at: string;
+  }[];
+  return rows.map((r) => ({
+    id: r.id,
+    titleEn: r.subject_en,
+    titleAr: r.subject_ar,
+    bodyEn: r.body_en,
+    bodyAr: r.body_ar,
+    createdAt: r.sent_at.slice(0, 16),
+  }));
+}
+
+/**
+ * EVERY SUBMISSION ON THE PLATFORM, for the administrator's Records tab.
+ *
+ * The reviewer's queue answers "what is waiting for me". This answers "what exists",
+ * which is a different question and the one an overseeing profile asks. Filed and
+ * unfiled alike, because a record that never filed is a fact about the platform too.
+ *
+ * Filtering is done in SQL, with ONE deliberate exception. Status, search and the
+ * demonstration boundary are WHERE clauses, because "server-side field limits are
+ * enforced on the server" and a wide query filtered in the page would still have read
+ * every row.
+ *
+ * THE LEVEL IS NOT, and cannot be. It is derived by lib/rules from the assessment
+ * answers -- nine domains, ten minimum conditions, the higher of the two -- and
+ * writing that as a SQL clause would be a SECOND derivation of the one number this
+ * whole platform turns on. Two derivations of one rule drift; that is the defect this
+ * build keeps finding. So the level is computed once, by the rules, and the filter is
+ * applied to the result. The cost is reading the event rows before narrowing, which
+ * is a page of records, not a national register scan.
+ */
+export interface AdminRecordRow {
+  id: string;
+  nameEn: string;
+  nameAr: string;
+  organizationEn: string;
+  organizationAr: string;
+  municipalities: string;
+  level: number | null;
+  startDate: string | null;
+  filed: boolean;
+  filedAt: string | null;
+  mophReference: string | null;
+  outcome: string | null;
+  outcomeAt: string | null;
+  lifecycle: string;
+}
+
+export interface AdminRecordFilter {
+  level?: number | undefined;
+  /** 'filed' | 'unfiled' | one of the three outcome keys | 'undetermined' */
+  status?: string | undefined;
+  /** Matched against the event name, the organization and the municipality. */
+  search?: string | undefined;
+}
+
+export function adminRecords(viewerIsDemo: boolean, filter: AdminRecordFilter = {}): AdminRecordRow[] {
+  const clauses: string[] = ['e.is_demo = ?'];
+  const params: (string | number)[] = [demoFlag(viewerIsDemo)];
+
+  if (filter.status === 'filed') clauses.push('e.filed = 1');
+  if (filter.status === 'unfiled') clauses.push('e.filed = 0');
+  if (filter.status === 'undetermined') {
+    clauses.push('e.filed = 1 AND NOT EXISTS (SELECT 1 FROM determinations d WHERE d.event_id = e.id)');
+  }
+  if (filter.status && ['incomplete', 'revision', 'satisfied'].includes(filter.status)) {
+    clauses.push(
+      `(SELECT d.outcome FROM determinations d WHERE d.event_id = e.id
+         ORDER BY d.recorded_at DESC, d.id DESC LIMIT 1) = ?`,
+    );
+    params.push(filter.status);
+  }
+  if (filter.search && filter.search.trim() !== '') {
+    clauses.push('(e.name_en LIKE ? OR e.name_ar LIKE ? OR e.municipalities LIKE ? OR o.name_en LIKE ? OR o.name_ar LIKE ?)');
+    const like = `%${filter.search.trim()}%`;
+    params.push(like, like, like, like, like);
+  }
+
+  const rows = getDb()
+    .prepare(
+      `SELECT e.id, e.name_en, e.name_ar, e.municipalities, e.demo_level, e.start_date,
+              e.filed, e.moph_reference, e.lifecycle,
+              COALESCE(o.name_en, '—') AS org_en, COALESCE(o.name_ar, '—') AS org_ar,
+              (SELECT s.filed_at FROM submissions s WHERE s.event_id = e.id) AS filed_at,
+              (SELECT d.outcome FROM determinations d WHERE d.event_id = e.id
+                ORDER BY d.recorded_at DESC, d.id DESC LIMIT 1) AS outcome,
+              (SELECT d.recorded_at FROM determinations d WHERE d.event_id = e.id
+                ORDER BY d.recorded_at DESC, d.id DESC LIMIT 1) AS outcome_at
+       FROM events e
+       LEFT JOIN organizations o ON o.account_id = e.account_id
+       WHERE ${clauses.join(' AND ')}
+       ORDER BY e.filed DESC, e.start_date DESC, e.id DESC`,
+    )
+    .all(...params) as unknown as {
+    id: string; name_en: string; name_ar: string; municipalities: string | null;
+    demo_level: number | null; start_date: string | null; filed: number;
+    moph_reference: string | null; lifecycle: string; org_en: string; org_ar: string;
+    filed_at: string | null; outcome: string | null; outcome_at: string | null;
+  }[];
+
+  const mapped = rows.map((r) => ({
+    id: r.id,
+    nameEn: r.name_en,
+    nameAr: r.name_ar,
+    organizationEn: r.org_en,
+    organizationAr: r.org_ar,
+    municipalities: r.municipalities ?? '—',
+    // Recomputed from the assessment where one exists, never trusted from storage.
+    level: derivedLevelFor(r.id) ?? r.demo_level,
+    startDate: r.start_date,
+    filed: r.filed === 1,
+    filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
+    mophReference: r.moph_reference,
+    outcome: r.outcome,
+    outcomeAt: r.outcome_at ? r.outcome_at.slice(0, 10) : null,
+    lifecycle: r.lifecycle,
+  }));
+
+  return filter.level === undefined ? mapped : mapped.filter((r) => r.level === filter.level);
+}
+
+/**
+ * WHO DID WHAT, WHEN -- the audit trail as one readable surface.
+ *
+ * Every one of these facts already existed, each on the record it belongs to, and
+ * there was nowhere to read them together. An overseeing profile asking "what
+ * happened on this platform last week" had to open records one at a time and hope.
+ *
+ * Assembled by union rather than by a written-to audit table, deliberately: an audit
+ * table is a second copy of the truth that can disagree with the first, and it only
+ * records what somebody remembered to write to it. These rows ARE the records.
+ */
+export interface ActivityRow {
+  at: string;
+  kind: string;
+  actor: string;
+  subject: string;
+  detail: string;
+  href: string | null;
+}
+
+export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRow[] {
+  const d = demoFlag(viewerIsDemo);
+  const rows = getDb()
+    .prepare(
+      `SELECT * FROM (
+         SELECT dt.recorded_at AS at, 'determination' AS kind, dt.recorded_by AS actor,
+                COALESCE(e.moph_reference, e.id) AS subject, dt.outcome AS detail,
+                '/ministry/submissions/' || e.id AS href
+           FROM determinations dt JOIN events e ON e.id = dt.event_id WHERE e.is_demo = ?
+         UNION ALL
+         SELECT s.filed_at, 'filed', s.representative,
+                COALESCE(e.moph_reference, e.id), 'submission filed',
+                '/ministry/submissions/' || e.id
+           FROM submissions s JOIN events e ON e.id = s.event_id
+           WHERE e.is_demo = ? AND s.filed_at IS NOT NULL
+         UNION ALL
+         SELECT i.date, 'inspection', i.inspector,
+                COALESCE(e.moph_reference, e.id), i.title_en,
+                '/ministry/submissions/' || e.id
+           FROM inspections i JOIN events e ON e.id = i.event_id
+           WHERE e.is_demo = ? AND i.date IS NOT NULL
+         UNION ALL
+         SELECT a.created_at, 'account', COALESCE(a.email, a.login), a.display_name, a.role,
+                '/ministry/admin/users'
+           FROM accounts a WHERE a.is_demo = ?
+         UNION ALL
+         SELECT o.recorded_at, 'organization', 'Ministry', o.name_en, o.status,
+                '/ministry/organizations'
+           FROM organizations o WHERE o.is_demo = ? AND o.recorded_at IS NOT NULL
+       )
+       WHERE at IS NOT NULL
+       ORDER BY at DESC
+       LIMIT ?`,
+    )
+    .all(d, d, d, d, d, limit) as unknown as {
+    at: string; kind: string; actor: string | null; subject: string; detail: string | null; href: string | null;
+  }[];
+  return rows.map((r) => ({
+    at: r.at.slice(0, 16),
+    kind: r.kind,
+    actor: r.actor ?? '—',
+    subject: r.subject,
+    detail: r.detail ?? '',
+    href: r.href,
+  }));
+}
+
+/**
  * MINISTRY POWERS THAT NOBODY REACHABLE HOLDS, within one demonstration scope.
  *
  * The matrix can be perfectly well formed and the platform still unusable: an action
@@ -2089,6 +2328,14 @@ export interface AdministeredAccountRow {
   /** A live activation link, if one is outstanding. */
   activationToken: string | null;
   holdings: AccountHoldings;
+  /**
+   * The most recent session this account opened, or null if it never has.
+   *
+   * "Never signed in" is a different fact from "invited and not activated": an account
+   * can have a password and still have never used it, and an administrator deciding
+   * whether a seat is real needs to tell those apart.
+   */
+  lastSeen: string | null;
 }
 
 export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccountRow[] {
@@ -2114,7 +2361,8 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
               -- column is a person, and matching on it is the only join available.
               (SELECT COUNT(*) FROM inspections n WHERE n.inspector = a.display_name) AS c_inspections,
               (SELECT COUNT(*) FROM venues v WHERE v.account_id = a.id) AS c_venues,
-              (SELECT COUNT(*) FROM facilities f WHERE f.account_id = a.id) AS c_facilities
+              (SELECT COUNT(*) FROM facilities f WHERE f.account_id = a.id) AS c_facilities,
+              (SELECT MAX(s.created_at) FROM sessions s WHERE s.account_id = a.id) AS last_seen
        FROM accounts a
        WHERE a.is_demo = ?
        ORDER BY a.role, a.display_name`,
@@ -2124,7 +2372,7 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
     is_demo: number; suspended: number; created_at: string; has_password: number;
     was_invited: number; from_nomination: number; activation_token: string | null;
     c_events: number; c_orgs: number; c_nominations: number; c_determinations: number;
-    c_inspections: number; c_venues: number; c_facilities: number;
+    c_inspections: number; c_venues: number; c_facilities: number; last_seen: string | null;
   }[];
 
   return rows.map((r) => ({
@@ -2140,6 +2388,7 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
     wasInvited: r.was_invited === 1,
     fromNomination: r.from_nomination === 1,
     activationToken: r.activation_token,
+    lastSeen: r.last_seen ? r.last_seen.slice(0, 16) : null,
     holdings: {
       events: r.c_events,
       organizations: r.c_orgs,

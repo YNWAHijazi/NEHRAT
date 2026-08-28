@@ -1,3 +1,4 @@
+import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -24,6 +25,7 @@ export default async function ConfigurationPage() {
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Configuration and versioning" ar="الإعدادات والإصدارات" />
       </h1>
+      <AdminTabs current="/ministry/admin/configuration" />
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
         <L
           en="These are the values every screen derives from — thresholds, phases and timeframes as data, never code. Changing one is a new version of the instrument's data, reviewed and published; this console reads, it does not edit in place."

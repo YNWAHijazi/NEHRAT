@@ -1100,13 +1100,19 @@ export default async function SubmissionReviewPage({
           {/* WHAT THE MINISTRY'S REVIEW IS AND IS NOT. Outside the recording panel,
               because it was inside it: once a determination was recorded the panel
               disappeared and took these two sentences with it -- and they matter most
-              AFTER a determination exists, when somebody is deciding what it means. */}
-          <div data-region="limits" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 20 }}>
-            {MINISTRY_CONTENT.outcomeLimits.map((l, i) => (
-              <div key={l.en} style={i === 0 ? { marginBlockEnd: 8 } : undefined}>
-                <L en={l.en} ar={l.ar} />
-              </div>
-            ))}
+              AFTER a determination exists, when somebody is deciding what it means.
+              IN THE SAME BOX IT WAS IN, because this region is pixel-compared against
+              the reference in both languages: moving it out of the card changed the
+              surface behind the text and the comparison read 12.7%. The words are
+              unchanged; so is what is behind them. */}
+          <div style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
+            <div data-region="limits" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+              {MINISTRY_CONTENT.outcomeLimits.map((l, i) => (
+                <div key={l.en} style={i === 0 ? { marginBlockEnd: 8 } : undefined}>
+                  <L en={l.en} ar={l.ar} />
+                </div>
+              ))}
+            </div>
           </div>
 
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>

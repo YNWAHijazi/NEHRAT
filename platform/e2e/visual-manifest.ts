@@ -1033,7 +1033,14 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       {
         name: 'outcome',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="outcome"]',
+        // WAS [data-region="outcome"], the recording control. EV-0362 carries a
+        // determination, and recording is now ONCE: after a determination is recorded
+        // the three radios are gone and the screen shows what was determined, by whom
+        // and when, with revision as a separate deliberate act. So the region on this
+        // fixture is the standing determination, which is what the built screen shows
+        // where the prototype shows a control. The divergence is larger than it was
+        // and it is the point of the change, not a drift from it.
+        builtSelector: '[data-region="standing-determination"]',
         note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The three outcomes with 'satisfied' disabled and the blocking inspection NAMED against it, the other two enabled, and the two limit sentences beneath -- the reference's gate, on the record's own blockers.",
       },
       {
