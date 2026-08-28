@@ -767,6 +767,19 @@ function migrate(d: DatabaseSync): void {
   addColumn('shared_documents', 'byte_size', 'byte_size INTEGER');
   addColumn('shared_documents', 'bytes', 'bytes BLOB');
 
+  // ACTIVATION LINKS. An administrator creates an account and the platform issues a
+  // link; the recipient sets their own password against it. The administrator never
+  // sets or sees one (reviewer ruling, 2026-08-28). This rides the reset table rather
+  // than a second one -- both are single-use, expiring, unguessable tokens that end
+  // in the same screen -- with `kind` separating the windows: a reset is an hour,
+  // an activation is days, because an invited person may not read their mail today.
+  //
+  // issued_by records WHICH administrator invited the account, which is what makes
+  // the origin derivable later. An account nobody can account for is the thing this
+  // column exists to prevent.
+  addColumn('password_resets', 'kind', "kind TEXT NOT NULL DEFAULT 'reset'");
+  addColumn('password_resets', 'issued_by', 'issued_by INTEGER REFERENCES accounts(id)');
+
   // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.
   const orgSql = (d
     .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'organizations'`)

@@ -259,9 +259,34 @@ describe('incomplete assessments', () => {
 });
 
 describe('the level is derived, never chosen', () => {
-  it('exposes no way to set a level', async () => {
-    const rules = await import('../lib/rules/index');
-    const setters = Object.keys(rules).filter((k) => /^(set|choose|assign|override)/i.test(k));
+  it('exposes no OPERATION that sets, chooses, assigns or overrides', async () => {
+    // Narrowed to callables, and here is why rather than because it was in the way.
+    // The pattern is a verb test applied to names, and a name can be a noun:
+    // ASSIGNABLE_ROLES is a list of the roles an administrator may grant, and a list
+    // cannot set anything. Requiring a FUNCTION keeps exactly the property this
+    // guards -- lib/rules derives, and nothing in it performs an assignment -- while
+    // no longer reporting a constant for its part of speech.
+    const rules = (await import('../lib/rules/index')) as Record<string, unknown>;
+    const setters = Object.keys(rules).filter(
+      (k) => /^(set|choose|assign|override)/i.test(k) && typeof rules[k] === 'function',
+    );
     expect(setters).toEqual([]);
+  });
+
+  it('and no CONSTANT smuggles a level in under one of those names either', async () => {
+    // The narrowing above is only safe while non-callables named that way have
+    // nothing to do with levels. This is the other half of the pair.
+    const rules = (await import('../lib/rules/index')) as Record<string, unknown>;
+    const suspicious = Object.keys(rules).filter(
+      (k) => /^(set|choose|assign|override)/i.test(k) && /level/i.test(k),
+    );
+    expect(suspicious).toEqual([]);
+  });
+
+  it('the guard is looking at a real module', () => {
+    // A test asserting an empty list passes just as well against an empty module.
+    return import('../lib/rules/index').then((rules) => {
+      expect(Object.keys(rules).length).toBeGreaterThan(50);
+    });
   });
 });

@@ -20,6 +20,7 @@ import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstration
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 import { NOMINEE_DOCUMENT_KEYS } from './rules/nomination-access';
+import type { AccountHoldings } from './rules/accounts';
 
 export interface EventRow {
   id: string;
@@ -1859,6 +1860,101 @@ export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
     )
     .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number; suspended: number }[];
   return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1, suspended: r.suspended === 1 }));
+}
+
+/**
+ * EVERY ACCOUNT, for the administration console.
+ *
+ * ministryUsers above lists five roles out of nine, which is right for the permission
+ * matrix it feeds and wrong for administering accounts: an administrator asked to
+ * manage "the accounts" could not see an organizer, a provider, a Director or a
+ * first-response unit at all. They exist, they sign in, and they were invisible here.
+ *
+ * Each row carries the facts its ORIGIN is derived from rather than a stored origin
+ * field -- a stored one goes stale the first time somebody forgets to write it -- and
+ * the counts of what it holds, so the console can state the weight of an act before
+ * the click rather than making an administrator go and find out.
+ *
+ * The holdings are counted per account in one pass. They are counts, not contents:
+ * this screen administers accounts and has no business rendering anybody's records.
+ */
+export interface AdministeredAccountRow {
+  id: number;
+  login: string;
+  email: string | null;
+  displayName: string;
+  role: string;
+  isDemo: boolean;
+  suspended: boolean;
+  createdAt: string;
+  /** Origin facts, resolved by lib/rules/accounts.ts. */
+  hasPassword: boolean;
+  wasInvited: boolean;
+  fromNomination: boolean;
+  /** A live activation link, if one is outstanding. */
+  activationToken: string | null;
+  holdings: AccountHoldings;
+}
+
+export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccountRow[] {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `SELECT a.id, a.login, a.email, a.display_name, a.role, a.is_demo, a.suspended,
+              a.created_at,
+              (a.password_hash IS NOT NULL) AS has_password,
+              EXISTS (SELECT 1 FROM password_resets p
+                      WHERE p.account_id = a.id AND p.kind = 'activation') AS was_invited,
+              EXISTS (SELECT 1 FROM invitations i WHERE i.account_id = a.id) AS from_nomination,
+              (SELECT p.token FROM password_resets p
+                WHERE p.account_id = a.id AND p.kind = 'activation'
+                  AND p.used_at IS NULL AND p.expires_at > now_stamp()
+                ORDER BY p.created_at DESC LIMIT 1) AS activation_token,
+              (SELECT COUNT(*) FROM events e WHERE e.account_id = a.id) AS c_events,
+              (SELECT COUNT(*) FROM organizations o WHERE o.account_id = a.id) AS c_orgs,
+              (SELECT COUNT(*) FROM invitations i
+                WHERE i.account_id = a.id AND i.status IN ('confirmed','declined')) AS c_nominations,
+              (SELECT COUNT(*) FROM determinations d WHERE d.recorded_by = a.display_name) AS c_determinations,
+              -- Inspections record the INSPECTOR by name, not by account id: the
+              -- column is a person, and matching on it is the only join available.
+              (SELECT COUNT(*) FROM inspections n WHERE n.inspector = a.display_name) AS c_inspections,
+              (SELECT COUNT(*) FROM venues v WHERE v.account_id = a.id) AS c_venues,
+              (SELECT COUNT(*) FROM facilities f WHERE f.account_id = a.id) AS c_facilities
+       FROM accounts a
+       WHERE a.is_demo = ?
+       ORDER BY a.role, a.display_name`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+    id: number; login: string; email: string | null; display_name: string; role: string;
+    is_demo: number; suspended: number; created_at: string; has_password: number;
+    was_invited: number; from_nomination: number; activation_token: string | null;
+    c_events: number; c_orgs: number; c_nominations: number; c_determinations: number;
+    c_inspections: number; c_venues: number; c_facilities: number;
+  }[];
+
+  return rows.map((r) => ({
+    id: r.id,
+    login: r.login,
+    email: r.email,
+    displayName: r.display_name,
+    role: r.role,
+    isDemo: r.is_demo === 1,
+    suspended: r.suspended === 1,
+    createdAt: r.created_at.slice(0, 10),
+    hasPassword: r.has_password === 1,
+    wasInvited: r.was_invited === 1,
+    fromNomination: r.from_nomination === 1,
+    activationToken: r.activation_token,
+    holdings: {
+      events: r.c_events,
+      organizations: r.c_orgs,
+      nominations: r.c_nominations,
+      determinations: r.c_determinations,
+      inspections: r.c_inspections,
+      venues: r.c_venues,
+      facilities: r.c_facilities,
+    },
+  }));
 }
 
 /** Counts only. Nothing here names an organizer, an account, an event or a patient. */

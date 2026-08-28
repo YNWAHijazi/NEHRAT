@@ -27,6 +27,7 @@ import {
   filingDeadline,
   requirementsForParty,
   type Level,
+  bilingualMap,
 } from '../../../lib/rules';
 import type { NominationBriefing } from '../../../lib/queries';
 
@@ -192,8 +193,8 @@ export function Briefing({
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
             {briefing.otherParties.map((p, i) => {
-              const state = (N.partyStates as Record<string, { en: string; ar: string }>)[p.status];
-              const kindLabel = (N.kinds as Record<string, { en: string; ar: string }>)[p.kind];
+              const state = bilingualMap(N.partyStates)[p.status];
+              const kindLabel = bilingualMap(N.kinds)[p.kind];
               return (
                 <div key={`${p.kind}-${i}`} style={{ background: 'var(--bg)', padding: '13px 18px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span style={{ fontSize: '14px', flex: 1, minWidth: 220 }}>

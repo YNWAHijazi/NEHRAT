@@ -42,3 +42,10 @@ export function checkPasswordPolicy(password: string): PolicyCheck {
 }
 
 export const RESET_EXPIRY_MINUTES: number = AUTH_POLICY.reset.linkExpiryMinutes;
+
+/**
+ * An activation link's window. Longer than a reset's by design: a reset answers
+ * somebody at their keyboard now, an activation reaches somebody who has just been
+ * told an account exists for them. An hour would expire before it arrived.
+ */
+export const ACTIVATION_EXPIRY_HOURS: number = AUTH_POLICY.reset.activationExpiryHours;

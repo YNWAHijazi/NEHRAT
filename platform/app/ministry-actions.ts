@@ -10,7 +10,10 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { randomBytes } from 'node:crypto';
 import { getDb } from '../lib/db';
+import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
+import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
 import { currentAccount } from '../lib/auth';
 import {
   MINISTRY_CONTENT,
@@ -544,21 +547,72 @@ export async function reverseOrganizationRecordingAction(orgId: number, formData
 }
 
 /**
- * User administration: add a Ministry account, change a role, suspend or lift.
- * Guard rails, each stated on the screen too: only Ministry-side roles are
- * assignable here (organizer-side accounts are made by registration and
- * nomination, never by an administrator); nobody edits their own row, so the
- * console cannot lock itself out or promote itself; a created account signs in
- * by email once credentials are issued out of band.
+ * ACCOUNT ADMINISTRATION, across every account (reviewer ruling, 2026-08-28).
+ *
+ * What changed and why each part of it changed:
+ *
+ * THE ADMINISTRATOR NEVER SETS OR SEES A PASSWORD. addMinistryUserAction used to
+ * insert an account with NO password_hash and tell the administrator that credentials
+ * were "issued out of band" -- which meant the account could not sign in at all and
+ * nothing on the screen said so. Creating an account now issues an ACTIVATION LINK
+ * and the recipient sets their own credential against it. An administrator who can
+ * set a password can sign in as that person, and on a platform where a reviewer's
+ * determination is the regulatory instrument, that is not a convenience worth having.
+ *
+ * EVERY ROLE, not five. The console listed Ministry-side accounts only, so an
+ * organizer, a provider, a Director or a first-response unit could not be seen here,
+ * let alone suspended.
+ *
+ * THE TWO UNTOUCHABLE ROWS are unchanged and now enforced through lib/rules: nobody
+ * edits their own row, and the platform owner's seat is above this console. The bar
+ * is returned as a REASON so the screen can name who holds the row rather than
+ * rendering a control that does nothing (non-negotiable 10).
  */
-const ASSIGNABLE_ROLES = ['reviewer', 'inspector', 'ministry_admin', 'order'] as const;
+
+/** Resolves the target and the reason an administrator may not act on it. */
+function targetOf(
+  actor: { id: number; isDemo: boolean },
+  login: string,
+): { id: number; role: string; displayName: string } | null {
+  const row = getDb()
+    .prepare(`SELECT id, role, display_name, is_demo FROM accounts WHERE login = ?`)
+    .get(login) as { id: number; role: string; display_name: string; is_demo: number } | undefined;
+  if (!row) return null;
+  // Demonstration isolation is symmetric: an administrator acts within their own
+  // world in both directions, or a real one could suspend a showcase account and a
+  // demonstration one could suspend a real reviewer.
+  if ((row.is_demo === 1) !== actor.isDemo) return null;
+  const bar = administrationBar(
+    { id: actor.id, isDemo: actor.isDemo },
+    { id: row.id, role: row.role, isDemo: row.is_demo === 1 },
+  );
+  if (bar !== null) return null;
+  return { id: row.id, role: row.role, displayName: row.display_name };
+}
+
+/** Issues a single-use activation link. Replacing one stops the previous working. */
+function issueActivation(accountId: number, issuedBy: number): string {
+  const db = getDb();
+  // A new link supersedes the old: two live links to one account would mean a
+  // withdrawn invitation could still be used.
+  db.prepare(
+    `UPDATE password_resets SET used_at = now_stamp()
+     WHERE account_id = ? AND kind = 'activation' AND used_at IS NULL`,
+  ).run(accountId);
+  const token = randomBytes(32).toString('hex');
+  db.prepare(
+    `INSERT INTO password_resets (token, account_id, kind, issued_by, expires_at)
+     VALUES (?, ?, 'activation', ?, datetime('now', ?))`,
+  ).run(token, accountId, issuedBy, `+${ACTIVATION_EXPIRY_HOURS} hours`);
+  return token;
+}
 
 export async function addMinistryUserAction(formData: FormData): Promise<void> {
   const actor = await requireMinistry('manageUsers');
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const role = String(formData.get('role') ?? '');
-  if (!name || !email || !(ASSIGNABLE_ROLES as readonly string[]).includes(role)) {
+  if (!name || !email || !isAssignableRole(role)) {
     redirect('/ministry/admin/users?error=fields');
   }
   const db = getDb();
@@ -566,25 +620,42 @@ export async function addMinistryUserAction(formData: FormData): Promise<void> {
     redirect('/ministry/admin/users?error=email-taken');
   }
   const initials = name.split(/\s+/).map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase();
-  // Demo isolation is symmetric: a demonstration administrator makes demonstration
-  // accounts; a real one makes real accounts.
-  db.prepare(
-    `INSERT INTO accounts (login, email, display_name, initials, role, is_demo)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-  ).run(`moph_${Date.now().toString(36)}`, email, name, initials, role, actor.isDemo ? 1 : 0);
+  // NO password_hash is written here, and none is accepted from the form. The column
+  // stays NULL until the holder sets one through their activation link.
+  const created = db
+    .prepare(
+      `INSERT INTO accounts (login, email, display_name, initials, role, is_demo)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(`acct_${randomBytes(6).toString('hex')}`, email, name, initials, role, actor.isDemo ? 1 : 0);
+  const token = issueActivation(created.lastInsertRowid as number, actor.id);
   revalidatePath('/ministry/admin/users');
-  redirect('/ministry/admin/users?notice=added');
+  redirect(`/ministry/admin/users?notice=invited&token=${token}`);
+}
+
+/** Re-issues the link for an account that never activated. */
+export async function reissueActivationAction(login: string): Promise<void> {
+  const actor = await requireMinistry('manageUsers');
+  const target = targetOf(actor, login);
+  if (!target) redirect('/ministry/admin/users');
+  const row = getDb()
+    .prepare(`SELECT password_hash FROM accounts WHERE id = ?`)
+    .get(target.id) as { password_hash: string | null } | undefined;
+  // An activated account does not get an activation link. Its holder resets their own
+  // password; an administrator issuing one here would be a way to take the account.
+  if (!row || row.password_hash !== null) redirect('/ministry/admin/users?error=already-active');
+  const token = issueActivation(target.id, actor.id);
+  revalidatePath('/ministry/admin/users');
+  redirect(`/ministry/admin/users?notice=reissued&token=${token}`);
 }
 
 export async function changeUserRoleAction(login: string, formData: FormData): Promise<void> {
   const actor = await requireMinistry('manageUsers');
   const role = String(formData.get('role') ?? '');
-  if (!(ASSIGNABLE_ROLES as readonly string[]).includes(role)) redirect('/ministry/admin/users');
-  const db = getDb();
-  const target = db.prepare(`SELECT id, login, role FROM accounts WHERE login = ?`).get(login) as { id: number; login: string; role: string } | undefined;
-  // Never your own row, and never the platform owner's -- that seat is above this console.
-  if (!target || target.id === actor.id || target.role === 'platform_owner') redirect('/ministry/admin/users');
-  db.prepare(`UPDATE accounts SET role = ? WHERE id = ?`).run(role, target.id);
+  if (!isAssignableRole(role)) redirect('/ministry/admin/users');
+  const target = targetOf(actor, login);
+  if (!target) redirect('/ministry/admin/users');
+  getDb().prepare(`UPDATE accounts SET role = ? WHERE id = ?`).run(role, target.id);
   revalidatePath('/ministry/admin/users');
   redirect('/ministry/admin/users?notice=role-changed');
 }
@@ -592,10 +663,9 @@ export async function changeUserRoleAction(login: string, formData: FormData): P
 export async function setUserSuspensionAction(login: string, formData: FormData): Promise<void> {
   const actor = await requireMinistry('manageUsers');
   const suspend = String(formData.get('suspend') ?? '') === '1';
-  const db = getDb();
-  const target = db.prepare(`SELECT id, role FROM accounts WHERE login = ?`).get(login) as { id: number; role: string } | undefined;
-  if (!target || target.id === actor.id || target.role === 'platform_owner') redirect('/ministry/admin/users');
-  db.prepare(`UPDATE accounts SET suspended = ? WHERE id = ?`).run(suspend ? 1 : 0, target.id);
+  const target = targetOf(actor, login);
+  if (!target) redirect('/ministry/admin/users');
+  getDb().prepare(`UPDATE accounts SET suspended = ? WHERE id = ?`).run(suspend ? 1 : 0, target.id);
   revalidatePath('/ministry/admin/users');
   redirect(`/ministry/admin/users?notice=${suspend ? 'suspended' : 'reinstated'}`);
 }

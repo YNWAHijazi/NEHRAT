@@ -22,6 +22,7 @@ import {
   ATTESTATIONS_CONTENT,
   DOMAINS,
   MAJOR_INCIDENT_ITEMS,
+  bilingualMap,
   MINISTRY_CONTENT,
   PLAN_SECTIONS,
   NEHRAT_TOOL_VERSION,
@@ -116,7 +117,7 @@ export default async function SubmissionReviewPage({
    * action reads as a missing feature rather than a withheld one.
    */
   const OwnerNote = ({ panel }: { panel: 'determinations' | 'inspections' | 'attestations' | 'measures' }) => {
-    const note = (MINISTRY_CONTENT.panelOwners as unknown as Record<string, { en: string; ar: string }>)[panel]!;
+    const note = bilingualMap(MINISTRY_CONTENT.panelOwners)[panel]!;
     return (
       <div
         data-region={`owner-${panel}`}
@@ -365,7 +366,7 @@ export default async function SubmissionReviewPage({
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {counterpartyDocs.map((c) => {
-                const state = (CD.states as Record<string, { en: string; ar: string }>)[c.source];
+                const state = bilingualMap(CD.states)[c.source];
                 const outstanding = c.source === 'requested' || c.source === 'missing';
                 return (
                   <div key={c.id} style={{ background: 'var(--bg)', padding: '12px 16px', borderInlineStart: `3px solid ${outstanding ? 'var(--bad)' : 'var(--brand)'}` }}>

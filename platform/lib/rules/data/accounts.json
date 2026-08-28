@@ -1,0 +1,125 @@
+{
+  "$comment": "Account administration copy. The administrator never sets or sees a password: creating an account issues an activation link and the recipient sets their own credential.",
+  "titleEn": "Accounts",
+  "titleAr": "الحسابات",
+  "introEn": "Every account on the platform, with how it came to exist. Ministry roles are not self-registerable; organizer, provider and Director accounts arrive by registration or by nomination.",
+  "introAr": "كل حساب على المنصة، وكيف نشأ. لا يمكن التسجيل الذاتي في أدوار الوزارة؛ أما حسابات المنظّمين والمزوّدين والمديرين الطبيين فتأتي بالتسجيل أو بالترشيح.",
+  "origins": {
+    "demonstration": {
+      "en": "Demonstration account",
+      "ar": "حساب توضيحي"
+    },
+    "invitedPending": {
+      "en": "Invited — not yet activated",
+      "ar": "مدعوّ — لم يُفعَّل بعد"
+    },
+    "invitedActive": {
+      "en": "Invited by an administrator",
+      "ar": "دعاه مسؤول"
+    },
+    "nominated": {
+      "en": "Registered against a nomination",
+      "ar": "سُجّل مقابل ترشيح"
+    },
+    "selfRegistered": {
+      "en": "Registered directly",
+      "ar": "سجّل مباشرة"
+    },
+    "outOfBand": {
+      "en": "Issued out of band",
+      "ar": "صدر خارج المنصة"
+    }
+  },
+  "originNotes": {
+    "demonstration": {
+      "en": "A seeded row. It exists so the Ministry can walk the platform, and it is excluded from the national registry and every aggregate.",
+      "ar": "سجل مُهيّأ. وُجد ليتيح للوزارة تصفّح المنصة، وهو مستثنى من السجل الوطني ومن كل تجميع."
+    },
+    "invitedPending": {
+      "en": "An activation link was issued and has not been used. This account cannot sign in until the holder sets their own password.",
+      "ar": "صدر رابط تفعيل ولم يُستخدَم. ولا يمكن لهذا الحساب تسجيل الدخول قبل أن يضع صاحبه كلمة مروره."
+    },
+    "outOfBand": {
+      "en": "Ministry roles are not self-registerable and nothing in the platform creates one. This account was issued by the out-of-band script.",
+      "ar": "لا يمكن التسجيل الذاتي في أدوار الوزارة ولا ينشئها شيء داخل المنصة. صدر هذا الحساب عبر أداة خارج المنصة."
+    }
+  },
+  "holdings": {
+    "events": {
+      "en": "{n} event record(s)",
+      "ar": "⁦{n}⁩ سجل فعالية"
+    },
+    "organizations": {
+      "en": "{n} organization registration(s)",
+      "ar": "⁦{n}⁩ تسجيل مؤسسة"
+    },
+    "nominations": {
+      "en": "{n} nomination(s) accepted or answered",
+      "ar": "⁦{n}⁩ ترشيح مقبول أو مُجاب"
+    },
+    "determinations": {
+      "en": "{n} determination(s) recorded under this name",
+      "ar": "⁦{n}⁩ نتيجة مسجَّلة باسم هذا الحساب"
+    },
+    "inspections": {
+      "en": "{n} inspection(s) recorded under this name",
+      "ar": "⁦{n}⁩ تفتيش مسجَّل باسم هذا الحساب"
+    },
+    "venues": {
+      "en": "{n} venue record(s)",
+      "ar": "⁦{n}⁩ سجل موقع"
+    },
+    "facilities": {
+      "en": "{n} facility record(s)",
+      "ar": "⁦{n}⁩ سجل مرفق"
+    }
+  },
+  "holdsNothingEn": "This account holds no records.",
+  "holdsNothingAr": "لا يحمل هذا الحساب أي سجلات.",
+  "bars": {
+    "ownRow": {
+      "en": "This is your own account. An administrator cannot change their own role or suspend themselves — the console must not be able to lock itself out or promote itself.",
+      "ar": "هذا حسابكم. ولا يمكن لمسؤول تغيير دوره أو تعليق نفسه — إذ يجب ألا يتمكن النظام من إقفال نفسه أو ترقية نفسه."
+    },
+    "platformOwner": {
+      "en": "The platform owner's account sits above this console. It sees counts and performs no regulatory action, and its role is not changed from here.",
+      "ar": "حساب مالك المنصة فوق هذه الشاشة. فهو يرى الأعداد ولا يقوم بأي إجراء تنظيمي، ولا يُغيَّر دوره من هنا."
+    }
+  },
+  "suspendTitleEn": "Suspend this account",
+  "suspendTitleAr": "تعليق هذا الحساب",
+  "suspendBodyEn": "The account stops answering on its next request — suspension is immediate, not deferred to the next sign-in. Its records are untouched and remain readable to the Ministry.",
+  "suspendBodyAr": "يتوقف الحساب عن الاستجابة عند طلبه التالي — فالتعليق فوري ولا يُؤجَّل إلى تسجيل الدخول التالي. أما سجلاته فلا تُمَس وتبقى مقروءة للوزارة.",
+  "restoreTitleEn": "Restore this account",
+  "restoreTitleAr": "إعادة تفعيل هذا الحساب",
+  "restoreBodyEn": "The account signs in again from its next attempt. Nothing else changes.",
+  "restoreBodyAr": "يعود الحساب إلى تسجيل الدخول من محاولته التالية. ولا يتغير شيء آخر.",
+  "roleChangeTitleEn": "Change the role",
+  "roleChangeTitleAr": "تغيير الدور",
+  "roleChangeBodyEn": "A role decides which surfaces the account reaches. Changing it does not move or delete anything the account holds, but the holder loses the screens their old role reached.",
+  "roleChangeBodyAr": "يحدد الدور الشاشات التي يصل إليها الحساب. ولا يؤدي تغييره إلى نقل أو حذف ما يحمله الحساب، لكن صاحبه يفقد الشاشات التي كان دوره السابق يصل إليها.",
+  "inviteTitleEn": "Create an account",
+  "inviteTitleAr": "إنشاء حساب",
+  "inviteBodyEn": "The platform issues an activation link. The person sets their own password against it. No administrator sets or sees a password.",
+  "inviteBodyAr": "تُصدر المنصة رابط تفعيل. ويضع الشخص كلمة مروره بنفسه من خلاله. ولا يضع أي مسؤول كلمة مرور ولا يطّلع عليها.",
+  "inviteLinkLabelEn": "The activation link — hand it to the person it names",
+  "inviteLinkLabelAr": "رابط التفعيل — سلّموه إلى الشخص الذي يسمّيه",
+  "inviteLinkNoteEn": "It sets a password once and then stops working. The token is unguessable; share it only with the person it names.",
+  "inviteLinkNoteAr": "يضع كلمة مرور مرة واحدة ثم يتوقف عن العمل. والرمز غير قابل للتخمين؛ فلا تشاركوه إلا مع الشخص الذي يسمّيه.",
+  "reissueEn": "Issue a new link",
+  "reissueAr": "إصدار رابط جديد",
+  "reissueNoteEn": "Issuing a new link stops the previous one working.",
+  "reissueNoteAr": "إصدار رابط جديد يوقف عمل الرابط السابق.",
+  "activateTitleEn": "Set your password",
+  "activateTitleAr": "ضعوا كلمة مروركم",
+  "activateBodyEn": "This link was issued for your account. Set a password and you are signed in. Nobody else has set or seen one for you.",
+  "activateBodyAr": "صدر هذا الرابط لحسابكم. ضعوا كلمة مرور وتُسجَّل دخولكم. ولم يضع أحد غيركم كلمة مرور لكم ولم يطّلع عليها.",
+  "activateDeadEn": "This link is no longer usable. It may have been used already, replaced by a newer link, or it may have expired. Ask the Ministry for a new one.",
+  "activateDeadAr": "لم يعد هذا الرابط صالحاً للاستخدام. ربما استُخدم سابقاً أو استُبدل برابط أحدث أو انتهت صلاحيته. اطلبوا من الوزارة رابطاً جديداً.",
+  "pendingChipEn": "Pending",
+  "pendingChipAr": "معلَّق",
+  "suspendedChipEn": "Suspended",
+  "suspendedChipAr": "مُعلَّق الوصول",
+  "activeChipEn": "Active",
+  "activeChipAr": "نشط"
+}

@@ -160,6 +160,49 @@ export async function requestPasswordResetAction(formData: FormData): Promise<vo
   redirect('/signin?mode=reset&notice=reset-sent');
 }
 
+/**
+ * Consumes a single-use link and sets the holder's OWN password.
+ *
+ * One action for both kinds. An activation (an administrator created the account and
+ * the holder has never had a credential) and a reset (they have one and cannot use
+ * it) are the same act: prove you hold the link, choose a secret nobody else has
+ * seen. Splitting them would give two places for the password policy to drift apart.
+ *
+ * The link is spent whether or not the sign-in that follows succeeds, and it is spent
+ * in the SAME statement that checks it is unspent -- an UPDATE ... WHERE used_at IS
+ * NULL, so two submissions of the same link cannot both find it live.
+ */
+export async function setPasswordFromLinkAction(token: string, formData: FormData): Promise<void> {
+  const password = String(formData.get('password') ?? '');
+  const confirm = String(formData.get('confirm') ?? '');
+  if (password !== confirm) redirect(`/activate/${token}?error=mismatch`);
+  if (!checkPasswordPolicy(password).ok) redirect(`/activate/${token}?error=policy`);
+
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT p.account_id FROM password_resets p JOIN accounts a ON a.id = p.account_id
+       WHERE p.token = ? AND p.used_at IS NULL AND p.expires_at > now_stamp()
+         AND a.suspended = 0`,
+    )
+    .get(token) as { account_id: number } | undefined;
+  if (!row) redirect(`/activate/${token}`);
+
+  const spent = db
+    .prepare(`UPDATE password_resets SET used_at = now_stamp() WHERE token = ? AND used_at IS NULL`)
+    .run(token);
+  // Lost the race: another submission of the same link got there first.
+  if (spent.changes === 0) redirect(`/activate/${token}`);
+
+  db.prepare(`UPDATE accounts SET password_hash = ? WHERE id = ?`).run(
+    hashPassword(password),
+    row.account_id,
+  );
+  await startSession(row.account_id);
+  const account = await currentAccount();
+  redirect(account ? landingRouteFor(account.role) : '/signin');
+}
+
 export async function signOutAction(): Promise<void> {
   await endSession();
   redirect('/signin');

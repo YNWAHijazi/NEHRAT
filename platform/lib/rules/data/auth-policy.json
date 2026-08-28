@@ -8,6 +8,8 @@
   },
   "reset": {
     "linkExpiryMinutes": 60,
-    "singleUse": true
+    "singleUse": true,
+    "$commentActivation": "An activation link is the same mechanism with a different window. A reset answers a person who is at their keyboard now; an activation reaches somebody who has just been told an account exists for them and may not read their mail today. One hour would expire before it arrived.",
+    "activationExpiryHours": 168
   }
 }

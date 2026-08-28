@@ -7,6 +7,7 @@
  */
 
 import matrixJson from './data/requirements-matrix.json';
+import { bilingualMap } from './bilingual-map';
 import type { Level } from './types';
 
 export interface RequirementRow {
@@ -31,7 +32,7 @@ export interface RequirementRow {
   partyKeys: readonly string[];
 }
 
-const PARTIES = matrixJson.parties as Record<string, { en: string; ar: string }>;
+const PARTIES = bilingualMap(matrixJson.parties);
 
 export function requirementsForLevel(level: Level): RequirementRow[] {
   const rows: RequirementRow[] = [];

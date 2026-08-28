@@ -12,6 +12,7 @@
  */
 
 import matrixJson from './data/requirements-matrix.json';
+import { bilingualMap } from './bilingual-map';
 import rolesJson from './data/roles.json';
 import complianceJson from './data/compliance-form.json';
 import type { Level } from './types';
@@ -34,7 +35,7 @@ export interface DirectorRequirement {
 
 import { requirementsForParty } from './requirements';
 
-const PARTIES = matrixJson.parties as Record<string, { en: string; ar: string }>;
+const PARTIES = bilingualMap(matrixJson.parties);
 
 /**
  * The rows naming the Event Medical Director at the level. At any level below 3 the

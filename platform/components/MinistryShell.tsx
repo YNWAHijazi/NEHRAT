@@ -10,7 +10,7 @@ import { GovernmentBand } from './Header';
 import { LangToggle, SignOutButton } from './HeaderMenus';
 import { L } from './L';
 import type { Account } from '../lib/auth';
-import { MINISTRY_CONTENT } from '../lib/rules';
+import { MINISTRY_CONTENT, bilingualMap } from '../lib/rules';
 
 export function MinistryShell({
   account,
@@ -26,7 +26,7 @@ export function MinistryShell({
   /** Back pill named after its destination; absent only on the console's own dashboard. */
   back?: { href: string; en: string; ar: string };
 }) {
-  const roleLabel = (MINISTRY_CONTENT.roleLabels as Record<string, { en: string; ar: string }>)[account.role] ?? {
+  const roleLabel = bilingualMap(MINISTRY_CONTENT.roleLabels)[account.role] ?? {
     en: account.role,
     ar: account.role,
   };

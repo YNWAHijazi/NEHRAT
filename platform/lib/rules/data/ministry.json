@@ -396,6 +396,23 @@
     "platform_owner": {
       "en": "Platform owner",
       "ar": "مالك المنصة"
+    },
+    "$comment": "Every role a person can hold, not only the Ministry-side ones. The counterparty roles were absent, so the account console rendered them as raw keys -- 'organizer', 'ems' -- in its rows and its role selector. A console that administers all nine roles must be able to name all nine.",
+    "organizer": {
+      "en": "Organizer",
+      "ar": "المنظِّم"
+    },
+    "ems": {
+      "en": "EMS provider",
+      "ar": "مزوّد الإسعاف"
+    },
+    "director": {
+      "en": "Event Medical Director",
+      "ar": "المدير الطبي للفعالية"
+    },
+    "response": {
+      "en": "First-response unit",
+      "ar": "وحدة الاستجابة الأولى"
     }
   },
   "reviewPlan": {
