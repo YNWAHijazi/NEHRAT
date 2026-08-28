@@ -31,12 +31,20 @@ screen in English and once with every screen in Arabic, from the first request.
 has been built: an overview, three service detail screens, a branching applicability
 check and a lookup screen, all signed out and touching no account.
 
-**Two things remain unfinished, and neither is in that path:**
+**Slice 0 is complete**, including the search screen: the overview, three service detail
+screens, the branching applicability check, search, the lookup, and a Ministry contact
+screen that names who answers rather than offering a form to nowhere.
 
-1. **The AI assistance layer is not built**, deliberately. It needs its own decision
-   about what the assistants may see.
-2. **The Order of Physicians lane is off**, as designed, which is why one of its powers
-   currently has no active account behind it.
+**Two things remain deliberately unbuilt, and neither is in that path.** Both are now
+recorded as decisions in `lib/rules/deferred.ts` and rendered on the administrator's
+Configuration tab, so an absent capability cannot be mistaken for a forgotten one:
+
+1. **The assistance layer.** The product specification describes it; the regulation does
+   not require it, and nothing in a Ministry review depends on one — every determination
+   is reached by a person reading a record. Building it means deciding what an assistant
+   may see, which is a data-protection question and deserves its own conversation.
+2. **Commercial capability.** It exists behind switches and is off. Nothing commercial
+   renders anywhere.
 
 Everything else in this report is detail behind that answer.
 
@@ -96,7 +104,7 @@ drawn. Section 5 lists them by kind.
 
 **True, and the second half of that sentence has been the main work of the last week.**
 
-The chain completed green. It is 337 unit and structural tests across 30 files, 111
+The chain completed green. It is 337 unit and structural tests across 30 files, 121
 application journeys, and 103 image comparisons across 51 screens in both languages. But a green suite proves nothing if the checks do not check. Five defects of
 exactly that kind were found and closed — described in section 6, because they are the
 most useful thing in this report for anyone maintaining the platform afterwards.
@@ -295,7 +303,7 @@ None of these is a defect. Each needs a name against it.
 | | |
 |---|---|
 | Unit and structural tests | 337, across 30 files |
-| Application journeys | 111 |
+| Application journeys | 121 |
 | Prototype image comparisons | 103, both languages |
 | Screens compared | 51 |
 | Regions compared | 109 |

@@ -30,8 +30,15 @@
  * this guard cannot see, and if the alias were ever the only reference the rule would
  * pass as wired while nothing called it under its own name.
  *
- * It also matches on plain text, so a rule named in a comment counts as a use. Comments
- * naming a rule you have just deleted will keep it looking wired.
+ * COMMENT LINES ARE NOW SKIPPED, and the reason is that this looseness stopped being
+ * theoretical. A new export named DEFERRED passed as wired because an unrelated file
+ * carried the words "THE DEFERRED DECISION IS TAKEN" in a docstring -- a guard built to
+ * catch checks that pass without checking, passing without checking. A rule named only
+ * in prose is documented, not wired.
+ *
+ * What remains: a trailing comment on a line of real code still counts, and an aliased
+ * import is still invisible. Both are narrower than what they replace and both are
+ * recorded here rather than discovered again.
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -92,6 +99,8 @@ describe('every lib/rules export is wired', () => {
             // import lines anywhere prove nothing by themselves.
             continue;
           }
+          // A rule named in a comment is documentation, not wiring.
+          if (/^\s*(\/\/|\*|\/\*)/.test(line)) continue;
           if (pattern.test(line)) {
             used = true;
             break;

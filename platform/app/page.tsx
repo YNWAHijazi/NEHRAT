@@ -31,9 +31,31 @@ export default async function OverviewPage() {
       <h1 data-sec-h1="" data-region="hero" style={{ margin: '8px 0 16px', fontSize: 40, fontWeight: 600, letterSpacing: '-.035em', lineHeight: 1.2, maxWidth: '20ch' }}>
         <L en="National Health and Medical Readiness" ar="الجاهزية الصحية والطبية الوطنية" />
       </h1>
-      <p style={{ margin: '0 0 32px', fontSize: 19, lineHeight: 1.6, color: 'var(--muted)', maxWidth: '62ch' }}>
+      <p style={{ margin: '0 0 24px', fontSize: 19, lineHeight: 1.6, color: 'var(--muted)', maxWidth: '62ch' }}>
         <L en={P.heroEn} ar={P.heroAr} />
       </p>
+
+      {/* THE HERO FIELD. Most people arrive with a question rather than a
+          destination, and the four chips are the questions they actually arrive with. */}
+      <form method="get" action="/search" data-region="hero-search" style={{ maxWidth: 620, marginBlockEnd: 12 }}>
+        <input
+          name="q"
+          aria-label="Search"
+          placeholder={P.searchPlaceholderEn}
+          style={{ height: 52, paddingInline: 18, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 26, fontSize: 16, inlineSize: '100%' }}
+        />
+      </form>
+      <div data-region="hero-chips" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 40 }}>
+        {P.chips.map((c) => (
+          <Link
+            key={c.q}
+            href={`/search?q=${encodeURIComponent(c.q)}`}
+            style={{ paddingBlock: 7, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 999, fontSize: '13px', color: 'var(--muted)' }}
+          >
+            <L en={c.en} ar={c.ar} />
+          </Link>
+        ))}
+      </div>
 
       {/* SERVICES — the three regulated processes, as the primary route in. */}
       <h2 style={{ margin: '0 0 8px', fontSize: 26, fontWeight: 600, letterSpacing: '-.025em' }}>

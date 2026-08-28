@@ -151,3 +151,83 @@ export function facilityApplicability(categoryIndex: number): FacilityAnswer | n
     missingAr: cat.missingAr ?? null,
   };
 }
+
+/* ---------------- search ---------------- */
+
+/**
+ * A Ministry reference number, recognised by shape.
+ *
+ * The search field takes one question, and a reference number is a different KIND of
+ * question from "what are the deadlines" -- it asks the register about one record
+ * rather than asking the platform about itself. Recognising it by shape means a person
+ * holding a reference can paste it into the one field on the page and be taken to the
+ * right tool, instead of having to know which of two tools they wanted.
+ */
+export const REFERENCE_SHAPE = /^MOPH-EV-\d{4}-\d{4}$/;
+
+export function looksLikeReference(query: string): boolean {
+  return REFERENCE_SHAPE.test(query.trim().toUpperCase());
+}
+
+export interface SearchHit {
+  en: string;
+  ar: string;
+  kindEn: string;
+  kindAr: string;
+  route: string;
+}
+
+const ROUTE_OF: Record<string, string> = {
+  applic: '/applicability',
+  service: '/services/certify-an-event',
+  venue: '/services/register-a-venue',
+  facility: '/services/register-a-facility',
+  home: '/',
+};
+
+/** Whether a haystack answers a query. Every word must appear somewhere. */
+function matches(query: string, haystack: string): boolean {
+  const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 1);
+  if (words.length === 0) return false;
+  const hay = haystack.toLowerCase();
+  return words.every((w) => hay.includes(w));
+}
+
+/**
+ * THE THREE KINDS OF RESULT, in the order a person needs them: a service they can
+ * start, a requirement or piece of guidance that answers the question, and -- if what
+ * they typed is a reference number -- the register.
+ *
+ * Bilingual keywords are matched, so a search in Arabic finds the same things as the
+ * same search in English. That is not decoration: the platform's users mostly type
+ * Arabic, and a search that only understood English would make the Arabic side a
+ * translation of a tool rather than the tool.
+ */
+export function searchServices(query: string): SearchHit[] {
+  return (landingJson.services as { k: string; en: string; ar: string; kw?: string }[])
+    .filter((s) => matches(query, `${s.en} ${s.ar} ${s.kw ?? ''}`))
+    .map((s) => ({
+      en: s.en,
+      ar: s.ar,
+      kindEn: 'Service',
+      kindAr: 'خدمة',
+      route:
+        s.k === 'certify'
+          ? '/services/certify-an-event'
+          : s.k === 'venue'
+            ? '/services/register-a-venue'
+            : '/services/register-a-facility',
+    }));
+}
+
+export function searchGuidance(query: string): SearchHit[] {
+  return (landingJson.guidance as { en: string; ar: string; kindEn: string; kindAr: string; kw: string; go: string }[])
+    .filter((g) => matches(query, `${g.en} ${g.ar} ${g.kw}`))
+    .map((g) => ({
+      en: g.en,
+      ar: g.ar,
+      kindEn: g.kindEn,
+      kindAr: g.kindAr,
+      route: ROUTE_OF[g.go] ?? '/',
+    }));
+}

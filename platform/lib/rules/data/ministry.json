@@ -731,6 +731,14 @@
     "neverSeenEn": "Never signed in",
     "neverSeenAr": "لم يسجّل الدخول قط",
     "createdEn": "Created",
-    "createdAr": "أُنشئ"
+    "createdAr": "أُنشئ",
+    "deferredTitleEn": "Capability deliberately not built",
+    "deferredTitleAr": "إمكانات لم تُبنَ عمداً",
+    "deferredBodyEn": "An absent feature with no record looks the same as one somebody forgot. Each of these was considered, decided against for the reason given, and carries the condition under which it would be built.",
+    "deferredBodyAr": "الميزة الغائبة بلا سجل تبدو كالميزة التي نسيها أحدهم. وقد نُظر في كل من هذه، وتقرر عدم بنائها للسبب المذكور، ويحمل كل منها الشرط الذي تُبنى بموجبه.",
+    "deferredReasonEn": "Why not",
+    "deferredReasonAr": "لماذا لا",
+    "deferredConditionEn": "What would change it",
+    "deferredConditionAr": "ما الذي يغيّر ذلك"
   }
 }

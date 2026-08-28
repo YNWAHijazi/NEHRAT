@@ -32,21 +32,24 @@
       "en": "Certify an event",
       "ar": "اعتماد فعالية",
       "descEn": "Complete the assessment, meet the requirements your level sets, and file before your deadline.",
-      "descAr": "استكمال التقييم واستيفاء متطلبات مستواكم والتقديم قبل انتهاء المهلة."
+      "descAr": "استكمال التقييم واستيفاء متطلبات مستواكم والتقديم قبل انتهاء المهلة.",
+      "kw": "certify event certification submit submission assessment level deadline file organizer اعتماد فعالية تقديم تقييم مستوى مهلة"
     },
     {
       "k": "venue",
       "en": "Register a recurring venue",
       "ar": "تسجيل موقع فعاليات متكرر",
       "descEn": "A venue licensed for 1,000 persons or more that regularly hosts organized events is classified annually.",
-      "descAr": "يُصنَّف سنوياً الموقع المرخص لـ 1,000 شخص أو أكثر ويستضيف بانتظام فعاليات منظّمة."
+      "descAr": "يُصنَّف سنوياً الموقع المرخص لـ 1,000 شخص أو أكثر ويستضيف بانتظام فعاليات منظّمة.",
+      "kw": "venue recurring register classification annual hall stadium amphitheatre capacity sports موقع متكرر تصنيف سنوي ملعب قاعة سعة رياضي"
     },
     {
       "k": "facility",
       "en": "Register a facility",
       "ar": "تسجيل منشأة",
       "descEn": "Covered facilities register the facility, its coordinator and each defibrillator, and keep the response plan current.",
-      "descAr": "تسجّل المنشآت المشمولة المنشأة ومنسّقها وكل جهاز إزالة رجفان، وتحفظ خطة الاستجابة محدّثة."
+      "descAr": "تسجّل المنشآت المشمولة المنشأة ومنسّقها وكل جهاز إزالة رجفان، وتحفظ خطة الاستجابة محدّثة.",
+      "kw": "facility register gym fitness school university airport port terminal mall aquatic pool cardiac readiness منشأة تسجيل صالة رياضية مدرسة جامعة مطار ميناء مركز تجاري مسبح جاهزية قلب"
     }
   ],
   "criteria": [
@@ -175,5 +178,114 @@
   "notRoutinelyAr": [
     "العمليات الاعتيادية للمدارس والجامعات وأماكن العمل والتدريب الرياضي والرعاية الصحية والضيافة والتجزئة والعبادة ومرافق اللياقة البدنية وغيرها من عمليات المرافق العادية غير خاضعة بصورة اعتيادية إلا إذا انطبق أحد المعايير أعلاه. وتبقى الفعالية الخاصة التي تُقام في مرفق كهذا خاضعة عند انطباق أحد المعايير.",
     "التجمعات العائلية أو الاجتماعية الخاصة الاعتيادية غير خاضعة بصورة اعتيادية إلا إذا بلغ الحضور 1,000 شخص، أو تطلّب التجمع ترخيصاً من سلطة مختصة، أو حددت الوزارة خطراً صحياً أو طبياً معيناً."
-  ]
+  ],
+  "guidance": [
+    {
+      "en": "The six applicability criteria",
+      "ar": "معايير الانطباق الستة",
+      "kindEn": "Requirement",
+      "kindAr": "متطلب",
+      "kw": "criteria applicability six subject scope attendance 1000 authorization designated referred",
+      "go": "applic"
+    },
+    {
+      "en": "What is not routinely subject",
+      "ar": "ما هو غير خاضع بصورة اعتيادية",
+      "kindEn": "Guidance",
+      "kindAr": "إرشاد",
+      "kw": "not routinely subject school university workplace training healthcare hospitality retail religious fitness private family gathering exempt",
+      "go": "applic"
+    },
+    {
+      "en": "Lead times — 7, 14 and 30 calendar days by level",
+      "ar": "المهل — 7 و14 و30 يوماً تقويمياً بحسب المستوى",
+      "kindEn": "Requirement",
+      "kindAr": "متطلب",
+      "kw": "lead time deadline days 7 14 30 file by submit when late short notice expedited",
+      "go": "service"
+    },
+    {
+      "en": "How Level 1, 2 and 3 are determined",
+      "ar": "كيف تُحدَّد المستويات 1 و2 و3",
+      "kindEn": "Guidance",
+      "kindAr": "إرشاد",
+      "kw": "level levels 1 2 3 score nine domains nehrat minimum condition classification explainer risk assessment",
+      "go": "home"
+    },
+    {
+      "en": "Required documents by level",
+      "ar": "الوثائق المطلوبة بحسب المستوى",
+      "kindEn": "Requirement",
+      "kindAr": "متطلب",
+      "kw": "documents required medical plan route map deployment map ems readiness declaration attachments",
+      "go": "service"
+    },
+    {
+      "en": "Cardiac-arrest readiness framework",
+      "ar": "إطار الجاهزية لتوقف القلب",
+      "kindEn": "Guidance",
+      "kindAr": "إرشاد",
+      "kw": "cardiac arrest readiness framework aed defibrillator cpr facility جاهزية توقف قلب إطار إنعاش",
+      "go": "facility"
+    },
+    {
+      "en": "Which facilities are covered",
+      "ar": "أي المنشآت مشمولة",
+      "kindEn": "Requirement",
+      "kindAr": "متطلب",
+      "kw": "covered facility category gym school university airport port terminal mall remote designated threshold phased schedule مشمولة فئة منشأة عتبة جدول مرحلي تحديد",
+      "go": "applic"
+    },
+    {
+      "en": "Where the two instruments meet",
+      "ar": "حيث يتلاقى الإطاران",
+      "kindEn": "Guidance",
+      "kindAr": "إرشاد",
+      "kw": "both instruments overlap higher governs reference reuse enter once stadium sports venue facility الإطاران الأعلى إحالة إدخال مرة واحدة ملعب",
+      "go": "home"
+    }
+  ],
+  "searchTitleEn": "Search",
+  "searchTitleAr": "بحث",
+  "searchPlaceholderEn": "A service, a requirement, or a Ministry reference number",
+  "searchPlaceholderAr": "خدمة أو متطلب أو رقم مرجعي لدى الوزارة",
+  "frequentEn": "Frequent",
+  "frequentAr": "الأكثر طلباً",
+  "chips": [
+    {
+      "en": "Do the rules apply to my event?",
+      "ar": "هل تنطبق القواعد على فعاليتي؟",
+      "q": "applicability"
+    },
+    {
+      "en": "Filing deadlines",
+      "ar": "مهل التقديم",
+      "q": "deadline"
+    },
+    {
+      "en": "Documents by level",
+      "ar": "المستندات بحسب المستوى",
+      "q": "documents"
+    },
+    {
+      "en": "Defibrillators in facilities",
+      "ar": "أجهزة إزالة الرجفان في المنشآت",
+      "q": "defibrillator"
+    }
+  ],
+  "servicesResultEn": "Services",
+  "servicesResultAr": "الخدمات",
+  "guidanceResultEn": "Requirements and guidance",
+  "guidanceResultAr": "المتطلبات والإرشادات",
+  "referenceResultEn": "Reference number lookup",
+  "referenceResultAr": "البحث عن رقم مرجعي",
+  "noResultsEn": "Nothing here matches that.",
+  "noResultsAr": "لا شيء هنا يطابق ذلك.",
+  "noResultsBodyEn": "Two things are worth trying. If you are asking whether the rules apply to something, the applicability check answers that directly. If you are asking something this platform does not cover, the Ministry answers it.",
+  "noResultsBodyAr": "هناك أمران يستحقان المحاولة. إذا كنتم تسألون عمّا إذا كانت القواعد تنطبق على شيء ما، فإن فحص الانطباق يجيب عن ذلك مباشرة. وإذا كان سؤالكم عمّا لا تغطيه هذه المنصة، فالوزارة هي التي تجيب عنه.",
+  "contactEn": "Ask the Ministry",
+  "contactAr": "سؤال الوزارة",
+  "contactBodyEn": "The Ministry of Public Health answers questions about scope and designation. Ask before the event rather than after it.",
+  "contactBodyAr": "تجيب وزارة الصحة العامة عن الأسئلة المتعلقة بالنطاق والتحديد. اسألوا قبل الفعالية لا بعدها.",
+  "$commentKeywords": "Search keywords carry no annex letters. The instrument names its parts by letter and this platform never does (SPEC 6): a person is told \"compliance and submission form\", not \"Annex C\". Matching a letter nobody is shown would be teaching the vocabulary the copy rules forbid, and the banned-terms sweep catches it here as it would anywhere else. A person searching by letter finds nothing; if the Ministry wants those synonyms, that is a decision to take rather than a default to inherit from the prototype."
 }

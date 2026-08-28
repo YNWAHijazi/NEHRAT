@@ -2,7 +2,7 @@ import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
-import { BANDS, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, filingDeadlineRule, type Level } from '../../../../lib/rules';
+import { BANDS, DEFERRED, MINISTRY_CONTENT, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, filingDeadlineRule, type Level } from '../../../../lib/rules';
 
 /**
  * Configuration and versioning -- the mass-gathering instrument's values, read
@@ -12,6 +12,7 @@ import { BANDS, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, fil
  */
 export default async function ConfigurationPage() {
   const account = await requireMinistryPage('configureMassGathering');
+  const AC = MINISTRY_CONTENT.adminConsole;
   const rows: { en: string; ar: string; value: string }[] = [
     { en: 'Risk assessment tool version', ar: 'إصدار أداة تقييم المخاطر (NEHRAT)', value: NEHRAT_TOOL_VERSION },
     { en: 'Level bands', ar: 'نطاقات المستويات', value: BANDS.map((b) => `L${b.level}: ${b.minScore}–${b.maxScore}`).join(' · ') },
@@ -46,6 +47,40 @@ export default async function ConfigurationPage() {
         { href: '/ministry/admin/cardiac', en: 'Cardiac-arrest configuration', ar: 'إعدادات الجاهزية لتوقف القلب', descEn: 'The ten powers and their publishable values.', descAr: 'الصلاحيات العشر وقيمها القابلة للنشر.' },
         { href: '/ministry/admin/registry', en: 'National registry', ar: 'السجل الوطني', descEn: 'Every record, demonstration rows excluded.', descAr: 'كل السجلات، مستثناةً صفوف العرض.' },
       ]} />
+      {/* WHAT IS DELIBERATELY NOT BUILT. On the Configuration tab because this screen
+          answers "what is set and what is unset", and a capability nobody built is the
+          same kind of fact as a value nobody published -- both are decisions the
+          Ministry can read and change. */}
+      <div data-region="deferred" style={{ marginBlockStart: 40 }}>
+        <h2 style={{ margin: '0 0 6px', fontSize: 19, fontWeight: 600, letterSpacing: '-.02em' }}>
+          <L en={AC.deferredTitleEn} ar={AC.deferredTitleAr} />
+        </h2>
+        <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
+          <L en={AC.deferredBodyEn} ar={AC.deferredBodyAr} />
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {DEFERRED.map((item) => (
+            <div key={item.key} style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--muted)', borderRadius: 10 }}>
+              <div style={{ fontSize: 16, fontWeight: 500, marginBlockEnd: 8 }}>
+                <L en={item.en} ar={item.ar} />
+              </div>
+              <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                <L en={AC.deferredReasonEn} ar={AC.deferredReasonAr} />
+              </div>
+              <p style={{ margin: '2px 0 10px', fontSize: '13px', lineHeight: 1.7, maxWidth: '84ch' }}>
+                <L en={item.reasonEn} ar={item.reasonAr} />
+              </p>
+              <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                <L en={AC.deferredConditionEn} ar={AC.deferredConditionAr} />
+              </div>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', lineHeight: 1.7, maxWidth: '84ch' }}>
+                <L en={item.conditionEn} ar={item.conditionAr} />
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </MinistryShell>
   );
 }
