@@ -55,17 +55,15 @@ test.describe('the outcome gate', () => {
     // attestable by the reviewer while the lane is off (open decision 19).
     await expect(att).toContainText('Assigned to the Order of Physicians, whose lane is off');
 
-    const outcome = page.locator('[data-region="outcome"]');
-    await expect(outcome).toContainText('Record the outcome');
-    // Both blocker classes are named against the gated outcome.
-    await expect(outcome).toContainText('Blocking inspection without recorded findings');
-    await expect(outcome).toContainText('Attestation pending');
-    // The gated-state copy, asserted HERE because it renders only while the gate is
-    // shut -- in the vocabulary test it raced this flow clearing the blockers.
-    await expect(outcome).toContainText(
-      'Everything must be complete before a clearance is shown. The other two outcomes stay available.',
-    );
-    const radios = outcome.locator('input[type="radio"]');
+    // EV-0362 carries a determination, so the FIRST-recording panel is not offered
+    // here -- recording is once. The same three options, gated by the same blockers,
+    // are in the revision panel, and the blockers are named there for the same
+    // reason (non-negotiable 10).
+    const revise = page.locator('[data-region="revise-determination"]');
+    await revise.locator('summary').click();
+    await expect(revise).toContainText('Blocking inspection without recorded findings');
+    await expect(revise).toContainText('Attestation pending');
+    const radios = page.locator('[data-region="outcome-options"] input[type="radio"]');
     await expect(radios.nth(0)).toBeEnabled(); // incomplete
     await expect(radios.nth(1)).toBeEnabled(); // revision
     await expect(radios.nth(2)).toBeDisabled(); // satisfied -- gated
@@ -83,9 +81,11 @@ test.describe('the outcome gate', () => {
     await expect(att).toContainText('All six attestations complete — a clearance may be recorded.');
 
     // Attestations clear, inspection still open: the gate must STILL be shut.
-    await expect(outcome).toContainText('Blocking inspection without recorded findings');
-    await expect(outcome).not.toContainText('Attestation pending');
-    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeDisabled();
+    const revise2 = page.locator('[data-region="revise-determination"]');
+    await revise2.locator('summary').click();
+    await expect(revise2).toContainText('Blocking inspection without recorded findings');
+    await expect(revise2).not.toContainText('Attestation pending');
+    await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeDisabled();
 
     // The inspector records the findings -- an inspector act, not an outcome.
     await signInAs(page, 'test_inspector');
@@ -107,7 +107,7 @@ test.describe('the outcome gate', () => {
     // Generous under full-suite dev-compile load; the state itself is instant. The
     // review screen now compiles the plan and attestation panels too, and 15s was
     // measured too tight on the full run.
-    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 30_000 });
+    await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 30_000 });
 
     // COMPLETION IS CORRECTABLE. A deficiency recorded against a complete item
     // returns it to pending and shuts the gate again -- an attestation recorded in
@@ -119,13 +119,13 @@ test.describe('the outcome gate', () => {
     await page.waitForURL('**/ministry/submissions/EV-0362');
     await expect(attNow).toContainText('1 of 6 pending');
     await expect(attNow).toContainText('The attached map omits the second treatment post.');
-    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeDisabled();
+    await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeDisabled();
 
     // And re-attesting reopens the gate, leaving the record clean for later tests.
     const reattest = attNow.locator('form:has(input[name="itemKey"][value="deploymentMap"]):has(input[value="attest"])');
     await reattest.locator('button').click();
     await page.waitForURL('**/ministry/submissions/EV-0362');
-    await expect(page.locator('[data-region="outcome"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 15_000 });
+    await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 15_000 });
   });
 
   test('below Level 3 the attestation panel is the explicit empty state, not nothing', async ({ page }) => {
@@ -178,7 +178,9 @@ test.describe('the pinned vocabulary', () => {
   // rides here until the prototype's glossary defect is corrected in Pass C.
   test('the outcome card and the limit sentences read verbatim, in both languages', async ({ page }) => {
     await signInAs(page, 'test_moph');
-    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
+    // EV-0455 is filed with NOTHING recorded, so the recording panel and its copy are
+    // on screen. EV-0362 already carries a determination and offers the revision.
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0455');
     const outcome = page.locator('[data-region="outcome"]');
     await expect(outcome).toContainText('Record an outcome');
     await expect(outcome).toContainText('Three outcomes exist. Nothing else is a determination.');
@@ -289,7 +291,10 @@ test.describe('scheduling an inspection', () => {
     await expect(form.locator('input[name="date"]')).toBeVisible();
     await expect(form.locator('input[name="blocking"]')).toBeVisible();
 
-    await form.locator('input[name="titleEn"]').fill('Deployment walk-through');
+    // A unique title: this test SCHEDULES, so a second run against the same database
+    // would match two rows and the count assertion would read as a defect.
+    const title = `Deployment walk-through ${Date.now().toString(36)}`;
+    await form.locator('input[name="titleEn"]').fill(title);
     await form.locator('input[name="titleAr"]').fill('جولة على الانتشار');
     await form.locator('input[name="blocking"]').check();
     await form.locator('button[type="submit"]').click();
@@ -298,15 +303,20 @@ test.describe('scheduling an inspection', () => {
     // Asserted by CONTENT, not by a count delta: the region's children include an
     // empty state before the first inspection and an owner note for roles that cannot
     // schedule, so the child count is not the number of inspections.
-    const row = page.locator('[data-region="inspections"] > div', { hasText: 'Deployment walk-through' });
+    const row = page.locator('[data-region="inspections"] > div', { hasText: title });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText('Blocking');
 
     // A BLOCKING INSPECTION WITH NO FINDINGS gates the satisfied outcome and nothing
     // else -- the other two determinations stay available throughout.
+    // EV-0301 carries a determination, so the gate shows on the REVISION panel: a
+    // blocking inspection with no findings gates the satisfied outcome whether the
+    // determination is a first one or a revision.
     await signInAs(page, 'test_moph');
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0301');
-    await expect(page.locator('[data-region="outcome"]')).toContainText('Deployment walk-through');
+    const gated = page.locator('[data-region="revise-determination"]');
+    await gated.locator('summary').click();
+    await expect(gated).toContainText(title);
   });
 
   test('the organizer is told, rather than finding out on the day', async ({ page }) => {

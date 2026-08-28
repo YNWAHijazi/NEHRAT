@@ -9,6 +9,7 @@
  */
 
 import attachmentsCatalog from './data/attachments-catalog.json';
+import { certificationBlockerText } from './certification';
 import complianceJson from './data/compliance-form.json';
 import lifecycleJson from './data/lifecycle.json';
 import planJson from './data/plan.json';
@@ -96,6 +97,8 @@ export interface SubmissionFacts {
   organizationStatus: 'none' | 'pending' | 'recorded' | 'returned';
   /** doc_key -> attached (system and platform docs report their own completeness). */
   documentState: Record<string, boolean>;
+  /** The organizer certification's field values, for the completeness rule. */
+  certification: Record<string, string>;
   /** Named EMS providers and their answers. */
   providers: { name: string; status: 'nominated' | 'confirmed' | 'declined' | 'withdrawn' | 'removed'; declaration: 'none' | 'draft' | 'signed' }[];
   /** The Event Medical Director invitation, when the level requires one. */
@@ -115,6 +118,7 @@ export type BlockerKind =
   | 'directorMissing'
   | 'directorUnanswered'
   | 'declarationsIncomplete'
+  | 'certificationIncomplete'
   | 'eventCancelled';
 
 export interface SubmissionBlocker {
@@ -193,6 +197,18 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
         itemAr: 'المدير الطبي للفعالية — مُرشَّح ولم يقبل بعد',
       });
     }
+  }
+
+  // THE ORGANIZER'S OWN CERTIFICATION had the same hole as the provider's: a
+  // submission could be filed with no authorized representative named. The
+  // declarations being ticked is not the same as the certification being made.
+  const certification = certificationBlockerText('organizer', facts.certification);
+  if (certification) {
+    blockers.push({
+      kind: 'certificationIncomplete',
+      itemEn: certification.en,
+      itemAr: certification.ar,
+    });
   }
 
   if (!facts.declarationsComplete) {

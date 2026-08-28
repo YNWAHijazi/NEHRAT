@@ -41,10 +41,17 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
 @media (max-width:760px){[data-tabs]{flex-wrap:nowrap !important;overflow-x:auto;scrollbar-width:none}[data-tabs]>*{flex:none}[data-tabs]::-webkit-scrollbar{display:none}}
 @keyframes sk{0%{background-position:100% 0}100%{background-position:-100% 0}}
 [data-sk]{border-radius:4px;background:linear-gradient(90deg,var(--surface2) 25%,var(--line) 50%,var(--surface2) 75%);background-size:200% 100%;animation:sk 1400ms linear infinite}
+/* PRINTING. Two printable documents now, and this rule hid everything except the
+   first: body *{visibility:hidden} with only [data-wallcard] made visible again. The
+   determination certificate -- the document an organizer hands to the authorising
+   authority -- would have printed a blank page. Both are named; anything added later
+   that is meant to reach paper must be named here too. */
 @media print{
-[data-noprint],[data-prototype-nav],[data-seq]{display:none !important}
+[data-noprint],[data-no-print],[data-prototype-nav],[data-seq],[data-region="certificate-controls"]{display:none !important}
 body *{visibility:hidden}
-[data-wallcard],[data-wallcard] *{visibility:visible}
-[data-wallcard]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;border:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
+[data-wallcard],[data-wallcard] *,[data-region="certificate"],[data-region="certificate"] *{visibility:visible}
+[data-wallcard],[data-region="certificate"]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;border:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
+[data-region="certificate"]{--bg:#ffffff;--surface:#ffffff;--surface2:#ffffff;--ink:#000000;--muted:#333333}
+[data-region="certificate"]>div>div{break-inside:avoid}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}[data-sk]{background:var(--surface2) !important}button:not(:disabled):active,a:active{transform:none !important}}

@@ -161,7 +161,8 @@
       "respondEnquiry",
       "recordCorrective",
       "viewFacilityLane",
-      "designateCovered"
+      "designateCovered",
+      "scheduleInspection"
     ],
     "inspector": [
       "viewMinistry",
@@ -184,7 +185,10 @@
       "recordOrganization",
       "respondEnquiry",
       "recordCorrective",
-      "requireMeasures"
+      "requireMeasures",
+      "scheduleInspection",
+      "recordOutcome",
+      "recordAttestation"
     ],
     "order": [
       "orderVerify"
@@ -569,5 +573,59 @@
     "noneYetAr": "لا تفتيش مجدول على هذا التقديم. جدولوا واحداً أدناه إذا كان هذا التقديم يستوجبه؛ ولا شيء قائم قبل وجوده.",
     "allRecordedEn": "Every inspection on this submission has its findings recorded. Nothing here is waiting on you; schedule another below if one is needed.",
     "allRecordedAr": "كل تفتيش على هذا التقديم سُجِّلت نتائجه الميدانية. ولا شيء هنا بانتظاركم؛ جدولوا تفتيشاً آخر أدناه إذا لزم."
+  },
+  "determination": {
+    "$comment": "A determination is a regulatory act. Once recorded it is shown, not offered again; changing it is a separate deliberate act that names a reason and never overwrites the original.",
+    "standingTitleEn": "The determination on this submission",
+    "standingTitleAr": "النتيجة المسجَّلة على هذا التقديم",
+    "recordedByEn": "Recorded by {who} on {when}",
+    "recordedByAr": "سجّلها {who} في ⁦{when}⁩",
+    "noteLabelEn": "Note to the organizer, as written",
+    "noteLabelAr": "الملاحظة إلى المنظّم كما كُتبت",
+    "reviseTitleEn": "Record a revised determination",
+    "reviseTitleAr": "تسجيل نتيجة معدَّلة",
+    "reviseBodyEn": "A revision is a second determination, not a correction of the first. The organizer has already been notified of the one that stands and may have acted on it. The original stays on the record, marked as replaced, and the reason you give here is sent to the organizer in your own words.",
+    "reviseBodyAr": "التعديل نتيجة ثانية لا تصحيح للأولى. فقد أُبلغ المنظّم بالنتيجة القائمة وربما تصرّف على أساسها. وتبقى النتيجة الأصلية مسجَّلة موسومة بأنها استُبدلت، ويُرسل السبب الذي تكتبونه هنا إلى المنظّم بكلماتكم.",
+    "reasonLabelEn": "Why the determination is being revised (required, sent to the organizer)",
+    "reasonLabelAr": "سبب تعديل النتيجة (مطلوب، ويُرسل إلى المنظّم)",
+    "reviseSubmitEn": "Record the revised determination",
+    "reviseSubmitAr": "تسجيل النتيجة المعدَّلة",
+    "supersededChipEn": "Replaced",
+    "supersededChipAr": "استُبدلت",
+    "standsChipEn": "Stands",
+    "standsChipAr": "قائمة",
+    "replacedNoteEn": "Replaced by a later determination.",
+    "replacedNoteAr": "استُبدلت بنتيجة لاحقة.",
+    "revisionReasonLabelEn": "Reason for the revision, as written",
+    "revisionReasonLabelAr": "سبب التعديل كما كُتب"
+  },
+  "certificate": {
+    "$comment": "The document the organizer hands to the authorising authority. It states the determination in its exact wording and says plainly what it is not.",
+    "titleEn": "Ministry determination",
+    "titleAr": "نتيجة الوزارة",
+    "introEn": "This is the record of the Ministry's determination on your submission. It concerns health and medical preparedness only.",
+    "introAr": "هذا سجل نتيجة الوزارة على تقديمكم. وهو يتعلق بالتأهب الصحي والطبي فقط.",
+    "refLabelEn": "Ministry reference number",
+    "refLabelAr": "الرقم المرجعي لدى الوزارة",
+    "eventLabelEn": "Event",
+    "eventLabelAr": "الفعالية",
+    "levelLabelEn": "Event level",
+    "levelLabelAr": "مستوى الفعالية",
+    "outcomeLabelEn": "Determination",
+    "outcomeLabelAr": "النتيجة",
+    "byLabelEn": "Recorded by",
+    "byLabelAr": "سجّلها",
+    "dateLabelEn": "Date recorded",
+    "dateLabelAr": "تاريخ التسجيل",
+    "limitsEn": "The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority, and this determination does not replace any other permit or authorization required under Lebanese law.",
+    "limitsAr": "تراجع الوزارة التأهب الصحي والطبي فقط. ويبقى ترخيص الفعالية من صلاحية السلطة المختصة قانوناً، ولا تحل هذه النتيجة محل أي ترخيص أو إذن آخر مطلوب بموجب القانون اللبناني.",
+    "verifyEn": "This determination can be checked against the Ministry reference number above.",
+    "verifyAr": "يمكن التحقق من هذه النتيجة بالرقم المرجعي المذكور أعلاه.",
+    "openEn": "Open the determination record",
+    "openAr": "فتح سجل النتيجة",
+    "printEn": "Print or save as PDF",
+    "printAr": "طباعة أو حفظ بصيغة PDF",
+    "revisedNoteEn": "This determination replaced an earlier one on the same submission. The earlier determination remains on the record.",
+    "revisedNoteAr": "استبدلت هذه النتيجة نتيجة سابقة على التقديم نفسه. وتبقى النتيجة السابقة مسجَّلة."
   }
 }

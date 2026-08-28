@@ -14,6 +14,7 @@ import { randomBytes } from 'node:crypto';
 import { getDb } from '../lib/db';
 import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
 import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
+import { verbatimQuote } from '../lib/rules/verbatim';
 import { currentAccount } from '../lib/auth';
 import {
   MINISTRY_CONTENT,
@@ -107,6 +108,13 @@ export async function recordOutcomeAction(eventId: string, formData: FormData): 
   const availability = outcomeAvailability(blockers).find((o) => o.key === outcome);
   if (!availability?.available) redirect(`/ministry/submissions/${eventId}?error=gated`);
   const note = String(formData.get('note') ?? '').trim();
+  // A FIRST determination only. Changing one is a separate act with its own reason;
+  // this path used to accept a second silently and the screen kept its radios live,
+  // so a recorded regulatory determination could be replaced by a stray click.
+  const standing = getDb()
+    .prepare(`SELECT id FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC LIMIT 1`)
+    .get(eventId) as { id: number } | undefined;
+  if (standing) redirect(`/ministry/submissions/${eventId}?error=already-determined`);
   getDb()
     .prepare(`INSERT INTO determinations (event_id, outcome, note, recorded_by) VALUES (?, ?, ?, ?)`)
     .run(eventId, outcome, note, actor.displayName);
@@ -718,6 +726,54 @@ export async function createInspectionAction(eventId: string, formData: FormData
   );
   revalidatePath(`/ministry/submissions/${eventId}`);
   redirect(`/ministry/submissions/${eventId}?notice=inspection-scheduled`);
+}
+
+/**
+ * REVISING a determination: a second regulatory act, never an overwrite.
+ *
+ * The original stays in the table and in the history panel, marked as superseded by
+ * this one. A reason is required and is not optional politeness -- a determination
+ * that changed with no recorded reason is a determination nobody can account for, and
+ * the organizer has already acted on the first one.
+ */
+export async function reviseOutcomeAction(eventId: string, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordOutcome');
+  const outcome = String(formData.get('outcome') ?? '');
+  if (!['incomplete', 'revision', 'satisfied'].includes(outcome)) redirect(`/ministry/submissions/${eventId}`);
+  const reason = String(formData.get('reason') ?? '').trim();
+  if (!reason) redirect(`/ministry/submissions/${eventId}?error=revision-reason`);
+
+  const db = getDb();
+  const standing = db
+    .prepare(`SELECT id, outcome FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC LIMIT 1`)
+    .get(eventId) as { id: number; outcome: string } | undefined;
+  // Nothing to revise: this is the first determination, and that is the other action.
+  if (!standing) redirect(`/ministry/submissions/${eventId}?error=nothing-to-revise`);
+
+  const blockers = await outcomeBlockersFor(eventId);
+  const availability = outcomeAvailability(blockers).find((o) => o.key === outcome);
+  if (!availability?.available) redirect(`/ministry/submissions/${eventId}?error=gated`);
+
+  const note = String(formData.get('note') ?? '').trim();
+  db.prepare(
+    `INSERT INTO determinations (event_id, outcome, note, recorded_by, supersedes, revision_reason)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  ).run(eventId, outcome, note, actor.displayName, standing.id, reason);
+
+  const def = MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome);
+  const ev = db.prepare(`SELECT name_en, name_ar, moph_reference FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; moph_reference: string | null };
+  notifyEventOwner(
+    eventId,
+    `A revised determination — ${ev.moph_reference ?? ev.name_en}`,
+    `نتيجة معدَّلة — ${ev.moph_reference ?? ev.name_ar}`,
+    `The Ministry has recorded a revised determination on your submission: ${def?.en ?? outcome}. The reason, as written: “${verbatimQuote(reason)}”. The determination it replaces remains on the record. Your reference number does not change.`,
+    `سجّلت الوزارة نتيجة معدَّلة على تقديمكم: ${def?.ar ?? outcome}. والسبب كما كُتب: «${verbatimQuote(reason)}». وتبقى النتيجة التي استُبدلت مسجَّلة. ولا يتغير رقمكم المرجعي.`,
+    `/events/${eventId}`,
+  );
+  revalidatePath(`/ministry/submissions/${eventId}`);
+  revalidatePath('/dashboard');
+  revalidatePath(`/events/${eventId}`);
+  redirect(`/ministry/submissions/${eventId}?notice=revised`);
 }
 
 /** Toggle whether an inspection blocks the satisfied outcome. */

@@ -51,6 +51,14 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
     lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
     documentState,
+    // The organizer certification's own fields, from the stored submission. Empty
+    // when nothing has been saved, which is correct: an unstarted certification is an
+    // incomplete one.
+    certification: {
+      representative: submission?.representative ?? '',
+      telephone: submission?.telephone ?? '',
+      position: submission?.position ?? '',
+    },
     // Withdrawn and removed parties are HISTORY, not parties: they neither block
     // filing nor count toward a level's requirements. This is the way out of the
     // trap where one confirmed provider and one unanswered nomination blocked filing

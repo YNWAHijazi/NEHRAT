@@ -186,6 +186,11 @@ test.describe('creation to determination, end to end', () => {
     for (let i = 0; i < 6; i += 1) {
       await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
     }
+    // The certification, which is part of making the submission and was not being
+    // made: a form could be filed with no authorized representative named.
+    await page.locator('label:has-text("Authorized representative") input').fill('R. Haddad');
+    await page.locator('label:has-text("Telephone") input').first().fill('+961 1 000 000');
+    await page.locator('label:has-text("Position") input').fill('Events director');
     await page.locator('button:has-text("Save the form")').click();
     await expect(page.locator('text=Saved.')).toBeVisible();
     const fileBtn = page.locator('button:has-text("File the submission")');
@@ -197,6 +202,10 @@ test.describe('creation to determination, end to end', () => {
     // The Ministry records each of the three outcomes in turn, through the screen.
     await signInAs(page, 'test_moph');
     const review = `/ministry/submissions/${eventId}`;
+    // RECORDING IS ONCE; CHANGING IT IS A REVISION. The three radios used to stay
+    // live after a determination was recorded, so this walk recorded three outcomes
+    // in turn by overwriting -- a regulatory act replaced by a stray click. The
+    // second and third go through the revision path, which requires a reason.
     const record = async (value: string, expected: string) => {
       await gotoRidingRestarts(page, review);
       const outcome = page.locator('[data-region="outcome"]');
@@ -206,11 +215,21 @@ test.describe('creation to determination, end to end', () => {
       await page.waitForURL(`**${review}**`);
       await expect(page.locator('[data-region="determinations"]')).toContainText(expected);
     };
+    const revise = async (value: string, expected: string) => {
+      await gotoRidingRestarts(page, review);
+      const panel = page.locator('[data-region="revise-determination"]');
+      await panel.locator('summary').click();
+      await panel.locator(`input[type="radio"][value="${value}"]`).check();
+      await panel.locator('textarea[name="reason"]').fill(`Revised in the completion walk — now ${value}.`);
+      await panel.locator('button[type="submit"]').click();
+      await page.waitForURL(/notice=revised/);
+      await expect(page.locator('[data-region="standing-determination"]')).toContainText(expected);
+    };
     await record('incomplete', 'Submission received but incomplete');
-    await record('revision', 'Additional information or revision required');
+    await revise('revision', 'Additional information or revision required');
     // A Level 1 submission: no attestations apply, no inspection blocks -- the
     // satisfied outcome is open, and recording it completes the chain.
-    await record('satisfied', 'Health and medical preparedness requirements satisfied');
+    await revise('satisfied', 'Health and medical preparedness requirements satisfied');
 
     // And the organizer reads the determination on their own record.
     await signInAs(page, 'test_organizer');

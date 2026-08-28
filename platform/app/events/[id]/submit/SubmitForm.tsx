@@ -11,6 +11,9 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
+import { DocumentViewer } from '../../../../components/DocumentViewer';
+import { attachDocumentAction } from '../../../actions';
+import { acceptAttribute, catalogueEntry, missingCertificationFields } from '../../../../lib/rules';
 import { fileSubmissionAction, saveComplianceAction } from '../../../actions';
 import { SourceDivergence } from '../../../../components/SourceDivergence';
 import type { SubmissionRow } from '../../../../lib/queries';
@@ -25,6 +28,8 @@ interface DeclItem {
   divergenceNoteEn?: string;
   divergenceNoteAr?: string;
   fields?: { key: string; en: string; ar: string }[];
+  /** A declaration that cannot be made without a file behind it. */
+  attachmentKey?: string;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -41,6 +46,7 @@ export function SubmitForm({
   level,
   declarations,
   initial,
+  attachments,
   blockers,
   expedited,
   revisionOpen,
@@ -61,6 +67,12 @@ export function SubmitForm({
   /** The compliance form's certifying words, shown above the fields they are signed with. */
   certificationStatement: { en: string; ar: string } | null;
   headerRows: { en: string; ar: string; valueEn: string; valueAr: string }[];
+  /**
+   * Which catalogue documents are attached, and what is known about each. The
+   * insurance declaration reads this: it used to carry a text box asking whether
+   * evidence was attached, and the word "yes" satisfied it.
+   */
+  attachments: Record<string, { fileName: string; hasFile: boolean; contentType: string | null }>;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -75,6 +87,13 @@ export function SubmitForm({
   const [position, setPosition] = useState(initial?.position ?? '');
   const [saved, setSaved] = useState(false);
   const [fileError, setFileError] = useState(false);
+
+  // The organizer's own certification had the identical hole to the provider's: a
+  // submission could be filed with no authorized representative named. The filing
+  // gate enforces it; this names the fields where they are.
+  const missingCert = new Set(
+    missingCertificationFields('organizer', { representative, telephone, position }).map((f) => f.key),
+  );
 
   const filed = initial?.filedAt != null;
   // Locked once filed -- except while a revision or incomplete outcome holds the form open.
@@ -134,6 +153,11 @@ export function SubmitForm({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden', marginBlockEnd: 28 }}>
           {applicable.map((d, i) => {
+            // A declaration backed by an attachment is unavailable while the file is
+            // absent -- disabled WITH A REASON below it, never a tick that lies.
+            const evidence = d.attachmentKey ? attachments[d.attachmentKey] : undefined;
+            const evidenceDoc = d.attachmentKey ? catalogueEntry(d.attachmentKey) : undefined;
+            const evidenceMissing = d.attachmentKey !== undefined && !evidence;
             const on = ticked[String(i)] === true;
             return (
               <div key={d.en} style={{ background: 'var(--bg)' }}>
@@ -142,7 +166,7 @@ export function SubmitForm({
                   <input
                     type="checkbox"
                     checked={on}
-                    disabled={locked}
+                    disabled={locked || evidenceMissing}
                     onChange={() => setTicked((prev) => ({ ...prev, [String(i)]: !on }))}
                     style={{ flex: 'none', width: 18, height: 18, marginBlockStart: 2, accentColor: 'var(--brand)' }}
                   />
@@ -173,6 +197,50 @@ export function SubmitForm({
                         </label>
                       ))}
                     </div>
+                    {/* THE EVIDENCE IS A FILE, NOT A WORD. This was a text box, and
+                        typing "yes" into it satisfied the declaration. An attachment
+                        row like every other: upload it, read it back, and the
+                        declaration above stays unavailable until it is there. */}
+                    {d.attachmentKey ? (
+                      <div data-region="insurance-evidence" style={{ marginBlockStart: 16, padding: '14px 16px', background: 'var(--surface2)', borderRadius: 10 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span style={{ fontSize: '13.5px' }}>
+                            <L en={evidenceDoc?.en ?? 'Evidence of insurance'} ar={evidenceDoc?.ar ?? 'إثبات التأمين'} />
+                          </span>
+                          <span style={{ fontSize: '12.5px', padding: '3px 9px', borderRadius: 999, background: evidence ? 'var(--brand-soft)' : 'var(--bad-soft)', color: evidence ? 'var(--brand)' : 'var(--bad)' }}>
+                            {evidence ? <L en="Attached" ar="مُرفق" /> : <L en="Not attached" ar="غير مُرفق" />}
+                          </span>
+                        </div>
+                        {evidence ? (
+                          <>
+                            <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>{evidence.fileName}</div>
+                            <DocumentViewer
+                              href={`/api/documents/${eventId}/${d.attachmentKey}`}
+                              hasFile={evidence.hasFile}
+                              contentType={evidence.contentType}
+                              label="Evidence of insurance"
+                            />
+                          </>
+                        ) : (
+                          <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 4, maxWidth: '74ch' }}>
+                            <L
+                              en="The declaration above cannot be made until the certificate or policy is attached."
+                              ar="لا يمكن الإقرار أعلاه قبل إرفاق الشهادة أو البوليصة."
+                            />
+                          </div>
+                        )}
+                        {!locked ? (
+                          <form action={attachDocumentAction.bind(null, eventId)} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 10 }}>
+                            <input type="hidden" name="docKey" value={d.attachmentKey} />
+                            <input type="hidden" name="returnTo" value={`/events/${eventId}/submit`} />
+                            <input type="file" name="file" required accept={acceptAttribute()} aria-label="Attach the evidence of insurance" style={{ fontSize: 13, maxWidth: 240 }} />
+                            <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                              {evidence ? <L en="Replace" ar="استبدال" /> : <L en="Attach" ar="إرفاق" />}
+                            </button>
+                          </form>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -193,13 +261,27 @@ export function SubmitForm({
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Authorized representative" ar="الممثل المفوّض" />
             </span>
-            <input value={representative} disabled={locked} onChange={(e) => setRepresentative(e.target.value)} style={inputStyle} />
+            <input
+              value={representative}
+              disabled={locked}
+              required
+              aria-invalid={!locked && missingCert.has('representative')}
+              onChange={(e) => setRepresentative(e.target.value)}
+              style={{ ...inputStyle, ...(!locked && missingCert.has('representative') ? { border: '1px solid var(--bad)' } : {}) }}
+            />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Position" ar="الصفة" />
             </span>
-            <input value={position} disabled={locked} onChange={(e) => setPosition(e.target.value)} style={inputStyle} />
+            <input
+              value={position}
+              disabled={locked}
+              required
+              aria-invalid={!locked && missingCert.has('position')}
+              onChange={(e) => setPosition(e.target.value)}
+              style={{ ...inputStyle, ...(!locked && missingCert.has('position') ? { border: '1px solid var(--bad)' } : {}) }}
+            />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>

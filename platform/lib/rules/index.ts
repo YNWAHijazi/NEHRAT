@@ -27,3 +27,5 @@ export * from './uploads';
 export * from './nomination-access';
 export * from './accounts';
 export * from './bilingual-map';
+export * from './certification';
+export * from './verbatim';

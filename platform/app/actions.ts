@@ -11,20 +11,12 @@
 import { redirect } from 'next/navigation';
 import { nowStamp } from '../lib/clock';
 
-/**
- * A person's own words, quoted inside “ ” or « », with our sentence-ending full stop
- * outside. Their sentence usually ends in one already, and adding ours produced
- * `...that weekend.".` in the decline notification. Strip theirs, keep ours: the
- * wording is untouched, only the terminal punctuation is de-duplicated.
- */
-function verbatimQuote(reason: string): string {
-  const trimmed = reason.trimEnd();
-  return /[.!?؟]$/.test(trimmed) ? trimmed.slice(0, -1) : trimmed;
-}
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
 import { UPLOADS_CONTENT, maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
+import { missingCertificationFields } from '../lib/rules/certification';
+import { verbatimQuote } from '../lib/rules/verbatim';
 import {
   checkPasswordPolicy,
   hashPassword,
@@ -378,16 +370,25 @@ export async function attachDocumentAction(
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   const docKey = String(formData.get('docKey') ?? '');
   const file = formData.get('file');
-  if (!docKey || !(file instanceof File)) redirect(`/events/${eventId}/requirements`);
+  // WHERE TO COME BACK TO. The same attachment can be made from the requirements
+  // screen or from the compliance form it belongs to, and sending an organizer back
+  // to a different screen than the one they were on is its own small dead end.
+  // Constrained to this event's own paths -- a returnTo taken from a form is
+  // attacker-controlled text, and an open redirect is not worth the convenience.
+  const asked = String(formData.get('returnTo') ?? '');
+  const returnTo = /^\/events\/[A-Za-z0-9-]+\/[a-z-]+$/.test(asked) && asked.startsWith(`/events/${eventId}/`)
+    ? asked
+    : `/events/${eventId}/requirements`;
+  if (!docKey || !(file instanceof File)) redirect(returnTo);
 
   const refusal = refuseUpload({ type: file.type, size: file.size });
   if (refusal) {
-    redirect(`/events/${eventId}/requirements?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
+    redirect(`${returnTo}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
   }
   const bytes = Buffer.from(await file.arrayBuffer());
   // The buffer is the truth. A declared size can lie; a length cannot.
   if (bytes.length > maxUploadBytes()) {
-    redirect(`/events/${eventId}/requirements?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
+    redirect(`${returnTo}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
   }
   getDb()
     .prepare(
@@ -399,7 +400,8 @@ export async function attachDocumentAction(
     )
     .run(eventId, docKey, file.name.trim(), file.type, bytes.length, bytes);
   revalidatePath(`/events/${eventId}/requirements`);
-  redirect(`/events/${eventId}/requirements`);
+  revalidatePath(returnTo);
+  redirect(returnTo);
 }
 
 /**
@@ -1388,6 +1390,12 @@ export async function signDeclarationAction(
   if (!ownedInvitation(account.id, token)) return { error: 'not-found' };
   const gate = declarationGate(payload.items);
   if (!gate.canSign) return { error: 'items-outstanding' };
+  // THE CERTIFICATION BLOCK, which nothing checked. A declaration signed with an
+  // empty Date was released to the organizer and counted toward the Level 3 package.
+  // Enforced HERE as well as in the form: a disabled button is a courtesy, and this
+  // is the rule.
+  const missing = missingCertificationFields('ems', payload.certification);
+  if (missing.length > 0) return { error: `certification:${missing.map((f) => f.key).join(',')}` };
   const db = getDb();
   db.prepare(
     `UPDATE invitations SET declaration = 'signed', declaration_items = ?, certification = ?,

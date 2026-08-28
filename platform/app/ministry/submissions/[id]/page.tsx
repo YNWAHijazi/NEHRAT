@@ -47,6 +47,7 @@ import {
   recordInspectionAction,
   recordOutcomeAction,
   requireMeasureAction,
+  reviseOutcomeAction,
 } from '../../../ministry-actions';
 
 /**
@@ -88,6 +89,8 @@ export default async function SubmissionReviewPage({
   const RP = MINISTRY_CONTENT.reviewPlan;
   const AA = MINISTRY_CONTENT.assessmentAnswers;
   const SI = MINISTRY_CONTENT.scheduleInspection;
+  const DT = MINISTRY_CONTENT.determination;
+  const standing = determinations.find((d) => !d.superseded) ?? null;
   const CD = MINISTRY_CONTENT.counterpartyDocuments;
   // The confirmed director, read directly: the review query's providers are the EMS
   // lane, and invitationForEvent is scoped to the counterparty's own account.
@@ -956,7 +959,94 @@ export default async function SubmissionReviewPage({
 
         <div data-action-panel="determinations">
           {!mayRecord ? <OwnerNote panel="determinations" /> : null}
-          {mayRecord ? (
+
+          {/* WHAT STANDS, once anything does. The three radios used to remain live
+              after a determination was recorded, so a regulatory act could be
+              replaced by a stray click with nothing saying it had. Recording is
+              offered once; changing it is the separate act below. */}
+          {standing ? (
+            <div data-region="standing-determination" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
+              <h2 style={{ margin: '0 0 10px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+                <L en={DT.standingTitleEn} ar={DT.standingTitleAr} />
+              </h2>
+              <div style={{ fontSize: 17, lineHeight: 1.5, fontWeight: 500, marginBlockEnd: 6 }}>
+                <L
+                  en={MINISTRY_CONTENT.outcomes.find((o) => o.key === standing.outcome)?.en ?? standing.outcome}
+                  ar={MINISTRY_CONTENT.outcomes.find((o) => o.key === standing.outcome)?.ar ?? standing.outcome}
+                />
+              </div>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                <L
+                  en={DT.recordedByEn.replace('{who}', standing.recordedBy).replace('{when}', standing.recordedAt)}
+                  ar={DT.recordedByAr.replace('{who}', standing.recordedBy).replace('{when}', standing.recordedAt)}
+                />
+              </div>
+              {standing.note ? (
+                <div style={{ marginBlockStart: 10 }}>
+                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 4 }}>
+                    <L en={DT.noteLabelEn} ar={DT.noteLabelAr} />
+                  </div>
+                  <div style={{ fontSize: '13.5px', lineHeight: 1.65, maxWidth: '74ch' }}>{standing.note}</div>
+                </div>
+              ) : null}
+
+              {mayRecord ? (
+                <details data-region="revise-determination" style={{ marginBlockStart: 18 }}>
+                  <summary style={{ cursor: 'pointer', fontSize: '13px', color: 'var(--accent-ink)' }}>
+                    <L en={DT.reviseTitleEn} ar={DT.reviseTitleAr} />
+                  </summary>
+                  <div style={{ marginBlockStart: 12 }}>
+                    <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '74ch' }}>
+                      <L en={DT.reviseBodyEn} ar={DT.reviseBodyAr} />
+                    </p>
+                    <form action={reviseOutcomeAction.bind(null, id)}>
+                      <div data-region="outcome-options" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 14 }}>
+                        {outcomes.map((o) => (
+                          <label key={o.key} style={{ display: 'flex', gap: 12, alignItems: 'start', padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10, cursor: o.available ? 'pointer' : 'not-allowed', opacity: o.available ? 1 : 0.55 }}>
+                            <input type="radio" name="outcome" value={o.key} required disabled={!o.available} style={{ marginBlockStart: 3 }} />
+                            <span style={{ fontSize: '14px', lineHeight: 1.5 }}>
+                              <L en={o.en} ar={o.ar} />
+                              {/* DISABLED WITH THE REASON, here as in the recording
+                                  panel: a revision is gated by exactly the same
+                                  blockers, and an option greyed with no reason is
+                                  the thing non-negotiable 10 forbids. */}
+                              {!o.available ? (
+                                <span style={{ display: 'block', marginBlockStart: 4, fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+                                  <L en={`Unavailable — ${o.blockers.length} outstanding`} ar={`غير متاح — ${o.blockers.length} قائم`} />
+                                  {o.blockers.map((b) => (
+                                    <span key={b.en} style={{ display: 'block' }}>
+                                      <L en={b.en} ar={b.ar} />
+                                    </span>
+                                  ))}
+                                </span>
+                              ) : null}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 12 }}>
+                        <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                          <L en={DT.reasonLabelEn} ar={DT.reasonLabelAr} />
+                        </span>
+                        <textarea name="reason" rows={3} required style={{ padding: 10, background: 'var(--bg)', border: '1px solid var(--accent)', borderRadius: 8, fontSize: 13, lineHeight: 1.6, resize: 'vertical' }} />
+                      </label>
+                      <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 12 }}>
+                        <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                          <L en={DT.noteLabelEn} ar={DT.noteLabelAr} />
+                        </span>
+                        <input name="note" style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }} />
+                      </label>
+                      <button type="submit" style={{ height: 40, paddingInline: 18, border: '1px solid var(--accent)', background: 'var(--bg)', color: 'var(--accent-ink)', borderRadius: 20, fontSize: 13, cursor: 'pointer' }}>
+                        <L en={DT.reviseSubmitEn} ar={DT.reviseSubmitAr} />
+                      </button>
+                    </form>
+                  </div>
+                </details>
+              ) : null}
+            </div>
+          ) : null}
+
+          {mayRecord && !standing ? (
             <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en="Record an outcome" ar="تسجيل نتيجة" />
@@ -965,7 +1055,7 @@ export default async function SubmissionReviewPage({
                 <L en="Three outcomes exist. Nothing else is a determination." ar="توجد ثلاث نتائج فقط. ما عداها ليس قراراً." />
               </p>
               <form action={recordOutcomeAction.bind(null, id)}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 14 }}>
+                <div data-region="outcome-options" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 14 }}>
                   {outcomes.map((o) => (
                     <label key={o.key} style={{ display: 'flex', gap: 12, alignItems: 'start', padding: '14px 16px', border: `1px solid ${o.available ? 'var(--line)' : 'var(--line)'}`, background: o.available ? 'var(--bg)' : 'var(--surface2)', borderRadius: 10, cursor: o.available ? 'pointer' : 'not-allowed' }}>
                       <input type="radio" name="outcome" value={o.key} disabled={!o.available} style={{ marginBlockStart: 4 }} />
@@ -1003,32 +1093,61 @@ export default async function SubmissionReviewPage({
                 </button>
               </form>
               <div style={{ marginBlockStart: 16, paddingBlockStart: 14, borderBlockStart: '1px solid var(--line)' }}>
-                <div data-region="limits" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
-                  {MINISTRY_CONTENT.outcomeLimits.map((l, i) => (
-                    <div key={l.en} style={i === 0 ? { marginBlockEnd: 8 } : undefined}>
-                      <L en={l.en} ar={l.ar} />
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           ) : null}
+
+          {/* WHAT THE MINISTRY'S REVIEW IS AND IS NOT. Outside the recording panel,
+              because it was inside it: once a determination was recorded the panel
+              disappeared and took these two sentences with it -- and they matter most
+              AFTER a determination exists, when somebody is deciding what it means. */}
+          <div data-region="limits" style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 20 }}>
+            {MINISTRY_CONTENT.outcomeLimits.map((l, i) => (
+              <div key={l.en} style={i === 0 ? { marginBlockEnd: 8 } : undefined}>
+                <L en={l.en} ar={l.ar} />
+              </div>
+            ))}
+          </div>
 
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Determination history" ar="سجل النتائج" />
           </h2>
           <div data-region="determinations" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {determinations.map((d, i) => {
+            {/* BOTH, and which is which. A revision does not remove what it
+                replaced: the organizer was notified of the earlier determination and
+                may have acted on it, so it stays on the record marked as replaced. */}
+            {determinations.map((d) => {
               const def = MINISTRY_CONTENT.outcomes.find((o) => o.key === d.outcome);
               return (
-                <div key={i} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 10 }}>
-                  <div style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
-                    <L en={def?.en ?? d.outcome} ar={def?.ar ?? d.outcome} />
+                <div key={d.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${d.superseded ? 'dashed var(--muted)' : `solid ${d.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`}`, borderRadius: 10, opacity: d.superseded ? 0.75 : 1 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: '14.5px', lineHeight: 1.5 }}>
+                      <L en={def?.en ?? d.outcome} ar={def?.ar ?? d.outcome} />
+                    </span>
+                    <span style={{ flex: 'none', padding: '2px 9px', borderRadius: 999, background: d.superseded ? 'var(--surface2)' : 'var(--brand-soft)', color: d.superseded ? 'var(--muted)' : 'var(--brand)', fontSize: 12 }}>
+                      <L
+                        en={d.superseded ? DT.supersededChipEn : DT.standsChipEn}
+                        ar={d.superseded ? DT.supersededChipAr : DT.standsChipAr}
+                      />
+                    </span>
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>
                     {d.recordedAt} · {d.recordedBy}
                   </div>
                   {d.note ? <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 6, lineHeight: 1.6 }}>{d.note}</div> : null}
+                  {d.revisionReason ? (
+                    <div style={{ marginBlockStart: 8 }}>
+                      <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                        <L en={DT.revisionReasonLabelEn} ar={DT.revisionReasonLabelAr} />
+                      </div>
+                      <div style={{ fontSize: '13px', lineHeight: 1.65, marginBlockStart: 3 }}>{d.revisionReason}</div>
+                    </div>
+                  ) : null}
+                  {d.superseded ? (
+                    <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 6 }}>
+                      <L en={DT.replacedNoteEn} ar={DT.replacedNoteAr} />
+                    </div>
+                  ) : null}
                 </div>
               );
             })}

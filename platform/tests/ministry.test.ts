@@ -15,12 +15,19 @@ import {
   effectiveCycles,
   outcomeAvailability,
   permissionMatrix,
+  rolesHolding,
 } from '../lib/rules/ministry';
 
 describe('the permission matrix', () => {
-  it('only a reviewer records an outcome -- the row the Ministry will argue about', () => {
+  it('a reviewer and the administrator record outcomes; an inspector never does', () => {
+    // THE RULING CHANGED, twice, and the history is the point of this comment.
+    // 2026-08-27: recordOutcome was the reviewer's alone, and the administrator was
+    // deliberately excluded. 2026-08-29 reversed it: the master administrator is an
+    // OVERSEEING profile, holding everything any Ministry role can do. What did not
+    // change is the inspector: findings are not a determination, and an inspector
+    // records corrective actions and none of the three outcomes.
     expect(can('reviewer', 'recordOutcome')).toBe(true);
-    expect(can('ministry_admin', 'recordOutcome')).toBe(false);
+    expect(can('ministry_admin', 'recordOutcome')).toBe(true);
     expect(can('inspector', 'recordOutcome')).toBe(false);
     expect(can('platform_owner', 'recordOutcome')).toBe(false);
     expect(can('order', 'recordOutcome')).toBe(false);
@@ -34,7 +41,7 @@ describe('the permission matrix', () => {
     expect(can('inspector', 'configureCardiac')).toBe(false);
   });
 
-  it('an administrator works the queue and never determines (reviewer ruling, 2026-08-27)', () => {
+  it('an administrator holds every Ministry action (reviewer ruling, 2026-08-29)', () => {
     expect(can('ministry_admin', 'configureCardiac')).toBe(true);
     expect(can('ministry_admin', 'configureMassGathering')).toBe(true);
     expect(can('ministry_admin', 'manageUsers')).toBe(true);
@@ -47,8 +54,11 @@ describe('the permission matrix', () => {
     expect(can('ministry_admin', 'respondEnquiry')).toBe(true);
     expect(can('ministry_admin', 'recordCorrective')).toBe(true);
     expect(can('ministry_admin', 'requireMeasures')).toBe(true);
-    expect(can('ministry_admin', 'recordOutcome')).toBe(false);
-    expect(can('ministry_admin', 'recordAttestation')).toBe(false);
+    // Reversed 2026-08-29: the administrator oversees, so it holds these too. The
+    // line that still holds is the one below it -- the platform owner's surfaces
+    // remain out of reach, because that seat is not a Ministry role.
+    expect(can('ministry_admin', 'recordOutcome')).toBe(true);
+    expect(can('ministry_admin', 'recordAttestation')).toBe(true);
   });
 
   it('a Ministry administrator cannot reach the platform-owner surfaces', () => {
@@ -145,5 +155,37 @@ describe('the configuration values', () => {
     const half = effectiveCycles({ checkCycleDays: 120 });
     expect(half.provisional).toBe(true);
     expect(half.checkCycleDays).toBe(120);
+  });
+});
+
+describe('a power held by nobody reachable', () => {
+  it('the reviewer schedules inspections (reviewer ruling, 2026-08-29)', () => {
+    // Reversed from the earlier ruling, and for a reason that only shows up on a
+    // walk: a reviewer holding a submission whose SATISFIED outcome is gated by an
+    // inspection could not schedule that inspection. The gate and the control were
+    // held by different roles, and the screen named an owner the reviewer could not
+    // reach. Kept with the inspector too.
+    expect(can('reviewer', 'scheduleInspection')).toBe(true);
+    expect(can('inspector', 'scheduleInspection')).toBe(true);
+  });
+
+  it('no action in the matrix is held by nobody at all', () => {
+    for (const row of permissionMatrix()) {
+      expect(
+        rolesHolding(row.action.key as Parameters<typeof rolesHolding>[0]).length,
+        `${row.action.key} is held by no role`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it('rolesHolding is the inverse of can, for every action and role', () => {
+    // Two derivations of one fact drift. This asserts they cannot.
+    for (const row of permissionMatrix()) {
+      const action = row.action.key as Parameters<typeof rolesHolding>[0];
+      const holders = new Set(rolesHolding(action));
+      for (const [role, held] of Object.entries(row.roles)) {
+        expect(holders.has(role), `${role}/${action}`).toBe(held);
+      }
+    }
   });
 });

@@ -9,6 +9,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
+import { missingCertificationFields } from '../../../../lib/rules';
 import { SourceDivergence } from '../../../../components/SourceDivergence';
 import { DECLARATION_ITEM10_DIVERGENCE } from '../../../../lib/rules';
 import { saveDeclarationDraftAction, signDeclarationAction } from '../../../actions';
@@ -57,6 +58,11 @@ export function DeclarationForm({
   });
   const [saved, setSaved] = useState(false);
   const gate = useMemo(() => declarationGate(confirmed), [confirmed]);
+  // THE CERTIFICATION BLOCK. Signing used to check the ten items and nothing else, so
+  // a declaration signed with an empty Date was released to the organizer. Every
+  // field is required; the missing ones are NAMED rather than counted.
+  const missingCert = useMemo(() => missingCertificationFields('ems', cert), [cert]);
+  const maySign = gate.canSign && missingCert.length === 0;
 
   const persist = (sign: boolean) => {
     setSaved(false);
@@ -118,8 +124,15 @@ export function DeclarationForm({
                 type={f.key === 'date' ? 'date' : 'text'}
                 value={cert[f.key] ?? ''}
                 disabled={signed}
+                required
+                aria-invalid={!signed && (cert[f.key] ?? '').trim() === ''}
                 onChange={(e) => setCert((c) => ({ ...c, [f.key]: e.target.value }))}
-                style={inputStyle}
+                style={{
+                  ...inputStyle,
+                  ...(!signed && (cert[f.key] ?? '').trim() === ''
+                    ? { border: '1px solid var(--bad)' }
+                    : {}),
+                }}
               />
             </label>
           ))}
@@ -144,13 +157,18 @@ export function DeclarationForm({
           <button
             type="button"
             onClick={() => persist(true)}
-            disabled={!gate.canSign || pending}
-            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: gate.canSign ? 'var(--brand)' : 'var(--surface2)', color: gate.canSign ? 'var(--bg)' : 'var(--muted)', fontSize: 15, fontWeight: 500, cursor: gate.canSign ? 'pointer' : 'not-allowed' }}
+            disabled={!maySign || pending}
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: maySign ? 'var(--brand)' : 'var(--surface2)', color: maySign ? 'var(--bg)' : 'var(--muted)', fontSize: 15, fontWeight: 500, cursor: maySign ? 'pointer' : 'not-allowed' }}
           >
             <L en="Sign the declaration" ar="توقيع الإقرار" />
           </button>
-          <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-            {gate.canSign ? (
+          <span data-region="sign-gate" style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
+            {gate.canSign && missingCert.length > 0 ? (
+              <L
+                en={`The certification is not complete: ${missingCert.map((f) => f.en).join(', ')}`}
+                ar={`التصديق غير مكتمل: ${missingCert.map((f) => f.ar).join('، ')}`}
+              />
+            ) : gate.canSign ? (
               <L en="All ten items confirmed" ar="تم تأكيد البنود العشرة" />
             ) : (
               <L

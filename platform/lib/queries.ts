@@ -22,7 +22,8 @@ import { organizerEventState } from './rules';
 import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination-access';
 import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
-import { can } from './rules/ministry';
+import { can, permissionMatrix, rolesHolding } from './rules/ministry';
+import { certificationComplete } from './rules/certification';
 
 export interface EventRow {
   id: string;
@@ -583,15 +584,25 @@ export interface AttachmentRow {
   docKey: string;
   fileName: string;
   attachedAt: string;
+  /** Whether the platform holds the file itself. Bytes are never selected here. */
+  hasFile: boolean;
+  contentType: string | null;
 }
 
 export function attachmentsFor(accountId: number, eventId: string): AttachmentRow[] {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return [];
   const rows = getDb()
-    .prepare(`SELECT doc_key, file_name, attached_at FROM event_attachments WHERE event_id = ?`)
-    .all(eventId) as unknown as { doc_key: string; file_name: string; attached_at: string }[];
-  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at }));
+    .prepare(
+      `SELECT doc_key, file_name, attached_at, content_type,
+              (bytes IS NOT NULL AND length(bytes) > 0) AS has_file
+       FROM event_attachments WHERE event_id = ?`,
+    )
+    .all(eventId) as unknown as { doc_key: string; file_name: string; attached_at: string; content_type: string | null; has_file: number }[];
+  return rows.map((r) => ({
+    docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at,
+    hasFile: r.has_file === 1, contentType: r.content_type,
+  }));
 }
 
 export interface InvitationRow {
@@ -842,6 +853,30 @@ export function postEventReportFor(accountId: number, eventId: string): PostEven
  * construction; platform documents report their own completeness; attached documents
  * are complete when a row exists; the third-party document when every provider signed.
  */
+/**
+ * The keys documentStateFor answers for. Exported so a guard can compare them against
+ * the catalogue rather than trusting that the two were kept together by hand.
+ */
+export const DOCUMENT_STATE_KEYS: readonly string[] = [
+  'assessment', 'arrangements', 'complianceForm', 'plan', 'siteMap',
+  'deploymentMap', 'insuranceEvidence', 'emsDeclarations', 'other',
+];
+
+/**
+ * Whether each catalogue document is satisfied, for one event.
+ *
+ * THIS MAP IS HAND-WRITTEN BESIDE A DATA-DRIVEN CATALOGUE, which is a shape this
+ * build keeps getting caught by: add a document to attachments-catalog.json and it
+ * appears on every screen that reads the catalogue, while this map silently returns
+ * undefined for it -- and undefined reads as "not satisfied", so the document blocks
+ * filing forever with no way to satisfy it. tests/attachments.test.ts now asserts
+ * every catalogue key has an entry here, so the omission fails the build instead of
+ * the organizer.
+ *
+ * Most entries are an attachment; three are DERIVED, because the platform completes
+ * them rather than receiving a file: the assessment, the compliance form and the
+ * plan. Those keep their own completeness rules in lib/rules.
+ */
 export function documentStateFor(
   accountId: number,
   eventId: string,
@@ -856,14 +891,25 @@ export function documentStateFor(
   // Both completeness rules live in lib/rules -- this file never re-derives them.
   const planComplete = planIsComplete(plan, level);
   const declarationsComplete = declarationsAreComplete(submission?.declarations ?? null, level);
+  // THE FORM IS NOT COMPLETE WITHOUT ITS CERTIFICATION. The requirements screen used
+  // to call this row done as soon as the boxes were ticked, while the authorized
+  // representative, telephone and position were still empty -- so an organizer saw a
+  // green compliance form and a filing gate that refused, with the two disagreeing
+  // about the same document.
+  const certificationDone = certificationComplete('organizer', {
+    representative: submission?.representative ?? '',
+    telephone: submission?.telephone ?? '',
+    position: submission?.position ?? '',
+  });
 
   return {
     assessment: true,
     arrangements: attached.has('arrangements'),
-    complianceForm: declarationsComplete,
+    complianceForm: declarationsComplete && certificationDone,
     plan: planComplete,
     siteMap: attached.has('siteMap'),
     deploymentMap: attached.has('deploymentMap'),
+    insuranceEvidence: attached.has('insuranceEvidence'),
     // CONFIRMED providers only, per lib/rules/submission.ts: a declined party has
     // answered and can never sign -- counting them made one decline block filing
     // forever. At least one confirmed provider must exist and every one must sign.
@@ -1523,17 +1569,54 @@ function filingMetFor(
 }
 
 export interface DeterminationRow {
+  id: number;
   outcome: 'incomplete' | 'revision' | 'satisfied';
   note: string;
   recordedBy: string;
   recordedAt: string;
+  /** The determination this one replaced, if it is a revision. */
+  supersedes: number | null;
+  /** Why it was revised. Verbatim; never improved. */
+  revisionReason: string | null;
+  /** True once a later determination has replaced this one. */
+  superseded: boolean;
 }
 
+/**
+ * Every determination on an event, newest first, with which replaced which.
+ *
+ * THE TABLE WAS ALWAYS APPEND-ONLY; THE SCREEN WAS NOT. After recording, the three
+ * radios stayed live and a second record silently replaced the first with nothing
+ * saying it had -- a regulatory act overwritten by a stray click. The rows were all
+ * still here; nothing read them as a chain. They are read as one now, so the screen
+ * can show what stands, what it replaced, and why.
+ */
 export function determinationsFor(eventId: string): DeterminationRow[] {
   const rows = getDb()
-    .prepare(`SELECT outcome, note, recorded_by, recorded_at FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC`)
-    .all(eventId) as unknown as { outcome: DeterminationRow['outcome']; note: string; recorded_by: string; recorded_at: string }[];
-  return rows.map((r) => ({ outcome: r.outcome, note: r.note, recordedBy: r.recorded_by, recordedAt: r.recorded_at.slice(0, 10) }));
+    .prepare(
+      `SELECT id, outcome, note, recorded_by, recorded_at, supersedes, revision_reason
+       FROM determinations WHERE event_id = ? ORDER BY recorded_at DESC, id DESC`,
+    )
+    .all(eventId) as unknown as {
+    id: number; outcome: DeterminationRow['outcome']; note: string; recorded_by: string;
+    recorded_at: string; supersedes: number | null; revision_reason: string | null;
+  }[];
+  const replaced = new Set(rows.map((r) => r.supersedes).filter((v): v is number => v !== null));
+  return rows.map((r) => ({
+    id: r.id,
+    outcome: r.outcome,
+    note: r.note,
+    recordedBy: r.recorded_by,
+    recordedAt: r.recorded_at.slice(0, 10),
+    supersedes: r.supersedes,
+    revisionReason: r.revision_reason,
+    superseded: replaced.has(r.id),
+  }));
+}
+
+/** The determination that STANDS: the newest one nothing has replaced. */
+export function standingDeterminationFor(eventId: string): DeterminationRow | null {
+  return determinationsFor(eventId).find((d) => !d.superseded) ?? null;
 }
 
 export interface AddedMeasureRow {
@@ -1907,6 +1990,42 @@ export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
     )
     .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number; suspended: number }[];
   return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1, suspended: r.suspended === 1 }));
+}
+
+/**
+ * MINISTRY POWERS THAT NOBODY REACHABLE HOLDS, within one demonstration scope.
+ *
+ * The matrix can be perfectly well formed and the platform still unusable: an action
+ * assigned only to a role that has no active account is advertised on every screen
+ * and performable by nobody. That is exactly what the reviewer walked into --
+ * scheduleInspection was the inspector's alone, there was no inspector account in the
+ * real scope, and the inspections panel told them a reviewer or inspector would do it
+ * while refusing them and offering no one else.
+ *
+ * Worse than an unassigned power, because an unassigned power is silent and this one
+ * names an owner who does not exist.
+ *
+ * Scoped, because the two worlds are separate: a demonstration inspector does not
+ * make the power reachable for a real reviewer, and vice versa.
+ */
+export function unreachablePowers(viewerIsDemo: boolean): { action: string; en: string; ar: string; roles: string[] }[] {
+  const active = new Set(
+    (
+      getDb()
+        .prepare(
+          `SELECT DISTINCT role FROM accounts WHERE is_demo = ? AND suspended = 0`,
+        )
+        .all(demoFlag(viewerIsDemo)) as unknown as { role: string }[]
+    ).map((r) => r.role),
+  );
+  return permissionMatrix()
+    .map((row) => ({
+      action: row.action.key,
+      en: row.action.en,
+      ar: row.action.ar,
+      roles: rolesHolding(row.action.key as Parameters<typeof rolesHolding>[0]),
+    }))
+    .filter((row) => !row.roles.some((r) => active.has(r)));
 }
 
 /**

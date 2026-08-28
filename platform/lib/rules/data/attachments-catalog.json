@@ -47,6 +47,15 @@
       "attach": true
     },
     {
+      "key": "insuranceEvidence",
+      "en": "Evidence of insurance",
+      "ar": "إثبات التأمين",
+      "minLevel": 3,
+      "attach": true,
+      "noteEn": "The certificate or policy itself. The insurance declaration on the compliance form cannot be made without it.",
+      "noteAr": "الشهادة أو البوليصة نفسها. ولا يمكن الإقرار بالتأمين في نموذج الامتثال من دونها."
+    },
+    {
       "key": "emsDeclarations",
       "en": "EMS readiness declaration from each participating EMS provider",
       "ar": "إقرار جاهزية الإسعاف من كل مزوّد إسعاف مشارك",

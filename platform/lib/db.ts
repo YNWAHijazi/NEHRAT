@@ -767,6 +767,14 @@ function migrate(d: DatabaseSync): void {
   addColumn('shared_documents', 'byte_size', 'byte_size INTEGER');
   addColumn('shared_documents', 'bytes', 'bytes BLOB');
 
+  // A DETERMINATION IS A REGULATORY ACT, NOT AN EDITABLE FIELD. The table was already
+  // append-only, and the SCREEN was not: after recording, the three radios stayed live
+  // and a second record silently superseded the first with nothing saying it had. A
+  // revision is now a separate, deliberate act that names the determination it
+  // replaces and carries a reason, and both rows stay in the history.
+  addColumn('determinations', 'supersedes', 'supersedes INTEGER REFERENCES determinations(id)');
+  addColumn('determinations', 'revision_reason', 'revision_reason TEXT');
+
   // ACTIVATION LINKS. An administrator creates an account and the platform issues a
   // link; the recipient sets their own password against it. The administrator never
   // sets or sees one (reviewer ruling, 2026-08-28). This rides the reset table rather

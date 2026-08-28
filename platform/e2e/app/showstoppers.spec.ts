@@ -79,6 +79,13 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
       // The list re-renders on every tick; always take the first remaining.
       await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
     }
+    // THE CERTIFICATION. This walk used to tick six boxes and file, and it PASSED --
+    // which is how a submission could be filed with no authorized representative
+    // named. Ticking the declarations is not making the certification.
+    await fill(page, 'Authorized representative', 'R. Haddad');
+    await fill(page, 'Telephone', '+961 1 000 000');
+    await fill(page, 'Position', 'Events director');
+
     // Blockers are server-derived: save, let the refresh recompute, then file.
     await page.locator('button:has-text("Save the form")').click();
     await expect(page.locator('text=Saved.')).toBeVisible();

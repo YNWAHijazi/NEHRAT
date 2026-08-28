@@ -6,6 +6,7 @@ import { SubmitForm } from './SubmitForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
   assessmentsFor,
+  attachmentsFor,
   documentStateFor,
   eventFor,
   invitationsFor,
@@ -149,6 +150,12 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           level={level}
           declarations={[...COMPLIANCE_DECLARATIONS]}
           initial={submission}
+          attachments={Object.fromEntries(
+            attachmentsFor(account.id, id).map((a) => [
+              a.docKey,
+              { fileName: a.fileName, hasFile: a.hasFile, contentType: a.contentType },
+            ]),
+          )}
           blockers={gate.blockers}
           expedited={gate.expedited}
           revisionOpen={event.filed && revisionOpenFor(id)}

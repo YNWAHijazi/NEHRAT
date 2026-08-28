@@ -441,8 +441,21 @@ export function seedDemonstration(db: DatabaseSync): void {
   );
   attachWithFile('EV-0362', 'siteMap', 'baalbeck-site-map.pdf', 'Site and route map', 'EV-0362 — Baalbeck Summer Festival');
   attachWithFile('EV-0362', 'deploymentMap', 'baalbeck-deployment-map.pdf', 'Deployment map', 'EV-0362 — Baalbeck Summer Festival');
+  // Evidence of insurance is a Level 3 requirement and a FILE (it was a text box that
+  // the word "yes" satisfied). The seeded Level 3 submission has to carry it, or the
+  // demonstration record cannot refile -- the gate would refuse a document the
+  // showcase never attached.
+  attachWithFile('EV-0362', 'insuranceEvidence', 'cedar-assurance-CA-2026-11842.pdf', 'Evidence of insurance', 'EV-0362 — Cedar Assurance SAL, policy CA-2026-11842');
   attachWithFile('EV-0455', 'siteMap', 'byblos-harbour-site-map.pdf', 'Site and route map', 'EV-0455 — Byblos Harbour Swim');
   attachWithFile('EV-0455', 'deploymentMap', 'byblos-harbour-deployment-map.pdf', 'Deployment map', 'EV-0455 — Byblos Harbour Swim');
+  // EV-0244 is a SATISFIED Level 3 record and carried no attachments at all -- it
+  // predates the filing gate and nothing re-checked it, so the showcase held a
+  // satisfied Level 3 submission missing every document that level requires. A
+  // Ministry walking it would have read a determination on a package that could not
+  // have been filed.
+  attachWithFile('EV-0244', 'siteMap', 'tripoli-marathon-route.pdf', 'Site and route map', 'EV-0244 — Tripoli Marathon');
+  attachWithFile('EV-0244', 'deploymentMap', 'tripoli-marathon-deployment-map.pdf', 'Deployment map', 'EV-0244 — Tripoli Marathon');
+  attachWithFile('EV-0244', 'insuranceEvidence', 'tripoli-marathon-insurance.pdf', 'Evidence of insurance', 'EV-0244 — Tripoli Marathon');
   seedPlan('EV-0301', allSections, 'saida-night-run-plan.pdf', allMi);
   seedPlan('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
 

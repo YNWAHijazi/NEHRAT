@@ -91,13 +91,10 @@
           "key": "coveragePeriod",
           "en": "Coverage period",
           "ar": "فترة التغطية"
-        },
-        {
-          "key": "evidenceAttached",
-          "en": "Evidence of insurance attached",
-          "ar": "أُرفق إثبات التأمين"
         }
       ],
+      "$commentEvidence": "evidenceAttached WAS A TEXT BOX HERE, and the word 'yes' satisfied it. A field asking whether evidence is attached, answered by typing yes, evidences nothing. It is now an attachment -- insuranceEvidence in the attachments catalogue -- rendered as a row on this declaration, and the declaration cannot be made without a file behind it.",
+      "attachmentKey": "insuranceEvidence",
       "divergenceNoteEn": "The Arabic issue of the compliance form carries no insurance declaration at all. The English is followed, so this item is declared here; the Arabic wording is a translation pending a Ministry decision.",
       "divergenceNoteAr": "لا يتضمن الإصدار العربي من نموذج الامتثال أي إقرار تأمين. ويُتبع النص الإنكليزي، فيُقَرّ هذا البند هنا؛ والصياغة العربية ترجمة بانتظار قرار الوزارة."
     },

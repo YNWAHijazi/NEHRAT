@@ -34,6 +34,15 @@ export interface ComplianceDeclaration {
   divergenceNoteEn?: string;
   divergenceNoteAr?: string;
   fields?: BilingualField[];
+  /**
+   * A declaration that cannot be made without a FILE behind it.
+   *
+   * The insurance declaration used to carry a text field asking whether evidence was
+   * attached, and the word "yes" satisfied it. A field asking whether evidence exists,
+   * answered by typing, evidences nothing. The key names an attachments-catalogue
+   * document; the declaration is refused until that document is attached.
+   */
+  attachmentKey?: string;
 }
 
 export const COMPLIANCE_DECLARATIONS: readonly ComplianceDeclaration[] = complianceJson.sectionA;

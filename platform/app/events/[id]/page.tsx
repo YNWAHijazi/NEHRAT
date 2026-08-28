@@ -5,7 +5,7 @@ import { L } from '../../../components/L';
 import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
-import { invitationForEvent, governanceFor, postEventReportFor } from '../../../lib/queries';
+import { invitationForEvent, governanceFor, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
 import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
@@ -26,6 +26,7 @@ import {
   postEventReportGate,
   type EventGateContext,
   type Gate,
+  MINISTRY_CONTENT,
 } from '../../../lib/rules';
 import enMessages from '../../../lib/i18n/messages/en.json';
 import arMessages from '../../../lib/i18n/messages/ar.json';
@@ -205,6 +206,13 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const level = gateCtx.finalLevel;
 
   const allInvitations = invitationsFor(account.id, id);
+  // Is the Level 3 Director requirement actually outstanding? A nomination is not a
+  // confirmation, so only a confirmed Director fills it.
+  const standingDetermination = standingDeterminationFor(id);
+  const CERT = MINISTRY_CONTENT.certificate;
+  const directorConfirmed = allInvitations.some(
+    (i) => i.kind === 'director' && i.status === 'confirmed',
+  );
   // Both kinds count; a declined party HAS answered and is not pending.
   const agencyPending = allInvitations.filter((p) => p.status === 'nominated').length;
   const agencyPendColor = agencyPending > 0 ? 'var(--bad)' : 'var(--brand)';
@@ -415,6 +423,36 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </div>
         </div>
 
+        {/* THE CERTIFICATE, at the top of the record once a determination stands.
+            A determination was recorded, the organizer was notified, and there was
+            nothing on their side they could print -- and this document is what they
+            hand to the authorising authority. */}
+        {standingDetermination ? (
+          <div data-region="determination-card" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${standingDetermination.outcome === 'satisfied' ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12, marginBlockEnd: 32 }}>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+              <L en={CERT.titleEn} ar={CERT.titleAr} />
+            </div>
+            <div style={{ fontSize: '17px', fontWeight: 500, lineHeight: 1.5, marginBlockEnd: 6 }}>
+              <L
+                en={MINISTRY_CONTENT.outcomes.find((o) => o.key === standingDetermination.outcome)?.en ?? standingDetermination.outcome}
+                ar={MINISTRY_CONTENT.outcomes.find((o) => o.key === standingDetermination.outcome)?.ar ?? standingDetermination.outcome}
+              />
+            </div>
+            <div style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockEnd: 14 }}>
+              <L
+                en={`${event.mophReference ?? ''} · ${CERT.byLabelEn} ${standingDetermination.recordedBy} · ${standingDetermination.recordedAt}`}
+                ar={`${event.mophReference ?? ''} · ${CERT.byLabelAr} ${standingDetermination.recordedBy} · ⁦${standingDetermination.recordedAt}⁩`}
+              />
+            </div>
+            <a
+              href={`/events/${id}/determination`}
+              style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+            >
+              <L en={CERT.openEn} ar={CERT.openAr} />
+            </a>
+          </div>
+        ) : null}
+
         {filing?.conditional && filing.conditionEn && filing.conditionAr ? (
           <p style={{ margin: '0 0 32px', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '78ch' }}>
             <L en={filing.conditionEn} ar={filing.conditionAr} />
@@ -534,9 +572,13 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </div>
         </div>
 
-        {/* Level 3 requirements note: present ONLY at Level 3. At Level 2 this block is
-            absent -- no greyed row, no mention (non-negotiable #10). */}
-        {emdGate.behaviour !== 'absent' && level === 3 ? (
+        {/* Level 3 requirements note: present ONLY at Level 3, and only WHILE THE
+            REQUIREMENT IS UNFILLED. It used to render on the level alone, so an
+            organizer who had nominated a Director and had them confirm was still
+            being told to appoint one -- an instruction to do something already done,
+            on the same screen that shows it was done. Derived from the record now:
+            it disappears the moment a Director confirms. */}
+        {emdGate.behaviour !== 'absent' && level === 3 && !directorConfirmed ? (
           <div style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--l3)', borderRadius: 12, marginBlockEnd: 40 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Level 3 requirement" ar="متطلب المستوى 3" />

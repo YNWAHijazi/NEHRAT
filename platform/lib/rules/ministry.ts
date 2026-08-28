@@ -154,3 +154,18 @@ export function effectiveCycles(published: {
     provisional: check === null || lapse === null,
   };
 }
+
+/**
+ * Which roles hold an action. The other direction from can().
+ *
+ * Exists so a caller can ask "is there anybody who could do this?" without
+ * re-deriving the matrix. A POWER HELD BY NOBODY REACHABLE is worse than a power
+ * nobody has, because the screen advertises it: the reviewer walked a submission
+ * whose satisfied outcome was gated by an inspection, was told inspections are
+ * scheduled by a reviewer or an inspector, and found that no account they could
+ * reach held the power. The control existed and the owner named in its own copy did
+ * not exist.
+ */
+export function rolesHolding(action: MinistryAction): string[] {
+  return Object.keys(MATRIX).filter((role) => (MATRIX[role] ?? []).includes(action));
+}

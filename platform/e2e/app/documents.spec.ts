@@ -50,8 +50,10 @@ test.describe('the Ministry opens the file', () => {
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     const panel = page.locator('[data-region="review-attachments"]');
     await expect(panel).toBeVisible();
-    // Not "a link exists somewhere" -- a viewer per attached document.
-    await expect(panel.locator('[data-region="doc-viewer"]')).toHaveCount(2);
+    // Not "a link exists somewhere" -- a viewer per attached document. EV-0362 is a
+    // Level 3 record and carries the site map, the deployment map and the evidence of
+    // insurance, which became an attachment when it stopped being a text box.
+    await expect(panel.locator('[data-region="doc-viewer"]')).toHaveCount(3);
     await expect(panel.locator(`a[href="${DOC}"]`).first()).toHaveAttribute('href', DOC);
   });
 
