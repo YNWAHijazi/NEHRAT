@@ -26,6 +26,9 @@ const PORT = Number(process.env['E2E_PORT'] ?? 3000);
 const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
+  // Unbypassable free-space check: see scripts/disk-check.mjs for why preflight
+  // alone was not enough.
+  globalSetup: join(HERE, 'scripts', 'disk-check.mjs'),
   testDir: 'e2e',
   fullyParallel: true,
   // One dev server carries every worker, and the reference captures are pixel-heavy.

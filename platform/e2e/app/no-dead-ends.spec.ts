@@ -21,6 +21,40 @@ import { gotoRidingRestarts } from '../helpers/resilient';
 const MARKERS =
   /\b(outstanding|pending|awaiting|not yet|overdue|unanswered|owed|not set|incomplete|missing|blocked while|cannot be certified|awaiting recording|awaiting you|not recorded|not started|lapsed|lapsing|open —)\b/i;
 
+/**
+ * WHY THE FIRST VERSION OF THIS SCANNER MISSED THE OUTCOME PANEL.
+ *
+ * Two causes, and the second is the interesting one.
+ *
+ * 1. COVERAGE. Every Ministry route in the walks below pointed at EV-0362, which
+ *    already carries a determination, two inspections and six attestations. Its
+ *    panels are never empty, so the empty state that carried the defect never
+ *    rendered under scan. EV-0455 -- seeded filed with nothing recorded against
+ *    it, which is the entire reason it exists -- is now walked by every Ministry
+ *    role.
+ *
+ * 2. VOCABULARY. MARKERS was built from words seen on CHIPS ("outstanding",
+ *    "awaiting", "overdue"). An empty panel says none of them: "No determination
+ *    has been recorded.", "No inspections on this submission.", "Nothing
+ *    attached." all missed.
+ *
+ * The obvious repair -- match /^(no|none|nothing)/ too -- was tried and REJECTED.
+ * It fired on "Nothing reported." (Ministry changes), "None notified."
+ * (incidents), "No referrals logged." (applicability) and "Not currently covered"
+ * (a facility designation label, not an absence at all). Every one of those is a
+ * legitimate nothing-is-owed state, and no string test can separate "nothing is
+ * owed" from "something is owed and you cannot do it". The words are identical.
+ *
+ * So the second detector is STRUCTURAL, not lexical. A panel that carries an
+ * action for SOME role is marked `data-action-panel` in the DOM. The contract:
+ * for every role, such a panel must contain either a control or a named owner.
+ * Emptiness is irrelevant; the question is whether the role looking at it is
+ * told who holds the pen. This is the reviewer's own rule, made checkable, and
+ * it cannot be satisfied by rewording.
+ */
+const ACTION_PANEL = '[data-action-panel]';
+const OWNER_NOTE = '[data-region^="owner-"]';
+
 const OWNERS =
   /(Ministry|organizer|Order of Physicians|Director|provider|operator|reviewer|inspector|named agenc|counterpart|المنظّم|الوزارة|النقابة|المدير|المزوّد|المشغّل|المراجع|المفتش)/i;
 
@@ -36,7 +70,7 @@ async function scan(page: Page, route: string): Promise<DeadEnd[]> {
   const response = await gotoRidingRestarts(page, route);
   if (!response || response.status() >= 400) return [];
   return page.evaluate(
-    ({ markerSrc, ownerSrc, waitSrc }) => {
+    ({ markerSrc, ownerSrc, waitSrc, actionSel, ownerSel }) => {
       const markers = new RegExp(markerSrc, 'i');
       const owners = new RegExp(ownerSrc, 'i');
       const waits = new RegExp(waitSrc, 'i');
@@ -63,9 +97,18 @@ async function scan(page: Page, route: string): Promise<DeadEnd[]> {
         }
         if (!ok) out.push({ route: location.pathname, text });
       }
+
+      // The structural half. An action-bearing panel must offer this role a
+      // control or name who holds one. Nothing about the copy is consulted.
+      for (const panel of Array.from(main.querySelectorAll(actionSel))) {
+        if (panel.querySelector('button, a[href], input, select, textarea, summary')) continue;
+        if (panel.querySelector(ownerSel)) continue;
+        const key = panel.getAttribute('data-action-panel') ?? '?';
+        out.push({ route: location.pathname, text: `action panel "${key}": no control and no named owner` });
+      }
       return out;
     },
-    { markerSrc: MARKERS.source, ownerSrc: OWNERS.source, waitSrc: WAITS.source },
+    { markerSrc: MARKERS.source, ownerSrc: OWNERS.source, waitSrc: WAITS.source, actionSel: ACTION_PANEL, ownerSel: OWNER_NOTE },
   );
 }
 
@@ -93,14 +136,19 @@ const WALKS: { login: string; routes: string[] }[] = [
   {
     login: 'test_moph',
     routes: [
-      '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/submissions/EV-0455',
+      '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362',
+      // EV-0455 is filed with NOTHING recorded against it: no determination, no
+      // inspection, no attestation. Its empty panels are the ones that must name
+      // an owner, and a submission that already carries determinations (EV-0362)
+      // never renders them.
+      '/ministry/submissions/EV-0455',
       '/ministry/changes', '/ministry/organizations', '/ministry/enquiries', '/ministry/incidents',
       '/ministry/facilities', '/ministry/facilities/arrests', '/ministry/applicability',
       '/ministry/determinations', '/ministry/order',
     ],
   },
-  { login: 'test_inspector', routes: ['/ministry', '/ministry/submissions/EV-0362'] },
-  { login: 'test_moph_admin', routes: ['/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/organizations', '/ministry/enquiries', '/ministry/admin/users', '/ministry/admin/cardiac', '/ministry/admin/configuration', '/ministry/admin/registry'] },
+  { login: 'test_inspector', routes: ['/ministry', '/ministry/submissions/EV-0362', '/ministry/submissions/EV-0455'] },
+  { login: 'test_moph_admin', routes: ['/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/submissions/EV-0455', '/ministry/organizations', '/ministry/enquiries', '/ministry/admin/users', '/ministry/admin/cardiac', '/ministry/admin/configuration', '/ministry/admin/registry'] },
   { login: 'test_owner', routes: ['/platform/admin', '/platform/activity'] },
 ];
 

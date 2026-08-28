@@ -18,7 +18,9 @@ const PLATFORM = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** Enough for a full run's screenshots, diffs and traces, with room to spare. */
 const REQUIRED_MB = 1024;
 
-const stale = ['test-results', 'e2e/output', 'playwright-report'];
+// .next-e2e is the e2e server's own build directory -- 300 MB of the fill, and
+// a build cache like any other, so it goes with the rest.
+const stale = ['test-results', 'e2e/output', 'playwright-report', '.next-e2e'];
 await Promise.all(
   stale.map((d) => rm(join(PLATFORM, d), { recursive: true, force: true })),
 );

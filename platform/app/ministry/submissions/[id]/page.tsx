@@ -101,6 +101,23 @@ export default async function SubmissionReviewPage({
   const mayInspect = can(account.role, 'scheduleInspection');
   const catalog = review.level ? documentsForLevel(review.level) : [];
 
+  /**
+   * Who holds an action this account does not. The control being ABSENT is correct
+   * (non-negotiable 10); the silence was not -- an empty panel with an implied
+   * action reads as a missing feature rather than a withheld one.
+   */
+  const OwnerNote = ({ panel }: { panel: 'determinations' | 'inspections' | 'attestations' | 'measures' }) => {
+    const note = (MINISTRY_CONTENT.panelOwners as unknown as Record<string, { en: string; ar: string }>)[panel]!;
+    return (
+      <div
+        data-region={`owner-${panel}`}
+        style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 8, marginBlockStart: 10, fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '80ch' }}
+      >
+        <L en={note.en} ar={note.ar} />
+      </div>
+    );
+  };
+
   const STATUS_CHIP: Record<string, { en: string; ar: string; bg: string; color: string }> = {
     nominated: { en: 'Nominated — unanswered', ar: 'مُسمّى — دون إجابة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
     confirmed: { en: 'Confirmed', ar: 'مؤكَّد', bg: 'var(--brand-soft)', color: 'var(--brand)' },
@@ -452,7 +469,8 @@ export default async function SubmissionReviewPage({
             </div>
           ) : null}
           {attRows.length > 0 ? (
-            <div data-region="attestations" style={{ marginBlockEnd: 28 }}>
+            <div data-region="attestations" data-action-panel="attestations" style={{ marginBlockEnd: 28 }}>
+              {!mayAttest ? <OwnerNote panel="attestations" /> : null}
               {attSummary ? (
                 <div data-region="att-summary" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, padding: '12px 16px', background: 'var(--surface2)', borderRadius: 8, marginBlockEnd: 14, fontSize: 13, lineHeight: 1.5 }}>
                   <L en={attSummary.en} ar={attSummary.ar} />
@@ -549,7 +567,7 @@ export default async function SubmissionReviewPage({
               ar="النتائج الميدانية ليست نتيجة قرار ولا تقرر واحدة. والتفتيش الحاجب دون نتائج مسجَّلة يحجب النتيجة المستوفاة فقط."
             />
           </p>
-          <div data-region="inspections" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
+          <div data-region="inspections" data-action-panel="inspections" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {inspections.map((i) => (
               <div key={i.id} style={{ paddingBlock: '17px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: i.findings || mayInspect ? 10 : 0 }}>
@@ -644,8 +662,10 @@ export default async function SubmissionReviewPage({
                 </form>
               </details>
             ) : null}
+            {!mayInspect ? <OwnerNote panel="inspections" /> : null}
           </div>
 
+          <div data-action-panel="measures" style={{ display: 'contents' }}>
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en={MINISTRY_CONTENT.additionalMeasures.en} ar={MINISTRY_CONTENT.additionalMeasures.ar} />
           </h2>
@@ -653,6 +673,7 @@ export default async function SubmissionReviewPage({
             <L en={MINISTRY_CONTENT.additionalMeasures.noteEn} ar={MINISTRY_CONTENT.additionalMeasures.noteAr} />
           </p>
           <div data-region="measures" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
+            {!mayMeasure ? <OwnerNote panel="measures" /> : null}
             {measures.map((m) => {
               const doc = catalog.find((d) => d.key === m.catalogKey);
               return (
@@ -701,9 +722,11 @@ export default async function SubmissionReviewPage({
               </button>
             </form>
           ) : null}
+          </div>
         </div>
 
-        <div>
+        <div data-action-panel="determinations">
+          {!mayRecord ? <OwnerNote panel="determinations" /> : null}
           {mayRecord ? (
             <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>

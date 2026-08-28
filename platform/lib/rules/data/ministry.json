@@ -426,5 +426,24 @@
         "ar": "غير مُعالَج"
       }
     }
+  },
+  "panelOwners": {
+    "$comment": "Who holds an action a viewing role does not. An ABSENT control is correct where the role never holds it (non-negotiable 10), but silence is not: a panel that names an absent thing must name the party who acts, or the viewer cannot tell a withheld control from a missing feature. Rendered from the permission the role lacks, never from a hard-coded role name.",
+    "determinations": {
+      "en": "Determinations are recorded by a Ministry reviewer. You cannot record one on this account.",
+      "ar": "تُسجَّل النتائج من مراجع في الوزارة. ولا يمكنكم تسجيل نتيجة على هذا الحساب."
+    },
+    "inspections": {
+      "en": "Inspections are scheduled and their findings recorded by a Ministry reviewer or inspector. You cannot schedule one on this account.",
+      "ar": "يُجدول التفتيش وتُسجَّل نتائجه من مراجع أو مفتش في الوزارة. ولا يمكنكم جدولة تفتيش على هذا الحساب."
+    },
+    "attestations": {
+      "en": "Attestations are recorded by a Ministry reviewer. You cannot attest or record a deficiency on this account.",
+      "ar": "تُسجَّل التصديقات من مراجع في الوزارة. ولا يمكنكم التصديق أو تسجيل قصور على هذا الحساب."
+    },
+    "measures": {
+      "en": "Additional measures are required by a Ministry reviewer. You cannot add one on this account.",
+      "ar": "تُشترط التدابير الإضافية من مراجع في الوزارة. ولا يمكنكم إضافة تدبير على هذا الحساب."
+    }
   }
 }
