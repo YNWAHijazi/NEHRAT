@@ -8,12 +8,22 @@
 import Link from 'next/link';
 import { L } from '../../components/L';
 import type { InvitationDetail } from '../../lib/queries';
-import { filingDeadline } from '../../lib/rules';
+import { ROLES_CONTENT, filingDeadline } from '../../lib/rules';
 import { addDaysIso, POST_EVENT_REPORT } from '../../lib/rules';
 
 interface RowShape {
   key: string;
   href: string;
+  /**
+   * THE STANDING VIEW of the event, for a party whose nomination is confirmed.
+   *
+   * Everything a counterparty was told about the event lived on the nomination token
+   * -- a link in their mail, read once, before they had an account. After accepting
+   * they had this row and no route back to the facts they accepted on. Absent while a
+   * nomination is unanswered: there is no standing view of an event nobody has
+   * accepted, and the token still carries the briefing.
+   */
+  briefHref?: string;
   nameEn: string; nameAr: string;
   orgEn: string; orgAr: string;
   date: string;
@@ -62,6 +72,7 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
       return {
         key: inv.token,
         href: isL3 ? `/events/${inv.eventId}/declaration` : `/events/${inv.eventId}/participation`,
+        ...(inv.status === 'confirmed' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,
         date: inv.eventStart ?? '', level, chips,
@@ -104,6 +115,7 @@ export function directorRows(
       const reportDue = inv.eventEnd ? addDaysIso(inv.eventEnd, POST_EVENT_REPORT.windowDays) : '';
       return {
         key: inv.token,
+        ...(inv.status === 'confirmed' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         href: reportOwed || done ? `/events/${inv.eventId}/report` : `/events/${inv.eventId}`,
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,
@@ -164,7 +176,8 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
           </div>
         ) : null}
         {outstanding.map((e) => (
-          <Link key={e.key} href={e.href} data-stack="" style={{ textAlign: 'start', paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+          <div key={e.key} style={{ display: 'contents' }}>
+          <Link href={e.href} data-stack="" style={{ textAlign: 'start', paddingBlock: '25px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.color}`, borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1fr 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}>
                 <L en={e.nameEn} ar={e.nameAr} />
@@ -211,6 +224,13 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
             </div>
           </Link>
+          {/* Outside the row's own Link, because a link cannot nest in a link. */}
+          {e.briefHref ? (
+            <Link href={e.briefHref} data-region="standing-view" style={{ fontSize: '12.5px', color: 'var(--brand)', paddingInlineStart: 26, marginBlockStart: -4 }}>
+              <L en={ROLES_CONTENT.nomination.openStandingEn} ar={ROLES_CONTENT.nomination.openStandingAr} />
+            </Link>
+          ) : null}
+          </div>
         ))}
       </div>
 

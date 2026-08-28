@@ -190,3 +190,67 @@ test.describe('stage three — the account, after the answer and never as part o
     await expect(page.locator('[data-region="accepted-no-account"]')).toBeVisible();
   });
 });
+
+test.describe('the standing view, after accepting', () => {
+  test('the accepted party reads the event again, with the four plan sections and a version', async ({ page }) => {
+    // Everything a counterparty was told lived on the nomination token -- a link in
+    // their mail, read once, before they had an account. After accepting they had a
+    // dashboard row and no route back to the facts they accepted on.
+    await signInAs(page, 'test_ems');
+    await gotoRidingRestarts(page, '/dashboard');
+    // REACHABLE FROM THE DASHBOARD ROW, which is the half that was missing.
+    const link = page.locator('[data-region="standing-view"]').first();
+    await expect(link).toBeVisible();
+    await link.click();
+    await page.waitForURL(/\/events\/EV-\d+\/brief$/);
+
+    // The slice is then read on EV-0362, the seeded event that HAS a plan. EV-0418
+    // has none, and its brief correctly shows the not-written-yet state -- which is
+    // the right behaviour and the wrong fixture for asserting the four sections.
+    await gotoRidingRestarts(page, '/events/EV-0362/brief');
+
+    // Same scope as stage one, kept current.
+    await expect(page.locator('[data-region="briefing"]')).toBeVisible();
+    await expect(page.locator('[data-region="briefing-requirements"]')).toBeVisible();
+
+    const slice = page.locator('[data-region="plan-slice"]');
+    await expect(slice).toBeVisible();
+    for (const heading of [
+      'Patient access and extraction',
+      'Coordination and communications',
+      'Receiving emergency departments',
+      'Major-incident and mass-casualty arrangements',
+    ]) {
+      await expect(slice, `${heading} is missing from the slice`).toContainText(heading);
+    }
+    // And NOT the rest of the plan: being named in an event is not being named in all
+    // of it. Staffing, equipment and contingencies are the organizer's.
+    for (const withheld of ['Medical and first-aid staffing', 'Medical equipment and supplies', 'Patient documentation']) {
+      await expect(slice, `${withheld} must not be disclosed`).not.toContainText(withheld);
+    }
+
+    // THE VERSION STAMP is the point: a standing view that changes silently is worse
+    // than none.
+    await expect(page.locator('[data-region="plan-version"]')).toContainText(/Version \d+, last saved \d{4}-\d{2}-\d{2}/);
+  });
+
+  test('a party with no confirmed nomination on the event cannot open its brief', async ({ page }) => {
+    // The nomination is the entitlement, not the role.
+    await signInAs(page, 'test_ems');
+    const response = await gotoRidingRestarts(page, '/events/EV-0244/brief');
+    expect(response?.status()).toBe(404);
+  });
+
+  test('accepting is not a widening: the same documents, before and after', async ({ page }) => {
+    await signInAs(page, 'test_ems');
+    // EV-0362 is the event this account is confirmed on.
+    expect((await page.request.get('/api/documents/EV-0362/siteMap')).status()).toBe(200);
+    expect((await page.request.get('/api/documents/EV-0362/deploymentMap')).status()).toBe(200);
+    for (const withheld of ['insuranceCertificate', 'complianceForm', 'plan-document']) {
+      expect(
+        (await page.request.get(`/api/documents/EV-0362/${withheld}`)).status(),
+        `${withheld} must stay closed to a named party`,
+      ).toBe(404);
+    }
+  });
+});

@@ -27,7 +27,7 @@ import {
   type MinistryAction,
   type OutcomeBlocker,
 } from '../lib/rules';
-import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor } from '../lib/queries';
+import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor, inspectorCandidates } from '../lib/queries';
 
 async function requireMinistry(action: MinistryAction): Promise<{ id: number; role: string; displayName: string; isDemo: boolean }> {
   const account = await currentAccount();
@@ -517,7 +517,6 @@ export async function returnOrganizationAction(orgId: number, formData: FormData
     `أعادت الوزارة تسجيل مؤسستكم. والسبب كما كُتب: «${reason}». عدّلوا البيانات وأعيدوا التقديم؛ ويبقى تقديم الملفات محجوباً حتى تُسجَّل المؤسسة.`,
     org.is_demo,
   );
-  void actor;
   revalidatePath('/ministry/organizations');
   redirect('/ministry/organizations?notice=returned');
 }
@@ -677,21 +676,48 @@ export async function setUserSuspensionAction(login: string, formData: FormData)
  * whether an inspection gates the satisfied outcome is the scheduler's call.
  */
 export async function createInspectionAction(eventId: string, formData: FormData): Promise<void> {
-  const actor = await requireMinistry('scheduleInspection');
+  // The gate, not an identity: who CONDUCTS the inspection is a field below, and it
+  // used to be silently whoever clicked this.
+  await requireMinistry('scheduleInspection');
   const titleEn = String(formData.get('titleEn') ?? '').trim();
   const titleAr = String(formData.get('titleAr') ?? '').trim();
   const date = String(formData.get('date') ?? '').trim();
   const blocking = String(formData.get('blocking') ?? '') === '1';
   if (!titleEn || !titleAr) redirect(`/ministry/submissions/${eventId}?error=inspection-titles`);
   const db = getDb();
-  const ev = db.prepare(`SELECT is_demo FROM events WHERE id = ?`).get(eventId) as { is_demo: number } | undefined;
+  const ev = db
+    .prepare(`SELECT is_demo, name_en, name_ar FROM events WHERE id = ?`)
+    .get(eventId) as { is_demo: number; name_en: string; name_ar: string } | undefined;
   if (!ev) redirect('/ministry/queue');
+
+  // WHO CONDUCTS IT is an input now, not the identity of whoever clicked. Validated
+  // against the accounts that actually hold the power -- a free-text name would let
+  // an inspection be assigned to somebody who cannot record its findings, which is a
+  // scheduled inspection nobody will ever complete.
+  const named = String(formData.get('inspector') ?? '').trim();
+  const candidates = inspectorCandidates(ev.is_demo === 1);
+  const inspector = candidates.find((c) => c.displayName === named)?.displayName;
+  if (!inspector) redirect(`/ministry/submissions/${eventId}?error=inspector`);
+
   db.prepare(
     `INSERT INTO inspections (event_id, title_en, title_ar, inspector, state, date, blocking, is_demo)
      VALUES (?, ?, ?, ?, ?, NULLIF(?, ''), ?, ?)`,
-  ).run(eventId, titleEn, titleAr, actor.displayName, date ? 'scheduled' : 'none', date, blocking ? 1 : 0, ev.is_demo);
+  ).run(eventId, titleEn, titleAr, inspector, date ? 'scheduled' : 'none', date, blocking ? 1 : 0, ev.is_demo);
+
+  // THE ORGANIZER IS TOLD. An inspection scheduled on a submission and never
+  // mentioned to the party being inspected is the definition of an outstanding thing
+  // with no owner on the side that has to accommodate it.
+  const S = MINISTRY_CONTENT.scheduleInspection;
+  notifyEventOwner(
+    eventId,
+    `${S.notifyTitleEn} — ${ev.name_en}`,
+    `${S.notifyTitleAr} — ${ev.name_ar}`,
+    `${S.notifyBodyEn} ${titleEn}. ${date ? `Scheduled for ${date}.` : S.notifyNoDateEn}`,
+    `${S.notifyBodyAr} ${titleAr}. ${date ? `مقرَّر في ⁦${date}⁩.` : S.notifyNoDateAr}`,
+    `/events/${eventId}/requirements`,
+  );
   revalidatePath(`/ministry/submissions/${eventId}`);
-  redirect(`/ministry/submissions/${eventId}`);
+  redirect(`/ministry/submissions/${eventId}?notice=inspection-scheduled`);
 }
 
 /** Toggle whether an inspection blocks the satisfied outcome. */

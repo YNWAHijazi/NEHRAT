@@ -25,11 +25,15 @@
  *    reviewer cannot open a demonstration route map and a demonstration reviewer
  *    cannot open a real organizer's.
  *
- * WHO MAY READ, TODAY: the organizer who owns the event, and any Ministry role
- * holding viewSubmission on a FILED submission. Nominated counterparties -- an
- * EMS provider reading the deployment map it is named in -- are item 5 of the
- * same review and are not smuggled in here; when they arrive they arrive as an
- * explicit branch below, not as a loosened condition.
+ * WHO MAY READ: the organizer who owns the event; any Ministry role holding
+ * viewSubmission on a FILED submission; and a counterparty whose nomination on this
+ * event is CONFIRMED, for the documents its role is allow-listed for.
+ *
+ * That third branch is written as a branch, not as a loosened condition on the other
+ * two -- it was left as a named seam when the route was built and it arrives the same
+ * way. It reads the same allow-list the anonymous token route reads
+ * (lib/rules/nomination-access), so an accepted party sees exactly what they saw
+ * before accepting and not one document more: accepting is not a widening of access.
  */
 
 import { NextResponse } from 'next/server';
@@ -38,6 +42,7 @@ import { getDb } from '../../../../../lib/db';
 import { can } from '../../../../../lib/rules/ministry';
 import { demonstrationFilter } from '../../../../../lib/rules/scope';
 import { PLAN_DOC_KEY, servedType } from '../../../../../lib/rules/uploads';
+import { nomineeMayReadDocument } from '../../../../../lib/rules/nomination-access';
 
 const notFound = (): NextResponse => new NextResponse('Not found', { status: 404 });
 
@@ -68,7 +73,15 @@ export async function GET(
   const owns = event.account_id === account.id;
   // A Ministry role reads a submission, and a submission exists once it is filed.
   const ministryMayRead = can(account.role, 'viewSubmission') && event.filed === 1;
-  if (!owns && !ministryMayRead) return notFound();
+  // A named counterparty reads its own role's documents on the event it accepted.
+  const nomination = db
+    .prepare(
+      `SELECT kind FROM invitations
+       WHERE event_id = ? AND account_id = ? AND status = 'confirmed' LIMIT 1`,
+    )
+    .get(eventId, account.id) as { kind: 'ems' | 'director' } | undefined;
+  const nomineeMayRead = nomination !== undefined && nomineeMayReadDocument(nomination.kind, docKey);
+  if (!owns && !ministryMayRead && !nomineeMayRead) return notFound();
 
   const row = (
     docKey === PLAN_DOC_KEY

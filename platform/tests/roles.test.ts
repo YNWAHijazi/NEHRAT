@@ -15,7 +15,8 @@ import {
   orderLaneActive,
 } from '../lib/rules/roles';
 import { requirementsForParty } from '../lib/rules/requirements';
-import { nomineeMayReadDocument } from '../lib/rules/nomination-access';
+import { NOMINEE_PLAN_SECTIONS, nomineeMayReadDocument, nomineeMayReadSection } from '../lib/rules/nomination-access';
+import { PLAN_SECTIONS } from '../lib/rules/content';
 
 describe("the Director's requirements, derived from the matrix", () => {
   it('names five requirements at Level 3', () => {
@@ -157,5 +158,33 @@ describe('what a nomination token may read', () => {
         expect(nomineeMayReadDocument(kind, forbidden), `${kind} must not read ${forbidden}`).toBe(false);
       }
     }
+  });
+});
+
+describe('the plan slice a named party may read', () => {
+  it('is four sections: access and extraction, communications, hospitals, major incident', () => {
+    // Reviewer instruction, 2026-08-28. These four and no others: a provider deciding
+    // whether it can meet the major-incident arrangements needs the arrangements, not
+    // a note that they exist -- and the plan also carries the organizer's staffing,
+    // equipment, contingencies and contacts, which are not the provider's to read.
+    expect([...NOMINEE_PLAN_SECTIONS]).toEqual([9, 10, 11, 12]);
+  });
+
+  it('names the sections the instrument numbers, not a set of our own', () => {
+    const byNumber = new Map(PLAN_SECTIONS.map((s) => [s.n, s.en]));
+    expect(byNumber.get(9)).toMatch(/access and extraction/i);
+    expect(byNumber.get(10)).toMatch(/communications/i);
+    expect(byNumber.get(11)).toMatch(/receiving emergency departments/i);
+    expect(byNumber.get(12)).toMatch(/major-incident/i);
+  });
+
+  it('excludes every other section of the sixteen', () => {
+    // Widening this is a disclosure decision, and it should fail a test when somebody
+    // makes it by accident.
+    for (const sec of PLAN_SECTIONS) {
+      expect(nomineeMayReadSection(sec.n), `section ${sec.n}`).toBe([9, 10, 11, 12].includes(sec.n));
+    }
+    expect(nomineeMayReadSection(1)).toBe(false);
+    expect(nomineeMayReadSection(16)).toBe(false);
   });
 });

@@ -272,3 +272,48 @@ test.describe('platform activity stays counts only', () => {
     }
   });
 });
+
+test.describe('scheduling an inspection', () => {
+  test('is a peer control above Require additional measures, with who conducts it', async ({ page }) => {
+    // It used to be a disclosure at the foot of the inspection list with three inputs
+    // and no way to say who conducts it -- the inspector was silently whoever clicked
+    // Schedule, so an inspection could only ever be assigned to the person arranging
+    // it, and the findings are recorded against that name.
+    await signInAs(page, 'test_inspector');
+    // EV-0301 is test_organizer's and none of its routes are pixel-compared, so the
+    // organizer half of this can be walked without disturbing a reference comparison.
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0301');
+    const form = page.locator('[data-region="schedule-inspection"]');
+    await expect(form).toBeVisible();
+    await expect(form.locator('select[name="inspector"]')).toBeVisible();
+    await expect(form.locator('input[name="date"]')).toBeVisible();
+    await expect(form.locator('input[name="blocking"]')).toBeVisible();
+
+    await form.locator('input[name="titleEn"]').fill('Deployment walk-through');
+    await form.locator('input[name="titleAr"]').fill('جولة على الانتشار');
+    await form.locator('input[name="blocking"]').check();
+    await form.locator('button[type="submit"]').click();
+    await page.waitForURL(/notice=inspection-scheduled/);
+
+    // Asserted by CONTENT, not by a count delta: the region's children include an
+    // empty state before the first inspection and an owner note for roles that cannot
+    // schedule, so the child count is not the number of inspections.
+    const row = page.locator('[data-region="inspections"] > div', { hasText: 'Deployment walk-through' });
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText('Blocking');
+
+    // A BLOCKING INSPECTION WITH NO FINDINGS gates the satisfied outcome and nothing
+    // else -- the other two determinations stay available throughout.
+    await signInAs(page, 'test_moph');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0301');
+    await expect(page.locator('[data-region="outcome"]')).toContainText('Deployment walk-through');
+  });
+
+  test('the organizer is told, rather than finding out on the day', async ({ page }) => {
+    // An inspection scheduled on a submission and never mentioned to the party being
+    // inspected is an outstanding thing with no owner on the side that accommodates it.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/notifications');
+    await expect(page.locator('body')).toContainText('An inspection has been scheduled');
+  });
+});

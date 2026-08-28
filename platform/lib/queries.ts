@@ -19,8 +19,10 @@ import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
 import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
-import { NOMINEE_DOCUMENT_KEYS } from './rules/nomination-access';
+import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination-access';
+import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
+import { can } from './rules/ministry';
 
 export interface EventRow {
   id: string;
@@ -1246,6 +1248,51 @@ export function nominationBriefing(token: string): NominationBriefing | null {
   };
 }
 
+/**
+ * THE PLAN SLICE a named party may read, with the version it was read at.
+ *
+ * THE VERSION STAMP IS THE POINT. A standing view that silently changes is worse than
+ * no standing view: a provider who read the major-incident arrangements in August and
+ * acts on them in September must be able to see whether what they read is what
+ * stands. The version and the date it was last saved are rendered with the text, and
+ * the plan's version increments on every save (savePlanAction archives the row it
+ * replaces), so a changed slice is visible as a changed number.
+ *
+ * Four sections, from lib/rules/nomination-access. Returns null when the organizer
+ * has no plan yet -- which the screen states, rather than showing four empty rows
+ * that read as an organizer who wrote nothing.
+ */
+export interface NomineePlanSlice {
+  version: number;
+  updatedAt: string;
+  mode: 'write' | 'attach';
+  sections: { n: number; en: string; ar: string; text: string; covered: boolean }[];
+}
+
+export function nomineePlanSlice(eventId: string): NomineePlanSlice | null {
+  const r = getDb()
+    .prepare(
+      `SELECT mode, sections, version, updated_at FROM plans WHERE event_id = ?`,
+    )
+    .get(eventId) as
+    | { mode: 'write' | 'attach'; sections: string; version: number; updated_at: string }
+    | undefined;
+  if (!r) return null;
+  const stored = JSON.parse(r.sections) as Record<string, { text?: string; covered?: boolean }>;
+  return {
+    version: r.version,
+    updatedAt: r.updated_at.slice(0, 10),
+    mode: r.mode,
+    sections: PLAN_SECTIONS.filter((sec) => nomineeMayReadSection(sec.n)).map((sec) => ({
+      n: sec.n,
+      en: sec.en,
+      ar: sec.ar,
+      text: (stored[String(sec.n)]?.text ?? '').trim(),
+      covered: stored[String(sec.n)]?.covered === true,
+    })),
+  };
+}
+
 /** Every nomination linked to this account -- the role dashboards. */
 export function invitationsForAccount(accountId: number): InvitationDetail[] {
   const rows = getDb()
@@ -1860,6 +1907,35 @@ export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
     )
     .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number; suspended: number }[];
   return rows.map((r) => ({ login: r.login, displayName: r.display_name, role: r.role, isDemo: r.is_demo === 1, suspended: r.suspended === 1 }));
+}
+
+/**
+ * WHO CAN CONDUCT AN INSPECTION -- the accounts the scheduling control names.
+ *
+ * "Who conducts it" was not a field: the inspector was silently whoever clicked
+ * Schedule, so an inspection could only ever be assigned to the person arranging it.
+ * The findings are then recorded against that name, which makes the assignment a
+ * matter of record rather than a convenience.
+ *
+ * Derived from the permission matrix, not from a role string written here: whoever
+ * holds scheduleInspection is who can conduct one, and if the Ministry re-rules that
+ * the list follows. Suspended accounts are excluded -- an inspection assigned to an
+ * account that cannot sign in is an inspection nobody will conduct.
+ */
+export function inspectorCandidates(viewerIsDemo: boolean): { displayName: string; role: string }[] {
+  const eligible = ['reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner'].filter((r) =>
+    can(r, 'scheduleInspection'),
+  );
+  if (eligible.length === 0) return [];
+  const marks = eligible.map(() => '?').join(',');
+  const rows = getDb()
+    .prepare(
+      `SELECT display_name, role FROM accounts
+       WHERE role IN (${marks}) AND is_demo = ? AND suspended = 0
+       ORDER BY display_name`,
+    )
+    .all(...eligible, demoFlag(viewerIsDemo)) as unknown as { display_name: string; role: string }[];
+  return rows.map((r) => ({ displayName: r.display_name, role: r.role }));
 }
 
 /**

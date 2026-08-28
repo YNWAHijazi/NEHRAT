@@ -92,7 +92,21 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
 });
 
 test.describe('showstopper 4 — a revision outcome reopens the submission', () => {
-  test('EV-0362 refiles as version 2; the reviewer sees the version; the reference holds', async ({ page }) => {
+  test('EV-0362 refiles as a new version; the reviewer sees it; the reference holds', async ({ page }) => {
+    await signInAs(page, 'test_organizer');
+    // THE VERSION IS READ BEFORE AND COMPARED, not asserted as the number 2.
+    // Refiling is a MUTATION and this test used to assert an absolute version, so its
+    // own retry failed: the first attempt refiled to 2, timed out on a navigation,
+    // and the retry refiled to 3 and then failed the assertion. That reads as a
+    // product defect and is a test that cannot survive being run twice. What the
+    // showstopper is about is that refiling ARCHIVES the version it replaces and the
+    // reference number does not change -- neither of which is a fact about the
+    // number 2.
+    await signInAs(page, 'test_moph');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
+    const beforeText = await page.locator('[data-region="review-header"]').innerText();
+    const before = Number(/version (\d+)/.exec(beforeText)?.[1] ?? '1');
+
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/events/EV-0362/submit');
     // The revision banner, and the form unlocked despite being filed.
@@ -105,7 +119,13 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
 
     await signInAs(page, 'test_moph');
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
-    await expect(page.locator('body')).toContainText('revised submission, version 2');
+    await expect(page.locator('[data-region="review-header"]')).toContainText(
+      `revised submission, version ${before + 1}`,
+    );
+    // The version it replaced is archived and readable, which is the showstopper.
+    await expect(page.locator('[data-region="review-versions"]')).toContainText(
+      `Version ${before} — superseded`,
+    );
   });
 });
 

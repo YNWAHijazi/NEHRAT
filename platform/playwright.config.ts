@@ -32,9 +32,18 @@ export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
   // One dev server carries every worker, and the reference captures are pixel-heavy.
-  // Uncapped workers overload it and time honest tests out; four is stable on this
-  // machine and the suite still finishes in minutes.
-  workers: 4,
+  // Uncapped workers overload it and time honest tests out.
+  //
+  // FOUR WAS STABLE UNTIL THE SUITE GREW. At ~80 app tests -- including a route sweep
+  // that visits about fifty routes as eight roles -- four workers put enough
+  // concurrent first-compiles on one `next dev` that the long MUTATING journeys
+  // (create, assess, attach, file, determine) started losing steps: a submit that
+  // never landed, then an assertion on the state it should have produced. Every one
+  // passed in isolation and on retry, which is the signature of load rather than a
+  // defect, and a retry that passes is still a run that was not green.
+  //
+  // Two. The suite takes longer and says what it means.
+  workers: 2,
   forbidOnly: !!process.env['CI'],
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
@@ -87,7 +96,13 @@ export default defineConfig({
           {
             name: 'app',
             testMatch: /app\/.*\.spec\.ts/,
-            use: { baseURL: BASE_URL, navigationTimeout: 150_000 },
+            // 70s, NOT 150s, and the arithmetic is the reason. gotoRidingRestarts
+            // retries a hung navigation once, so a stalled goto costs TWO navigation
+            // budgets. At 150s that is 300s against a 180s test timeout: the retry
+            // could never complete, and the test died on the clock instead of on the
+            // retry. 70 x 2 = 140 fits inside 300 with room for the rest of a long
+            // journey. 70s is still far longer than any first compile observed here.
+            use: { baseURL: BASE_URL, navigationTimeout: 70_000 },
             // Same known, logged cause as the reference project: the dev server's
             // memory watchdog restarts it once as a long run accumulates, and the
             // test in flight dies on a dropped connection. Two belts here:
@@ -100,7 +115,10 @@ export default defineConfig({
             // MUTATING flow killed mid-run fails its retry too, because its state
             // is half-applied; that hard failure is correct and demands a re-run
             // rather than being papered over.
-            timeout: 180_000,
+            // 300s: the longest journey here is create, assess, attach, declare,
+            // file and three determinations -- about a dozen navigations, each of
+            // which may pay a first compile.
+            timeout: 300_000,
             // The 60s default is a COMPILATION budget, and it was the wrong size for
             // this project: a signed-out sweep hitting /facilities/new for the first
             // time, while three other workers each compile a route of their own, is

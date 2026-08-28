@@ -534,5 +534,40 @@
         "ar": "لم يضفه أي من الطرفين"
       }
     }
+  },
+  "scheduleInspection": {
+    "$comment": "The scheduling control, a peer of Require additional measures and directly above it. Four inputs: what is inspected, who conducts it, when, and whether it blocks the satisfied outcome.",
+    "en": "Schedule an inspection",
+    "ar": "جدولة تفتيش",
+    "noteEn": "An inspection is not an outcome and never decides one. Findings are recorded by whoever conducts it. A blocking inspection without recorded findings gates only the satisfied outcome; the other two determinations stay available throughout.",
+    "noteAr": "التفتيش ليس نتيجة ولا يقرر واحدة أبداً. وتُسجَّل النتائج الميدانية ممن يجريه. والتفتيش الحاجب دون نتائج مسجَّلة يحجب النتيجة المستوفاة وحدها؛ أما القراران الآخران فيبقيان متاحين طوال الوقت.",
+    "whatEn": "What is inspected",
+    "whatAr": "ما يُفتَّش",
+    "whatArLabelEn": "What is inspected (Arabic)",
+    "whatArLabelAr": "ما يُفتَّش (بالعربية)",
+    "whoEn": "Who conducts it",
+    "whoAr": "من يجريه",
+    "whoNoteEn": "The inspection is recorded against this person, and they are the one who records its findings.",
+    "whoNoteAr": "يُسجَّل التفتيش باسم هذا الشخص، وهو من يسجّل نتائجه الميدانية.",
+    "whenEn": "Date",
+    "whenAr": "التاريخ",
+    "whenUnsetEn": "Leave the date unset to record that an inspection is required before one is arranged. The organizer is told it is required and that no date is set.",
+    "whenUnsetAr": "اتركوا التاريخ فارغاً لتسجيل أن التفتيش مطلوب قبل ترتيب موعده. ويُبلَّغ المنظّم بأنه مطلوب وبأنه لم يُحدَّد له تاريخ.",
+    "blockingEn": "This inspection blocks the satisfied outcome until its findings are recorded",
+    "blockingAr": "يحجب هذا التفتيش النتيجة المستوفاة حتى تُسجَّل نتائجه الميدانية",
+    "submitEn": "Schedule the inspection",
+    "submitAr": "جدولة التفتيش",
+    "noCandidatesEn": "No account on this platform holds the power to conduct an inspection, so none can be scheduled. The Ministry issues an inspector account before an inspection can be arranged.",
+    "noCandidatesAr": "لا يملك أي حساب على هذه المنصة صلاحية إجراء تفتيش، فلا يمكن جدولة أي تفتيش. وتُصدر الوزارة حساب مفتش قبل إمكان ترتيب التفتيش.",
+    "notifyTitleEn": "An inspection has been scheduled",
+    "notifyTitleAr": "جُدول تفتيش",
+    "notifyBodyEn": "The Ministry has scheduled an inspection on this submission. An inspection is not a determination and does not decide one.",
+    "notifyBodyAr": "جدولت الوزارة تفتيشاً على هذا التقديم. والتفتيش ليس نتيجة ولا يقرر واحدة.",
+    "notifyNoDateEn": "No date is set yet; you are told when one is.",
+    "notifyNoDateAr": "لم يُحدَّد تاريخ بعد؛ وتُبلَّغون عند تحديده.",
+    "noneYetEn": "No inspection is scheduled on this submission. Schedule one below if this submission needs one; nothing is outstanding until one exists.",
+    "noneYetAr": "لا تفتيش مجدول على هذا التقديم. جدولوا واحداً أدناه إذا كان هذا التقديم يستوجبه؛ ولا شيء قائم قبل وجوده.",
+    "allRecordedEn": "Every inspection on this submission has its findings recorded. Nothing here is waiting on you; schedule another below if one is needed.",
+    "allRecordedAr": "كل تفتيش على هذا التقديم سُجِّلت نتائجه الميدانية. ولا شيء هنا بانتظاركم؛ جدولوا تفتيشاً آخر أدناه إذا لزم."
   }
 }

@@ -17,6 +17,7 @@ import {
   derivationForReview,
   assessmentAnswersForReview,
   sharedDocumentsForReview,
+  inspectorCandidates,
 } from '../../../../lib/queries';
 import {
   ATTESTATIONS_CONTENT,
@@ -86,12 +87,14 @@ export default async function SubmissionReviewPage({
   const plan = planForReview(id);
   const RP = MINISTRY_CONTENT.reviewPlan;
   const AA = MINISTRY_CONTENT.assessmentAnswers;
+  const SI = MINISTRY_CONTENT.scheduleInspection;
   const CD = MINISTRY_CONTENT.counterpartyDocuments;
   // The confirmed director, read directly: the review query's providers are the EMS
   // lane, and invitationForEvent is scoped to the counterparty's own account.
   const attachments = attachmentsForReview(id);
   const assessment = assessmentAnswersForReview(id);
   const counterpartyDocs = sharedDocumentsForReview(id);
+  const conductors = inspectorCandidates(account.isDemo);
   const versions = submissionVersionsFor(id);
   const director = getDb()
     .prepare(
@@ -789,37 +792,106 @@ export default async function SubmissionReviewPage({
                 <L en="No inspections on this submission." ar="لا تفتيشات على هذا التقديم." />
               </div>
             ) : null}
-            {mayInspect ? (
-              <details data-region="new-inspection">
-                <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none', paddingBlock: 6 }}>
-                  <span style={{ textDecoration: 'underline' }}>
-                    <L en="Schedule a new inspection" ar="جدولة تفتيش جديد" />
-                  </span>
-                </summary>
-                <form action={createInspectionAction.bind(null, id)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end', padding: '12px 16px', background: 'var(--surface2)', borderRadius: 10 }}>
-                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Title (English)" ar="العنوان (بالإنكليزية)" /></span>
-                    <input name="titleEn" required style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
-                  </label>
-                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Title (Arabic)" ar="العنوان (بالعربية)" /></span>
-                    <input name="titleAr" dir="rtl" required style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
-                  </label>
-                  <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Date" ar="التاريخ" /></span>
-                    <input name="date" type="date" style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
-                  </label>
-                  <label style={{ display: 'flex', gap: 8, alignItems: 'center', height: 36 }}>
-                    <input type="checkbox" name="blocking" value="1" />
-                    <span style={{ fontSize: '12.5px' }}><L en="Blocks the satisfied outcome" ar="يحجب نتيجة الاستيفاء" /></span>
-                  </label>
-                  <button type="submit" style={{ height: 36, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, cursor: 'pointer' }}>
-                    <L en="Schedule" ar="جدولة" />
-                  </button>
-                </form>
-              </details>
+            {/* NOTHING HERE IS WAITING ON YOU -- and my own dead-end guard caught
+                both cases. Moving the scheduling control out of this panel into its
+                own left the list with no control and no owner for the one role that
+                CAN act. That happens twice: an inspector on a submission with no
+                inspections, and an inspector on one where every inspection already
+                has its findings recorded, so no per-row control remains either. The
+                list still carries a per-row action, so it stays an action panel; it
+                just has to say something when no row is waiting on the reader. */}
+            {mayInspect && inspections.every((i) => i.state === 'recorded') ? (
+              // data-region="owner-*" deliberately: this line satisfies the panel
+              // contract the same way an owner note does, by naming where the action
+              // is. The owner here is the reader themselves, one panel down.
+              <div data-region="owner-inspections-empty" style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)', lineHeight: 1.65, maxWidth: '78ch' }}>
+                {inspections.length === 0 ? (
+                  <L en={SI.noneYetEn} ar={SI.noneYetAr} />
+                ) : (
+                  <L en={SI.allRecordedEn} ar={SI.allRecordedAr} />
+                )}
+              </div>
             ) : null}
             {!mayInspect ? <OwnerNote panel="inspections" /> : null}
+          </div>
+
+          {/* SCHEDULING, as a peer of Require additional measures and directly above
+              it, on the reviewer's instruction. It used to be a disclosure at the
+              foot of the inspection list with three inputs and no way to say WHO
+              CONDUCTS IT -- the inspector was silently whoever clicked Schedule, so
+              an inspection could only ever be assigned to the person arranging it. */}
+          <div data-action-panel="scheduleInspection" style={{ display: 'contents' }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <L en={SI.en} ar={SI.ar} />
+            </h2>
+            <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
+              <L en={SI.noteEn} ar={SI.noteAr} />
+            </p>
+            {!mayInspect ? (
+              <div style={{ marginBlockEnd: 28 }}>
+                <OwnerNote panel="inspections" />
+              </div>
+            ) : conductors.length === 0 ? (
+              // NOT AN EMPTY FORM. With nobody able to conduct one, a scheduling
+              // control would take a submission and produce an inspection assigned to
+              // nobody -- so the reason is stated instead (non-negotiable 10).
+              <div data-region="no-conductors" style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)', lineHeight: 1.65, marginBlockEnd: 28, maxWidth: '78ch' }}>
+                <L en={SI.noCandidatesEn} ar={SI.noCandidatesAr} />
+              </div>
+            ) : (
+              <form
+                action={createInspectionAction.bind(null, id)}
+                data-region="schedule-inspection"
+                style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'end', padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 28 }}
+              >
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    <L en={SI.whatEn} ar={SI.whatAr} />
+                  </span>
+                  <input name="titleEn" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    <L en={SI.whatArLabelEn} ar={SI.whatArLabelAr} />
+                  </span>
+                  <input name="titleAr" dir="rtl" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 190 }}>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    <L en={SI.whoEn} ar={SI.whoAr} />
+                  </span>
+                  <select name="inspector" required defaultValue={conductors[0]?.displayName} style={{ height: 38, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+                    {conductors.map((c) => (
+                      <option key={c.displayName} value={c.displayName}>
+                        {c.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    <L en={SI.whenEn} ar={SI.whenAr} />
+                  </span>
+                  <input name="date" type="date" style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+                </label>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center', height: 38, flexBasis: '100%' }}>
+                  <input type="checkbox" name="blocking" value="1" />
+                  <span style={{ fontSize: '12.5px' }}>
+                    <L en={SI.blockingEn} ar={SI.blockingAr} />
+                  </span>
+                </label>
+                <div style={{ flexBasis: '100%', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, flex: 1, minWidth: 260, maxWidth: '70ch' }}>
+                    <L en={SI.whoNoteEn} ar={SI.whoNoteAr} />
+                    {' '}
+                    <L en={SI.whenUnsetEn} ar={SI.whenUnsetAr} />
+                  </span>
+                  <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer', flex: 'none' }}>
+                    <L en={SI.submitEn} ar={SI.submitAr} />
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           <div data-action-panel="measures" style={{ display: 'contents' }}>
