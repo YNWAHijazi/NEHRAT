@@ -10,6 +10,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
 
 
@@ -45,9 +46,16 @@ test.describe('the nomination loop', () => {
 
     // The token is dead: the nominee's page shows withdrawn and offers no response.
     await gotoRidingRestarts(page, '/invitations/demo-coastal-medical-0418');
-    await expect(page.locator('body')).toContainText('withdrawn by the organizer');
-    await expect(page.locator('button:has-text("Accept")')).toHaveCount(0);
-    await expect(page.locator('input[type="password"]')).toHaveCount(0);
+    await expectAbsent(page, {
+      absent: 'button:has-text("Accept")',
+      anchor: /withdrawn by the organizer/,
+      because: 'a withdrawn nomination accepts no response',
+    });
+    await expectAbsent(page, {
+      absent: 'input[type="password"]',
+      anchor: /withdrawn by the organizer/,
+      because: 'and offers no registration either -- the token is dead for both',
+    });
 
     // REMOVE a confirmed provider. The weight is stated BEFORE the confirming click.
     await gotoRidingRestarts(page, '/events/EV-0418/requirements');

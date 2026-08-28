@@ -12,6 +12,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
 
 
@@ -131,8 +132,11 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
     await signInAs(page, 'test_organizer');
     // EV-0362 starts after the review clock's today.
     await gotoRidingRestarts(page, '/events/EV-0362/incident');
-    await expect(page.locator('body')).toContainText("Available from the event's first day");
-    await expect(page.locator('button:has-text("Notify the Ministry")')).toHaveCount(0);
+    await expectAbsent(page, {
+      absent: 'button:has-text("Notify the Ministry")',
+      anchor: /Available from the event's first day/,
+      because: 'before the event starts the control is a reason, not a form',
+    });
   });
 });
 

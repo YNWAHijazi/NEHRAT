@@ -14,6 +14,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
 
 /** The demonstration logins from SPEC 3b -- the roles the Ministry walks the platform with. */
@@ -77,7 +78,12 @@ test.describe('the organizer surface belongs to the organizer', () => {
     await signInAs(page, LOGINS.admin);
     await gotoRidingRestarts(page, '/ministry');
     // Not hidden -- unreachable. The menu lives only on the surface they are refused.
-    await expect(page.locator('[data-svc-menu]')).toHaveCount(0);
+    // ANCHORED: both assertions here are absences, and on a 404 both used to pass.
+    await expectAbsent(page, {
+      absent: '[data-svc-menu]',
+      anchor: /Ministry|الوزارة/,
+      because: 'a Ministry role must not carry the organizer Start a service menu',
+    });
     await expect(page.locator('body')).not.toContainText('Start a service');
   });
 });
@@ -119,8 +125,11 @@ test.describe('Ministry tiers', () => {
     // ABSENT there -- not greyed (rule 10). Admin surfaces refuse outright.
     await signInAs(page, 'test_inspector');
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
-    await expect(page.locator('body')).toContainText(/Inspections|التفتيشات/);
-    await expect(page.locator('[data-region="outcome"]')).toHaveCount(0);
+    await expectAbsent(page, {
+      absent: '[data-region="outcome"]',
+      anchor: /Inspections|التفتيشات/,
+      because: 'the outcome block is ABSENT for an inspector, not greyed (rule 10)',
+    });
     await expectRefusal(page, '/ministry/admin/cardiac', /cardiac-arrest configuration|إعدادات الجاهزية/i);
     await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
   });

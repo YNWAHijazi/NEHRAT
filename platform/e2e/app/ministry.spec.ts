@@ -11,6 +11,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
 
 
@@ -90,7 +91,11 @@ test.describe('the outcome gate', () => {
     await signInAs(page, 'test_inspector');
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
     // And has NO attest control anywhere: recording an attestation is the reviewer's.
-    await expect(page.locator('[data-region="attestations"] form')).toHaveCount(0);
+    await expectAbsent(page, {
+      absent: '[data-region="attestations"] form',
+      anchor: '[data-region="attestations"]',
+      because: 'recording an attestation is the reviewer\'s alone; an inspector reads the panel',
+    });
     const blocking = page.locator('[data-region="inspections"] > div').first();
     await blocking.locator('input[name="findings"]').fill('Treatment post and deployment verified as planned.');
     await blocking.locator('button:has-text("Save")').click();
@@ -130,7 +135,11 @@ test.describe('the outcome gate', () => {
     const empty = page.locator('[data-region="attestations-empty"]');
     await expect(empty).toContainText('No attestation items apply to this submission.');
     await expect(empty).toContainText('Level 2');
-    await expect(page.locator('[data-region="attestations"]')).toHaveCount(0);
+    await expectAbsent(page, {
+      absent: '[data-region="attestations"]',
+      anchor: '[data-region="attestations-empty"]',
+      because: 'no attestation item applies at Level 2, so the row set is absent entirely',
+    });
   });
 });
 

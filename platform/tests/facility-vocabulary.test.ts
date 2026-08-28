@@ -27,6 +27,18 @@ describe('the facility side carries no mass-gathering status vocabulary', () => 
     expect(OUTCOMES).toHaveLength(6);
   });
 
+  // WIRED TO REAL DATA. A guard that sweeps an empty corpus finds no offenders and
+  // reports green, and the green is indistinguishable from a clean codebase. This is
+  // the fourth defect of that family (see tests/absence-is-anchored.test.ts for the
+  // list), so every sweep now proves it swept something. filesUnder throws on a
+  // missing directory; these floors catch the other half -- a corpus filtered down
+  // to nothing by a renamed route or a wrong extension.
+  it('finds the facility-side files it is meant to sweep', () => {
+    // Filtered BY FILENAME, so renaming the facility routes would silently empty
+    // this corpus and every assertion below would pass having read nothing.
+    expect(facilitySideFiles().length).toBeGreaterThanOrEqual(10);
+  });
+
   for (const outcome of OUTCOMES) {
     it(`no facility-side file says "${outcome.slice(0, 40)}"`, () => {
       const offenders = facilitySideFiles()

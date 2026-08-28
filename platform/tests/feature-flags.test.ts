@@ -10,6 +10,18 @@ import { ALL_FLAGS, featureEnabled } from '../lib/rules/flags';
 import { filesUnder, read, relative } from './helpers/files';
 
 describe('commercial and AI capability', () => {
+  // WIRED TO REAL DATA. A guard that sweeps an empty corpus finds no offenders and
+  // reports green, and the green is indistinguishable from a clean codebase. This is
+  // the fourth defect of that family (see tests/absence-is-anchored.test.ts for the
+  // list), so every sweep now proves it swept something. filesUnder throws on a
+  // missing directory; these floors catch the other half -- a corpus filtered down
+  // to nothing by a renamed route or a wrong extension.
+  it('sweeps the real source tree', () => {
+    expect(
+      [...filesUnder('app', ['.tsx', '.ts']), ...filesUnder('components', ['.tsx', '.ts'])].length,
+    ).toBeGreaterThanOrEqual(90);
+  });
+
   it('exists as flags', () => {
     for (const expected of [
       'applicationFees',

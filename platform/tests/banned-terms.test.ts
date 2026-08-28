@@ -93,9 +93,24 @@ describe('banned terms', () => {
 });
 
 describe('the sweep covers rendered source too', () => {
+  // WIRED TO REAL DATA. A guard that sweeps an empty corpus finds no offenders and
+  // reports green, and the green is indistinguishable from a clean codebase. This is
+  // the fourth defect of that family (see tests/absence-is-anchored.test.ts for the
+  // list), so every sweep now proves it swept something. filesUnder throws on a
+  // missing directory; these floors catch the other half -- a corpus filtered down
+  // to nothing by a renamed route or a wrong extension.
+  const rendered = filesUnder('app', ['.tsx']).concat(filesUnder('components', ['.tsx']));
+
+  it('sweeps every rendered file, and there are many', () => {
+    expect(rendered.length).toBeGreaterThanOrEqual(60);
+    expect(dataStrings.length, 'no strings pulled from lib/rules/data').toBeGreaterThanOrEqual(500);
+    expect(userFacing.length, 'the user-facing corpus is empty').toBeGreaterThanOrEqual(500);
+    expect(banned.terms.length, 'no banned terms loaded').toBeGreaterThanOrEqual(5);
+  });
+
   it('finds no banned English term in a component', () => {
     const offenders: string[] = [];
-    for (const file of filesUnder('app', ['.tsx']).concat(filesUnder('components', ['.tsx']))) {
+    for (const file of rendered) {
       const text = read(file);
       for (const term of banned.terms) {
         if (new RegExp(`["'\`][^"'\`]*\\b${term.en}\\b[^"'\`]*["'\`]`, 'i').test(text)) {

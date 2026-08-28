@@ -28,10 +28,25 @@ const PHYSICAL: { pattern: RegExp; use: string }[] = [
 const SOURCE = [
   ...filesUnder('app', ['.tsx', '.ts', '.css']),
   ...filesUnder('components', ['.tsx', '.ts', '.css']),
-  ...filesUnder('styles', ['.css']),
+  // app/globals.css is the only stylesheet; there is no styles/ directory and the
+  // guard used to sweep it for nothing. Listed here so a future one is picked up,
+  // and marked optional WITH ITS REASON rather than silently returning empty.
+  ...filesUnder('styles', ['.css'], { because: 'all CSS lives in app/globals.css today; a styles/ directory would be new' }),
 ];
 
 describe('logical properties only', () => {
+  // WIRED TO REAL DATA. A guard that sweeps an empty corpus finds no offenders and
+  // reports green, and the green is indistinguishable from a clean codebase. This is
+  // the fourth defect of that family (see tests/absence-is-anchored.test.ts for the
+  // list), so every sweep now proves it swept something. filesUnder throws on a
+  // missing directory; these floors catch the other half -- a corpus filtered down
+  // to nothing by a renamed route or a wrong extension.
+  it('sweeps the real source tree', () => {
+    expect(SOURCE.length).toBeGreaterThanOrEqual(90);
+    expect(SOURCE.some((f) => f.endsWith('.css')), 'no stylesheet in the corpus').toBe(true);
+  });
+
+
   for (const { pattern, use } of PHYSICAL) {
     it(`no source uses ${pattern.source} -- use ${use}`, () => {
       const offenders = SOURCE.filter((f) => pattern.test(read(f))).map(relative);
