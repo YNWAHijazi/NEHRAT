@@ -1105,6 +1105,19 @@ export async function removeProviderAction(eventId: string, formData: FormData):
  * account; declining requires a reason and is a material change the organizer must
  * report; a modification request keeps the nomination open with the reason attached.
  */
+/**
+ * The nominee's answer -- STAGE TWO OF THREE, and it stands alone.
+ *
+ * ACCEPTING IS NEVER THE SAME CLICK AS BEING SIGNED IN (reviewer ruling, 2026-08-28).
+ * This action used to create an account, start a session and record the response in
+ * one submit: a party could not answer a nomination without simultaneously choosing a
+ * password. Declining required registering with the platform in order to say no.
+ *
+ * The token is the credential (rule 6), and it is sufficient for all three answers.
+ * An accepted nomination whose holder has not yet registered is a real state --
+ * status confirmed, account_id NULL -- and stage three (/invitations/[token]/account)
+ * is where that link is made, or not. The answer stands either way.
+ */
 export async function respondToInvitationAction(token: string, formData: FormData): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
@@ -1113,30 +1126,9 @@ export async function respondToInvitationAction(token: string, formData: FormDat
   if (inv.status === 'withdrawn' || inv.status === 'removed') {
     redirect(`/invitations/${token}`);
   }
-  let account = await currentAccount();
-  if (!account) {
-    // Self-registration AGAINST the invitation (rule 6): the account is created from
-    // the nomination screen's own form, with the role the nomination names.
-    const name = String(formData.get('fullName') ?? '').trim();
-    const email = String(formData.get('email') ?? '').trim().toLowerCase();
-    const password = String(formData.get('password') ?? '');
-    if (!name || !email || !checkPasswordPolicy(password).ok) {
-      redirect(`/invitations/${token}?error=account`);
-    }
-    const exists = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email);
-    if (exists) redirect(`/invitations/${token}?error=email-taken`);
-    const initials = name.split(/\s+/).map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase();
-    const role = inv.kind === 'ems' ? 'ems' : 'director';
-    const created = getDb()
-      .prepare(
-        `INSERT INTO accounts (login, email, password_hash, display_name, initials, role, is_demo)
-         VALUES (?, ?, ?, ?, ?, ?, 0)`,
-      )
-      .run(`user_${Date.now().toString(36)}`, email, hashPassword(password), name, initials, role);
-    await startSession(created.lastInsertRowid as number);
-    account = await currentAccount();
-    if (!account) redirect('/signin');
-  }
+  // A holder who is ALREADY signed in has their account linked by the response; one
+  // who is not answers anonymously against the token and is offered stage three.
+  const account = await currentAccount();
   const db = getDb();
   const response = String(formData.get('response') ?? '');
   const reason = String(formData.get('reason') ?? '').trim();
@@ -1144,15 +1136,29 @@ export async function respondToInvitationAction(token: string, formData: FormDat
 
   if (response === 'accept') {
     db.prepare(
-      `UPDATE invitations SET status = 'confirmed', account_id = ?, answered_at = now_stamp() WHERE token = ?`,
-    ).run(account.id, token);
-    redirect('/profile?notice=accepted');
+      // COALESCE, not overwrite: a nomination already linked to an account keeps it.
+      `UPDATE invitations SET status = 'confirmed', account_id = COALESCE(?, account_id),
+         answered_at = now_stamp() WHERE token = ?`,
+    ).run(account?.id ?? null, token);
+    notifyOrganizerOf(
+      inv.event_id,
+      `A named party has accepted — ${eventName.name_en}`,
+      `قبل طرف مُسمّى — ${eventName.name_ar}`,
+      `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has accepted the nomination.`,
+      `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
+      `/events/${inv.event_id}/requirements`,
+    );
+    // Stage three. A signed-in holder is already where they need to be; anyone else
+    // is offered an account -- offered, not required.
+    if (account) redirect(`/events/${inv.event_id}?notice=accepted`);
+    redirect(`/invitations/${token}/account`);
   }
   if (response === 'decline') {
     if (!reason) redirect(`/invitations/${token}?error=reason`);
     db.prepare(
-      `UPDATE invitations SET status = 'declined', account_id = ?, response_note = ?, answered_at = now_stamp() WHERE token = ?`,
-    ).run(account.id, reason, token);
+      `UPDATE invitations SET status = 'declined', account_id = COALESCE(?, account_id),
+         response_note = ?, answered_at = now_stamp() WHERE token = ?`,
+    ).run(account?.id ?? null, reason, token);
     // Declining is a MATERIAL CHANGE the organizer must report (rule 6) -- but only
     // a FILED submission has anything on file to change. Before filing, the
     // instruction is simply to name another party; the change route would bounce.
@@ -1175,8 +1181,8 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     if (!reason) redirect(`/invitations/${token}?error=reason`);
     // Not a nomination state: the nomination stays open with the note attached.
     db.prepare(
-      `UPDATE invitations SET response_note = ?, account_id = ? WHERE token = ?`,
-    ).run(reason, account.id, token);
+      `UPDATE invitations SET response_note = ?, account_id = COALESCE(?, account_id) WHERE token = ?`,
+    ).run(reason, account?.id ?? null, token);
     notifyOrganizerOf(
       inv.event_id,
       `A named party requests a modification — ${eventName.name_en}`,
@@ -1188,6 +1194,94 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     redirect(`/invitations/${token}?notice=modification`);
   }
   redirect(`/invitations/${token}`);
+}
+
+/**
+ * STAGE THREE: the account, after the answer and never as part of it.
+ *
+ * Self-registration AGAINST the invitation (rule 6) -- the role comes from the
+ * nomination, never from anything the registrant types. Two paths, because a party
+ * nominated to a second event already has an account and must not be told to make
+ * another: create one, or sign in to the one that exists and have the nomination
+ * linked to it.
+ *
+ * Reachable only from a nomination that has been ANSWERED. There is no account to
+ * make against an unanswered one, and making the account first would put us back
+ * where the ruling found us.
+ */
+export async function registerAgainstInvitationAction(
+  token: string,
+  formData: FormData,
+): Promise<void> {
+  const inv = invitationRow(token);
+  if (!inv) redirect('/signin');
+  if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
+  if (inv.account_id !== null) redirect(`/events/${inv.event_id}`);
+
+  const name = String(formData.get('fullName') ?? '').trim();
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  if (!name || !email || !checkPasswordPolicy(password).ok) {
+    redirect(`/invitations/${token}/account?error=account`);
+  }
+  const db = getDb();
+  if (db.prepare(`SELECT id FROM accounts WHERE email = ?`).get(email)) {
+    // Not an error to correct by choosing another email -- the other path is right
+    // there, and this is how a party nominated twice arrives.
+    redirect(`/invitations/${token}/account?error=email-taken`);
+  }
+  const initials = name.split(/\s+/).map((w) => w[0] ?? '').join('').slice(0, 2).toUpperCase();
+  const created = db
+    .prepare(
+      `INSERT INTO accounts (login, email, password_hash, display_name, initials, role, is_demo)
+       VALUES (?, ?, ?, ?, ?, ?, 0)`,
+    )
+    .run(
+      `user_${randomBytes(6).toString('hex')}`,
+      email,
+      hashPassword(password),
+      name,
+      initials,
+      inv.kind === 'ems' ? 'ems' : 'director',
+    );
+  const accountId = created.lastInsertRowid as number;
+  db.prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(accountId, token);
+  await startSession(accountId);
+  redirect(`/events/${inv.event_id}?notice=registered`);
+}
+
+/** Stage three, the other path: an account already exists, so link this nomination to it. */
+export async function signInAgainstInvitationAction(
+  token: string,
+  formData: FormData,
+): Promise<void> {
+  const inv = invitationRow(token);
+  if (!inv) redirect('/signin');
+  if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
+
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  const row = getDb()
+    .prepare(`SELECT id, password_hash, role, suspended FROM accounts WHERE email = ?`)
+    .get(email) as
+    | { id: number; password_hash: string | null; role: string; suspended: number }
+    | undefined;
+  // One refusal for every failure: a wrong password and an unknown address must not
+  // be distinguishable, or this becomes a way to enumerate who holds an account.
+  if (!row || !row.password_hash || row.suspended === 1 || !verifyPassword(password, row.password_hash)) {
+    await rememberSignInFields({ email });
+    redirect(`/invitations/${token}/account?error=credentials`);
+  }
+  // The nomination names a role, and the account carries one. A Ministry reviewer or
+  // an organizer signing in here would be linked to a counterparty nomination and
+  // land on a surface their role does not hold.
+  const expected = inv.kind === 'ems' ? 'ems' : 'director';
+  if (row.role !== expected) redirect(`/invitations/${token}/account?error=role`);
+
+  getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
+  await forgetSignInFields();
+  await startSession(row.id);
+  redirect(`/events/${inv.event_id}?notice=linked`);
 }
 
 function ownedInvitation(accountId: number, token: string): boolean {

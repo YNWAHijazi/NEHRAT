@@ -27,6 +27,8 @@ export interface RequirementRow {
   /** The user-facing bilingual statement of the divergence, rendered where the row is read. */
   divergenceNoteEn: string | null;
   divergenceNoteAr: string | null;
+  /** The party keys carrying this row at this level, in the data's own order. */
+  partyKeys: readonly string[];
 }
 
 const PARTIES = matrixJson.parties as Record<string, { en: string; ar: string }>;
@@ -55,6 +57,7 @@ export function requirementsForLevel(level: Level): RequirementRow[] {
       divergence: (r as { divergence?: string }).divergence ?? null,
       divergenceNoteEn: (r as { divergenceNoteEn?: string }).divergenceNoteEn ?? null,
       divergenceNoteAr: (r as { divergenceNoteAr?: string }).divergenceNoteAr ?? null,
+      partyKeys,
     });
   }
   return rows;
@@ -63,4 +66,28 @@ export function requirementsForLevel(level: Level): RequirementRow[] {
 /** Requirement 15: the event medical command function, the Director's alone, Level 3 only. */
 export function commandFunctionRow(level: Level): RequirementRow | null {
   return requirementsForLevel(level).find((r) => r.n === 15) ?? null;
+}
+
+/**
+ * The rows a NAMED PARTY carries at a level, and which of them are theirs alone.
+ *
+ * A nominated party deciding whether to accept is being asked to take on specific
+ * requirements, and until now the nomination screen told them so in prose written by
+ * hand. This derives it: at Level 3 the Event Medical Director carries five rows, and
+ * requirement 15 -- the event medical command function -- names no other party at any
+ * level. The prose said "four are shared, one is yours alone" and happened to be
+ * right; this makes it TRUE BY DERIVATION rather than by a sentence somebody kept in
+ * step. If the Ministry re-issues the matrix, the screen follows.
+ *
+ * `sole` is not "important" -- it is the mechanical fact that no other party is named
+ * against the row, which is what makes it undischargeable by anyone else.
+ */
+export interface PartyRequirementRow extends RequirementRow {
+  readonly sole: boolean;
+}
+
+export function requirementsForParty(level: Level, party: string): PartyRequirementRow[] {
+  return requirementsForLevel(level)
+    .filter((r) => r.partyKeys.includes(party))
+    .map((r) => ({ ...r, sole: r.partyKeys.length === 1 }));
 }

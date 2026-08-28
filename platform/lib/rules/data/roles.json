@@ -21,11 +21,11 @@
       },
       {
         "key": "modification",
-        "en": "Request modification",
-        "ar": "طلب تعديل",
-        "descEn": "A reason is required. Use this where you can serve the event but not as described.",
-        "descAr": "يُطلب سبب. استخدموه إذا كان بإمكانكم خدمة الفعالية لكن ليس بالصيغة الموصوفة.",
-        "$comment": "Not a nomination state (SPEC lists nominated/confirmed/declined). A modification request keeps the nomination open and sends the reason to the organizer."
+        "en": "Request further information",
+        "ar": "طلب معلومات إضافية",
+        "descEn": "Ask the organizer a question, or say what would need to change. The nomination remains open and nothing is recorded against you.",
+        "descAr": "اسألوا المنظّم سؤالاً، أو بيّنوا ما يلزم تغييره. يبقى الترشيح قائماً ولا يُسجَّل شيء عليكم.",
+        "$comment": "Not a nomination state (SPEC lists nominated/confirmed/declined): it keeps the nomination open and sends the text to the organizer. RENAMED from \"Request modification\" at reviewer instruction (2026-08-28), which specified this response as \"request further information\". The two readings are one act -- an open question to the organizer that answers nothing -- so the description now covers both asking a question and asking for a change, rather than splitting one mechanism into two options. RECONCILIATION NOTE: the prototype says \"Request modification\"; the divergence is recorded on the respond region in the visual manifest."
       }
     ],
     "reasonRequired": {
@@ -708,5 +708,130 @@
     "orderOfPhysicians": {
       "active": false
     }
+  },
+  "nomination": {
+    "$comment": "The nomination in three stages: view, respond, account. Accepting is never the same click as being signed in -- a party must be able to read what they are being asked to take on, answer it, and only then decide whether to hold an account.",
+    "stage1TitleEn": "What you are being asked to take on",
+    "stage1TitleAr": "ما يُطلب منكم تحمّله",
+    "stage1IntroEn": "Read this before you answer. Nothing here commits you, and no account is needed to read it or to answer.",
+    "stage1IntroAr": "اقرأوا هذا قبل الإجابة. لا شيء هنا يُلزمكم، ولا يلزم حساب لقراءته أو للإجابة عليه.",
+    "eventTitleEn": "The event",
+    "eventTitleAr": "الفعالية",
+    "labels": {
+      "organizer": {
+        "en": "Organizer",
+        "ar": "المنظِّم"
+      },
+      "eventName": {
+        "en": "Event",
+        "ar": "الفعالية"
+      },
+      "eventType": {
+        "en": "Type",
+        "ar": "النوع"
+      },
+      "dates": {
+        "en": "Dates",
+        "ar": "التواريخ"
+      },
+      "times": {
+        "en": "Opening and closing",
+        "ar": "الفتح والإغلاق"
+      },
+      "venue": {
+        "en": "Venue, route, or location",
+        "ar": "الموقع أو المسار"
+      },
+      "municipality": {
+        "en": "Municipality",
+        "ar": "البلدية"
+      },
+      "level": {
+        "en": "Level",
+        "ar": "المستوى"
+      },
+      "namedAs": {
+        "en": "You are named as",
+        "ar": "سُمّيتم بصفة"
+      }
+    },
+    "unsetEn": "Not set",
+    "unsetAr": "غير محدَّد",
+    "deadlineTitleEn": "The organizer's filing deadline",
+    "deadlineTitleAr": "مهلة التقديم لدى المنظّم",
+    "deadlineBodyEn": "The organizer must file the health and medical preparedness package by this date. Your answer is needed before then.",
+    "deadlineBodyAr": "على المنظّم تقديم حزمة التأهب الصحي والطبي بحلول هذا التاريخ. ويلزم ردّكم قبله.",
+    "deadlineFiledEn": "The package has already been filed. Your answer still stands to be recorded, and a change to it is a material change the organizer reports to the Ministry.",
+    "deadlineFiledAr": "قُدِّمت الحزمة سابقاً. ولا يزال ردّكم يُسجَّل، وأي تغيير فيه تغيير جوهري يبلّغ المنظّم الوزارة به.",
+    "deadlineUnknownEn": "No filing deadline can be shown: the event has no start date recorded yet.",
+    "deadlineUnknownAr": "لا يمكن عرض مهلة التقديم: لم يُسجَّل تاريخ بدء للفعالية بعد.",
+    "requirementsTitleEn": "The requirements this level puts on you",
+    "requirementsTitleAr": "المتطلبات التي يضعها هذا المستوى عليكم",
+    "requirementsIntroEn": "Derived from the requirements matrix at this level. Rows marked as yours alone name no other party: nobody else can discharge them.",
+    "requirementsIntroAr": "مُشتقة من مصفوفة المتطلبات عند هذا المستوى. والبنود الموسومة بأنها لكم وحدكم لا تُسمّي أي طرف آخر: ولا يمكن لأحد غيركم الوفاء بها.",
+    "soleEn": "Yours alone",
+    "soleAr": "لكم وحدكم",
+    "sharedEn": "Shared",
+    "sharedAr": "مشترك",
+    "requirementsNoneEn": "This level puts no requirement matrix row on you directly. What you are asked for is set out above.",
+    "requirementsNoneAr": "لا يضع هذا المستوى أي بند من مصفوفة المتطلبات عليكم مباشرة. وما يُطلب منكم مبيَّن أعلاه.",
+    "partiesTitleEn": "Who else is named",
+    "partiesTitleAr": "من سُمّي غيركم",
+    "partiesIntroEn": "Every party the organizer has named on this event, and where each response stands.",
+    "partiesIntroAr": "كل طرف سمّاه المنظّم في هذه الفعالية، وموقف كل ردّ.",
+    "partiesNoneEn": "No other party is named on this event yet.",
+    "partiesNoneAr": "لم يُسمَّ أي طرف آخر في هذه الفعالية بعد.",
+    "youEn": "(you)",
+    "youAr": "(أنتم)",
+    "kinds": {
+      "ems": {
+        "en": "EMS provider",
+        "ar": "مزوّد الإسعاف"
+      },
+      "director": {
+        "en": "Event Medical Director",
+        "ar": "المدير الطبي للفعالية"
+      }
+    },
+    "partyStates": {
+      "nominated": {
+        "en": "Has not answered",
+        "ar": "لم يُجب"
+      },
+      "confirmed": {
+        "en": "Accepted",
+        "ar": "قبل"
+      },
+      "declined": {
+        "en": "Declined",
+        "ar": "اعتذر"
+      }
+    },
+    "documentsTitleEn": "Documents that concern your role",
+    "documentsTitleAr": "المستندات المتعلقة بدوركم",
+    "documentsIntroEn": "These are the documents relating to what you are being asked to do. This is not the organizer's submission, and you are not being given access to it.",
+    "documentsIntroAr": "هذه هي المستندات المتعلقة بما يُطلب منكم. وليست هذه حزمة المنظّم، ولا تُمنحون الوصول إليها.",
+    "documentsNoneEn": "The organizer has attached no document that concerns your role.",
+    "documentsNoneAr": "لم يرفق المنظّم أي مستند يتعلق بدوركم.",
+    "stage2TitleEn": "Your answer",
+    "stage2TitleAr": "ردّكم",
+    "stage3TitleEn": "Set up your account",
+    "stage3TitleAr": "إعداد حسابكم",
+    "stage3IntroEn": "Your answer is recorded. An account is what gives you the working screens for this event: the documents, the declaration where one applies, and the record afterwards.",
+    "stage3IntroAr": "سُجِّل ردّكم. والحساب هو ما يمنحكم شاشات العمل لهذه الفعالية: المستندات، والإقرار حيث ينطبق، والسجل بعد ذلك.",
+    "stage3AcceptedEn": "Accepted. The organizer has been notified.",
+    "stage3AcceptedAr": "تم القبول. وأُبلغ المنظّم.",
+    "stage3HaveAccountEn": "Already have an account?",
+    "stage3HaveAccountAr": "ألديكم حساب؟",
+    "stage3SignInEn": "Sign in and this nomination is linked to it.",
+    "stage3SignInAr": "سجّلوا الدخول ويُربط هذا الترشيح به.",
+    "stage3CreateEn": "Create an account",
+    "stage3CreateAr": "إنشاء حساب",
+    "stage3LaterEn": "You can close this page and come back to this link later. Your answer stands either way.",
+    "stage3LaterAr": "يمكنكم إغلاق هذه الصفحة والعودة إلى هذا الرابط لاحقاً. ويبقى ردّكم قائماً في الحالتين.",
+    "infoRequestEn": "Request further information",
+    "infoRequestAr": "طلب معلومات إضافية",
+    "infoRequestDescEn": "Ask the organizer a question before you answer. The nomination stays open and nothing is recorded against you.",
+    "infoRequestDescAr": "اسألوا المنظّم قبل الإجابة. يبقى الترشيح قائماً ولا يُسجَّل شيء عليكم."
   }
 }

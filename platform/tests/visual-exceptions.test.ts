@@ -21,6 +21,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { VISUAL_MANIFEST } from '../e2e/visual-manifest';
+import { filesUnder, read } from './helpers/files';
 
 /** Phrases that assert fidelity rather than explain a divergence. */
 const FIDELITY_CLAIMS = [
@@ -68,5 +69,76 @@ describe('visual exceptions cannot self-certify', () => {
       .filter(({ region }) => (region.note ?? '').trim().length < 20)
       .map(({ file, region }) => `${file}.${region.name}`);
     expect(silent, 'An exception with no reason is indistinguishable from an oversight.').toEqual([]);
+  });
+});
+
+/**
+ * AND THE SELECTOR MUST STILL RESOLVE.
+ *
+ * The guard above checks what an exception CLAIMS. It cannot see whether the region
+ * the exception names still exists. An exception whose `builtSelector` points at a
+ * `data-region` that has been renamed or deleted is guarding nothing: the comparison
+ * skips a region that is not there, the manifest still lists it, and the suite is
+ * green because there is nothing left to disagree with.
+ *
+ * That is the same family as the four already found (see
+ * tests/absence-is-anchored.test.ts for the list): something reports success without
+ * doing its job, and the result is indistinguishable from success.
+ *
+ * Rebuilding the nomination screen in three stages produced exactly this -- the
+ * `invite-facts` region became `briefing`, and the stale exception passed every check
+ * in this file.
+ */
+describe('every manifest region names something that exists', () => {
+  const SOURCE = filesUnder('app', ['.tsx']).concat(filesUnder('components', ['.tsx']));
+  const ALL = SOURCE.map((f) => read(f)).join('\n');
+
+  it('sweeps the rendered source (wired to real data)', () => {
+    expect(SOURCE.length).toBeGreaterThanOrEqual(60);
+  });
+
+  /**
+   * Regions rendered with a COMPUTED name -- `data-region={`bls-${g.key}`}` -- exist at
+   * runtime but never appear literally in source. The static prefix is collected so
+   * they are not reported as stale.
+   *
+   * STANDING LIMITATION, recorded here rather than left to be rediscovered: a prefix
+   * match confirms the FAMILY is rendered, not the exact member. `bls-equipment` is
+   * accepted because something renders `bls-*`; if the keys changed to `bls-kit` this
+   * guard would still pass. Closing that needs the runtime, which is the visual
+   * comparison's job, not this guard's.
+   */
+  const computedPrefixes = [...ALL.matchAll(/data-region=\{`([^$`]*)\$\{/g)].map((m) => m[1] ?? '');
+
+  it('knows which regions are computed', () => {
+    expect(computedPrefixes.length, 'no computed data-region found -- the matcher is broken').toBeGreaterThan(0);
+  });
+
+  it('every data-region selector in the manifest is rendered somewhere', () => {
+    const named = VISUAL_MANIFEST.flatMap((file) =>
+      (file.regions ?? [])
+        .filter((r) => r.builtSelector !== undefined && file.builtRoute !== null)
+        .map((r) => ({ file: file.id, region: r.name, selector: r.builtSelector as string })),
+    );
+    expect(named.length, 'no built selectors in the manifest').toBeGreaterThan(10);
+
+    const offenders = named
+      .filter(({ selector }) => {
+        // Only data-region selectors are checkable this way; anything else is left
+        // to the comparison itself rather than guessed at here.
+        const m = /^\[data-region="([^"]+)"\]$/.exec(selector);
+        if (!m) return false;
+        const name = m[1] as string;
+        if (ALL.includes(`data-region="${name}"`)) return false;
+        return !computedPrefixes.some((prefix) => prefix !== '' && name.startsWith(prefix));
+      })
+      .map(({ file, region, selector }) => `${file}.${region} -- ${selector}`);
+
+    expect(
+      offenders,
+      'These manifest regions name a data-region no screen renders. The region was ' +
+        'renamed or removed and the manifest was not; the comparison now skips it and ' +
+        'the exception guards nothing. Point it at the real region, or delete the entry.',
+    ).toEqual([]);
   });
 });

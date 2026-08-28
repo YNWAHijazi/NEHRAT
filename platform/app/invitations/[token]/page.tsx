@@ -3,14 +3,28 @@ import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { RespondForm } from './RespondForm';
 import { currentAccount } from '../../../lib/auth';
-import { invitationByToken } from '../../../lib/queries';
+import { invitationByToken, nominationBriefing } from '../../../lib/queries';
+import { Briefing } from './Briefing';
 import { ROLES_CONTENT } from '../../../lib/rules';
 
 /**
- * The nomination screen. The token is the credential (rule 6): an unguessable link,
- * never a sequential id, and the holder sees this one nomination -- no event they
- * were not named in. Accepting links or creates the account; declining requires a
- * reason and is a material change the organizer must report.
+ * The nomination, IN THREE STAGES (reviewer ruling, 2026-08-28).
+ *
+ *   1. VIEW    -- this page's Briefing: what the party is being asked to take on,
+ *                 readable on the token before any response and without an account.
+ *   2. RESPOND -- this page's RespondForm: accept, decline with a reason, or ask the
+ *                 organizer a question. Also on the token, also without an account.
+ *   3. ACCOUNT -- /invitations/[token]/account, AFTER accepting and never as part of
+ *                 it. Create one, or sign in to one that already exists.
+ *
+ * What this replaces: five facts and a decision, where the submit button responded to
+ * the nomination and created an account in the same click. Accepting was therefore the
+ * same act as being signed in, and declining required registering with the platform in
+ * order to say no.
+ *
+ * The token is the credential (rule 6): unguessable, never sequential, and it shows
+ * this one nomination -- no event the holder was not named in, and not the organizer's
+ * submission for the one they were.
  */
 export default async function InvitationPage({
   params,
@@ -24,16 +38,10 @@ export default async function InvitationPage({
   if (!invitation) notFound();
   const { notice, error } = await searchParams;
   const account = await currentAccount();
+  const briefing = nominationBriefing(token);
   const content = ROLES_CONTENT;
   const isDirector = invitation.kind === 'director';
 
-  const facts = [
-    { en: isDirector ? 'Nominated by' : 'Invited by', ar: isDirector ? 'الترشيح من' : 'الدعوة من', vEn: invitation.organizationNameEn, vAr: invitation.organizationNameAr },
-    { en: 'Event', ar: 'الفعالية', vEn: invitation.eventNameEn, vAr: invitation.eventNameAr },
-    { en: 'Event level', ar: 'مستوى الفعالية', vEn: invitation.eventLevel ? `Level ${invitation.eventLevel}` : '—', vAr: invitation.eventLevel ? `المستوى ${invitation.eventLevel}` : '—' },
-    { en: 'Event date', ar: 'تاريخ الفعالية', vEn: invitation.eventStart ?? '—', vAr: invitation.eventStart ? `⁦${invitation.eventStart}⁩` : '—' },
-    { en: 'Named as', ar: 'المُسمّى', vEn: invitation.nameEn, vAr: invitation.nameAr },
-  ];
 
   return (
     <>
@@ -121,33 +129,16 @@ export default async function InvitationPage({
             </p>
           ) : null}
 
-          <div data-region="invite-facts" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-              {facts.map((f) => (
-                <div key={f.en} style={{ background: 'var(--bg)', padding: '16px 18px' }}>
-                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-                    <L en={f.en} ar={f.ar} />
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.4 }}>
-                    <L en={f.vEn} ar={f.vAr} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            {!isDirector && invitation.eventLevel === 3 ? (
-              <div style={{ marginBlockStart: 26 }}>
-                <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
-                  <L en="In full" ar="بالتفصيل" />
-                </div>
-                <div style={{ fontSize: 17, lineHeight: 1.6, maxWidth: '66ch' }}>
-                  <L
-                    en="Complete and sign the EMS Readiness Declaration for this event, and confirm your agency's role in the major-incident and mass-casualty plan. The organizer cannot file the Level 3 package without it."
-                    ar="استكمال وتوقيع إقرار جاهزية خدمات الطوارئ الطبية لهذه الفعالية، وتأكيد دور جهتكم في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية. لا يمكن للمنظّم تقديم حزمة المستوى 3 من دونه."
-                  />
-                </div>
-              </div>
-            ) : null}
-          </div>
+          {briefing ? (
+            <Briefing
+              briefing={briefing}
+              token={token}
+              kind={invitation.kind}
+              level={invitation.eventLevel}
+              namedEn={invitation.nameEn}
+              namedAr={invitation.nameAr}
+            />
+          ) : null}
 
           {isDirector ? (
             <div data-region="accepting" style={{ padding: '32px 36px', border: '2px solid var(--brand)', borderRadius: 16, marginBlockEnd: 20 }}>
@@ -171,12 +162,29 @@ export default async function InvitationPage({
           ) : null}
 
           {invitation.status === 'nominated' ? (
-            <RespondForm token={token} kind={invitation.kind} signedIn={account !== null} eventLevel={invitation.eventLevel} />
+            <RespondForm token={token} kind={invitation.kind} eventLevel={invitation.eventLevel} />
           ) : null}
           {invitation.status === 'confirmed' && account ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, fontSize: 15 }}>
               <a href="/dashboard">
                 <L en="Accepted. Open your dashboard." ar="تم القبول. افتحوا لوحتكم." />
+              </a>
+            </div>
+          ) : null}
+          {/* ACCEPTED, NOT YET REGISTERED -- a real state now that accepting no longer
+              creates an account. It must not be a dead end: the answer stands, and the
+              route to the working screens is named. */}
+          {invitation.status === 'confirmed' && !account ? (
+            <div data-region="accepted-no-account" style={{ padding: '22px 26px', border: '2px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, fontSize: 15, lineHeight: 1.65 }}>
+              <div style={{ marginBlockEnd: 12 }}>
+                <L en={content.nomination.stage3AcceptedEn} ar={content.nomination.stage3AcceptedAr} />{' '}
+                <L en={content.nomination.stage3IntroEn} ar={content.nomination.stage3IntroAr} />
+              </div>
+              <a
+                href={`/invitations/${token}/account`}
+                style={{ display: 'inline-flex', alignItems: 'center', height: 44, paddingInline: 22, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500 }}
+              >
+                <L en={content.nomination.stage3CreateEn} ar={content.nomination.stage3CreateAr} />
               </a>
             </div>
           ) : null}

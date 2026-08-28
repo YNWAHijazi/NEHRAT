@@ -1,10 +1,17 @@
 'use client';
 
 /**
- * The three responses (accept / decline / request modification) with the reason
- * required for the second and third, and the account block for a holder who is not
- * yet signed in -- self-registration against the invitation, never against the
- * platform at large (rule 6).
+ * STAGE TWO: the answer, and only the answer.
+ *
+ * This form used to carry the account fields too, and its submit button both
+ * responded to the nomination and created an account with a session. Accepting was
+ * therefore the same click as being signed in, and DECLINING required registering
+ * with the platform in order to say no. The reviewer's ruling of 2026-08-28 separates
+ * them: the token is the credential (rule 6) and it is sufficient for all three
+ * answers. The account comes after, on its own screen, and only if the party wants
+ * one.
+ *
+ * All three responses are offered to BOTH kinds. The Director used to be offered two.
  */
 
 import { useState } from 'react';
@@ -24,12 +31,10 @@ const inputStyle: React.CSSProperties = {
 export function RespondForm({
   token,
   kind,
-  signedIn,
   eventLevel,
 }: {
   token: string;
   kind: 'ems' | 'director';
-  signedIn: boolean;
   eventLevel: Level | null;
 }) {
   const content = ROLES_CONTENT.ems;
@@ -42,7 +47,11 @@ export function RespondForm({
   };
   const [picked, setPicked] = useState<string | null>(null);
   const [declineOpen, setDeclineOpen] = useState(false);
-  const responses = kind === 'ems' ? content.nominationResponses : content.nominationResponses.filter((r) => r.key !== 'modification');
+  // ALL THREE RESPONSES, FOR BOTH KINDS. The Director used to be offered two: the
+  // request-for-information option was filtered out, which left a physician deciding
+  // on personal responsibility with no way to ask a question first -- accept blind or
+  // decline. Declining is a material change; asking is not. (Reviewer, 2026-08-28.)
+  const responses = content.nominationResponses;
   const needsReason = picked === 'decline' || picked === 'modification';
 
   return (
@@ -111,58 +120,13 @@ export function RespondForm({
         </div>
       ) : null}
 
-      {!signedIn && picked ? (
-        <div data-region="account-setup" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Set up your account" ar="إعداد حسابكم" />
-          </h2>
-          <p style={{ margin: '0 0 24px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-            {kind === 'ems' ? (
-              <L
-                en="An individual account gives access to the platform. Your agency profile is completed once and reused across every event. Fee: None."
-                ar="يمنح الحساب الفردي الوصول إلى المنصة. يُستكمل ملف جهتكم مرة واحدة ويُعاد استخدامه في كل فعالية. الرسم: لا يوجد."
-              />
-            ) : (
-              <L
-                en="Your physician profile is completed once and reused across every event you direct. Fee: None."
-                ar="يُستكمل ملفكم الطبي مرة واحدة ويُعاد استخدامه في كل فعالية تديرونها. الرسم: لا يوجد."
-              />
-            )}
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-                <L en="Full name" ar="الاسم الكامل" />
-              </span>
-              <input name="fullName" style={inputStyle} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-                <L en="Email" ar="البريد الإلكتروني" />
-              </span>
-              <input name="email" type="email" style={inputStyle} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-                <L en="Password" ar="كلمة المرور" />
-              </span>
-              <input name="password" type="password" style={inputStyle} />
-            </label>
-          </div>
-        </div>
-      ) : null}
-
       {picked === 'accept' || picked === 'modification' || (picked === 'decline' && declineOpen) ? (
         <button
           type="submit"
           style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: picked === 'decline' ? 'var(--bad)' : 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
         >
           {picked === 'accept' ? (
-            kind === 'ems' ? (
-              <L en="Accept and continue to the provider profile" ar="القبول والمتابعة إلى ملف المزوّد" />
-            ) : (
-              <L en="Accept and continue to your profile" ar="القبول والمتابعة إلى ملفكم" />
-            )
+            <L en="Accept the nomination" ar="قبول الترشيح" />
           ) : picked === 'decline' ? (
             <L en="Decline and notify the organizer" ar="الاعتذار وإبلاغ المنظّم" />
           ) : (

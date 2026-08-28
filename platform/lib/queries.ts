@@ -19,6 +19,7 @@ import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
 import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
+import { NOMINEE_DOCUMENT_KEYS } from './rules/nomination-access';
 
 export interface EventRow {
   id: string;
@@ -1112,6 +1113,136 @@ export function invitationByToken(token: string): InvitationDetail | null {
     | Parameters<typeof mapInvitation>[0]
     | undefined;
   return r ? mapInvitation(r) : null;
+}
+
+/**
+ * THE BRIEFING a nominated party reads BEFORE responding (stage one of three).
+ *
+ * The nomination screen used to carry five facts -- who invited you, the event, its
+ * level, its date, and the name you were nominated under -- and then asked for a
+ * decision. That is not enough to decide with. A party being asked to take personal
+ * or institutional responsibility for an event needs to know when it is, where, how
+ * big, what the level demands of THEM, when the organizer must file, who else is
+ * named beside them, and what documents concern their role.
+ *
+ * WHAT THIS DELIBERATELY DOES NOT RETURN: the submission. Not the assessment answers,
+ * not the compliance form, not the other parties' declarations, not any document
+ * outside the nominee's own role. A nomination is an invitation to take on a defined
+ * part, not a licence to read the organizer's file (rule 6: none sees an event it was
+ * not named in -- and being named in one is not being named in all of it).
+ *
+ * The identity of the Event Medical Director IS returned, to everyone named. It has
+ * to be: declaration item 7 turns on who the Director is, so an EMS provider asked to
+ * sign cannot evaluate the nomination without it.
+ */
+export interface NominationBriefing {
+  eventNameEn: string; eventNameAr: string;
+  organizationNameEn: string; organizationNameAr: string;
+  startDate: string | null; endDate: string | null;
+  openingTime: string | null; closingTime: string | null;
+  venueRoute: string | null; municipalities: string | null;
+  eventType: string | null;
+  filed: boolean;
+  /** Everyone else named on this event, with the state of their own nomination. */
+  otherParties: {
+    kind: 'ems' | 'director';
+    nameEn: string; nameAr: string;
+    status: InvitationDetail['status'];
+    isThisOne: boolean;
+  }[];
+  /** Documents that concern the nominee's role -- never the whole attachment set. */
+  documents: { docKey: string; fileName: string; attachedAt: string; hasFile: boolean; contentType: string | null }[];
+}
+
+export function nominationBriefing(token: string): NominationBriefing | null {
+  const db = getDb();
+  const inv = db
+    .prepare(`SELECT event_id, kind FROM invitations WHERE token = ?`)
+    .get(token) as { event_id: string; kind: 'ems' | 'director' } | undefined;
+  if (!inv) return null;
+
+  const ev = db
+    .prepare(
+      `SELECT name_en, name_ar, start_date, end_date, opening_time, closing_time,
+              venue_route, municipalities, event_type, filed
+       FROM events WHERE id = ?`,
+    )
+    .get(inv.event_id) as
+    | {
+        name_en: string; name_ar: string; start_date: string | null; end_date: string | null;
+        opening_time: string | null; closing_time: string | null; venue_route: string | null;
+        municipalities: string | null; event_type: string | null; filed: number;
+      }
+    | undefined;
+  if (!ev) return null;
+
+  const org = db
+    .prepare(
+      `SELECT o.name_en, o.name_ar FROM events e
+       LEFT JOIN organizations o ON o.account_id = e.account_id WHERE e.id = ?`,
+    )
+    .get(inv.event_id) as { name_en: string | null; name_ar: string | null } | undefined;
+
+  const parties = db
+    .prepare(
+      `SELECT token, kind, name_en, name_ar, status FROM invitations
+       WHERE event_id = ? ORDER BY kind, invited_at`,
+    )
+    .all(inv.event_id) as unknown as {
+    token: string; kind: 'ems' | 'director'; name_en: string; name_ar: string;
+    status: InvitationDetail['status'];
+  }[];
+
+  // The SAME allow-list the serving route checks against (lib/rules/nomination-access).
+  // A second copy here would let the panel and the route drift: a listed document the
+  // route refuses is a dead control, and a served one the panel never lists is a hole.
+  const allowed = NOMINEE_DOCUMENT_KEYS[inv.kind];
+  const documents = (
+    db
+      .prepare(
+        `SELECT doc_key, file_name, attached_at, content_type,
+                (bytes IS NOT NULL AND length(bytes) > 0) AS has_file
+         FROM event_attachments WHERE event_id = ? ORDER BY attached_at`,
+      )
+      .all(inv.event_id) as unknown as {
+      doc_key: string; file_name: string; attached_at: string;
+      content_type: string | null; has_file: number;
+    }[]
+  )
+    .filter((d) => allowed.includes(d.doc_key))
+    .map((d) => ({
+      docKey: d.doc_key,
+      fileName: d.file_name,
+      attachedAt: d.attached_at.slice(0, 10),
+      hasFile: d.has_file === 1,
+      contentType: d.content_type,
+    }));
+
+  return {
+    eventNameEn: ev.name_en,
+    eventNameAr: ev.name_ar,
+    organizationNameEn: org?.name_en ?? '',
+    organizationNameAr: org?.name_ar ?? '',
+    startDate: ev.start_date,
+    endDate: ev.end_date,
+    openingTime: ev.opening_time,
+    closingTime: ev.closing_time,
+    venueRoute: ev.venue_route,
+    municipalities: ev.municipalities,
+    eventType: ev.event_type,
+    filed: ev.filed === 1,
+    otherParties: parties
+      // A withdrawn or removed party is not "who else is named" -- they are not.
+      .filter((p) => p.status !== 'withdrawn' && p.status !== 'removed')
+      .map((p) => ({
+        kind: p.kind,
+        nameEn: p.name_en,
+        nameAr: p.name_ar,
+        status: p.status,
+        isThisOne: p.token === token,
+      })),
+    documents,
+  };
 }
 
 /** Every nomination linked to this account -- the role dashboards. */

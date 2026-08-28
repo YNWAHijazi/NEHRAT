@@ -23,3 +23,5 @@ export * from './pii';
 export * from './roles';
 export * from './ministry';
 export * from './attestations';
+export * from './uploads';
+export * from './nomination-access';

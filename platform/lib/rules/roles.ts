@@ -32,34 +32,33 @@ export interface DirectorRequirement {
   others: { en: string; ar: string }[];
 }
 
+import { requirementsForParty } from './requirements';
+
 const PARTIES = matrixJson.parties as Record<string, { en: string; ar: string }>;
 
 /**
  * The rows naming the Event Medical Director at the level. At any level below 3 the
  * result is EMPTY -- the role does not exist there, and a screen showing this list
  * at Level 2 is wrong twice over.
+ *
+ * DELEGATES to requirementsForParty. This used to walk the matrix itself, and when
+ * the nomination briefing needed the same thing for an EMS provider a second walk was
+ * written beside it -- two derivations of one rule, which is how they drift. The
+ * general one is the only one; this keeps the Director's shape (it carries `others`,
+ * which the briefing does not need) and stops deciding anything for itself.
  */
 export function directorRequirements(level: Level): DirectorRequirement[] {
-  if (level !== 3) return [];
-  const rows: DirectorRequirement[] = [];
-  for (const r of matrixJson.requirements) {
-    const partyKeys = (r.parties[level - 1] ?? []) as string[];
-    if (!partyKeys.includes('D')) continue;
-    const value = r.values[level - 1];
-    if (!value) continue;
-    rows.push({
-      n: r.n,
-      en: r.en,
-      ar: r.ar,
-      valueEn: value.en,
-      valueAr: value.ar,
-      sole: partyKeys.length === 1,
-      others: partyKeys
-        .filter((k) => k !== 'D')
-        .map((k) => PARTIES[k] ?? { en: k, ar: k }),
-    });
-  }
-  return rows;
+  return requirementsForParty(level, 'D').map((r) => ({
+    n: r.n,
+    en: r.en,
+    ar: r.ar,
+    valueEn: r.valueEn,
+    valueAr: r.valueAr,
+    sole: r.sole,
+    others: r.partyKeys
+      .filter((k) => k !== 'D')
+      .map((k) => PARTIES[k] ?? { en: k, ar: k }),
+  }));
 }
 
 /* ---------------- the declaration signing gate ---------------- */

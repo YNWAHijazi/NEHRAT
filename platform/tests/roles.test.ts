@@ -14,6 +14,8 @@ import {
   directorRequirements,
   orderLaneActive,
 } from '../lib/rules/roles';
+import { requirementsForParty } from '../lib/rules/requirements';
+import { nomineeMayReadDocument } from '../lib/rules/nomination-access';
 
 describe("the Director's requirements, derived from the matrix", () => {
   it('names five requirements at Level 3', () => {
@@ -97,5 +99,63 @@ describe('the first-response readiness lists match the source counts', () => {
 describe('the Order of Physicians lane', () => {
   it('ships off -- activation is a Ministry act recorded as data', () => {
     expect(orderLaneActive()).toBe(false);
+  });
+});
+
+describe('the nomination offers all three responses to both kinds', () => {
+  it('a Director can ask a question before answering, as an EMS provider can', () => {
+    // The screen used to filter the request-for-information option out for the
+    // Director, leaving a physician deciding on personal responsibility with two
+    // choices: accept blind, or decline. Declining is a material change the organizer
+    // must report; asking a question is not, and making the lighter option
+    // unavailable pushed the heavier one. (Reviewer, 2026-08-28.)
+    const keys = ROLES_CONTENT.ems.nominationResponses.map((r) => r.key);
+    expect(keys).toEqual(['accept', 'decline', 'modification']);
+  });
+
+  it('the third response keeps the nomination open rather than answering it', () => {
+    const ask = ROLES_CONTENT.ems.nominationResponses.find((r) => r.key === 'modification');
+    expect(ask, 'the request-for-information response exists').toBeDefined();
+    // Its own description must not read as a decision: the nomination stays open and
+    // nothing is recorded against the party.
+    expect(`${ask?.descEn}`).toMatch(/remains open|stays open|still/i);
+  });
+});
+
+describe('a nominated party sees their own requirements, derived not described', () => {
+  it('the Level 3 Director carries five rows, and requirement 15 is theirs alone', () => {
+    // The prose said "four are shared with the organizer and the providers, one is
+    // yours alone" and happened to be right. This makes it true BY DERIVATION: if the
+    // Ministry re-issues the matrix, the screen follows instead of the sentence
+    // quietly going stale.
+    const rows = requirementsForParty(3, 'D');
+    expect(rows.map((r) => r.n)).toEqual([8, 12, 15, 16, 19]);
+    expect(rows.filter((r) => r.sole).map((r) => r.n)).toEqual([15]);
+  });
+
+  it('no Director row exists below Level 3 -- absent, not empty', () => {
+    // Non-negotiable 10: what never applies is absent entirely.
+    expect(requirementsForParty(1, 'D')).toEqual([]);
+    expect(requirementsForParty(2, 'D')).toEqual([]);
+  });
+
+  it('the EMS provider carries the readiness declaration at Level 3 and not below', () => {
+    expect(requirementsForParty(3, 'E').some((r) => r.n === 20)).toBe(true);
+    expect(requirementsForParty(2, 'E').some((r) => r.n === 20)).toBe(false);
+  });
+});
+
+describe('what a nomination token may read', () => {
+  it('is an allow-list, so a new catalogue document is not disclosed by default', () => {
+    // The failure mode of "everything except" is silent over-disclosure: a document
+    // added to the catalogue tomorrow would go to every nominated party until somebody
+    // noticed. Here it is invisible until somebody decides it concerns them.
+    for (const kind of ['ems', 'director'] as const) {
+      expect(nomineeMayReadDocument(kind, 'siteMap')).toBe(true);
+      expect(nomineeMayReadDocument(kind, 'deploymentMap')).toBe(true);
+      for (const forbidden of ['complianceForm', 'insuranceCertificate', 'riskAssessment', 'plan-document', 'anythingNew']) {
+        expect(nomineeMayReadDocument(kind, forbidden), `${kind} must not read ${forbidden}`).toBe(false);
+      }
+    }
   });
 });
