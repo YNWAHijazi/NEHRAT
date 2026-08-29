@@ -18,6 +18,33 @@ for (const lang of LANGUAGES) {
       await useLanguage(context, lang);
     });
 
+    test('the hero is a dark band, and it is the page\'s one dark ground', async ({ page }) => {
+      await gotoRidingRestarts(page, '/');
+      const band = page.locator('[data-region="hero-band"]');
+      await expect(band).toBeVisible();
+      // The band takes its ground and its text from the hero tokens, not the page's --
+      // its text sits on a dark ground in BOTH themes and cannot take the page ink.
+      const ground = await band.evaluate((el) => window.getComputedStyle(el).backgroundColor);
+      const pageGround = await page.locator('body').evaluate((el) => window.getComputedStyle(el).backgroundColor);
+      expect(ground, 'the hero band shares the page ground -- there is no band').not.toBe(pageGround);
+      // Full width: the band is not inset inside the measured column.
+      const bandBox = await band.boundingBox();
+      const viewport = page.viewportSize();
+      expect(bandBox!.width).toBeGreaterThanOrEqual((viewport?.width ?? 1280) - 2);
+    });
+
+    test('the dock is four round controls, not a stack of labels', async ({ page }) => {
+      await gotoRidingRestarts(page, '/');
+      const dock = page.locator('[data-dock]');
+      await expect(dock.locator('button')).toHaveCount(4);
+      // Text size CYCLES on one button: three sizes are one setting.
+      const sizeBtn = dock.locator('button[title="Text size"]');
+      await expect(sizeBtn).toHaveCount(1);
+      const before = await page.locator('html').getAttribute('data-textsize');
+      await sizeBtn.click();
+      await expect(page.locator('html')).not.toHaveAttribute('data-textsize', before ?? '100');
+    });
+
     test('search answers with services and guidance, in either language', async ({ page }) => {
       await gotoRidingRestarts(page, '/');
       // The hero field, which is how most people arrive at a question.
@@ -83,6 +110,51 @@ for (const lang of LANGUAGES) {
         await gotoRidingRestarts(page, route);
         await expect(page.locator('[data-region="service-detail"]')).toBeVisible();
         await expect(page.locator('body')).toContainText(lang === 'ar' ? 'الرسم: لا يوجد' : 'Fee: None');
+      }
+    });
+
+    test('all three services end with the same flow, and their own end state', async ({ page }) => {
+      // They had drifted into three different shapes, which made two of the three read
+      // as less considered than the first. Same table, different end state.
+      const ends: [string, string, string][] = [
+        ['/services/certify-an-event', 'From registration to reference number', 'من التسجيل إلى الرقم المرجعي'],
+        ['/services/register-a-venue', 'From registration to classification', 'من التسجيل إلى التصنيف'],
+        ['/services/register-a-facility', 'From registration to a maintained record', 'من التسجيل إلى سجل محفوظ'],
+      ];
+      for (const [route, en, ar] of ends) {
+        await gotoRidingRestarts(page, route);
+        const flow = page.locator('[data-region="flow"]');
+        await expect(flow, `${route} has no flow`).toBeVisible();
+        await expect(page.locator('body')).toContainText(lang === 'ar' ? ar : en);
+        // A numbered sequence, not a paragraph: header row plus at least six steps.
+        expect(await flow.locator('> div').count()).toBeGreaterThanOrEqual(7);
+      }
+
+      // The venue reuses the SAME nine domains the event assessment uses, answered for
+      // a routine operating session. That section did not exist and made the annual
+      // classification look like a formality.
+      await gotoRidingRestarts(page, '/services/register-a-venue');
+      await expect(page.locator('[data-region="domains"] > div')).toHaveCount(9);
+
+      // The facility names the rule beside each category, not the category alone.
+      await gotoRidingRestarts(page, '/services/register-a-facility');
+      await expect(page.locator('[data-region="facility-categories"] > div')).toHaveCount(6);
+      await expect(page.locator('[data-region="facility-obligations"] > div')).toHaveCount(9);
+    });
+
+    test('each suggestion chip reaches a different kind of result', async ({ page }) => {
+      // One per kind, from the prototype: a service, guidance, a real reference number
+      // so the lookup path is discoverable, and a term that matches nothing so the
+      // no-results state is reachable without inventing a failure.
+      const expected: [string, string][] = [
+        ['Certify an event', 'search-services'],
+        ['defibrillator', 'search-guidance'],
+        ['MOPH-EV-2026-0418', 'search-reference'],
+        ['Road closure', 'search-no-results'],
+      ];
+      for (const [q, region] of expected) {
+        await gotoRidingRestarts(page, `/search?q=${encodeURIComponent(q)}`);
+        await expect(page.locator(`[data-region="${region}"]`), `${q} should reach ${region}`).toBeVisible();
       }
     });
   });

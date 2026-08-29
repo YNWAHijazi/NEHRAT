@@ -253,24 +253,24 @@
   "frequentAr": "الأكثر طلباً",
   "chips": [
     {
-      "en": "Do the rules apply to my event?",
-      "ar": "هل تنطبق القواعد على فعاليتي؟",
-      "q": "applicability"
+      "en": "Certify an event",
+      "ar": "اعتماد فعالية",
+      "q": "Certify an event"
     },
     {
-      "en": "Filing deadlines",
-      "ar": "مهل التقديم",
-      "q": "deadline"
-    },
-    {
-      "en": "Documents by level",
-      "ar": "المستندات بحسب المستوى",
-      "q": "documents"
-    },
-    {
-      "en": "Defibrillators in facilities",
-      "ar": "أجهزة إزالة الرجفان في المنشآت",
+      "en": "Defibrillator",
+      "ar": "جهاز إزالة الرجفان",
       "q": "defibrillator"
+    },
+    {
+      "en": "MOPH-EV-2026-0418",
+      "ar": "MOPH-EV-2026-0418",
+      "q": "MOPH-EV-2026-0418"
+    },
+    {
+      "en": "Road closure",
+      "ar": "إقفال طريق",
+      "q": "Road closure"
     }
   ],
   "servicesResultEn": "Services",
@@ -287,5 +287,179 @@
   "contactAr": "سؤال الوزارة",
   "contactBodyEn": "The Ministry of Public Health answers questions about scope and designation. Ask before the event rather than after it.",
   "contactBodyAr": "تجيب وزارة الصحة العامة عن الأسئلة المتعلقة بالنطاق والتحديد. اسألوا قبل الفعالية لا بعدها.",
-  "$commentKeywords": "Search keywords carry no annex letters. The instrument names its parts by letter and this platform never does (SPEC 6): a person is told \"compliance and submission form\", not \"Annex C\". Matching a letter nobody is shown would be teaching the vocabulary the copy rules forbid, and the banned-terms sweep catches it here as it would anywhere else. A person searching by letter finds nothing; if the Ministry wants those synonyms, that is a decision to take rather than a default to inherit from the prototype."
+  "$commentKeywords": "Search keywords carry no annex letters. The instrument names its parts by letter and this platform never does (SPEC 6): a person is told \"compliance and submission form\", not \"Annex C\". Matching a letter nobody is shown would be teaching the vocabulary the copy rules forbid, and the banned-terms sweep catches it here as it would anywhere else. A person searching by letter finds nothing; if the Ministry wants those synonyms, that is a decision to take rather than a default to inherit from the prototype.",
+  "flows": {
+    "certify": [
+      {
+        "en": "Create an account and register your organization. The Ministry records it before you can file.",
+        "ar": "أنشئوا حساباً وسجّلوا مؤسستكم. تسجّلها الوزارة قبل أن يمكنكم التقديم.",
+        "n": 1
+      },
+      {
+        "en": "Create the event and complete the assessment. Your level and requirements appear immediately.",
+        "ar": "أنشئوا الفعالية واستكملوا التقييم. يظهر مستواكم ومتطلباتكم فوراً.",
+        "n": 2
+      },
+      {
+        "en": "Meet the requirements your level sets and attach the documents it calls for.",
+        "ar": "استوفوا المتطلبات التي يفرضها مستواكم وأرفقوا المستندات التي يقتضيها.",
+        "n": 3
+      },
+      {
+        "en": "Level 3 — invite each participating EMS provider to file its readiness declaration against the event.",
+        "ar": "المستوى 3 — ادعوا كل مزوّد إسعاف مشارك لتقديم إقرار جاهزيته على الفعالية.",
+        "n": 4
+      },
+      {
+        "en": "Submit before your deadline. You receive an acknowledgment and a reference number.",
+        "ar": "قدّموا قبل انتهاء مهلتكم. تستلمون إشعاراً بالاستلام ورقماً مرجعياً.",
+        "n": 5
+      },
+      {
+        "en": "Report any material change after submission.",
+        "ar": "أبلغوا عن أي تغيير جوهري بعد التقديم.",
+        "n": 6
+      },
+      {
+        "en": "File the post-event report — always for Level 3; for Levels 1 and 2 after a reportable event or on Ministry request.",
+        "ar": "قدّموا التقرير اللاحق للفعالية — دائماً في المستوى 3؛ وفي المستويين 1 و2 بعد واقعة واجبة الإبلاغ أو بطلب الوزارة.",
+        "n": 7
+      }
+    ],
+    "venue": [
+      {
+        "en": "Create an account and register the operating organization.",
+        "ar": "أنشئوا حساباً وسجّلوا المؤسسة المشغّلة.",
+        "n": 1
+      },
+      {
+        "en": "Register the venue — name, address, municipality and licensed capacity.",
+        "ar": "سجّلوا الموقع — الاسم والعنوان والبلدية والسعة المرخصة.",
+        "n": 2
+      },
+      {
+        "en": "Complete the annual assessment for one routine operating session.",
+        "ar": "استكملوا التقييم السنوي لفترة تشغيل اعتيادية واحدة.",
+        "n": 3
+      },
+      {
+        "en": "Certify and submit. The Ministry reviews and records the classification.",
+        "ar": "صدّقوا وقدّموا. تراجع الوزارة وتسجّل التصنيف.",
+        "n": 4
+      },
+      {
+        "en": "The classification stands for twelve months and sets a floor for organizers using the venue.",
+        "ar": "يسري التصنيف اثني عشر شهراً ويحدد حدّاً أدنى للمنظّمين الذين يستخدمون الموقع.",
+        "n": 5
+      },
+      {
+        "en": "Reassess on any material change, and renew before the twelve months lapse.",
+        "ar": "أعيدوا التقييم عند أي تغيير جوهري، وجدّدوا قبل انقضاء الاثني عشر شهراً.",
+        "n": 6
+      }
+    ],
+    "facility": [
+      {
+        "en": "Create an account and register the operating organization.",
+        "ar": "أنشئوا حساباً وسجّلوا المؤسسة المشغّلة.",
+        "n": 1
+      },
+      {
+        "en": "Register the facility and name its cardiac-readiness coordinator.",
+        "ar": "سجّلوا المنشأة وسمّوا منسّق الجاهزية لتوقف القلب.",
+        "n": 2
+      },
+      {
+        "en": "Register each defibrillator as its own record — location, accessibility, pad and battery expiry.",
+        "ar": "سجّلوا كل جهاز كسجل مستقل — الموقع وإمكان الوصول وتاريخا انتهاء اللصاقات والبطارية.",
+        "n": 3
+      },
+      {
+        "en": "Complete the cardiac emergency response plan and record the annual drill.",
+        "ar": "استكملوا خطة استجابة طوارئ القلب وسجّلوا التمرين السنوي.",
+        "n": 4
+      },
+      {
+        "en": "Confirm readiness once a year, and update on relocation, replacement or a change in accessibility.",
+        "ar": "أكّدوا الجاهزية مرة في السنة، وحدّثوا عند النقل أو الاستبدال أو تغيّر إمكان الوصول.",
+        "n": 5
+      },
+      {
+        "en": "Report any suspected cardiac arrest, CPR attempt or device use, and correct any deficiency the Ministry raises.",
+        "ar": "أبلغوا عن أي توقف قلب مشتبه به أو محاولة إنعاش أو استخدام جهاز، وصحّحوا أي قصور تثيره الوزارة.",
+        "n": 6
+      }
+    ]
+  },
+  "flowTitles": {
+    "certify": {
+      "en": "From registration to reference number",
+      "ar": "من التسجيل إلى الرقم المرجعي"
+    },
+    "venue": {
+      "en": "From registration to classification",
+      "ar": "من التسجيل إلى التصنيف"
+    },
+    "facility": {
+      "en": "From registration to a maintained record",
+      "ar": "من التسجيل إلى سجل محفوظ"
+    }
+  },
+  "facilityObligations": [
+    {
+      "en": "One named cardiac-readiness coordinator",
+      "ar": "منسق واحد مُسمّى للجاهزية لتوقف القلب"
+    },
+    {
+      "en": "A maintained cardiac emergency response plan",
+      "ar": "خطة استجابة لطوارئ توقف القلب محدّثة"
+    },
+    {
+      "en": "CPR and defibrillator trained personnel present during operating hours",
+      "ar": "موظفون مدرَّبون على الإنعاش واستخدام الجهاز خلال ساعات العمل"
+    },
+    {
+      "en": "An accessible defibrillator where one is required",
+      "ar": "جهاز إزالة رجفان متاح للوصول حيث يكون مطلوباً"
+    },
+    {
+      "en": "Visible signage and manufacturer maintenance",
+      "ar": "لافتات ظاهرة وصيانة وفق تعليمات الشركة الصانعة"
+    },
+    {
+      "en": "Clear procedures for calling the ambulance service, guiding it in, and handing over care",
+      "ar": "إجراءات واضحة لاستدعاء خدمة الإسعاف وإرشادها ونقل المسؤولية"
+    },
+    {
+      "en": "At least one practical drill each year",
+      "ar": "تمرين عملي واحد على الأقل كل سنة"
+    },
+    {
+      "en": "A report after any suspected arrest, CPR attempt or device use",
+      "ar": "تقرير بعد أي اشتباه بتوقف قلب أو محاولة إنعاش أو استخدام جهاز"
+    },
+    {
+      "en": "Prompt correction of deficiencies and return of a used device to service",
+      "ar": "تصحيح سريع لأوجه القصور وإعادة الجهاز المستخدم إلى الخدمة"
+    }
+  ],
+  "stepEn": "Step",
+  "stepAr": "الخطوة",
+  "whatHappensEn": "What happens",
+  "whatHappensAr": "ماذا يحصل",
+  "venueAssessEn": "The same nine risk domains an event assessment uses, answered for one routine operating session rather than for a single event.",
+  "venueAssessAr": "المجالات التسعة نفسها التي يستخدمها تقييم الفعالية، مُجابة لفترة تشغيل اعتيادية واحدة لا لفعالية واحدة.",
+  "venueFloorEn": "A venue licensed for 1,000 or more starts at Level 2 as a minimum condition, whatever the score.",
+  "venueFloorAr": "الموقع المرخّص لألف شخص أو أكثر يبدأ من المستوى 2 كشرط من شروط الحد الأدنى، مهما كانت النتيجة.",
+  "facilityRuleIntroEn": "The Ministry sets the capacity threshold for public venues, revises the phased schedule, and may designate an individual facility.",
+  "facilityRuleIntroAr": "تحدد الوزارة عتبة السعة للأماكن العامة، وتنقّح الجدول المرحلي، ويجوز لها تحديد منشأة بعينها.",
+  "obligationsTitleEn": "Continuing obligations",
+  "obligationsTitleAr": "الموجبات المستمرة",
+  "coveredTitleEn": "Covered facilities and the defibrillator requirement",
+  "coveredTitleAr": "المنشآت المشمولة ومتطلب الجهاز",
+  "categoryEn": "Category",
+  "categoryAr": "فئة المنشأة",
+  "requirementEn": "Requirement",
+  "requirementAr": "المتطلب",
+  "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page."
 }

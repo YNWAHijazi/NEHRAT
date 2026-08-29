@@ -16,10 +16,21 @@ import { PUBLIC_LANDING } from '../lib/rules';
 export function PublicShell({
   children,
   signedIn,
+  hero,
 }: {
   children: React.ReactNode;
   /** Someone already signed in gets a way back to their own work, not a second sign-in. */
   signedIn: boolean;
+  /**
+   * THE DARK BAND, on the screens that have one.
+   *
+   * It runs full width from under the header to below the suggestion chips, and it is
+   * the page's one dark ground. Without it the overview renders entirely on white and
+   * reads as a document rather than a service: the contrast is the reason the white
+   * below it works at all. It carries its own token block (--hero-*) because its text
+   * sits on a dark ground in BOTH themes and cannot take the page's ink colour.
+   */
+  hero?: React.ReactNode;
 }): React.ReactElement {
   return (
     <>
@@ -60,7 +71,51 @@ export function PublicShell({
         </div>
       </header>
 
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 0' }}>
+      {hero ? (
+        <div
+          data-region="hero-band"
+          style={{
+            background: 'var(--hero-bg)',
+            color: 'var(--hero-ink)',
+            borderBlockEnd: '1px solid var(--hero-line)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* A glow at the top-start corner and a faint grid. Texture, not structure --
+              both are decoration and neither carries meaning, so both are safe to lose
+              on a printer or a reduced-transparency setting. */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'radial-gradient(60rem 32rem at 12% -10%, var(--hero-glow), transparent 62%)',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage:
+                'linear-gradient(var(--hero-line2) 1px, transparent 1px), linear-gradient(90deg, var(--hero-line2) 1px, transparent 1px)',
+              backgroundSize: '72px 72px',
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            data-pad=""
+            style={{ position: 'relative', maxWidth: 1160, marginInline: 'auto', padding: '56px 32px 48px' }}
+          >
+            {hero}
+          </div>
+        </div>
+      ) : null}
+
+      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: hero ? '44px 32px 0' : '44px 32px 0' }}>
         {children}
       </main>
 

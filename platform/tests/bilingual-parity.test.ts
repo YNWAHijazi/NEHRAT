@@ -157,6 +157,12 @@ describe('every data file, not a hand-written list of five', () => {
       .filter((p) => (p.en as string).trim() !== '' && (p.ar as string).trim() !== '')
       // A bare number, a code or a date is legitimately the same in both.
       .filter((p) => !/^[\d\s./:-]+$/.test(p.en as string))
+      // SO IS A MINISTRY REFERENCE NUMBER. It has one form in both issues by
+      // construction -- MOPH-EV-2026-0418 is not translated, and rendering it
+      // differently on the Arabic side would break the thing it identifies. Matched by
+      // the reference shape rather than allowlisted by path, so it covers the next one
+      // too and nothing else.
+      .filter((p) => !/^MOPH-[A-Z]{2}-\d{4}-\d{4}$/.test((p.en as string).trim()))
       .filter((p) => p.en === p.ar || !arabic.test(p.ar as string))
       .map((p) => `${p.file}:${p.path}.${p.key}`)
       .filter((id) => !excluded(id));

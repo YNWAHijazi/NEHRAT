@@ -26,37 +26,60 @@ export default async function OverviewPage() {
   };
 
   return (
-    <PublicShell signedIn={account !== null}>
-      {/* HERO — one sentence saying what this is, and the two tools that need no account. */}
-      <h1 data-sec-h1="" data-region="hero" style={{ margin: '8px 0 16px', fontSize: 40, fontWeight: 600, letterSpacing: '-.035em', lineHeight: 1.2, maxWidth: '20ch' }}>
-        <L en="National Health and Medical Readiness" ar="الجاهزية الصحية والطبية الوطنية" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 19, lineHeight: 1.6, color: 'var(--muted)', maxWidth: '62ch' }}>
-        <L en={P.heroEn} ar={P.heroAr} />
-      </p>
-
-      {/* THE HERO FIELD. Most people arrive with a question rather than a
-          destination, and the four chips are the questions they actually arrive with. */}
-      <form method="get" action="/search" data-region="hero-search" style={{ maxWidth: 620, marginBlockEnd: 12 }}>
-        <input
-          name="q"
-          aria-label="Search"
-          placeholder={P.searchPlaceholderEn}
-          style={{ height: 52, paddingInline: 18, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 26, fontSize: 16, inlineSize: '100%' }}
-        />
-      </form>
-      <div data-region="hero-chips" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 40 }}>
-        {P.chips.map((c) => (
-          <Link
-            key={c.q}
-            href={`/search?q=${encodeURIComponent(c.q)}`}
-            style={{ paddingBlock: 7, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 999, fontSize: '13px', color: 'var(--muted)' }}
+    <PublicShell
+      signedIn={account !== null}
+      hero={
+        <>
+          <h1
+            data-sec-h1=""
+            data-region="hero"
+            style={{ margin: '0 0 16px', fontSize: 'clamp(2.1rem, 5vw, 3.1rem)', fontWeight: 600, letterSpacing: '-.035em', lineHeight: 1.15, maxWidth: '18ch', color: 'var(--hero-ink)', textWrap: 'balance' }}
           >
-            <L en={c.en} ar={c.ar} />
-          </Link>
-        ))}
-      </div>
+            <L en="National Health and Medical Readiness" ar="الجاهزية الصحية والطبية الوطنية" />
+          </h1>
+          <p style={{ margin: '0 0 28px', fontSize: 19, lineHeight: 1.6, color: 'var(--hero-muted)', maxWidth: '58ch' }}>
+            <L en={P.heroEn} ar={P.heroAr} />
+          </p>
 
+          {/* The field is dark inside the band -- a white input here would be a hole
+              punched in the ground rather than a control sitting on it. */}
+          <form method="get" action="/search" data-region="hero-search" style={{ maxWidth: 620, marginBlockEnd: 14 }}>
+            <input
+              name="q"
+              aria-label="Search"
+              placeholder={P.searchPlaceholderEn}
+              style={{
+                height: 54,
+                paddingInline: 20,
+                inlineSize: '100%',
+                background: 'var(--hero-field)',
+                border: '1px solid var(--hero-line)',
+                borderRadius: 27,
+                fontSize: 16,
+                color: 'var(--hero-ink)',
+              }}
+            />
+          </form>
+
+          {/* ONE CHIP PER KIND OF RESULT, from the prototype: a service, a piece of
+              guidance, a real reference number so the lookup path is discoverable, and
+              a term that matches nothing so the no-results state is reachable. Four
+              questions would all have resolved to guidance and left two states
+              unreachable from the front page. */}
+          <div data-region="hero-chips" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {P.chips.map((c) => (
+              <Link
+                key={c.q}
+                href={`/search?q=${encodeURIComponent(c.q)}`}
+                style={{ paddingBlock: 7, paddingInline: 15, border: '1px solid var(--hero-line)', borderRadius: 999, fontSize: '13px', color: 'var(--hero-muted)' }}
+              >
+                <L en={c.en} ar={c.ar} />
+              </Link>
+            ))}
+          </div>
+        </>
+      }
+    >
       {/* SERVICES — the three regulated processes, as the primary route in. */}
       <h2 style={{ margin: '0 0 8px', fontSize: 26, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en="Services" ar="الخدمات" />

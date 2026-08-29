@@ -52,6 +52,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   };
   const row: React.CSSProperties = { background: 'var(--bg)', padding: '14px 18px', fontSize: '14.5px', lineHeight: 1.55 };
 
+  // One flow per service, from the data. The end state differs; the shape does not.
+  const flowKey = key === 'certify-an-event' ? 'certify' : key === 'register-a-venue' ? 'venue' : 'facility';
+  const flow = (P.flows as Record<string, { n: number; en: string; ar: string }[]>)[flowKey] ?? [];
+  const flowTitle = (P.flowTitles as Record<string, { en: string; ar: string }>)[flowKey]!;
+
   return (
     <PublicShell signedIn={account !== null}>
       <Link href="/" style={{ fontSize: '13.5px', color: 'var(--brand)' }}>
@@ -67,6 +72,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         <L en="Fee: None." ar="الرسم: لا يوجد." />
       </p>
 
+      {/* WHAT THE SERVICE COVERS. Each screen answers the same question in its own
+          terms -- the event by its nine domains and its documents, the venue by the
+          same nine answered for a routine session, the facility by category. All three
+          then end with the same thing: a numbered flow from registration to the state
+          the service produces. They had drifted into three different shapes, which
+          made two of the three read as less considered than the first. */}
       {key === 'certify-an-event' ? (
         <>
           <h2 style={h2}>
@@ -103,26 +114,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               </div>
             ))}
           </div>
-
-          <h2 style={h2}>
-            <L en="From registration to reference number" ar="من التسجيل إلى الرقم المرجعي" />
-          </h2>
-          <ol data-region="sequence" style={{ margin: 0, paddingInlineStart: 22, fontSize: '14.5px', lineHeight: 1.9 }}>
-            {[
-              ['Register your organization', 'سجّلوا مؤسستكم'],
-              ['Create the event and complete the assessment', 'أنشئوا الفعالية واستكملوا التقييم'],
-              ['The level derives — it is never chosen', 'يُشتق المستوى — ولا يُختار أبداً'],
-              ['Name the parties your level requires', 'سمّوا الأطراف التي يستلزمها مستواكم'],
-              ['Attach what the level asks for and write the plan', 'أرفقوا ما يطلبه المستوى واكتبوا الخطة'],
-              ['File before your deadline', 'قدّموا قبل انتهاء مهلتكم'],
-              ['Receive a Ministry reference number', 'تستلمون رقماً مرجعياً من الوزارة'],
-              ['The Ministry records a determination', 'تسجّل الوزارة نتيجة'],
-            ].map(([en, ar]) => (
-              <li key={en}>
-                <L en={en!} ar={ar!} />
-              </li>
-            ))}
-          </ol>
         </>
       ) : null}
 
@@ -138,14 +129,27 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               </div>
             ))}
           </div>
+
+          {/* THE SAME NINE DOMAINS, answered for a routine operating session. The venue
+              screen used to say nothing about its assessment at all, which made the
+              annual classification look like a formality rather than the same
+              instrument the event uses. */}
           <h2 style={h2}>
-            <L en="From registration to classification" ar="من التسجيل إلى التصنيف" />
+            <L en="What the assessment covers" ar="ما يشمله التقييم" />
           </h2>
-          <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.7, maxWidth: '80ch' }}>
-            <L
-              en="A recurring venue is registered once and classified annually. The classification does not set the level of an individual event held there; each event carries its own assessment."
-              ar="يُسجَّل الموقع المتكرر مرة واحدة ويُصنَّف سنوياً. ولا يحدد التصنيف مستوى أي فعالية فردية تُقام فيه؛ فلكل فعالية تقييمها الخاص."
-            />
+          <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
+            <L en={P.venueAssessEn} ar={P.venueAssessAr} />
+          </p>
+          <div data-region="domains" style={listBox}>
+            {DOMAINS.map((d) => (
+              <div key={d.number} style={row}>
+                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 12 }}>{d.number}</span>
+                <L en={d.en} ar={d.ar} />
+              </div>
+            ))}
+          </div>
+          <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
+            <L en={P.venueFloorEn} ar={P.venueFloorAr} />
           </p>
         </>
       ) : null}
@@ -153,32 +157,63 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
       {key === 'register-a-facility' ? (
         <>
           <h2 style={h2}>
-            <L en="Which category does the place fall into" ar="في أي فئة يندرج المكان" />
+            <L en={P.coveredTitleEn} ar={P.coveredTitleAr} />
           </h2>
           <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-            <L
-              en="Facilities are not scored. The category decides the rule, and for some categories the Ministry has not yet set the value the rule turns on."
-              ar="لا تُقيَّم المنشآت بالنتيجة. فالفئة تحدد القاعدة، وفي بعض الفئات لم تحدد الوزارة بعد القيمة التي تتوقف عليها القاعدة."
-            />
+            <L en={P.facilityRuleIntroEn} ar={P.facilityRuleIntroAr} />
           </p>
+          {/* CATEGORY AND RULE TOGETHER. A list of categories alone tells an operator
+              which box they are in and not what follows from it -- and for three of the
+              six what follows is that the Ministry has not set a value yet. */}
           <div data-region="facility-categories" style={listBox}>
-            {FACILITY_CONTENT.categories.map((c) => (
-              <div key={c.key} style={row}>
-                <L en={c.en} ar={c.ar} />
+            {P.facilityCategories.map((c, i) => (
+              <div key={i} style={row}>
+                <div style={{ fontWeight: 500 }}>
+                  <L en={c.en} ar={c.ar} />
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.6 }}>
+                  <L en={c.ruleEn} ar={c.ruleAr} />
+                </div>
               </div>
             ))}
           </div>
+
           <h2 style={h2}>
-            <L en="Continuing obligations" ar="الموجبات المستمرة" />
+            <L en={P.obligationsTitleEn} ar={P.obligationsTitleAr} />
           </h2>
-          <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.7, maxWidth: '80ch' }}>
-            <L
-              en="A covered facility registers the facility, its coordinator and each defibrillator, and keeps the cardiac emergency response plan current. Each device is one record, confirmed once a year."
-              ar="تسجّل المنشأة المشمولة المنشأة ومنسّقها وكل جهاز إزالة رجفان، وتحفظ خطة الاستجابة لطوارئ القلب محدّثة. وكل جهاز سجل واحد يُؤكَّد مرة في السنة."
-            />
-          </p>
+          <div data-region="facility-obligations" style={listBox}>
+            {P.facilityObligations.map((o) => (
+              <div key={o.en} style={row}>
+                <L en={o.en} ar={o.ar} />
+              </div>
+            ))}
+          </div>
         </>
       ) : null}
+
+      {/* THE FLOW. Every service ends here, with the same table and a different end
+          state: a reference number, a classification, a maintained record. */}
+      <h2 style={h2}>
+        <L en={flowTitle.en} ar={flowTitle.ar} />
+      </h2>
+      <div data-region="flow" style={listBox}>
+        <div style={{ ...row, display: 'flex', gap: 16, background: 'var(--surface2)', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+          <span style={{ flex: 'none', minWidth: 40 }}>
+            <L en={P.stepEn} ar={P.stepAr} />
+          </span>
+          <span>
+            <L en={P.whatHappensEn} ar={P.whatHappensAr} />
+          </span>
+        </div>
+        {flow.map((step) => (
+          <div key={step.n} style={{ ...row, display: 'flex', gap: 16, alignItems: 'baseline' }}>
+            <span style={{ flex: 'none', minWidth: 40, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{step.n}</span>
+            <span>
+              <L en={step.en} ar={step.ar} />
+            </span>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBlockStart: 36 }}>
         <Link href="/applicability" style={{ height: 44, paddingInline: 20, border: '1px solid var(--line)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
