@@ -36,6 +36,30 @@ function urgencyColor(days: number): string {
       : 'var(--brand)';
 }
 
+/**
+ * The three service cards on the empty dashboard offer three ways in, and the
+ * platform prefers none of them. Events used to carry a filled brand-coloured
+ * link while venues and facilities were outlined, which reads as one action
+ * chosen for you and two withheld -- a reviewer read it exactly that way. The
+ * services are peers: an organizer arrives to discharge whichever obligation
+ * they were sent here for. One object, used three times, so they cannot drift
+ * apart again the way they did.
+ */
+const serviceAction: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  alignSelf: 'start',
+  marginBlockStart: 'auto',
+  height: 44,
+  paddingInline: 22,
+  border: '1px solid var(--line)',
+  background: 'var(--bg)',
+  borderRadius: 22,
+  fontSize: '14.5px',
+  fontWeight: 500,
+  color: 'var(--ink)',
+};
+
 const secLabel: React.CSSProperties = {
   fontSize: '11.5px',
   letterSpacing: '.06em',
@@ -323,7 +347,7 @@ export default async function DashboardPage({
                   ar="تُسجَّل هنا كل فعالية تقيمونها مع تقييمها ومستواها وتقديمها. أنشئوا الفعالية أولاً؛ فالتقييم يحدد المستوى، والمستوى يحدد المهلة."
                 />
               </p>
-              <Link href="/events/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500 }}>
+              <Link href="/events/new" style={serviceAction}>
                 <L en="Create an event" ar="إنشاء فعالية" />
               </Link>
             </div>
@@ -337,7 +361,7 @@ export default async function DashboardPage({
                   ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر. ويحمل تصنيفه حداً أدنى للمستوى إلى كل فعالية تُقام فيه."
                 />
               </p>
-              <Link href="/venues/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--ink)' }}>
+              <Link href="/venues/new" style={serviceAction}>
                 <L en="Register a venue" ar="تسجيل موقع" />
               </Link>
             </div>
@@ -351,7 +375,7 @@ export default async function DashboardPage({
                   ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة — ضمن الجاهزية لتوقف القلب، بمعزل عن الفعاليات."
                 />
               </p>
-              <Link href="/facilities/new" style={{ display: 'inline-flex', alignItems: 'center', alignSelf: 'start', marginBlockStart: 'auto', height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--ink)' }}>
+              <Link href="/facilities/new" style={serviceAction}>
                 <L en="Register a facility" ar="تسجيل منشأة" />
               </Link>
             </div>
