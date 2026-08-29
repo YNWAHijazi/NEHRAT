@@ -1,22 +1,25 @@
 /**
- * Preflight for the visual comparison.
+ * Preflight for the visual comparison: clear the previous run's artifacts, then
+ * refuse the run if there is not enough disk for the next one.
  *
- * The comparison writes three PNGs per region per language and a trace per failure.
- * When the disk fills, Playwright reports ENOSPC as a failed assertion, which reads
- * exactly like a real visual regression -- and a reviewer then spends an hour
- * diagnosing a full disk. Cheaper to check first and say so.
+ * THE FLOOR IS NOT DEFINED HERE. It was, and it was 1024 MB -- the figure from when
+ * the suite was smaller -- while the corrected per-run floors lived only in
+ * disk-check.mjs. Both guards ran. The stale one ran FIRST and printed the
+ * reassuring line, so a chain starting with 3.9 GB was told "Preflight: 3896 MB
+ * free" and started anyway; only the globalSetup half would have caught it. Two
+ * copies of a threshold is one threshold and one lie about it, so this half now
+ * asks the other half.
  *
- * Also clears the artifacts of previous runs, which are what fills the disk.
+ * The clearing stays here rather than moving to globalSetup, because globalSetup
+ * fires once per project and would delete the reference run's output before the
+ * app run began.
  */
-import { statfsSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import checkDisk from './disk-check.mjs';
 
 const PLATFORM = join(dirname(fileURLToPath(import.meta.url)), '..');
-
-/** Enough for a full run's screenshots, diffs and traces, with room to spare. */
-const REQUIRED_MB = 1024;
 
 // .next-e2e is the e2e server's own build directory -- 300 MB of the fill, and
 // a build cache like any other, so it goes with the rest.
@@ -25,22 +28,13 @@ await Promise.all(
   stale.map((d) => rm(join(PLATFORM, d), { recursive: true, force: true })),
 );
 
-const { bsize, bavail } = statfsSync(PLATFORM);
-const freeMb = Math.floor((bsize * bavail) / (1024 * 1024));
-
-if (freeMb < REQUIRED_MB) {
-  process.stderr.write(
-    `\nNOT ENOUGH DISK FOR THE VISUAL COMPARISON\n\n` +
-      `  free:     ${freeMb} MB\n` +
-      `  required: ${REQUIRED_MB} MB\n\n` +
-      `The comparison writes a reference, a built and a diff image per region per\n` +
-      `language, plus a trace for every failure. Running it now would fail with\n` +
-      `ENOSPC on assertions that look like visual regressions but are not.\n\n` +
-      `Free some space and run again. The usual culprits:\n` +
-      `  platform/.next          the dev build cache -- safe to delete, it rebuilds\n` +
-      `  ~/Library/Caches        browser and package caches\n\n`,
+// Measured AFTER the clearing, so the figure is what the run will actually have.
+try {
+  const { freeMb, requiredMb } = checkDisk();
+  process.stdout.write(
+    `Preflight: ${freeMb} MB free against a ${requiredMb} MB floor, stale artifacts cleared.\n`,
   );
+} catch (error) {
+  process.stderr.write(`${error.message}\n`);
   process.exit(1);
 }
-
-process.stdout.write(`Preflight: ${freeMb} MB free, stale artifacts cleared.\n`);

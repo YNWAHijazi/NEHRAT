@@ -63,7 +63,7 @@ export default function checkDisk() {
 
   const { bsize, bavail } = statfsSync(PLATFORM);
   const freeMb = Math.floor((bsize * bavail) / (1024 * 1024));
-  if (freeMb >= requiredMb) return;
+  if (freeMb >= requiredMb) return { freeMb, requiredMb };
   throw new Error(
     `\nNOT ENOUGH DISK FOR THIS RUN\n\n` +
       `  free:     ${freeMb} MB\n` +
