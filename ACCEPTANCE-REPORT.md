@@ -331,6 +331,64 @@ What remains loose is recorded in the guard, again — a trailing comment on a l
 code still counts, and an aliased import is still invisible. Both are narrower than what
 they replace. **Both should be read as risks rather than as notes.**
 
+### And the same failure again, in a different guard
+
+The wiring guard is the sharper story. This one is the more useful, because the two
+together say something neither says alone.
+
+`scripts/disk-check.mjs` exists for exactly one purpose: to stop a run starting on a disk
+too small to finish it. When the disk fills mid-run, Playwright reports `ENOSPC` as failed
+assertions — which read exactly like visual regressions and navigation flakes, on screens
+nobody has touched. The guard exists so nobody spends an afternoon debugging a full disk.
+
+A run started with roughly 3 GB free. **The guard ran, measured, and passed.** The disk
+filled anyway, and the run produced **forty-four failures across nine unrelated specs** —
+precisely the misdiagnosis the guard was written to prevent.
+
+Its logic was correct. Its threshold was measuring the wrong quantity.
+
+The floor had been set from the size of the artifacts a run leaves behind: the build
+directory, the images, the traces — about 350 MB. But watching free space *across* a run
+shows an app-only pass consuming **2.9 GB**, and clearing every artifact afterwards
+recovers only that same 350 MB. The other 2.5 GB is `next dev` rewriting chunks for twenty
+minutes and rebuilding wholesale after each memory-watchdog restart: transient, reclaimed
+by the operating system, and completely invisible to anyone measuring what is left at the
+end.
+
+**The guard was measuring the residue and calling it the appetite.**
+
+Two things came out of correcting it. The floor is now per-run, because the reference
+project writes three images per region per language and the app project writes traces only
+on failure — one number refused app-only runs that would have finished comfortably, and a
+guard that refuses work it did not need to refuse is a guard somebody eventually lowers.
+And which project is running is read from `process.argv`, because `FullConfig.projects`
+lists every *configured* project regardless of `--project`. That was found by probing after
+the first attempt refused an app-only run, not by reading the type.
+
+### What the two of them say together
+
+The wiring guard was **defeated by an input it should have ignored** — a sentence in a
+docstring in an unrelated file. The disk guard was **measuring a quantity unrelated to what
+it claimed to measure** — the residue of a run instead of its appetite.
+
+The corrected disk guard then made the point a third time, on this report's own final
+verification run. The run began with 5.8 GB free — comfortably over the measured floor — and
+the guard passed. Two hours later the app project had spent it: free space fell to 1.4 GB,
+`next dev` restarted twice under its memory watchdog, and every test in the back half of the
+sequence slowed from seconds to minutes. Seven ended in navigation timeouts. Re-run alone
+with headroom, the same forty-eight tests passed in under three minutes. Not one of those
+seven failures used the word *disk*: they arrive as timeouts, and a timeout is read as a
+defect in whatever screen happened to be under the cursor. A guard that measures at the door
+cannot see a cost paid over the following hour.
+
+Neither was missing. Neither was wrong in its logic. Both ran, both passed, and both were
+answering a different question from the one they were written for. That is the whole
+family in two sentences, and it is why the closing instruction of this report is not *add
+more guards* but:
+
+> **Ask of every check: what would have to be true for this to pass while the thing it
+> protects is broken?** If that question has an easy answer, the check is not yet a check.
+
 ---
 
 ## 7. Decisions the Ministry still owns
