@@ -365,7 +365,7 @@ And which project is running is read from `process.argv`, because `FullConfig.pr
 lists every *configured* project regardless of `--project`. That was found by probing after
 the first attempt refused an app-only run, not by reading the type.
 
-### What the two of them say together
+### What the four of them say together
 
 The wiring guard was **defeated by an input it should have ignored** — a sentence in a
 docstring in an unrelated file. The disk guard was **measuring a quantity unrelated to what
@@ -384,7 +384,26 @@ with headroom, the same forty-eight tests passed in under three minutes. Not one
 seven failures used the word *disk*: they arrive as timeouts, and a timeout is read as a
 defect in whatever screen happened to be under the cursor.
 
-**And that third one generalises past disk.** Every precondition check has the same shape: it
+A fourth turned up in the same hour, while re-running the chain that produced the third,
+and it is the cleanest of the four. The chain's first gate is `scripts/preflight.mjs`. It
+carried its own floor — `REQUIRED_MB = 1024`, the figure from when the suite was smaller —
+while the corrected per-run floors, 5120 MB for a run that builds reference images and 3584
+for one that does not, lived in `scripts/disk-check.mjs`. Both guards existed. Both ran. The
+stale one ran **first**, and printed `Preflight: 3896 MB free, stale artifacts cleared.` —
+a true number, in a reassuring sentence, compared against a threshold that had been wrong
+for weeks. Nothing in that line is false. Nothing in it means anything either. The floor it
+was measured against is not in the message, so there is no way to read the line and notice.
+
+That is the family with nothing else going on: the check was present, it ran, it announced
+free space, and the figure was meaningless because the number behind it was obsolete. It is
+also the reason the other two took as long to find as they did — a guard that reports
+*something* is much harder to doubt than a guard that reports nothing. The fix was to delete
+the second copy of the threshold rather than update it, and to print the floor beside the
+measurement, so the line now reads `Preflight: 7940 MB free against a 5120 MB floor` and
+carries the thing that could be wrong on its face. **Two copies of a threshold is one
+threshold and one lie about it.**
+
+**The third of these generalises past disk.** Every precondition check has the same shape: it
 establishes a fact at time zero, and everything after it assumes the fact still holds. Free
 space, a free port, available memory, a seeded database, a pinned clock, a reachable service,
 an unexpired credential — each is checked once at the door and then relied on for the whole
