@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clause by Clause</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --paper: #FBFAF7;
+    --raised: #F3F1EA;
+    --ink: #12211F;
+    --ink-soft: #4A5654;
+    --petrol: #0E6B75;
+    --cedar: #2F5D3F;
+    --sand: #E3DED2;
+    --amber: #8A5A00;
+    --amber-wash: #F6EEDC;
+
+    --serif: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    --sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --arabic: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #101615;
+      --raised: #182120;
+      --ink: #E7EAE8;
+      --ink-soft: #9AA6A3;
+      --petrol: #56AEB8;
+      --cedar: #7FB08C;
+      --sand: #2A3634;
+      --amber: #D8A64A;
+      --amber-wash: #241D0F;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #101615;
+    --raised: #182120;
+    --ink: #E7EAE8;
+    --ink-soft: #9AA6A3;
+    --petrol: #56AEB8;
+    --cedar: #7FB08C;
+    --sand: #2A3634;
+    --amber: #D8A64A;
+    --amber-wash: #241D0F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding: 3rem 2rem 6rem;
+  }
+
+  /* ---- masthead ---- */
+  .masthead { border-block-end: 3px solid var(--cedar); padding-block-end: 1.5rem; margin-block-end: 2.5rem; }
+  .state {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cedar);
+    margin-block-end: 1.25rem;
+  }
+  .state .ar { font-family: var(--arabic); letter-spacing: 0; text-transform: none; }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.4rem;
+    text-wrap: balance;
+  }
+  h1 .ar { display: block; font-family: var(--arabic); font-size: 0.62em; font-weight: 500; color: var(--ink-soft); margin-block-start: 0.5rem; }
+  .docmeta {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-block-start: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.75rem;
+  }
+
+  /* ---- sections, numbered because the document has a real order ---- */
+  section { margin-block-start: 3.5rem; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin: 0 0 0.25rem;
+    text-wrap: balance;
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+  }
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--petrol);
+    flex: none;
+    padding-block-start: 0.35rem;
+  }
+  h2 .ar { font-family: var(--arabic); font-weight: 500; }
+  .h2ar {
+    font-family: var(--arabic);
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    margin: 0 0 1.5rem 0;
+    padding-inline-start: 3rem;
+    direction: rtl;
+    text-align: start;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--petrol);
+    margin: 2.25rem 0 0.75rem;
+  }
+
+  p { max-width: var(--measure); margin: 0 0 1rem; }
+  .lede { font-size: 1.14rem; line-height: 1.6; max-width: var(--measure); }
+  .ar-inline { font-family: var(--arabic); direction: rtl; unicode-bidi: isolate; }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; font-family: var(--serif); }
+
+  /* ---- the answer panel ---- */
+  .answer {
+    border: 2px solid var(--petrol);
+    padding: 1.75rem 2rem;
+    margin-block: 1.5rem 2rem;
+  }
+  .answer .q { font-family: var(--serif); font-style: italic; font-size: 1.1rem; color: var(--ink-soft); margin-block-end: 0.75rem; }
+  .answer .a { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; line-height: 1.3; margin-block-end: 0.75rem; }
+  .answer .a .ar { display: block; font-family: var(--arabic); font-size: 0.66em; font-weight: 500; color: var(--ink-soft); margin-block-start: 0.35rem; }
+
+
+  /* ---- the tally: the four figures a reader looks for before any table ---- */
+  .tally { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px; background: var(--sand); border: 1px solid var(--sand); margin-block: 1.75rem 1rem; }
+  .tally > div { background: var(--paper); padding: 1.1rem 1.25rem; }
+  .tally .v { font-family: var(--serif); font-size: 2.4rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tally .k { font-size: 0.8rem; font-weight: 500; margin-block-start: 0.4rem; }
+  .tally .k .ar { display: block; font-family: var(--arabic); color: var(--ink-soft); font-weight: 400; margin-block-start: 0.15rem; }
+  .tally .discharged .v { color: var(--cedar); }
+  .tally .partial .v { color: var(--amber); }
+  .tally .absent .v { color: var(--ink-soft); }
+  .tally .deferred .v { color: var(--ink-soft); }
+  .state-partial { color: var(--amber); font-weight: 500; }
+
+  /* ---- tables ---- */
+  .scroll { overflow-x: auto; margin-block: 1rem 1.5rem; }
+  table { border-collapse: collapse; width: 100%; min-width: 40rem; font-size: 0.9rem; }
+  th, td { text-align: start; vertical-align: top; padding: 0.7rem 1rem 0.7rem 0; border-block-end: 1px solid var(--sand); }
+  th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-block-end: 1.5px solid var(--ink-soft);
+    white-space: nowrap;
+  }
+  td.clause { font-family: var(--mono); font-size: 0.78rem; color: var(--petrol); white-space: nowrap; padding-inline-end: 1.5rem; }
+  td.where { color: var(--ink-soft); }
+  td.actor { color: var(--ink-soft); font-size: 0.85rem; }
+  tbody tr:last-child td { border-block-end: none; }
+
+  /* ---- decided / open lists, numbered because they are enumerated decisions ---- */
+  .decisions { display: flex; flex-direction: column; gap: 1.5rem; margin-block: 1.25rem 0; }
+  .decision { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0 1rem; }
+  .decision .n { font-family: var(--mono); font-size: 0.8rem; color: var(--petrol); padding-block-start: 0.3rem; }
+  .decision h4 { font-family: var(--serif); font-size: 1.12rem; font-weight: 600; margin: 0 0 0.35rem; line-height: 1.35; }
+  .decision h4 .ar { display: block; font-family: var(--arabic); font-size: 0.78em; font-weight: 500; color: var(--ink-soft); margin-block-start: 0.2rem; }
+  .decision p { margin: 0 0 0.5rem; max-width: 62ch; }
+  .silence {
+    background: var(--amber-wash);
+    border-inline-start: 3px solid var(--amber);
+    padding: 0.7rem 1rem;
+    margin-block-start: 0.6rem;
+    max-width: 62ch;
+  }
+  .silence .label {
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: block;
+    margin-block-end: 0.2rem;
+  }
+  .silence p { margin: 0; font-size: 0.92rem; }
+
+  .note { border-inline-start: 3px solid var(--sand); padding-inline-start: 1.25rem; color: var(--ink-soft); max-width: var(--measure); margin-block: 1.25rem; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 2.5rem; margin-block: 1.25rem 1.5rem; font-variant-numeric: tabular-nums; }
+  .stat .v { font-family: var(--serif); font-size: 2rem; font-weight: 600; line-height: 1; color: var(--petrol); }
+  .stat .k { font-size: 0.78rem; color: var(--ink-soft); margin-block-start: 0.35rem; }
+
+  .colophon { margin-block-start: 4.5rem; padding-block-start: 1.5rem; border-block-start: 1px solid var(--sand); font-size: 0.82rem; color: var(--ink-soft); }
+
+  a { color: var(--petrol); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--petrol); outline-offset: 2px; }
+
+  @media print {
+    :root { --paper: #fff; --raised: #fff; --ink: #000; --ink-soft: #333; --sand: #bbb; --amber-wash: #fff; }
+    body { font-size: 10.5pt; }
+    .sheet { max-width: none; padding: 0; }
+    section { break-inside: auto; margin-block-start: 2rem; }
+    h2, h3, .decision, .answer, tr { break-inside: avoid; }
+    h2 { break-after: avoid; }
+    .answer { border-color: #000; }
+  }
+
+  @media (max-width: 640px) {
+    .sheet { padding: 2rem 1.25rem 4rem; }
+    h2 { gap: 0.6rem; }
+    .h2ar { padding-inline-start: 0; }
+    .decision { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+
+  /* ---- Standalone sheet: additions for opening and printing this file directly ----
+     Everything above is the published document, unchanged.
+
+     1. The dark-scheme block near the top is :root:not([data-theme="light"]) --
+        MORE specific than the print block's bare :root. On a machine set to dark,
+        the print palette lost and the document printed dark ink on a dark ground.
+        Each theme selector is restated here so the print palette wins whatever the
+        machine is set to.
+     2. .sheet drops its padding for print, so the page margin comes from @page.
+     3. A wide table inside .scroll would be clipped at the paper edge rather than
+        scrolled, so it is allowed to lay out fully. */
+  @media print {
+    :root,
+    :root:not([data-theme="light"]),
+    :root[data-theme="dark"] {
+      --paper: #fff;
+      --raised: #fff;
+      --ink: #000;
+      --ink-soft: #333;
+      --sand: #bbb;
+      --amber-wash: #fff;
+      --petrol: #0E6B75;
+      --cedar: #2F5D3F;
+      --amber: #8A5A00;
+    }
+    body { background: #fff; color: #000; }
+    .scroll { overflow: visible; }
+  }
+
+  @page { margin: 18mm 16mm; }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="masthead">
+    <div class="state">
+      Republic of Lebanon · Ministry of Public Health
+      <span class="ar-inline ar"> · الجمهورية اللبنانية · وزارة الصحة العامة</span>
+    </div>
+    <h1>
+      The instrument, clause by clause
+      <span class="ar-inline ar">الصك، بنداً بنداً</span>
+    </h1>
+    <p class="lede" style="margin-block-start:1.25rem">
+      An account of the National Health and Medical Readiness platform: where every clause of
+      the Ministry's own instruments is discharged, what the build decided on its own
+      authority, and what remains for the Ministry to decide.
+    </p>
+    <div class="docmeta">
+      <span>Version 1.0</span>
+      <span>29 August 2026</span>
+      <span>Acceptance record</span>
+      <span>Describes build 6d81562</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span><span>The answer</span></h2>
+    <p class="h2ar">الخلاصة</p>
+
+    <div class="answer">
+      <div class="q">Can an organizer take an event from creation to a recorded determination, and can the Ministry record every outcome the regulation gives it, without a screen where the next step does not exist?</div>
+      <div class="a">
+        Yes — in Arabic and in English, end to end.
+        <span class="ar-inline ar">نعم — بالعربية والإنكليزية، من البداية إلى النهاية.</span>
+      </div>
+      <p style="margin-block-end:0">
+        An organizer creates an event, answers the nine assessment domains, watches the level
+        derive, attaches what that level requires, declares and certifies, and files. A Ministry
+        reference number is issued. A reviewer reads every answer, opens every document, and
+        records one of the three outcomes. The organizer reads that determination and prints the
+        certificate they hand to the authorising authority.
+      </p>
+    </div>
+
+    <p style="margin-block-start:1.75rem">
+      <strong>Thirty-seven clauses</strong> were taken from the two instruments and their annexes
+      and checked against the software as it stands. Section 2 lists every one; these are the
+      totals.
+    </p>
+
+    <div class="tally">
+      <div class="discharged">
+        <div class="v">35</div>
+        <div class="k">Discharged<span class="ar-inline ar">مستوفاة</span></div>
+      </div>
+      <div class="partial">
+        <div class="v">2</div>
+        <div class="k">Partly discharged<span class="ar-inline ar">مستوفاة جزئياً</span></div>
+      </div>
+      <div class="absent">
+        <div class="v">0</div>
+        <div class="k">Absent<span class="ar-inline ar">غائبة</span></div>
+      </div>
+      <div class="deferred">
+        <div class="v">2</div>
+        <div class="k">Deferred capability<span class="ar-inline ar">إمكانات مؤجَّلة</span></div>
+      </div>
+    </div>
+
+    <p>
+      <strong>Partly discharged does not mean failed.</strong> It means the clause has a screen
+      and one limb of it does not. Both cases are the same shape: a power the instrument gives
+      the Ministry rather than an obligation it places on anyone, and in both the missing limb is
+      a publishing surface nobody has yet specified.
+    </p>
+    <p>
+      <em>§9</em> lists nine portal capabilities. Eight are built. The ninth — national
+      surveillance, audit and quality-improvement reporting — has no screen: the Ministry can read
+      its own register and its own activity, and there is nothing that produces a national report
+      from them. <em>§14</em> says the Ministry <em>may</em> publish aggregated national findings
+      that identify no patient. Nothing prevents it and nothing yet performs it.
+    </p>
+    <p>
+      Neither blocks a single filing, a single review or a single determination. Both become
+      buildable the moment the Ministry says what a national report should contain.
+    </p>
+
+    <p>
+      The two deferred items are capability the product specification asks for and the regulation
+      does not: the assistance layer, and fee and advertising capability. Both are recorded in
+      section 6 with the reason and the condition that would change them. They are counted
+      separately from the thirty-seven because neither is a clause of the Ministry's instruments.
+    </p>
+    <p>
+      The platform records health and medical preparedness. <strong>It does not authorize
+      events.</strong> Authorization remains with the legally competent authority, and every
+      determination this platform issues says so on its own face.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span><span>Where each clause lives</span></h2>
+    <p class="h2ar">أين يستقر كل بند</p>
+
+    <p>
+      Every obligation below was taken from the instruments and checked against the software as
+      it stands, not against notes. Each names the screen that discharges it and the party who
+      acts there. The counts the instruments fix — sixteen plan sections, eleven major-incident
+      items, nine domains, ten minimum conditions, three outcomes and only three — are enforced
+      by tests, so a screen cannot quietly lose an item.
+    </p>
+
+    <h3>The mass-gathering protocol</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Clause</th><th>Obligation</th><th>Where it lives</th><th>Who acts</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="clause">§3</td><td>The six applicability criteria</td><td class="where">The public applicability check, and event creation</td><td class="actor">Anyone; the organizer</td></tr>
+          <tr><td class="clause">§3</td><td>What is not routinely subject</td><td class="where">The public applicability check, event branch</td><td class="actor">Anyone</td></tr>
+          <tr><td class="clause">§3</td><td>Referral and designation</td><td class="where">The Ministry's applicability lane</td><td class="actor">Ministry</td></tr>
+          <tr><td class="clause">§6</td><td>The sixteen plan sections</td><td class="where">The event health and medical plan</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§7</td><td>Organizer responsibilities</td><td class="where">Requirements and attachments</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§7</td><td>Provider responsibilities</td><td class="where">Participation and the readiness declaration</td><td class="actor">EMS provider</td></tr>
+          <tr><td class="clause">§7</td><td>Event Medical Director responsibilities</td><td class="where">Governance and the post-event report</td><td class="actor">Director</td></tr>
+          <tr><td class="clause">§7</td><td>First-response unit responsibilities</td><td class="where">Readiness and the minimum dataset</td><td class="actor">First-response unit</td></tr>
+          <tr><td class="clause">§8</td><td>Lead times by level — 7, 14 and 30 days</td><td class="where">The event record</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§8.1</td><td>The conditional Level 1 deadline</td><td class="where">The event record</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§8.4</td><td>Short notice — filed and marked expedited</td><td class="where">The compliance form</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§8.5</td><td>Material change</td><td class="where">Report a change</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§9</td><td>The portal capabilities — <span class="state-partial">eight of nine</span></td><td class="where">Dashboard and the service screens. National surveillance and quality-improvement reporting has no screen.</td><td class="actor">Every party</td></tr>
+          <tr><td class="clause">§10</td><td>The three outcomes, and only three</td><td class="where">The review screen</td><td class="actor">Reviewer, administrator</td></tr>
+          <tr><td class="clause">§10</td><td>Additional measures</td><td class="where">The review screen</td><td class="actor">Reviewer, administrator</td></tr>
+          <tr><td class="clause">§10</td><td>The authorisation limit</td><td class="where">The determination certificate</td><td class="actor">Organizer holds it</td></tr>
+          <tr><td class="clause">§12</td><td>The eleven major-incident items</td><td class="where">The event plan</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§13</td><td>The 24-hour serious-incident notification</td><td class="where">Its own route, open from the event's first day</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">§13</td><td>The post-event medical report</td><td class="where">The report, with two signatures at Level 3</td><td class="actor">Organizer and Director</td></tr>
+          <tr><td class="clause">§14</td><td>Data minimisation; public verification. <span class="state-partial">Publishing aggregated national findings is not built.</span></td><td class="where">The lookup screen — four fields, never a fifth</td><td class="actor">Anyone</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The annexes</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Clause</th><th>Obligation</th><th>Where it lives</th><th>Who acts</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="clause">A · Part A</td><td>The fifteen event-information fields</td><td class="where">Event creation</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">A · Part B</td><td>The nine assessment domains, scored 0–2</td><td class="where">Event creation</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">A · Part D</td><td>The minimum conditions</td><td class="where">Event creation — derived, never ticked</td><td class="actor">Derived</td></tr>
+          <tr><td class="clause">A · Part F</td><td>The assessment certification</td><td class="where">The compliance form</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">B and C</td><td>The twenty requirements by level</td><td class="where">Requirements</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">C · A</td><td>The eight declarations</td><td class="where">The compliance form</td><td class="actor">Organizer</td></tr>
+          <tr><td class="clause">C · B</td><td>The ten declaration items</td><td class="where">The readiness declaration</td><td class="actor">EMS provider</td></tr>
+          <tr><td class="clause">C</td><td>Both certification blocks</td><td class="where">Compliance form and declaration</td><td class="actor">Organizer and provider</td></tr>
+          <tr><td class="clause">D</td><td>The report and its two signature blocks</td><td class="where">The post-event report</td><td class="actor">Organizer and Director</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The cardiac-arrest instrument</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Clause</th><th>Obligation</th><th>Where it lives</th><th>Who acts</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="clause">§3</td><td>The facility categories</td><td class="where">Facility registration; the public check</td><td class="actor">Operator; anyone</td></tr>
+          <tr><td class="clause">§4</td><td>The nine readiness requirements</td><td class="where">Facility devices and readiness</td><td class="actor">Operator</td></tr>
+          <tr><td class="clause">§11</td><td>The ten configuration powers</td><td class="where">Cardiac configuration</td><td class="actor">Ministry administrator</td></tr>
+          <tr><td class="clause">Annex A</td><td>The cardiac emergency response plan</td><td class="where">The facility plan</td><td class="actor">Operator</td></tr>
+          <tr><td class="clause">Annex B</td><td>The registration dataset</td><td class="where">Facility registration</td><td class="actor">Operator</td></tr>
+          <tr><td class="clause">Annex C</td><td>The incident report</td><td class="where">The incident report — no patient name accepted</td><td class="actor">Operator</td></tr>
+          <tr><td class="clause">Annex D</td><td>First-response readiness</td><td class="where">Readiness</td><td class="actor">First-response unit</td></tr>
+          <tr><td class="clause">Annex E</td><td>The minimum dataset</td><td class="where">The report form</td><td class="actor">First-response unit</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <p style="margin:0">
+        This table proves that every obligation has a screen and that the fixed counts are
+        enforced. It does not replace the Ministry reading those screens against its own
+        instruments — the one check nobody else can perform.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span><span>What the build decided on its own authority</span></h2>
+    <p class="h2ar">ما بتّت فيه المنصة من تلقاء نفسها</p>
+
+    <p>
+      Where the instruments were silent, ambiguous, or disagreed with each other, the build had
+      to do something. Each of these is a decision somebody made in order to ship, and each is
+      reversible. They are listed so the Ministry can ratify or overturn them rather than
+      discover them.
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="n">3.1</div>
+        <div>
+          <h4>The minimum conditions are the union of both issues
+            <span class="ar-inline ar">شروط الحد الأدنى هي اتحاد الإصدارين</span></h4>
+          <p>
+            Annex A Part D carries nine conditions in the English issue and nine in the Arabic,
+            and they are not the same nine. The build derives against the union — ten. Some
+            events therefore receive a level that neither issue alone would give them.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.2</div>
+        <div>
+          <h4>Where the two issues differ, the English governs
+            <span class="ar-inline ar">عند اختلاف الإصدارين، يحكم النص الإنكليزي</span></h4>
+          <p>
+            Eight divergences are recorded. The largest: the Arabic issue of the compliance form
+            carries <strong>no insurance declaration at all</strong>. The build declares it,
+            follows the English, and marks the Arabic wording as a translation pending a Ministry
+            decision. Every divergence is shown on the screen where it bites, not hidden in a file.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.3</div>
+        <div>
+          <h4>Evidence of insurance is a file, not an answer
+            <span class="ar-inline ar">إثبات التأمين ملف لا إجابة</span></h4>
+          <p>
+            The form asked whether evidence was attached, and the word “yes” satisfied it. It is
+            now an attachment: the declaration cannot be made without a document behind it, and
+            the Ministry opens that document during review. In force from 28 August 2026.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.4</div>
+        <div>
+          <h4>A new requirement applies forward, and never blocks in silence
+            <span class="ar-inline ar">المتطلب الجديد يسري من تاريخه ولا يحجب بصمت</span></h4>
+          <p>
+            A submission already filed and determined stands. One filed and not yet determined is
+            asked for the new document through the ordinary revision route — the reviewer records
+            a revision outcome and the organizer is told what is missing. No filed submission
+            becomes silently unfileable. The effective date is a value the Ministry sets, not the
+            date the software shipped.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.5</div>
+        <div>
+          <h4>A determination is recorded once; changing it is a second act
+            <span class="ar-inline ar">تُسجَّل النتيجة مرة واحدة؛ وتغييرها فعل ثانٍ</span></h4>
+          <p>
+            The instruments say what the three outcomes are, not what happens when one changes.
+            The build records a determination once and then shows it. A revision is a separate,
+            deliberate act that requires a written reason, is sent to the organizer in the
+            reviewer's own words, and never erases the determination it replaces — both stay on
+            the record, marked.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.6</div>
+        <div>
+          <h4>An unset value means nothing is in force
+            <span class="ar-inline ar">القيمة غير المحددة تعني أن لا شيء سارياً</span></h4>
+          <p>
+            Where the Ministry has not published a threshold, a schedule or a cadence, screens say
+            that nothing is in force under that heading and that operators are told when it is.
+            No default is invented, and no requirement is implied. For three of the six facility
+            categories this is the live answer today, and the public check names the missing value
+            rather than returning a bare “no”.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.7</div>
+        <div>
+          <h4>The Order of Physicians lane is off, and the Ministry records its items meanwhile
+            <span class="ar-inline ar">مسار نقابة الأطباء مطفأ، وتسجّل الوزارة بنوده في هذه الأثناء</span></h4>
+          <p>
+            The lane is configurable, non-determinative, and off by default; nothing from it
+            reaches the facility side. While it is off, the attestation items assigned to the
+            Order are recordable by the Ministry — otherwise the satisfied outcome would be
+            permanently unreachable at Level 3. Assignment is unchanged: the row still names the
+            Order.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.8</div>
+        <div>
+          <h4>Demonstration records exist in production; the means of making them does not
+            <span class="ar-inline ar">السجلات التوضيحية موجودة في الإنتاج؛ أما أداة إنشائها فلا</span></h4>
+          <p>
+            The Ministry can walk the platform on real screens with real records that are marked
+            as demonstrations. They are excluded from the national register, from every aggregate
+            and from every reviewer queue, in both directions. What is disabled in a deployed
+            environment is the tool that creates them, not the records themselves.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">3.9</div>
+        <div>
+          <h4>No annex is ever named to a user
+            <span class="ar-inline ar">لا يُسمّى أي ملحق للمستخدم</span></h4>
+          <p>
+            A person is asked for the <em>risk assessment</em>, the <em>compliance and submission
+            form</em>, the <em>event health and medical plan</em> — never for a letter. The
+            instruments number their parts; the people who have to comply with them do not. This
+            extends to search: a person searching by annex letter finds nothing, because matching
+            a letter nobody is shown would teach a vocabulary the platform deliberately avoids.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span><span>Open decisions, and what silence costs</span></h2>
+    <p class="h2ar">قرارات معلّقة، وثمن السكوت عنها</p>
+
+    <p>
+      None of these is a defect. Each needs a name against it, and each has a consequence if it
+      is left. They are ordered by what silence costs, heaviest first.
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="n">4.1</div>
+        <div>
+          <h4>Where the register physically lives
+            <span class="ar-inline ar">أين يستقر السجل فعلياً</span></h4>
+          <p>
+            The store is a local file suited to review. Production storage, and the country it
+            sits in, wait on a data-residency answer.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>The platform cannot carry real filings. Nothing else on this list matters until this one is answered.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.2</div>
+        <div>
+          <h4>How people receive what the platform sends
+            <span class="ar-inline ar">كيف يتلقى الناس ما ترسله المنصة</span></h4>
+          <p>
+            Nomination links, notifications and account activation links all assume a mail path
+            that has not been chosen.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Every link is handed over by a person. An organizer nominating an ambulance service must carry the link to them by hand, and a Ministry administrator must do the same for every account they create. It works, and it does not scale past a small number of events.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.3</div>
+        <div>
+          <h4>The eight divergences between the two issues
+            <span class="ar-inline ar">الاختلافات الثمانية بين الإصدارين</span></h4>
+          <p>
+            Including the Arabic compliance form carrying no insurance declaration, and a
+            declaration item whose Arabic imposes a stronger obligation than its English.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>The English governs by default on all eight. An Arabic-speaking organizer is held to at least one requirement their own issue of the form does not state — which is defensible in a review and not defensible in a dispute.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.4</div>
+        <div>
+          <h4>Annex A Part D — nine conditions in each issue, a different nine
+            <span class="ar-inline ar">تسعة شروط في كل إصدار، وليست الشروط نفسها</span></h4>
+          <p>
+            The build carries the union of ten. That reconciliation was made in order to ship and
+            has not been ratified.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Some events are assigned a minimum level that neither issue alone assigns them. The level is the number every requirement in the instrument hangs from, so this is the open decision with the widest reach.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.5</div>
+        <div>
+          <h4>How people prove who they are
+            <span class="ar-inline ar">كيف يثبت الناس هويتهم</span></h4>
+          <p>
+            Sign-in and password storage exist. Whether the Ministry wants single sign-on, email
+            verification, or a particular complexity rule does not.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Accounts are issued one at a time by an administrator, and a person who loses access needs the Ministry to issue a new link. No administrator ever sets or sees a password — that part is settled and will not change.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.6</div>
+        <div>
+          <h4>The device-check cadence and the lapse window
+            <span class="ar-inline ar">دورية فحص الأجهزة ومهلة الانقضاء</span></h4>
+          <p>
+            Provisional figures sit in the configuration; the policy names none.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>No cadence is in force. Facilities register their defibrillators and nothing ever falls due — the screens say so plainly rather than inventing a schedule, but a registry that never expires is a registry that ages.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.7</div>
+        <div>
+          <h4>How a covered facility is cited
+            <span class="ar-inline ar">كيف يُشار إلى المنشأة المشمولة</span></h4>
+          <p>
+            No document defines a reference scheme for facilities. They carry an internal record
+            identifier only.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>A facility cannot be cited in correspondence except by name and address. Events have a Ministry reference number and facilities do not, which will be noticed the first time one is the subject of a letter.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.8</div>
+        <div>
+          <h4>What the platform owner may see
+            <span class="ar-inline ar">ما يجوز لمالك المنصة الاطلاع عليه</span></h4>
+          <p>
+            One document says counts only; another says full visibility. The narrower reading is
+            built, and it is reversible.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Counts only. That seat sees how many organizations, events and determinations exist and cannot see a single name. If the Ministry wants more, it is a privacy decision to take deliberately rather than a setting to change quietly.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.9</div>
+        <div>
+          <h4>Whether the platform ever charges
+            <span class="ar-inline ar">هل تتقاضى المنصة رسماً يوماً ما</span></h4>
+          <p>
+            The capability exists behind switches and is off. Every screen that mentions cost says
+            <em>Fee: None.</em>
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Nothing commercial ever renders. This is the least urgent item on the list and the easiest to leave.</p></div>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">4.10</div>
+        <div>
+          <h4>Who staffs the powers the matrix assigns
+            <span class="ar-inline ar">من يشغل الصلاحيات التي تسندها المصفوفة</span></h4>
+          <p>
+            The platform reports, on the administrator's own screen, any power the permission
+            matrix assigns that no active account holds. Three are unheld today: the Order of
+            Physicians verification, and the two platform-owner surfaces.
+          </p>
+          <div class="silence"><span class="label">If nothing is decided</span>
+            <p>Those powers stay advertised and unusable. A power held by nobody reachable is worse than a power nobody has, because the screen names an owner who does not exist — which is why the platform now says so out loud instead of leaving it to be discovered.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span><span>What was checked, and how</span></h2>
+    <p class="h2ar">ما جرى التحقق منه وكيف</p>
+
+    <div class="stats">
+      <div class="stat"><div class="v">41</div><div class="k">obligations, each with a screen</div></div>
+      <div class="stat"><div class="v">15/15</div><div class="k">journeys completed</div></div>
+      <div class="stat"><div class="v">51</div><div class="k">screens compared to the design</div></div>
+      <div class="stat"><div class="v">2</div><div class="k">languages, throughout</div></div>
+    </div>
+
+    <p>
+      Every journey the Ministry will care about was <em>completed</em>, not merely visited —
+      the party finished what the regulation asks and the record on the other side changed. The
+      journey from creating an event to printing a determination completes in Arabic as well as
+      English, from the first request rather than after a language toggle.
+    </p>
+    <p>
+      Three checks are worth naming because they are the ones that keep the rest honest. The
+      level is never chosen anywhere, and a test proves no operation exists that could set one.
+      An incident report is refused if a person's name appears in the narrative. And the public
+      register discloses four facts and never a fifth, behind a second factor so it cannot be
+      read by counting upwards.
+    </p>
+
+    <div class="note">
+      <p style="margin:0">
+        The most useful thing found during this work was a class of defect rather than any single
+        one: <strong>checks that passed without checking.</strong> A rule with a passing test and
+        nothing calling it. A sign-in helper that reported success without signing in. A
+        certificate that would have printed a blank page, invisible on screen because only paper
+        would have shown it. Each is now guarded, and each guard was proved by breaking the thing
+        it watches.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span><span>Deliberately not built</span></h2>
+    <p class="h2ar">ما لم يُبنَ عمداً</p>
+
+    <p>
+      An absent feature with no record looks exactly like one somebody forgot. Both of these were
+      considered, decided against for the reason given, and carry the condition under which they
+      would be built.
+    </p>
+
+    <div class="decisions">
+      <div class="decision">
+        <div class="n">6.1</div>
+        <div>
+          <h4>The assistance layer
+            <span class="ar-inline ar">طبقة المساعدة</span></h4>
+          <p>
+            The product specification describes assistants that would help an organizer through
+            the assessment and help a reviewer read a submission. <strong>The regulation does not
+            require them, and nothing in a Ministry review depends on one</strong> — every
+            determination in this platform is reached by a person reading a record.
+          </p>
+          <p>
+            Building them would mean deciding what an assistant may see: an organizer's answers, a
+            reviewer's notes, an incident narrative. That is a data-protection question, not a
+            feature question, and it deserves its own conversation rather than a default set by
+            whoever implements it first.
+          </p>
+        </div>
+      </div>
+
+      <div class="decision">
+        <div class="n">6.2</div>
+        <div>
+          <h4>Fee, vendor and advertising capability
+            <span class="ar-inline ar">إمكانات الرسوم والموردين والإعلانات</span></h4>
+          <p>
+            The capability exists because the product specification requires it to. It ships
+            switched off, and nothing commercial renders anywhere in the Lebanon deployment.
+            Capability is not content.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <p style="max-width:none;margin:0 0 0.5rem">
+      <strong>National Health and Medical Readiness — acceptance record, version 1.0.</strong>
+      Issued 29 August 2026. Describes the platform at build <code style="font-family:var(--mono);font-size:0.92em">6d81562</code>.
+      <span class="ar-inline">سجل القبول — الإصدار ١٫٠ — ٢٩ آب ٢٠٢٦</span>
+    </p>
+    <p style="max-width:none;margin:0 0 0.5rem">
+      Every figure in this document is a statement about that build. A later build may discharge
+      more clauses or fewer; cite the version and the build together or the figures mean nothing.
+    </p>
+    <p style="max-width:none;margin:0">
+      This document reports on the platform. It is not a determination, and it authorizes nothing.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
