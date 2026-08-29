@@ -371,6 +371,10 @@ The wiring guard was **defeated by an input it should have ignored** — a sente
 docstring in an unrelated file. The disk guard was **measuring a quantity unrelated to what
 it claimed to measure** — the residue of a run instead of its appetite.
 
+Neither was missing. Neither was wrong in its logic. Both ran, both passed, and both were
+answering a different question from the one they were written for. That is the whole family
+in two sentences.
+
 The corrected disk guard then made the point a third time, on this report's own final
 verification run. The run began with 5.8 GB free — comfortably over the measured floor — and
 the guard passed. Two hours later the app project had spent it: free space fell to 1.4 GB,
@@ -378,16 +382,22 @@ the guard passed. Two hours later the app project had spent it: free space fell 
 sequence slowed from seconds to minutes. Seven ended in navigation timeouts. Re-run alone
 with headroom, the same forty-eight tests passed in under three minutes. Not one of those
 seven failures used the word *disk*: they arrive as timeouts, and a timeout is read as a
-defect in whatever screen happened to be under the cursor. A guard that measures at the door
-cannot see a cost paid over the following hour.
+defect in whatever screen happened to be under the cursor.
 
-Neither was missing. Neither was wrong in its logic. Both ran, both passed, and both were
-answering a different question from the one they were written for. That is the whole
-family in two sentences, and it is why the closing instruction of this report is not *add
-more guards* but:
+**And that third one generalises past disk.** Every precondition check has the same shape: it
+establishes a fact at time zero, and everything after it assumes the fact still holds. Free
+space, a free port, available memory, a seeded database, a pinned clock, a reachable service,
+an unexpired credential — each is checked once at the door and then relied on for the whole
+run, and each can stop being true while the run is still using it. When one does, the failure
+surfaces wherever the work happened to be, wearing that screen's name. The next check to fail
+this way will not be about disk, and it will not announce itself either. So a check worth
+having says not only *is this true now* but *for how long, and what does it look like when it
+stops* — and the run either re-checks it or reports it by name when it goes.
 
 > **Ask of every check: what would have to be true for this to pass while the thing it
 > protects is broken?** If that question has an easy answer, the check is not yet a check.
+> And ask it a second time in the future tense: *what would have to become true, after this
+> passes, for the run to proceed on a fact that is no longer so?*
 
 ---
 
