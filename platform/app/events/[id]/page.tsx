@@ -53,6 +53,85 @@ const upLabel: React.CSSProperties = {
 };
 
 /**
+ * The four routes off the event record.
+ *
+ * They were a wrapping flex row, which put three pills on one line at three
+ * different widths and the fourth alone on the next, with two reason captions
+ * hanging under two of them and nothing lining up with anything. A grid gives
+ * one column per action: the pills come out the same width, they sit on a
+ * shared baseline, and every caption starts on the same line.
+ *
+ * ONE pill style, used by the plain link and by BOTH branches of GatedAction.
+ * It was three inline copies and they had already drifted -- the disabled
+ * button carried neither the colour nor the centring the two links had.
+ */
+const actionGrid: React.CSSProperties = {
+  display: 'grid',
+  /**
+   * 376px is measured, not chosen: the longest label, "Open requirements and
+   * attachments", sets 331px of text and the pill adds 44px of padding. Below
+   * that the label wraps to two lines and the row stops looking aligned, which
+   * is what a narrower column produced on the first attempt.
+   */
+  /**
+   * min(376px, 100%), not 376px: a bare minimum track is a FLOOR the grid will
+   * not go below, so on a 335px phone the row overflowed its own panel by 41px
+   * and the page scrolled sideways. Wrapping it in min() lets the track collapse
+   * to the container when the container is the smaller of the two.
+   */
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(376px, 100%), 1fr))',
+  gap: '14px 12px',
+  alignItems: 'start',
+  /**
+   * Its own full-width row under the counters. Sharing the row left 731px, which
+   * fits one 376px column and wastes the rest; the full width fits two.
+   */
+  flexBasis: '100%',
+  // Basis alone left the row at its content width inside a wider panel; grow
+  // makes it actually take the row it was given.
+  flexGrow: 1,
+};
+
+const actionCell: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 6,
+  alignItems: 'stretch',
+};
+
+const actionPill: React.CSSProperties = {
+  // A FLOOR, not a fixed height: the Arabic issue of a label is not the English
+  // one's length, and a fixed 44px clips the second line rather than growing.
+  minHeight: 44,
+  paddingBlock: 8,
+  paddingInline: 22,
+  border: '1px solid var(--line)',
+  background: 'var(--bg)',
+  borderRadius: 22,
+  fontSize: '14.5px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'var(--ink)',
+  width: '100%',
+};
+
+/**
+ * Disabled is NOT the same pill in a grid cell. Non-negotiable 10 turns on a
+ * reader telling "will become available" from "live" at a glance, and the old
+ * disabled button got that distinction from the browser's default disabled
+ * grey -- which the shared style would have overwritten with --ink, leaving a
+ * dead control that looks live. Muted is stated here rather than inherited.
+ */
+const actionPillDisabled: React.CSSProperties = { ...actionPill, color: 'var(--muted)' };
+
+const actionReason: React.CSSProperties = {
+  fontSize: 12,
+  lineHeight: 1.5,
+  color: 'var(--muted)',
+};
+
+/**
  * A gated action row. Two behaviours, distinguishable at a glance:
  * enabled renders as a live control; disabled renders greyed WITH its reason beside it.
  * The third behaviour, absent, never reaches this component -- absent means no row.
@@ -71,26 +150,21 @@ function GatedAction({
   if (gate.behaviour === 'absent') return null;
   if (gate.behaviour === 'enabled') {
     return (
-      <Link
-        href={href}
-        style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
-      >
-        <L en={en} ar={ar} />
-      </Link>
+      <span style={actionCell}>
+        <Link href={href} style={actionPill}>
+          <L en={en} ar={ar} />
+        </Link>
+      </span>
     );
   }
   const reasonEn = gate.reasonKey ? messageFor(enMessages, gate.reasonKey, gate.params) : '';
   const reasonAr = gate.reasonKey ? messageFor(arMessages, gate.reasonKey, gate.params) : '';
   return (
-    <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 5, alignItems: 'start' }}>
-      <button
-        type="button"
-        disabled
-        style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px' }}
-      >
+    <span style={actionCell}>
+      <button type="button" disabled style={actionPillDisabled}>
         <L en={en} ar={ar} />
       </button>
-      <span style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--muted)', maxWidth: 210 }}>
+      <span style={actionReason}>
         <L en={reasonEn} ar={reasonAr} />
       </span>
     </span>
@@ -547,10 +621,12 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'start' }}>
-            <Link href={`/events/${event.id}/requirements`} style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
-              <L en="Open requirements and attachments" ar="فتح المتطلبات والمرفقات" />
-            </Link>
+          <div style={actionGrid}>
+            <span style={actionCell}>
+              <Link href={`/events/${event.id}/requirements`} style={actionPill}>
+                <L en="Open requirements and attachments" ar="فتح المتطلبات والمرفقات" />
+              </Link>
+            </span>
             <GatedAction
               gate={materialChangeGate(gateCtx)}
               href={`/events/${event.id}/change`}
