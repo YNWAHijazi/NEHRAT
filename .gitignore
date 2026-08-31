@@ -12,3 +12,4 @@ playwright-report/
 platform/e2e/output/
 var/
 next-env.d.ts
+.next-probe/
