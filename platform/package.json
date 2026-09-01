@@ -20,12 +20,13 @@
     "dev:e2e": "rm -f var/e2e.db* && next dev",
     "preflight": "node scripts/preflight.mjs",
     "db:reseed": "npx tsx scripts/reseed-dev.ts",
-    "demo:bootstrap": "npx tsx scripts/bootstrap-demonstration.ts"
+    "demo:bootstrap": "tsx scripts/bootstrap-demonstration.ts"
   },
   "dependencies": {
     "next": "^15.5.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "tsx": "^4.23.13"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
