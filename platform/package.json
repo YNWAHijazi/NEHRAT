@@ -19,7 +19,8 @@
     "e2e:install": "playwright install chromium",
     "dev:e2e": "rm -f var/e2e.db* && next dev",
     "preflight": "node scripts/preflight.mjs",
-    "db:reseed": "npx tsx scripts/reseed-dev.ts"
+    "db:reseed": "npx tsx scripts/reseed-dev.ts",
+    "demo:bootstrap": "npx tsx scripts/bootstrap-demonstration.ts"
   },
   "dependencies": {
     "next": "^15.5.0",

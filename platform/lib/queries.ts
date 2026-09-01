@@ -2600,3 +2600,23 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     })),
   };
 }
+
+/**
+ * Whether this instance holds demonstration accounts.
+ *
+ * The sign-in panel used to be gated on NODE_ENV, borrowing the guard that forces the
+ * SEEDER off in a deployed environment. The two are different questions. Non-negotiable 8
+ * is explicit: demonstration accounts DO exist in production so the Ministry can walk the
+ * platform; what is forced off is the seeder. Keying the panel to the environment meant a
+ * deployed instance provisioned with those accounts offered no way to reach them, and an
+ * instance with none still promised them locally.
+ *
+ * So the panel asks the record instead. Accounts present, panel shown. None, no panel,
+ * and nothing to explain.
+ */
+export function demonstrationAccountsExist(): boolean {
+  const row = getDb()
+    .prepare(`SELECT COUNT(*) AS n FROM accounts WHERE is_demo = 1`)
+    .get() as { n: number } | undefined;
+  return (row?.n ?? 0) > 0;
+}

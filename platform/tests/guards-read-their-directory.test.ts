@@ -55,6 +55,8 @@ const NAMED_INPUTS_ALLOWED: Record<string, string> = {
     'Pins a specific snapshot against the specific prototype files it was extracted from. Naming them IS the check -- a drift guard that swept a directory would not know which file each pin belongs to.',
   'guards-read-their-directory.test.ts':
     'This file. It reads the tests directory to find the guards, and names only itself and the drift pin in the allowlist below.',
+  'bootstrap-demonstration.test.ts':
+    'Holds one command and the two files its safety depends on -- the seeder it must agree with, and the passwordless sign-in action that must read is_demo off the record. Four named files, not a class of files: sweeping a directory would find files that have nothing to do with the contract and miss none that do.',
 };
 
 describe('a guard reads its directory rather than naming its inputs', () => {

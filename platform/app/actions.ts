@@ -52,6 +52,13 @@ export async function demoSignInAction(formData: FormData): Promise<void> {
   if (!DEMO_LOGINS.has(login)) redirect('/signin?error=unknown');
   const account = findAccountByLogin(login);
   if (!account) redirect('/signin?error=unknown');
+  // THE RECORD DECIDES, not the list above. This action signs somebody in with no
+  // password, so the only thing standing between it and an authentication bypass is
+  // that the account really is a demonstration account. It used to trust DEMO_LOGINS
+  // alone -- safe only while the panel was hidden outside a review build, which is an
+  // assumption held somewhere else entirely. A real account created with one of those
+  // logins would have been signed into without a credential. Now the row is asked.
+  if (!account.isDemo) redirect('/signin?error=unknown');
   await startSession(account.id);
   // Each role lands on its own surface -- landingRouteFor, the same derivation the
   // credentialed sign-in uses. This used to be an if-chain here and a bare
