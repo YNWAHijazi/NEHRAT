@@ -15,7 +15,7 @@
  * not a gate, and must never be expressed through this module.
  */
 
-import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, type FilingDeadline } from './deadlines';
+import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, startOfBeirutDay, type FilingDeadline } from './deadlines';
 import { REASSESSMENT_WINDOW } from './load';
 import type { Level } from './types';
 
@@ -86,7 +86,16 @@ export function seriousIncidentGate(ctx: EventGateContext): Gate {
   if (ctx.eventStartDate === null) {
     return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentNeedsEventDate' };
   }
-  const start = new Date(`${ctx.eventStartDate}T00:00:00+03:00`);
+  // startOfBeirutDay, NOT a hand-built `+03:00`. Lebanon is +03:00 in summer and
+  // +02:00 in winter, so the literal offset was wrong for half the year -- and at
+  // MIDNIGHT a one-hour error moves the instant to 23:00 the PREVIOUS Beirut day,
+  // opening this gate a calendar day early for every winter event. The other five
+  // hard-coded offsets in the codebase all sit at noon, where an hour cannot change
+  // the date; this was the only one at a boundary. startOfBeirutDay resolves the
+  // offset for the actual instant and refines it, which is why the post-event window
+  // was already correct.
+  const [y, m, d] = ctx.eventStartDate.split('-').map(Number) as [number, number, number];
+  const start = startOfBeirutDay({ year: y, month: m, day: d });
   if (ctx.now.getTime() >= start.getTime()) return ENABLED;
   return {
     behaviour: 'disabled',

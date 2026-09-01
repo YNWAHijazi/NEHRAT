@@ -6,8 +6,24 @@
  */
 
 export function reviewClockOverride(): string | null {
-  if (process.env.NODE_ENV === 'production') return null;
   const pinned = process.env['REVIEW_CLOCK'];
+  if (process.env.NODE_ENV === 'production') {
+    // REFUSE, do not ignore. Ignoring it was quieter than it should be: a deployed
+    // instance with REVIEW_CLOCK set would run on the real clock while whoever set it
+    // believed the platform was pinned, and nothing anywhere would say otherwise.
+    // A pinned clock reaching production is a misconfiguration that silently falsifies
+    // every deadline, every date gate and the post-event window -- so it is a hard
+    // failure, not a warning and not a shrug. Unset is the only correct value here.
+    if (pinned && pinned.trim() !== '') {
+      throw new Error(
+        `REVIEW_CLOCK is set to "${pinned}" in a production build. It pins "today" for ` +
+          `the visual comparison and must never be live where the Ministry works: every ` +
+          `date gate would compute against a frozen date, and nothing would fail. ` +
+          `Unset it (non-negotiable 11).`,
+      );
+    }
+    return null;
+  }
   return pinned && /^\d{4}-\d{2}-\d{2}$/.test(pinned) ? pinned : null;
 }
 
