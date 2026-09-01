@@ -32,7 +32,11 @@ if (process.env['NODE_ENV'] === 'production') {
   process.exit(1);
 }
 
-const DB = process.env['DATABASE_PATH'] ?? 'var/dev.db';
+// `||`, NOT `??`. This script DELETES the database it names, and ?? passes an
+// empty string through -- DATABASE_PATH="" would have made the target an empty
+// path. Found by the sweep in tests/database-path.test.ts, not by anyone reading
+// this line, which is the argument for sweeping.
+const DB = process.env['DATABASE_PATH'] || 'var/dev.db';
 
 interface CarriedAccount {
   login: string;

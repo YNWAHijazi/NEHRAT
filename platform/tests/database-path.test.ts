@@ -27,6 +27,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { filesUnder, read, relative } from './helpers/files';
 
 const ROOT = join(__dirname, '..');
 const DB_SRC = readFileSync(join(ROOT, 'lib/db.ts'), 'utf8');
@@ -35,6 +36,7 @@ const NEXT_CONFIG = readFileSync(join(ROOT, 'next.config.ts'), 'utf8');
 const ORIGINAL = { ...process.env };
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   process.env = { ...ORIGINAL };
   vi.resetModules();
 });
@@ -49,7 +51,7 @@ async function freshGetDb(): Promise<() => unknown> {
 describe('the database path', () => {
   it('refuses the development fallback in production when DATABASE_PATH is unset', async () => {
     delete process.env['DATABASE_PATH'];
-    process.env['NODE_ENV'] = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const getDb = await freshGetDb();
     expect(() => getDb()).toThrow(/DATABASE_PATH is unset/);
   });
@@ -58,14 +60,14 @@ describe('the database path', () => {
     // The `??` bug: an empty string is not nullish, so it would have sailed through
     // as the path. Reachable by adding the variable and leaving the value blank.
     process.env['DATABASE_PATH'] = '';
-    process.env['NODE_ENV'] = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const getDb = await freshGetDb();
     expect(() => getDb()).toThrow(/DATABASE_PATH is unset/);
   });
 
   it('treats a whitespace-only DATABASE_PATH as unset', async () => {
     process.env['DATABASE_PATH'] = '   ';
-    process.env['NODE_ENV'] = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const getDb = await freshGetDb();
     expect(() => getDb()).toThrow(/DATABASE_PATH is unset/);
   });
@@ -74,14 +76,14 @@ describe('the database path', () => {
     // The positive half. Without it the three refusals above are satisfied by a
     // getDb() that throws unconditionally, which would pass every one of them.
     process.env['DATABASE_PATH'] = join(tmpdir(), `nehrat-path-${process.pid}.db`);
-    process.env['NODE_ENV'] = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     const getDb = await freshGetDb();
     expect(() => getDb()).not.toThrow();
   });
 
   it('allows the development fallback outside production', async () => {
     delete process.env['DATABASE_PATH'];
-    process.env['NODE_ENV'] = 'development';
+    vi.stubEnv('NODE_ENV', 'development');
     const getDb = await freshGetDb();
     expect(() => getDb()).not.toThrow();
   });
@@ -108,12 +110,42 @@ describe('the database path', () => {
 });
 
 describe('environment variables read with the right operator', () => {
-  it('neither the database path nor the build directory uses ??', () => {
-    // `??` passes an empty string through. Both of these are set from a hosting
-    // dashboard, where a blank value field is one tab away.
-    expect(DB_SRC).not.toMatch(/process\.env\['DATABASE_PATH'\]\s*\?\?/);
-    expect(NEXT_CONFIG).not.toMatch(/process\.env\['NEXT_DIST_DIR'\]\s*\?\?/);
+  it('NO file reads an environment variable with ??', () => {
+    // SWEPT, NOT NAMED. This started as two named files -- lib/db.ts and
+    // next.config.ts -- and the guard that checks guards refused it: naming inputs
+    // creates a blind spot that grows silently as files are added, and the allowlist
+    // is capped so exemptions cannot be bought indefinitely. It was right. "An
+    // environment variable read with ??" is a CLASS of files, not two of them.
+    //
+    // The defect: `??` catches undefined but not an empty string, and a variable added
+    // through a hosting dashboard with the value field left blank IS an empty string.
+    // It then sails through as if it were a real value.
+    const sources = [
+      ...filesUnder('lib', ['.ts']),
+      ...filesUnder('app', ['.ts', '.tsx']),
+      ...filesUnder('scripts', ['.ts', '.mjs']),
+      join(ROOT, 'next.config.ts'),
+    ];
+    expect(sources.length, 'the sweep found no files').toBeGreaterThan(50);
+
+    const offenders: string[] = [];
+    for (const file of sources) {
+      for (const line of read(file).split('\n')) {
+        if (/process\.env\[[^\]]+\]\s*\?\?/.test(line)) offenders.push(`${relative(file)}: ${line.trim()}`);
+      }
+    }
+    expect(
+      offenders,
+      'These read an environment variable with ??, which passes an empty string ' +
+        'through as if it were a value. Use || so a blank dashboard field falls back.',
+    ).toEqual([]);
+  });
+
+  it('and the ones that matter use || (this check is wired to real data)', () => {
+    // The positive half: the sweep above is satisfied by a codebase that reads no
+    // environment variables at all.
     expect(NEXT_CONFIG).toMatch(/process\.env\['NEXT_DIST_DIR'\]\s*\|\|/);
+    expect(DB_SRC).toMatch(/process\.env\['DATABASE_PATH'\]\?\.trim\(\)/);
   });
 
   it('the build emits a standalone bundle, and keeps its own dist directory', () => {
