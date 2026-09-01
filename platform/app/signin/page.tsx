@@ -78,19 +78,12 @@ const DEMO_LOGINS: DemoLogin[] = [
   },
   {
     login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة', primary: true,
-    canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries.',
-    canAr: 'تسجيل أي من النتائج الثلاث، والإسناد، واشتراط تدابير إضافية، والرد على الاستفسارات.',
+    canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries., schedule inspections and record findings.',
+    canAr: 'تسجيل أي من النتائج الثلاث، والإسناد، واشتراط تدابير إضافية، والرد على الاستفسارات، وجدولة التفتيش وتسجيل نتائجه.',
     cannotEn: 'Change configuration or manage users.',
     cannotAr: 'تغيير الإعدادات أو إدارة المستخدمين.',
   },
-  {
-    login: 'test_inspector', en: 'Ministry inspector', ar: 'مفتش الوزارة',
-    canEn: 'Schedule inspections, record findings and corrective actions.',
-    canAr: 'جدولة عمليات التفتيش وتسجيل النتائج والإجراءات التصحيحية.',
-    cannotEn: 'Record any outcome — the control is absent, not disabled.',
-    cannotAr: 'تسجيل أي نتيجة — والأداة غائبة لا معطَّلة.',
-  },
-  {
+    {
     login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة',
     canEn: 'Configure the instrument and the cardiac policy, manage users, record organizations, answer enquiries, assign submissions, require measures and record corrective actions.',
     canAr: 'ضبط الإطار وسياسة توقف القلب، وإدارة المستخدمين، وتثبيت المؤسسات، والرد على الاستفسارات، وإسناد التقديمات، واشتراط التدابير، وتسجيل الإجراءات التصحيحية.',

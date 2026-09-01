@@ -4,7 +4,7 @@
  * Three rules live here and no screen re-implements them:
  *  - the permission matrix: every role against every action, from the data --
  *    asked by every Ministry screen AND every server action. An administrator
- *    cannot record an outcome; an inspector records corrective actions and none
+ *    cannot record an outcome; corrective actions and findings are reviewer acts and none
  *    of the three; the platform owner performs no regulatory action at all.
  *  - the outcome gate: "requirements satisfied" is disabled while any blocking
  *    item is outstanding, each named -- and THE OTHER TWO OUTCOMES STAY
@@ -27,12 +27,12 @@ export type MinistryRole =
   | 'director'
   | 'response'
   | 'reviewer'
-  | 'inspector'
   | 'ministry_admin'
   | 'order'
   | 'platform_owner';
 
 export type MinistryAction =
+  | 'archiveRecord'
   | 'viewMinistry'
   | 'viewQueue'
   | 'viewSubmission'
@@ -162,7 +162,7 @@ export function effectiveCycles(published: {
  * re-deriving the matrix. A POWER HELD BY NOBODY REACHABLE is worse than a power
  * nobody has, because the screen advertises it: the reviewer walked a submission
  * whose satisfied outcome was gated by an inspection, was told inspections are
- * scheduled by a reviewer or an inspector, and found that no account they could
+ * scheduled by a reviewer, and found that no account they could
  * reach held the power. The control existed and the owner named in its own copy did
  * not exist.
  */

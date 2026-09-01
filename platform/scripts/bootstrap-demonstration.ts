@@ -43,7 +43,7 @@ import { hashPassword, checkPasswordPolicy } from '../lib/password';
  * review build. It is covered by tests/demonstration-isolation.test.ts, and it should
  * stay covered.
  *
- * The seeder creates four further accounts -- inspector, first-response unit, platform
+ * The seeder creates three further accounts -- first-response unit, platform
  * owner and the Order lane reviewer -- because the demonstration records reference them
  * and a walkthrough missing them is broken. Those are reachable from the demonstration
  * panel and carry no password, as before. Only the six below get credentials.

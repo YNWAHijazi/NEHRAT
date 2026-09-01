@@ -13,19 +13,19 @@ import { landingRouteFor, usesOrganizerSurface } from '../lib/rules';
 
 const EVERY_ROLE = [
   'organizer', 'ems', 'director', 'response',
-  'reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner',
+  'reviewer', 'ministry_admin', 'order', 'platform_owner',
 ] as const;
 
 describe('the landing route', () => {
   it('never sends a Ministry role to the organizer surface', () => {
-    for (const role of ['reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner']) {
+    for (const role of ['reviewer', 'ministry_admin', 'order', 'platform_owner']) {
       expect(landingRouteFor(role), `${role} must not land on /dashboard`).not.toBe('/dashboard');
       expect(usesOrganizerSurface(role), `${role} must be refused the organizer surface`).toBe(false);
     }
   });
 
-  it('sends the three console roles to the console', () => {
-    for (const role of ['reviewer', 'inspector', 'ministry_admin']) {
+  it('sends the console roles to the console', () => {
+    for (const role of ['reviewer', 'ministry_admin']) {
       expect(landingRouteFor(role)).toBe('/ministry');
     }
   });

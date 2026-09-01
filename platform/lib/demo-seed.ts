@@ -93,7 +93,6 @@ export function seedDemonstration(db: DatabaseSync): void {
   const director = insertAccount.run('test_director', 'Dr N. Salameh', 'NS', 'director').lastInsertRowid as number;
   const response = insertAccount.run('test_response', 'M. Aoun', 'MA', 'response').lastInsertRowid as number;
   insertAccount.run('test_moph', 'L. Nassar', 'LN', 'reviewer');
-  insertAccount.run('test_inspector', 'K. Abou Jaoude', 'KA', 'inspector');
   insertAccount.run('test_moph_admin', 'R. Sfeir', 'RS', 'ministry_admin');
   insertAccount.run('test_owner', 'Platform operations', 'PO', 'platform_owner');
   // Listed on Users and roles; holds no sign-in button. Its access follows the
@@ -688,12 +687,12 @@ export function seedDemonstration(db: DatabaseSync): void {
   insertInspection.run(
     'EV-0362', 'Medical treatment post and deployment verified on site',
     'التحقق ميدانياً من نقطة المعالجة الطبية والانتشار',
-    'K. Abou Jaoude', 'scheduled', d('2026-09-06'), 1, '',
+    'L. Nassar', 'scheduled', d('2026-09-06'), 1, '',
   );
   insertInspection.run(
     'EV-0362', 'Ambulance access and patient-extraction routes walked',
     'معاينة مسارات وصول الإسعاف وإخلاء المرضى سيراً',
-    'K. Abou Jaoude', 'recorded', d('2026-08-01'), 0,
+    'L. Nassar', 'recorded', d('2026-08-01'), 0,
     'Both extraction routes passable. The northern route narrows to 3.1 m at the market arch; noted, no corrective action raised.',
   );
 

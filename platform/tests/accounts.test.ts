@@ -48,7 +48,7 @@ describe('the assignable roles', () => {
     // The console listed four of nine. An organizer, a provider, a Director and a
     // first-response unit could not be seen here at all, let alone suspended.
     expect([...ASSIGNABLE_ROLES].sort()).toEqual(
-      ['director', 'ems', 'inspector', 'ministry_admin', 'order', 'organizer', 'response', 'reviewer'].sort(),
+      ['director', 'ems', 'ministry_admin', 'order', 'organizer', 'response', 'reviewer'].sort(),
     );
     expect(isAssignableRole('platform_owner')).toBe(false);
     expect(isAssignableRole('nonsense')).toBe(false);

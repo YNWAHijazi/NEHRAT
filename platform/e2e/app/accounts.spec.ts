@@ -102,7 +102,7 @@ test.describe('creating an account', () => {
     await form.locator('summary').click();
     await form.locator('input[name="name"]').fill('Activation Walk');
     await form.locator('input[name="email"]').fill(unique('activation.walk'));
-    await form.locator('select[name="role"]').selectOption('inspector');
+    await form.locator('select[name="role"]').selectOption('reviewer');
     await form.locator('button[type="submit"]').click();
     await page.waitForURL(/notice=invited/);
     const link = (await page.locator('[data-region="issued-link"] code').innerText()).trim();

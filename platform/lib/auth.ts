@@ -24,7 +24,6 @@ export interface Account {
     | 'director'
     | 'response'
     | 'reviewer'
-    | 'inspector'
     | 'ministry_admin'
     | 'order'
     | 'platform_owner';

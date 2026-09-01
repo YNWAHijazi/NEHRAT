@@ -43,6 +43,13 @@ export interface EventGateContext {
   now: Date;
   /** Cancellation closes the record; the report is not owed. Defaults to active. */
   lifecycle?: EventLifecycle;
+  /**
+   * Archived records are READ-ONLY (partner review, 2026-09-01): the Ministry
+   * administrator shelves a concluded event, and every action gate resolves ABSENT --
+   * not disabled-with-a-reason, because on an archived record the action never
+   * applies again. The archived band on the record is the stated reason.
+   */
+  archived?: boolean;
 }
 
 function endInstant(eventEndDate: string): Date {
@@ -58,6 +65,7 @@ function endInstant(eventEndDate: string): Date {
  * with its date").
  */
 export function postEventReportGate(ctx: EventGateContext): Gate {
+  if (ctx.archived) return { behaviour: 'absent' };
   // A cancelled event owes no report -- the gate is ABSENT, not merely shut, and the
   // record's cancellation band is the stated reason. Postponement changes nothing
   // here: the original date's obligations stand until a revised filing replaces them.
@@ -82,6 +90,7 @@ export function postEventReportGate(ctx: EventGateContext): Gate {
  * regardless of the post-event report window.
  */
 export function seriousIncidentGate(ctx: EventGateContext): Gate {
+  if (ctx.archived) return { behaviour: 'absent' };
   if (!ctx.filed) return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentBeforeFiling' };
   if (ctx.eventStartDate === null) {
     return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentNeedsEventDate' };
@@ -139,6 +148,7 @@ export function eventStage(input: {
 
 /** Material change: a state gate. Disabled until the submission is filed. */
 export function materialChangeGate(ctx: EventGateContext): Gate {
+  if (ctx.archived) return { behaviour: 'absent' };
   if (ctx.filed) return ENABLED;
   return { behaviour: 'disabled', reasonKey: 'gate.materialChangeBeforeFiling' };
 }
@@ -148,6 +158,7 @@ export function materialChangeGate(ctx: EventGateContext): Gate {
  * row is ABSENT, not greyed. Showing a greyed row implies there could be one.
  */
 export function eventMedicalDirectorGate(ctx: EventGateContext): Gate {
+  if (ctx.archived) return { behaviour: 'absent' };
   if (ctx.finalLevel === 3) return ENABLED;
   return ABSENT;
 }

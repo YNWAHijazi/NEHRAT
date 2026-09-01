@@ -37,7 +37,7 @@ export default async function UsersPage({
   // organizers, providers, directors and first-response units are five different
   // populations with different questions attached to them.
   const segmentOf = (role: string): string =>
-    ['reviewer', 'inspector', 'ministry_admin', 'platform_owner', 'order'].includes(role)
+    ['reviewer', 'ministry_admin', 'platform_owner', 'order'].includes(role)
       ? 'ministry'
       : ['organizer', 'ems', 'director', 'response'].includes(role)
         ? role
@@ -55,7 +55,7 @@ export default async function UsersPage({
   const laneActive = laneConfig ? laneConfig.value === 'on' : orderLaneActive();
   const matrix = permissionMatrix();
   const roleLabels = bilingualMap(MINISTRY_CONTENT.roleLabels);
-  const matrixRoles = ['reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner'];
+  const matrixRoles = ['reviewer', 'ministry_admin', 'order', 'platform_owner'];
 
   // EVERY assignable role, from lib/rules. This console listed four, so an organizer,
   // a provider, a Director and a first-response unit could not be seen here at all.
@@ -327,8 +327,8 @@ export default async function UsersPage({
       </h2>
       <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '84ch' }}>
         <L
-          en="Rendered from the same data the server enforces. An administrator configures and never determines; an inspector records corrective actions and none of the three outcomes; the platform owner performs no regulatory action."
-          ar="تُعرض من البيانات نفسها التي يطبّقها الخادم. فالمسؤول الإداري يُعدّ ولا يبتّ؛ والمفتش يسجّل الإجراءات التصحيحية ولا يسجّل أياً من النتائج الثلاث؛ ومالك المنصة لا يقوم بأي عمل تنظيمي."
+          en="Rendered from the same data the server enforces. A reviewer schedules inspections and records corrective actions alongside the three outcomes; an administrator can do anything a Ministry role can, except act on its own account."
+          ar="تُعرض من البيانات نفسها التي يطبّقها الخادم. فالمراجع يجدول التفتيش ويسجّل الإجراءات التصحيحية إلى جانب النتائج الثلاث؛ والمسؤول الإداري يمكنه ما يمكن لأي دور وزاري، عدا التصرف في حسابه." 
         />
       </p>
       <div style={{ overflowX: 'auto' }}>

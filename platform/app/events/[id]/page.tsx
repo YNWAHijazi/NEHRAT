@@ -361,6 +361,14 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         {/* The lifecycle band beats everything: a cancelled or postponed record says
             so before anything else, with the consequence stated. */}
+        {event.archivedAt !== null ? (
+          <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+            <L
+              en={`Archived by the Ministry on ${event.archivedAt.slice(0, 10)}. This record is read-only; nothing further is owed on it.`}
+              ar={`أُرشف هذا السجل لدى الوزارة في ⁦${event.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+            />
+          </div>
+        ) : null}
         {event.lifecycle === 'cancelled' ? (
           <div data-region="lifecycle-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7 }}>
             <L
@@ -384,7 +392,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
             button. Derived from the SAME blockers the Submit gate names, so the panel
             and the screen it opens can never disagree. The waiting state is the one
             that matters -- amber that is somebody else's move says so. */}
-        {!event.filed && event.lifecycle === 'active' ? (
+        {!event.filed && event.lifecycle === 'active' && event.archivedAt === null ? (
           <Link
             href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
             data-region="next-action"
@@ -686,7 +694,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                 </div>
               ))}
             </div>
-            {event.lifecycle !== 'cancelled' ? (
+            {event.lifecycle !== 'cancelled' && event.archivedAt === null ? (
               <div style={{ marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
                 <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>
                   <L en="Run the assessment again" ar="إعادة إجراء التقييم" />
@@ -701,7 +709,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </>
         ) : null}
 
-        {event.lifecycle !== 'cancelled' ? (
+        {event.lifecycle !== 'cancelled' && event.archivedAt === null ? (
           <div style={{ marginBlockEnd: 28 }}>
             {/* ABSENT once filed, not greyed: after filing, editing the details never
                 applies again -- Report a material change is the instrument's route, and

@@ -53,6 +53,8 @@ export interface EventRow {
   venueFacilityId: string | null;
   /** Cancellation and postponement -- a lifecycle, never a deletion. */
   lifecycle: 'active' | 'cancelled' | 'postponed';
+  /** Set when a Ministry administrator archived the record (read-only thereafter). */
+  archivedAt: string | null;
   lifecycleAt: string | null;
   lifecycleNote: string | null;
   postponedTo: string | null;
@@ -75,6 +77,7 @@ interface EventDbRow {
   lifecycle_at?: string | null;
   lifecycle_note?: string | null;
   postponed_to?: string | null;
+  archived_at?: string | null;
   end_date: string | null;
   moph_reference: string | null;
   filed: number;
@@ -234,6 +237,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     createdAt: row.created_at,
     venueFacilityId: row.venue_facility_id,
     lifecycle: (row.lifecycle ?? 'active') as EventRow['lifecycle'],
+    archivedAt: row.archived_at ?? null,
     lifecycleAt: row.lifecycle_at ? row.lifecycle_at.slice(0, 10) : null,
     lifecycleNote: row.lifecycle_note ?? null,
     postponedTo: row.postponed_to ?? null,
@@ -243,7 +247,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
 const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, moph_reference, filed,
    demo_state_en, demo_state_ar, demo_due, demo_due_label_en, demo_due_label_ar,
    demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id,
-   lifecycle, lifecycle_at, lifecycle_note, postponed_to`;
+   lifecycle, lifecycle_at, lifecycle_note, postponed_to, archived_at`;
 
 function orgRecordedFor(accountId: number): boolean {
   const r = getDb()
@@ -254,8 +258,19 @@ function orgRecordedFor(accountId: number): boolean {
 
 export function eventsFor(accountId: number): EventRow[] {
   const orgRecorded = orgRecordedFor(accountId);
+  // Archived records leave the main dashboard (partner review); they live in the
+  // collapsed Previous requests section, via archivedEventsFor below.
   const rows = getDb()
-    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? ORDER BY created_at DESC`)
+    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? AND archived_at IS NULL ORDER BY created_at DESC`)
+    .all(accountId) as unknown as EventDbRow[];
+  return rows.map((r) => toEventRow(r, orgRecorded));
+}
+
+/** The owner's archived records: read-only rows under "Previous requests". */
+export function archivedEventsFor(accountId: number): EventRow[] {
+  const orgRecorded = orgRecordedFor(accountId);
+  const rows = getDb()
+    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? AND archived_at IS NOT NULL ORDER BY end_date DESC`)
     .all(accountId) as unknown as EventDbRow[];
   return rows.map((r) => toEventRow(r, orgRecorded));
 }
@@ -1988,7 +2003,7 @@ export function ministryUsers(viewerIsDemo: boolean): MinistryUserRow[] {
   const rows = getDb()
     .prepare(
       `SELECT login, display_name, role, is_demo, suspended FROM accounts
-       WHERE role IN ('reviewer','inspector','ministry_admin','order','platform_owner') AND is_demo = ?
+       WHERE role IN ('reviewer','ministry_admin','order','platform_owner') AND is_demo = ?
        ORDER BY role, display_name`,
     )
     .all(demoFlag(viewerIsDemo)) as unknown as { login: string; display_name: string; role: string; is_demo: number; suspended: number }[];
@@ -2137,6 +2152,8 @@ export interface AdminRecordRow {
   outcome: string | null;
   outcomeAt: string | null;
   lifecycle: string;
+  endDate: string | null;
+  archivedAt: string | null;
 }
 
 export interface AdminRecordFilter {
@@ -2172,6 +2189,7 @@ export function adminRecords(viewerIsDemo: boolean, filter: AdminRecordFilter = 
   const rows = getDb()
     .prepare(
       `SELECT e.id, e.name_en, e.name_ar, e.municipalities, e.demo_level, e.start_date,
+              e.end_date, e.archived_at,
               e.filed, e.moph_reference, e.lifecycle,
               COALESCE(o.name_en, '—') AS org_en, COALESCE(o.name_ar, '—') AS org_ar,
               (SELECT s.filed_at FROM submissions s WHERE s.event_id = e.id) AS filed_at,
@@ -2186,7 +2204,8 @@ export function adminRecords(viewerIsDemo: boolean, filter: AdminRecordFilter = 
     )
     .all(...params) as unknown as {
     id: string; name_en: string; name_ar: string; municipalities: string | null;
-    demo_level: number | null; start_date: string | null; filed: number;
+    demo_level: number | null; start_date: string | null; end_date: string | null;
+    archived_at: string | null; filed: number;
     moph_reference: string | null; lifecycle: string; org_en: string; org_ar: string;
     filed_at: string | null; outcome: string | null; outcome_at: string | null;
   }[];
@@ -2198,6 +2217,8 @@ export function adminRecords(viewerIsDemo: boolean, filter: AdminRecordFilter = 
     organizationEn: r.org_en,
     organizationAr: r.org_ar,
     municipalities: r.municipalities ?? '—',
+    endDate: r.end_date,
+    archivedAt: r.archived_at,
     // Recomputed from the assessment where one exists, never trusted from storage.
     level: derivedLevelFor(r.id) ?? r.demo_level,
     startDate: r.start_date,
@@ -2328,8 +2349,8 @@ export function unreachablePowers(viewerIsDemo: boolean): { action: string; en: 
  * the list follows. Suspended accounts are excluded -- an inspection assigned to an
  * account that cannot sign in is an inspection nobody will conduct.
  */
-export function inspectorCandidates(viewerIsDemo: boolean): { displayName: string; role: string }[] {
-  const eligible = ['reviewer', 'inspector', 'ministry_admin', 'order', 'platform_owner'].filter((r) =>
+export function inspectionConductors(viewerIsDemo: boolean): { displayName: string; role: string }[] {
+  const eligible = ['reviewer', 'ministry_admin', 'order', 'platform_owner'].filter((r) =>
     can(r, 'scheduleInspection'),
   );
   if (eligible.length === 0) return [];

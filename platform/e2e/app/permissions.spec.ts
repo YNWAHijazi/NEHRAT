@@ -24,7 +24,6 @@ const LOGINS = {
   director: 'test_director',
   response: 'test_response',
   reviewer: 'test_moph',
-  inspector: 'test_inspector',
   admin: 'test_moph_admin',
 } as const;
 
@@ -60,7 +59,6 @@ test.describe('the organizer surface belongs to the organizer', () => {
   // one without the other leaves the surface reachable by typing the address.
   for (const [name, login] of [
     ['a reviewer', LOGINS.reviewer],
-    ['an inspector', LOGINS.inspector],
     ['a Ministry administrator', LOGINS.admin],
   ] as const) {
     test(`${name} is refused the organizer dashboard`, async ({ page }) => {
@@ -120,18 +118,13 @@ test.describe('Ministry tiers', () => {
     await expectRefusal(page, '/ministry/admin/users', /users and roles|المستخدمون والأدوار/i);
   });
 
-  test('an inspector holds no outcome control and no admin surface', async ({ page }) => {
-    // The inspector reaches the queue and a submission, and the outcome block is
-    // ABSENT there -- not greyed (rule 10). Admin surfaces refuse outright.
-    await signInAs(page, 'test_inspector');
-    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
-    await expectAbsent(page, {
-      absent: '[data-region="outcome"]',
-      anchor: /Inspections|التفتيشات/,
-      because: 'the outcome block is ABSENT for an inspector, not greyed (rule 10)',
-    });
-    await expectRefusal(page, '/ministry/admin/cardiac', /cardiac-arrest configuration|إعدادات الجاهزية/i);
-    await expectRefusal(page, '/platform/activity', /platform activity|نشاط المنصة/i);
+  test('no demonstration sign-in offers the retired inspector role', async ({ page }) => {
+    // The inspector role merged into reviewer (partner review, 2026-09-01). The panel
+    // must not offer it, and the merged reviewer records findings AND outcomes -- both
+    // asserted positively in ministry.spec.ts. Anchor first, absence second.
+    await gotoRidingRestarts(page, '/signin');
+    await expect(page.locator('body')).toContainText(/Ministry reviewer|مراجع/);
+    await expect(page.locator('body')).not.toContainText(/Ministry inspector|مفتش الوزارة/);
   });
 
   test('an organizer cannot reach the review queue', async ({ page }) => {

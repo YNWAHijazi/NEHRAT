@@ -2,7 +2,7 @@
  * The Ministry console's rules (Slice 6).
  *
  * Under test: the permission matrix -- including the rows the Ministry will
- * argue about (an administrator cannot record an outcome; an inspector records
+ * argue about (an administrator cannot record an outcome; corrective actions and
  * corrective actions and none of the three; the platform owner performs no
  * regulatory action); the outcome gate that disables ONLY 'satisfied' while
  * blockers are outstanding; and the provisional cycles yielding to published
@@ -19,7 +19,7 @@ import {
 } from '../lib/rules/ministry';
 
 describe('the permission matrix', () => {
-  it('a reviewer and the administrator record outcomes; an inspector never does', () => {
+  it('a reviewer and the administrator record outcomes; nobody else does', () => {
     // THE RULING CHANGED, twice, and the history is the point of this comment.
     // 2026-08-27: recordOutcome was the reviewer's alone, and the administrator was
     // deliberately excluded. 2026-08-29 reversed it: the master administrator is an
@@ -28,17 +28,18 @@ describe('the permission matrix', () => {
     // records corrective actions and none of the three outcomes.
     expect(can('reviewer', 'recordOutcome')).toBe(true);
     expect(can('ministry_admin', 'recordOutcome')).toBe(true);
-    expect(can('inspector', 'recordOutcome')).toBe(false);
     expect(can('platform_owner', 'recordOutcome')).toBe(false);
     expect(can('order', 'recordOutcome')).toBe(false);
   });
 
-  it('an inspector records corrective actions and schedules inspections, nothing more', () => {
-    expect(can('inspector', 'recordCorrective')).toBe(true);
-    expect(can('inspector', 'scheduleInspection')).toBe(true);
-    expect(can('inspector', 'requireMeasures')).toBe(false);
-    expect(can('inspector', 'recordOrganization')).toBe(false);
-    expect(can('inspector', 'configureCardiac')).toBe(false);
+  it('the inspector role is merged into reviewer: gone from the matrix, powers kept', () => {
+    // Partner review, 2026-09-01: one Ministry role reviews, flags a submission as
+    // needing inspection, self-assigns the visit, and records corrective actions and
+    // findings. The ROLE went; the POWERS stayed, on the reviewer. Anchored both
+    // ways: the role is absent from the matrix, and the reviewer holds what it held.
+    expect(permissionMatrix().some((row) => 'inspector' in row.roles || rolesHolding(row.action.key as Parameters<typeof rolesHolding>[0]).includes('inspector' as never))).toBe(false);
+    expect(can('reviewer', 'recordCorrective')).toBe(true);
+    expect(can('reviewer', 'scheduleInspection')).toBe(true);
   });
 
   it('an administrator holds every Ministry action (reviewer ruling, 2026-08-29)', () => {
@@ -66,11 +67,23 @@ describe('the permission matrix', () => {
     expect(can('ministry_admin', 'manageFlags')).toBe(false);
   });
 
-  it('the platform owner performs no regulatory action at all', () => {
+  it('the platform owner holds the administration tabs, and still never determines', () => {
+    // REVERSES non-negotiable 13's narrow reading, by ruling (partner review,
+    // 2026-09-01): the owner sees the four administration tabs alongside the master
+    // administrator, synced — configuration, activity, users, records. What did NOT
+    // move: the owner records no outcome, no attestation, no corrective action, and
+    // holds no reviewer surface. The exact grant is pinned so a later widening is a
+    // deliberate edit here, not a drift.
     const ownerActions = permissionMatrix()
       .filter((row) => row.roles['platform_owner'])
-      .map((row) => row.action.key);
-    expect(ownerActions).toEqual(['viewPlatformActivity', 'manageFlags']);
+      .map((row) => row.action.key)
+      .sort();
+    expect(ownerActions).toEqual(
+      ['archiveRecord', 'configureCardiac', 'configureMassGathering', 'manageFlags', 'manageUsers', 'viewPlatformActivity', 'viewRegistry'].sort(),
+    );
+    expect(can('platform_owner', 'recordOutcome')).toBe(false);
+    expect(can('platform_owner', 'recordAttestation' as never)).toBe(false);
+    expect(can('platform_owner', 'viewQueue')).toBe(false);
   });
 
   it('the public roles hold no ministry action', () => {
@@ -164,9 +177,10 @@ describe('a power held by nobody reachable', () => {
     // walk: a reviewer holding a submission whose SATISFIED outcome is gated by an
     // inspection could not schedule that inspection. The gate and the control were
     // held by different roles, and the screen named an owner the reviewer could not
-    // reach. Kept with the inspector too.
+    // reach. The inspector role has since merged into reviewer (partner review,
+    // 2026-09-01), which settles the same defect from the other side: the role that
+    // reviews is the role that inspects.
     expect(can('reviewer', 'scheduleInspection')).toBe(true);
-    expect(can('inspector', 'scheduleInspection')).toBe(true);
   });
 
   it('no action in the matrix is held by nobody at all', () => {

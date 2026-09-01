@@ -47,10 +47,18 @@ describe('commercial and AI capability', () => {
       ...filesUnder('app', ['.tsx', '.ts']),
       ...filesUnder('components', ['.tsx', '.ts']),
     ]
-      .filter((f) => /featureEnabled|feature-flags/.test(read(f)))
-      // Master admin is the one screen whose PURPOSE is to report the flag states
-      // (it renders no capability behind them); everything else stays forbidden.
+      .filter((f) => /featureEnabled|feature-flags|effectiveFlag/.test(read(f)))
+      // The ADMINISTRATION surfaces are the exemption, pinned by name: their purpose
+      // is to show and record the switch states (partner review: every flag genuinely
+      // controllable, each with a plain-language line). Administering a switch is not
+      // rendering the capability behind it -- FlagsPanel renders the switch and its
+      // description, setFeatureFlagAction records the decision, and the owner console
+      // and Configuration tab render the shared panel. A FOURTH file consulting a
+      // flag still fails here, which is the guard's whole job.
       .filter((f) => !f.endsWith('app/platform/admin/page.tsx'))
+      .filter((f) => !f.endsWith('components/FlagsPanel.tsx'))
+      .filter((f) => !f.endsWith('app/ministry-actions.ts'))
+      .filter((f) => !f.endsWith('app/ministry/admin/configuration/page.tsx'))
       .map(relative);
     expect(
       offenders,

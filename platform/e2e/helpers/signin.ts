@@ -38,7 +38,6 @@ export const LANDING: Record<string, string> = {
   test_director: '/dashboard',
   test_response: '/first-response/readiness',
   test_moph: '/ministry',
-  test_inspector: '/ministry',
   test_moph_admin: '/ministry',
   test_owner: '/platform/admin',
   test_order: '/ministry/order',

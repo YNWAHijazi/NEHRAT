@@ -39,7 +39,7 @@ export const ASSIGNABLE_ROLES = [
   'director',
   'response',
   'reviewer',
-  'inspector',
+  
   'ministry_admin',
   'order',
 ] as const;

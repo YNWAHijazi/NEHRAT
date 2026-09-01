@@ -1,4 +1,5 @@
 import { AdminTabs } from '../../../../components/AdminTabs';
+import { FlagsPanel } from '../../../../components/FlagsPanel';
 import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -42,6 +43,19 @@ export default async function ConfigurationPage() {
             <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{r.value}</span>
           </div>
         ))}
+      </div>
+
+      <h2 style={{ margin: '32px 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
+        <L en="Capability switches" ar="مفاتيح القدرات" />
+      </h2>
+      <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
+        <L
+          en="Each switch says what turning it on does. They ship off, and nothing commercial renders while they are. The platform owner's console shows the same switches, synced."
+          ar="كل مفتاح يوضح ما الذي يفعله تشغيله. تُشحن مطفأة، ولا يظهر أي محتوى تجاري ما دامت كذلك. وتعرض لوحة مالك المنصة المفاتيح نفسها، متزامنةً."
+        />
+      </p>
+      <div style={{ marginBlockEnd: 32 }}>
+        <FlagsPanel />
       </div>
       <MinistryFooter steps={[
         { href: '/ministry/admin/cardiac', en: 'Cardiac-arrest configuration', ar: 'إعدادات الجاهزية لتوقف القلب', descEn: 'The ten powers and their publishable values.', descAr: 'الصلاحيات العشر وقيمها القابلة للنشر.' },

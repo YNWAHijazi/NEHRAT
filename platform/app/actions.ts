@@ -43,7 +43,6 @@ const DEMO_LOGINS = new Set([
   'test_response',
   'test_moph',
   'test_moph_admin',
-  'test_inspector',
   'test_owner',
 ]);
 
@@ -253,6 +252,18 @@ export interface AssessmentSubmission {
 }
 
 /**
+ * Archived records are read-only (partner review, 2026-09-01). The screens hide every
+ * control; this is the half a crafted request meets. One helper so the refusal cannot
+ * drift between actions -- the same lesson as the database-path fallback.
+ */
+function refuseIfArchived(eventId: string): void {
+  const row = getDb().prepare(`SELECT archived_at FROM events WHERE id = ?`).get(eventId) as
+    | { archived_at: string | null }
+    | undefined;
+  if (row?.archived_at) redirect(`/events/${eventId}?error=archived`);
+}
+
+/**
  * Creates the event and its first assessment version. The level is derived here, by
  * lib/rules, at save -- and recomputed at read. It is never accepted from the client.
  */
@@ -375,6 +386,7 @@ export async function attachDocumentAction(
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const docKey = String(formData.get('docKey') ?? '');
   const file = formData.get('file');
   // WHERE TO COME BACK TO. The same attachment can be made from the requirements
@@ -456,6 +468,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const kind = String(formData.get('kind') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
@@ -615,6 +628,7 @@ export async function reportMaterialChangeAction(eventId: string, formData: Form
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const aspects = formData.getAll('aspect').map(String);
   const description = String(formData.get('description') ?? '').trim();
   const effectiveDate = String(formData.get('effectiveDate') ?? '').trim();
@@ -699,6 +713,7 @@ export async function notifySeriousIncidentAction(eventId: string, formData: For
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const incidentType = String(formData.get('incidentType') ?? '');
   const occurredAt = String(formData.get('occurredAt') ?? '').trim();
   if (!['arrest', 'death', 'major', 'interruption'].includes(incidentType) || occurredAt === '') {
@@ -1080,6 +1095,7 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const token = String(formData.get('token') ?? '');
   const db = getDb();
   const inv = db
@@ -1110,6 +1126,7 @@ export async function removeProviderAction(eventId: string, formData: FormData):
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const token = String(formData.get('token') ?? '');
   const db = getDb();
   const inv = db
@@ -1585,6 +1602,7 @@ export async function cancelEventAction(eventId: string, formData: FormData): Pr
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const reason = String(formData.get('reason') ?? '').trim();
   if (!reason) redirect(`/events/${eventId}/lifecycle?error=reason`);
   const db = getDb();
@@ -1602,6 +1620,7 @@ export async function postponeEventAction(eventId: string, formData: FormData): 
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const reason = String(formData.get('reason') ?? '').trim();
   const newDate = String(formData.get('newDate') ?? '').trim();
   if (!reason) redirect(`/events/${eventId}/lifecycle?error=reason`);
@@ -1624,6 +1643,7 @@ export async function removeAttachmentAction(eventId: string, formData: FormData
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const docKey = String(formData.get('docKey') ?? '');
   const db = getDb();
   const ev = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number };
@@ -1642,6 +1662,7 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   // THE RECORD DECIDES, not the screen that hid the link. Once filed, the submission
   // is the Ministry's copy of these facts and editing them in place would desynchronize
   // the two silently -- Report a material change is the route (Protocol 8.5). The UI
@@ -1673,6 +1694,7 @@ export async function deleteDraftEventAction(eventId: string): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const db = getDb();
   const ev = db.prepare(`SELECT filed, name_en, name_ar, is_demo FROM events WHERE id = ?`).get(eventId) as { filed: number; name_en: string; name_ar: string; is_demo: number };
   if (ev.filed === 1) redirect(`/events/${eventId}`);

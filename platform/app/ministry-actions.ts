@@ -12,8 +12,10 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb } from '../lib/db';
+import { beirutToday } from '../lib/clock';
 import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
 import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
+import { ALL_FLAGS, type FeatureFlag } from '../lib/rules/flags';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import { currentAccount } from '../lib/auth';
 import {
@@ -28,7 +30,7 @@ import {
   type MinistryAction,
   type OutcomeBlocker,
 } from '../lib/rules';
-import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor, inspectorCandidates } from '../lib/queries';
+import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor, inspectionConductors } from '../lib/queries';
 
 async function requireMinistry(action: MinistryAction): Promise<{ id: number; role: string; displayName: string; isDemo: boolean }> {
   const account = await currentAccount();
@@ -426,6 +428,60 @@ export async function publishConfigAction(formData: FormData): Promise<void> {
   redirect('/ministry/admin/cardiac?notice=published');
 }
 
+/**
+ * Archive a concluded event (partner review, 2026-09-01). The record leaves the
+ * owner's main dashboard for the collapsed "Previous requests" section and is
+ * read-only from then on: every action gate resolves absent and every mutating
+ * action refuses on archived_at. Only a CONCLUDED event archives -- one whose end
+ * date has passed on the Beirut clock -- because shelving a live obligation would
+ * hide it, not conclude it.
+ */
+export async function archiveRecordAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('archiveRecord');
+  const eventId = String(formData.get('eventId') ?? '');
+  const row = getDb()
+    .prepare(`SELECT id, end_date, archived_at, is_demo FROM events WHERE id = ?`)
+    .get(eventId) as { id: string; end_date: string | null; archived_at: string | null; is_demo: number } | undefined;
+  // Demonstration scope follows the session, both directions, like every surface.
+  if (!row || (row.is_demo === 1) !== actor.isDemo) redirect('/ministry/admin/records?error=unknown');
+  if (row.archived_at) redirect('/ministry/admin/records?notice=already-archived');
+  if (!row.end_date || row.end_date >= beirutToday()) {
+    redirect('/ministry/admin/records?error=not-concluded');
+  }
+  getDb()
+    .prepare(`UPDATE events SET archived_at = now_stamp(), archived_by = ? WHERE id = ?`)
+    .run(actor.displayName, eventId);
+  revalidatePath('/ministry/admin/records');
+  redirect('/ministry/admin/records?notice=archived');
+}
+
+
+/**
+ * Record a capability-flag decision. Guarded like the Order lane: manageFlags, which
+ * the owner and (via the partner ruling) the master administrator's console reach.
+ * The shipped default in feature-flags.json never changes; the override is the
+ * recorded decision, and effectiveFlag() is the one rule that combines them.
+ */
+export async function setFeatureFlagAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageFlags');
+  const flag = String(formData.get('flag') ?? '');
+  const state = String(formData.get('state') ?? '');
+  if (!ALL_FLAGS.includes(flag as FeatureFlag) || (state !== 'on' && state !== 'off')) {
+    redirect('/platform/admin?error=flag');
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
+       VALUES (?, ?, NULL, ?, now_stamp())
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
+    )
+    .run(`flag:${flag}`, state, actor.displayName);
+  revalidatePath('/platform/admin');
+  revalidatePath('/ministry/admin/configuration');
+  redirect(`/platform/admin?notice=flag`);
+}
+
+
 /** The Order lane switch, on Master admin. Off suspends the Order reviewer's access. */
 export async function setOrderLaneAction(formData: FormData): Promise<void> {
   const actor = await requireMinistry('manageFlags');
@@ -703,7 +759,7 @@ export async function createInspectionAction(eventId: string, formData: FormData
   // an inspection be assigned to somebody who cannot record its findings, which is a
   // scheduled inspection nobody will ever complete.
   const named = String(formData.get('inspector') ?? '').trim();
-  const candidates = inspectorCandidates(ev.is_demo === 1);
+  const candidates = inspectionConductors(ev.is_demo === 1);
   const inspector = candidates.find((c) => c.displayName === named)?.displayName;
   if (!inspector) redirect(`/ministry/submissions/${eventId}?error=inspector`);
 

@@ -87,15 +87,9 @@ test.describe('the outcome gate', () => {
     await expect(revise2).not.toContainText('Attestation pending');
     await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeDisabled();
 
-    // The inspector records the findings -- an inspector act, not an outcome.
-    await signInAs(page, 'test_inspector');
-    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
-    // And has NO attest control anywhere: recording an attestation is the reviewer's.
-    await expectAbsent(page, {
-      absent: '[data-region="attestations"] form',
-      anchor: '[data-region="attestations"]',
-      because: 'recording an attestation is the reviewer\'s alone; an inspector reads the panel',
-    });
+    // The reviewer records the findings -- corrective actions and findings are
+    // reviewer acts since the merge (partner review, 2026-09-01), and still not an
+    // outcome. The submission stays open under the same account.
     const blocking = page.locator('[data-region="inspections"] > div').first();
     await blocking.locator('input[name="findings"]').fill('Treatment post and deployment verified as planned.');
     await blocking.locator('button:has-text("Save")').click();
@@ -278,10 +272,10 @@ test.describe('platform activity stays counts only', () => {
 test.describe('scheduling an inspection', () => {
   test('is a peer control above Require additional measures, with who conducts it', async ({ page }) => {
     // It used to be a disclosure at the foot of the inspection list with three inputs
-    // and no way to say who conducts it -- the inspector was silently whoever clicked
-    // Schedule, so an inspection could only ever be assigned to the person arranging
-    // it, and the findings are recorded against that name.
-    await signInAs(page, 'test_inspector');
+    // and no way to say who conducts it. Since the merge (partner review, 2026-09-01)
+    // the reviewer flags a submission as needing inspection and can self-assign the
+    // visit -- the conductor select is how, and it still names WHO conducts.
+    await signInAs(page, 'test_moph');
     // EV-0301 is test_organizer's and none of its routes are pixel-compared, so the
     // organizer half of this can be walked without disturbing a reference comparison.
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0301');

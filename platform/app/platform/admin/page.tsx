@@ -1,8 +1,9 @@
 import { L } from '../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { FlagsPanel } from '../../../components/FlagsPanel';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { ministryConfig } from '../../../lib/queries';
-import { ALL_FLAGS, featureEnabled, orderLaneActive } from '../../../lib/rules';
+import { orderLaneActive } from '../../../lib/rules';
 import { setOrderLaneAction } from '../../ministry-actions';
 
 /**
@@ -40,23 +41,22 @@ export default async function MasterAdminPage({
         />
       </p>
 
-      <div data-region="flags" style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 860, marginBlockEnd: 32 }}>
-        {ALL_FLAGS.map((flag) => (
-          <div key={flag} style={{ padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{flag}</span>
-            <span style={{ padding: '3px 10px', borderRadius: 999, background: featureEnabled(flag) ? 'var(--brand-soft)' : 'var(--surface2)', color: featureEnabled(flag) ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px', letterSpacing: '.04em' }}>
-              {featureEnabled(flag) ? <L en="ON" ar="مشغّل" /> : <L en="OFF" ar="مطفأ" />}
-            </span>
-          </div>
+      {/* The four administration tabs, granted to the owner by the partner ruling —
+          the same screens the master administrator sees, not copies of them. */}
+      <div data-region="owner-admin-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBlockEnd: 28 }}>
+        {[
+          ['/ministry/admin/configuration', 'Configuration', 'الإعدادات'],
+          ['/ministry/admin/activity', 'Activity', 'النشاط'],
+          ['/ministry/admin/users', 'Users and roles', 'المستخدمون والأدوار'],
+          ['/ministry/admin/records', 'Records', 'السجلات'],
+        ].map(([href, en, ar]) => (
+          <a key={href} href={href} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+            <L en={en!} ar={ar!} />
+          </a>
         ))}
       </div>
-      <p style={{ margin: '0 0 32px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '84ch' }}>
-        <L
-          en="These states are read from the configuration data. The reference console showed them as switches; activating one is a governance decision recorded in that data, and this screen reports it rather than performing it."
-          ar="تُقرأ هذه الحالات من بيانات الإعداد. وقد أظهرتها اللوحة المرجعية كمفاتيح؛ لكن تفعيل إحداها قرار حوكمة يُسجَّل في تلك البيانات، وهذه الشاشة تعرضه ولا تنفّذه."
-        />
-      </p>
-
+      <FlagsPanel />
+      
       <div data-region="order-lane" style={{ padding: '20px 24px', border: `1px solid ${laneActive ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, maxWidth: 860 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 8 }}>
           <span style={{ fontSize: 15, fontWeight: 600 }}>

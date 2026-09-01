@@ -68,6 +68,13 @@ export function getDb(): DatabaseSync {
   // there is deliberately no environment variable that re-enables it in production.
   // BEFORE the seeder: triggers installed afterwards never see the rows it wrote, so
   // every seeded default kept the real clock while the gates ran on the review clock.
+  // THE INSPECTOR ROLE IS MERGED INTO REVIEWER (partner review, 2026-09-01). One
+  // Ministry role reviews, flags a submission as needing inspection, self-assigns the
+  // visit, and records corrective actions and findings. Databases created before the
+  // ruling hold inspector rows under the old CHECK (which also allows 'reviewer', so
+  // this idempotent flip is valid against both schemas).
+  db.exec(`UPDATE accounts SET role = 'reviewer' WHERE role = 'inspector'`);
+
   stampDefaultsOnTheOneClock(db);
   if (process.env.NODE_ENV !== 'production') {
     seedDemonstration(db);
@@ -124,7 +131,7 @@ function migrate(d: DatabaseSync): void {
       password_hash TEXT,
       display_name TEXT NOT NULL,
       initials TEXT NOT NULL DEFAULT '',
-      role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','inspector','ministry_admin','order','platform_owner')),
+      role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','ministry_admin','order','platform_owner')),
       is_demo INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -753,6 +760,16 @@ function migrate(d: DatabaseSync): void {
   // databases, and pre-migration rows (which predate typed notifications) read as
   // the generic 'major' kind rather than crashing every screen that lists them.
   addColumn('serious_incident_notifications', 'incident_type', "incident_type TEXT NOT NULL DEFAULT 'major'");
+  // ARCHIVE (partner review, 2026-09-01): a Ministry administrator can archive a
+  // concluded record. Archived records leave the owner's main dashboard for a
+  // collapsed "Previous requests" section and are read-only inside -- every action
+  // gate resolves absent and every mutating action refuses. Unset = not archived.
+  addColumn('events', 'archived_at', 'archived_at TEXT');
+  addColumn('events', 'archived_by', 'archived_by TEXT');
+  addColumn('venues', 'archived_at', 'archived_at TEXT');
+  addColumn('venues', 'archived_by', 'archived_by TEXT');
+  addColumn('facilities', 'archived_at', 'archived_at TEXT');
+  addColumn('facilities', 'archived_by', 'archived_by TEXT');
   addColumn('serious_incident_notifications', 'occurred_at', "occurred_at TEXT NOT NULL DEFAULT ''");
   addColumn('invitations', 'closed_at', 'closed_at TEXT');
   // Cancellation and postponement (Protocol 8.5 / 9(vii)): a lifecycle on the event,

@@ -4,7 +4,7 @@
  * Why this is a script and not a screen: Ministry roles are not self-registerable.
  * The only account-creation path in the product is nomination (non-negotiable 6) --
  * an EMS provider or Event Medical Director registering against an invitation token.
- * Nothing in the console creates a reviewer, an inspector or an administrator, and
+ * Nothing in the console creates a reviewer or an administrator, and
  * that is deliberate. So a real Ministry account is made out of band, here.
  *
  * This is NOT the demonstration login. `test_moph_admin` already exists, signs in
@@ -72,9 +72,9 @@ export function generatePassword() {
 
 /**
  * Ministry-side roles, which have no other route in: nothing in the console
- * creates a reviewer, an inspector or an administrator.
+ * creates a reviewer or an administrator.
  */
-const MINISTRY_ROLES = ['reviewer', 'inspector', 'ministry_admin', 'platform_owner'];
+const MINISTRY_ROLES = ['reviewer', 'ministry_admin', 'platform_owner'];
 
 /**
  * Counterparty roles, which normally arrive by NOMINATION (non-negotiable 6):

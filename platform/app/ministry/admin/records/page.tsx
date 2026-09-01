@@ -4,6 +4,8 @@ import { L } from '../../../../components/L';
 import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { adminRecords } from '../../../../lib/queries';
+import { archiveRecordAction } from '../../../ministry-actions';
+import { beirutToday } from '../../../../lib/clock';
 import { MINISTRY_CONTENT, bilingualMap } from '../../../../lib/rules';
 
 /**
@@ -118,8 +120,8 @@ export default async function AdminRecordsPage({
         {records.map((r) => {
           const def = outcomes.find((o) => o.key === r.outcome);
           return (
+            <div key={r.id}>
             <Link
-              key={r.id}
               href={`/ministry/admin/records/${r.id}`}
               data-stack=""
               style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${r.filed ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, display: 'grid', gridTemplateColumns: 'minmax(200px,1.5fr) 1fr 1.2fr auto', gap: 18, alignItems: 'center', color: 'var(--ink)' }}
@@ -156,6 +158,24 @@ export default async function AdminRecordsPage({
                 {r.level ?? '—'}
               </div>
             </Link>
+            {/* Archive (partner review): only a CONCLUDED event offers it — ended on
+                the Beirut clock. An archived row says so; a live one shows nothing
+                here (absent, not greyed: archiving a live obligation never applies).
+                Outside the Link: a form inside an anchor is not a control, it is a
+                navigation with a button drawn on it. */}
+            {r.archivedAt ? (
+              <div style={{ padding: '6px 20px 0', fontSize: '12.5px', color: 'var(--muted)' }}>
+                <L en={`Archived ${r.archivedAt.slice(0, 10)} — read-only. It appears under the organizer's previous requests.`} ar={`مؤرشف ⁦${r.archivedAt.slice(0, 10)}⁩ — للقراءة فقط. يظهر ضمن الطلبات السابقة لدى المنظّم.`} />
+              </div>
+            ) : r.endDate && r.endDate < beirutToday() ? (
+              <form action={archiveRecordAction} style={{ padding: '6px 20px 0' }}>
+                <input type="hidden" name="eventId" value={r.id} />
+                <button type="submit" style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                  <L en="Archive — the event has concluded" ar="أرشفة — انتهت الفعالية" />
+                </button>
+              </form>
+            ) : null}
+            </div>
           );
         })}
       </div>

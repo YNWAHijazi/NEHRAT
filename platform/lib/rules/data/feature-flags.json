@@ -1,17 +1,67 @@
 {
-  "$comment": "Capability is not content (SPEC 2c). The product specification requires these capabilities to exist behind flags because the platform is licensed, not bespoke. They ship OFF and nothing commercial renders in the Lebanon tenant. Turning one on is a Ministry/owner decision recorded here as data -- never a code change, never a default.",
-  "flags": {
-    "applicationFees": false,
-    "platformTransactionFees": false,
-    "vendorDirectory": false,
-    "sponsoredListings": false,
-    "advertising": false,
-    "aedPurchaseLinks": false,
-    "aiAedIdentifierCapture": false,
-    "aiUserReadinessAssistant": false,
-    "aiReviewerAssistant": false,
-    "aiPlatformIntelligenceAssistant": false,
-    "aedGeolocationRegistry": false,
-    "aedAutomatedNotifications": false
+ "$comment": "Capability is not content (SPEC 2c). The product specification requires these capabilities to exist behind flags because the platform is licensed, not bespoke. They ship OFF and nothing commercial renders in the Lebanon tenant. Turning one on is a Ministry/owner decision recorded here as data -- never a code change, never a default. `descriptions` are the plain-language lines the console shows beside each switch (partner review: no flag that is off with no explanation and no control).",
+ "flags": {
+  "applicationFees": false,
+  "platformTransactionFees": false,
+  "vendorDirectory": false,
+  "sponsoredListings": false,
+  "advertising": false,
+  "aedPurchaseLinks": false,
+  "aiAedIdentifierCapture": false,
+  "aiUserReadinessAssistant": false,
+  "aiReviewerAssistant": false,
+  "aiPlatformIntelligenceAssistant": false,
+  "aedGeolocationRegistry": false,
+  "aedAutomatedNotifications": false
+ },
+ "descriptions": {
+  "applicationFees": {
+   "en": "Charges organizers a fee to file a submission.",
+   "ar": "يفرض رسماً على المنظّمين عند تقديم الملف."
+  },
+  "platformTransactionFees": {
+   "en": "Adds a platform fee to payments made through the platform.",
+   "ar": "يضيف رسم منصة على المدفوعات التي تمر عبرها."
+  },
+  "vendorDirectory": {
+   "en": "Shows a directory of commercial medical-service vendors.",
+   "ar": "يعرض دليلاً لمزوّدي الخدمات الطبية التجاريين."
+  },
+  "sponsoredListings": {
+   "en": "Lets vendors pay to appear higher in the directory.",
+   "ar": "يتيح للمزوّدين الدفع للظهور في مقدمة الدليل."
+  },
+  "advertising": {
+   "en": "Shows paid advertising on platform screens.",
+   "ar": "يعرض إعلانات مدفوعة على شاشات المنصة."
+  },
+  "aedPurchaseLinks": {
+   "en": "Adds links to buy defibrillators from suppliers.",
+   "ar": "يضيف روابط لشراء أجهزة إزالة الرجفان من الموردين."
+  },
+  "aiAedIdentifierCapture": {
+   "en": "Reads defibrillator details from a photo instead of typed entry.",
+   "ar": "يقرأ بيانات جهاز إزالة الرجفان من صورة بدل الإدخال اليدوي."
+  },
+  "aiUserReadinessAssistant": {
+   "en": "An assistant that helps organizers complete their filings.",
+   "ar": "مساعد يساعد المنظّمين على استكمال ملفاتهم."
+  },
+  "aiReviewerAssistant": {
+   "en": "An assistant that summarises submissions for reviewers.",
+   "ar": "مساعد يلخّص الملفات للمراجعين."
+  },
+  "aiPlatformIntelligenceAssistant": {
+   "en": "An assistant that answers questions over platform-wide data.",
+   "ar": "مساعد يجيب عن أسئلة على بيانات المنصة كلها."
+  },
+  "aedGeolocationRegistry": {
+   "en": "A public map of registered defibrillator locations.",
+   "ar": "خريطة عامة لمواقع أجهزة إزالة الرجفان المسجّلة."
+  },
+  "aedAutomatedNotifications": {
+   "en": "Automatic reminders to facilities about device upkeep.",
+   "ar": "تذكيرات تلقائية للمنشآت بصيانة الأجهزة."
   }
+ }
 }

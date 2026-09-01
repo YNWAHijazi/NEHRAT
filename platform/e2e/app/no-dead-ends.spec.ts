@@ -143,7 +143,6 @@ const WALKS: { login: string; routes: string[] }[] = [
       '/ministry/determinations', '/ministry/order',
     ],
   },
-  { login: 'test_inspector', routes: ['/ministry', '/ministry/submissions/EV-0362', '/ministry/submissions/EV-0455'] },
   { login: 'test_moph_admin', routes: ['/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/submissions/EV-0455', '/ministry/organizations', '/ministry/enquiries', '/ministry/admin/users', '/ministry/admin/cardiac', '/ministry/admin/configuration', '/ministry/admin/registry'] },
   { login: 'test_owner', routes: ['/platform/admin', '/platform/activity'] },
 ];

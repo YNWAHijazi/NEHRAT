@@ -1,5 +1,5 @@
 {
-  "$comment": "The Ministry console. The three outcomes are the ONLY regulatory determinations. A reviewer records them, and so does the master administrator -- the profile that does anything any Ministry role can do, except act on its own account (walkthrough item 6, commit 373f155). This sentence used to end at 'only a reviewer records them' and stayed that way after the matrix changed 630 lines below, so the file contradicted itself and the stale half is the one a reader meets first. Internal workflow states are grey and are not determinations; an inspector records corrective actions and can record none of the three. The facility lane is separate from the event lane and carries no event outcome.",
+  "$comment": "The Ministry console. The three outcomes are the ONLY regulatory determinations. A reviewer records them, and so does the master administrator -- the profile that does anything any Ministry role can do, except act on its own account (walkthrough item 6, commit 373f155). THE INSPECTOR ROLE IS MERGED INTO REVIEWER (partner review, 2026-09-01): one Ministry role reviews, flags a submission as needing inspection, self-assigns the visit, and records corrective actions and findings -- which remain acts that are not determinations. Internal workflow states are grey and are not determinations. The facility lane is separate from the event lane and carries no event outcome.",
   "outcomes": [
     {
       "key": "incomplete",
@@ -142,6 +142,11 @@
       "key": "manageFlags",
       "en": "Master admin — capability flags",
       "ar": "الإدارة العليا — مفاتيح القدرات"
+    },
+    {
+      "key": "archiveRecord",
+      "en": "Archive a concluded record",
+      "ar": "أرشفة سجل منتهٍ"
     }
   ],
   "matrix": {
@@ -164,14 +169,6 @@
       "designateCovered",
       "scheduleInspection"
     ],
-    "inspector": [
-      "viewMinistry",
-      "viewQueue",
-      "viewSubmission",
-      "scheduleInspection",
-      "recordCorrective",
-      "viewFacilityLane"
-    ],
     "ministry_admin": [
       "viewMinistry",
       "viewQueue",
@@ -188,14 +185,20 @@
       "requireMeasures",
       "scheduleInspection",
       "recordOutcome",
-      "recordAttestation"
+      "recordAttestation",
+      "archiveRecord"
     ],
     "order": [
       "orderVerify"
     ],
     "platform_owner": [
       "viewPlatformActivity",
-      "manageFlags"
+      "manageFlags",
+      "viewRegistry",
+      "manageUsers",
+      "configureMassGathering",
+      "configureCardiac",
+      "archiveRecord"
     ]
   },
   "cardiacPowers": [
@@ -385,10 +388,6 @@
       "en": "Reviewer",
       "ar": "مراجع"
     },
-    "inspector": {
-      "en": "Inspector",
-      "ar": "مفتش"
-    },
     "ministry_admin": {
       "en": "Administrator",
       "ar": "مسؤول إداري"
@@ -455,8 +454,8 @@
       "ar": "تُسجَّل النتائج من مراجع في الوزارة. ولا يمكنكم تسجيل نتيجة على هذا الحساب."
     },
     "inspections": {
-      "en": "Inspections are scheduled and their findings recorded by a Ministry reviewer or inspector. You cannot schedule one on this account.",
-      "ar": "يُجدول التفتيش وتُسجَّل نتائجه من مراجع أو مفتش في الوزارة. ولا يمكنكم جدولة تفتيش على هذا الحساب."
+      "en": "Inspections are scheduled and their findings recorded by a Ministry reviewer. You cannot schedule one on this account.",
+      "ar": "يُجدول التفتيش وتُسجَّل نتائجه من مراجع في الوزارة. ولا يمكنكم جدولة تفتيش من هذا الحساب."
     },
     "attestations": {
       "en": "Attestations are recorded by a Ministry reviewer. You cannot attest or record a deficiency on this account.",
@@ -561,8 +560,8 @@
     "blockingAr": "يحجب هذا التفتيش النتيجة المستوفاة حتى تُسجَّل نتائجه الميدانية",
     "submitEn": "Schedule the inspection",
     "submitAr": "جدولة التفتيش",
-    "noCandidatesEn": "No account on this platform holds the power to conduct an inspection, so none can be scheduled. The Ministry issues an inspector account before an inspection can be arranged.",
-    "noCandidatesAr": "لا يملك أي حساب على هذه المنصة صلاحية إجراء تفتيش، فلا يمكن جدولة أي تفتيش. وتُصدر الوزارة حساب مفتش قبل إمكان ترتيب التفتيش.",
+    "noCandidatesEn": "No account on this platform holds the power to conduct an inspection, so none can be scheduled. The Ministry issues a reviewer account before an inspection can be arranged.",
+    "noCandidatesAr": "لا يملك أي حساب على هذه المنصة صلاحية إجراء معاينة، فلا يمكن تحديد موعد لأي منها. تُصدر الوزارة حساب مراجع قبل ترتيب المعاينة.",
     "notifyTitleEn": "An inspection has been scheduled",
     "notifyTitleAr": "جُدول تفتيش",
     "notifyBodyEn": "The Ministry has scheduled an inspection on this submission. An inspection is not a determination and does not decide one.",

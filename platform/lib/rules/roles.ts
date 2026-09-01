@@ -142,7 +142,7 @@ export function usesOrganizerSurface(role: string): boolean {
 export function landingRouteFor(role: string): string {
   if (usesOrganizerSurface(role)) return '/dashboard';
   if (role === 'response') return '/first-response/readiness';
-  if (role === 'reviewer' || role === 'inspector' || role === 'ministry_admin') return '/ministry';
+  if (role === 'reviewer' || role === 'ministry_admin') return '/ministry';
   if (role === 'order') return '/ministry/order';
   // Unchanged from what the demonstration sign-in already did.
   if (role === 'platform_owner') return '/platform/admin';

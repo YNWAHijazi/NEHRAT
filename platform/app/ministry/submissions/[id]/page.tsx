@@ -17,7 +17,7 @@ import {
   derivationForReview,
   assessmentAnswersForReview,
   sharedDocumentsForReview,
-  inspectorCandidates,
+  inspectionConductors,
 } from '../../../../lib/queries';
 import {
   ATTESTATIONS_CONTENT,
@@ -97,7 +97,7 @@ export default async function SubmissionReviewPage({
   const attachments = attachmentsForReview(id);
   const assessment = assessmentAnswersForReview(id);
   const counterpartyDocs = sharedDocumentsForReview(id);
-  const conductors = inspectorCandidates(account.isDemo);
+  const conductors = inspectionConductors(account.isDemo);
   const versions = submissionVersionsFor(id);
   const director = getDb()
     .prepare(
