@@ -84,15 +84,6 @@ export default async function OverviewPage() {
       <h2 style={{ margin: '0 0 8px', fontSize: 26, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en="Services" ar="الخدمات" />
       </h2>
-      <p style={{ margin: '0 0 6px', fontSize: '15.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-        <L en={P.servicesIntroEn} ar={P.servicesIntroAr} />
-      </p>
-      <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', margin: '24px 0 4px' }}>
-        <L en={P.regulatedEn} ar={P.regulatedAr} />
-      </div>
-      <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)' }}>
-        <L en={P.regulatedNoteEn} ar={P.regulatedNoteAr} />
-      </p>
       <div data-region="services" data-wide="" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, marginBlockEnd: 40 }}>
         {P.services.map((s) => (
           <Link
@@ -111,16 +102,6 @@ export default async function OverviewPage() {
             </div>
           </Link>
         ))}
-      </div>
-
-      {/* WHERE THE TWO INSTRUMENTS MEET — the stadium case, stated as ordinary. */}
-      <div data-region="both-instruments" style={{ padding: '24px 28px', border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 40, maxWidth: '84ch' }}>
-        <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-          <L en={P.meetEn} ar={P.meetAr} />
-        </div>
-        <p style={{ margin: 0, fontSize: '15.5px', lineHeight: 1.65 }}>
-          <L en={P.meetBodyEn} ar={P.meetBodyAr} />
-        </p>
       </div>
 
       {/* PUBLIC TOOLS — visually subordinate, and each says no account, no obligation. */}
@@ -155,35 +136,6 @@ export default async function OverviewPage() {
         </Link>
       </div>
 
-      {/* HOW A LEVEL IS DETERMINED — scoped, and ending with what facilities do instead. */}
-      <h2 style={{ margin: '0 0 6px', fontSize: 26, fontWeight: 600, letterSpacing: '-.025em' }}>
-        <L en={P.levelTitleEn} ar={P.levelTitleAr} />
-      </h2>
-      <div style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: '12.5px', marginBlockEnd: 12 }}>
-        <L en={P.levelScopeEn} ar={P.levelScopeAr} />
-      </div>
-      <p style={{ margin: '0 0 12px', fontSize: '15.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
-        <L en={P.levelBodyEn} ar={P.levelBodyAr} />
-      </p>
-      <div data-region="level-bands" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginBlockEnd: 12 }}>
-        {[
-          { n: 1, en: 'Score 0 to 5', ar: 'النتيجة من 0 إلى 5' },
-          { n: 2, en: 'Score 6 to 11', ar: 'النتيجة من 6 إلى 11' },
-          { n: 3, en: 'Score 12 to 18', ar: 'النتيجة من 12 إلى 18' },
-        ].map((b) => (
-          <div key={b.n} style={{ padding: '16px 18px', background: 'var(--surface2)', borderRadius: 12, borderInlineStart: `3px solid var(--l${b.n})` }}>
-            <div style={{ fontSize: 20, fontWeight: 600, color: `var(--l${b.n})` }}>
-              <L en={`Level ${b.n}`} ar={`المستوى ${b.n}`} />
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
-              <L en={b.en} ar={b.ar} />
-            </div>
-          </div>
-        ))}
-      </div>
-      <p style={{ margin: '0 0 44px', fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-        <L en={P.levelFacilityNoteEn} ar={P.levelFacilityNoteAr} />
-      </p>
     </PublicShell>
   );
 }

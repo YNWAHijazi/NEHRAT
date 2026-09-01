@@ -100,11 +100,6 @@
       "k": "vCap",
       "en": "Approved or licensed capacity of 1,000 persons or more",
       "ar": "سعة معتمدة أو مرخصة تبلغ 1,000 شخص أو أكثر"
-    },
-    {
-      "k": "vSport",
-      "en": "The venue is a sports, athletic or aquatic facility",
-      "ar": "الموقع منشأة رياضية أو للألعاب أو مائية"
     }
   ],
   "facilityCategories": [
@@ -235,14 +230,6 @@
       "kindAr": "متطلب",
       "kw": "covered facility category gym school university airport port terminal mall remote designated threshold phased schedule مشمولة فئة منشأة عتبة جدول مرحلي تحديد",
       "go": "applic"
-    },
-    {
-      "en": "Where the two instruments meet",
-      "ar": "حيث يتلاقى الإطاران",
-      "kindEn": "Guidance",
-      "kindAr": "إرشاد",
-      "kw": "both instruments overlap higher governs reference reuse enter once stadium sports venue facility الإطاران الأعلى إحالة إدخال مرة واحدة ملعب",
-      "go": "home"
     }
   ],
   "searchTitleEn": "Search",
@@ -461,5 +448,7 @@
   "categoryAr": "فئة المنشأة",
   "requirementEn": "Requirement",
   "requirementAr": "المتطلب",
-  "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page."
+  "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page.",
+  "venueScopeNoteEn": "This covers sports, athletic and aquatic venues.",
+  "venueScopeNoteAr": "يشمل ذلك المواقع الرياضية والمائية."
 }

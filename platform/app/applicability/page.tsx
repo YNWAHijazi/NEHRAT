@@ -121,7 +121,11 @@ export default async function ApplicabilityPage({
         </form>
       ) : null}
 
-      {/* THE VENUE BRANCH — both conditions, and the sports flag. */}
+      {/* THE VENUE BRANCH — exactly the two conditions the rule takes. The old form
+          showed a third checkbox (the sports scope) under a heading that said "both
+          conditions": the input was collected and DISCARDED — venueApplicability()
+          takes two arguments — so the screen asked a question the answer to which
+          went nowhere. The scope is a note now, not a condition (partner review). */}
       {subject === 'venue' ? (
         <form method="get" data-region="venue-branch">
           <input type="hidden" name="subject" value="venue" />
@@ -131,13 +135,16 @@ export default async function ApplicabilityPage({
           <div style={listBox}>
             {P.venueConditions.map((c, i) => (
               <label key={c.k} style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', gap: 14, alignItems: 'start', cursor: 'pointer' }}>
-                <input type="checkbox" name={i === 0 ? 'hosts' : i === 1 ? 'cap' : 'sport'} value="1" style={{ flex: 'none', width: 18, height: 18, marginBlockStart: 2, accentColor: 'var(--brand)' }} />
+                <input type="checkbox" name={i === 0 ? 'hosts' : 'cap'} value="1" style={{ flex: 'none', width: 18, height: 18, marginBlockStart: 2, accentColor: 'var(--brand)' }} />
                 <span style={{ fontSize: '14.5px', lineHeight: 1.6 }}>
                   <L en={c.en} ar={c.ar} />
                 </span>
               </label>
             ))}
           </div>
+          <p style={{ margin: '10px 0 0', fontSize: '13px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <L en={P.venueScopeNoteEn} ar={P.venueScopeNoteAr} />
+          </p>
           <button type="submit" style={{ marginBlockStart: 16, height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
             <L en="Check" ar="تحقق" />
           </button>
