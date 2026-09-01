@@ -187,7 +187,7 @@ export default async function SignInPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={null} organization={null} unreadCount={0} showBack={false} />
+      <Header account={null} organization={null} unreadCount={0} showBack />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
           <div style={{ padding: 35, background: 'var(--surface2)', borderRadius: 16 }}>

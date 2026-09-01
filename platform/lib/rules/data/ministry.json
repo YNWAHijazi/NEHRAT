@@ -1,5 +1,5 @@
 {
-  "$comment": "The Ministry console. The three outcomes are the ONLY regulatory determinations and only a reviewer records them; internal workflow states are grey and are not determinations; an inspector records corrective actions and can record none of the three. The facility lane is separate from the event lane and carries no event outcome.",
+  "$comment": "The Ministry console. The three outcomes are the ONLY regulatory determinations. A reviewer records them, and so does the master administrator -- the profile that does anything any Ministry role can do, except act on its own account (walkthrough item 6, commit 373f155). This sentence used to end at 'only a reviewer records them' and stayed that way after the matrix changed 630 lines below, so the file contradicted itself and the stale half is the one a reader meets first. Internal workflow states are grey and are not determinations; an inspector records corrective actions and can record none of the three. The facility lane is separate from the event lane and carries no event outcome.",
   "outcomes": [
     {
       "key": "incomplete",

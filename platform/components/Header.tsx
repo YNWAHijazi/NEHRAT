@@ -7,6 +7,7 @@
 
 import Link from 'next/link';
 import { L } from './L';
+import { landingRouteFor } from '../lib/rules';
 import { HeaderMenus, LangToggle } from './HeaderMenus';
 import type { Account, Organization } from '../lib/auth';
 
@@ -30,9 +31,21 @@ export function GovernmentBand() {
   );
 }
 
-function MinistryMark() {
+/**
+ * The mark is a link home, which is what everybody tries first and what
+ * PublicShell has always done. It was inert here, so a signed-out visitor who
+ * reached /signin had no way back to the landing page at all -- no pill, no
+ * clickable name, nothing but the browser's own Back.
+ *
+ * Home is derived, not fixed: landingRouteFor is the same derivation the
+ * credentialed sign-in and the demonstration panel use, so a reviewer lands on
+ * the Ministry console rather than an organizer dashboard they are refused.
+ */
+function MinistryMark({ account }: { account: Account | null }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <Link
+      href={account ? landingRouteFor(account.role) : '/'}
+      style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ink)' }}>
       <span
         style={{
           display: 'grid',
@@ -63,7 +76,7 @@ function MinistryMark() {
           <L en="Event Health Readiness" ar="التأهب الصحي للفعاليات" />
         </span>
       </span>
-    </div>
+    </Link>
   );
 }
 
@@ -101,10 +114,10 @@ export function Header({
           flexWrap: 'wrap',
         }}
       >
-        <MinistryMark />
+        <MinistryMark account={account} />
         {showBack ? (
           <Link
-            href="/dashboard"
+            href={account ? landingRouteFor(account.role) : '/'}
             style={{
               height: 36,
               paddingInline: 15,
@@ -133,7 +146,12 @@ export function Header({
             >
               <path d="M15 5l-7 7 7 7" />
             </svg>
-            <L en="Dashboard" ar="اللوحة" />
+            {account ? (
+              <L en="Dashboard" ar="اللوحة" />
+            ) : (
+              // The same label every public screen uses for this destination.
+              <L en="Overview" ar="نظرة عامة" />
+            )}
           </Link>
         ) : null}
         <div style={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>

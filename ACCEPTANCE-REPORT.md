@@ -365,7 +365,7 @@ And which project is running is read from `process.argv`, because `FullConfig.pr
 lists every *configured* project regardless of `--project`. That was found by probing after
 the first attempt refused an app-only run, not by reading the type.
 
-### What the four of them say together
+### What the five of them say together
 
 The wiring guard was **defeated by an input it should have ignored** — a sentence in a
 docstring in an unrelated file. The disk guard was **measuring a quantity unrelated to what
@@ -402,6 +402,21 @@ the second copy of the threshold rather than update it, and to print the floor b
 measurement, so the line now reads `Preflight: 7940 MB free against a 5120 MB floor` and
 carries the thing that could be wrong on its face. **Two copies of a threshold is one
 threshold and one lie about it.**
+
+A fifth arrived when demonstration accounts were given published passwords for a
+deployed instance, and it is two failures with one shape. `demoSignInAction` starts a
+session with **no credential**. It validated the submitted login against a hard-coded set
+of login strings and never read `is_demo` off the row it then signed in — so a real
+account created with one of those logins would have been signed in without a password.
+Beside it, the sign-in panel that offers those logins was gated on `NODE_ENV`, borrowing
+the guard that forces the *seeder* off to answer a different question: the seeder must not
+run in production, but the accounts belong there (non-negotiable 8).
+
+Neither was reachable while the panel was hidden outside a review build. That is what made
+them invisible, and it is also what made removing the hiding dangerous: the safety of the
+first defect was being held by the second one, in a different file, as a side effect. Both
+now derive from the record — the action asks the row whether it is a demonstration
+account, and the panel appears because such accounts exist.
 
 **The third of these generalises past disk.** Every precondition check has the same shape: it
 establishes a fact at time zero, and everything after it assumes the fact still holds. Free

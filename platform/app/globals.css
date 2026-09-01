@@ -56,6 +56,13 @@ input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
 [data-noprint],[data-no-print],[data-prototype-nav],[data-seq],[data-region="certificate-controls"]{display:none !important}
 body *{visibility:hidden}
 [data-wallcard],[data-wallcard] *,[data-region="certificate"],[data-region="certificate"] *{visibility:visible}
+/* The demonstration band prints. Without this it is visible on screen and absent from
+   the paper -- and the determination certificate, the one document handed to somebody
+   as proof, is exactly what gets printed. The certificate is shifted down to make room;
+   a real session has no band and no shift. */
+html[data-demonstration] [data-demonstration-band],html[data-demonstration] [data-demonstration-band] *{visibility:visible}
+html[data-demonstration] [data-demonstration-band]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;background:#fff !important;color:#000 !important;border-block-end:1.5px solid #000 !important;font-weight:600}
+html[data-demonstration] [data-wallcard],html[data-demonstration] [data-region="certificate"]{inset-block-start:72px}
 [data-wallcard],[data-region="certificate"]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;border:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
 [data-region="certificate"]{--bg:#ffffff;--surface:#ffffff;--surface2:#ffffff;--ink:#000000;--muted:#333333}
 [data-region="certificate"]>div>div{break-inside:avoid}

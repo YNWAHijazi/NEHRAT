@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
+import { currentAccount } from '../lib/auth';
+import { DemonstrationBand } from '../components/DemonstrationBand';
 import { ControlDock } from '../components/ControlDock';
 import './globals.css';
 
@@ -21,6 +23,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const palette = jar.get('palette')?.value === 'cedar' ? 'cedar' : 'petrol';
   const textsizeRaw = jar.get('textsize')?.value;
   const textsize = textsizeRaw === '112' || textsizeRaw === '125' ? textsizeRaw : '100';
+  // The band is a property of the SESSION, not of the route, so it is resolved once here
+  // rather than by each screen remembering to render it. A screen that forgot would be
+  // the one screenshotted.
+  const account = await currentAccount();
+  const demonstration = account?.isDemo === true;
 
   return (
     <html
@@ -29,6 +36,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       data-theme={theme}
       data-palette={palette}
       data-textsize={textsize}
+      {...(demonstration ? { 'data-demonstration': '' } : {})}
       style={textsize === '100' ? undefined : { fontSize: `${textsize}%` }}
     >
       <head>
@@ -40,6 +48,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
       </head>
       <body>
+        {demonstration ? <DemonstrationBand /> : null}
         <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>{children}</div>
         <ControlDock />
       </body>
