@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { DatasetForm } from './DatasetForm';
 import { currentAccount } from '../../../../lib/auth';
 import { unreadCountFor , ministryConfig } from '../../../../lib/queries';
@@ -49,19 +48,6 @@ export default async function DatasetReportPage() {
             )}
           </div>
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/first-response/readiness',
-              en: 'First-response readiness',
-              ar: 'جاهزية الاستجابة الأولية',
-              descEn: 'Equipment, competence, operational readiness, the written procedure.',
-              descAr: 'التجهيزات والكفاءة والجاهزية التشغيلية والإجراء المكتوب.',
-            },
-          ]}
-        />
       </main>
     </>
   );

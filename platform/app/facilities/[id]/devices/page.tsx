@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { DeviceRegistry } from './DeviceRegistry';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { facilityDetail, facilityDevices, facilityPersons, unreadCountFor } from '../../../../lib/queries';
@@ -38,7 +37,7 @@ export default async function DeviceRegistryPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         {notice === 'saved' ? (
           <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
@@ -62,26 +61,6 @@ export default async function DeviceRegistryPage({
           today={beirutToday()}
         />
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/facilities/${facility.id}/plan`,
-              en: 'Cardiac emergency response plan',
-              ar: 'خطة الاستجابة لطوارئ توقف القلب',
-              descEn: 'Its device section derives from this registry.',
-              descAr: 'يُستمد قسم أجهزتها من هذا السجل.',
-            },
-            {
-              href: `/facilities/${facility.id}`,
-              en: 'Facility readiness',
-              ar: 'جاهزية المرفق',
-              descEn: 'The validity ledger and the standing state.',
-              descAr: 'سجل الصلاحية والحالة القائمة.',
-            },
-          ]}
-        />
       </main>
     </>
   );

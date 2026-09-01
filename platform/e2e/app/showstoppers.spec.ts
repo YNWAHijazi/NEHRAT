@@ -31,21 +31,15 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await fill(page, 'Event name (Arabic)', 'أمسية شطرنج مجتمعية');
     await fill(page, 'Start date', '2026-09-10');
     await fill(page, 'End date', '2026-09-10');
-    await fill(page, 'Event type', 'Indoor recreational gathering');
+    await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
     await fill(page, 'Venue, route, or location', 'Municipal hall, Jounieh');
     await fill(page, 'Municipality or municipalities', 'Jounieh');
     await fill(page, 'Opening time', '14:00');
     await fill(page, 'Closing time', '18:00');
     await fill(page, 'Expected participants', '80');
-    await fill(page, 'Expected spectators or attendees', '40');
-    await fill(page, 'Expected staff, performers, contractors, and volunteers', '10');
-    await fill(page, 'Expected maximum simultaneous attendance', '120');
-    // The two venue questions must be ANSWERED: the form no longer answers them on the
-    // organizer's behalf, so an unanswered pair derives nothing (non-negotiable 0).
-    const noPills = page.locator('button[data-yesno="no"]');
-    await expect(noPills).toHaveCount(2);
-    await noPills.nth(0).click();
-    await noPills.nth(1).click();
+    await fill(page, 'Expected spectators', '40');
+    await fill(page, 'Expected staff and volunteers', '10');
+    // The event-type dropdown answered the venue question above.
     // Every domain at score 0: the option button whose marker span reads exactly "0".
     const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
     const count = await zeros.count();

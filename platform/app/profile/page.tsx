@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
-import { SequenceFooter } from '../../components/SequenceFooter';
 import { currentAccount } from '../../lib/auth';
 import { roleProfileFor, unreadCountFor } from '../../lib/queries';
 import { ROLES_CONTENT } from '../../lib/rules';
@@ -73,19 +72,6 @@ export default async function ProfilePage({
             </div>
           ) : null}
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Events you have been named in, and what each one owes.',
-              descAr: 'الفعاليات التي سُمّيتم فيها وما يستحق على كل منها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

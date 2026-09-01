@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { unreadCountFor } from '../../../lib/queries';
-import { ARABIC_ONLY_NOTES, BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS } from '../../../lib/rules';
+import { BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS } from '../../../lib/rules';
 import { AssessmentForm } from './AssessmentForm';
 
 export default async function NewEventPage() {
@@ -16,7 +16,7 @@ export default async function NewEventPage() {
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <AssessmentForm domains={[...DOMAINS]} conditions={[...MINIMUM_CONDITIONS]} bands={[...BANDS]} maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} arabicOnlyNotes={[...ARABIC_ONLY_NOTES]} />
+        <AssessmentForm domains={[...DOMAINS]} conditions={[...MINIMUM_CONDITIONS]} bands={[...BANDS]} maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} />
       </main>
     </>
   );

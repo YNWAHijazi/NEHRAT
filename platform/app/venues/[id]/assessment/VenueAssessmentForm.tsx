@@ -68,7 +68,6 @@ export function VenueAssessmentForm({
       courseDistanceKm: null,
       venueLicensedCapacity: venueFacts.licensedCapacity,
       venueIsNightclubOrDanceVenue: venueFacts.isNightclub,
-      venueRegularlyHostsOrganizedEvents: venueFacts.regularlyHosts,
     }),
     [attendance, venueFacts],
   );

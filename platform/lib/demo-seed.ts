@@ -224,7 +224,6 @@ export function seedDemonstration(db: DatabaseSync): void {
     courseDistanceKm: 12,
     venueLicensedCapacity: null,
     venueIsNightclubOrDanceVenue: false,
-    venueRegularlyHostsOrganizedEvents: false,
   });
   // Derivation is recomputed against lib/rules at read time; the stored copy is a record.
   insertAssessment.run(
@@ -273,7 +272,6 @@ export function seedDemonstration(db: DatabaseSync): void {
     courseDistanceKm: null,
     venueLicensedCapacity: 4500,
     venueIsNightclubOrDanceVenue: false,
-    venueRegularlyHostsOrganizedEvents: true,
   });
   const insertVenueAssessment = db.prepare(
     `INSERT INTO venue_assessments (venue_id, version, answers, inputs, derivation,
@@ -434,7 +432,6 @@ export function seedDemonstration(db: DatabaseSync): void {
       courseDistanceKm: null,
       venueLicensedCapacity: 20000,
       venueIsNightclubOrDanceVenue: false,
-      venueRegularlyHostsOrganizedEvents: true,
     }),
     NEHRAT_TOOL_VERSION,
     d('2026-07-28'),

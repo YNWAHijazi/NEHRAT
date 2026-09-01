@@ -3,10 +3,9 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
 import { StartServiceMenu } from '../../components/StartServiceMenu';
-import { SequenceFooter, type SequenceStep } from '../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
-import { determinationsFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
+import { invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
 import { REASSESSMENT_WINDOW, landingRouteFor, usesOrganizerSurface } from '../../lib/rules';
 import {
@@ -237,19 +236,6 @@ export default async function DashboardPage({
             countEn={`${rows.length} events · ${owed} need a response from you`}
             countAr={`${rows.length} فعالية · ${owed} تحتاج ردّاً منكم`}
           />
-          <SequenceFooter
-            labelEn="Next in the sequence"
-            labelAr="التالي في التسلسل"
-            steps={[
-              {
-                href: '/profile',
-                en: account.role === 'ems' ? 'Agency profile' : 'Physician profile',
-                ar: account.role === 'ems' ? 'ملف الجهة' : 'الملف الطبي',
-                descEn: 'Completed once and reused across every event.',
-                descAr: 'يُستكمل مرة واحدة ويُعاد استخدامه في كل فعالية.',
-              },
-            ]}
-          />
         </main>
       </>
     );
@@ -261,10 +247,6 @@ export default async function DashboardPage({
   const unread = unreadCountFor(account.id);
   const today = beirutToday();
 
-  const returned = events.find(
-    (e) => e.outcome === 'revision' || e.stateEn === 'Information required',
-  );
-  const returnedNote = returned ? (determinationsFor(returned.id)[0]?.note ?? '') : '';
   const empty = events.length === 0 && venues.length === 0 && facilities.length === 0;
 
   return (
@@ -310,28 +292,6 @@ export default async function DashboardPage({
         {notice === 'draft-deleted' ? (
           <div style={{ padding: '18px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
             <L en="The draft was deleted. Nothing had been filed, so nothing is owed by anyone." ar="حُذفت المسودة. لم يكن شيء قد قُدّم، فلا شيء مستحقاً على أحد." />
-          </div>
-        ) : null}
-        {returned ? (
-          <div style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 12, marginBlockEnd: 44 }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Awaiting your response" ar="بانتظار ردكم" />
-            </div>
-            <div style={{ fontSize: 16, lineHeight: 1.6 }}>
-              {/* The Ministry's ACTUAL note, verbatim -- this panel used to hard-code
-                  a demonstration demand regardless of what was recorded. */}
-              {returnedNote ? (
-                <L
-                  en={`${returned.nameEn} — the Ministry's note, as written: “${returnedNote}”${returned.due ? ` Respond by ${returned.due}.` : ''}`}
-                  ar={`${returned.nameAr} — ملاحظة الوزارة كما كُتبت: «${returnedNote}»${returned.due ? ` الرد بحلول \u2066${returned.due}\u2069.` : ''}`}
-                />
-              ) : (
-                <L
-                  en={`${returned.nameEn} — the Ministry requires additional information or revision. Open the record for the details.${returned.due ? ` Respond by ${returned.due}.` : ''}`}
-                  ar={`${returned.nameAr} — تطلب الوزارة معلومات إضافية أو تعديلاً. افتحوا السجل للتفاصيل.${returned.due ? ` الرد بحلول \u2066${returned.due}\u2069.` : ''}`}
-                />
-              )}
-            </div>
           </div>
         ) : null}
 
@@ -386,9 +346,6 @@ export default async function DashboardPage({
               <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
                 <L en="Events" ar="الفعاليات" />
               </h2>
-              <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                <L en="One-off. Each counts down to a filing date." ar="مرة واحدة. كل منها يعدّ تنازلياً حتى تاريخ التقديم." />
-              </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
               {events.map((event) => (
@@ -402,9 +359,6 @@ export default async function DashboardPage({
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
                     <L en="Facilities" ar="المرافق" />
                   </h2>
-                  <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                    <L en="Cardiac-arrest instrument. Obligations continue year to year, tied to no event." ar="إطار الجاهزية لتوقف القلب. موجبات مستمرة سنة بعد سنة وغير مرتبطة بأي فعالية." />
-                  </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 44 }}>
                   {facilities.map((f) => {
@@ -464,9 +418,6 @@ export default async function DashboardPage({
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
                     <L en="Venues" ar="المواقع" />
                   </h2>
-                  <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                    <L en="Recurring. Each holds a dated classification that either stands or lapses." ar="دورية. كل موقع يحمل تصنيفاً مؤرخاً إما أن يبقى قائماً أو ينتهي." />
-                  </span>
                 </div>
                 <div data-stack="" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1.1fr 1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
                   {(
@@ -515,68 +466,8 @@ export default async function DashboardPage({
           </>
         )}
 
-        <SequenceFooter
-          labelEn="Open a record, or start something new"
-          labelAr="افتحوا سجلاً أو ابدأوا شيئاً جديداً"
-          steps={dashboardSteps(events)}
-        />
       </main>
     </>
   );
 }
 
-/** The reference's dashboard footer, driven by the account's actual rows. */
-function dashboardSteps(events: EventRow[]): SequenceStep[] {
-  const steps: SequenceStep[] = [];
-  const first = events.find((e) => !e.filed) ?? events[0];
-  if (first) {
-    steps.push({
-      href: `/events/${first.id}`,
-      en: `Event record — ${first.nameEn}`,
-      ar: `سجل الفعالية — ${first.nameAr}`,
-      descEn: `Level ${first.level ?? '—'}, not yet held. Level, filing date and submission history.`,
-      descAr: `المستوى ${first.level ?? '—'}، لم تُقَم بعد. المستوى وتاريخ التقديم وسجل التقديم.`,
-    });
-  }
-  const postOwed = events.find((e) => e.stateEn === 'Post-event report owed');
-  if (postOwed) {
-    steps.push({
-      href: `/events/${postOwed.id}/post-event`,
-      en: `Post-event report — ${postOwed.nameEn}`,
-      ar: `التقرير اللاحق — ${postOwed.nameAr}`,
-      descEn: 'A held Level 3 event. Due within seven calendar days; this one is overdue.',
-      descAr: 'فعالية مستوى 3 أُقيمت. مستحق خلال سبعة أيام تقويمية، وهذا متأخر.',
-    });
-  }
-  steps.push(
-    {
-      href: '/events/new',
-      en: 'Applicability and assessment',
-      ar: 'الانطباق والتقييم',
-      descEn: 'Nine domains. Produces the final level, which sets everything else.',
-      descAr: 'تسعة مجالات. تُنتج المستوى النهائي الذي يحدد كل ما عداه.',
-    },
-    {
-      href: '/venues/new',
-      en: 'Register a venue',
-      ar: 'تسجيل موقع',
-      descEn: 'Recurring venues licensed for 1,000 or more.',
-      descAr: 'المواقع الدورية المرخّصة لألف شخص أو أكثر.',
-    },
-    {
-      href: '/facilities/new',
-      en: 'Register a facility',
-      ar: 'تسجيل منشأة',
-      descEn: 'The facility, its coordinator and each defibrillator, under cardiac-arrest readiness.',
-      descAr: 'المنشأة ومنسّقها وكل جهاز، ضمن الجاهزية لتوقف القلب.',
-    },
-    {
-      href: '/notifications',
-      en: 'Notifications',
-      ar: 'الإشعارات',
-      descEn: 'Everything sent to you. Each opens the record it concerns.',
-      descAr: 'كل ما أُرسل إليكم. ويفتح كل منها السجل الذي يخصّه.',
-    },
-  );
-  return steps;
-}

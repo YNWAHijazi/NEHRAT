@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
-import { SequenceFooter } from '../../components/SequenceFooter';
 import { currentAccount } from '../../lib/auth';
 import { getDb } from '../../lib/db';
 import { saveCredentialAction } from '../actions';
@@ -80,26 +79,6 @@ export default async function CredentialsPage({
             <L en={content.credNonDeterminative.en} ar={content.credNonDeterminative.ar} />
           </div>
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/profile',
-              en: 'Physician profile',
-              ar: 'الملف الطبي',
-              descEn: 'What the Order verifies against, where the lane is active.',
-              descAr: 'ما تتحقق النقابة على أساسه، حيث يكون المسار مفعّلاً.',
-            },
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Events you have been named in.',
-              descAr: 'الفعاليات التي سُمّيتم فيها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

@@ -212,7 +212,14 @@ describe('every manifest region names something that exists', () => {
    * knowing, because a whole-screen selector is the least specific thing an exception
    * can name. If this list grows, the guard is shrinking.
    */
-  const EXPECTED_UNCHECKABLE = ['ministry-registry.screen -- main'];
+  const EXPECTED_UNCHECKABLE = [
+    // The partner simplification pass made the whole dashboard expected-divergent
+    // (banner, footer and narration removed by ruling); its region is `main`, the
+    // one page-level element, and flips back to data-region compares when the
+    // prototype adopts the ruling.
+    'organizer-dashboard.whole -- main',
+    'ministry-registry.screen -- main',
+  ];
 
   it('knows which regions are computed', () => {
     expect(computedPrefixes.length, 'no computed data-region found -- the matcher is broken').toBeGreaterThan(0);
@@ -236,7 +243,7 @@ describe('every manifest region names something that exists', () => {
     expect(
       literal.length,
       `only ${literal.length} of ${withSelector.length} manifest selectors resolve literally`,
-    ).toBeGreaterThanOrEqual(withSelector.length - 4);
+    ).toBeGreaterThanOrEqual(withSelector.length - EXPECTED_UNCHECKABLE.length - 3);
   });
 
   it('every data-region selector in the manifest is rendered somewhere', () => {

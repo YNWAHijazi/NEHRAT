@@ -32,7 +32,6 @@ const benignInputs: MinimumConditionInputs = {
   courseDistanceKm: null,
   venueLicensedCapacity: 200,
   venueIsNightclubOrDanceVenue: false,
-  venueRegularlyHostsOrganizedEvents: false,
 };
 
 describe('the data itself', () => {
@@ -41,8 +40,14 @@ describe('the data itself', () => {
     for (const d of DOMAINS) expect(d.options).toHaveLength(3);
   });
 
-  it('carries ten minimum conditions', () => {
-    expect(MINIMUM_CONDITIONS).toHaveLength(10);
+  it('carries the nine minimum conditions of the English issue', () => {
+    // Nine, not ten: the earlier build carried the union of the two issues, and the
+    // partner ruling (English governs, 2026-09-01) removed the Arabic issue's
+    // recurring-venue generalization of the nightclub row. The exact difference is
+    // pinned in tests/reference-drift.test.ts (RULINGS).
+    expect(MINIMUM_CONDITIONS).toHaveLength(9);
+    expect(MINIMUM_CONDITIONS.some((c) => c.key === 'recur')).toBe(false);
+    expect(MINIMUM_CONDITIONS.some((c) => c.key === 'club')).toBe(true);
   });
 
   it('bands cover 0 to 18 with no gap and no overlap', () => {
@@ -143,7 +148,6 @@ describe('every minimum condition fires from captured data', () => {
     att2: { expectedMaxSimultaneousAttendance: 15_000 },
     att3: { expectedMaxSimultaneousAttendance: 20_000 },
     club: { venueIsNightclubOrDanceVenue: true, venueLicensedCapacity: 1_000 },
-    recur: { venueRegularlyHostsOrganizedEvents: true, venueLicensedCapacity: 1_000 },
     run: { eventDisciplines: ['running'], courseDistanceKm: 10 },
     run21: { eventDisciplines: ['running'], courseDistanceKm: 21.1 },
     tri: { eventDisciplines: ['triathlon'] },
@@ -152,7 +156,7 @@ describe('every minimum condition fires from captured data', () => {
     motor: { eventDisciplines: ['motor_racing'] },
   };
 
-  it('has a case for all ten', () => {
+  it('has a case for all nine', () => {
     expect(Object.keys(cases).sort()).toEqual(
       MINIMUM_CONDITIONS.map((c) => c.key).sort(),
     );

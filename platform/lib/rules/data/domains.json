@@ -1,27 +1,8 @@
 {
-  "$comment": "Regulatory values as data. Arabic wording from the Arabic issue of Annex A (handoff 5, decision 3); English mirrors the reference prototype. scripts/extract-reference.py + tests/reference-drift.test.ts keep them in step.",
+  "$comment": "Regulatory values as data. ENGLISH GOVERNS (partner ruling, 2026-09-01): where the Arabic issue of Annex A adds or narrows content, the English issue's content is built and the Arabic string is a translation of the English. Two option strings changed under that ruling (domain 2 score 0: the Arabic issue's religious-service clause removed; domain 6 score 2: the Arabic issue's competent-public-authority clause removed) and the arabicOnlyNotes rows are gone -- they existed to record the divergences pending a decision, and the decision is made. scripts/extract-reference.py + tests/reference-drift.test.ts keep the rest in step with the prototype; the ruled strings are pinned by the drift test's RULINGS map.",
   "domainCount": 9,
   "maxScorePerDomain": 2,
-  "arabicOnlyNotes": [
-    {
-      "where": "domain 2, score 0",
-      "ar": "يضيف الإصدار العربي: أو خدمة دينية يحضرها الجمهور جلوساً",
-      "en": "The Arabic issue adds: or a religious service attended by a seated public.",
-      "source": "ar/02 NEHRAT, Part B, domain 2"
-    },
-    {
-      "where": "domain 6, score 2",
-      "ar": "يشترط الإصدار العربي أن يكون التحذير صادراً عن سلطة عامة مختصة",
-      "en": "The Arabic issue requires the warning be issued by a competent public authority.",
-      "source": "ar/02 NEHRAT, Part B, domain 6"
-    },
-    {
-      "where": "recurring venues",
-      "ar": "يضيف الإصدار العربي: يُحدَّد في التقييم السنوي تاريخ بدء سريانه وتاريخ انتهاء صلاحيته",
-      "en": "The Arabic issue adds: the annual assessment carries an effective date and an expiry date.",
-      "source": "ar/02 NEHRAT, Part D, recurring venues"
-    }
-  ],
+  "arabicOnlyNotes": [],
   "domains": [
     {
       "number": 1,
@@ -57,7 +38,7 @@
         {
           "score": 0,
           "en": "Conference, meeting, exhibition, ceremony or other recreational event without organized physical activity",
-          "ar": "مؤتمر أو اجتماع أو معرض أو مراسم أو خدمة دينية يحضرها الجمهور جلوساً، أو فعالية أخرى لا تتضمن نشاطاً بدنياً منظماً"
+          "ar": "مؤتمر أو اجتماع أو معرض أو مراسم أو فعالية أخرى لا تتضمن نشاطاً بدنياً منظماً"
         },
         {
           "score": 1,
@@ -99,8 +80,8 @@
       "number": 4,
       "en": "Event duration",
       "ar": "مدة الفعالية",
-      "noteEn": "From opening until the scheduled departure of the last participant or attendee. An event continuing past midnight without closing is one continuous operating period.",
-      "noteAr": "من الافتتاح حتى المغادرة المقررة لآخر مشارك أو حاضر. الفعالية التي تستمر بعد منتصف الليل دون إقفال تُعتبر فترة تشغيل واحدة متصلة.",
+      "noteEn": "From opening until the last scheduled departure.",
+      "noteAr": "من الافتتاح حتى آخر مغادرة مقررة.",
       "options": [
         {
           "score": 0,
@@ -163,7 +144,7 @@
         {
           "score": 2,
           "en": "An official weather or environmental warning applies to the event location and time",
-          "ar": "يكون موقع الفعالية وموعدها مشمولين بتحذير رسمي صادر عن سلطة عامة مختصة بشأن خطر متعلق بالطقس أو البيئة"
+          "ar": "يكون موقع الفعالية وموعدها مشمولين بتحذير رسمي بشأن خطر متعلق بالطقس أو البيئة"
         }
       ]
     },

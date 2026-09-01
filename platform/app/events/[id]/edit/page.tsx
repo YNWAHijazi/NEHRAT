@@ -24,6 +24,9 @@ export default async function EditEventPage({
   const event = eventFor(account.id, id);
   if (!event) notFound();
   if (event.lifecycle === 'cancelled') redirect(`/events/${id}`);
+  // Filed records are not editable in place -- material change is the route. The
+  // server action refuses too; this keeps the screen from offering what it will refuse.
+  if (event.filed) redirect(`/events/${id}`);
   const { error } = await searchParams;
 
   const label: React.CSSProperties = { fontSize: '12.5px', color: 'var(--muted)', display: 'block', marginBlockEnd: 6 };
@@ -32,7 +35,7 @@ export default async function EditEventPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack={true} />
+      <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 720 }}>
           <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 8 }}>

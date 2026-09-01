@@ -26,8 +26,11 @@ export interface MinimumConditionInputs {
   /** Required when eventDisciplines includes "running". Blank on a marathon returns Level 2. */
   courseDistanceKm: number | null;
   venueLicensedCapacity: number | null;
+  // venueRegularlyHostsOrganizedEvents left this contract with the recur condition
+  // (partner ruling, English governs). The venue INSTRUMENT still asks it -- on the
+  // venue record, where it belongs -- and stored assessment JSON from before the
+  // ruling carries the old key harmlessly.
   venueIsNightclubOrDanceVenue: boolean | null;
-  venueRegularlyHostsOrganizedEvents: boolean | null;
 }
 
 export interface DerivationInput {

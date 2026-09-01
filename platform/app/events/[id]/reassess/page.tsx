@@ -5,7 +5,7 @@ import { AssessmentForm } from '../../../events/new/AssessmentForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { assessmentsFor, eventFor, unreadCountFor } from '../../../../lib/queries';
 import {
-  ARABIC_ONLY_NOTES, BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS,
+  BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS,
 } from '../../../../lib/rules';
 
 /**
@@ -26,7 +26,7 @@ export default async function ReassessPage({ params }: { params: Promise<{ id: s
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack={true} />
+      <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 4 }}>
           <L en={`${event.nameEn} · ${event.id}`} ar={`${event.nameAr} · ${event.id}`} />
@@ -36,7 +36,6 @@ export default async function ReassessPage({ params }: { params: Promise<{ id: s
           conditions={[...MINIMUM_CONDITIONS]}
           bands={[...BANDS]}
           maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN}
-          arabicOnlyNotes={[...ARABIC_ONLY_NOTES]}
           reassess={{
             eventId: id,
             answers: latest ? [...latest.answers] : Array<0 | 1 | 2 | null>(DOMAIN_COUNT).fill(null),
@@ -46,7 +45,6 @@ export default async function ReassessPage({ params }: { params: Promise<{ id: s
               courseDistanceKm: null,
               venueLicensedCapacity: null,
               venueIsNightclubOrDanceVenue: null,
-              venueRegularlyHostsOrganizedEvents: null,
             },
           }}
         />

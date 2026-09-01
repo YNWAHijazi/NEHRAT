@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, unreadCountFor } from '../../../../lib/queries';
 import { ROLES_CONTENT } from '../../../../lib/rules';
@@ -33,7 +32,7 @@ export default async function ParticipationPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={null} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           {notice === 'sent' ? (
@@ -107,26 +106,6 @@ export default async function ParticipationPage({
 
           <DeclineBlock token={invitation.token} />
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${id}/documents`,
-              en: 'Shared documents',
-              ar: 'المستندات المشتركة',
-              descEn: 'One list, visible to your organization and to the organizer.',
-              descAr: 'قائمة واحدة تظهر لمؤسستكم وللمنظّم.',
-            },
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Events you have been named in.',
-              descAr: 'الفعاليات التي سُمّيتم فيها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

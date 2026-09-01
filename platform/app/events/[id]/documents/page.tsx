@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { AddDocumentForm } from './AddDocumentForm';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, sharedDocumentsFor, unreadCountFor } from '../../../../lib/queries';
@@ -41,7 +40,7 @@ export default async function SharedDocumentsPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={null} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 1000 }}>
           {notice === 'added' ? (
@@ -106,19 +105,6 @@ export default async function SharedDocumentsPage({
             })}
           </div>
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Events you have been named in.',
-              descAr: 'الفعاليات التي سُمّيتم فيها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

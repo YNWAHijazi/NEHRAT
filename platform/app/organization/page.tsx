@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
-import { SequenceFooter } from '../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { unreadCountFor } from '../../lib/queries';
 import { registerOrganizationAction } from '../actions';
@@ -148,27 +147,6 @@ export default async function OrganizationPage({
           )}
         </div>
 
-        <SequenceFooter
-          labelEn="Where this screen leads"
-          labelAr="إلى أين تقود هذه الشاشة"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-              primary: true,
-            },
-            {
-              href: '/events/new',
-              en: 'Certify an event',
-              ar: 'اعتماد فعالية',
-              descEn: 'Create the event and complete the assessment; this continues while recording is pending.',
-              descAr: 'أنشئوا الفعالية وأكملوا التقييم؛ يستمر ذلك أثناء انتظار التسجيل.',
-            },
-          ]}
-        />
       </main>
     </>
   );

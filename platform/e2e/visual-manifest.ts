@@ -94,16 +94,18 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
   },
   {
     id: 'organizer-dashboard',
-    // Held at 5%: the returned panel now shows the Ministry's RECORDED note
-    // verbatim where the reference hard-codes a demonstration demand -- the
-    // dead-end directive's fix (the panel used to state requirements nobody
-    // recorded). The note's text is asserted verbatim in e2e/app/ministry.spec.ts;
-    // everything else on the page still compares inside the hold.
-    threshold: 0.05,
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Dashboard',
     builtRoute: '/dashboard',
     signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'whole',
+        mode: 'expectedDivergent',
+        builtSelector: 'main',
+        note: 'Expected divergent by the partner simplification pass (2026-09-01): the dashboard is the rows — the "Awaiting your response" banner, the "Open a record, or start something new" footer and the three section narration lines were removed deliberately. Status lives on each row. The reference predates the ruling; the prototype is expected to follow it, and this flips back to a compare when it does. This entry was a full-page compare held at 5%.',
+      },
+    ],
   },
   {
     id: 'organizer-assessment',
@@ -121,10 +123,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'rail',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'cardByText', text: 'Where this event stands' },
         builtSelector: '[data-region="rail"]',
-        note: 'The six-stage rail. Held at 2%. Known residuals inside the budget: stage 3 meta reads "In progress" (reference: "2 outstanding" -- counters are Slice 2 data) and stage 2 shows the actual version-2 date where the reference hand-wrote a different one than its own history list.',
+        note: 'Expected divergent by the partner simplification pass (2026-09-01): the stage meta lines were rewritten to lay language — "One of three outcomes" is now "Waiting for the Ministry", "Owed only after a reportable event or on Ministry request" is now "Not needed for this event", "Pending with the Ministry. Filing waits for it." is now "With the Ministry". The rail structure and states are unchanged and asserted in e2e/app/journeys.spec.ts. Was a compare held at 2%; flips back when the prototype adopts the lay strings.',
       },
       {
         name: 'record-header',

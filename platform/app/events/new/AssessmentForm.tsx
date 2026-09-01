@@ -1,38 +1,92 @@
 'use client';
 
 /**
- * Applicability and assessment.
+ * Applicability and assessment — one form, rebuilt for simplicity (partner review,
+ * 2026-09-01).
  *
- * The prototype's ten minimum conditions included seven manual checkboxes. Here NONE are
- * manual (non-negotiable #0): every condition derives from captured values -- attendance
- * as a number, disciplines as a structured list, course distance as a required field on
- * running events, venue facts. The conditions render read-only, marked as derived.
+ * What changed and why:
+ * - Parts 1 and 2 merged. The old form asked for the event, then a second section of
+ *   "figures the classification depends on" that re-asked what Part 1 already knew.
+ * - EVENT TYPE IS A DROPDOWN, and picking it IS the floor input. Choosing "Running
+ *   event" feeds the running condition; choosing "Event at a nightclub or dance venue"
+ *   answers the venue question. Nothing asks again later.
+ * - ATTENDANCE IS ASKED ONCE. The three expected counts (participants, spectators,
+ *   staff) are the assessment tool's own Part A fields, and the derivation's "most people present
+ *   at the same time" is their sum — the instrument defines it as everyone at once, including
+ *   participants, attendees, staff, performers, contractors and volunteers. Summing is
+ *   the conservative reading: it can only raise the level, never lower it.
+ * - The ten-condition checklist display is GONE from the organizer's screen. The result
+ *   is the level and one line why (lib/rules/why.ts); the full derivation detail stays
+ *   on the Ministry reviewer's screen. Both results and which governed are still
+ *   reported, compactly (non-negotiable 1).
+ * - "The venue regularly hosts organized events" is no longer asked here — it is a
+ *   venue question, on the venue record. The recur condition it fed was the Arabic
+ *   issue's; English governs (partner ruling).
  *
- * The level is output, never input. This form owns no level control, and the result
- * panel reports both results and which governed. An unset required input produces an
- * incomplete result naming the field -- never a level.
+ * What did not change: the level is derived, never chosen. This form owns no level
+ * control. An unset required input produces "Please fill in: …" naming the field —
+ * never a level.
  */
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
-import { YesNoPair } from '../../../components/YesNoPair';
 import { createEventAction, reassessAction } from '../../actions';
-import type { ArabicOnlyNote, Band, Domain, MinimumCondition } from '../../../lib/rules/load';
-import { deriveLevel, bandForScore } from '../../../lib/rules/derive';
+import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
+import { deriveLevel } from '../../../lib/rules/derive';
+import { levelWhy } from '../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
 
-const DISCIPLINES: { key: string; en: string; ar: string }[] = [
-  { key: 'running', en: 'Organized running event', ar: 'فعالية جري منظمة' },
-  { key: 'cycling', en: 'Cycling race', ar: 'سباق دراجات' },
+/**
+ * The event-type list: every discipline that carries a level floor, the venue type that
+ * carries one, and plain kinds for everything else. The mapping is the point — the
+ * chosen type resolves the derivation inputs, so the floor questions are never asked
+ * as questions.
+ */
+const EVENT_TYPES: {
+  key: string;
+  en: string;
+  ar: string;
+  disciplines: readonly string[];
+  nightclub: boolean;
+}[] = [
+  { key: 'running', en: 'Running event', ar: 'فعالية جري', disciplines: ['running'], nightclub: false },
+  { key: 'cycling', en: 'Cycling race', ar: 'سباق دراجات', disciplines: ['cycling'], nightclub: false },
+  { key: 'triathlon', en: 'Triathlon', ar: 'سباق ثلاثي (ترياتلون)', disciplines: ['triathlon'], nightclub: false },
+  { key: 'open_water', en: 'Open-water swimming', ar: 'سباحة في المياه المفتوحة', disciplines: ['open_water_swimming'], nightclub: false },
+  { key: 'boxing', en: 'Boxing', ar: 'ملاكمة', disciplines: ['boxing'], nightclub: false },
+  { key: 'kickboxing', en: 'Kickboxing', ar: 'كيك بوكسينغ', disciplines: ['kickboxing'], nightclub: false },
+  { key: 'muay_thai', en: 'Muay Thai', ar: 'مواي تاي', disciplines: ['muay_thai'], nightclub: false },
+  { key: 'mma', en: 'Mixed martial arts', ar: 'فنون قتالية مختلطة', disciplines: ['mixed_martial_arts'], nightclub: false },
+  { key: 'motor', en: 'Motor racing', ar: 'سباق سيارات', disciplines: ['motor_racing'], nightclub: false },
+  { key: 'other_sport', en: 'Another sporting event', ar: 'فعالية رياضية أخرى', disciplines: [], nightclub: false },
+  { key: 'nightclub', en: 'Event at a nightclub or dance venue', ar: 'فعالية في ملهى ليلي أو صالة رقص', disciplines: [], nightclub: true },
+  { key: 'concert', en: 'Concert, festival or performance', ar: 'حفلة أو مهرجان أو عرض', disciplines: [], nightclub: false },
+  { key: 'gathering', en: 'Conference, exhibition or ceremony', ar: 'مؤتمر أو معرض أو مراسم', disciplines: [], nightclub: false },
+  { key: 'other', en: 'Something else', ar: 'شيء آخر', disciplines: [], nightclub: false },
+];
+
+/** The floor-carrying disciplines, for the "also includes" row. */
+const EXTRA_DISCIPLINES: { key: string; en: string; ar: string }[] = [
+  { key: 'running', en: 'Running', ar: 'جري' },
+  { key: 'cycling', en: 'Cycling', ar: 'دراجات' },
   { key: 'triathlon', en: 'Triathlon', ar: 'ترياتلون' },
-  { key: 'open_water_swimming', en: 'Organized open-water swimming event', ar: 'فعالية سباحة منظمة في المياه المفتوحة' },
+  { key: 'open_water_swimming', en: 'Open-water swimming', ar: 'سباحة في المياه المفتوحة' },
   { key: 'boxing', en: 'Boxing', ar: 'ملاكمة' },
   { key: 'kickboxing', en: 'Kickboxing', ar: 'كيك بوكسينغ' },
   { key: 'muay_thai', en: 'Muay Thai', ar: 'مواي تاي' },
   { key: 'mixed_martial_arts', en: 'Mixed martial arts', ar: 'فنون قتالية مختلطة' },
-  { key: 'motor_racing', en: 'Competitive motor-vehicle racing', ar: 'سباق سيارات تنافسي' },
+  { key: 'motor_racing', en: 'Motor racing', ar: 'سباق سيارات' },
 ];
+
+/** Reassess mode has stored inputs but no stored type key: recover the closest type. */
+function typeFromInputs(inputs: MinimumConditionInputs): string {
+  if (inputs.venueIsNightclubOrDanceVenue === true) return 'nightclub';
+  for (const t of EVENT_TYPES) {
+    if (t.disciplines.length > 0 && t.disciplines.every((d) => inputs.eventDisciplines.includes(d))) return t.key;
+  }
+  return inputs.eventDisciplines.length > 0 ? 'other_sport' : 'other';
+}
 
 const inputStyle: React.CSSProperties = {
   height: 44,
@@ -46,30 +100,14 @@ const inputStyle: React.CSSProperties = {
 
 const fieldLabel: React.CSSProperties = { fontSize: '13.5px', color: 'var(--muted)' };
 
-function SectionHeading({ en, ar, noteEn, noteAr }: { en: string; ar: string; noteEn?: string; noteAr?: string }) {
+function Field({ labelEn, labelAr, children }: { labelEn: string; labelAr: string; children: React.ReactNode }) {
   return (
-    <>
-      <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-        <L en={en} ar={ar} />
-      </h2>
-      {noteEn && noteAr ? (
-        <p style={{ margin: '0 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-          <L en={noteEn} ar={noteAr} />
-        </p>
-      ) : null}
-    </>
-  );
-}
-
-/** A source-tagged note: wording one issue of the regulation carries and the other lacks. */
-function SourceNote({ note }: { note: ArabicOnlyNote }) {
-  return (
-    <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-      <span style={{ display: 'inline-block', padding: '1px 7px', marginInlineEnd: 7, border: '1px solid var(--line)', borderRadius: 999, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
-        <L en="Arabic issue" ar="الإصدار العربي" />
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={fieldLabel}>
+        <L en={labelEn} ar={labelAr} />
       </span>
-      <L en={note.en} ar={note.ar} />
-    </p>
+      {children}
+    </label>
   );
 }
 
@@ -78,21 +116,16 @@ export function AssessmentForm({
   conditions,
   bands,
   maxScore,
-  arabicOnlyNotes,
   reassess,
 }: {
   domains: Domain[];
   conditions: MinimumCondition[];
   bands: Band[];
   maxScore: number;
-  arabicOnlyNotes: ArabicOnlyNote[];
-  /**
-   * Re-running the assessment on an EXISTING event: prefilled from the latest
-   * version, saved as a NEW version with every earlier one kept readable. The
-   * event-information fields do not render -- the record already holds them.
-   */
   reassess?: { eventId: string; answers: (0 | 1 | 2 | null)[]; inputs: MinimumConditionInputs };
 }) {
+  void conditions;
+  void bands;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [nameEn, setNameEn] = useState('');
@@ -100,69 +133,86 @@ export function AssessmentForm({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [partA, setPartA] = useState({
-    eventType: '', venueRoute: '', municipalities: '',
+    venueRoute: '', municipalities: '',
     openingTime: '', closingTime: '',
     expectedParticipants: '', expectedSpectators: '', expectedStaff: '',
     previousEdition: false, recurringFixedVenue: false,
   });
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
+
+  const [typeKey, setTypeKey] = useState<string>(reassess ? typeFromInputs(reassess.inputs) : '');
+  const [extraDisciplines, setExtraDisciplines] = useState<string[]>(
+    reassess
+      ? reassess.inputs.eventDisciplines.filter(
+          (d) => !(EVENT_TYPES.find((t) => t.key === typeFromInputs(reassess.inputs))?.disciplines ?? []).includes(d),
+        )
+      : [],
+  );
   const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(
     reassess ? reassess.answers : Array(9).fill(null),
   );
-  const [attendance, setAttendance] = useState(
+  // Reassess edits the stored attendance figure directly; creation derives it from the
+  // three expected counts below, so the number is never asked twice.
+  const [attendanceDirect, setAttendanceDirect] = useState(
     reassess?.inputs.expectedMaxSimultaneousAttendance != null ? String(reassess.inputs.expectedMaxSimultaneousAttendance) : '',
   );
-  const [disciplines, setDisciplines] = useState<string[]>(reassess ? [...reassess.inputs.eventDisciplines] : []);
   const [courseKm, setCourseKm] = useState(
     reassess?.inputs.courseDistanceKm != null ? String(reassess.inputs.courseDistanceKm) : '',
   );
   const [capacity, setCapacity] = useState(
     reassess?.inputs.venueLicensedCapacity != null ? String(reassess.inputs.venueLicensedCapacity) : '',
   );
-  // Unanswered, not false: a seeded false asserts an answer nobody gave, and the two
-  // venue floors could then never report "incomplete" naming the field (non-negotiable 0).
-  const [nightclub, setNightclub] = useState<boolean | null>(reassess ? reassess.inputs.venueIsNightclubOrDanceVenue : null);
-  const [regularVenue, setRegularVenue] = useState<boolean | null>(reassess ? reassess.inputs.venueRegularlyHostsOrganizedEvents : null);
   const [error, setError] = useState<string | null>(null);
+
+  const chosenType = EVENT_TYPES.find((t) => t.key === typeKey) ?? null;
+  const disciplines = useMemo(() => {
+    const base = chosenType?.disciplines ?? [];
+    return [...base, ...extraDisciplines.filter((d) => !base.includes(d))];
+  }, [chosenType, extraDisciplines]);
+
+  const attendance: number | null = useMemo(() => {
+    if (reassess) return attendanceDirect.trim() === '' ? null : Number(attendanceDirect);
+    const parts = [partA.expectedParticipants, partA.expectedSpectators, partA.expectedStaff]
+      .filter((v) => v.trim() !== '')
+      .map(Number);
+    if (parts.length === 0) return null;
+    return parts.reduce((a, b) => a + b, 0);
+  }, [reassess, attendanceDirect, partA.expectedParticipants, partA.expectedSpectators, partA.expectedStaff]);
 
   const inputs: MinimumConditionInputs = useMemo(
     () => ({
-      expectedMaxSimultaneousAttendance: attendance.trim() === '' ? null : Number(attendance),
+      expectedMaxSimultaneousAttendance: attendance,
       eventDisciplines: disciplines,
       courseDistanceKm: courseKm.trim() === '' ? null : Number(courseKm),
       venueLicensedCapacity: capacity.trim() === '' ? null : Number(capacity),
-      venueIsNightclubOrDanceVenue: nightclub,
-      venueRegularlyHostsOrganizedEvents: regularVenue,
+      // The dropdown answers the venue question; unanswered only while no type is chosen.
+      venueIsNightclubOrDanceVenue: chosenType === null ? null : chosenType.nightclub,
     }),
-    [attendance, disciplines, courseKm, capacity, nightclub, regularVenue],
+    [attendance, disciplines, courseKm, capacity, chosenType],
   );
 
   const derivation = useMemo(
     () => deriveLevel({ answers: answers as DomainAnswers, inputs }),
     [answers, inputs],
   );
+  const why = levelWhy(derivation);
 
   const isRunning = disciplines.includes('running');
-  const triggeredKeys = new Set(derivation.triggeredConditions.map((c) => c.key));
-  const score = derivation.scoreTotal;
-  const markerPct = score === null ? 0 : Math.round((score / maxScore) * 100);
+  const isNightclub = chosenType?.nightclub === true;
 
   const missingLabels: { en: string; ar: string }[] = derivation.missingInputs.map((k) => {
     if (k === 'expectedMaxSimultaneousAttendance')
-      return { en: 'Expected maximum simultaneous attendance', ar: 'الحد الأقصى المتوقع للحضور المتزامن' };
+      return reassess
+        ? { en: 'Most people at the same time', ar: 'أكبر عدد من الحاضرين في الوقت نفسه' }
+        : { en: 'Expected numbers', ar: 'الأعداد المتوقعة' };
     if (k === 'courseDistanceKm') return { en: 'Course distance', ar: 'مسافة المسار' };
-    if (k === 'venueIsNightclubOrDanceVenue')
-      return { en: 'Whether the venue is a nightclub or dance venue', ar: 'ما إذا كان الموقع ملهى ليلياً أو مكاناً للرقص' };
-    if (k === 'venueRegularlyHostsOrganizedEvents')
-      return { en: 'Whether the venue regularly hosts organized events', ar: 'ما إذا كان الموقع يستضيف فعاليات منظمة بانتظام' };
+    if (k === 'venueIsNightclubOrDanceVenue') return { en: 'Event type', ar: 'نوع الفعالية' };
     if (k === 'venueLicensedCapacity')
-      return { en: 'Licensed venue capacity', ar: 'السعة المرخّصة للموقع' };
-    if (k === 'eventDisciplines')
-      return { en: 'Disciplines the event includes', ar: 'الرياضات التي تشملها الفعالية' };
+      return { en: 'Licensed capacity of the venue', ar: 'السعة المرخّصة للموقع' };
     if (k.startsWith('domain')) {
       const n = k.slice(6);
-      return { en: `Domain ${n}`, ar: `المجال ${n}` };
+      return { en: `Question ${n}`, ar: `السؤال ${n}` };
     }
     return { en: k, ar: k };
   });
@@ -185,10 +235,19 @@ export function AssessmentForm({
         startDate,
         endDate,
         partA: {
-          ...partA,
+          // The chosen type's English label is the stored Part A event-type value, as
+          // the earlier typed field was before it; the structured floor inputs travel in
+          // `inputs` alongside it.
+          eventType: chosenType?.en ?? '',
+          venueRoute: partA.venueRoute,
+          municipalities: partA.municipalities,
+          openingTime: partA.openingTime,
+          closingTime: partA.closingTime,
           expectedParticipants: partA.expectedParticipants === '' ? null : Number(partA.expectedParticipants),
           expectedSpectators: partA.expectedSpectators === '' ? null : Number(partA.expectedSpectators),
           expectedStaff: partA.expectedStaff === '' ? null : Number(partA.expectedStaff),
+          previousEdition: partA.previousEdition,
+          recurringFixedVenue: partA.recurringFixedVenue,
         },
         answers: answers as DomainAnswers,
         inputs,
@@ -206,193 +265,158 @@ export function AssessmentForm({
       <p style={{ margin: '0 0 48px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '70ch' }}>
         {reassess ? (
           <L
-            en="Re-running the assessment saves a NEW version; every earlier version stays readable on the event record. The level re-derives from these answers -- it is never chosen."
-            ar="إعادة التقييم تحفظ نسخة جديدة؛ وتبقى كل نسخة سابقة قابلة للقراءة على سجل الفعالية. ويُستنتج المستوى من هذه الأجوبة من جديد — ولا يُختار أبداً."
+            en="Saving stores a new version. Earlier versions stay on the record."
+            ar="الحفظ يخزّن نسخة جديدة، وتبقى النسخ السابقة على السجل."
           />
         ) : (
           <L
-            en="The national risk assessment, in the order the tool sets. Complete it in one pass or return to it. Nothing is filed from this page."
-            ar="التقييم الوطني للمخاطر، بترتيبه الأصلي. أكملوه بمرة واحدة أو عودوا إليه. لا يُقدَّم شيء من هذه الصفحة."
+            en="Answer these once. The answers set your event's level, and the level sets what you need to do."
+            ar="أجيبوا عن هذه الأسئلة مرة واحدة. الأجوبة تحدد مستوى فعاليتكم، والمستوى يحدد ما عليكم فعله."
           />
         )}
       </p>
 
       {reassess ? null : (
         <>
-      <SectionHeading en="Part 1 — The event" ar="الجزء 1 — الفعالية" />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 40 }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="Event name (English)" ar="اسم الفعالية (بالإنكليزية)" />
-          </span>
-          <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="Event name (Arabic)" ar="اسم الفعالية (بالعربية)" />
-          </span>
-          <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="Start date" ar="تاريخ البداية" />
-          </span>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="End date" ar="تاريخ النهاية" />
-          </span>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
-        </label>
-        {(
-          [
-            ['eventType', 'Event type', 'نوع الفعالية أو نمط التشغيل الاعتيادي'],
-            ['venueRoute', 'Venue, route, or location', 'الموقع أو المسار أو مكان الانعقاد'],
-            ['municipalities', 'Municipality or municipalities', 'البلدية أو البلديات'],
-            ['openingTime', 'Opening time', 'وقت الافتتاح'],
-            ['closingTime', 'Closing time', 'وقت الإغلاق'],
-            ['expectedParticipants', 'Expected participants', 'العدد المتوقع للمشاركين'],
-            ['expectedSpectators', 'Expected spectators or attendees', 'العدد المتوقع للمتفرجين أو الحضور'],
-            ['expectedStaff', 'Expected staff, performers, contractors, and volunteers', 'العدد المتوقع للعاملين والفنانين والمتعاقدين والمتطوعين'],
-          ] as const
-        ).map(([key, en, ar]) => (
-          <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span style={fieldLabel}>
-              <L en={en} ar={ar} />
-            </span>
-            <input
-              type={key.startsWith('expected') ? 'number' : key.endsWith('Time') ? 'time' : 'text'}
-              value={String(partA[key])}
-              onChange={(e) => setA(key, e.target.value)}
-              style={inputStyle}
-            />
-          </label>
-        ))}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 40 }}>
-        {(
-          [
-            ['previousEdition', 'A previous edition of the same event has been held', 'سبق إقامة الفعالية نفسها'],
-            ['recurringFixedVenue', 'The venue is fixed and hosts events repeatedly', 'الموقع ثابت ويستضيف فعاليات بصورة متكررة'],
-          ] as const
-        ).map(([key, en, ar]) => {
-          const on = partA[key];
-          return (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={on}
-              onClick={() => setA(key, !on)}
-              style={{ textAlign: 'start', display: 'flex', gap: 14, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
-            >
-              <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--brand)' : 'transparent', marginBlockStart: 2 }} />
-              <span style={{ fontSize: 15, lineHeight: 1.6 }}>
-                <L en={en} ar={ar} />
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
+          <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+            <L en="The event" ar="الفعالية" />
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
+            <Field labelEn="Event name (English)" labelAr="اسم الفعالية (بالإنكليزية)">
+              <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Event name (Arabic)" labelAr="اسم الفعالية (بالعربية)">
+              <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Start date" labelAr="تاريخ البداية">
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="End date" labelAr="تاريخ النهاية">
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Opening time" labelAr="وقت الافتتاح">
+              <input type="time" value={partA.openingTime} onChange={(e) => setA('openingTime', e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Closing time" labelAr="وقت الإغلاق">
+              <input type="time" value={partA.closingTime} onChange={(e) => setA('closingTime', e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Venue, route, or location" labelAr="الموقع أو المسار أو مكان الانعقاد">
+              <input value={partA.venueRoute} onChange={(e) => setA('venueRoute', e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Municipality or municipalities" labelAr="البلدية أو البلديات">
+              <input value={partA.municipalities} onChange={(e) => setA('municipalities', e.target.value)} style={inputStyle} />
+            </Field>
+          </div>
         </>
       )}
 
-      <SectionHeading
-        en="Part 2 — Figures the classification depends on"
-        ar="الجزء 2 — الأرقام التي يعتمد عليها التصنيف"
-        noteEn="These are captured as values, not inferred from an answer. The minimum event level resolves from them."
-        noteAr="تُسجَّل هذه كقيم ولا تُستنتج من إجابة. ومنها يتحدد الحد الأدنى لمستوى الفعالية."
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 24 }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="Expected maximum simultaneous attendance" ar="الحد الأقصى المتوقع للحضور المتزامن" />
-          </span>
-          <input type="number" min={0} value={attendance} onChange={(e) => setAttendance(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span style={fieldLabel}>
-            <L en="Venue licensed capacity, where licensed" ar="السعة المرخّصة للموقع، حيث يوجد ترخيص" />
-          </span>
-          <input type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} style={inputStyle} />
-        </label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
+        <Field labelEn="Event type" labelAr="نوع الفعالية">
+          <select value={typeKey} onChange={(e) => setTypeKey(e.target.value)} style={{ ...inputStyle, appearance: 'auto' }}>
+            <option value="" disabled />
+            {EVENT_TYPES.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.en} · {t.ar}
+              </option>
+            ))}
+          </select>
+        </Field>
+        {isNightclub ? (
+          <Field labelEn="Licensed capacity of the venue" labelAr="السعة المرخّصة للموقع">
+            <input type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} style={inputStyle} />
+          </Field>
+        ) : null}
+        {isRunning ? (
+          <Field labelEn="Course distance, km" labelAr="مسافة المسار بالكيلومترات">
+            <input type="number" min={0} step="0.1" value={courseKm} onChange={(e) => setCourseKm(e.target.value)} style={inputStyle} />
+          </Field>
+        ) : null}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 24 }}>
-        {[
-          {
-            value: nightclub,
-            onPick: setNightclub,
-            en: 'The venue is a nightclub or dance venue',
-            ar: 'الموقع ملهى ليلي أو مكان للرقص',
-            issue: 'en-only' as const,
-          },
-          {
-            value: regularVenue,
-            onPick: setRegularVenue,
-            en: 'The venue regularly hosts organized events',
-            ar: 'يستضيف الموقع فعاليات منظمة بانتظام',
-            issue: 'ar-only' as const,
-          },
-        ].map((c) => (
-          <div
-            key={c.en}
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', border: `1px solid ${c.value === null ? 'var(--accent)' : 'var(--line)'}`, background: 'var(--surface)', borderRadius: 10 }}
-          >
-            <span style={{ fontSize: 15, lineHeight: 1.6, flex: 1, minWidth: 240 }}>
-              <L en={c.en} ar={c.ar} />
-              <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--muted)', verticalAlign: 'middle' }}>
-                {c.issue === 'en-only' ? (
-                  <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
-                ) : (
-                  <L en="Arabic issue only" ar="الإصدار العربي فقط" />
-                )}
-              </span>
-            </span>
-            <YesNoPair value={c.value} onPick={c.onPick} />
+
+      {chosenType ? (
+        <div style={{ marginBlockEnd: 24 }}>
+          <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 8 }}>
+            <L en="Does it also include any of these?" ar="هل تتضمن أيضاً أياً من هذه؟" />
           </div>
-        ))}
-      </div>
-      <div style={{ marginBlockEnd: 16 }}>
-        <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 8 }}>
-          <L en="Disciplines the event includes, where it is a sporting event" ar="الرياضات التي تشملها الفعالية، حيث تكون فعالية رياضية" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {EXTRA_DISCIPLINES.filter((d) => !(chosenType.disciplines as readonly string[]).includes(d.key)).map((d) => {
+              const on = extraDisciplines.includes(d.key);
+              return (
+                <button
+                  key={d.key}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() =>
+                    setExtraDisciplines((prev) => (on ? prev.filter((k) => k !== d.key) : [...prev, d.key]))
+                  }
+                  style={{ height: 38, paddingInline: 15, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 19, fontSize: 14, cursor: 'pointer' }}
+                >
+                  <L en={d.en} ar={d.ar} />
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {DISCIPLINES.map((d) => {
-            const on = disciplines.includes(d.key);
-            return (
-              <button
-                key={d.key}
-                type="button"
-                aria-pressed={on}
-                onClick={() =>
-                  setDisciplines((prev) => (on ? prev.filter((k) => k !== d.key) : [...prev, d.key]))
-                }
-                style={{ height: 38, paddingInline: 15, border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 19, fontSize: 14, cursor: 'pointer' }}
-              >
-                <L en={d.en} ar={d.ar} />
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      {isRunning ? (
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 320, marginBlockEnd: 16 }}>
-          <span style={fieldLabel}>
-            <L en="Course distance, km — required for a running event" ar="مسافة المسار بالكيلومترات — مطلوبة لفعالية الجري" />
-          </span>
-          <input type="number" min={0} step="0.1" value={courseKm} onChange={(e) => setCourseKm(e.target.value)} style={inputStyle} />
-        </label>
       ) : null}
 
-      <div style={{ marginBlockStart: 24, marginBlockEnd: 56 }} />
+      {reassess ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 40 }}>
+          <Field labelEn="Most people at the same time" labelAr="أكبر عدد من الحاضرين في الوقت نفسه">
+            <input type="number" min={0} value={attendanceDirect} onChange={(e) => setAttendanceDirect(e.target.value)} style={inputStyle} />
+          </Field>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 8 }}>
+            <Field labelEn="Expected participants" labelAr="العدد المتوقع للمشاركين">
+              <input type="number" min={0} value={partA.expectedParticipants} onChange={(e) => setA('expectedParticipants', e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Expected spectators" labelAr="العدد المتوقع للمتفرجين">
+              <input type="number" min={0} value={partA.expectedSpectators} onChange={(e) => setA('expectedSpectators', e.target.value)} style={inputStyle} />
+            </Field>
+            <Field labelEn="Expected staff and volunteers" labelAr="العدد المتوقع للعاملين والمتطوعين">
+              <input type="number" min={0} value={partA.expectedStaff} onChange={(e) => setA('expectedStaff', e.target.value)} style={inputStyle} />
+            </Field>
+          </div>
+          <p style={{ margin: '0 0 32px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '70ch' }}>
+            <L
+              en="Together these count everyone who may be there at the same time — that figure helps set the level. You will not be asked for it again."
+              ar="تحسب هذه الأعداد معاً كل من قد يكون حاضراً في الوقت نفسه — وهذا الرقم يساهم في تحديد المستوى. ولن يُطلب منكم مرة أخرى."
+            />
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 48 }}>
+            {(
+              [
+                ['previousEdition', 'This event has been held before', 'أقيمت هذه الفعالية من قبل'],
+                ['recurringFixedVenue', 'It is at a fixed venue that hosts events repeatedly', 'تقام في موقع ثابت يستضيف فعاليات بصورة متكررة'],
+              ] as const
+            ).map(([key, en, ar]) => {
+              const on = partA[key];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setA(key, !on)}
+                  style={{ textAlign: 'start', display: 'flex', gap: 14, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
+                >
+                  <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--brand)' : 'transparent', marginBlockStart: 2 }} />
+                  <span style={{ fontSize: 15, lineHeight: 1.6 }}>
+                    <L en={en} ar={ar} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
-      <SectionHeading
-        en="Part 3 — The nine domains"
-        ar="الجزء 3 — المجالات التسعة"
-        noteEn="Select one score for each domain. Where more than one option applies, select the highest."
-        noteAr="اختاروا نتيجة واحدة لكل مجال. عند انطباق أكثر من خيار، اختاروا الأعلى."
-      />
+      <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+        <L en="Nine questions" ar="تسعة أسئلة" />
+      </h2>
+      <p style={{ margin: '0 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
+        <L en="Pick one answer for each. If more than one fits, pick the highest." ar="اختاروا جواباً واحداً لكل سؤال. وإذا انطبق أكثر من جواب، اختاروا الأعلى." />
+      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
           <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
@@ -407,11 +431,6 @@ export function AssessmentForm({
                 <L en={domain.noteEn} ar={domain.noteAr} />
               </p>
             ) : null}
-            {arabicOnlyNotes
-              .filter((n) => n.where.startsWith(`domain ${domain.number},`))
-              .map((n) => (
-                <SourceNote key={n.where} note={n} />
-              ))}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 10 }}>
               {domain.options.map((option) => {
                 const on = answers[di] === option.score;
@@ -439,146 +458,45 @@ export function AssessmentForm({
         ))}
       </div>
 
-      <SectionHeading en="Part 4 — Classification" ar="الجزء 4 — التصنيف" />
-      <div style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-          <L en="Total score from your answers" ar="المجموع من أجوبتكم" />
+      {/* The result: the level and one line why. The organizer never sees the condition
+          checklist; the reviewer's screen keeps the full derivation (partner review). */}
+      <div data-region="result" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+        <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
+          <L en="Your event's level" ar="مستوى فعاليتكم" />
         </div>
-        <div style={{ position: 'relative', height: 44 }}>
-          {score !== null ? (
-            <div style={{ position: 'absolute', insetInlineStart: `${markerPct}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-              <span style={{ fontSize: 15, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                {score}{' '}
-                <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 13 }}>
-                  <L en={`of ${maxScore}`} ar={`من ${maxScore}`} />
-                </span>
-              </span>
-              <span style={{ display: 'block', width: 1, height: 12, background: 'var(--ink)', opacity: 0.5 }} />
+        {derivation.finalLevel !== null ? (
+          <>
+            <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: '-.025em', color: `var(--l${derivation.finalLevel})` }}>
+              <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
             </div>
-          ) : null}
-        </div>
-        <div style={{ display: 'flex', gap: 3 }}>
-          {Array.from({ length: maxScore + 1 }, (_, i) => (
-            <span
-              key={i}
-              style={{ flex: 1, height: 44, borderRadius: 3, background: score !== null && i <= score ? `var(--l${bandForScore(i)})` : 'var(--surface2)' }}
-            />
-          ))}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: bands.map((b) => `${b.maxScore - b.minScore + 1}fr`).join(' '), gap: 3, marginBlockStart: 10, fontSize: '12.5px', color: 'var(--muted)' }}>
-          {bands.map((b) => (
-            <div key={b.level}>
-              <L en={`Level ${b.level}`} ar={`المستوى ${b.level}`} /> · {b.minScore}–{b.maxScore}
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginBlockStart: 32, paddingBlockStart: 28, borderBlockStart: '1px solid var(--line)' }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-            <L
-              en="Minimum event level — conditions that cannot be classified lower. Every condition derives from your answers above; none is a checkbox."
-              ar="الحد الأدنى لمستوى الفعالية — شروط لا يمكن التصنيف تحتها. كل شرط مستمد من أجوبتكم أعلاه؛ ولا شيء منها خانة اختيار."
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {conditions.map((condition) => {
-              const on = triggeredKeys.has(condition.key);
-              return (
-                <div
-                  key={condition.key}
-                  style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', border: `1px solid ${on ? (condition.level === 3 ? 'var(--l3)' : 'var(--accent)') : 'var(--line)'}`, background: on ? (condition.level === 3 ? 'var(--l3s)' : 'var(--accent-soft)') : 'var(--bg)', borderRadius: 8 }}
-                >
-                  <span style={{ flex: 'none', width: 16, height: 16, border: `1.5px solid ${on ? 'var(--ink)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--ink)' : 'transparent' }} />
-                  <span style={{ flex: 1 }}>
-                    <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.5 }}>
-                      <L en={condition.en} ar={condition.ar} />
-                    </span>
-                    <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
-                      <L en="Derived from the figures above" ar="مستمد من الأرقام أعلاه" />
-                      {condition.issue !== 'both' ? (
-                        <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
-                          {condition.issue === 'ar-only' ? (
-                            <L en="Arabic issue only" ar="الإصدار العربي فقط" />
-                          ) : (
-                            <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
-                          )}
-                        </span>
-                      ) : null}
-                    </span>
-                  </span>
-                  <span style={{ flex: 'none', fontSize: 13, color: `var(--l${condition.level})` }}>
-                    <L en={`Level ${condition.level}`} ar={`المستوى ${condition.level}`} />
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          {arabicOnlyNotes
-            .filter((n) => n.where === 'recurring venues')
-            .map((n) => (
-              <SourceNote key={n.where} note={n} />
-            ))}
-        </div>
-
-        <div style={{ marginBlockStart: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ background: 'var(--surface)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Score-based level" ar="المستوى بحسب النتيجة" />
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
-              {derivation.scoreBandLevel !== null ? (
-                <L en={`Level ${derivation.scoreBandLevel}`} ar={`المستوى ${derivation.scoreBandLevel}`} />
-              ) : (
-                <span style={{ color: 'var(--muted)' }}>—</span>
-              )}
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Minimum event level" ar="الحد الأدنى لمستوى الفعالية" />
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
-              {derivation.minimumConditionLevel !== null ? (
-                <L en={`Level ${derivation.minimumConditionLevel}`} ar={`المستوى ${derivation.minimumConditionLevel}`} />
-              ) : (
-                <L en="None" ar="لا يوجد" />
-              )}
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface2)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Final event level — the higher of the two" ar="المستوى النهائي — الأعلى من الاثنين" />
-            </div>
-            {derivation.finalLevel !== null ? (
-              <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', color: `var(--l${derivation.finalLevel})` }}>
-                <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
-              </div>
-            ) : (
-              <div style={{ fontSize: '14.5px', lineHeight: 1.6 }}>
-                <L en="Not yet derivable. Still required:" ar="لا يمكن استنتاجه بعد. ما يزال مطلوباً:" />
-                <span style={{ display: 'block', marginBlockStart: 4, color: 'var(--accent-ink)' }}>
-                  {missingLabels.map((m, i) => (
-                    <span key={m.en} style={{ display: 'inline' }}>
-                      {i > 0 ? ' · ' : ''}
-                      <L en={m.en} ar={m.ar} />
-                    </span>
-                  ))}
-                </span>
-              </div>
-            )}
-            {derivation.governedBy ? (
-              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 6 }}>
-                {derivation.governedBy === 'score' ? (
-                  <L en="Governed by the assessment score" ar="يحكمه مجموع نقاط التقييم" />
-                ) : derivation.governedBy === 'minimumCondition' ? (
-                  <L en="Governed by a minimum condition" ar="يحكمه حد أدنى إلزامي" />
-                ) : (
-                  <L en="The score and a minimum condition give the same level" ar="يعطي المجموع والحد الأدنى المستوى نفسه" />
-                )}
-              </div>
+            {why.reason ? (
+              <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.6, maxWidth: '60ch' }}>
+                <L en={why.reason.en} ar={why.reason.ar} />
+              </p>
             ) : null}
+            {why.comparison ? (
+              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>
+                <L en={why.comparison.en} ar={why.comparison.ar} />
+                {' '}
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <L en={`(${derivation.scoreTotal} of ${maxScore} points)`} ar={`(${derivation.scoreTotal} من ${maxScore} نقطة)`} />
+                </span>
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <div style={{ fontSize: 16, lineHeight: 1.6 }}>
+            <L en="Please fill in:" ar="يرجى استكمال:" />
+            <span style={{ display: 'block', marginBlockStart: 4, color: 'var(--accent-ink)' }}>
+              {missingLabels.map((m, i) => (
+                <span key={m.en} style={{ display: 'inline' }}>
+                  {i > 0 ? ' · ' : ''}
+                  <L en={m.en} ar={m.ar} />
+                </span>
+              ))}
+            </span>
           </div>
-        </div>
+        )}
       </div>
 
       {error ? (
@@ -602,14 +520,6 @@ export function AssessmentForm({
           <L en="Save the assessment and open the event record" ar="حفظ التقييم وفتح سجل الفعالية" />
         )}
       </button>
-      {!derivation.complete ? (
-        <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-          <L
-            en="The level is derived once every domain is answered and every required figure is captured."
-            ar="يُستنتج المستوى بعد الإجابة عن جميع المجالات وإدخال جميع الأرقام المطلوبة."
-          />
-        </p>
-      ) : null}
     </div>
   );
 }

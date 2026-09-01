@@ -180,10 +180,13 @@ describe('non-negotiable 7 — the name gate catches the bare capitalized name',
   });
 });
 
-describe('non-negotiable 0 — the two venue floors have a real unset state', () => {
-  // Pass A: the event form seeded both flags `false`, so these two conditions could
-  // never report "incomplete naming the field" -- the level derived from a question
-  // nobody was asked. The form is now tri-state; these traps hold the rule.
+describe('non-negotiable 0 — the venue floor has a real unset state', () => {
+  // Pass A: the event form seeded the venue flags `false`, so the venue conditions
+  // could never report "incomplete naming the field" -- the level derived from a
+  // question nobody was asked. One venue floor remains (club; the recur condition was
+  // the Arabic issue's and English governs, partner ruling); the trap still holds:
+  // in the rebuilt form the event-type dropdown answers the flag, and an unchosen
+  // type leaves it null, which must surface as incomplete, never a level.
   const answers = Array(9).fill(0) as (0 | 1 | 2)[];
   const base = {
     expectedMaxSimultaneousAttendance: 500,
@@ -195,18 +198,17 @@ describe('non-negotiable 0 — the two venue floors have a real unset state', ()
   it('unanswered venue questions return incomplete, naming them — never a level', () => {
     const d = deriveLevel({
       answers,
-      inputs: { ...base, venueIsNightclubOrDanceVenue: null, venueRegularlyHostsOrganizedEvents: null },
+      inputs: { ...base, venueIsNightclubOrDanceVenue: null, },
     });
     expect(d.complete).toBe(false);
     expect(d.finalLevel).toBeNull();
     expect(d.missingInputs).toContain('venueIsNightclubOrDanceVenue');
-    expect(d.missingInputs).toContain('venueRegularlyHostsOrganizedEvents');
   });
 
   it('a definite No settles the condition and derives', () => {
     const d = deriveLevel({
       answers,
-      inputs: { ...base, venueIsNightclubOrDanceVenue: false, venueRegularlyHostsOrganizedEvents: false },
+      inputs: { ...base, venueIsNightclubOrDanceVenue: false, },
     });
     expect(d.complete).toBe(true);
     expect(d.finalLevel).toBe(1);
@@ -215,7 +217,7 @@ describe('non-negotiable 0 — the two venue floors have a real unset state', ()
   it('Yes without the capacity names the capacity as owed', () => {
     const d = deriveLevel({
       answers,
-      inputs: { ...base, venueIsNightclubOrDanceVenue: true, venueRegularlyHostsOrganizedEvents: false },
+      inputs: { ...base, venueIsNightclubOrDanceVenue: true, },
     });
     expect(d.complete).toBe(false);
     expect(d.missingInputs).toContain('venueLicensedCapacity');
@@ -228,7 +230,6 @@ describe('non-negotiable 0 — the two venue floors have a real unset state', ()
         ...base,
         venueLicensedCapacity: 1200,
         venueIsNightclubOrDanceVenue: true,
-        venueRegularlyHostsOrganizedEvents: false,
       },
     });
     expect(d.complete).toBe(true);

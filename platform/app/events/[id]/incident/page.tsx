@@ -40,7 +40,7 @@ export default async function IncidentPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>

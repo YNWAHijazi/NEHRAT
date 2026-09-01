@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import { RegisterFacilityForm } from './RegisterFacilityForm';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { publishedFacilityValues, unreadCountFor } from '../../../lib/queries';
@@ -35,19 +34,6 @@ export default async function RegisterFacilityPage() {
           />
         </p>
         <RegisterFacilityForm published={publishedFacilityValues()} />
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

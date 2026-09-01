@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { SubmitForm } from './SubmitForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
@@ -68,7 +67,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div data-region="package-docs" style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
@@ -164,27 +163,6 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           headerRows={headerRows}
         />
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${id}/acknowledgment`,
-              en: 'Acknowledgment',
-              ar: 'إشعار الاستلام',
-              descEn: 'The Ministry reference number. Give it to the authorising authority.',
-              descAr: 'الرقم المرجعي للوزارة. قدّموه إلى السلطة المرخِّصة.',
-              primary: true,
-            },
-            {
-              href: `/events/${id}/requirements`,
-              en: 'Requirements and attachments',
-              ar: 'المتطلبات والمرفقات',
-              descEn: 'Documents, named providers, requirements you certify to, inspections.',
-              descAr: 'المستندات والمزوّدون المُسمّون والمتطلبات التي تصدّقون عليها والتفتيش.',
-            },
-          ]}
-        />
       </main>
     </>
   );

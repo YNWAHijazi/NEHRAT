@@ -85,11 +85,19 @@ export function Header({
   organization,
   unreadCount,
   showBack,
+  back,
 }: {
   account: Account | null;
   organization: Organization | null;
   unreadCount: number;
   showBack: boolean;
+  /**
+   * Contextual back (partner review): from a requirement, back goes to the EVENT, not
+   * the dashboard — each step of dashboard → event → requirement is reachable. A child
+   * screen passes its parent here; without it the pill falls back to the role's landing
+   * surface, which is right for top-level screens and was previously the only target.
+   */
+  back?: { href: string; en: string; ar: string };
 }) {
   return (
     <header
@@ -117,7 +125,7 @@ export function Header({
         <MinistryMark account={account} />
         {showBack ? (
           <Link
-            href={account ? landingRouteFor(account.role) : '/'}
+            href={back ? back.href : account ? landingRouteFor(account.role) : '/'}
             style={{
               height: 36,
               paddingInline: 15,
@@ -146,7 +154,9 @@ export function Header({
             >
               <path d="M15 5l-7 7 7 7" />
             </svg>
-            {account ? (
+            {back ? (
+              <L en={back.en} ar={back.ar} />
+            ) : account ? (
               <L en="Dashboard" ar="اللوحة" />
             ) : (
               // The same label every public screen uses for this destination.

@@ -1,5 +1,5 @@
 {
-  "$comment": "The ten minimum conditions: the UNION of the English and Arabic issues of Annex A Part D -- a reconciliation, not the regulation, standing because a union can only raise a level (SPEC 1). Each row's `issue` tags which issue carries it; `club` is English-only and its Arabic is a translation pending the Ministry. `derivation` is the build's own -- the prototype used manual checkboxes for seven of these (non-negotiable #0).",
+  "$comment": "The minimum conditions of Annex A Part D. ENGLISH GOVERNS (partner ruling, 2026-09-01): the earlier build carried the UNION of the English and Arabic issues -- eleven months of 'ten conditions' -- because the two issues disagree on one row: English Part D has 'Nightclub or dance venue licensed for 1,000 or more' (club) where the Arabic issue generalizes the same row to any venue regularly hosting organized events (recur). The partner ruled the English issue's content is what is built, so recur is REMOVED and the nine English rows stand. The venue INSTRUMENT (annual classification of recurring venues, Protocol 3.1) is unaffected -- that criterion is English text; only the event-side minimum condition goes. Each row's `issue` tag is provenance and is no longer rendered. `derivation` is the build's own -- the prototype used manual checkboxes for seven of these (non-negotiable #0). reasonEn/reasonAr are the lay one-line explanations the result panel shows; they live beside the thresholds they describe so a Ministry threshold edit updates both in one row.",
   "requiredInputs": {
     "expectedMaxSimultaneousAttendance": {
       "type": "integer",
@@ -49,7 +49,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because between 10,000 and 19,999 people are expected at the same time.",
+      "reasonAr": "لأنه يُتوقّع حضور ما بين 10,000 و19,999 شخصاً في الوقت نفسه."
     },
     {
       "key": "att3",
@@ -65,7 +67,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because 20,000 or more people are expected at the same time.",
+      "reasonAr": "لأنه يُتوقّع حضور 20,000 شخص أو أكثر في الوقت نفسه."
     },
     {
       "key": "club",
@@ -86,27 +90,9 @@
         ]
       },
       "issue": "en-only",
-      "arabicIsTranslation": true
-    },
-    {
-      "key": "recur",
-      "level": 2,
-      "en": "Venue regularly hosting organized events, licensed for 1,000 or more",
-      "ar": "موقع يستضيف فعاليات منظمة بصورة منتظمة، وتبلغ سعته المعتمدة أو المرخّصة 1,000 شخص أو أكثر",
-      "derivation": {
-        "all": [
-          {
-            "input": "venueRegularlyHostsOrganizedEvents",
-            "op": "isTrue"
-          },
-          {
-            "input": "venueLicensedCapacity",
-            "op": "gte",
-            "value": 1000
-          }
-        ]
-      },
-      "issue": "ar-only"
+      "arabicIsTranslation": true,
+      "reasonEn": "Because the venue is a nightclub or dance venue licensed for 1,000 or more.",
+      "reasonAr": "لأن الموقع ملهى ليلي أو صالة رقص مرخّصة لـ1,000 شخص أو أكثر."
     },
     {
       "key": "run",
@@ -124,7 +110,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes an organized running event.",
+      "reasonAr": "لأنها تتضمن فعالية جري منظمة."
     },
     {
       "key": "run21",
@@ -147,7 +135,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes a running course of 21.1 km or more.",
+      "reasonAr": "لأنها تتضمن مسار جري بطول 21.1 كلم أو أكثر."
     },
     {
       "key": "tri",
@@ -165,7 +155,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes a triathlon.",
+      "reasonAr": "لأنها تتضمن سباقاً ثلاثياً (ترياتلون)."
     },
     {
       "key": "open",
@@ -183,7 +175,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes organized open-water swimming.",
+      "reasonAr": "لأنها تتضمن سباحة منظمة في المياه المفتوحة."
     },
     {
       "key": "combat",
@@ -204,7 +198,9 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes a boxing, kickboxing, Muay Thai or mixed martial arts competition.",
+      "reasonAr": "لأنها تتضمن منافسة في الملاكمة أو الكيك بوكسينغ أو المواي تاي أو الفنون القتالية المختلطة."
     },
     {
       "key": "motor",
@@ -222,7 +218,20 @@
           }
         ]
       },
-      "issue": "both"
+      "issue": "both",
+      "reasonEn": "Because it includes competitive motor racing.",
+      "reasonAr": "لأنها تتضمن سباق سيارات تنافسياً."
     }
-  ]
+  ],
+  "reasons": {
+    "$comment": "The result panel's why-lines when no single condition governs. {score} interpolates the total; {level} the level.",
+    "scoreEn": "Because the answers add up to {score} points.",
+    "scoreAr": "لأن مجموع الإجابات {score} نقطة.",
+    "bothEn": "The points and a minimum condition both give this level.",
+    "bothAr": "يعطي مجموع النقاط وأحد الحدود الدنيا هذا المستوى نفسه.",
+    "comparisonEn": "Points: Level {scoreLevel}. Minimum condition: Level {conditionLevel}. The higher applies.",
+    "comparisonAr": "النقاط: المستوى {scoreLevel}. الحد الأدنى: المستوى {conditionLevel}. ويُعتمد الأعلى.",
+    "scoreOnlyEn": "Points: Level {scoreLevel}. No minimum condition applies.",
+    "scoreOnlyAr": "النقاط: المستوى {scoreLevel}. ولا ينطبق أي حد أدنى."
+  }
 }

@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { VenueAssessmentForm } from './VenueAssessmentForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { unreadCountFor, venueAssessmentsFor, venueById, venueChangeSinceAssessment } from '../../../../lib/queries';
@@ -48,7 +47,7 @@ export default async function VenueAssessmentPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/venues/${id}`, en: 'Venue record', ar: 'سجل الموقع' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <VenueAssessmentForm
           venueId={venue.id}
@@ -68,19 +67,6 @@ export default async function VenueAssessmentPage({
           effectivePreview={effectivePreview}
           validPreview={validPreview}
           triggers={[...VENUE_REASSESSMENT_TRIGGERS]}
-        />
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/venues/${venue.id}`,
-              en: 'Venue record',
-              ar: 'سجل الموقع',
-              descEn: 'The classification, its validity, and what the venue owes.',
-              descAr: 'التصنيف وصلاحيته وما يستحق على الموقع.',
-            },
-          ]}
         />
       </main>
     </>

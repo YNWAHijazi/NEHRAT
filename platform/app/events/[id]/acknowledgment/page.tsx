@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { PrintButton } from '../../../../components/PrintButton';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
   assessmentsFor,
@@ -54,7 +53,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Acknowledgment of receipt" ar="إشعار الاستلام" />
@@ -175,31 +174,6 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
 
         {filed ? <PrintBar /> : null}
 
-        <SequenceFooter
-          labelEn="Where this record leads"
-          labelAr="إلى أين يقود هذا السجل"
-          steps={[
-            {
-              href: `/events/${id}`,
-              en: 'Event record',
-              ar: 'سجل الفعالية',
-              descEn: 'Level, filing date and submission history.',
-              descAr: 'المستوى وتاريخ التقديم وسجل التقديم.',
-              primary: true,
-            },
-            ...(filed
-              ? [
-                  {
-                    href: `/events/${id}/change`,
-                    en: 'Report a material change',
-                    ar: 'الإبلاغ عن تغيير جوهري',
-                    descEn: 'After submission, any change to the enumerated list or a domain answer.',
-                    descAr: 'بعد التقديم، أي تغيير في القائمة المحددة أو في إجابة مجال.',
-                  },
-                ]
-              : []),
-          ]}
-        />
       </main>
     </>
   );

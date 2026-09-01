@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { beirutToday } from '../../../lib/clock';
 import {
@@ -382,26 +381,6 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
         </div>
         </div>
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/venues/${venue.id}/change`,
-              en: 'Report a change',
-              ar: 'الإبلاغ عن تغيير',
-              descEn: 'A material change to the venue requires reassessment before the annual date.',
-              descAr: 'التغيير الجوهري في الموقع يستوجب إعادة التقييم قبل الموعد السنوي.',
-            },
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

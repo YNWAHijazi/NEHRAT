@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
-import { SequenceFooter } from '../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { notificationsFor, unreadCountFor } from '../../lib/queries';
 import { markNotificationReadAction } from '../actions';
@@ -50,8 +49,8 @@ export default async function NotificationsPage({
         </h1>
         <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
           <L
-            en="Everything the Ministry, a named party or the platform has sent. Each row opens the record it concerns; the record is where the obligation lives, not the notification."
-            ar="كل ما أرسلته الوزارة أو جهة مُسمّاة أو المنصة. يفتح كل صف السجل الذي يخصه؛ فالموجب يقع على السجل لا على الإشعار."
+            en="Each row opens the record it concerns."
+            ar="كل صف يفتح السجل الذي يخصّه."
           />
         </p>
 
@@ -141,20 +140,6 @@ export default async function NotificationsPage({
           </div>
         )}
 
-        <SequenceFooter
-          labelEn="Where this screen leads"
-          labelAr="إلى أين تقود هذه الشاشة"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-              primary: true,
-            },
-          ]}
-        />
       </main>
     </>
   );

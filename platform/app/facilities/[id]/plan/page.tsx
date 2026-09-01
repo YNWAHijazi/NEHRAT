@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { PlanConfirmation, PersonsForm, PrintButton } from './PlanConfirmation';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
@@ -74,7 +73,7 @@ export default async function FacilityPlanPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
           <L en={`${facility.nameEn} · ${facility.id}`} ar={`${facility.nameAr} · ${facility.id}`} />
@@ -192,19 +191,6 @@ export default async function FacilityPlanPage({
           existing={confirmation}
         />
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/facilities/${facility.id}`,
-              en: 'Facility readiness',
-              ar: 'جاهزية المرفق',
-              descEn: 'The validity ledger and the standing state.',
-              descAr: 'سجل الصلاحية والحالة القائمة.',
-            },
-          ]}
-        />
       </main>
     </>
   );

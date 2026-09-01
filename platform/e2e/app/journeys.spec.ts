@@ -64,24 +64,18 @@ for (const lang of LANGUAGES) {
       await fillLabelled(page, 'Event name (Arabic)', `رحلة ${stamp}`);
       await fillLabelled(page, 'Start date', '2026-10-02');
       await fillLabelled(page, 'End date', '2026-10-02');
-      await fillLabelled(page, 'Event type', 'Indoor recreational gathering');
+      await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
       await fillLabelled(page, 'Venue, route, or location', 'Municipal hall, Jounieh');
       await fillLabelled(page, 'Municipality or municipalities', 'Jounieh');
       await fillLabelled(page, 'Opening time', '14:00');
       await fillLabelled(page, 'Closing time', '18:00');
       await fillLabelled(page, 'Expected participants', '80');
-      await fillLabelled(page, 'Expected spectators or attendees', '40');
-      await fillLabelled(page, 'Expected staff, performers, contractors, and volunteers', '10');
-      await fillLabelled(page, 'Expected maximum simultaneous attendance', '120');
+      await fillLabelled(page, 'Expected spectators', '40');
+      await fillLabelled(page, 'Expected staff and volunteers', '10');
 
-      // THE TWO VENUE QUESTIONS ARE ANSWERED BY THE ORGANIZER, not by the form on
-      // their behalf -- an unanswered pair derives nothing (non-negotiable 0). In
-      // Arabic these are the same controls in a mirrored layout, which is the half a
-      // per-string parity check cannot see.
-      const noPills = page.locator('button[data-yesno="no"]');
-      await expect(noPills).toHaveCount(2);
-      await noPills.nth(0).click();
-      await noPills.nth(1).click();
+      // The event-type dropdown answers the venue question; no separate venue
+      // yes/no controls exist any more (partner review: picking the type IS the
+      // floor input).
 
       // Every domain at score 0, so the level derives to 1 rather than being chosen.
       const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');

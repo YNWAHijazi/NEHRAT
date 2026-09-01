@@ -125,5 +125,9 @@
     "$comment": "Added at reviewer instruction (handoff 5 approval): said wherever an organizer could mistake the classification for an event certification.",
     "en": "This classification sets a floor for events held at the venue: no event here can be classified below it. It does not certify any event — each event completes its own assessment and its own submission.",
     "ar": "يحدد هذا التصنيف حداً أدنى للفعاليات المقامة في الموقع: لا يمكن تصنيف أي فعالية هنا دونه. وهو لا يعتمد أي فعالية — فكل فعالية تستكمل تقييمها الخاص وتقديمها الخاص."
+  },
+  "registrationCriterion": {
+    "$comment": "Protocol 3.1, English issue: a recurring event venue that regularly hosts organized events AND has an approved or licensed capacity of this many persons or more is classified annually. This threshold used to be read from the recur minimum condition; the partner ruling (English governs) removed that condition, and the venue instrument keeps the criterion, so the number lives here now.",
+    "minLicensedCapacity": 1000
   }
 }

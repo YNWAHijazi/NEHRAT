@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
 import { invitationForEvent, governanceFor, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
@@ -19,6 +18,7 @@ import {
 } from '../../../lib/queries';
 import {
   DOMAIN_COUNT,
+  levelWhy,
   MAX_SCORE_PER_DOMAIN,
   eventFilingDeadline,
   eventMedicalDirectorGate, eventStage, nextAction, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
@@ -262,6 +262,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const versions = assessmentsFor(account.id, id);
   const latest = versions[0] ?? null;
   const derivation = latest?.derivation ?? null;
+  const why = derivation ? levelWhy(derivation) : null;
   const today = beirutToday();
 
   const gateCtx: EventGateContext = {
@@ -319,7 +320,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const stages: RailStage[] = [
     orgRecorded
       ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization?.recordedAt ?? '', metaAr: organization?.recordedAt ? `\u2066${organization.recordedAt}\u2069` : '' }
-      : { k: 'current', en: 'Organization recording', ar: 'تسجيل المؤسسة', metaEn: 'Pending with the Ministry. Filing waits for it.', metaAr: 'قيد الاستكمال لدى الوزارة. التقديم بانتظاره.' },
+      : { k: 'current', en: 'Organization recording', ar: 'تسجيل المؤسسة', metaEn: 'With the Ministry', metaAr: 'لدى الوزارة' },
     assessed
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
       : { k: 'current', en: 'Assessment', ar: 'التقييم', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
@@ -333,12 +334,12 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
       : { k: 'todo', en: 'Submitted', ar: 'التقديم', metaEn: filing ? `File by ${filing.date}` : '', metaAr: filing ? `التقديم بحلول \u2066${filing.date}\u2069` : '' },
     event.outcome
       ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: event.stateEn, metaAr: event.stateAr }
-      : { k: event.filed ? 'current' : 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'One of three outcomes', metaAr: 'إحدى ثلاث نتائج' },
+      : { k: event.filed ? 'current' : 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'Waiting for the Ministry', metaAr: 'بانتظار الوزارة' },
     level === 3
       ? stage === POST_EVENT_STAGE
         ? { k: 'current', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Open now — within 7 days of the event', metaAr: 'مفتوح الآن — خلال 7 أيام من الفعالية' }
         : { k: reportSubmitted ? 'done' : 'todo', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
-      : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Owed only after a reportable event or on Ministry request', metaAr: 'يُستحق فقط بعد واقعة واجبة الإبلاغ أو بطلب الوزارة' },
+      : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Not needed for this event', metaAr: 'غير مطلوب لهذه الفعالية' },
   ];
   const railNoteEn = `Stage ${stage} of ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · stage ${POST_EVENT_STAGE} not applicable`);
   const railNoteAr = `المرحلة ${stage} من ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · المرحلة ${POST_EVENT_STAGE} غير منطبقة`);
@@ -533,75 +534,46 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </p>
         ) : null}
 
-        {/* The derivation: both results, and which governed. Never the final level alone. */}
+        {/* The level and one line why (partner review). Both results and which governed
+            stay reported, compactly -- the full condition-by-condition detail is the
+            Ministry reviewer's screen, not the organizer's (non-negotiable 1 holds). */}
         {derivation ? (
           <div data-region="derivation" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 40 }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 18 }}>
-              <L en="How the level was determined" ar="كيف تحدد المستوى" />
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
+              <L en="Level" ar="المستوى" />
             </div>
-            <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, alignItems: 'start' }}>
-              <div>
-                <div style={upLabel}>
-                  <L en="Assessment score" ar="مجموع نقاط التقييم" />
+            {level !== null ? (
+              <>
+                <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-.02em', color: `var(--l${level})` }}>
+                  <L en={`Level ${level}`} ar={`المستوى ${level}`} />
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                  {derivation.scoreTotal ?? '—'}
-                  <span style={{ fontSize: 14, fontWeight: 400, color: 'var(--muted)' }}> / {DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN}</span>
-                </div>
-                <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
-                  {derivation.scoreBandLevel !== null ? (
-                    <L en={`Score band: Level ${derivation.scoreBandLevel}`} ar={`نطاق النقاط: المستوى ${derivation.scoreBandLevel}`} />
-                  ) : (
-                    <L en="Incomplete" ar="غير مكتمل" />
-                  )}
-                </div>
-              </div>
-              <div>
-                <div style={upLabel}>
-                  <L en="Minimum conditions" ar="الحدود الدنيا الإلزامية" />
-                </div>
-                {derivation.triggeredConditions.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {derivation.triggeredConditions.map((c) => (
-                      <div key={c.key} style={{ fontSize: '13.5px', lineHeight: 1.5 }}>
-                        <span style={{ display: 'inline-block', padding: '1px 7px', borderRadius: 999, background: `var(--l${c.level}s)`, borderInlineStart: `2px solid var(--l${c.level})`, marginInlineEnd: 7 }}>
-                          <L en={`Level ${c.level}`} ar={`المستوى ${c.level}`} />
-                        </span>
-                        <L en={c.en} ar={c.ar} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-                    <L en="None triggered" ar="لم يُستوفَ أي حد" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <div style={upLabel}>
-                  <L en="Final event level — the higher of the two" ar="المستوى النهائي — الأعلى من الاثنين" />
-                </div>
-                <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', color: level ? `var(--l${level})` : 'var(--muted)' }}>
-                  {level !== null ? <L en={`Level ${level}`} ar={`المستوى ${level}`} /> : <L en="Not yet derived" ar="لم يُستنتج بعد" />}
-                </div>
-                {derivation.governedBy ? (
-                  <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
-                    <L
-                      en={messageFor(enMessages, `level.governedBy${derivation.governedBy === 'score' ? 'Score' : derivation.governedBy === 'minimumCondition' ? 'MinimumCondition' : 'Both'}`)}
-                      ar={messageFor(arMessages, `level.governedBy${derivation.governedBy === 'score' ? 'Score' : derivation.governedBy === 'minimumCondition' ? 'MinimumCondition' : 'Both'}`)}
-                    />
-                  </div>
+                {why?.reason ? (
+                  <p style={{ margin: '6px 0 0', fontSize: 15, lineHeight: 1.6, maxWidth: '60ch' }}>
+                    <L en={why.reason.en} ar={why.reason.ar} />
+                  </p>
                 ) : null}
-                {!derivation.complete && derivation.missingInputs.length > 0 ? (
-                  <div style={{ fontSize: '13.5px', color: 'var(--accent-ink)', marginBlockStart: 6, lineHeight: 1.5 }}>
-                    <L
-                      en={messageFor(enMessages, 'gate.assessmentIncomplete')}
-                      ar={messageFor(arMessages, 'gate.assessmentIncomplete')}
-                    />
-                  </div>
+                {why?.comparison ? (
+                  <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>
+                    <L en={why.comparison.en} ar={why.comparison.ar} />{' '}
+                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      <L en={`(${derivation.scoreTotal} of ${DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} points)`} ar={`(${derivation.scoreTotal} من ${DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} نقطة)`} />
+                    </span>
+                  </p>
                 ) : null}
+              </>
+            ) : (
+              <div style={{ fontSize: 15, lineHeight: 1.6 }}>
+                <span style={{ color: 'var(--muted)' }}>
+                  <L en="Not yet derived." ar="لم يُستنتج بعد." />
+                </span>{' '}
+                <span style={{ color: 'var(--accent-ink)' }}>
+                  <L
+                    en={messageFor(enMessages, 'gate.assessmentIncomplete')}
+                    ar={messageFor(arMessages, 'gate.assessmentIncomplete')}
+                  />
+                </span>
               </div>
-            </div>
+            )}
           </div>
         ) : null}
 
@@ -661,8 +633,8 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
             </div>
             <div style={{ fontSize: '15.5px', lineHeight: 1.6 }}>
               <L
-                en="An Event Medical Director — a licensed physician — is required. The organizer cannot file the Level 3 package without one. Nomination is made from the requirements screen."
-                ar="يلزم مدير طبي للفعالية — طبيب مرخّص. لا يمكن للمنظّم تقديم ملف المستوى 3 من دونه. يتم الترشيح من شاشة المتطلبات."
+                en="A licensed physician must be named as Event Medical Director before you can file. Name one from the requirements screen."
+                ar="يجب تسمية طبيب مرخّص مديراً طبياً للفعالية قبل التقديم. يمكن تسميته من شاشة المتطلبات."
               />
             </div>
           </div>
@@ -729,37 +701,23 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
           </>
         ) : null}
 
-                {event.lifecycle !== 'cancelled' ? (
+        {event.lifecycle !== 'cancelled' ? (
           <div style={{ marginBlockEnd: 28 }}>
-            <Link href={`/events/${event.id}/edit`} style={{ fontSize: '13.5px', color: 'var(--muted)', textDecoration: 'underline', marginInlineEnd: 20 }}>
-              <L en="Edit event details" ar="تعديل تفاصيل الفعالية" />
-            </Link>
+            {/* ABSENT once filed, not greyed: after filing, editing the details never
+                applies again -- Report a material change is the instrument's route, and
+                it appears exactly when this disappears. Before filing, editing stays
+                (partner review; the walkthrough found an event editable after its
+                determination was recorded). */}
+            {!event.filed ? (
+              <Link href={`/events/${event.id}/edit`} style={{ fontSize: '13.5px', color: 'var(--muted)', textDecoration: 'underline', marginInlineEnd: 20 }}>
+                <L en="Edit event details" ar="تعديل تفاصيل الفعالية" />
+              </Link>
+            ) : null}
             <Link href={`/events/${event.id}/lifecycle`} style={{ fontSize: '13.5px', color: 'var(--muted)', textDecoration: 'underline' }}>
               <L en={LIFECYCLE_CONTENT.control.linkEn} ar={LIFECYCLE_CONTENT.control.linkAr} />
             </Link>
           </div>
         ) : null}
-        <SequenceFooter
-          labelEn="Where this record leads"
-          labelAr="إلى أين يقود هذا السجل"
-          steps={[
-            {
-              href: `/events/${event.id}/requirements`,
-              en: 'Requirements and attachments',
-              ar: 'المتطلبات والمرفقات',
-              descEn: 'Everything the derived level requires, in the order it needs acting on.',
-              descAr: 'كل ما يتطلبه المستوى المستنتج، بالترتيب الذي يستدعي التصرف.',
-              primary: true,
-            },
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-            },
-          ]}
-        />
       </main>
     </>
   );

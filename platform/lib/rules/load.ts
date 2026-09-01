@@ -8,6 +8,7 @@
 
 import domainsJson from './data/domains.json';
 import minimumConditionsJson from './data/minimum-conditions.json';
+import venueJson from './data/venue.json';
 import levelsJson from './data/levels.json';
 import authPolicyJson from './data/auth-policy.json';
 import type { Level, Predicate } from './types';
@@ -42,6 +43,9 @@ export interface MinimumCondition {
   readonly issue: 'both' | 'en-only' | 'ar-only';
   /** True where the row's Arabic is a translation pending the Ministry (club). */
   readonly arabicIsTranslation: boolean;
+  /** Lay one-line why, shown when this condition governs the level. */
+  reasonEn: string;
+  reasonAr: string;
 }
 
 export interface Band {
@@ -68,18 +72,6 @@ export const DOMAIN_COUNT: number = domainsJson.domainCount;
 /** Which issue of the instrument scores assessments; stamped onto every assessment row. */
 export const NEHRAT_TOOL_VERSION: string = domainsJson.toolVersion;
 
-export interface ArabicOnlyNote {
-  readonly where: string;
-  readonly ar: string;
-  readonly en: string;
-  readonly source: string;
-}
-
-/**
- * Deltas the Arabic issue of Annex A carries that the English lacks, surfaced as
- * source-tagged notes rather than folded in silently (handoff 5, decision 1).
- */
-export const ARABIC_ONLY_NOTES: readonly ArabicOnlyNote[] = domainsJson.arabicOnlyNotes;
 export const MAX_SCORE_PER_DOMAIN: number = domainsJson.maxScorePerDomain;
 
 export const MINIMUM_CONDITIONS: readonly MinimumCondition[] =
@@ -91,20 +83,25 @@ export const MINIMUM_CONDITIONS: readonly MinimumCondition[] =
     derivation: c.derivation as Predicate,
     issue: (c as { issue?: MinimumCondition['issue'] }).issue ?? 'both',
     arabicIsTranslation: Boolean((c as { arabicIsTranslation?: boolean }).arabicIsTranslation),
+    reasonEn: c.reasonEn,
+    reasonAr: c.reasonAr,
   }));
 
+/** The result panel's why-line templates when no single condition governs. Data, not code. */
+export const LEVEL_REASON_TEMPLATES = minimumConditionsJson.reasons;
+
 /**
- * The recurring-venue capacity threshold, read from the recur condition's own predicate
- * so the registration screen and the derivation can never disagree (SPEC 3).
+ * The venue-registration capacity threshold, Protocol 3.1 (English issue). It used to be
+ * read from the recur minimum condition; the partner ruling (English governs, 2026-09-01)
+ * removed that condition while the venue instrument keeps the criterion, so the number
+ * lives in venue.json now. Registration screen and eligibility rule read one value.
  */
 export const RECURRING_VENUE_MIN_CAPACITY: number = (() => {
-  const recur = MINIMUM_CONDITIONS.find((c) => c.key === 'recur');
-  const all = (recur?.derivation as { all?: { input?: string; op?: string; value?: number }[] })?.all ?? [];
-  const leaf = all.find((l) => l.input === 'venueLicensedCapacity' && l.op === 'gte');
-  if (typeof leaf?.value !== 'number') {
-    throw new Error('minimum-conditions.json: the recur condition no longer carries a venueLicensedCapacity gte threshold');
+  const v = (venueJson as { registrationCriterion?: { minLicensedCapacity?: number } }).registrationCriterion;
+  if (typeof v?.minLicensedCapacity !== 'number') {
+    throw new Error('venue.json: registrationCriterion.minLicensedCapacity is missing');
   }
-  return leaf.value;
+  return v.minLicensedCapacity;
 })();
 
 export const BANDS: readonly Band[] = levelsJson.bands.map((b) => ({

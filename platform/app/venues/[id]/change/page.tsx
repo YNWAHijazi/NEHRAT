@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { VenueChangeForm } from './VenueChangeForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { unreadCountFor, venueById, venueChangesFor } from '../../../../lib/queries';
@@ -32,7 +31,7 @@ export default async function VenueChangePage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/venues/${id}`, en: 'Venue record', ar: 'سجل الموقع' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
@@ -85,26 +84,6 @@ export default async function VenueChangePage({
           ) : null}
         </div>
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/venues/${venue.id}/assessment`,
-              en: 'Annual assessment',
-              ar: 'التقييم السنوي',
-              descEn: 'A reported change opens the reassessment regardless of the annual window.',
-              descAr: 'الإبلاغ عن تغيير يفتح إعادة التقييم بصرف النظر عن النافذة السنوية.',
-            },
-            {
-              href: `/venues/${venue.id}`,
-              en: 'Venue record',
-              ar: 'سجل الموقع',
-              descEn: 'The classification, its validity, and what the venue owes.',
-              descAr: 'التصنيف وصلاحيته وما يستحق على الموقع.',
-            },
-          ]}
-        />
       </main>
     </>
   );

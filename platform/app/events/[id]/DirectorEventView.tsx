@@ -7,7 +7,6 @@
 import Link from 'next/link';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import type { Account } from '../../../lib/auth';
 import type { InvitationDetail } from '../../../lib/queries';
 import { ROLES_CONTENT, directorRequirements, filingDeadline } from '../../../lib/rules';
@@ -169,26 +168,6 @@ export function DirectorEventView({
           </div>
         </div>
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${invitation.eventId}/governance`,
-              en: 'Clinical governance and medical command',
-              ar: 'الحوكمة السريرية والقيادة الطبية',
-              descEn: "Yours to write; it lands in the organizer's plan.",
-              descAr: 'من كتابتكم؛ ويُدرج في خطة المنظّم.',
-            },
-            {
-              href: `/events/${invitation.eventId}/report`,
-              en: 'Post-event medical report',
-              ar: 'التقرير الطبي لما بعد الفعالية',
-              descEn: 'Two signatures at Level 3; yours is one of them.',
-              descAr: 'توقيعان في المستوى 3؛ توقيعكم أحدهما.',
-            },
-          ]}
-        />
       </main>
     </>
   );

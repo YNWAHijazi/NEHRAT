@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import {
   facilityDetail,
@@ -322,33 +321,6 @@ export default async function FacilityReadinessPage({
           </div>
         ) : null}
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/facilities/${facility.id}/devices`,
-              en: 'AED registry',
-              ar: 'سجل أجهزة إزالة الرجفان',
-              descEn: 'Each device is a separate record: confirm, relocate, replace.',
-              descAr: 'كل جهاز سجل مستقل: تأكيد أو نقل أو استبدال.',
-            },
-            {
-              href: `/facilities/${facility.id}/plan`,
-              en: 'Cardiac emergency response plan',
-              ar: 'خطة الاستجابة لطوارئ توقف القلب',
-              descEn: 'The structured plan, its derived device section and the annual confirmation.',
-              descAr: 'الخطة المنظّمة وقسم أجهزتها المستمد والتأكيد السنوي.',
-            },
-            {
-              href: `/facilities/${facility.id}/incidents/new`,
-              en: 'Facility cardiac-arrest incident report',
-              ar: 'تقرير حادثة توقف القلب في المرفق',
-              descEn: 'Filed after any suspected cardiac arrest, CPR attempt or AED use.',
-              descAr: 'يُقدَّم بعد أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام جهاز.',
-            },
-          ]}
-        />
       </main>
     </>
   );

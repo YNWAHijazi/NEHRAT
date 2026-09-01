@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { SourceDivergence } from '../../../../components/SourceDivergence';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { InviteForm } from './InviteForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
@@ -180,7 +179,7 @@ export default async function RequirementsPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
@@ -503,7 +502,7 @@ export default async function RequirementsPage({
                   ) : null}
                   {governance['command']?.trim() ? (
                     <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
-                      <L en="Medical-command arrangements written by the Director — requirement 15 addressed; the text sits in plan section 10." ar="كتب المدير الترتيبات للقيادة الطبية — المتطلب 15 مُعالَج؛ والنص في البند 10 من الخطة." />
+                      <L en="The Director has written the medical-command arrangements; the text is in the plan." ar="كتب المدير ترتيبات القيادة الطبية؛ والنص في الخطة." />
                     </div>
                   ) : null}
                 </div>
@@ -704,34 +703,6 @@ export default async function RequirementsPage({
           )}
         </details>
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${id}/plan`,
-              en: 'Health and medical plan',
-              ar: 'خطة التأهب الصحي والطبي',
-              descEn: 'Sixteen sections. Write here or attach a plan you already hold.',
-              descAr: 'ستة عشر بنداً. اكتبوها هنا أو أرفقوا خطة تملكونها.',
-              primary: true,
-            },
-            {
-              href: `/events/${id}/submit`,
-              en: 'Submission package',
-              ar: 'حزمة التقديم',
-              descEn: 'The compliance form and the package, completed on the platform.',
-              descAr: 'نموذج الامتثال والحزمة، يُستكملان على المنصة.',
-            },
-            {
-              href: `/events/${id}`,
-              en: 'Event record',
-              ar: 'سجل الفعالية',
-              descEn: 'Level, filing date and submission history.',
-              descAr: 'المستوى وتاريخ التقديم وسجل التقديم.',
-            },
-          ]}
-        />
       </main>
     </>
   );

@@ -10,6 +10,7 @@ export * from './types';
 export * from './load';
 export * from './predicate';
 export * from './derive';
+export * from './why';
 export * from './deadlines';
 export * from './scope';
 export * from './public-lookup';

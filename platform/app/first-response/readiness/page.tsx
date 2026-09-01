@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
-import { SequenceFooter } from '../../../components/SequenceFooter';
 import { ReadinessChecklist } from './ReadinessChecklist';
 import { currentAccount } from '../../../lib/auth';
 import { frReadinessFor, frReportsFor, unreadCountFor } from '../../../lib/queries';
@@ -89,19 +88,6 @@ export default async function FirstResponseReadinessPage() {
           </div>
         </div>
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: '/first-response/reports/new',
-              en: 'Minimum dataset',
-              ar: 'الحد الأدنى للبيانات',
-              descEn: 'One report per patient, five sections, no patient name.',
-              descAr: 'تقرير واحد لكل مريض، خمسة أقسام، دون اسم المريض.',
-            },
-          ]}
-        />
       </main>
     </>
   );

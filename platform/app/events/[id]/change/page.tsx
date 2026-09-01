@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { ChangeForm } from './ChangeForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { eventFor, materialChangesFor, unreadCountFor } from '../../../../lib/queries';
@@ -35,7 +34,7 @@ export default async function ChangePage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
@@ -92,27 +91,6 @@ export default async function ChangePage({
           ) : null}
         </div>
 
-        <SequenceFooter
-          labelEn="Where this record leads"
-          labelAr="إلى أين يقود هذا السجل"
-          steps={[
-            {
-              href: `/events/${id}`,
-              en: 'Event record',
-              ar: 'سجل الفعالية',
-              descEn: 'Level, filing date and submission history.',
-              descAr: 'المستوى وتاريخ التقديم وسجل التقديم.',
-              primary: true,
-            },
-            {
-              href: `/events/${id}/requirements`,
-              en: 'Requirements and attachments',
-              ar: 'المتطلبات والمرفقات',
-              descEn: 'Where a revised document is re-attached if the Ministry requires one.',
-              descAr: 'حيث يُعاد إرفاق مستند منقّح إذا طلبته الوزارة.',
-            },
-          ]}
-        />
       </main>
     </>
   );

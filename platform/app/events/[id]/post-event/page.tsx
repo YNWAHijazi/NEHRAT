@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { PostEventForm } from './PostEventForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { clockNow } from '../../../../lib/clock';
@@ -89,7 +88,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
@@ -191,27 +190,6 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
           />
         </div>
 
-        <SequenceFooter
-          labelEn="Where this record leads"
-          labelAr="إلى أين يقود هذا السجل"
-          steps={[
-            {
-              href: '/dashboard',
-              en: 'Dashboard',
-              ar: 'اللوحة',
-              descEn: 'Every record on this account, and what each one owes.',
-              descAr: 'كل سجل على هذا الحساب وما يستحق على كل منها.',
-              primary: true,
-            },
-            {
-              href: `/events/${id}`,
-              en: 'Event record',
-              ar: 'سجل الفعالية',
-              descEn: 'Level, filing date and submission history.',
-              descAr: 'المستوى وتاريخ التقديم وسجل التقديم.',
-            },
-          ]}
-        />
       </main>
     </>
   );

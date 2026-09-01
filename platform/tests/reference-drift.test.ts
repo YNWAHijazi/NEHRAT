@@ -31,6 +31,33 @@ const inPack = (recorded: string): string =>
 
 const REGENERATE = 'npm run rules:regenerate';
 
+/**
+ * THE PARTNER RULING (2026-09-01): ENGLISH GOVERNS. The prototype and snapshot carry
+ * the UNION of the English and Arabic issues; the build now carries the English issue's
+ * content, and this map is the exact, exhaustive difference. Drift is still caught
+ * everywhere else: the build must equal the snapshot TRANSFORMED BY THESE RULINGS,
+ * string for string — a ruled row asserts its ruled value verbatim, never merely
+ * "different from the snapshot".
+ */
+const RULINGS = {
+  // The one row the two issues disagree on: English Part D has the nightclub/dance
+  // venue row (club); the Arabic issue generalizes the same row to any recurring venue
+  // (recur). English governs, so recur is removed and nine conditions stand.
+  removedConditions: ['recur'],
+  // Arabic strings become translations of the English content where the Arabic issue
+  // added or narrowed. Asserted verbatim so a later hand-edit still fails here.
+  arOverrides: {
+    'domain2.option0': 'مؤتمر أو اجتماع أو معرض أو مراسم أو فعالية أخرى لا تتضمن نشاطاً بدنياً منظماً',
+    'domain6.option2': 'يكون موقع الفعالية وموعدها مشمولين بتحذير رسمي بشأن خطر متعلق بالطقس أو البيئة',
+  } as Record<string, string>,
+  // The domain 4 duration note was rewritten to lay language (partner review). Ruled
+  // values, both languages, asserted verbatim below.
+  noteOverrides: {
+    'domain4.noteEn': 'From opening until the last scheduled departure.',
+    'domain4.noteAr': 'من الافتتاح حتى آخر مغادرة مقررة.',
+  } as Record<string, string>,
+};
+
 describe('the snapshot matches the Arabic issue of Annex A', () => {
   const arabicPath = inPack(snapshot.arabicSourceFile);
 
@@ -77,23 +104,37 @@ describe('the snapshot matches the reference prototype', () => {
   });
 });
 
-describe('the ten minimum conditions match the reference', () => {
+describe('the minimum conditions match the reference under the ruling', () => {
   const fromReference = snapshot.minimumConditions;
   const fromBuild = conditionsJson.conditions;
+  const ruledReference = fromReference.filter((c) => !RULINGS.removedConditions.includes(c.key));
 
-  it('there are ten on both sides', () => {
+  it('the snapshot still carries the union of ten; the build carries the nine ruled rows', () => {
+    // The snapshot pins the PROTOTYPE, which records the union. The build is the
+    // English issue's nine (partner ruling). Both counts are exact — a tenth row
+    // reappearing in the build, or an eleventh in the prototype, fails here.
     expect(fromReference).toHaveLength(10);
-    expect(fromBuild).toHaveLength(10);
+    expect(fromBuild).toHaveLength(9);
   });
 
-  it('the key sets are identical', () => {
+  it('the removed row is exactly the ruling, and it is genuinely gone', () => {
+    // Anchored absence: recur exists in the snapshot (the positive half) and not in
+    // the build. If the extractor ever drops it from the snapshot too, the positive
+    // half fails and the ruling map needs revisiting rather than silently passing.
+    for (const key of RULINGS.removedConditions) {
+      expect(fromReference.some((c) => c.key === key), `${key} missing from snapshot`).toBe(true);
+      expect(fromBuild.some((c) => c.key === key), `${key} should be removed (English governs)`).toBe(false);
+    }
+  });
+
+  it('the key sets are identical after the ruling', () => {
     expect(fromBuild.map((c) => c.key).sort()).toEqual(
-      fromReference.map((c) => c.key).sort(),
+      ruledReference.map((c) => c.key).sort(),
     );
   });
 
   it('every condition carries the reference level and both reference strings', () => {
-    for (const ref of fromReference) {
+    for (const ref of ruledReference) {
       const built = fromBuild.find((c) => c.key === ref.key);
       expect(built, `condition ${ref.key} missing from the build`).toBeDefined();
       expect(built!.level, `${ref.key} level`).toBe(ref.level);
@@ -105,7 +146,7 @@ describe('the ten minimum conditions match the reference', () => {
   it('every condition the build derives is one the reference defines', () => {
     for (const built of fromBuild) {
       expect(
-        fromReference.some((r) => r.key === built.key),
+        ruledReference.some((r) => r.key === built.key),
         `${built.key} exists in the build but not in the reference`,
       ).toBe(true);
     }
@@ -119,7 +160,7 @@ describe('the nine domains match the reference', () => {
     for (const d of domainsJson.domains) expect(d.options).toHaveLength(3);
   });
 
-  it('every domain name and option string matches, in both languages', () => {
+  it('every domain name and option string matches, in both languages, under the ruling', () => {
     for (const ref of snapshot.domains) {
       const built = domainsJson.domains.find((d) => d.number === ref.number);
       expect(built, `domain ${ref.number} missing`).toBeDefined();
@@ -129,9 +170,21 @@ describe('the nine domains match the reference', () => {
         const builtOpt = built!.options.find((o) => o.score === refOpt.score);
         expect(builtOpt, `domain ${ref.number} option ${refOpt.score}`).toBeDefined();
         expect(builtOpt!.en).toBe(refOpt.en);
-        expect(builtOpt!.ar).toBe(refOpt.ar);
+        // A ruled Arabic string asserts its RULED value verbatim — the Arabic issue's
+        // additions were removed by decision, and a hand-edit away from the ruled value
+        // still fails here. Every other string matches the snapshot exactly.
+        const ruled = RULINGS.arOverrides[`domain${ref.number}.option${refOpt.score}`];
+        expect(builtOpt!.ar).toBe(ruled ?? refOpt.ar);
       }
     }
+  });
+
+  it('the ruled strings and the lay duration note hold their ruled values', () => {
+    const d4 = domainsJson.domains.find((d) => d.number === 4)!;
+    expect(d4.noteEn).toBe(RULINGS.noteOverrides['domain4.noteEn']);
+    expect(d4.noteAr).toBe(RULINGS.noteOverrides['domain4.noteAr']);
+    // And the divergence-note rows are gone with the divergences they recorded.
+    expect(domainsJson.arabicOnlyNotes).toEqual([]);
   });
 });
 

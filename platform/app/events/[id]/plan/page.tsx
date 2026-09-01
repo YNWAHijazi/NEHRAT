@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { PlanForm } from './PlanForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
@@ -55,7 +54,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
@@ -159,27 +158,6 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           </section>
         ) : null}
 
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${id}/requirements`,
-              en: 'Requirements and attachments',
-              ar: 'المتطلبات والمرفقات',
-              descEn: 'Documents, named providers, requirements you certify to, inspections.',
-              descAr: 'المستندات والمزوّدون المُسمّون والمتطلبات التي تصدّقون عليها والتفتيش.',
-            },
-            {
-              href: `/events/${id}/submit`,
-              en: 'Submission package',
-              ar: 'حزمة التقديم',
-              descEn: 'The compliance form and the package, completed on the platform.',
-              descAr: 'نموذج الامتثال والحزمة، يُستكملان على المنصة.',
-              primary: true,
-            },
-          ]}
-        />
       </main>
     </>
   );

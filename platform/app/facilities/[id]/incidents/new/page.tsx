@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../../components/Header';
 import { L } from '../../../../../components/L';
-import { SequenceFooter } from '../../../../../components/SequenceFooter';
 import { IncidentForm } from './IncidentForm';
 import { currentAccount, organizationFor } from '../../../../../lib/auth';
 import { facilityDetail, facilityPersons, unreadCountFor } from '../../../../../lib/queries';
@@ -29,7 +28,7 @@ export default async function IncidentReportPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 860 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
@@ -48,19 +47,6 @@ export default async function IncidentReportPage({
             coordinatorEmail={coordinator?.email ?? ''}
           />
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/facilities/${facility.id}`,
-              en: 'Facility readiness',
-              ar: 'جاهزية المرفق',
-              descEn: 'Post-incident readiness feeds the validity ledger.',
-              descAr: 'تغذي الجاهزية بعد الحادثة سجل الصلاحية.',
-            },
-          ]}
-        />
       </main>
     </>
   );

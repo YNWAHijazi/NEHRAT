@@ -784,7 +784,6 @@ export async function saveVenueAssessmentAction(
     courseDistanceKm: null,
     venueLicensedCapacity: venue.licensed_capacity,
     venueIsNightclubOrDanceVenue: venue.is_nightclub === 1,
-    venueRegularlyHostsOrganizedEvents: venue.regularly_hosts === 1,
   };
   const derivation = deriveLevel({ answers: payload.answers, inputs });
   if (!derivation.complete || derivation.finalLevel === null) return { error: 'incomplete' };
@@ -1643,6 +1642,13 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  // THE RECORD DECIDES, not the screen that hid the link. Once filed, the submission
+  // is the Ministry's copy of these facts and editing them in place would desynchronize
+  // the two silently -- Report a material change is the route (Protocol 8.5). The UI
+  // already hides the link after filing; this is the half that survives a crafted
+  // request, and it was missing: a filed, even determined, event accepted edits.
+  const filedRow = getDb().prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number } | undefined;
+  if (filedRow?.filed === 1) redirect(`/events/${eventId}?error=filed-record`);
   const nameEn = String(formData.get('nameEn') ?? '').trim();
   const nameAr = String(formData.get('nameAr') ?? '').trim();
   const startDate = String(formData.get('startDate') ?? '').trim();

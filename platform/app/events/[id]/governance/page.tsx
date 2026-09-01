@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { SequenceFooter } from '../../../../components/SequenceFooter';
 import { currentAccount } from '../../../../lib/auth';
 import { governanceFor, invitationForEvent, unreadCountFor } from '../../../../lib/queries';
 import { ROLES_CONTENT } from '../../../../lib/rules';
@@ -39,7 +38,7 @@ export default async function GovernancePage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={unread} showBack={true} />
+      <Header account={account} organization={null} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 940 }}>
           {notice === 'saved' ? (
@@ -101,19 +100,6 @@ export default async function GovernancePage({
             </button>
           </form>
         </div>
-        <SequenceFooter
-          labelEn="Next in the sequence"
-          labelAr="التالي في التسلسل"
-          steps={[
-            {
-              href: `/events/${id}`,
-              en: 'What you are responsible for',
-              ar: 'ما أنتم مسؤولون عنه',
-              descEn: 'The requirements naming the Event Medical Director.',
-              descAr: 'المتطلبات التي تسمّي المدير الطبي للفعالية.',
-            },
-          ]}
-        />
       </main>
     </>
   );
