@@ -13,14 +13,49 @@ import { join } from 'node:path';
 import { seedDemonstration } from './demo-seed';
 
 const DATA_DIR = join(process.cwd(), 'var');
-const DB_PATH = process.env['DATABASE_PATH'] ?? join(DATA_DIR, 'dev.db');
+
+/**
+ * Where the register lives, and the refusal that goes with it.
+ *
+ * `||`, NOT `??`. `??` only catches undefined, and a variable added through a hosting
+ * dashboard with the value field left blank is an EMPTY STRING -- not nullish. So
+ * DATABASE_PATH="" would have produced an empty path, silently.
+ *
+ * THE REFUSAL. In a deployed environment the development fallback is not a fallback,
+ * it is ephemeral disk inside a container that the next deploy destroys. This was not
+ * hypothetical: on the first deployed run DATABASE_PATH was unset, the app wrote to
+ * var/dev.db in the container while an empty volume sat mounted at /data, and a
+ * provisioning command reported success. That command now refuses -- but the fallback
+ * that caused it lived here, so anything ELSE calling getDb() got the same behaviour.
+ * Two answers to one question, and only one of them was authoritative. The refusal
+ * belongs where the path is computed.
+ *
+ * INSIDE getDb(), NOT AT MODULE SCOPE. `next build` runs with NODE_ENV=production and
+ * pages import this module while prerendering, so a top-level throw fails the BUILD --
+ * on a machine where DATABASE_PATH is legitimately unset because nothing is serving
+ * yet. Evaluating on first use also means a path supplied at runtime is honoured even
+ * when the build knew nothing about it.
+ */
+function databasePath(): string {
+  const configured = process.env['DATABASE_PATH']?.trim();
+  if (!configured && process.env['NODE_ENV'] === 'production') {
+    throw new Error(
+      'DATABASE_PATH is unset. Refusing the development fallback, which in a deployed ' +
+        'container is ephemeral disk -- the register would be discarded on the next ' +
+        'deploy, having reported nothing wrong. Set DATABASE_PATH to a path on a ' +
+        'mounted volume.',
+    );
+  }
+  return configured || join(DATA_DIR, 'dev.db');
+}
 
 let db: DatabaseSync | null = null;
 
 export function getDb(): DatabaseSync {
   if (db) return db;
+  const dbPath = databasePath();
   mkdirSync(DATA_DIR, { recursive: true });
-  db = new DatabaseSync(DB_PATH);
+  db = new DatabaseSync(dbPath);
   db.exec('PRAGMA journal_mode = WAL');
   db.exec('PRAGMA foreign_keys = ON');
   // now_stamp(): the review-clock-aware timestamp, registered as a SQL function so
