@@ -25,6 +25,7 @@
  * prevent. Refusing is cheap; a duplicated register is not.
  */
 
+import { resolve } from 'node:path';
 import { getDb } from '../lib/db';
 import { seedDemonstration } from '../lib/demo-seed';
 import { hashPassword, checkPasswordPolicy } from '../lib/password';
@@ -64,6 +65,38 @@ const CREDENTIALED: { login: string; password: string; whoEn: string }[] = [
 const EMAIL_DOMAIN = 'demonstration.invalid';
 
 function main(): void {
+  /**
+   * WHERE, before anything else.
+   *
+   * This is the correction to a real failure. On the first deployed run DATABASE_PATH
+   * was unset, so lib/db.ts fell back to its development default -- a file on the
+   * CONTAINER's own disk, which the next deploy destroys -- while an empty volume sat
+   * mounted at /data. The command wrote eleven accounts and a full demonstration
+   * dataset there and printed "Demonstration accounts provisioned." The operator did
+   * everything correctly and the tool told them it had worked.
+   *
+   * The one fact that would have exposed it -- the path actually written -- was the one
+   * the success message left out. So: refuse when the path is not stated, and print the
+   * resolved path whatever happens. A provisioning command on a deployed host has no
+   * business guessing where the national register lives.
+   */
+  const configured = process.env['DATABASE_PATH'];
+  if (configured === undefined || configured.trim() === '') {
+    process.stderr.write(
+      `\nREFUSING: DATABASE_PATH IS NOT SET\n\n` +
+        `Without it the database falls back to a development default inside the\n` +
+        `container, which the next deploy destroys -- and this command would report\n` +
+        `success while writing there.\n\n` +
+        `On Railway: Variables -> DATABASE_PATH=/data/nehrat.db, then REDEPLOY (a new\n` +
+        `variable only reaches a new deployment), then run this again. Check the volume\n` +
+        `is mounted at the same path first:\n\n` +
+        `  echo "DATABASE_PATH=[$DATABASE_PATH]"\n` +
+        `  ls -la /data\n`,
+    );
+    process.exit(1);
+  }
+  const target = resolve(configured);
+
   const db = getDb();
 
   const existing = db
@@ -73,6 +106,7 @@ function main(): void {
   if (existing.length > 0) {
     process.stderr.write(
       `\nREFUSING: THIS INSTANCE ALREADY HOLDS DEMONSTRATION ACCOUNTS\n\n` +
+        `  database: ${target}\n\n` +
         existing.map((r) => `  ${r.login}\n`).join('') +
         `\nNothing has been changed. Running again would add a second set of\n` +
         `demonstration events to a register the Ministry reads, and the duplicates\n` +
@@ -124,6 +158,7 @@ function main(): void {
   const width = Math.max(...CREDENTIALED.map((a) => `${a.login}@${EMAIL_DOMAIN}`.length));
   process.stdout.write(
     `\nDemonstration accounts provisioned.\n\n` +
+      `  database: ${target}\n\n` +
       `${rows.n} accounts carry is_demo = 1. Six sign in with the credentials below;\n` +
       `the rest are reachable from the demonstration panel on the sign-in page, which\n` +
       `appears because these accounts now exist.\n\n` +

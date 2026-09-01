@@ -77,6 +77,19 @@ describe('the demonstration bootstrap', () => {
     expect(BOOTSTRAP).not.toMatch(/INSERT INTO accounts/);
   });
 
+  it('refuses when DATABASE_PATH is unset, and always says where it wrote', () => {
+    // The real failure this corrects: on a deployed host DATABASE_PATH was unset, the
+    // database fell back to a development default on the container's own disk -- which
+    // the next deploy destroys -- and the command printed "Demonstration accounts
+    // provisioned." while an empty volume sat mounted beside it. The one fact that
+    // would have shown it was the path, and the success message omitted it.
+    expect(BOOTSTRAP).toContain("process.env['DATABASE_PATH']");
+    expect(BOOTSTRAP).toContain('REFUSING: DATABASE_PATH IS NOT SET');
+    // Both outcomes name the path: the success line and the already-provisioned refusal.
+    const named = BOOTSTRAP.split('database: ${target}').length - 1;
+    expect(named, 'every outcome must state the database it acted on').toBe(2);
+  });
+
   it('addresses cannot be mistaken for mailboxes that receive', () => {
     // RFC 2606 reserves .invalid. No notification, reset or nomination can arrive here.
     expect(BOOTSTRAP).toContain('demonstration.invalid');
