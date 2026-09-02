@@ -3,7 +3,7 @@ import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { designationsForReview, ministryConfig } from '../../../../lib/queries';
 import { FACILITY_CONTENT, MINISTRY_CONTENT } from '../../../../lib/rules';
-import { publishConfigAction } from '../../../ministry-actions';
+import { publishConfigAction, setRegistryCapabilityAction } from '../../../ministry-actions';
 
 /**
  * Cardiac-arrest configuration: the ten Ministry powers from the source, each
@@ -72,6 +72,11 @@ export default async function CardiacConfigPage({
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }} consoleEn="Administration" consoleAr="الإدارة">
+      {notice === 'capability' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The capability state has been recorded." ar="سُجّلت حالة القدرة." />
+        </div>
+      ) : null}
       {notice === 'published' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Set and published. The operators the value reaches have been notified, effective on the date named." ar="حُدِّدت ونُشرت. وأُبلغ المشغّلون الذين تصلهم القيمة، وتسري بالتاريخ المسمّى." />
@@ -251,6 +256,53 @@ export default async function CardiacConfigPage({
             </div>
           );
         })}
+      </div>
+
+      {/* THE TWO AED REGISTRY CAPABILITIES, moved here from the platform's
+          capability list (partner ruling, 2026-09-02): regulatory, not
+          commercial, so the Ministry holds the switch and the owner does not. */}
+      <div data-region="registry-capabilities" style={{ marginBlockStart: 32, maxWidth: 900 }}>
+        <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
+          <L en={MINISTRY_CONTENT.registryCapabilities.titleEn} ar={MINISTRY_CONTENT.registryCapabilities.titleAr} />
+        </h2>
+        <p style={{ margin: '0 0 14px', fontSize: '13px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
+          <L en={MINISTRY_CONTENT.registryCapabilities.introEn} ar={MINISTRY_CONTENT.registryCapabilities.introAr} />
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {MINISTRY_CONTENT.registryCapabilities.items.map((item) => {
+            const row = config.get(`cardiac:${item.key}`);
+            const itemOn = row?.value === 'on';
+            return (
+              <div key={item.key} style={{ padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <div style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                    <L en={item.titleEn} ar={item.titleAr} />
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, lineHeight: 1.55 }}>
+                    <L en={item.en} ar={item.ar} />
+                  </div>
+                  {row ? (
+                    <div style={{ fontSize: '12px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>
+                      <L en={`Recorded ${row.publishedAt} by ${row.publishedBy}`} ar={`سُجّلت في ⁦${row.publishedAt}⁩ بواسطة ${row.publishedBy}`} />
+                    </div>
+                  ) : null}
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span style={{ padding: '3px 10px', borderRadius: 999, background: itemOn ? 'var(--brand-soft)' : 'var(--surface2)', border: itemOn ? 0 : '1px solid var(--line)', color: itemOn ? 'var(--brand)' : 'var(--muted)', fontSize: '12.5px', letterSpacing: '.04em' }}>
+                    {itemOn ? <L en="ON" ar="مشغّلة" /> : <L en="OFF" ar="مطفأة" />}
+                  </span>
+                  <form action={setRegistryCapabilityAction}>
+                    <input type="hidden" name="key" value={item.key} />
+                    <input type="hidden" name="state" value={itemOn ? 'off' : 'on'} />
+                    <button type="submit" style={{ height: 32, paddingInline: 14, border: itemOn ? '1px solid var(--line)' : 0, borderRadius: 16, background: itemOn ? 'var(--bg)' : 'var(--brand)', color: itemOn ? 'var(--ink)' : 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                      {itemOn ? <L en="Turn off" ar="إطفاء" /> : <L en="Turn on" ar="تشغيل" />}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </MinistryShell>
   );

@@ -1,5 +1,4 @@
 import { AdminTabs } from '../../../../components/AdminTabs';
-import { FlagsPanel } from '../../../../components/FlagsPanel';
 import Link from 'next/link';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
@@ -56,18 +55,12 @@ export default async function ConfigurationPage() {
         ))}
       </div>
 
-      <h2 style={{ margin: '32px 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
-        <L en="Capability switches" ar="مفاتيح القدرات" />
-      </h2>
-      <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
-        <L
-          en="They ship off, and nothing commercial renders while they are."
-          ar="تُشحن مطفأة، ولا يظهر أي محتوى تجاري ما دامت كذلك."
-        />
-      </p>
-      <div style={{ marginBlockEnd: 32 }}>
-        <FlagsPanel />
-      </div>
+      {/* No capability switches here, deliberately (partner ruling, 2026-09-02):
+          the platform capabilities are the owner's, held behind manageFlags, which
+          no Ministry role carries. Absent entirely, not greyed -- for the Ministry
+          administrator they never apply. The two AED registry capabilities that
+          once sat in that list are Ministry powers and live under Cardiac-arrest
+          configuration, linked above. */}
       {/* WHAT IS DELIBERATELY NOT BUILT. On the Configuration tab because this screen
           answers "what is set and what is unset", and a capability nobody built is the
           same kind of fact as a value nobody published -- both are decisions the

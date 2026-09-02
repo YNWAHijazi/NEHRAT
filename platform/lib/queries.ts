@@ -2029,6 +2029,51 @@ export function ministryConfig(): Map<string, ConfigValueRow> {
   );
 }
 
+/**
+ * The stored configuration of one capability: ministry_config keys
+ * `capability:<flag>:<field>`, one row per field, so the publish machinery and
+ * the enable rule read the same store. Returned keyed by field name.
+ */
+export function capabilityConfigFor(flag: string): Map<string, string> {
+  const prefix = `capability:${flag}:`;
+  const rows = getDb()
+    .prepare(`SELECT key, value FROM ministry_config WHERE key LIKE ? ESCAPE '\\'`)
+    .all(`${prefix.replace(/[%_\\]/g, (c) => `\\${c}`)}%`) as unknown as { key: string; value: string }[];
+  return new Map(rows.map((r) => [r.key.slice(prefix.length), r.value]));
+}
+
+/**
+ * The readiness checks the enable rule consumes -- facts, not configuration.
+ * The directory and advertising commits give these real evaluators; until those
+ * tables exist nothing is listed, and false is the true answer.
+ */
+export function capabilityChecks(): Record<string, boolean> {
+  return { listedVendor: false, placementAndAd: false };
+}
+
+export interface CapabilityActRow {
+  state: 'on' | 'off';
+  actor: string;
+  at: string;
+  config: Record<string, string>;
+}
+
+/** The licensing acts on one capability, newest first. These rows are the record. */
+export function capabilityActs(flag: string): CapabilityActRow[] {
+  const rows = getDb()
+    .prepare(`SELECT state, actor, at, config FROM capability_acts WHERE flag = ? ORDER BY at DESC, id DESC`)
+    .all(flag) as unknown as { state: 'on' | 'off'; actor: string; at: string; config: string }[];
+  return rows.map((r) => {
+    let parsed: Record<string, string> = {};
+    try {
+      parsed = JSON.parse(r.config) as Record<string, string>;
+    } catch {
+      parsed = {};
+    }
+    return { state: r.state, actor: r.actor, at: r.at.slice(0, 16), config: parsed };
+  });
+}
+
 export interface MinistryUserRow {
   login: string;
   displayName: string;
@@ -2325,6 +2370,12 @@ export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRo
                 'No longer covered — ' || COALESCE(f.archived_reason, ''),
                 '/ministry/admin/registry'
            FROM facilities f WHERE f.is_demo = ? AND f.archived_at IS NOT NULL
+         UNION ALL
+         -- Licensing acts are platform-global: a capability is on for every scope
+         -- or none, so the act shows in both. No link: the capability pages are
+         -- the owner's, and this trail is also the administrator's.
+         SELECT ca.at, 'capability', ca.actor, ca.flag, 'Turned ' || ca.state, NULL
+           FROM capability_acts ca
        )
        WHERE at IS NOT NULL
        ORDER BY at DESC

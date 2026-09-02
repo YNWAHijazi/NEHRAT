@@ -1,67 +1,421 @@
 {
- "$comment": "Capability is not content (SPEC 2c). The product specification requires these capabilities to exist behind flags because the platform is licensed, not bespoke. They ship OFF and nothing commercial renders in the Lebanon tenant. Turning one on is a Ministry/owner decision recorded here as data -- never a code change, never a default. `descriptions` are the plain-language lines the console shows beside each switch (partner review: no flag that is off with no explanation and no control).",
- "flags": {
-  "applicationFees": false,
-  "platformTransactionFees": false,
-  "vendorDirectory": false,
-  "sponsoredListings": false,
-  "advertising": false,
-  "aedPurchaseLinks": false,
-  "aiAedIdentifierCapture": false,
-  "aiUserReadinessAssistant": false,
-  "aiReviewerAssistant": false,
-  "aiPlatformIntelligenceAssistant": false,
-  "aedGeolocationRegistry": false,
-  "aedAutomatedNotifications": false
- },
- "descriptions": {
-  "applicationFees": {
-   "en": "Charges organizers a fee to file a submission.",
-   "ar": "يفرض رسماً على المنظّمين عند تقديم الملف."
+  "$comment": "Capability is not content (SPEC 2c). The product specification requires these capabilities to exist behind flags because the platform is licensed, not bespoke. They ship OFF and nothing commercial renders in the Lebanon tenant. THE SHAPE (partner ruling, 2026-09-02): the list does not toggle -- each capability has its own page with what it is, the toggle, and its configuration beneath; a capability with no configuration cannot be enabled, and the disabled toggle names what is missing. Turning one on is a licensing act recorded in capability_acts -- who, when, and the configuration at that moment. The two AED regulatory capabilities (geolocation registry, automated upkeep notifications) LEFT this list for the Ministry's cardiac configuration -- they are regulatory, not commercial, and belong under the cardiac powers.",
+  "flags": {
+    "applicationFees": false,
+    "platformTransactionFees": false,
+    "vendorDirectory": false,
+    "sponsoredListings": false,
+    "advertising": false,
+    "aedPurchaseLinks": false,
+    "aiAedIdentifierCapture": false,
+    "aiUserReadinessAssistant": false,
+    "aiReviewerAssistant": false,
+    "aiPlatformIntelligenceAssistant": false
   },
-  "platformTransactionFees": {
-   "en": "Adds a platform fee to payments made through the platform.",
-   "ar": "يضيف رسم منصة على المدفوعات التي تمر عبرها."
+  "groups": {
+    "commercial": [
+      "applicationFees",
+      "platformTransactionFees",
+      "vendorDirectory",
+      "sponsoredListings",
+      "advertising",
+      "aedPurchaseLinks"
+    ],
+    "assistive": [
+      "aiAedIdentifierCapture",
+      "aiUserReadinessAssistant",
+      "aiReviewerAssistant",
+      "aiPlatformIntelligenceAssistant"
+    ]
   },
-  "vendorDirectory": {
-   "en": "Shows a directory of commercial medical-service vendors.",
-   "ar": "يعرض دليلاً لمزوّدي الخدمات الطبية التجاريين."
+  "groupTitles": {
+    "commercial": {
+      "en": "Commercial",
+      "ar": "تجارية"
+    },
+    "assistive": {
+      "en": "Assistive",
+      "ar": "مساعدة"
+    }
   },
-  "sponsoredListings": {
-   "en": "Lets vendors pay to appear higher in the directory.",
-   "ar": "يتيح للمزوّدين الدفع للظهور في مقدمة الدليل."
+  "groupNotes": {
+    "commercial": {
+      "en": "Excluded by the readiness policy from its own scope; permitted as licensed platform capability. Off in the Ministry tenant.",
+      "ar": "مستثناة من نطاق سياسة التأهب ذاتها؛ ومسموحة كقدرة منصة مرخَّصة. مطفأة في مستأجر الوزارة."
+    },
+    "assistive": {
+      "en": "Not commercial. Each needs a model, a data reach and a spend ceiling before it can be enabled.",
+      "ar": "ليست تجارية. تحتاج كل واحدة إلى نموذج ومدى بيانات وسقف إنفاق قبل تشغيلها."
+    }
   },
-  "advertising": {
-   "en": "Shows paid advertising on platform screens.",
-   "ar": "يعرض إعلانات مدفوعة على شاشات المنصة."
+  "descriptions": {
+    "applicationFees": {
+      "en": "Charges organizers a fee to file a submission.",
+      "ar": "يفرض رسماً على المنظّمين عند تقديم الملف."
+    },
+    "platformTransactionFees": {
+      "en": "Adds a platform fee to payments made through the platform.",
+      "ar": "يضيف رسم منصة على المدفوعات التي تمر عبرها."
+    },
+    "vendorDirectory": {
+      "en": "Shows a directory of commercial medical-service vendors.",
+      "ar": "يعرض دليلاً لمزوّدي الخدمات الطبية التجاريين."
+    },
+    "sponsoredListings": {
+      "en": "Lets vendors pay to appear higher in the directory.",
+      "ar": "يتيح للمزوّدين الدفع للظهور في مقدمة الدليل."
+    },
+    "advertising": {
+      "en": "Shows paid advertising on platform screens.",
+      "ar": "يعرض إعلانات مدفوعة على شاشات المنصة."
+    },
+    "aedPurchaseLinks": {
+      "en": "Adds links to buy defibrillators from suppliers.",
+      "ar": "يضيف روابط لشراء أجهزة إزالة الرجفان من الموردين."
+    },
+    "aiAedIdentifierCapture": {
+      "en": "Reads defibrillator details from a photo instead of typed entry.",
+      "ar": "يقرأ بيانات جهاز إزالة الرجفان من صورة بدل الإدخال اليدوي."
+    },
+    "aiUserReadinessAssistant": {
+      "en": "An assistant that helps organizers complete their filings.",
+      "ar": "مساعد يساعد المنظّمين على استكمال ملفاتهم."
+    },
+    "aiReviewerAssistant": {
+      "en": "An assistant that summarises submissions for reviewers.",
+      "ar": "مساعد يلخّص الملفات للمراجعين."
+    },
+    "aiPlatformIntelligenceAssistant": {
+      "en": "An assistant that answers questions over platform-wide data.",
+      "ar": "مساعد يجيب عن أسئلة على بيانات المنصة كلها."
+    }
   },
-  "aedPurchaseLinks": {
-   "en": "Adds links to buy defibrillators from suppliers.",
-   "ar": "يضيف روابط لشراء أجهزة إزالة الرجفان من الموردين."
-  },
-  "aiAedIdentifierCapture": {
-   "en": "Reads defibrillator details from a photo instead of typed entry.",
-   "ar": "يقرأ بيانات جهاز إزالة الرجفان من صورة بدل الإدخال اليدوي."
-  },
-  "aiUserReadinessAssistant": {
-   "en": "An assistant that helps organizers complete their filings.",
-   "ar": "مساعد يساعد المنظّمين على استكمال ملفاتهم."
-  },
-  "aiReviewerAssistant": {
-   "en": "An assistant that summarises submissions for reviewers.",
-   "ar": "مساعد يلخّص الملفات للمراجعين."
-  },
-  "aiPlatformIntelligenceAssistant": {
-   "en": "An assistant that answers questions over platform-wide data.",
-   "ar": "مساعد يجيب عن أسئلة على بيانات المنصة كلها."
-  },
-  "aedGeolocationRegistry": {
-   "en": "A public map of registered defibrillator locations.",
-   "ar": "خريطة عامة لمواقع أجهزة إزالة الرجفان المسجّلة."
-  },
-  "aedAutomatedNotifications": {
-   "en": "Automatic reminders to facilities about device upkeep.",
-   "ar": "تذكيرات تلقائية للمنشآت بصيانة الأجهزة."
+  "details": {
+    "applicationFees": {
+      "titleEn": "Application fees",
+      "titleAr": "رسوم الطلبات",
+      "whatEn": "Charges a fee to file. A fee is set per service — certify an event, register a venue, register a facility — each independently, any of them zero. When on, the fee appears on the service detail page before an organizer starts, again on the submission package as an amount due, and filing waits until it is paid.",
+      "whatAr": "يفرض رسماً عند التقديم. يُحدَّد رسم لكل خدمة — اعتماد فعالية، تسجيل موقع، تسجيل منشأة — كلٌّ على حدة، وأيٌّ منها قد يكون صفراً. عند التشغيل يظهر الرسم على صفحة الخدمة قبل أن يبدأ المنظّم، ثم على حزمة التقديم كمبلغ مستحق، ولا يتم التقديم قبل سداده.",
+      "requiredConfig": [
+        {
+          "key": "currency",
+          "labelEn": "Currency",
+          "labelAr": "العملة",
+          "kind": "select",
+          "options": [
+            "USD",
+            "LBP"
+          ]
+        },
+        {
+          "key": "feeCertifyEvent",
+          "labelEn": "Fee — certify an event",
+          "labelAr": "الرسم — اعتماد فعالية",
+          "kind": "number"
+        },
+        {
+          "key": "feeRegisterVenue",
+          "labelEn": "Fee — register a venue",
+          "labelAr": "الرسم — تسجيل موقع",
+          "kind": "number"
+        },
+        {
+          "key": "feeRegisterFacility",
+          "labelEn": "Fee — register a facility",
+          "labelAr": "الرسم — تسجيل منشأة",
+          "kind": "number"
+        },
+        {
+          "key": "variesByLevel",
+          "labelEn": "The event fee varies by level",
+          "labelAr": "يتغير رسم الفعالية بحسب المستوى",
+          "kind": "select",
+          "options": [
+            "no",
+            "yes"
+          ]
+        }
+      ]
+    },
+    "platformTransactionFees": {
+      "titleEn": "Platform transaction fees",
+      "titleAr": "رسوم معاملات المنصة",
+      "whatEn": "Adds the platform's own fee on payments made through the platform, on top of any application fee — a percentage or a flat amount. It is shown separately wherever a fee is shown, so what is the Ministry's and what is the platform's stays legible.",
+      "whatAr": "يضيف رسم المنصة على المدفوعات التي تمر عبرها، فوق أي رسم طلب — نسبة مئوية أو مبلغاً ثابتاً. ويُعرض منفصلاً حيثما يُعرض أي رسم، فيبقى واضحاً ما هو للوزارة وما هو للمنصة.",
+      "requiredConfig": [
+        {
+          "key": "mode",
+          "labelEn": "Kind",
+          "labelAr": "النوع",
+          "kind": "select",
+          "options": [
+            "percent",
+            "flat"
+          ]
+        },
+        {
+          "key": "amount",
+          "labelEn": "Amount (a percentage or a flat sum, by kind)",
+          "labelAr": "القيمة (نسبة أو مبلغ ثابت بحسب النوع)",
+          "kind": "number"
+        }
+      ]
+    },
+    "vendorDirectory": {
+      "titleEn": "Vendor directory",
+      "titleAr": "دليل المزوّدين",
+      "whatEn": "A directory of commercial vendors — defibrillator supply, pads and batteries, ambulance services, resuscitation training, event medical cover — added by the administrator, never self-registered. When on, the directory is a public page and is linked from the facility and requirements screens where an operator might need one. Every listing states that listing is commercial and is not Ministry endorsement.",
+      "whatAr": "دليل لمزوّدين تجاريين — توريد أجهزة إزالة الرجفان، اللصاقات والبطاريات، خدمات الإسعاف، التدريب على الإنعاش، التغطية الطبية للفعاليات — يضيفهم المسؤول ولا يسجّلون أنفسهم. عند التشغيل يظهر الدليل صفحةً عامة ويُربط من شاشات المنشآت والمتطلبات حيث قد يحتاجه المشغّل. وتذكر كل قائمة أن الإدراج تجاري وليس تزكية من الوزارة.",
+      "requiredConfig": [],
+      "requiredChecks": [
+        {
+          "key": "listedVendor",
+          "labelEn": "At least one listed vendor",
+          "labelAr": "مزوّد مُدرج واحد على الأقل"
+        }
+      ]
+    },
+    "sponsoredListings": {
+      "titleEn": "Sponsored listings",
+      "titleAr": "القوائم المموَّلة",
+      "whatEn": "Lets a directory vendor hold a sponsored position for a period. A sponsored row is labelled as sponsored wherever it appears, always. Needs the vendor directory on — there is nothing to sponsor without it.",
+      "whatAr": "يتيح لمزوّد في الدليل موقعاً مموَّلاً لفترة محددة. ويُوسم الصف المموَّل بذلك حيثما ظهر، دائماً. يتطلب تشغيل دليل المزوّدين — فلا شيء يُموَّل من دونه.",
+      "requiredConfig": [],
+      "dependsOn": "vendorDirectory"
+    },
+    "advertising": {
+      "titleEn": "Advertising",
+      "titleAr": "الإعلانات",
+      "whatEn": "Paid placements at the foot of public pages only — never on a screen where someone is filing, reviewing or reporting an incident; the placement list is structural, not a guideline. An advert is an image, a link, a period and a placement.",
+      "whatAr": "مواضع مدفوعة في أسفل الصفحات العامة فقط — وليس أبداً على شاشة يقدّم فيها أحد أو يراجع أو يبلّغ عن حادثة؛ فقائمة المواضع بنيوية لا إرشادية. الإعلان صورة ورابط وفترة وموضع.",
+      "requiredConfig": [],
+      "requiredChecks": [
+        {
+          "key": "placementAndAd",
+          "labelEn": "At least one placement holding an advert in period",
+          "labelAr": "موضع واحد على الأقل فيه إعلان ضمن فترته"
+        }
+      ]
+    },
+    "aedPurchaseLinks": {
+      "titleEn": "AED purchase links",
+      "titleAr": "روابط شراء أجهزة إزالة الرجفان",
+      "whatEn": "A device on the registry gains a where-to-buy link resolving to directory vendors in the defibrillator categories — never an arbitrary external address. Needs the vendor directory on.",
+      "whatAr": "يحصل الجهاز في السجل على رابط أين-يُشترى يقود إلى مزوّدي الدليل في فئات أجهزة إزالة الرجفان — وليس إلى عنوان خارجي عشوائي. يتطلب تشغيل دليل المزوّدين.",
+      "requiredConfig": [],
+      "dependsOn": "vendorDirectory"
+    },
+    "aiAedIdentifierCapture": {
+      "titleEn": "AED identifier capture assistant",
+      "titleAr": "مساعد التقاط معرّفات الأجهزة",
+      "whatEn": "Reads a photographed device label and proposes the registry fields. It sees the uploaded image and the device form, nothing else.",
+      "whatAr": "يقرأ ملصق الجهاز المصوَّر ويقترح حقول السجل. يرى الصورة المرفوعة ونموذج الجهاز، لا غير.",
+      "requiredConfig": [
+        {
+          "key": "model",
+          "labelEn": "Model",
+          "labelAr": "النموذج",
+          "kind": "select",
+          "options": [
+            "claude-fable-5",
+            "claude-opus-5",
+            "claude-sonnet-5",
+            "claude-haiku-4-5"
+          ]
+        },
+        {
+          "key": "dataScope",
+          "labelEn": "Data it can reach",
+          "labelAr": "البيانات التي يصل إليها",
+          "kind": "text"
+        },
+        {
+          "key": "humanConfirm",
+          "labelEn": "A person confirms before anything is written",
+          "labelAr": "يؤكد شخص قبل كتابة أي شيء",
+          "kind": "select",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "key": "monthlyCeilingUsd",
+          "labelEn": "Monthly spend ceiling (USD)",
+          "labelAr": "سقف الإنفاق الشهري (دولار)",
+          "kind": "number"
+        },
+        {
+          "key": "onCeiling",
+          "labelEn": "When the ceiling is reached",
+          "labelAr": "عند بلوغ السقف",
+          "kind": "select",
+          "options": [
+            "pause",
+            "notify-and-pause"
+          ]
+        }
+      ]
+    },
+    "aiUserReadinessAssistant": {
+      "titleEn": "User readiness assistant",
+      "titleAr": "مساعد التأهب للمستخدم",
+      "whatEn": "Answers an operator's questions about their own obligations, from their own records and the published instruments.",
+      "whatAr": "يجيب عن أسئلة المشغّل حول موجباته، من سجلاته هو ومن الأدوات المنشورة.",
+      "requiredConfig": [
+        {
+          "key": "model",
+          "labelEn": "Model",
+          "labelAr": "النموذج",
+          "kind": "select",
+          "options": [
+            "claude-fable-5",
+            "claude-opus-5",
+            "claude-sonnet-5",
+            "claude-haiku-4-5"
+          ]
+        },
+        {
+          "key": "dataScope",
+          "labelEn": "Data it can reach",
+          "labelAr": "البيانات التي يصل إليها",
+          "kind": "text"
+        },
+        {
+          "key": "humanConfirm",
+          "labelEn": "A person confirms before anything is written",
+          "labelAr": "يؤكد شخص قبل كتابة أي شيء",
+          "kind": "select",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "key": "monthlyCeilingUsd",
+          "labelEn": "Monthly spend ceiling (USD)",
+          "labelAr": "سقف الإنفاق الشهري (دولار)",
+          "kind": "number"
+        },
+        {
+          "key": "onCeiling",
+          "labelEn": "When the ceiling is reached",
+          "labelAr": "عند بلوغ السقف",
+          "kind": "select",
+          "options": [
+            "pause",
+            "notify-and-pause"
+          ]
+        }
+      ]
+    },
+    "aiReviewerAssistant": {
+      "titleEn": "Reviewer assistant",
+      "titleAr": "مساعد المراجع",
+      "whatEn": "Summarizes a submission for the reviewer. It records nothing on its own: with the confirmation setting on, a person confirms before anything is written.",
+      "whatAr": "يلخّص التقديم للمراجع. ولا يسجّل شيئاً من تلقائه: مع تفعيل إعداد التأكيد، يؤكد شخص قبل كتابة أي شيء.",
+      "requiredConfig": [
+        {
+          "key": "model",
+          "labelEn": "Model",
+          "labelAr": "النموذج",
+          "kind": "select",
+          "options": [
+            "claude-fable-5",
+            "claude-opus-5",
+            "claude-sonnet-5",
+            "claude-haiku-4-5"
+          ]
+        },
+        {
+          "key": "dataScope",
+          "labelEn": "Data it can reach",
+          "labelAr": "البيانات التي يصل إليها",
+          "kind": "text"
+        },
+        {
+          "key": "humanConfirm",
+          "labelEn": "A person confirms before anything is written",
+          "labelAr": "يؤكد شخص قبل كتابة أي شيء",
+          "kind": "select",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "key": "monthlyCeilingUsd",
+          "labelEn": "Monthly spend ceiling (USD)",
+          "labelAr": "سقف الإنفاق الشهري (دولار)",
+          "kind": "number"
+        },
+        {
+          "key": "onCeiling",
+          "labelEn": "When the ceiling is reached",
+          "labelAr": "عند بلوغ السقف",
+          "kind": "select",
+          "options": [
+            "pause",
+            "notify-and-pause"
+          ]
+        }
+      ]
+    },
+    "aiPlatformIntelligenceAssistant": {
+      "titleEn": "Platform intelligence assistant",
+      "titleAr": "مساعد ذكاء المنصة",
+      "whatEn": "Answers the platform owner's questions about activity across the tenant.",
+      "whatAr": "يجيب عن أسئلة مالك المنصة حول النشاط عبر المستأجر.",
+      "requiredConfig": [
+        {
+          "key": "model",
+          "labelEn": "Model",
+          "labelAr": "النموذج",
+          "kind": "select",
+          "options": [
+            "claude-fable-5",
+            "claude-opus-5",
+            "claude-sonnet-5",
+            "claude-haiku-4-5"
+          ]
+        },
+        {
+          "key": "dataScope",
+          "labelEn": "Data it can reach",
+          "labelAr": "البيانات التي يصل إليها",
+          "kind": "text"
+        },
+        {
+          "key": "humanConfirm",
+          "labelEn": "A person confirms before anything is written",
+          "labelAr": "يؤكد شخص قبل كتابة أي شيء",
+          "kind": "select",
+          "options": [
+            "yes",
+            "no"
+          ]
+        },
+        {
+          "key": "monthlyCeilingUsd",
+          "labelEn": "Monthly spend ceiling (USD)",
+          "labelAr": "سقف الإنفاق الشهري (دولار)",
+          "kind": "number"
+        },
+        {
+          "key": "onCeiling",
+          "labelEn": "When the ceiling is reached",
+          "labelAr": "عند بلوغ السقف",
+          "kind": "select",
+          "options": [
+            "pause",
+            "notify-and-pause"
+          ]
+        }
+      ],
+      "blocked": {
+        "reasonEn": "Its reach is an unmade decision. The product specification gives this assistant full tenant visibility; the platform-activity ruling holds the owner to counts only. Those contradict, and neither this page nor this build resolves it. The capability stays disabled until the decision is made.",
+        "reasonAr": "مداه قرار لم يُتَّخذ. تمنح مواصفات المنتج هذا المساعد رؤية كاملة للمستأجر؛ بينما يُلزم قرارُ نشاط المنصة المالكَ بالأعداد فقط. وهما متناقضان، ولا تحسمه هذه الصفحة ولا هذا البناء. تبقى القدرة معطَّلة حتى يُتَّخذ القرار."
+      }
+    }
   }
- }
 }

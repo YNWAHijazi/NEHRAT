@@ -2,12 +2,29 @@
  * SPEC 2c: build the flags, ship them off, render nothing. All three assertions are
  * load-bearing: the flags exist (capability), every one is off (shipped off), and no
  * screen consults them yet (nothing rendered -- there is nothing to gate).
+ *
+ * Since the shape ruling (2026-09-02) this also pins the shape itself: the groups
+ * partition the list exactly; the two AED regulatory capabilities are NOT flags (they
+ * are Ministry powers under cardiac configuration); and the enable rule -- a
+ * capability with no configuration cannot be enabled -- names what is missing.
  */
 
 import { describe, expect, it } from 'vitest';
 import flagsJson from '../lib/rules/data/feature-flags.json';
-import { ALL_FLAGS, featureEnabled } from '../lib/rules/flags';
+import ministryJson from '../lib/rules/data/ministry.json';
+import {
+  ALL_FLAGS,
+  FLAG_GROUPS,
+  featureEnabled,
+  flagDetail,
+  flagGroup,
+  groupFlags,
+  missingForEnable,
+  type FeatureFlag,
+} from '../lib/rules/flags';
 import { filesUnder, read, relative } from './helpers/files';
+
+const noChecks = { flagOn: () => false, checks: {} as Record<string, boolean> };
 
 describe('commercial and AI capability', () => {
   // WIRED TO REAL DATA. A guard that sweeps an empty corpus finds no offenders and
@@ -30,8 +47,32 @@ describe('commercial and AI capability', () => {
       'sponsoredListings',
       'advertising',
       'aedPurchaseLinks',
+      'aiAedIdentifierCapture',
+      'aiUserReadinessAssistant',
+      'aiReviewerAssistant',
+      'aiPlatformIntelligenceAssistant',
     ]) {
       expect(ALL_FLAGS).toContain(expected);
+    }
+  });
+
+  it('the two AED regulatory capabilities are not flags — they are Ministry powers', () => {
+    // Moved to cardiac configuration by the shape ruling. Reappearing here would
+    // put a regulatory power back in the platform owner's hands.
+    expect(ALL_FLAGS).not.toContain('aedGeolocationRegistry');
+    expect(ALL_FLAGS).not.toContain('aedAutomatedNotifications');
+    const cardiacKeys = (
+      ministryJson as unknown as { registryCapabilities: { items: { key: string }[] } }
+    ).registryCapabilities.items.map((i) => i.key);
+    expect(cardiacKeys).toEqual(['aedGeolocationRegistry', 'aedAutomatedNotifications']);
+  });
+
+  it('the groups partition the list exactly', () => {
+    const grouped = FLAG_GROUPS.flatMap((g) => [...groupFlags(g)]);
+    expect([...grouped].sort()).toEqual([...ALL_FLAGS].sort());
+    expect(new Set(grouped).size).toBe(grouped.length);
+    for (const flag of ALL_FLAGS) {
+      expect(FLAG_GROUPS).toContain(flagGroup(flag));
     }
   });
 
@@ -49,20 +90,93 @@ describe('commercial and AI capability', () => {
     ]
       .filter((f) => /featureEnabled|feature-flags|effectiveFlag/.test(read(f)))
       // The ADMINISTRATION surfaces are the exemption, pinned by name: their purpose
-      // is to show and record the switch states (partner review: every flag genuinely
-      // controllable, each with a plain-language line). Administering a switch is not
-      // rendering the capability behind it -- FlagsPanel renders the switch and its
-      // description, setFeatureFlagAction records the decision, and the owner console
-      // and Configuration tab render the shared panel. A FOURTH file consulting a
-      // flag still fails here, which is the guard's whole job.
+      // is to show and record the capability states. The list (FlagsPanel, rendered
+      // on the owner console) carries no control; the capability's own page carries
+      // the toggle and configuration; setFeatureFlagAction records the licensing
+      // act. Administering a capability is not rendering the capability behind it.
+      // A FIFTH file consulting a flag still fails here, which is the guard's whole
+      // job. The Ministry configuration tab LEFT this list with the shape ruling:
+      // no Ministry surface consults a flag any more.
       .filter((f) => !f.endsWith('app/platform/admin/page.tsx'))
+      .filter((f) => !f.endsWith('app/platform/admin/capabilities/[flag]/page.tsx'))
       .filter((f) => !f.endsWith('components/FlagsPanel.tsx'))
       .filter((f) => !f.endsWith('app/ministry-actions.ts'))
-      .filter((f) => !f.endsWith('app/ministry/admin/configuration/page.tsx'))
       .map(relative);
     expect(
       offenders,
       'A screen consults a feature flag. With every flag off that can only mean commercial UI exists behind it -- which SPEC 2c forbids rendering.',
     ).toEqual([]);
+  });
+});
+
+describe('the enable rule: a capability with no configuration cannot be enabled', () => {
+  it('names every missing configuration field', () => {
+    const missing = missingForEnable('applicationFees', new Map(), noChecks);
+    expect(missing.length).toBe(flagDetail('applicationFees').requiredConfig.length);
+    expect(missing.every((m) => m.kind === 'field')).toBe(true);
+    expect(missing[0]!.en).toContain('Currency');
+    expect(missing[0]!.ar).toContain('العملة');
+  });
+
+  it('clears when every field holds a value — zero is a value', () => {
+    const stored = new Map(
+      flagDetail('applicationFees').requiredConfig.map((f) => [f.key, f.kind === 'number' ? '0' : 'USD']),
+    );
+    expect(missingForEnable('applicationFees', stored, noChecks)).toEqual([]);
+  });
+
+  it('an empty string is not a value', () => {
+    const stored = new Map(flagDetail('platformTransactionFees').requiredConfig.map((f) => [f.key, '  ']));
+    const missing = missingForEnable('platformTransactionFees', stored, noChecks);
+    expect(missing.length).toBe(2);
+  });
+
+  it('a dependency that is off blocks, naming the dependency', () => {
+    for (const flag of ['sponsoredListings', 'aedPurchaseLinks'] as FeatureFlag[]) {
+      expect(flagDetail(flag).dependsOn).toBe('vendorDirectory');
+      const off = missingForEnable(flag, new Map(), noChecks);
+      expect(off.some((m) => m.kind === 'dependency' && m.en.includes('Vendor directory'))).toBe(true);
+      const on = missingForEnable(flag, new Map(), { flagOn: () => true, checks: {} });
+      expect(on.some((m) => m.kind === 'dependency')).toBe(false);
+    }
+  });
+
+  it('a readiness check that is not met blocks, named', () => {
+    const missing = missingForEnable('vendorDirectory', new Map(), noChecks);
+    expect(missing).toEqual([
+      expect.objectContaining({ kind: 'check', en: expect.stringContaining('listed vendor') }),
+    ]);
+    expect(missingForEnable('vendorDirectory', new Map(), { flagOn: () => false, checks: { listedVendor: true } })).toEqual([]);
+  });
+
+  it('the platform intelligence assistant is blocked by an unmade decision, and configuration does not unblock it', () => {
+    const fullConfig = new Map(
+      flagDetail('aiPlatformIntelligenceAssistant').requiredConfig.map((f) => [f.key, f.kind === 'number' ? '100' : (f.options?.[0] ?? 'x')]),
+    );
+    const missing = missingForEnable('aiPlatformIntelligenceAssistant', fullConfig, { flagOn: () => true, checks: {} });
+    expect(missing).toEqual([expect.objectContaining({ kind: 'decision' })]);
+    // Both readings named, neither resolved: the page surfaces the contradiction.
+    expect(missing[0]!.en).toMatch(/full tenant visibility/);
+    expect(missing[0]!.en).toMatch(/counts only/);
+  });
+
+  it('every assistive capability requires a model, a data reach, a confirmation setting and a spend ceiling', () => {
+    for (const flag of groupFlags('assistive')) {
+      const keys = flagDetail(flag).requiredConfig.map((f) => f.key);
+      expect(keys).toEqual(['model', 'dataScope', 'humanConfirm', 'monthlyCeilingUsd', 'onCeiling']);
+    }
+  });
+
+  it('every capability page carries bilingual title, description and detail', () => {
+    for (const flag of ALL_FLAGS) {
+      const d = flagDetail(flag);
+      for (const s of [d.titleEn, d.titleAr, d.whatEn, d.whatAr]) {
+        expect(s.trim().length, `${flag} detail strings`).toBeGreaterThan(0);
+      }
+      for (const f of d.requiredConfig) {
+        expect(f.labelEn.trim().length).toBeGreaterThan(0);
+        expect(f.labelAr.trim().length).toBeGreaterThan(0);
+      }
+    }
   });
 });

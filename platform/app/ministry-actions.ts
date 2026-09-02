@@ -15,7 +15,7 @@ import { getDb } from '../lib/db';
 import { beirutToday } from '../lib/clock';
 import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
 import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
-import { ALL_FLAGS, type FeatureFlag } from '../lib/rules/flags';
+import { ALL_FLAGS, effectiveFlag, flagDetail, missingForEnable, type FeatureFlag } from '../lib/rules/flags';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import { currentAccount } from '../lib/auth';
 import {
@@ -30,7 +30,7 @@ import {
   type MinistryAction,
   type OutcomeBlocker,
 } from '../lib/rules';
-import { addedMeasuresFor, attestationRecordsFor, derivedLevelFor, inspectionsFor, inspectionConductors } from '../lib/queries';
+import { addedMeasuresFor, attestationRecordsFor, capabilityChecks, capabilityConfigFor, derivedLevelFor, inspectionsFor, inspectionConductors, ministryConfig } from '../lib/queries';
 
 async function requireMinistry(action: MinistryAction): Promise<{ id: number; role: string; displayName: string; isDemo: boolean }> {
   const account = await currentAccount();
@@ -366,6 +366,31 @@ export async function designateCoveredAction(formData: FormData): Promise<void> 
 }
 
 /**
+ * The two AED registry capabilities -- geolocation registry, automated upkeep
+ * notifications -- are Ministry powers, not platform capabilities (partner
+ * ruling, 2026-09-02: they moved here from the owner's capability list). A
+ * Ministry switch, recorded in ministry_config like any published value.
+ */
+export async function setRegistryCapabilityAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('configureCardiac');
+  const key = String(formData.get('key') ?? '');
+  const state = String(formData.get('state') ?? '');
+  const known = MINISTRY_CONTENT.registryCapabilities.items.map((i) => i.key);
+  if (!known.includes(key) || (state !== 'on' && state !== 'off')) {
+    redirect('/ministry/admin/cardiac?error=incomplete');
+  }
+  getDb()
+    .prepare(
+      `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
+       VALUES (?, ?, NULL, ?, now_stamp())
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
+    )
+    .run(`cardiac:${key}`, state, actor.displayName);
+  revalidatePath('/ministry/admin/cardiac');
+  redirect('/ministry/admin/cardiac?notice=capability');
+}
+
+/**
  * Set and publish a cardiac configuration value. Unset is the first-class
  * answer until this lands; publishing records the effective date and notifies
  * the operators the value reaches -- the public page promised them that.
@@ -516,6 +541,12 @@ export async function endFacilityCoverageAction(formData: FormData): Promise<voi
  * The shipped default in feature-flags.json never changes; the override is the
  * recorded decision, and effectiveFlag() is the one rule that combines them.
  */
+/**
+ * The licensing act. Enabling asks the one rule -- a capability with no
+ * configuration cannot be enabled -- and the act is recorded in capability_acts
+ * with who, when, and the configuration at that moment. Turning off is always
+ * allowed and recorded the same way.
+ */
 export async function setFeatureFlagAction(formData: FormData): Promise<void> {
   const actor = await requireMinistry('manageFlags');
   const flag = String(formData.get('flag') ?? '');
@@ -523,16 +554,60 @@ export async function setFeatureFlagAction(formData: FormData): Promise<void> {
   if (!ALL_FLAGS.includes(flag as FeatureFlag) || (state !== 'on' && state !== 'off')) {
     redirect('/platform/admin?error=flag');
   }
-  getDb()
-    .prepare(
-      `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
-       VALUES (?, ?, NULL, ?, now_stamp())
-       ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
-    )
-    .run(`flag:${flag}`, state, actor.displayName);
+  const db = getDb();
+  const stored = capabilityConfigFor(flag);
+  if (state === 'on') {
+    const config = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+    const missing = missingForEnable(flag as FeatureFlag, stored, {
+      flagOn: (dep) => effectiveFlag(dep, config),
+      checks: capabilityChecks(),
+    });
+    // The page disables the toggle and names these; refusing here keeps the rule
+    // a rule rather than a rendering.
+    if (missing.length > 0) redirect(`/platform/admin/capabilities/${flag}?error=missing`);
+  }
+  db.prepare(
+    `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
+     VALUES (?, ?, NULL, ?, now_stamp())
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
+  ).run(`flag:${flag}`, state, actor.displayName);
+  db.prepare(`INSERT INTO capability_acts (flag, state, config, actor, at) VALUES (?, ?, ?, ?, now_stamp())`).run(
+    flag,
+    state,
+    JSON.stringify(Object.fromEntries(stored)),
+    actor.displayName,
+  );
   revalidatePath('/platform/admin');
-  revalidatePath('/ministry/admin/configuration');
-  redirect(`/platform/admin?notice=flag`);
+  revalidatePath(`/platform/admin/capabilities/${flag}`);
+  redirect(`/platform/admin/capabilities/${flag}?notice=${state}`);
+}
+
+/**
+ * Stores a capability's configuration, one ministry_config row per declared
+ * field (`capability:<flag>:<field>`). Only fields the data file declares are
+ * written; an emptied field is removed, returning it to unset -- the enable
+ * rule then names it again.
+ */
+export async function saveCapabilityConfigAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageFlags');
+  const flag = String(formData.get('flag') ?? '');
+  if (!ALL_FLAGS.includes(flag as FeatureFlag)) redirect('/platform/admin?error=flag');
+  const db = getDb();
+  for (const field of flagDetail(flag as FeatureFlag).requiredConfig) {
+    const value = String(formData.get(field.key) ?? '').trim();
+    const key = `capability:${flag}:${field.key}`;
+    if (value === '') {
+      db.prepare(`DELETE FROM ministry_config WHERE key = ?`).run(key);
+    } else {
+      db.prepare(
+        `INSERT INTO ministry_config (key, value, effective, published_by, published_at)
+         VALUES (?, ?, NULL, ?, now_stamp())
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value, published_by = excluded.published_by, published_at = excluded.published_at`,
+      ).run(key, value, actor.displayName);
+    }
+  }
+  revalidatePath(`/platform/admin/capabilities/${flag}`);
+  redirect(`/platform/admin/capabilities/${flag}?notice=config`);
 }
 
 

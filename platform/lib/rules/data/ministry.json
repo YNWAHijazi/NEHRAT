@@ -668,6 +668,14 @@
       "organization": {
         "en": "Organization recorded",
         "ar": "سُجّلت مؤسسة"
+      },
+      "coverage": {
+        "en": "Coverage ended",
+        "ar": "أُنهيت تغطية"
+      },
+      "capability": {
+        "en": "Capability act",
+        "ar": "إجراء قدرة"
       }
     },
     "unreachableTitleEn": "Powers no active account holds",
@@ -718,5 +726,27 @@
     "deferredReasonAr": "لماذا لا",
     "deferredConditionEn": "What would change it",
     "deferredConditionAr": "ما الذي يغيّر ذلك"
+  },
+  "registryCapabilities": {
+    "titleEn": "Registry capabilities",
+    "titleAr": "قدرات السجل",
+    "introEn": "Two capabilities of the device registry, exercised under these powers. They moved here from the platform's capability list because they are regulatory, not commercial: the Ministry holds them, the platform owner does not. Each is off until turned on here, and nothing renders while it is.",
+    "introAr": "قدرتان لسجل الأجهزة تُمارسان بموجب هذه الصلاحيات. نُقلتا إلى هنا من قائمة قدرات المنصة لأنهما تنظيميتان لا تجاريتان: الوزارة تملكهما، لا مالك المنصة. وكل منهما مطفأة حتى تُشغَّل هنا، ولا يظهر شيء ما دامت كذلك.",
+    "items": [
+      {
+        "key": "aedGeolocationRegistry",
+        "titleEn": "Geolocation registry",
+        "titleAr": "سجل المواقع الجغرافية",
+        "en": "A public map of registered defibrillator locations.",
+        "ar": "خريطة عامة لمواقع أجهزة إزالة الرجفان المسجّلة."
+      },
+      {
+        "key": "aedAutomatedNotifications",
+        "titleEn": "Automated upkeep notifications",
+        "titleAr": "إشعارات الصيانة التلقائية",
+        "en": "Automatic reminders to facilities about device upkeep.",
+        "ar": "تذكيرات تلقائية للمنشآت بصيانة الأجهزة."
+      }
+    ]
   }
 }

@@ -8,11 +8,11 @@ import { setOrderLaneAction } from '../../ministry-actions';
 
 /**
  * Master admin -- above the Ministry, and holding no regulatory action. The
- * commercial capability flags render as governed states, not switches: the
- * Lebanon tenant ships with all of them off, and activation is a governance
- * decision recorded in the configuration data, not a console click. The one
- * live control is the Order of Physicians lane, whose off state suspends the
- * Order reviewer's access.
+ * capability list carries no control (partner ruling, 2026-09-02): each row
+ * opens the capability's own page, where the toggle sits above its
+ * configuration and cannot be enabled without it. The Lebanon tenant ships
+ * with every capability off. The one control on this screen is the Order of
+ * Physicians lane, whose off state suspends the Order reviewer's access.
  */
 export default async function MasterAdminPage({
   searchParams,

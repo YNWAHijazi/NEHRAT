@@ -696,6 +696,18 @@ function migrate(d: DatabaseSync): void {
       read INTEGER NOT NULL DEFAULT 0,
       is_demo INTEGER NOT NULL DEFAULT 0
     );
+
+    -- Turning a platform capability on or off is a licensing act, not a toggle
+    -- flip: who, when, and the configuration at that moment. These rows ARE the
+    -- record the activity trail reads -- there is no separate audit copy.
+    CREATE TABLE IF NOT EXISTS capability_acts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      flag TEXT NOT NULL,
+      state TEXT NOT NULL CHECK (state IN ('on','off')),
+      config TEXT NOT NULL DEFAULT '{}',   -- JSON snapshot of the capability's configuration
+      actor TEXT NOT NULL,
+      at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 
   // Additive column migrations: CREATE TABLE IF NOT EXISTS never alters an existing
