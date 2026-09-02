@@ -55,10 +55,7 @@ export default async function DirectorReportPage({
               {directorSigned && organizerSigned ? (
                 <L en="Signed. The report now carries both signatures." ar="وُقّع. ويحمل التقرير الآن التوقيعين." />
               ) : (
-                <L
-                  en="Signed. The organizer has not yet signed; the report is complete when both signatures are recorded."
-                  ar="وُقّع. لم يوقّع المنظّم بعد؛ ويكتمل التقرير بتسجيل التوقيعين معاً."
-                />
+                <L en="Signed." ar="وُقّع." />
               )}
             </div>
           ) : null}
@@ -95,19 +92,21 @@ export default async function DirectorReportPage({
                 {directorSigned && organizerSigned ? (
                   <L en="The report is complete. Both signatures are recorded." ar="اكتمل التقرير. وسُجّل التوقيعان." />
                 ) : directorSigned ? (
-                  <L en="You have signed. The organizer's signature completes the report." ar="وقّعتم. وتوقيع المنظّم يُكمل التقرير." />
-                ) : !report ? (
-                  <L en="The organizer has not prepared the report yet. Your signature becomes available once the figures exist." ar="لم يُعِدّ المنظّم التقرير بعد. يصبح توقيعكم متاحاً متى وُجدت الأرقام." />
+                  <L en="You have signed." ar="وقّعتم." />
                 ) : overdueDays > 0 ? (
-                  <L en={`This report is ${overdueDays} days overdue and is waiting on your signature.`} ar={`تأخر هذا التقرير ${overdueDays} أيام وهو بانتظار توقيعكم.`} />
+                  <L en={`This report is ${overdueDays} days overdue.`} ar={`تأخر هذا التقرير ${overdueDays} أيام.`} />
                 ) : (
-                  <L en="This report is waiting on your signature." ar="هذا التقرير بانتظار توقيعكم." />
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <L en={`Due ${due}`} ar={`مستحق في ⁦${due}⁩`} />
+                  </span>
                 )}
               </div>
               <div style={{ fontSize: 15, lineHeight: 1.7 }}>
+                {/* One sentence of mechanics; each party's status is said once, in
+                    the signature block where the Director acts (partner ruling). */}
                 <L
-                  en={`Due ${due}, ${POST_EVENT_REPORT.windowDays} calendar days after the event. Either signature may come first; the report is complete when both are recorded. ${organizerSigned ? 'The organizer has signed.' : 'The organizer has not yet signed.'}`}
-                  ar={`مستحق في ⁦${due}⁩، ${POST_EVENT_REPORT.windowDays} أيام تقويمية بعد الفعالية. لأيٍّ من التوقيعين أن يسبق؛ ويكتمل التقرير بتسجيلهما معاً. ${organizerSigned ? 'وقّع المنظّم.' : 'لم يوقّع المنظّم بعد.'}`}
+                  en={`Due ${due}, ${POST_EVENT_REPORT.windowDays} calendar days after the event. Either signature may come first; the report is complete when both are recorded.`}
+                  ar={`مستحق في ⁦${due}⁩، ${POST_EVENT_REPORT.windowDays} أيام تقويمية بعد الفعالية. لأيٍّ من التوقيعين أن يسبق؛ ويكتمل التقرير بتسجيلهما معاً.`}
                 />
               </div>
             </div>
@@ -152,13 +151,9 @@ export default async function DirectorReportPage({
                 <L en={content.reportReadOnly.en} ar={content.reportReadOnly.ar} />
               </div>
             </div>
-          ) : (
-            <div style={{ padding: '26px 30px', border: '1px dashed var(--line)', borderRadius: 16, marginBlockEnd: 20, fontSize: 15, color: 'var(--muted)', lineHeight: 1.65 }}>
-              <L en="The organizer has not started the report yet. Your signature becomes available once it is prepared." ar="لم يبدأ المنظّم التقرير بعد. يصبح توقيعكم متاحاً بعد إعداده." />
-            </div>
-          )}
+          ) : null}
 
-          {report ? (
+          {(
             <div data-region="signatures" style={{ padding: '29px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L en="Signatures" ar="التواقيع" />
@@ -174,7 +169,15 @@ export default async function DirectorReportPage({
                     <L en="Organizer representative" ar="ممثل المنظّم" />
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: 999, background: organizerSigned ? 'var(--brand-soft)' : 'var(--surface2)', color: organizerSigned ? 'var(--brand)' : 'var(--muted)', fontSize: 13 }}>
-                    {organizerSigned ? <L en="Signed" ar="وُقّع" /> : <L en="Not yet signed" ar="لم يُوقَّع بعد" />}
+                    {/* The organizer's status, said ONCE, where the Director acts
+                        (partner ruling, 2026-09-02). */}
+                    {organizerSigned ? (
+                      <L en="Signed" ar="وُقّع" />
+                    ) : report ? (
+                      <L en="Not yet signed" ar="لم يُوقَّع بعد" />
+                    ) : (
+                      <L en="Has not prepared the report yet" ar="لم يُعِدّ التقرير بعد" />
+                    )}
                   </span>
                 </div>
                 <div style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${directorSigned ? 'solid var(--brand)' : 'dashed var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -186,13 +189,15 @@ export default async function DirectorReportPage({
                       <L en="Signed" ar="وُقّع" />
                     ) : report?.directorReturnedAt ? (
                       <L en={`Returned ${report.directorReturnedAt} — with the organizer for revision`} ar={`أُعيد في ⁦${report.directorReturnedAt}⁩ — لدى المنظّم للتنقيح`} />
-                    ) : (
+                    ) : report ? (
                       <L en="Awaiting your signature" ar="بانتظار توقيعكم" />
+                    ) : (
+                      <L en="Signs once the figures exist" ar="يوقّع متى وُجدت الأرقام" />
                     )}
                   </span>
                 </div>
               </div>
-              {!directorSigned && !report?.directorReturnedAt ? (
+              {report && !directorSigned && !report.directorReturnedAt ? (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                   <form action={signPostEventReportAction.bind(null, id)}>
                     <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
@@ -203,7 +208,7 @@ export default async function DirectorReportPage({
                 </div>
               ) : null}
             </div>
-          ) : null}
+          )}
         </div>
       </main>
     </>
