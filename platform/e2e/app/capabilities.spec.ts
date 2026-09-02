@@ -256,6 +256,47 @@ test.describe('the capability shape', () => {
     await page.waitForURL(/notice=off/);
   });
 
+  test('AED purchase links: where-to-buy resolves to the directory, and only while both are on', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // The dependency names itself; the directory going on makes the toggle live.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/aedPurchaseLinks');
+    await expect(page.locator('[data-region="capability-toggle"]')).toContainText('Needs Vendor directory on first.');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/aedPurchaseLinks');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+
+    // The registry gains where-to-buy: the Cedar vendor, the disclaimer, and
+    // every destination local -- resolution is to the directory, nowhere else.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/facilities/FC-0014/devices');
+    const region = page.locator('[data-region="where-to-buy"]');
+    await expect(region).toContainText('Where to buy');
+    await expect(region).toContainText('Cedar Medical Supplies');
+    await expect(region).toContainText('not Ministry endorsement');
+    for (const href of await region.locator('a').evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).getAttribute('href') ?? ''))) {
+      expect(href.startsWith('/')).toBe(true);
+    }
+
+    // The directory going off takes the resolution with it, purchase links
+    // still on: absent, not a link to nowhere. Then both off.
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/facilities/FC-0014/devices');
+    await expect(page.locator('[data-region="where-to-buy"]')).toHaveCount(0);
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/aedPurchaseLinks');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+  });
+
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');

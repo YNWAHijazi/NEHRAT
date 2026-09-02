@@ -115,6 +115,10 @@ describe('commercial and AI capability', () => {
       // e2e/app/capabilities.spec.ts walks off-absent and on-present for both.
       .filter((f) => !f.endsWith('app/vendors/page.tsx'))
       .filter((f) => !f.endsWith('components/VendorDirectoryLink.tsx'))
+      // AED purchase links (its commit): one component, null unless BOTH the
+      // purchase links and the directory they resolve to are on, and its only
+      // destinations are listed directory vendors -- never an external address.
+      .filter((f) => !f.endsWith('components/AedWhereToBuy.tsx'))
       .map(relative);
     expect(
       offenders,
