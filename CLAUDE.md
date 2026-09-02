@@ -55,9 +55,10 @@ and which governed. No dropdown, no edit, anywhere.
 **2. Three outcomes, and only a Ministry reviewer records them.**
 Submission received but incomplete · Additional information or revision required · Health and
 medical preparedness requirements satisfied. **Never "approved". Never "rejected".** Internal
-states (in queue, in progress, assigned) render grey and are *not* determinations. An inspector
-records corrective actions and can record none of the three. The Order of Physicians lane is off
-by default, non-determinative, never reaches the facility side.
+states (in queue, in progress, assigned) render grey and are *not* determinations. Corrective
+actions and inspection findings are reviewer acts and are none of the three — the separate
+inspector role merged into reviewer (partner ruling, 2026-09-01). The Order of Physicians lane is
+off by default, non-determinative, never reaches the facility side.
 
 **3. Nothing regulatory is hard-coded.** Thresholds, phases, timeframes, designations are all
 Ministry-configurable. Never render a threshold as a fixed number in copy. **The unset state is a
@@ -112,8 +113,9 @@ opens 00:00 Asia/Beirut the day after the event **ends**, not starts.
 requires fee/vendor/advertising capability behind feature flags (`lib/rules/data/feature-flags.json`);
 they ship off and NOTHING commercial renders in the Lebanon tenant.
 
-**13. Platform owner sees counts only** until the Ministry rules (SPEC §2c). Build the narrower
-reading; it is reversible. **14. The AI layer is real, required, and deliberately not built** —
+**13. The platform owner holds the four administration tabs** alongside master admin — partner
+ruling 2026-09-01, reversing the earlier counts-only reading of SPEC §2c. The owner records no
+outcome and no attestation, and platform activity stays counts-only. **14. The AI layer is real, required, and deliberately not built** —
 it needs its own conversation about what the assistants may see; sequence after the Ministry console.
 
 ## Copy

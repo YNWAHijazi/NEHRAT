@@ -203,3 +203,47 @@ alternatives — items not in force while the lane is off, or blocking with no r
 contradict either the gate or the lane's own screen. The prototype holds both sides of the
 contradiction (Order items read-only to the Ministry; the lane off on its own Order screen).
 Who records Order-assigned attestations while the lane is off. *Ministry.*
+
+---
+
+## Addendum — 2026-09-02, after the partner-review simplification pass
+
+The register above is kept as written. The Pass A re-walk (2026-09-02, HEAD dd86753) found it
+had drifted from the build in both directions; this addendum records the movements so the next
+audit reads the register and the build in agreement. Decision numbers refer to the entries above.
+
+**Closed by building:**
+- **1. The public entry surfaces** — built: `/applicability` (three branches), `/lookup`,
+  `/search`, the landing and service details. The applicability check answers with the six
+  criteria and both not-routinely-subject limbs.
+- **3. Ministry designation and referral** — built as a full lane at `/ministry/applicability`
+  (logReferralAction, determineApplicabilityAction, designation).
+- **5. Cancellation and postponement** — built at `/events/[id]/lifecycle`
+  (`lib/rules/data/lifecycle.json` cites Protocol 8.5/9(vii); the reference survives, a
+  determination does not carry to a postponed date).
+- **12. Document storage** — the deferred decision was taken (reviewer ruling, 2026-08-28,
+  recorded in `lib/rules/uploads.ts`): the platform stores and serves the file.
+
+**Settled by partner ruling (2026-09-01), superseding the entry's open question:**
+- **13. The role model** — the inspector role merged into reviewer. One Ministry role reviews,
+  flags for inspection, self-assigns the visit, records corrective actions and findings — which
+  remain acts, never one of the three outcomes. Recorded in `lib/rules/data/ministry.json` and
+  the migration in `lib/db.ts`.
+- **15. The platform owner's reach** — the owner holds the four administration tabs alongside
+  master admin (reversing the counts-only reading). The owner records no outcome and no
+  attestation; platform activity stays counts-only. Pinned in `tests/ministry.test.ts`.
+
+**Rulings with no prior entry, recorded here so the register carries them:**
+- **English governs the minimum conditions** (partner ruling, 2026-09-01): the Arabic-issue-only
+  rows left the derivation — `recur` removed, nine conditions stand
+  (`lib/rules/data/minimum-conditions.json`, pinned by `tests/reference-drift.test.ts` with the
+  snapshot's union of ten explicitly recorded as the superseded state). ACCEPTANCE.md's line
+  "the build carries the union" predates this ruling.
+- **Attendance is the sum** (partner ruling, organizer merge): "expected maximum simultaneous
+  attendance" is no longer asked as its own field; it is the sum of expected participants,
+  spectators and staff, and a re-assessment revises it directly.
+
+**Still open, unchanged:** 2, 4, 6–11, 14, 16–19 — and the Pass A re-walk's open-bug list
+(expedited flag invisible to the reviewer; §13 ¶2(b) trigger and ¶2(c) request control;
+the malls capacity field; Annex B §6.2 status-change routes; the Level 1 measures selector;
+Arabic dual agreement) sits outside this register as defects, not decisions.

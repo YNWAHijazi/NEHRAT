@@ -490,7 +490,10 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                 {level ?? '—'}
               </div>
             </div>
-            {filing ? (
+            {/* A filed record owes no filing: the File by / Days left tiles rendered
+                on after filing — a satisfied record read "Days left −34" beside a rail
+                marking Submitted done (Pass B re-walk, 2026-09-02). */}
+            {filing && !event.filed ? (
               <>
                 <div>
                   <div style={upLabel}>
