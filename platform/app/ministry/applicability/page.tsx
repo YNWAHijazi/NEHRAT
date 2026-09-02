@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { applicabilityRecords } from '../../../lib/queries';
 import { can } from '../../../lib/rules';
@@ -40,8 +40,8 @@ export default async function ApplicabilityPage({
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
         <L
-          en="Events that reached the Ministry from outside the platform. Each is determined in or out of scope with the reasons recorded; an in-scope event may be designated, which is the instrument's route for bringing an unregistered gathering into the process. Only a reviewer determines."
-          ar="فعاليات وصلت الوزارة من خارج المنصة. يُحسم كل منها ضمن النطاق أو خارجه مع تسجيل الأسباب؛ ويجوز تحديد الفعالية الواقعة ضمن النطاق، وهو مسار الإطار لإدخال تجمع غير مسجَّل في العملية. والمراجع وحده يحسم."
+          en="Events that reached the Ministry from outside the platform, each determined in or out of scope with the reasons recorded."
+          ar="فعاليات وصلت الوزارة من خارج المنصة، يُحسم كل منها ضمن النطاق أو خارجه مع تسجيل الأسباب."
         />
       </p>
 
@@ -118,7 +118,6 @@ export default async function ApplicabilityPage({
           </button>
         </form>
       ) : null}
-      <MinistryFooter steps={[{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'Where in-scope events arrive once registered and filed.', descAr: 'حيث تصل الفعاليات ضمن النطاق بعد تسجيلها وتقديمها.' }]} />
     </MinistryShell>
   );
 }

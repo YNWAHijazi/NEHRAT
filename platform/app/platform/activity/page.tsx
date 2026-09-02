@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { platformCounts } from '../../../lib/queries';
 import { MINISTRY_CONTENT } from '../../../lib/rules';
@@ -49,7 +49,12 @@ export default async function PlatformActivityPage() {
           </div>
         ))}
       </div>
-      <MinistryFooter steps={[{ href: '/platform/admin', en: 'Master admin', ar: 'الإدارة العليا', descEn: 'Capability flags and the Order lane.', descAr: 'مفاتيح القدرات ومسار النقابة.' }]} />
+      {/* No sequence footers (partner ruling, second sweep) — a quiet link instead. */}
+      <div style={{ marginBlockStart: 28 }}>
+        <a href="/platform/admin" style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="Master admin" ar="الإدارة العليا" />
+        </a>
+      </div>
     </MinistryShell>
   );
 }

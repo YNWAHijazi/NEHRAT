@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { L } from '../../components/L';
-import { MinistryFooter, MinistryShell } from '../../components/MinistryShell';
+import { MinistryShell } from '../../components/MinistryShell';
 import { requireMinistryPage } from '../../lib/ministry-auth';
 import { beirutToday } from '../../lib/clock';
 import {
@@ -80,13 +80,29 @@ export default async function MinistryDashboardPage() {
         </Link>
       ) : null}
 
-      <div data-region="counters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 32 }}>
+      <div data-region="counters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
         {counters.map((c) => (
           <Link key={c.en} href={c.href} style={{ background: 'var(--bg)', padding: '18px 20px', color: 'var(--ink)' }}>
             <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.03em', color: c.color }}>{c.n}</div>
             <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.4 }}>
               <L en={c.en} ar={c.ar} />
             </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* The dashboard is the console's index: the surfaces without a counter are
+          still reachable from it, as plain links. The per-screen sequence footers
+          were cut on the partner's second-sweep ruling. */}
+      <div data-region="console-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 32 }}>
+        {[
+          { href: '/ministry/applicability', en: 'Applicability and referrals', ar: 'الانطباق والإحالات' },
+          { href: '/ministry/incidents', en: 'Incidents and reports', ar: 'الحوادث والتقارير' },
+          { href: '/ministry/determinations', en: 'Determinations and designations', ar: 'البت والتحديد' },
+          { href: '/ministry/order', en: 'Order of Physicians lane', ar: 'مسار نقابة الأطباء' },
+        ].map((s) => (
+          <Link key={s.href} href={s.href} style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+            <L en={s.en} ar={s.ar} />
           </Link>
         ))}
       </div>
@@ -189,7 +205,7 @@ export default async function MinistryDashboardPage() {
       </div>
 
       <div data-region="facility-band" style={{ marginBlockStart: 36, paddingBlockStart: 28, borderBlockStart: '1px solid var(--line)' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 16 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Cardiac-arrest instrument" ar="إطار الجاهزية لتوقف القلب" />
           </h2>
@@ -197,12 +213,6 @@ export default async function MinistryDashboardPage() {
             <L en="Separate lane" ar="مسار منفصل" />
           </span>
         </div>
-        <p style={{ margin: '0 0 16px', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '82ch' }}>
-          <L
-            en="Covered facilities carry no event outcome. The counts below are readiness and reporting states, and the wording is provisional pending Ministry approval."
-            ar="لا تحمل المرافق المشمولة نتيجة فعالية. والأعداد أدناه حالات جاهزية وإبلاغ، والصياغة مؤقتة بانتظار موافقة الوزارة."
-          />
-        </p>
 
         {/* One coherent band: two EQUAL columns, each a self-contained card with its
             own heading, its rows filling the card, and its link in the card foot --
@@ -268,14 +278,6 @@ export default async function MinistryDashboardPage() {
         </div>
       </div>
 
-      <MinistryFooter
-        steps={[
-          { href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'Filed submissions, their workflow state and their determinations.', descAr: 'التقديمات المقدَّمة وحالاتها الداخلية ونتائجها.' },
-          { href: '/ministry/organizations', en: 'Organizations', ar: 'المؤسسات', descEn: 'Recording opens filing for the organizer.', descAr: 'التسجيل يفتح التقديم للمنظّم.' },
-          { href: '/ministry/enquiries', en: 'Enquiries', ar: 'الاستفسارات', descEn: 'Questions against a determination. The outcome does not change here.', descAr: 'أسئلة على نتيجة. ولا تتغير النتيجة هنا.' },
-          { href: '/ministry/applicability', en: 'Applicability and referrals', ar: 'الانطباق والإحالات', descEn: 'Events referred from outside, determined in or out of scope with reasons.', descAr: 'فعاليات محالة من الخارج، تُحسم ضمن النطاق أو خارجه مع الأسباب.' },
-        ]}
-      />
     </MinistryShell>
   );
 }

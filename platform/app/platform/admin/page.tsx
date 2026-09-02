@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { FlagsPanel } from '../../../components/FlagsPanel';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { ministryConfig } from '../../../lib/queries';
@@ -76,7 +76,12 @@ export default async function MasterAdminPage({
           />
         </p>
       </div>
-      <MinistryFooter steps={[{ href: '/platform/activity', en: 'Platform activity', ar: 'نشاط المنصة', descEn: 'Counts only.', descAr: 'أعداد فقط.' }]} />
+      {/* No sequence footers (partner ruling, second sweep) — a quiet link instead. */}
+      <div style={{ marginBlockStart: 28 }}>
+        <a href="/platform/activity" style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="Platform activity" ar="نشاط المنصة" />
+        </a>
+      </div>
     </MinistryShell>
   );
 }

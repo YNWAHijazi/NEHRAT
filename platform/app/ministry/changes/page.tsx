@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { changesForReview } from '../../../lib/queries';
 
@@ -10,15 +10,9 @@ export default async function ChangesPage() {
   const rows = changesForReview(account.isDemo);
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
-      <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
+      <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Changes and notifications" ar="التغييرات والإشعارات" />
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L
-          en="Material changes with their reported substance, declined and removed parties, and cancellations and postponements — each appears here the moment it is recorded."
-          ar="التغييرات الجوهرية بمضمونها المبلَّغ، والأطراف المعتذرة والمُزالة، والإلغاءات والتأجيلات — يظهر كل منها هنا لحظة تسجيله."
-        />
-      </p>
       <div data-region="changes" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((c) => {
           const inner = (
@@ -46,7 +40,6 @@ export default async function ChangesPage() {
           </div>
         ) : null}
       </div>
-      <MinistryFooter steps={[{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'The submissions the changes land on.', descAr: 'التقديمات التي تقع عليها التغييرات.' }]} />
     </MinistryShell>
   );
 }

@@ -46,8 +46,8 @@ export default async function VenueChangePage({
           </h1>
           <p style={{ margin: '0 0 36px', fontSize: 16, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
             <L
-              en="Five circumstances require a new assessment before the current classification expires."
-              ar="خمسة ظروف تستوجب تقييماً جديداً قبل انتهاء التصنيف الحالي."
+              en="A change to any of these requires a new assessment before it takes effect."
+              ar="أي تغيير في أحد هذه الجوانب يستوجب تقييماً جديداً قبل أن يسري."
             />
           </p>
 
@@ -60,12 +60,7 @@ export default async function VenueChangePage({
             </div>
           ) : null}
 
-          <VenueChangeForm
-            venueId={venue.id}
-            validThrough={venue.validUntil}
-            level={venue.level}
-            aspects={[...VENUE_CHANGE_ASPECTS]}
-          />
+          <VenueChangeForm venueId={venue.id} aspects={[...VENUE_CHANGE_ASPECTS]} />
 
           {changes.length > 0 ? (
             <>

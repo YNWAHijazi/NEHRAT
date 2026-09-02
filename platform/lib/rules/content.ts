@@ -81,14 +81,12 @@ export const POST_EVENT_SIGNIFICANT: readonly BilingualField[] = postEventJson.s
 
 /* ---------------- The venue service (Slice 3) ---------------- */
 
+/** The five reassessment circumstances. Their affects/consequence strings left with
+ *  the change screen's affects cards (partner ruling, second sweep). */
 export interface VenueChangeAspect {
   key: string;
   en: string;
   ar: string;
-  affectsEn: string;
-  affectsAr: string;
-  consequenceEn: string;
-  consequenceAr: string;
 }
 
 export const VENUE_APPLICABILITY_INTRO: { en: string; ar: string } = venueJson.applicabilityIntro;
@@ -96,7 +94,6 @@ export const VENUE_CAPACITY_FIELD: BilingualField = venueJson.capacityField;
 export const VENUE_REGISTRATION_FIELDS: readonly BilingualField[] = venueJson.registrationFields;
 export const VENUE_REASSESSMENT_TRIGGERS: readonly { en: string; ar: string }[] = venueJson.reassessmentTriggers;
 export const VENUE_CHANGE_ASPECTS: readonly VenueChangeAspect[] = venueJson.changeAspects;
-export const VENUE_FLOOR_NOTE: { en: string; ar: string } = venueJson.floorNote;
 export const VENUE_ELIGIBILITY_QUESTIONS: { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion } =
   venueJson.eligibilityQuestions as { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion };
 

@@ -82,8 +82,8 @@ function InvitationLinkBlock({ token }: { token: string }) {
       </code>
       <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 6, maxWidth: '80ch' }}>
         <L
-          en="They answer through it. The token is unguessable; share it only with the party it names."
-          ar="من خلاله يجيبون. الرمز غير قابل للتخمين؛ فلا تشاركوه إلا مع الطرف الذي يسمّيه."
+          en="They answer through it. Share it only with the party it names."
+          ar="من خلاله يجيبون. فلا تشاركوه إلا مع الطرف الذي يسمّيه."
         />
       </div>
     </div>
@@ -189,8 +189,8 @@ export default async function RequirementsPage({
         </h1>
         <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
           <L
-            en={`Everything Level ${level} requires of you, in the order it needs acting on. Documents you attach, agencies that must answer, requirements you certify to, and checks conducted on site.`}
-            ar={`كل ما يقتضيه منكم المستوى ${level}، بترتيب ما يحتاج إلى إجراء. مستندات ترفقونها، وجهات عليها أن تُجيب، ومتطلبات تصدّقون عليها، وتحققات تُجرى ميدانياً.`}
+            en={`Everything Level ${level} requires of you.`}
+            ar={`كل ما يقتضيه منكم المستوى ${level}.`}
           />
         </p>
 
@@ -250,8 +250,8 @@ export default async function RequirementsPage({
           n={1}
           en="Documents to attach"
           ar="المستندات المطلوب إرفاقها"
-          noteEn="Anything attached here appears as complete in the submission package. It is never entered twice."
-          noteAr="كل ما يُرفق هنا يظهر مكتملاً في حزمة التقديم. لا يُدخَل مرتين."
+          noteEn="Anything attached here appears as complete in the submission package."
+          noteAr="كل ما يُرفق هنا يظهر مكتملاً في حزمة التقديم."
         />
         <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
           <L en={acceptHint().en} ar={acceptHint().ar} />
@@ -383,8 +383,8 @@ export default async function RequirementsPage({
           n={2}
           en="Named EMS providers"
           ar="مزوّدو الإسعاف المُسمّون"
-          noteEn="You cannot certify that participating providers have been identified until each named EMS provider has answered."
-          noteAr="لا يمكنكم الإقرار بتحديد المزوّدين المشاركين قبل أن يُجيب كل مزوّد إسعاف مُسمّى."
+          noteEn="Each provider you name must answer before you can certify the submission."
+          noteAr="على كل مزوّد تسمّونه أن يُجيب قبل أن تصدّقوا على التقديم."
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
           {providers.map((p) => {
@@ -581,8 +581,8 @@ export default async function RequirementsPage({
           </summary>
           <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
             <L
-              en="Nothing is attached against these and there is nothing here to tick. You certify to all of them together with one line in the compliance and submission form."
-              ar="لا يُرفق شيء مقابلها ولا شيء هنا للتأشير. وتصدّقون عليها جميعاً بسطر واحد في نموذج الامتثال والتقديم."
+              en="You certify to all of them with one line in the compliance and submission form."
+              ar="تصدّقون عليها جميعاً بسطر واحد في نموذج الامتثال والتقديم."
             />
           </p>
           {[
@@ -674,8 +674,8 @@ export default async function RequirementsPage({
           </summary>
           <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
             <L
-              en="Some requirements are checked on site rather than on paper. You do not schedule these; the authority conducting them does, and you will be told the date. Nothing is attached against them."
-              ar="تُتحقَّق بعض المتطلبات ميدانياً لا على الورق. ولا تجدولونها أنتم؛ بل الجهة التي تجريها، وستُبلَّغون بالتاريخ. ولا يُرفق شيء مقابلها."
+              en="The conducting authority schedules these checks, and you will be told the date."
+              ar="تجدول الجهةُ المنفِّذة هذه التحققات، وستُبلَّغون بالتاريخ."
             />
           </p>
           {inspections.length === 0 ? (

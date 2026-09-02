@@ -53,8 +53,8 @@ export default async function ChangePage({
           {notice === 'reported' ? (
             <div style={{ padding: '18px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: '14.5px', lineHeight: 1.6 }}>
               <L
-                en="The change has been notified to the Ministry. It appears in the record's history below; the Ministry may require revised documents."
-                ar="أُبلغت الوزارة بالتغيير. ويظهر في سجل التغييرات أدناه؛ وقد تطلب الوزارة مستندات منقّحة."
+                en="The change has been notified to the Ministry. The Ministry may require revised documents."
+                ar="أُبلغت الوزارة بالتغيير. وقد تطلب الوزارة مستندات منقّحة."
               />
             </div>
           ) : null}

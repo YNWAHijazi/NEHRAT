@@ -180,8 +180,8 @@ export function PlanForm({
           </div>
           <p style={{ margin: '0 0 18px', fontSize: '15.5px', lineHeight: 1.75 }}>
             <L
-              en="The requirements call this documented medical arrangements, not a plan. The sixteen-section structure below is not expected at this level and is collapsed. Do not turn a Level 1 arrangement into a lengthy manual."
-              ar="تسمّيها المتطلبات ترتيبات طبية موثقة، لا خطة. والهيكل المؤلف من ستة عشر بنداً أدناه غير متوقع في هذا المستوى وهو مطوي. ولا تحوّلوا ترتيب المستوى 1 إلى دليل مطوّل."
+              en="The requirements call this documented medical arrangements, not a plan. Do not turn a Level 1 arrangement into a lengthy manual."
+              ar="تسمّيها المتطلبات ترتيبات طبية موثقة، لا خطة. ولا تحوّلوا ترتيب المستوى 1 إلى دليل مطوّل."
             />
           </p>
           <button
@@ -252,8 +252,8 @@ export function PlanForm({
           </div>
           <div style={{ fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
             <L
-              en="Confirm coverage against each section below. The Ministry reviewer sees which sections you confirmed and the file itself."
-              ar="أكّدوا التغطية مقابل كل بند أدناه. ويرى مراجع الوزارة البنود التي أكّدتموها والملف نفسه."
+              en="Confirm coverage against each section below."
+              ar="أكّدوا التغطية مقابل كل بند أدناه."
             />
           </div>
         </div>
@@ -376,8 +376,8 @@ export function PlanForm({
           </h2>
           <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.6, color: 'var(--muted)', maxWidth: '76ch' }}>
             <L
-              en={`${facility.nameEn} is a registered covered facility. Its defibrillators, trained responders and cardiac arrangements can be referenced in this plan rather than entered again. The facility record stays the source of truth; nothing is copied into your plan.`}
-              ar={`${facility.nameAr} مرفق مشمول مسجَّل. ويمكن الإحالة في هذه الخطة إلى أجهزته ومستجيبيه المدرَّبين وترتيباته القلبية بدلاً من إدخالها مجدداً. ويبقى سجل المرفق مصدر الحقيقة، ولا يُنسخ شيء إلى خطتكم.`}
+              en={`${facility.nameEn} is a registered covered facility. Its defibrillators, trained responders and cardiac arrangements can be referenced in this plan rather than entered again.`}
+              ar={`${facility.nameAr} مرفق مشمول مسجَّل. ويمكن الإحالة في هذه الخطة إلى أجهزته ومستجيبيه المدرَّبين وترتيباته القلبية بدلاً من إدخالها مجدداً.`}
             />
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
@@ -424,8 +424,8 @@ export function PlanForm({
               </span>
               <span style={{ display: 'block', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', marginBlockStart: 6 }}>
                 <L
-                  en="This is yours to confirm for this event. It is not inherited from the facility's registration — a device behind a locked door on the day is not accessible, whatever the facility record says. Unconfirming and saving WITHDRAWS the reference from your plan; the facility's own record is unchanged."
-                  ar="هذا التأكيد عليكم لهذه الفعالية. ولا يُورَث من تسجيل المرفق — فالجهاز خلف باب مقفل يوم الفعالية ليس متاحاً، مهما قال سجل المرفق. وإلغاء التأكيد مع الحفظ يسحب الإحالة من خطتكم؛ ويبقى سجل المرفق نفسه دون تغيير."
+                  en="This is yours to confirm for this event; it is not inherited from the facility's registration. Unconfirming and saving withdraws the reference from your plan."
+                  ar="هذا التأكيد عليكم لهذه الفعالية؛ ولا يُورَث من تسجيل المرفق. وإلغاء التأكيد مع الحفظ يسحب الإحالة من خطتكم."
                 />
               </span>
             </span>
@@ -500,7 +500,7 @@ export function PlanForm({
             </span>
           </div>
           <p style={{ margin: '0 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '76ch' }}>
-            <L en="Sixteen items, set by the Protocol. You can return to them at any point before filing." ar="ستة عشر بنداً يحددها البروتوكول. ويمكنكم العودة إليها في أي وقت قبل التقديم." />
+            <L en="Sixteen items, set by the Protocol." ar="ستة عشر بنداً يحددها البروتوكول." />
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
             {sectionsDef.map((s) => {

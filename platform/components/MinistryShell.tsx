@@ -1,8 +1,9 @@
 /**
  * The Ministry console's chrome: the government band, the console header naming
  * the signed-in role, and the content column. Navigation is the dashboard's
- * counters and each screen's sequence footer -- the prototype's tab strip is a
- * reviewer's index and is not built.
+ * counters and its quiet link row -- the sequence footers left in the second
+ * simplification sweep, and the prototype's tab strip is a reviewer's index
+ * and is not built.
  */
 
 import Link from 'next/link';
@@ -78,29 +79,3 @@ export function MinistryShell({
   );
 }
 
-/** The console's own next-steps footer, mirroring the public screens' pattern. */
-export function MinistryFooter({
-  steps,
-}: {
-  steps: { href: string; en: string; ar: string; descEn: string; descAr: string }[];
-}) {
-  return (
-    <div data-noprint="" style={{ marginBlockStart: 56, paddingBlockStart: 24, borderBlockStart: '1px solid var(--line)' }}>
-      <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
-        <L en="Elsewhere in the console" ar="في أماكن أخرى من اللوحة" />
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12 }}>
-        {steps.map((s) => (
-          <Link key={s.href} href={s.href} style={{ padding: '17px 21px', background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBlockEnd: 4 }}>
-              <L en={s.en} ar={s.ar} />
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-              <L en={s.descEn} ar={s.descAr} />
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}

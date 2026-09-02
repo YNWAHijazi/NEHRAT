@@ -94,8 +94,8 @@ export function PlanConfirmation({
       </div>
       <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
         <L
-          en="Recording this confirmation restarts the annual clock on the validity ledger. It is signed by the coordinator — the device records are signed by the facility representative."
-          ar="تسجيل هذا التأكيد يعيد بدء العدّ السنوي في سجل الصلاحية. ويوقّعه المنسّق — أما سجلات الأجهزة فيوقّعها ممثل المرفق."
+          en="Recording this confirmation restarts the annual clock on the validity record. The coordinator signs it."
+          ar="تسجيل هذا التأكيد يعيد بدء العدّ السنوي في سجل الصلاحية. ويوقّعه المنسّق."
         />
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>

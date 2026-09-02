@@ -263,7 +263,7 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   const versions = assessmentsFor(account.id, id);
   const latest = versions[0] ?? null;
   const derivation = latest?.derivation ?? null;
-  const why = derivation ? levelWhy(derivation) : null;
+  const why = derivation ? levelWhy(derivation, latest?.inputs.eventDisciplines) : null;
   const today = beirutToday();
 
   const gateCtx: EventGateContext = {
@@ -342,8 +342,10 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
         : { k: reportSubmitted ? 'done' : 'todo', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
       : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Not needed for this event', metaAr: 'غير مطلوب لهذه الفعالية' },
   ];
-  const railNoteEn = `Stage ${stage} of ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · stage ${POST_EVENT_STAGE} not applicable`);
-  const railNoteAr = `المرحلة ${stage} من ${RAIL_STAGE_COUNT}` + (level === 3 ? '' : ` · المرحلة ${POST_EVENT_STAGE} غير منطبقة`);
+  // The tail that repeated the sixth column's own "Not applicable" label was cut
+  // in the second simplification sweep -- the rail already says it.
+  const railNoteEn = `Stage ${stage} of ${RAIL_STAGE_COUNT}`;
+  const railNoteAr = `المرحلة ${stage} من ${RAIL_STAGE_COUNT}`;
 
   // Submission history: the assessment versions plus creation, newest first.
   const history: { en: string; ar: string; date: string }[] = [
@@ -562,11 +564,8 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
                   </p>
                 ) : null}
                 {why?.comparison ? (
-                  <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>
-                    <L en={why.comparison.en} ar={why.comparison.ar} />{' '}
-                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      <L en={`(${derivation.scoreTotal} of ${DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} points)`} ar={`(${derivation.scoreTotal} من ${DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} نقطة)`} />
-                    </span>
+                  <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    <L en={why.comparison.en} ar={why.comparison.ar} />
                   </p>
                 ) : null}
               </>
@@ -642,8 +641,8 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
             </div>
             <div style={{ fontSize: '15.5px', lineHeight: 1.6 }}>
               <L
-                en="A licensed physician must be named as Event Medical Director before you can file. Name one from the requirements screen."
-                ar="يجب تسمية طبيب مرخّص مديراً طبياً للفعالية قبل التقديم. يمكن تسميته من شاشة المتطلبات."
+                en="A licensed physician must be named as Event Medical Director before you can file."
+                ar="يجب تسمية طبيب مرخّص مديراً طبياً للفعالية قبل التقديم."
               />
             </div>
           </div>

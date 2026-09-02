@@ -128,6 +128,7 @@ export function PublicShell({
       >
         <div data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '32px 32px 56px' }}>
           <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '84ch' }}>
+            <L en={PUBLIC_LANDING.scopeEn} ar={PUBLIC_LANDING.scopeAr} />{' '}
             <L en={PUBLIC_LANDING.jurisdictionEn} ar={PUBLIC_LANDING.jurisdictionAr} />
           </p>
           <div style={{ marginBlockStart: 20, display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: '13px' }}>

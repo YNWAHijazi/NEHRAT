@@ -33,19 +33,13 @@ const inputStyle: React.CSSProperties = {
   fontSize: 15,
 };
 
+/* The issue tags ("English issue only") left the labels (partner ruling, second
+   sweep): English governs, the ruling is made, and a form should not teach the
+   reader the two issues of the regulation. The tags stay in the data. */
 function QuestionLabel({ q }: { q: EligibilityQuestion }) {
   return (
     <span style={{ fontSize: '14.5px' }}>
       <L en={q.en} ar={q.ar} />
-      {q.issue !== 'both' ? (
-        <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--muted)', verticalAlign: 'middle' }}>
-          {q.issue === 'en-only' ? (
-            <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
-          ) : (
-            <L en="Arabic issue only" ar="الإصدار العربي فقط" />
-          )}
-        </span>
-      ) : null}
     </span>
   );
 }
@@ -70,6 +64,11 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
               <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                   <L en={f.en} ar={f.ar} />
+                  {f.key === 'contact' ? (
+                    <span style={{ marginInlineStart: 6 }}>
+                      <L en="(optional)" ar="(اختياري)" />
+                    </span>
+                  ) : null}
                 </span>
                 <input name={f.key} required={f.key !== 'contact'} style={inputStyle} />
               </label>
@@ -117,8 +116,8 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
           </div>
           <div style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', marginBlockEnd: 16 }}>
             <L
-              en="The assessment records an effective date and an expiry date. Assess one routine operating session under the risk assessment. The classification runs for twelve months from the date it is recorded."
-              ar="يُحدَّد في التقييم تاريخ بدء سريانه وتاريخ انتهاء صلاحيته. قيّموا فترة تشغيل اعتيادية واحدة وفق التقييم الوطني للمخاطر. يسري التصنيف اثني عشر شهراً من تاريخ تسجيله."
+              en="The assessment covers one routine operating session and stands for twelve months."
+              ar="يشمل التقييم فترة تشغيل اعتيادية واحدة ويسري اثني عشر شهراً."
             />
           </div>
           <button
@@ -132,8 +131,8 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
         <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: 16, lineHeight: 1.65, marginBlockEnd: 12 }}>
             <L
-              en="On these details the venue falls outside the annual assessment. The Ministry determines applicability where it is uncertain, so this is not a determination that the venue is outside the process."
-              ar="بحسب هذه المعطيات يقع الموقع خارج التقييم السنوي. تتخذ الوزارة القرار النهائي عند عدم اليقين بالانطباق، ولذلك لا يُعتبر هذا قراراً بأن الموقع خارج الآلية."
+              en="On these details the venue is outside the annual assessment. Where that is uncertain, the Ministry decides."
+              ar="بحسب هذه المعطيات يقع الموقع خارج التقييم السنوي. وعند عدم اليقين، تقرر الوزارة."
             />
           </div>
           <a href="/notifications" style={{ fontSize: 15, borderBlockEnd: '1px solid var(--brand)', paddingBlockEnd: 2 }}>

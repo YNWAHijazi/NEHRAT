@@ -315,9 +315,12 @@ export function SubmitForm({
       {locked ? (
         <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: 15, lineHeight: 1.65 }}>
           <L
-            en={`Filed. The Ministry reference number is ${initial?.mophReference ?? ''}. The acknowledgment carries what it means.`}
-            ar={`قُدِّم. الرقم المرجعي للوزارة هو ⁦${initial?.mophReference ?? ''}⁩. ويحمل الإشعار دلالته.`}
-          />
+            en={`Filed. The Ministry reference number is ${initial?.mophReference ?? ''}.`}
+            ar={`قُدِّم. الرقم المرجعي للوزارة هو ⁦${initial?.mophReference ?? ''}⁩.`}
+          />{' '}
+          <a href={`/events/${eventId}/acknowledgment`} style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+            <L en="Open the acknowledgment of receipt" ar="فتح إشعار الاستلام" />
+          </a>
         </div>
       ) : (
         <>
@@ -400,17 +403,12 @@ export function SubmitForm({
                 <L en="File the submission" ar="تقديم الملف" />
               )}
             </button>
-            {blockers.length > 0 ? (
-              <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
-                <L
-                  en={`Blocked while ${blockers.length} ${blockers.length === 1 ? 'item is' : 'items are'} outstanding.`}
-                  ar={`محجوب ما دامت ${blockers.length} بنود غير مستوفاة.`}
-                />
-              </span>
-            ) : null}
+            {/* The "Blocked while N items are outstanding" caption was cut in the
+                second simplification sweep: the panel directly above is the reason,
+                item by item, under the same condition. */}
             {fileError ? (
               <span style={{ fontSize: '13.5px', color: 'var(--bad)' }}>
-                <L en="Filing was refused by the server-side check. The outstanding items are listed above." ar="رفض التحقق على الخادم التقديم. البنود غير المستوفاة مدرجة أعلاه." />
+                <L en="Filing was refused; the outstanding items are listed above." ar="رُفض التقديم؛ والبنود غير المستوفاة مدرجة أعلاه." />
               </span>
             ) : null}
           </div>

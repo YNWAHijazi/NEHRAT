@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { enquiriesForReview } from '../../../lib/queries';
 import { can } from '../../../lib/rules';
@@ -27,7 +27,7 @@ export default async function EnquiriesPage({
         <L en="Enquiries" ar="الاستفسارات" />
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L en="A question against a determination. Answering it does not change the outcome; a changed outcome is a new determination on the submission." ar="سؤال على نتيجة. والإجابة عنه لا تغيّر النتيجة؛ والنتيجة المتغيرة قرار جديد على التقديم." />
+        <L en="Answering an enquiry does not change the outcome." ar="الرد على الاستفسار لا يغيّر النتيجة." />
       </p>
       <div data-region="enquiries" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((e) => (
@@ -73,7 +73,6 @@ export default async function EnquiriesPage({
           </div>
         ) : null}
       </div>
-      <MinistryFooter steps={[{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'The submissions the enquiries concern.', descAr: 'التقديمات التي تخصها الاستفسارات.' }]} />
     </MinistryShell>
   );
 }

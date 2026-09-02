@@ -25,7 +25,8 @@ import {
  *
  * NO ACCOUNT, NO DATABASE, NO RECORD. Everything is in the URL, so an answer can be
  * shared and re-read, and nothing a person tries here is stored against them. The
- * screens say so in those words: using this creates no obligation.
+ * screens no longer SAY so — the "creates no obligation" sentence was cut by name in
+ * the partner's second sweep — they just are so.
  *
  * "What is not routinely subject" renders ONLY in the event branch, per ROADMAP 1.
  */
@@ -68,12 +69,12 @@ export default async function ApplicabilityPage({
       <Link href="/" style={{ fontSize: '13.5px', color: 'var(--brand)' }}>
         <L en="Overview" ar="نظرة عامة" />
       </Link>
-      <h1 data-sec-h1="" style={{ margin: '10px 0 10px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
+      <h1 data-sec-h1="" style={{ margin: '10px 0 28px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Determination of applicability" ar="البت في الانطباق" />
       </h1>
-      <p style={{ margin: '0 0 28px', fontSize: '15.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-        <L en={P.toolsNoteEn} ar={P.toolsNoteAr} />
-      </p>
+      {/* The "Open to anyone. No account..." intro left (partner ruling, second sweep):
+          the same sentence was cut by name from the landing, and the check explains
+          itself by being usable without signing in. */}
 
       {/* WHAT ARE YOU ASKING ABOUT — three subjects, three tests. */}
       <div data-region="subject-choice" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12, marginBlockEnd: 32 }}>
@@ -100,10 +101,7 @@ export default async function ApplicabilityPage({
             <L en="The six criteria" ar="المعايير الستة" />
           </h2>
           <p style={{ margin: '0 0 14px', fontSize: '14px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
-            <L
-              en="Any one of these makes the event subject to the Protocol. They are alternatives, not a list to complete."
-              ar="يكفي أي واحد منها لإخضاع الفعالية للبروتوكول. فهي بدائل لا قائمة يجب استكمالها."
-            />
+            <L en="Any one of them is enough." ar="يكفي انطباق واحد منها." />
           </p>
           <div style={listBox}>
             {P.criteria.map((c, i) => (
@@ -204,8 +202,8 @@ export default async function ApplicabilityPage({
           </div>
           <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.7 }}>
             <L
-              en="This is the answer, not a gap in it. Nothing is in force against this category until the Ministry publishes that value, and operators are told when it does."
-              ar="هذا هو الجواب لا نقصٌ فيه. فلا شيء سارٍ على هذه الفئة إلى أن تنشر الوزارة تلك القيمة، ويُبلَّغ المشغّلون عند نشرها."
+              en="Nothing is in force against this category until the Ministry publishes that value, and operators are notified when it is published."
+              ar="لا شيء سارٍ على هذه الفئة إلى أن تنشر الوزارة تلك القيمة، ويُبلَّغ المشغّلون عند نشرها."
             />
           </p>
         </div>

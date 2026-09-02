@@ -323,8 +323,8 @@
       "ar": "وفي حال كانت وحدة الاستجابة غير مخولة بنقل المرضى، فعليها تنسيق تسليم الحالة إلى جهة خدمات الطوارئ الطبية المختصة بالنقل أو إلى أي جهة طبية مختصة أخرى."
     },
     "datasetIntro": {
-      "en": "One report for each patient. Five sections. The report carries no patient name.",
-      "ar": "يُستكمل تقرير مستقل لكل مريض. خمسة أقسام. ولا يتضمن التقرير اسم المريض."
+      "en": "One report for each patient. The report carries no patient name.",
+      "ar": "يُستكمل تقرير مستقل لكل مريض، ولا يتضمن التقرير اسم المريض."
     },
     "attachRoute": {
       "en": "A unit may use its own patient-care report where that report captures everything required here. Attaching it satisfies the obligation; nothing has to be re-typed into the platform.",

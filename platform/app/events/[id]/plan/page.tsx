@@ -64,8 +64,8 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         </h1>
         <p style={{ margin: '0 0 40px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
           <L
-            en="Two routes to the same obligation: write the plan in the platform, or attach the document you already hold and confirm its coverage. Either way, the sixteen items the Protocol sets are what the plan must address."
-            ar="مساران إلى الموجب نفسه: كتابة الخطة في المنصة، أو إرفاق المستند الذي تملكونه وتأكيد تغطيته. وفي الحالين، البنود الستة عشر التي يحددها البروتوكول هي ما يجب أن تعالجه الخطة."
+            en="Write the plan in the platform, or attach the document you already hold and confirm its coverage."
+            ar="اكتبوا الخطة في المنصة، أو أرفقوا المستند الذي تملكونه وأكّدوا تغطيته."
           />
         </p>
 
@@ -92,7 +92,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
               <L en="Versions" ar="النسخ" />
             </h2>
             <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L en="Each save archives the version it replaced. The current version leads; earlier versions are read-only." ar="كل حفظ يؤرشف النسخة التي حلّ محلها. النسخة الحالية أولاً؛ والنسخ السابقة للقراءة فقط." />
+              <L en="Each save archives the version it replaced." ar="كل حفظ يؤرشف النسخة التي حلّ محلها." />
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {plan ? (

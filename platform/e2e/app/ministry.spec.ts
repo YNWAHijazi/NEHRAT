@@ -177,13 +177,15 @@ test.describe('the pinned vocabulary', () => {
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0455');
     const outcome = page.locator('[data-region="outcome"]');
     await expect(outcome).toContainText('Record an outcome');
-    await expect(outcome).toContainText('Three outcomes exist. Nothing else is a determination.');
+    // The card's explanatory sentence ("Three outcomes exist. Nothing else is a
+    // determination.") was CUT on the partner's second-sweep ruling -- the three
+    // options themselves carry the vocabulary, and they are pinned by the queue
+    // and outcome tests. The limit sentences are untouched and stay verbatim.
     const limits = page.locator('[data-region="limits"]');
     await expect(limits).toContainText('The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority.');
     await expect(limits).toContainText('This status does not replace any other permit or authorization required under Lebanese law.');
     // Arabic, verbatim -- التأهب per the glossary, never الجاهزية on the event side.
     await expect(outcome).toContainText('تسجيل نتيجة');
-    await expect(outcome).toContainText('توجد ثلاث نتائج فقط. ما عداها ليس قراراً.');
     await expect(limits).toContainText('تراجع الوزارة التأهب الصحي والطبي فقط. يبقى ترخيص الفعالية من صلاحية السلطة المختصة قانوناً.');
     await expect(limits).toContainText('لا تحل هذه الحالة محل أي ترخيص أو إذن آخر مطلوب بموجب القانون اللبناني.');
   });
@@ -252,6 +254,9 @@ test.describe('cardiac configuration', () => {
     const body = page.locator('body');
     await expect(body).toContainText('Not set — nothing is in force under this value');
     await expect(body).toContainText('provisional figure');
+    // The status-wording caveat lives HERE, on the label-owner's screen, since it
+    // left the operator's facility record (partner ruling, second sweep).
+    await expect(page.locator('[data-region="provisional-wording"]')).toContainText('provisional');
 
     // Set and publish the corrective-action timeline. Selected by the power's own text,
     // not by row index: the rows are eleven for ten powers (11.3 renders as its two

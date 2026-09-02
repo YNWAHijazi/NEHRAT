@@ -12,7 +12,8 @@ import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { saveVenueAssessmentAction } from '../../../actions';
 import type { Band, Domain, MinimumCondition } from '../../../../lib/rules/load';
-import { bandForScore, deriveLevel } from '../../../../lib/rules/derive';
+import { deriveLevel } from '../../../../lib/rules/derive';
+import { levelWhy } from '../../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../../lib/rules/types';
 
 const inputStyle: React.CSSProperties = {
@@ -75,9 +76,8 @@ export function VenueAssessmentForm({
     () => deriveLevel({ answers: answers as DomainAnswers, inputs }),
     [answers, inputs],
   );
-  const triggeredKeys = new Set(derivation.triggeredConditions.map((c) => c.key));
-  const score = derivation.scoreTotal;
-  const markerPct = score === null ? 0 : Math.round((score / maxScore) * 100);
+  const why = levelWhy(derivation);
+  const unansweredDomains = domains.filter((_, i) => answers[i] === null);
 
   const submit = () => {
     setError(false);
@@ -98,12 +98,12 @@ export function VenueAssessmentForm({
       <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
         <L en={`${venueNameEn} · routine operations`} ar={`${venueNameAr} · التشغيل الاعتيادي`} />
       </div>
-      <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+      <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
         <L en="Annual venue assessment" ar="التقييم السنوي للموقع" />
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-        <L en="The same nine domains as the event assessment, assessed once each year." ar="المجالات التسعة نفسها المستخدمة في تقييم الفعاليات، تُقيَّم مرة كل سنة." />
-      </p>
+      {/* The cross-reference to the event assessment left this screen (partner
+          ruling, second sweep): a venue operator has no event assessment to
+          compare with, and the callout below says what to assess. */}
 
       <div data-region="session-callout" style={{ padding: '26px 30px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 44 }}>
         <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
@@ -125,7 +125,7 @@ export function VenueAssessmentForm({
       <div style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 380 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-            <L en="Expected maximum simultaneous attendance during a routine operating session" ar="الحد الأقصى المتوقع للحضور المتزامن خلال فترة تشغيل اعتيادية" />
+            <L en="Most people at the same time during a routine operating session" ar="أكبر عدد من الحاضرين في الوقت نفسه خلال فترة تشغيل اعتيادية" />
           </span>
           <input
             value={attendance}
@@ -169,107 +169,43 @@ export function VenueAssessmentForm({
         ))}
       </div>
 
+      {/* The result the way the event form gives it (partner ruling, second sweep):
+          the classification and one line why. The score bar, the band legend and the
+          condition checklist left the operator's screen -- the engine still derives
+          every condition, and the full detail stays on the Ministry side. */}
       <div data-region="classification" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-          <L en="Total score from your answers" ar="المجموع من أجوبتكم" />
+        <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
+          <L en="Your venue's classification" ar="تصنيف موقعكم" />
         </div>
-        <div style={{ position: 'relative', height: 44 }}>
-          {score !== null ? (
-            <div style={{ position: 'absolute', insetInlineStart: `${markerPct}%`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-              <span style={{ fontSize: 15, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                {score}{' '}
-                <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 13 }}>
-                  <L en={`of ${maxScore}`} ar={`من ${maxScore}`} />
+        {derivation.finalLevel !== null ? (
+          <>
+            <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: '-.025em', color: `var(--l${derivation.finalLevel})` }}>
+              <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
+            </div>
+            {why.reason ? (
+              <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.6, maxWidth: '60ch' }}>
+                <L en={why.reason.en} ar={why.reason.ar} />
+              </p>
+            ) : null}
+            {why.comparison ? (
+              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                <L en={why.comparison.en} ar={why.comparison.ar} />
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <div style={{ fontSize: 16, lineHeight: 1.6 }}>
+            <L en="Please answer:" ar="يرجى الإجابة على:" />
+            <span style={{ display: 'block', marginBlockStart: 4, color: 'var(--accent-ink)' }}>
+              {unansweredDomains.map((d, i) => (
+                <span key={d.number} style={{ display: 'inline' }}>
+                  {i > 0 ? ' · ' : ''}
+                  <L en={d.en} ar={d.ar} />
                 </span>
-              </span>
-              <span style={{ display: 'block', width: 1, height: 12, background: 'var(--ink)', opacity: 0.5 }} />
-            </div>
-          ) : null}
-        </div>
-        <div style={{ display: 'flex', gap: 3 }}>
-          {Array.from({ length: maxScore + 1 }, (_, i) => (
-            <span key={i} style={{ flex: 1, height: 44, borderRadius: 3, background: score !== null && i <= score ? `var(--l${bandForScore(i)})` : 'var(--surface2)' }} />
-          ))}
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: bands.map((b) => `${b.maxScore - b.minScore + 1}fr`).join(' '), gap: 3, marginBlockStart: 10, fontSize: '12.5px', color: 'var(--muted)' }}>
-          {bands.map((b) => (
-            <div key={b.level}>
-              <L en={`Level ${b.level}`} ar={`المستوى ${b.level}`} /> · {b.minScore}–{b.maxScore}
-            </div>
-          ))}
-        </div>
-
-        <div style={{ marginBlockStart: 32, paddingBlockStart: 28, borderBlockStart: '1px solid var(--line)' }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-            <L en="Minimum event level — conditions that cannot be classified lower. Every condition derives from the registration and the figures above." ar="الحد الأدنى لمستوى الفعالية — شروط لا يمكن التصنيف تحتها. كل شرط مستمد من التسجيل والأرقام أعلاه." />
+              ))}
+            </span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {conditions.map((condition) => {
-              const on = triggeredKeys.has(condition.key);
-              return (
-                <div key={condition.key} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px 16px', border: `1px solid ${on ? (condition.level === 3 ? 'var(--l3)' : 'var(--accent)') : 'var(--line)'}`, background: on ? (condition.level === 3 ? 'var(--l3s)' : 'var(--accent-soft)') : 'var(--bg)', borderRadius: 8 }}>
-                  <span style={{ flex: 'none', width: 16, height: 16, border: `1.5px solid ${on ? 'var(--ink)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--ink)' : 'transparent' }} />
-                  <span style={{ flex: 1 }}>
-                    <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.5 }}>
-                      <L en={condition.en} ar={condition.ar} />
-                    </span>
-                    {condition.issue !== 'both' ? (
-                      <span style={{ display: 'inline-block', marginBlockStart: 3, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                        {condition.issue === 'ar-only' ? (
-                          <L en="Arabic issue only" ar="الإصدار العربي فقط" />
-                        ) : (
-                          <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
-                        )}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span style={{ flex: 'none', fontSize: 13, color: `var(--l${condition.level})` }}>
-                    <L en={`Level ${condition.level}`} ar={`المستوى ${condition.level}`} />
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div data-region="results" style={{ marginBlockStart: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ background: 'var(--surface)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Score-based level" ar="المستوى بحسب النتيجة" />
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
-              {derivation.scoreBandLevel !== null ? (
-                <L en={`Level ${derivation.scoreBandLevel}`} ar={`المستوى ${derivation.scoreBandLevel}`} />
-              ) : (
-                <span style={{ color: 'var(--muted)' }}>—</span>
-              )}
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Minimum event level" ar="الحد الأدنى لمستوى الفعالية" />
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' }}>
-              {derivation.minimumConditionLevel !== null ? (
-                <L en={`Level ${derivation.minimumConditionLevel}`} ar={`المستوى ${derivation.minimumConditionLevel}`} />
-              ) : (
-                <L en="None" ar="لا يوجد" />
-              )}
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface2)', padding: '20px 22px' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en="Final level — the higher of the two" ar="المستوى النهائي — الأعلى من الاثنين" />
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', color: derivation.finalLevel ? `var(--l${derivation.finalLevel})` : 'var(--muted)' }}>
-              {derivation.finalLevel !== null ? (
-                <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
-              ) : (
-                <L en="Not yet derivable" ar="لا يمكن استنتاجه بعد" />
-              )}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       <div data-region="validity" style={{ padding: 32, border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
@@ -324,7 +260,7 @@ export function VenueAssessmentForm({
 
       {error ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--bad)' }}>
-          <L en="The classification cannot be recorded until every domain is answered and the attendance figure is captured." ar="لا يمكن تسجيل التصنيف قبل الإجابة عن جميع المجالات وإدخال رقم الحضور." />
+          <L en="Answer every domain and the attendance figure before recording the classification." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور قبل تسجيل التصنيف." />
         </p>
       ) : null}
       <button
@@ -337,7 +273,7 @@ export function VenueAssessmentForm({
       </button>
       {!derivation.complete ? (
         <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-          <L en="The classification is derived once every domain is answered and the attendance figure is captured." ar="يُستنتج التصنيف بعد الإجابة عن جميع المجالات وإدخال رقم الحضور." />
+          <L en="Answer every domain and the attendance figure first." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور أولاً." />
         </p>
       ) : null}
     </div>

@@ -70,9 +70,9 @@ export default async function CredentialsPage({
             <button type="submit" style={{ height: 40, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 20, fontSize: 14, cursor: 'pointer' }}>
               <L en="Save the record" ar="حفظ السجل" />
             </button>
-            <span style={{ flexBasis: '100%', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L en="This record is yours to maintain. Verification is the Order's, where its lane is active, and never decides an outcome." ar="هذا السجل عليكم صيانته. والتحقق للنقابة، حيث يكون مسارها مفعّلاً، ولا يقرر نتيجة أبداً." />
-            </span>
+            {/* The helper sentence left (partner ruling, second sweep): the lane-off
+                panel and the non-determinative panel on this same screen already say
+                whose the verification is and what it cannot decide. */}
           </form>
 
           <div data-region="non-determinative" style={{ padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '82ch' }}>

@@ -2,12 +2,11 @@
 
 /**
  * The change report, from the reference: five aspect chips, a description, the date the
- * change takes effect. Selecting any aspect surfaces what it affects and the
- * reassessment panel -- notifying the Ministry does not satisfy the reassessment.
+ * change takes effect. Selecting any aspect surfaces the reassessment panel --
+ * notifying the Ministry does not satisfy the reassessment.
  */
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { L } from '../../../../components/L';
 import { reportVenueChangeAction } from '../../../actions';
 
@@ -15,21 +14,13 @@ interface Aspect {
   key: string;
   en: string;
   ar: string;
-  affectsEn: string;
-  affectsAr: string;
-  consequenceEn: string;
-  consequenceAr: string;
 }
 
 export function VenueChangeForm({
   venueId,
-  validThrough,
-  level,
   aspects,
 }: {
   venueId: string;
-  validThrough: string | null;
-  level: number | null;
   aspects: Aspect[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -94,58 +85,28 @@ export function VenueChangeForm({
         </div>
       </div>
 
+      {/* The what-this-change-affects cards (domain numbers, threshold figures) left
+          this screen (partner ruling, second sweep): they taught the scoring model,
+          and the consequence that matters to the operator is the panel below. */}
       {any ? (
-        <div>
-          <div style={{ marginBlockEnd: 20 }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
-              <L en="What this change affects" ar="ما الذي يمسّه هذا التغيير" />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {aspects
-                .filter((a) => selected.has(a.key))
-                .map((a) => (
-                  <div key={a.key} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent-ink)', borderRadius: 12 }}>
-                    <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 4 }}>
-                      <L en={a.en} ar={a.ar} />
-                    </div>
-                    <div style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
-                      <L en={a.affectsEn} ar={a.affectsAr} />
-                    </div>
-                    {a.consequenceEn ? (
-                      <div style={{ fontSize: '14.5px', color: 'var(--accent-ink)', lineHeight: 1.55, marginBlockStart: 6 }}>
-                        <L en={a.consequenceEn} ar={a.consequenceAr} />
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-            </div>
+        <div data-region="reassessment-panel" style={{ padding: 32, border: '2px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
+          <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 12, maxWidth: '60ch' }}>
+            <L
+              en="A new assessment is required before this change takes effect."
+              ar="يلزم تقييم جديد قبل أن يسري هذا التغيير."
+            />
           </div>
-
-          <div data-region="reassessment-panel" style={{ padding: 32, border: '2px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
-            <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 12, maxWidth: '60ch' }}>
-              <L
-                en="A new assessment is required before this change takes effect, and the venue's level may change as a result."
-                ar="يلزم تقييم جديد قبل أن يسري هذا التغيير، وقد يتغيّر مستوى الموقع نتيجة لذلك."
-              />
-            </div>
-            <div style={{ fontSize: 15, lineHeight: 1.65, marginBlockEnd: 18 }}>
-              <L
-                en={`Do not implement the change before the new assessment is recorded. It cannot wait for the annual renewal on ${validThrough ?? '—'}.`}
-                ar={`لا تطبّقوا التغيير قبل تسجيل التقييم الجديد. ولا يمكن تأخيره إلى التجديد السنوي في ⁦${validThrough ?? '—'}⁩.`}
-              />
-            </div>
-            <div style={{ fontSize: 15, lineHeight: 1.65, marginBlockEnd: 18 }}>
-              <L
-                en={`The venue is currently classified at Level ${level ?? '—'}. A new classification carries its own effective and expiry dates. The existing classification stands until the new assessment is recorded, and notifying the Ministry does not satisfy the reassessment requirement.`}
-                ar={`الموقع مصنَّف حالياً في المستوى ${level ?? '—'}. ويحمل التصنيف الجديد تاريخي سريان وانتهاء خاصين به. ويبقى التصنيف الحالي سارياً إلى أن يُسجَّل التقييم الجديد، وإبلاغ الوزارة لا يستوفي موجب إعادة التقييم.`}
-              />
-            </div>
-            <div style={{ fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.6, maxWidth: '64ch' }}>
-              <L
-                en="First notify the Ministry of the change below; the reassessment starts from the venue record once the change is on file."
-                ar="أبلغوا الوزارة بالتغيير أدناه أولاً؛ وتبدأ إعادة التقييم من سجل الموقع بعد تسجيل التغيير."
-              />
-            </div>
+          <div style={{ fontSize: 15, lineHeight: 1.65, marginBlockEnd: 18 }}>
+            <L
+              en="Do not implement the change before the new assessment is recorded, and do not wait for the annual renewal. The current classification stands until then; reporting the change does not replace the reassessment."
+              ar="لا تطبّقوا التغيير قبل تسجيل التقييم الجديد، ولا تنتظروا التجديد السنوي. ويبقى التصنيف الحالي سارياً حتى ذلك الحين؛ والإبلاغ عن التغيير لا يحل محل إعادة التقييم."
+            />
+          </div>
+          <div style={{ fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.6, maxWidth: '64ch' }}>
+            <L
+              en="Report the change below first; the reassessment then opens from the venue record."
+              ar="أبلغوا عن التغيير أدناه أولاً؛ ثم تُفتح إعادة التقييم من سجل الموقع."
+            />
           </div>
         </div>
       ) : null}

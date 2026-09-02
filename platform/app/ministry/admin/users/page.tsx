@@ -1,6 +1,6 @@
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { administeredAccounts, ministryConfig } from '../../../../lib/queries';
 import { addMinistryUserAction, changeUserRoleAction, reissueActivationAction, setUserSuspensionAction } from '../../../ministry-actions';
@@ -322,15 +322,9 @@ export default async function UsersPage({
         </div>
       ) : null}
 
-      <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-        <L en="The permission matrix, as enforced" ar="مصفوفة الصلاحيات كما تُطبَّق" />
+      <h2 style={{ margin: '0 0 14px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+        <L en="Permissions" ar="الصلاحيات" />
       </h2>
-      <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '84ch' }}>
-        <L
-          en="Rendered from the same data the server enforces. A reviewer schedules inspections and records corrective actions alongside the three outcomes; an administrator can do anything a Ministry role can, except act on its own account."
-          ar="تُعرض من البيانات نفسها التي يطبّقها الخادم. فالمراجع يجدول التفتيش ويسجّل الإجراءات التصحيحية إلى جانب النتائج الثلاث؛ والمسؤول الإداري يمكنه ما يمكن لأي دور وزاري، عدا التصرف في حسابه." 
-        />
-      </p>
       <div style={{ overflowX: 'auto' }}>
         <div data-region="matrix" data-stack="" style={{ display: 'grid', gridTemplateColumns: `minmax(260px,1.6fr) repeat(${matrixRoles.length}, minmax(90px,1fr))`, gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', minWidth: 760 }}>
           <div data-th="" style={{ background: 'var(--surface2)', padding: '11px 16px', fontSize: 11, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -353,9 +347,6 @@ export default async function UsersPage({
           ])}
         </div>
       </div>
-      <MinistryFooter steps={[
-        { href: '/ministry/order', en: 'Order of Physicians lane', ar: 'مسار نقابة الأطباء', descEn: 'The lane whose state governs the Order account.', descAr: 'المسار الذي تحكم حالته حساب النقابة.' },
-      ]} />
     </MinistryShell>
   );
 }

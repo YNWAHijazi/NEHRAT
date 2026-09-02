@@ -3,7 +3,7 @@ import { getDb } from '../../../../lib/db';
 import { L } from '../../../../components/L';
 import { DocumentViewer } from '../../../../components/DocumentViewer';
 import { PLAN_DOC_KEY, humanSize } from '../../../../lib/rules/uploads';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import {
   addedMeasuresFor,
@@ -151,12 +151,12 @@ export default async function SubmissionReviewPage({
     <MinistryShell account={account} back={{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة' }}>
       {notice === 'recorded' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="The outcome has been recorded and the organizer notified. The reference number does not change." ar="سُجّلت النتيجة وأُبلغ المنظّم. ولا يتغير الرقم المرجعي." />
+          <L en="The outcome has been recorded and the organizer notified." ar="سُجّلت النتيجة وأُبلغ المنظّم." />
         </div>
       ) : null}
       {notice === 'measure' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="The additional measure has been recorded. It gates only the satisfied outcome." ar="سُجّل التدبير الإضافي. وهو يحجب النتيجة المستوفاة فقط." />
+          <L en="The additional measure has been recorded." ar="سُجّل التدبير الإضافي." />
         </div>
       ) : null}
       {error === 'gated' ? (
@@ -257,8 +257,8 @@ export default async function SubmissionReviewPage({
         ) : (
           <div style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
             <L
-              en="This demonstration record carries a seeded level without stored assessment answers, so no derivation can be shown. A real submission shows the score, the minimum conditions and which governed."
-              ar="يحمل هذا السجل التوضيحي مستوى مُهيّأ دون إجابات تقييم مخزنة، فلا يمكن عرض الاستنتاج. أما التقديم الحقيقي فيعرض النتيجة وشروط الحد الأدنى وأيهما حكم."
+              en="This demonstration record carries a seeded level without stored assessment answers, so no derivation can be shown."
+              ar="يحمل هذا السجل التوضيحي مستوى مُهيّأ دون إجابات تقييم مخزنة، فلا يمكن عرض الاستنتاج."
             />
           </div>
         )}
@@ -364,12 +364,9 @@ export default async function SubmissionReviewPage({
               REQUESTED and never supplied, which the organizer's own list cannot
               show and which a determination can turn on. */}
           <div data-region="counterparty-documents" style={{ marginBlockEnd: 28 }}>
-            <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+            <h2 style={{ margin: '0 0 14px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en={CD.titleEn} ar={CD.titleAr} />
             </h2>
-            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
-              <L en={CD.introEn} ar={CD.introAr} />
-            </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {counterpartyDocs.map((c) => {
                 const state = bilingualMap(CD.states)[c.source];
@@ -412,7 +409,7 @@ export default async function SubmissionReviewPage({
               right needs the inputs, not only the conclusion -- the same reason
               the Ministry now opens documents rather than reading their names. */}
           <div data-region="assessment-answers" style={{ marginBlockEnd: 28 }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 14px' }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en={AA.titleEn} ar={AA.titleAr} />
               </h2>
@@ -422,8 +419,11 @@ export default async function SubmissionReviewPage({
                 </span>
               ) : null}
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
-              <L en={AA.introEn} ar={AA.introAr} />
+            {/* One line, not the cut lecture: it says whose answers these are, which
+                is also what tells the reader an unset row is the organizer's blank,
+                not the reviewer's to fill (and the dead-end walker reads it so). */}
+            <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)' }}>
+              <L en="The answers as the organizer gave them." ar="الإجابات كما قدّمها المنظّم." />
             </p>
             {!assessment ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
@@ -496,7 +496,7 @@ export default async function SubmissionReviewPage({
           {/* The plan the outcome concerns -- the OTHER panel the same Slice 6
               exception hid. Read-only; nothing the Ministry can edit. */}
           <div data-region="review-plan" style={{ marginBlockEnd: 28 }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 14px' }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en={RP.titleEn} ar={RP.titleAr} />
               </h2>
@@ -516,9 +516,6 @@ export default async function SubmissionReviewPage({
                 </span>
               ) : null}
             </div>
-            <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
-              <L en={RP.introEn} ar={RP.introAr} />
-            </p>
             {!plan ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
                 <L en={RP.noPlanEn} ar={RP.noPlanAr} />
@@ -592,9 +589,6 @@ export default async function SubmissionReviewPage({
                       </div>
                     );
                   })}
-                </div>
-                <div style={{ marginBlockStart: 12, fontSize: 12, color: 'var(--muted)', lineHeight: 1.55 }}>
-                  <L en={RP.orderNoteEn} ar={RP.orderNoteAr} />
                 </div>
               </>
             )}
@@ -724,12 +718,6 @@ export default async function SubmissionReviewPage({
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Inspections" ar="التفتيشات" />
           </h2>
-          <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
-            <L
-              en="Findings are not an outcome and never decide one. A blocking inspection without recorded findings gates only the satisfied outcome."
-              ar="النتائج الميدانية ليست نتيجة قرار ولا تقرر واحدة. والتفتيش الحاجب دون نتائج مسجَّلة يحجب النتيجة المستوفاة فقط."
-            />
-          </p>
           <div data-region="inspections" data-action-panel="inspections" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {inspections.map((i) => (
               <div key={i.id} style={{ paddingBlock: '17px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${i.state === 'recorded' ? 'solid var(--brand)' : i.state === 'none' ? 'dashed var(--bad)' : 'solid var(--accent)'}`, borderRadius: 10 }}>
@@ -827,9 +815,6 @@ export default async function SubmissionReviewPage({
             <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en={SI.en} ar={SI.ar} />
             </h2>
-            <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
-              <L en={SI.noteEn} ar={SI.noteAr} />
-            </p>
             {!mayInspect ? (
               <div style={{ marginBlockEnd: 28 }}>
                 <OwnerNote panel="inspections" />
@@ -885,8 +870,6 @@ export default async function SubmissionReviewPage({
                 </label>
                 <div style={{ flexBasis: '100%', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.6, flex: 1, minWidth: 260, maxWidth: '70ch' }}>
-                    <L en={SI.whoNoteEn} ar={SI.whoNoteAr} />
-                    {' '}
                     <L en={SI.whenUnsetEn} ar={SI.whenUnsetAr} />
                   </span>
                   <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 13, cursor: 'pointer', flex: 'none' }}>
@@ -934,7 +917,7 @@ export default async function SubmissionReviewPage({
             <form action={requireMeasureAction.bind(null, id)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end', marginBlockEnd: 28 }}>
               <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 260, flex: 1 }}>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                  <L en="From the requirement catalogue — nothing outside it attaches" ar="من كتالوغ المتطلبات — لا يُرفق شيء من خارجه" />
+                  <L en="Requirement" ar="المتطلب" />
                 </span>
                 <select name="catalogKey" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
                   <option value="">—</option>
@@ -945,7 +928,7 @@ export default async function SubmissionReviewPage({
               </label>
               <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                  <L en="Note (a note, not a requirement)" ar="ملاحظة (ملاحظة لا متطلب)" />
+                  <L en="Note" ar="ملاحظة" />
                 </span>
                 <input name="note" style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }} />
               </label>
@@ -1048,12 +1031,9 @@ export default async function SubmissionReviewPage({
 
           {mayRecord && !standing ? (
             <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
-              <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <h2 style={{ margin: '0 0 16px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en="Record an outcome" ar="تسجيل نتيجة" />
               </h2>
-              <p style={{ margin: '0 0 16px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-                <L en="Three outcomes exist. Nothing else is a determination." ar="توجد ثلاث نتائج فقط. ما عداها ليس قراراً." />
-              </p>
               <form action={recordOutcomeAction.bind(null, id)}>
                 <div data-region="outcome-options" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 14 }}>
                   {outcomes.map((o) => (
@@ -1074,7 +1054,7 @@ export default async function SubmissionReviewPage({
                               </span>
                             ))}
                             <span style={{ display: 'block', marginBlockStart: 8, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-                              <L en="Everything must be complete before a clearance is shown. The other two outcomes stay available." ar="يجب أن يكتمل كل شيء قبل إظهار الاستيفاء. وتبقى النتيجتان الأخريان متاحتين." />
+                              <L en="The other two outcomes stay available." ar="تبقى النتيجتان الأخريان متاحتين." />
                             </span>
                           </span>
                         ) : null}
@@ -1092,8 +1072,6 @@ export default async function SubmissionReviewPage({
                   <L en="Record the outcome" ar="تسجيل النتيجة" />
                 </button>
               </form>
-              <div style={{ marginBlockStart: 16, paddingBlockStart: 14, borderBlockStart: '1px solid var(--line)' }}>
-              </div>
             </div>
           ) : null}
 
@@ -1165,13 +1143,6 @@ export default async function SubmissionReviewPage({
           </div>
         </div>
       </div>
-
-      <MinistryFooter
-        steps={[
-          { href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'Back to the filed submissions.', descAr: 'العودة إلى التقديمات.' },
-          { href: '/ministry/enquiries', en: 'Enquiries', ar: 'الاستفسارات', descEn: 'Questions against a determination.', descAr: 'أسئلة على نتيجة.' },
-        ]}
-      />
     </MinistryShell>
   );
 }

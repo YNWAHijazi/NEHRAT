@@ -100,15 +100,9 @@ export function RegisterFacilityForm({
 
       {step === 1 ? (
         <div style={{ maxWidth: 900 }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+          <h2 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Facility profile" ar="ملف المنشأة" />
           </h2>
-          <p style={{ margin: '0 0 24px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-            <L
-              en="Recorded once. Every device record and the response plan read from this; none of it is asked again."
-              ar="يُسجَّل مرة واحدة. ويقرأ منه كل سجل جهاز وخطة الاستجابة؛ ولا يُطلب شيء منه مجدداً."
-            />
-          </p>
           <div data-region="profile-form" style={{ padding: '31px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
             {content.profileFields.flatMap((f) => {
               const base = field(f.key, f.en, f.ar);
@@ -141,15 +135,11 @@ export function RegisterFacilityForm({
 
       {step === 2 ? (
         <div style={{ maxWidth: 920 }}>
-          <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+          <h2 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Category, and what it requires" ar="الفئة وما تقتضيه" />
           </h2>
-          <p style={{ margin: '0 0 24px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-            <L
-              en="This is a determination, not a form. Each category carries its own requirement logic, and three of the six wait on a value the Ministry has not set."
-              ar="هذا بتٌّ لا نموذج. تحمل كل فئة منطق متطلبها الخاص، وثلاث من الست تنتظر قيمة لم تحددها الوزارة."
-            />
-          </p>
+          {/* The determination-not-a-form explainer left this step (partner ruling,
+              second sweep): picking a category shows the applicable rule itself. */}
           <div data-region="category-options" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 28 }}>
             {FACILITY_CATEGORIES.map((raw, i) => {
               const c = governed(raw.key) ?? raw;
@@ -204,9 +194,6 @@ export function RegisterFacilityForm({
                   <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 12 }}>
                     <L en="Waiting on the Ministry" ar="بانتظار الوزارة" />
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockEnd: 6 }}>
-                    <L en="Value not yet set" ar="قيمة لم تُحدَّد بعد" />
-                  </div>
                   <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 16 }}>
                     <L en={picked.missingEn ?? ''} ar={picked.missingAr ?? ''} />
                   </div>
@@ -232,7 +219,7 @@ export function RegisterFacilityForm({
               {picked.alsoRecurringVenue ? (
                 <div data-region="venue-cross" style={{ padding: '28px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 16 }}>
                   <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 12 }}>
-                    <L en="The other instrument may also reach this building" ar="قد يصل الإطار الآخر إلى هذا المبنى أيضاً" />
+                    <L en="This building may also be a recurring venue" ar="قد يكون هذا المبنى أيضاً موقع فعاليات دورياً" />
                   </div>
                   <p style={{ margin: '0 0 18px', fontSize: '15.5px', lineHeight: 1.7, maxWidth: '70ch' }}>
                     <L en={content.venueCross.en} ar={content.venueCross.ar} />
@@ -263,15 +250,11 @@ export function RegisterFacilityForm({
             <input key={k} type="hidden" name={k} value={v} />
           ))}
           <input type="hidden" name="category" value={catKey ?? ''} />
-          <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+          <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Coordinator and responsible persons" ar="المنسّق والأشخاص المسؤولون" />
           </h2>
-          <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-            <L
-              en="A name or a position — either is accepted, so a facility may name a role rather than an individual."
-              ar="اسم أو مسمى وظيفي — كلاهما مقبول، فيمكن للمنشأة أن تسمّي وظيفة بدل شخص."
-            />
-          </p>
+          {/* The name-or-position explainer left this step (partner ruling, second
+              sweep): the field labels already say "Name or position". */}
           <div style={{ padding: '21px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
             <L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} />
           </div>
@@ -301,20 +284,14 @@ export function RegisterFacilityForm({
               </div>
             ))}
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-            <button
-              type="submit"
-              style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
-            >
-              <L en="Continue to the device records" ar="المتابعة إلى سجلات الأجهزة" />
-            </button>
-            <span style={{ fontSize: '13.5px', color: 'var(--muted)', maxWidth: '52ch', lineHeight: 1.6 }}>
-              <L
-                en="Devices are registered before the response plan, because the plan reads its device section from them."
-                ar="تُسجَّل الأجهزة قبل خطة الاستجابة، لأن الخطة تقرأ قسم أجهزتها منها."
-              />
-            </span>
-          </div>
+          {/* The why-devices-come-first note left this step (partner ruling, second
+              sweep): the order narrated internal plumbing. */}
+          <button
+            type="submit"
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+          >
+            <L en="Continue to the device records" ar="المتابعة إلى سجلات الأجهزة" />
+          </button>
         </form>
       ) : null}
     </div>

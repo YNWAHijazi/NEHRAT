@@ -51,7 +51,7 @@ export default async function DeviceRegistryPage({
           <L en="AED registry" ar="سجل أجهزة إزالة الرجفان" />
         </h1>
         <p style={{ margin: '0 0 32px', fontSize: 16, color: 'var(--muted)' }}>
-          <L en="Each device is a separate record. Select a device to confirm or update it." ar="كل جهاز سجل مستقل. اختر جهازاً لتأكيده أو تحديثه." />
+          <L en="Select a device to confirm or update it." ar="اختر جهازاً لتأكيده أو تحديثه." />
         </p>
 
         <DeviceRegistry

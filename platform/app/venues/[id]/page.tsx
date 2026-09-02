@@ -12,7 +12,7 @@ import {
   venueChangeSinceAssessment,
   venueChangesFor,
 } from '../../../lib/queries';
-import { requirementsForLevel, venueReassessmentGate, REASSESSMENT_WINDOW, VENUE_FLOOR_NOTE, type Gate, type Level } from '../../../lib/rules';
+import { requirementsForLevel, venueReassessmentGate, REASSESSMENT_WINDOW, type Gate, type Level } from '../../../lib/rules';
 import enMessages from '../../../lib/i18n/messages/en.json';
 import arMessages from '../../../lib/i18n/messages/ar.json';
 
@@ -150,16 +150,9 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
         ? { k: 'current', en: 'Reassessment due', ar: 'استحقاق إعادة التقييم', metaEn: expired ? 'Classification expired' : `Before ${venue.validUntil}`, metaAr: expired ? 'انتهت صلاحية التصنيف' : `قبل ⁦${venue.validUntil}⁩` }
         : { k: 'todo', en: 'Reassessment due', ar: 'استحقاق إعادة التقييم', metaEn: opensDate ? `Opens ${opensDate}` : '', metaAr: opensDate ? `يُفتح في ⁦${opensDate}⁩` : '' },
   ];
-  const railNoteEn = !classified
-    ? 'Stage 2 of 5'
-    : reassessmentDue
-      ? `Stage 5 of 5 · reassessment before ${venue.validUntil}`
-      : `Stage 4 of 5 · reassessment opens ${opensDate}`;
-  const railNoteAr = !classified
-    ? 'المرحلة 2 من 5'
-    : reassessmentDue
-      ? `المرحلة 5 من 5 · إعادة التقييم قبل ⁦${venue.validUntil}⁩`
-      : `المرحلة 4 من 5 · تُفتح إعادة التقييم في ⁦${opensDate}⁩`;
+  // The stage-count note ("Stage 4 of 5 · ...") left the rail (partner ruling,
+  // second sweep): the rail itself shows which stage is current, and the
+  // reassessment date already sits on stage 5 and under the disabled action.
 
   const requirements = level ? requirementsForLevel(level) : [];
   const attachOutstanding = requirements.filter((r) => r.attach).length;
@@ -184,12 +177,9 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div data-region="rail" style={{ marginBlockEnd: 28, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
+          <div style={{ marginBlockEnd: 18 }}>
             <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
               <L en="Where this venue stands" ar="موضع هذا الموقع" />
-            </span>
-            <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-              <L en={railNoteEn} ar={railNoteAr} />
             </span>
           </div>
           <div data-rail="" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
@@ -253,31 +243,20 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
                 {level !== null ? <L en={`Level ${level}`} ar={`المستوى ${level}`} /> : '—'}
               </div>
             </div>
+            {/* Three facts, not five (partner ruling, second sweep): the issue date
+                lives on the rail's classification stage, and the day count is what
+                the valid-through date says. */}
             {classified ? (
-              <>
-                <div>
-                  <div style={upLabel}>
-                    <L en="Effective from" ar="ساري اعتباراً من" />
-                  </div>
-                  <div style={{ fontSize: 24, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{venue.issued}</div>
+              <div>
+                <div style={upLabel}>
+                  <L en="Valid through" ar="صالح حتى" />
                 </div>
-                <div>
-                  <div style={upLabel}>
-                    <L en="Valid through" ar="صالح حتى" />
-                  </div>
-                  <div style={{ fontSize: 24, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: state.color }}>{venue.validUntil}</div>
-                </div>
-                <div>
-                  <div style={upLabel}>
-                    <L en="Days remaining" ar="الأيام المتبقية" />
-                  </div>
-                  <div style={{ fontSize: 24, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{daysLeft}</div>
-                </div>
-              </>
+                <div style={{ fontSize: 24, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: state.color }}>{venue.validUntil}</div>
+              </div>
             ) : null}
             <div>
               <div style={{ ...upLabel, marginBlockEnd: 6 }}>
-                <L en="State" ar="الحالة" />
+                <L en="Status" ar="الحالة" />
               </div>
               <div style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 999, background: state.chipBg, color: state.color, fontSize: 14 }}>
                 <L en={state.en} ar={state.ar} />
@@ -286,13 +265,9 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
           </div>
         </div>
 
-        {/* The floor note, at reviewer instruction: where an organizer could mistake the
-            classification for an event certification. Not in the reference. */}
-        {classified ? (
-          <div data-region="floor-note" style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32, fontSize: 15, lineHeight: 1.65, maxWidth: '86ch' }}>
-            <L en={VENUE_FLOOR_NOTE.en} ar={VENUE_FLOOR_NOTE.ar} />
-          </div>
-        ) : null}
+        {/* The floor note left this screen (partner ruling, second sweep) -- the
+            floor still binds inside the derivation, where it is enforced, not
+            narrated. */}
 
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'start', marginBlockEnd: 32 }}>
           <GatedAction gate={gate} href={`/venues/${venue.id}/assessment`} en="Start the annual reassessment" ar="بدء إعادة التقييم السنوي" />
@@ -331,16 +306,17 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
-            <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+            {/* Collapsed by default and stripped of its how-to-read note (partner
+                ruling, second sweep): the record's own facts come first, and the
+                rows explain themselves when opened. */}
+            <details data-region="requirements-fold" style={{ marginBlockEnd: 44 }}>
+            <summary style={{ cursor: 'pointer', listStyle: 'none', margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en={`Requirements for Level ${level}`} ar={`متطلبات المستوى ${level}`} />
-            </h2>
-            <p style={{ margin: '0 0 24px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
-              <L
-                en="One row per requirement, showing the value that applies at this level. A dashed edge marks an item owed by someone else."
-                ar="سطر واحد لكل متطلب، يعرض القيمة المنطبقة على هذا المستوى. الحد المتقطع يشير إلى بند على جهة أخرى."
-              />
-            </p>
-            <div data-region="requirements" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
+              <span style={{ marginInlineStart: 12, fontSize: 14, fontWeight: 400, color: 'var(--brand)' }}>
+                <L en="Show" ar="عرض" />
+              </span>
+            </summary>
+            <div data-region="requirements" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {requirements.map((r) => (
                 <div key={r.n} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${r.ems ? 'dashed' : 'solid'} ${r.ems ? 'var(--muted)' : 'var(--brand)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: 14, alignItems: 'start', minWidth: 280, flex: 1 }}>
@@ -362,6 +338,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
                 </div>
               ))}
             </div>
+            </details>
           </>
         ) : null}
 

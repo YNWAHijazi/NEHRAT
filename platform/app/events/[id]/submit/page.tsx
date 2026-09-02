@@ -85,9 +85,12 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
               <L en="Required" ar="مطلوب" />
             </span>
             <span style={{ lineHeight: 1.6 }}>
+              {/* The certify-gate clause that used to follow was cut in the second
+                  simplification sweep: the blocker panel below states it, item by
+                  item, at the moment it matters. */}
               <L
-                en="Every field is required unless marked optional. the compliance and submission form cannot be certified while any declaration item is unticked or any required attachment is missing."
-                ar="كل حقل مطلوب إلا ما وُسم اختيارياً. لا يمكن التصديق على نموذج الامتثال والتقديم وأي بند إقرار غير مؤشَّر أو أي مرفق مطلوب ناقص."
+                en="Every field is required unless marked optional."
+                ar="كل حقل مطلوب إلا ما وُسم اختيارياً."
               />
             </span>
           </div>

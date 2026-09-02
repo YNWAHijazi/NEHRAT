@@ -132,7 +132,7 @@ export function IncidentForm({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
         <div data-region="incident-info" style={sectionCard}>
           <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
-            <L en="Incident information" ar="معلومات المرفق والحادثة" />
+            <L en="Incident information" ar="معلومات الحادثة" />
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16 }}>
             {content.infoFields.map((f) => (
@@ -289,8 +289,8 @@ export function IncidentForm({
         {serverError ? (
           <p style={{ margin: 0, fontSize: 14, color: 'var(--bad)' }}>
             <L
-              en="The server found what looks like a personal name in the report. Remove it and submit again."
-              ar="وجد الخادم ما يبدو اسماً شخصياً في التقرير. أزيلوه وقدّموا مجدداً."
+              en="Something that looks like a personal name is still in the report. Remove it and submit again."
+              ar="لا يزال في التقرير ما يبدو اسماً شخصياً. أزيلوه وقدّموا مجدداً."
             />
           </p>
         ) : null}

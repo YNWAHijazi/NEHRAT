@@ -23,9 +23,10 @@ import {
 
 /**
  * Facility readiness -- the standing state (step 6). Readiness is not a score and
- * does not progress: the ledger derives each obligation's dates from the record
+ * does not progress: the record derives each obligation's dates from the facts
  * (lib/rules/facility.ts), and the as-of pills preview the same derivation at a
- * future date. Status wording is provisional and the screen says so (SPEC).
+ * future date. Status wording is provisional (SPEC) -- the caveat renders on the
+ * Ministry's cardiac configuration screen, not here (partner ruling, second sweep).
  */
 
 const STATUS_STYLE: Record<ObligationStatus, { color: string; chipBg: string }> = {
@@ -130,7 +131,7 @@ export default async function FacilityReadinessPage({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'start' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-              <L en="Viewing the ledger as of" ar="عرض السجل بتاريخ" />
+              <L en="Viewing as of" ar="العرض بتاريخ" />
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
               {offsets.map((v) => ({
@@ -155,35 +156,19 @@ export default async function FacilityReadinessPage({
         </div>
 
         <div data-region="standing" style={{ padding: '28px 32px', border: `1px solid ${standingLine.border}`, background: standingLine.bg, borderRadius: 16, marginBlockEnd: 14 }}>
+          {/* "Standing readiness" became "Status" (partner ruling, second sweep --
+              the round that renamed Standing to Status everywhere). */}
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
-            <L en="Standing readiness" ar="الجاهزية القائمة" />
+            <L en="Status" ar="الحالة" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em', lineHeight: 1.4, maxWidth: '60ch' }}>
             <L en={standingLine.en} ar={standingLine.ar} />
           </div>
         </div>
-        <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--muted)' }}>
-          <L en={content.ledger.intro.en} ar={content.ledger.intro.ar} />
-        </p>
-        {/* Two different provisional things, and publishing one does not settle the
-            other. The CYCLE FIGURES stop being provisional when the Ministry publishes
-            them. The STATUS WORDING (Current, Lapsing, Lapsed and the standing line)
-            stays provisional until the Ministry approves the labels themselves --
-            facility.json: "provisionalNote below must render wherever they appear".
-            Gating the wording note on the figures made publishing a cadence silently
-            withdraw a caveat about something else entirely. */}
-        <p data-region="provisional" style={{ margin: '0 0 40px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-          <L en={content.provisionalNote.en} ar={content.provisionalNote.ar} />
-          {!cycles.provisional ? (
-            <>
-              {' '}
-              <L
-                en={`Cycles run on the Ministry's published values: device checks every ${cycles.checkCycleDays} days, a ${cycles.lapseWindowDays}-day lapse window.`}
-                ar={`تسري الدورات وفق القيم المنشورة من الوزارة: فحص الأجهزة كل ${cycles.checkCycleDays} يوماً، ونافذة انتهاء ${cycles.lapseWindowDays} يوماً.`}
-              />
-            </>
-          ) : null}
-        </p>
+        {/* The model-explainer and the provisional-wording caveat both left this
+            screen (partner ruling, second sweep): the dates in the rows say what the
+            explainer said, and the caveat about status labels is the Ministry's own
+            concern -- it renders on the cardiac configuration screen instead. */}
 
         {catRequirements ? (
           <div data-region="category-requirements" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
@@ -200,7 +185,7 @@ export default async function FacilityReadinessPage({
         ) : null}
 
         <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-          <L en="Validity ledger" ar="سجل الصلاحية" />
+          <L en="Validity record" ar="سجل الصلاحية" />
         </h2>
         <div data-region="ledger" data-stack="" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr .9fr .8fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 44 }}>
           {content.ledger.columns.map((c) => (

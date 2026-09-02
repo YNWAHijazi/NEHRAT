@@ -1,5 +1,5 @@
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { arrestLocations } from '../../../../lib/queries';
 import { can } from '../../../../lib/rules';
@@ -37,8 +37,8 @@ export default async function ArrestLocationsPage({
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
         <L
-          en="Incidents grouped by place and category — the pattern no single report shows. No patient appears here; the reports carry none."
-          ar="الحوادث مجمَّعة بحسب المكان والفئة — النمط الذي لا يُظهره تقرير واحد. ولا يظهر هنا أي مريض؛ فالتقارير لا تحمل أياً."
+          en="Incidents grouped by place and category; the reports name no patient."
+          ar="الحوادث مجمَّعة بحسب المكان والفئة؛ ولا تسمّي التقارير أي مريض."
         />
       </p>
 
@@ -98,16 +98,12 @@ export default async function ArrestLocationsPage({
           </div>
           <div style={{ marginBlockStart: 16, padding: '14px 18px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, fontSize: '13px', lineHeight: 1.65, color: 'var(--accent-ink)' }}>
             <L
-              en="Designating a place here is how a facility with a confirmed arrest becomes covered. Its readiness obligations run from the designation date."
-              ar="تحديد مكان هنا هو الطريقة التي يصبح بها مرفق ذو توقف قلب مؤكَّد مشمولاً. وتسري موجبات جاهزيته من تاريخ التحديد."
+              en="Designating a place makes it a covered facility; its obligations run from the designation date."
+              ar="تحديد المكان يجعله مرفقاً مشمولاً؛ وتسري موجباته من تاريخ التحديد."
             />
           </div>
         </div>
       </div>
-      <MinistryFooter steps={[
-        { href: '/ministry/facilities', en: 'Facility oversight', ar: 'الرقابة على المرافق', descEn: 'The lane the designation lands in.', descAr: 'المسار الذي يقع فيه التحديد.' },
-        { href: '/ministry/determinations', en: 'Determinations and designations', ar: 'البت والتحديد', descEn: 'The register of designations made here.', descAr: 'سجل التحديدات المتخذة هنا.' },
-      ]} />
     </MinistryShell>
   );
 }

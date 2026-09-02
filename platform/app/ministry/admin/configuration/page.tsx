@@ -1,7 +1,8 @@
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { FlagsPanel } from '../../../../components/FlagsPanel';
+import Link from 'next/link';
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { BANDS, DEFERRED, MINISTRY_CONTENT, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, filingDeadlineRule, type Level } from '../../../../lib/rules';
 
@@ -28,10 +29,20 @@ export default async function ConfigurationPage() {
         <L en="Configuration and versioning" ar="الإعدادات والإصدارات" />
       </h1>
       <AdminTabs current="/ministry/admin/configuration" />
+      {/* The two configuration surfaces that are not tabs, reachable from here
+          since the sequence footers were cut (partner ruling, second sweep). */}
+      <div data-region="config-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 20 }}>
+        <Link href="/ministry/admin/cardiac" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="Cardiac-arrest configuration" ar="إعدادات الجاهزية لتوقف القلب" />
+        </Link>
+        <Link href="/ministry/admin/registry" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="National registry" ar="السجل الوطني" />
+        </Link>
+      </div>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
         <L
-          en="These are the values every screen derives from — thresholds, phases and timeframes as data, never code. Changing one is a new version of the instrument's data, reviewed and published; this console reads, it does not edit in place."
-          ar="هذه هي القيم التي تستمد منها كل شاشة — العتبات والمراحل والمهل بيانات لا شيفرة. وتغيير إحداها إصدار جديد لبيانات الأداة، يُراجَع ويُنشَر؛ وهذه اللوحة تقرأ ولا تعدّل في المكان."
+          en="The values in force. A change is a new version, reviewed and published; this console reads, it does not edit in place."
+          ar="القيم السارية. والتغيير إصدار جديد يُراجَع ويُنشَر؛ وهذه اللوحة تقرأ ولا تعدّل في المكان."
         />
       </p>
       <div data-region="config-values" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', maxWidth: 900 }}>
@@ -50,17 +61,13 @@ export default async function ConfigurationPage() {
       </h2>
       <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
         <L
-          en="Each switch says what turning it on does. They ship off, and nothing commercial renders while they are. The platform owner's console shows the same switches, synced."
-          ar="كل مفتاح يوضح ما الذي يفعله تشغيله. تُشحن مطفأة، ولا يظهر أي محتوى تجاري ما دامت كذلك. وتعرض لوحة مالك المنصة المفاتيح نفسها، متزامنةً."
+          en="They ship off, and nothing commercial renders while they are."
+          ar="تُشحن مطفأة، ولا يظهر أي محتوى تجاري ما دامت كذلك."
         />
       </p>
       <div style={{ marginBlockEnd: 32 }}>
         <FlagsPanel />
       </div>
-      <MinistryFooter steps={[
-        { href: '/ministry/admin/cardiac', en: 'Cardiac-arrest configuration', ar: 'إعدادات الجاهزية لتوقف القلب', descEn: 'The ten powers and their publishable values.', descAr: 'الصلاحيات العشر وقيمها القابلة للنشر.' },
-        { href: '/ministry/admin/registry', en: 'National registry', ar: 'السجل الوطني', descEn: 'Every record, demonstration rows excluded.', descAr: 'كل السجلات، مستثناةً صفوف العرض.' },
-      ]} />
       {/* WHAT IS DELIBERATELY NOT BUILT. On the Configuration tab because this screen
           answers "what is set and what is unset", and a capability nobody built is the
           same kind of fact as a value nobody published -- both are decisions the

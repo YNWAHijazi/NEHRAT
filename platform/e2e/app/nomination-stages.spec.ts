@@ -264,6 +264,25 @@ test.describe('the standing view, after accepting', () => {
     expect(response?.status()).toBe(404);
   });
 
+  test('an INVITED party reads the brief before answering — without the plan slice', async ({ page }) => {
+    // Partner ruling: invited, and permanently after accepting. demo-lrc-saida-0301
+    // is seeded nominated and linked, the state the walkthrough could not reach.
+    await signInAs(page, 'test_ems');
+    await gotoRidingRestarts(page, '/events/EV-0301/brief');
+    await expect(page.locator('[data-region="briefing"]')).toBeVisible();
+    await expect(page.locator('[data-region="brief-unanswered"]')).toContainText('not answered');
+    // The arrangements inside the organizer's plan open on acceptance, not before.
+    await expect(page.locator('[data-region="plan-slice"]')).toHaveCount(0);
+  });
+
+  test("a declined token stops serving the organizer's documents", async ({ page }) => {
+    // The same closure withdrawal and removal already had. demo-declined-0418 sits on
+    // the event whose siteMap IS on file, so the refusal is the status, not a missing
+    // file or the allow-list.
+    const refused = await page.request.get('/api/nomination-documents/demo-declined-0418/siteMap');
+    expect(refused.status()).toBe(404);
+  });
+
   test('accepting is not a widening: the same documents, before and after', async ({ page }) => {
     await signInAs(page, 'test_ems');
     // EV-0362 is the event this account is confirmed on.

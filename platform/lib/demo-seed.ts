@@ -63,7 +63,10 @@ export function linkDemonstrationCounterparties(db: DatabaseSync): number {
 
   if (ems !== null) {
     changed += db
-      .prepare(`UPDATE invitations SET account_id = ? WHERE token = 'demo-lrc-beirut-0418' AND account_id IS NULL`)
+      .prepare(
+        `UPDATE invitations SET account_id = ?
+         WHERE token IN ('demo-lrc-beirut-0418', 'demo-lrc-saida-0301') AND account_id IS NULL`,
+      )
       .run(ems).changes as number;
     changed += db
       .prepare(
@@ -90,6 +93,21 @@ export function linkDemonstrationCounterparties(db: DatabaseSync): number {
         `UPDATE invitations SET account_id = ? WHERE token IN ('demo-director-0362', 'demo-director-0244') AND account_id IS NULL`,
       )
       .run(director).changes as number;
+  }
+
+  // The one other UPDATE-shaped seed fact (same class as the linkage, found by the
+  // partner's sweep question): the 12K's cross-module facility reference entered the
+  // seeder in Slice 4, so a database provisioned earlier holds EV-0418 without it and
+  // the cross-module demonstration silently disappears. Guarded on the facility row
+  // existing -- where FC-0014 itself is absent the database predates the facility
+  // service entirely, and that needs a reseed, not a repair.
+  if (db.prepare(`SELECT id FROM facilities WHERE id = 'FC-0014'`).get()) {
+    changed += db
+      .prepare(
+        `UPDATE events SET venue_facility_id = 'FC-0014'
+         WHERE id = 'EV-0418' AND venue_facility_id IS NULL AND is_demo = 1`,
+      )
+      .run().changes as number;
   }
   return changed;
 }
@@ -531,6 +549,22 @@ export function seedDemonstration(db: DatabaseSync): void {
     'demo-director-0244', 'EV-0244', 'director',
     'Dr. N. Salameh', 'د. ن. سلامة',
     'n.salameh@example.lb', 'confirmed', 'none', d('2026-06-01'),
+  );
+
+  // The two states the walkthrough could not reach (partner review, second sweep):
+  // an INVITED party that already holds an account -- the brief must read from
+  // nomination onward, not only after accepting -- and a DECLINED token, which must
+  // stop serving the organizer's documents. Without these rows both paths were
+  // asserted only in code review, never by a test.
+  insertInvitation.run(
+    'demo-lrc-saida-0301', 'EV-0301', 'ems',
+    'Lebanese Red Cross — Saida', 'الصليب الأحمر اللبناني — صيدا',
+    'saida@lrc.example.lb', 'nominated', 'none', null,
+  );
+  insertInvitation.run(
+    'demo-declined-0418', 'EV-0418', 'ems',
+    'Sidon Route Medics', 'مسعفو طريق صيدا',
+    'dispatch@sidonroute.example.lb', 'declined', 'none', d('2026-08-12'),
   );
   db.prepare(
     `INSERT INTO post_event_reports (event_id, activity, significant, lessons_none, lessons_text)

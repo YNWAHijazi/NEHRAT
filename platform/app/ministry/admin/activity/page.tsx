@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { ministryActivity, unreachablePowers } from '../../../../lib/queries';
 import { MINISTRY_CONTENT, bilingualMap } from '../../../../lib/rules';
@@ -106,12 +106,6 @@ export default async function AdminActivityPage() {
           );
         })}
       </div>
-
-      <MinistryFooter
-        steps={[
-          { href: '/ministry/admin/users', en: 'Users', ar: 'المستخدمون', descEn: 'Who is on the platform and what they hold.', descAr: 'من على المنصة وما يحمله.' },
-        ]}
-      />
     </MinistryShell>
   );
 }

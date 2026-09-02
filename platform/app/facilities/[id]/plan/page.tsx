@@ -83,8 +83,8 @@ export default async function FacilityPlanPage({
         </h1>
         <p style={{ margin: '0 0 36px', fontSize: 16, color: 'var(--muted)', maxWidth: '80ch' }}>
           <L
-            en="A structured plan held on the platform. Update it whenever responsible persons, AED locations or emergency arrangements change."
-            ar="خطة منظّمة محفوظة على المنصة. حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة."
+            en="Update it whenever responsible persons, AED locations or emergency arrangements change."
+            ar="حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة."
           />
         </p>
 
@@ -132,10 +132,10 @@ export default async function FacilityPlanPage({
               <L en="Derived from the registry" ar="مستمدة من السجل" />
             </span>
           </div>
-          <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-            <L en={content.planDerivedNote.en} ar={content.planDerivedNote.ar} />
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 18 }}>
+          {/* The cannot-drift-apart paragraph left this section (partner ruling,
+              second sweep): the chip says the values derive, and the link below
+              says where to change them. */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockStart: 12, marginBlockEnd: 18 }}>
             {derived.map((d) => (
               <div key={d.en} style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', fontSize: '14.5px' }}>
                 <span style={{ color: 'var(--muted)' }}>

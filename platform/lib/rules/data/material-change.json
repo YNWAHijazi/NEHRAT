@@ -85,8 +85,8 @@
       "key": "ems",
       "en": "Participating EMS provider",
       "ar": "مزوّد الإسعاف المشارك",
-      "affectsEn": "the minimum requirements requirements and the Level 3 declaration",
-      "affectsAr": "متطلبات الحد الأدنى للمتطلبات وإقرار المستوى 3",
+      "affectsEn": "the minimum requirements and the Level 3 declaration",
+      "affectsAr": "متطلبات الحد الأدنى وإقرار المستوى 3",
       "consequenceEn": "",
       "consequenceAr": "",
       "levelMayChange": false

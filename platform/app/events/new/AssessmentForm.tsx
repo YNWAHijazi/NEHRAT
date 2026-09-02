@@ -196,7 +196,7 @@ export function AssessmentForm({
     () => deriveLevel({ answers: answers as DomainAnswers, inputs }),
     [answers, inputs],
   );
-  const why = levelWhy(derivation);
+  const why = levelWhy(derivation, disciplines);
 
   const isRunning = disciplines.includes('running');
   const isNightclub = chosenType?.nightclub === true;
@@ -380,8 +380,8 @@ export function AssessmentForm({
           </div>
           <p style={{ margin: '0 0 32px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '70ch' }}>
             <L
-              en="Together these count everyone who may be there at the same time — that figure helps set the level. You will not be asked for it again."
-              ar="تحسب هذه الأعداد معاً كل من قد يكون حاضراً في الوقت نفسه — وهذا الرقم يساهم في تحديد المستوى. ولن يُطلب منكم مرة أخرى."
+              en="Together these count everyone who may be there at the same time."
+              ar="تحسب هذه الأعداد معاً كل من قد يكون حاضراً في الوقت نفسه."
             />
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 48 }}>
@@ -411,12 +411,9 @@ export function AssessmentForm({
         </>
       )}
 
-      <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-        <L en="Nine questions" ar="تسعة أسئلة" />
+      <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+        <L en="Part two" ar="الجزء الثاني" />
       </h2>
-      <p style={{ margin: '0 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-        <L en="Pick one answer for each. If more than one fits, pick the highest." ar="اختاروا جواباً واحداً لكل سؤال. وإذا انطبق أكثر من جواب، اختاروا الأعلى." />
-      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
           <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
@@ -475,12 +472,8 @@ export function AssessmentForm({
               </p>
             ) : null}
             {why.comparison ? (
-              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>
+              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
                 <L en={why.comparison.en} ar={why.comparison.ar} />
-                {' '}
-                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  <L en={`(${derivation.scoreTotal} of ${maxScore} points)`} ar={`(${derivation.scoreTotal} من ${maxScore} نقطة)`} />
-                </span>
               </p>
             ) : null}
           </>

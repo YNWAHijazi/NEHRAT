@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { correctiveActions, facilitiesForOversight } from '../../../lib/queries';
 import { FACILITY_CONTENT, can } from '../../../lib/rules';
@@ -36,15 +35,9 @@ export default async function FacilityOversightPage({
           <L en="The corrective action has been raised and the operator notified." ar="أُثير الإجراء التصحيحي وأُبلغ المشغّل." />
         </div>
       ) : null}
-      <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
+      <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Facility oversight" ar="الرقابة على المرافق" />
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
-        <L
-          en="A separate lane from event review: nothing here is an event outcome, and mass-gathering status vocabulary does not appear. Status wording is provisional pending Ministry approval."
-          ar="مسار منفصل عن مراجعة الفعاليات: لا شيء هنا نتيجة فعالية، ولا تظهر مفردات حالات الفعاليات الجماهيرية. والصياغة مؤقتة بانتظار موافقة الوزارة."
-        />
-      </p>
 
       <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
         {facilities.map((f) => (
@@ -71,7 +64,7 @@ export default async function FacilityOversightPage({
         {timeline ? (
           <L en={`Due dates run ${timeline.value} days from the action being raised, per the published timeline effective ${timeline.effective ?? ''}.`} ar={`تُحتسب تواريخ الاستحقاق ${timeline.value} يوماً من إثارة الإجراء، وفق المهلة المنشورة السارية من ⁦${timeline.effective ?? ''}⁩.`} />
         ) : (
-          <L en="The corrective-action timeline is a Ministry value not yet set: actions are raised and tracked, and no due date is computed until it is published." ar="مهلة الإجراء التصحيحي قيمة وزارية لم تُحدَّد بعد: تُثار الإجراءات وتُتابع، ولا يُحتسب تاريخ استحقاق قبل نشرها." />
+          <L en="The corrective-action timeline is a Ministry value not yet set: no due date is computed until it is published." ar="مهلة الإجراء التصحيحي قيمة وزارية لم تُحدَّد بعد: لا يُحتسب تاريخ استحقاق قبل نشرها." />
         )}
       </p>
       <div data-region="corrective" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
@@ -110,7 +103,7 @@ export default async function FacilityOversightPage({
           <form action={requestReadinessConfirmationAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                <L en="Request readiness confirmation (power ten)" ar="طلب تأكيد الجاهزية (الصلاحية العاشرة)" />
+                <L en="Request readiness confirmation" ar="طلب تأكيد الجاهزية" />
               </span>
               <select name="facilityId" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
                 <option value="">—</option>
@@ -149,10 +142,6 @@ export default async function FacilityOversightPage({
           </button>
         </form>
       ) : null}
-      <MinistryFooter steps={[
-        { href: '/ministry/facilities/arrests', en: 'Reported arrest locations', ar: 'مواقع الحوادث المبلَّغة', descEn: 'Incidents grouped by place and category.', descAr: 'الحوادث مجمَّعة بحسب المكان والفئة.' },
-        { href: '/ministry', en: 'Dashboard', ar: 'اللوحة', descEn: 'Back to the operational dashboard.', descAr: 'العودة إلى اللوحة التشغيلية.' },
-      ]} />
     </MinistryShell>
   );
 }

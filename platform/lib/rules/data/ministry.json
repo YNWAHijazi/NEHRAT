@@ -44,8 +44,8 @@
   "additionalMeasures": {
     "en": "Require additional measures",
     "ar": "طلب تدابير إضافية",
-    "noteEn": "A distinct action, not a fourth outcome. Measures come from the requirement catalogue; nothing outside it can be attached to a submission.",
-    "noteAr": "إجراء مستقل، لا نتيجة رابعة. تأتي التدابير من كتالوغ المتطلبات؛ ولا يمكن إرفاق شيء من خارجه بأي تقديم."
+    "noteEn": "Measures come from the requirement catalogue; nothing outside it can be attached to a submission.",
+    "noteAr": "تأتي التدابير من كتالوغ المتطلبات؛ ولا يمكن إرفاق شيء من خارجه بأي تقديم."
   },
   "actions": [
     {
@@ -230,10 +230,10 @@
       "en": "Designate remote or difficult-access facilities",
       "ar": "تحديد المنشآت النائية أو صعبة الوصول",
       "kind": "act",
-      "actNoteEn": "Works by individual designation. Nothing is in force against a facility until it is designated and its operator notified. Recorded designations are listed here as they are made.",
-      "actNoteAr": "يعمل بالتحديد الفردي. ولا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها. وتُدرَج التحديدات المسجَّلة هنا فور صدورها.",
-      "limbEn": "Limb one of power 3. PAD 11.3 is a single power with two limbs -- remote or difficult-access facilities, and other individual facilities. It is shown as two rows because they are exercised separately; the numbering stays 3 for both, so eleven rows still reconcile to the source’s ten powers.",
-      "limbAr": "الشق الأول من الصلاحية 3. فالمادة 11.3 صلاحية واحدة بشقّين — المنشآت النائية أو صعبة الوصول، والمنشآت الفردية الأخرى. وتُعرض في صفّين لأنهما يُمارَسان منفصلين؛ ويبقى الرقم 3 لكليهما، فتتوافق الصفوف الأحد عشر مع صلاحيات المصدر العشر."
+      "actNoteEn": "Nothing is in force against a facility until it is designated and its operator notified. Recorded designations are listed here as they are made.",
+      "actNoteAr": "لا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها. وتُدرَج التحديدات المسجَّلة هنا فور صدورها.",
+      "limbEn": "Limb one of power 3 — the source names one power with two limbs, exercised separately, so it is shown as two rows numbered 3.",
+      "limbAr": "الشق الأول من الصلاحية 3 — يسمّي المصدر صلاحية واحدة بشقّين يُمارَسان منفصلين، فتُعرض في صفّين يحملان الرقم 3."
     },
     {
       "n": 3,
@@ -241,10 +241,10 @@
       "en": "Designate other individual facilities",
       "ar": "تحديد منشآت فردية أخرى",
       "kind": "act",
-      "actNoteEn": "The catch-all limb. Nothing is in force against a facility until it is designated and its operator notified.",
-      "actNoteAr": "الشق الجامع. ولا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها.",
-      "limbEn": "Limb two of power 3. The catch-all, for a facility no category reaches. See limb one for why the numbering repeats.",
-      "limbAr": "الشق الثاني من الصلاحية 3. وهو الشق الجامع، لمنشأة لا تصلها أي فئة. انظروا الشق الأول لسبب تكرار الرقم."
+      "actNoteEn": "Nothing is in force against a facility until it is designated and its operator notified.",
+      "actNoteAr": "لا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها.",
+      "limbEn": "Limb two of power 3, for a facility no category reaches.",
+      "limbAr": "الشق الثاني من الصلاحية 3، لمنشأة لا تصلها أي فئة."
     },
     {
       "n": 4,
@@ -265,8 +265,8 @@
       "kind": "value",
       "valueLabelEn": "Reporting submission timeframe (days after the incident)",
       "valueLabelAr": "مهلة تقديم الإبلاغ (أيام بعد الحادثة)",
-      "unsetNoteEn": "The dataset and incident forms state that the reporting timeframe is set by the Ministry. Until it is set and published, no due date is computed on any report.",
-      "unsetNoteAr": "تنص نماذج البيانات والحوادث على أن الوزارة تحدد مهلة الإبلاغ. وقبل تحديدها ونشرها، لا يُحتسب أي تاريخ استحقاق على أي تقرير.",
+      "unsetNoteEn": "The reporting timeframe is set by the Ministry. Until it is set and published, no due date is computed on any report.",
+      "unsetNoteAr": "تحدد الوزارة مهلة الإبلاغ. وقبل تحديدها ونشرها، لا يُحتسب أي تاريخ استحقاق على أي تقرير.",
       "valueKeys": [
         "reportingProcedures",
         "checkCycleDays",
@@ -290,8 +290,8 @@
         "checkCycleDays",
         "lapseWindowDays"
       ],
-      "outsideTheTenEn": "Not one of the ten. PAD 11 names ten powers and a device-check cadence is not among them; the policy nowhere states a cycle or a lapse window. These two are a platform cadence for the validity ledger, grouped under this power because establishing a reporting procedure is the power a cadence would be established under. Recorded for the Ministry to place or remove.",
-      "outsideTheTenAr": "ليست من الصلاحيات العشر. فالمادة 11 تسمّي عشر صلاحيات وليست وتيرة فحص الأجهزة منها؛ ولا تنص السياسة في أي موضع على دورة أو نافذة انتهاء. وهاتان قيمتان من وضع المنصة لسجل الصلاحية، جُمعتا تحت هذه الصلاحية لأن اعتماد إجراء الإبلاغ هو الصلاحية التي تُعتمد تحتها أي وتيرة. مسجَّل للوزارة لتضعه أو تحذفه."
+      "outsideTheTenEn": "Not one of the ten. The source names no device-check cadence; these two are platform values for the validity record, kept here for the Ministry to set or remove.",
+      "outsideTheTenAr": "ليست من الصلاحيات العشر. فلا يسمّي المصدر أي وتيرة لفحص الأجهزة؛ وهاتان قيمتان من وضع المنصة لسجل الصلاحية، تبقيان هنا لتحددهما الوزارة أو تحذفهما."
     },
     {
       "n": 6,
@@ -310,8 +310,8 @@
       "en": "Maintain or authorize AED and cardiac-arrest reporting registries",
       "ar": "إمساك سجلات أجهزة إزالة الرجفان والإبلاغ عن توقف القلب أو الإذن بها",
       "kind": "act",
-      "actNoteEn": "The platform's device and incident records are the registry substrate. Geolocation and automated notifications exist as capability flags, off, under Master admin.",
-      "actNoteAr": "سجلات الأجهزة والحوادث في المنصة هي أساس السجل. أما تحديد المواقع والإشعارات الآلية فقدرات خلف مفاتيح، مطفأة، ضمن الإدارة العليا."
+      "actNoteEn": "The platform's device and incident records are the registry. Geolocation and automated notifications are capability switches, off.",
+      "actNoteAr": "سجلات الأجهزة والحوادث في المنصة هي السجل. أما تحديد المواقع والإشعارات الآلية فمفاتيح قدرات، مطفأة."
     },
     {
       "n": 8,
@@ -319,8 +319,8 @@
       "en": "Review reported cardiac-arrest locations to identify facilities requiring additional readiness measures",
       "ar": "مراجعة مواقع حوادث توقف القلب المبلَّغة لتحديد المرافق التي تحتاج تدابير جاهزية إضافية",
       "kind": "act",
-      "actNoteEn": "Exercised on Reported arrest locations: incidents grouped by place and category, and the mechanism by which a facility with a confirmed arrest becomes covered.",
-      "actNoteAr": "تُمارَس في مواقع الحوادث المبلَّغة: الحوادث مجمَّعة بحسب المكان والفئة، وهي الآلية التي يصبح بها مرفق ذو توقف قلب مؤكَّد مشمولاً."
+      "actNoteEn": "Exercised on Reported arrest locations, where a place with a confirmed arrest is designated as covered.",
+      "actNoteAr": "تُمارَس في مواقع الحوادث المبلَّغة، حيث يُحدَّد المكان ذو توقف القلب المؤكَّد كمشمول."
     },
     {
       "n": 9,
@@ -328,8 +328,8 @@
       "en": "Issue or update standardized forms and technical guidance",
       "ar": "إصدار النماذج الموحدة والإرشادات التقنية أو تحديثها",
       "kind": "act",
-      "actNoteEn": "Form versions ride on Configuration and versioning; a new issue of a form is a version there, not an edit in place.",
-      "actNoteAr": "تُدار إصدارات النماذج في الإعدادات والإصدارات؛ فالإصدار الجديد لنموذج هو إصدار هناك، لا تعديل في مكانه."
+      "actNoteEn": "A new issue of a form is a version under Configuration and versioning, never an edit in place.",
+      "actNoteAr": "الإصدار الجديد لأي نموذج هو إصدار ضمن الإعدادات والإصدارات، لا تعديل في مكانه."
     },
     {
       "n": 10,
@@ -337,8 +337,8 @@
       "en": "Request readiness confirmation and require corrective action where deficiencies are identified",
       "ar": "طلب تأكيد الجاهزية واشتراط الإجراء التصحيحي عند اكتشاف قصور",
       "kind": "act",
-      "actNoteEn": "Exercised on Facility oversight: a readiness confirmation is requested of an operator, and a corrective action is raised where a deficiency is identified. The device-check cadence formerly shown here has moved to power 5, where it is marked as not one of the ten.",
-      "actNoteAr": "تُمارَس في الرقابة على المرافق: يُطلب تأكيد الجاهزية من المشغّل، ويُثار إجراء تصحيحي عند اكتشاف قصور. أما وتيرة فحص الأجهزة التي كانت تظهر هنا فقد نُقلت إلى الصلاحية 5، حيث وُسمت بأنها ليست من العشر."
+      "actNoteEn": "Exercised on Facility oversight: a readiness confirmation is requested of an operator, and a corrective action is raised where a deficiency is identified.",
+      "actNoteAr": "تُمارَس في الرقابة على المرافق: يُطلب تأكيد الجاهزية من المشغّل، ويُثار إجراء تصحيحي عند اكتشاف قصور."
     }
   ],
   "publicationStates": {
@@ -380,8 +380,8 @@
     "ar": "أعداد فقط. لا يُسمّى هنا منظِّم ولا حساب ولا فعالية ولا مريض، ولا شيء يُرشَّح إلى سلوك مؤسسة واحدة. أما رؤية المالك الأوسع الموصوفة في مواصفات المنتج فمسألة غير محسومة مسجَّلة للوزارة؛ ويبقى هذا ضيقاً إلى أن تبتّ فيها."
   },
   "orderSuspension": {
-    "en": "The Order of Physicians lane is off. The Order reviewer account is suspended with it — the role is listed, its access is not.",
-    "ar": "مسار نقابة الأطباء مطفأ. وحساب مراجع النقابة موقوف معه — الدور مُدرَج، والوصول لا."
+    "en": "The Order of Physicians lane is off, and the Order reviewer account is suspended with it.",
+    "ar": "مسار نقابة الأطباء مطفأ، وحساب مراجع النقابة موقوف معه."
   },
   "roleLabels": {
     "reviewer": {
@@ -426,16 +426,12 @@
     "versionWrittenAr": "النسخة {v} · مكتوبة في المنصة · {n} بنداً",
     "versionAttachedEn": "Version {v} · attached as a document",
     "versionAttachedAr": "النسخة {v} · مُرفقة كمستند",
-    "introEn": "The plan as submitted, readable in place. Where an organizer attaches a document instead, the sections they confirmed it covers are marked and the file sits alongside.",
-    "introAr": "الخطة كما قُدّمت، مقروءة في مكانها. وحيث يرفق المنظّم مستنداً بدلاً من ذلك، تُوسم البنود التي أكّد تغطيتها ويوضع الملف إلى جانبها.",
     "noPlanEn": "No plan has been saved on this submission yet.",
     "noPlanAr": "لم تُحفظ خطة على هذا التقديم بعد.",
-    "l3StripEn": "Level 3 additionally: Event Medical Director {director}. Clinical-governance and event medical-command arrangements are stated in sections 10 and 12.",
-    "l3StripAr": "إضافةً في المستوى 3: المدير الطبي للفعالية {director}. وترتيبات الحوكمة السريرية والقيادة الطبية مذكورة في البندين 10 و12.",
+    "l3StripEn": "Event Medical Director: {director}.",
+    "l3StripAr": "المدير الطبي للفعالية: {director}.",
     "miLabelEn": "Major-incident and mass-casualty plan — eleven items",
     "miLabelAr": "خطة الحوادث الجسيمة — أحد عشر بنداً",
-    "orderNoteEn": "The Order of Physicians attestation on clinical content reads these sections, not a file.",
-    "orderNoteAr": "يقرأ تصديق نقابة الأطباء على المحتوى السريري هذه البنود لا ملفاً.",
     "states": {
       "done": {
         "en": "Addressed",
@@ -470,8 +466,6 @@
     "$comment": "The nine answers behind the level, on the review screen. A reviewer reading a level without its inputs is reading a conclusion without evidence.",
     "titleEn": "Assessment answers",
     "titleAr": "إجابات التقييم",
-    "introEn": "The nine domains as the organizer answered them, and the structured inputs the minimum conditions derive from. Read-only: the level is derived and is never chosen.",
-    "introAr": "النطاقات التسعة كما أجاب عنها المنظّم، والمدخلات المهيكلة التي تُشتق منها شروط الحد الأدنى. للاطلاع فقط: المستوى مُشتق ولا يُختار أبداً.",
     "noneEn": "No assessment answers are stored against this record.",
     "noneAr": "لا إجابات تقييم مخزَّنة على هذا السجل.",
     "inputsLabelEn": "Structured inputs",
@@ -515,8 +509,6 @@
     "$comment": "The other document lane on the review screen: what a named party supplied, or was asked for and has not.",
     "titleEn": "Counterparty documents",
     "titleAr": "مستندات الأطراف المُسمّاة",
-    "introEn": "Documents exchanged between the organizer and each named party. A document requested and not supplied is shown as outstanding against the party it was requested from.",
-    "introAr": "المستندات المتبادلة بين المنظّم وكل طرف مُسمّى. ويظهر المستند المطلوب وغير المقدَّم على أنه قائم بذمّة الطرف المطلوب منه.",
     "noneEn": "No counterparty documents on this submission.",
     "noneAr": "لا مستندات أطراف مُسمّاة على هذا التقديم.",
     "states": {
@@ -542,20 +534,16 @@
     "$comment": "The scheduling control, a peer of Require additional measures and directly above it. Four inputs: what is inspected, who conducts it, when, and whether it blocks the satisfied outcome.",
     "en": "Schedule an inspection",
     "ar": "جدولة تفتيش",
-    "noteEn": "An inspection is not an outcome and never decides one. Findings are recorded by whoever conducts it. A blocking inspection without recorded findings gates only the satisfied outcome; the other two determinations stay available throughout.",
-    "noteAr": "التفتيش ليس نتيجة ولا يقرر واحدة أبداً. وتُسجَّل النتائج الميدانية ممن يجريه. والتفتيش الحاجب دون نتائج مسجَّلة يحجب النتيجة المستوفاة وحدها؛ أما القراران الآخران فيبقيان متاحين طوال الوقت.",
     "whatEn": "What is inspected",
     "whatAr": "ما يُفتَّش",
     "whatArLabelEn": "What is inspected (Arabic)",
     "whatArLabelAr": "ما يُفتَّش (بالعربية)",
     "whoEn": "Who conducts it",
     "whoAr": "من يجريه",
-    "whoNoteEn": "The inspection is recorded against this person, and they are the one who records its findings.",
-    "whoNoteAr": "يُسجَّل التفتيش باسم هذا الشخص، وهو من يسجّل نتائجه الميدانية.",
     "whenEn": "Date",
     "whenAr": "التاريخ",
-    "whenUnsetEn": "Leave the date unset to record that an inspection is required before one is arranged. The organizer is told it is required and that no date is set.",
-    "whenUnsetAr": "اتركوا التاريخ فارغاً لتسجيل أن التفتيش مطلوب قبل ترتيب موعده. ويُبلَّغ المنظّم بأنه مطلوب وبأنه لم يُحدَّد له تاريخ.",
+    "whenUnsetEn": "The date can stay unset; the organizer is told an inspection is required and that no date is set yet.",
+    "whenUnsetAr": "يمكن ترك التاريخ فارغاً؛ ويُبلَّغ المنظّم بأن التفتيش مطلوب وبأنه لم يُحدَّد له تاريخ بعد.",
     "blockingEn": "This inspection blocks the satisfied outcome until its findings are recorded",
     "blockingAr": "يحجب هذا التفتيش النتيجة المستوفاة حتى تُسجَّل نتائجه الميدانية",
     "submitEn": "Schedule the inspection",
@@ -568,10 +556,10 @@
     "notifyBodyAr": "جدولت الوزارة تفتيشاً على هذا التقديم. والتفتيش ليس نتيجة ولا يقرر واحدة.",
     "notifyNoDateEn": "No date is set yet; you are told when one is.",
     "notifyNoDateAr": "لم يُحدَّد تاريخ بعد؛ وتُبلَّغون عند تحديده.",
-    "noneYetEn": "No inspection is scheduled on this submission. Schedule one below if this submission needs one; nothing is outstanding until one exists.",
-    "noneYetAr": "لا تفتيش مجدول على هذا التقديم. جدولوا واحداً أدناه إذا كان هذا التقديم يستوجبه؛ ولا شيء قائم قبل وجوده.",
-    "allRecordedEn": "Every inspection on this submission has its findings recorded. Nothing here is waiting on you; schedule another below if one is needed.",
-    "allRecordedAr": "كل تفتيش على هذا التقديم سُجِّلت نتائجه الميدانية. ولا شيء هنا بانتظاركم؛ جدولوا تفتيشاً آخر أدناه إذا لزم."
+    "noneYetEn": "No inspection is scheduled on this submission. Schedule one below if it needs one.",
+    "noneYetAr": "لا تفتيش مجدول على هذا التقديم. جدولوا واحداً أدناه إذا كان يستوجبه.",
+    "allRecordedEn": "Every inspection here has its findings recorded. Schedule another below if one is needed.",
+    "allRecordedAr": "كل تفتيش هنا سُجِّلت نتائجه الميدانية. جدولوا تفتيشاً آخر أدناه إذا لزم."
   },
   "determination": {
     "$comment": "A determination is a regulatory act. Once recorded it is shown, not offered again; changing it is a separate deliberate act that names a reason and never overwrites the original.",
@@ -583,8 +571,8 @@
     "noteLabelAr": "الملاحظة إلى المنظّم كما كُتبت",
     "reviseTitleEn": "Record a revised determination",
     "reviseTitleAr": "تسجيل نتيجة معدَّلة",
-    "reviseBodyEn": "A revision is a second determination, not a correction of the first. The organizer has already been notified of the one that stands and may have acted on it. The original stays on the record, marked as replaced, and the reason you give here is sent to the organizer in your own words.",
-    "reviseBodyAr": "التعديل نتيجة ثانية لا تصحيح للأولى. فقد أُبلغ المنظّم بالنتيجة القائمة وربما تصرّف على أساسها. وتبقى النتيجة الأصلية مسجَّلة موسومة بأنها استُبدلت، ويُرسل السبب الذي تكتبونه هنا إلى المنظّم بكلماتكم.",
+    "reviseBodyEn": "The original stays on the record, marked as replaced. The reason you give here is sent to the organizer as written.",
+    "reviseBodyAr": "تبقى النتيجة الأصلية مسجَّلة موسومة بأنها استُبدلت. ويُرسل السبب الذي تكتبونه هنا إلى المنظّم كما هو.",
     "reasonLabelEn": "Why the determination is being revised (required, sent to the organizer)",
     "reasonLabelAr": "سبب تعديل النتيجة (مطلوب، ويُرسل إلى المنظّم)",
     "reviseSubmitEn": "Record the revised determination",
@@ -633,8 +621,8 @@
     "titleAr": "الإدارة العامة",
     "recordsTitleEn": "Records",
     "recordsTitleAr": "السجلات",
-    "recordsIntroEn": "Every event record on the platform, filed or not. The reviewer's queue answers what is waiting; this answers what exists.",
-    "recordsIntroAr": "كل سجل فعالية على المنصة، مقدَّماً كان أم لا. تجيب قائمة المراجع عمّا هو بالانتظار؛ ويجيب هذا عمّا هو موجود.",
+    "recordsIntroEn": "Every event record on the platform, filed or not.",
+    "recordsIntroAr": "كل سجل فعالية على المنصة، مقدَّماً كان أم لا.",
     "filterLevelEn": "Level",
     "filterLevelAr": "المستوى",
     "filterStatusEn": "Status",
@@ -661,8 +649,8 @@
     "openFileAr": "فتح الملف الكامل",
     "activityTitleEn": "Activity",
     "activityTitleAr": "النشاط",
-    "activityIntroEn": "Who did what, and when. Every entry here is the record itself, not a copy written alongside it.",
-    "activityIntroAr": "من فعل ماذا ومتى. وكل قيد هنا هو السجل نفسه لا نسخة مكتوبة إلى جانبه.",
+    "activityIntroEn": "Who did what, and when.",
+    "activityIntroAr": "من فعل ماذا ومتى.",
     "activityNoneEn": "No activity in this scope yet.",
     "activityNoneAr": "لا نشاط في هذا النطاق بعد.",
     "kinds": {
@@ -689,8 +677,8 @@
     },
     "unreachableTitleEn": "Powers no active account holds",
     "unreachableTitleAr": "صلاحيات لا يملكها أي حساب نشط",
-    "unreachableBodyEn": "These actions are assigned in the permission matrix and no active account in this scope holds them. A power held by nobody reachable is advertised on screens that then refuse everyone — worse than an unassigned power, because it names an owner who does not exist.",
-    "unreachableBodyAr": "هذه الإجراءات مُسندة في مصفوفة الصلاحيات ولا يملكها أي حساب نشط في هذا النطاق. والصلاحية التي لا يملكها أحد يمكن الوصول إليه تُعلَن على شاشات ترفض الجميع بعدها — وهي أسوأ من صلاحية غير مسندة، لأنها تسمّي مالكاً غير موجود.",
+    "unreachableBodyEn": "No active account holds these actions. Issuing an account with the listed role restores them.",
+    "unreachableBodyAr": "لا يملك أي حساب نشط هذه الإجراءات. وإصدار حساب بالدور المذكور يعيدها.",
     "unreachableNoneEn": "Every action in the matrix is held by at least one active account in this scope.",
     "unreachableNoneAr": "كل إجراء في المصفوفة يملكه حساب نشط واحد على الأقل في هذا النطاق.",
     "printFileEn": "Print the complete file",
@@ -733,8 +721,8 @@
     "createdAr": "أُنشئ",
     "deferredTitleEn": "Capability deliberately not built",
     "deferredTitleAr": "إمكانات لم تُبنَ عمداً",
-    "deferredBodyEn": "An absent feature with no record looks the same as one somebody forgot. Each of these was considered, decided against for the reason given, and carries the condition under which it would be built.",
-    "deferredBodyAr": "الميزة الغائبة بلا سجل تبدو كالميزة التي نسيها أحدهم. وقد نُظر في كل من هذه، وتقرر عدم بنائها للسبب المذكور، ويحمل كل منها الشرط الذي تُبنى بموجبه.",
+    "deferredBodyEn": "Each of these was considered and decided against for the reason given, with the condition that would change it.",
+    "deferredBodyAr": "نُظر في كل من هذه وتقرر عدم بنائه للسبب المذكور، مع الشرط الذي يغيّر ذلك.",
     "deferredReasonEn": "Why not",
     "deferredReasonAr": "لماذا لا",
     "deferredConditionEn": "What would change it",

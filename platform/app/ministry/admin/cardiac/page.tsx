@@ -1,5 +1,5 @@
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { designationsForReview, ministryConfig } from '../../../../lib/queries';
 import { FACILITY_CONTENT, MINISTRY_CONTENT } from '../../../../lib/rules';
@@ -86,10 +86,7 @@ export default async function CardiacConfigPage({
         <L en="Cardiac-arrest configuration" ar="إعدادات الجاهزية لتوقف القلب" />
       </h1>
       <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
-        <L
-          en="The ten Ministry powers, per the source. The counters below describe publication, not force: a value is published or it is not, and nothing regulatory is hard-coded behind it."
-          ar="صلاحيات الوزارة العشر، وفق المصدر. والعدّادات أدناه تصف النشر لا السريان: فالقيمة إما منشورة أو لا، ولا شيء تنظيمي مثبَّت خلفها."
-        />
+        <L en="The ten Ministry powers, per the source." ar="صلاحيات الوزارة العشر، وفق المصدر." />
       </p>
 
       <div data-region="pub-counters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
@@ -112,6 +109,12 @@ export default async function CardiacConfigPage({
 
       <div data-region="in-force-note" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
         <L en={MINISTRY_CONTENT.inForceWithoutValue.en} ar={MINISTRY_CONTENT.inForceWithoutValue.ar} />
+      </div>
+
+      {/* The status-wording caveat is the Ministry's own concern, so it lives here
+          rather than on the operator's facility record (partner ruling, second sweep). */}
+      <div data-region="provisional-wording" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '86ch' }}>
+        <L en={FACILITY_CONTENT.provisionalNote.en} ar={FACILITY_CONTENT.provisionalNote.ar} />
       </div>
 
       <div data-region="powers" id="powers" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -249,10 +252,6 @@ export default async function CardiacConfigPage({
           );
         })}
       </div>
-      <MinistryFooter steps={[
-        { href: '/ministry/admin/configuration', en: 'Configuration and versioning', ar: 'الإعدادات والإصدارات', descEn: 'The mass-gathering instrument and its versions.', descAr: 'إطار الفعاليات الجماهيرية وإصداراته.' },
-        { href: '/ministry/facilities', en: 'Facility oversight', ar: 'الرقابة على المرافق', descEn: 'Where the published timelines take effect.', descAr: 'حيث تسري المهل المنشورة.' },
-      ]} />
     </MinistryShell>
   );
 }

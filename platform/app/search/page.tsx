@@ -130,8 +130,8 @@ export default async function SearchPage({
           </div>
           <p style={{ margin: '0 0 16px', fontSize: '14.5px', lineHeight: 1.7 }}>
             <L
-              en="Verifying it needs the event's start date as well. Somebody holding a genuine reference knows it, and asking for it is what stops the register being read by counting upwards."
-              ar="يستلزم التحقق منه تاريخ بدء الفعالية أيضاً. فمن يحمل رقماً حقيقياً يعرفه، وطلبه هو ما يمنع قراءة السجل بالعد التصاعدي."
+              en="Verifying it needs the event's start date as well."
+              ar="يستلزم التحقق منه تاريخ بدء الفعالية أيضاً."
             />
           </p>
           <Link
@@ -149,12 +149,11 @@ export default async function SearchPage({
       {/* NOTHING MATCHED is not a dead end: two routes out, and both are real. */}
       {nothing ? (
         <div data-region="search-no-results" style={{ padding: '24px 26px', border: '1px solid var(--line)', borderRadius: 14, maxWidth: '80ch' }}>
-          <div style={{ fontSize: 19, fontWeight: 600, marginBlockEnd: 8 }}>
+          {/* The "Two things are worth trying..." paragraph left (partner ruling,
+              second sweep): the two buttons say where to go. */}
+          <div style={{ fontSize: 19, fontWeight: 600, marginBlockEnd: 16 }}>
             <L en={P.noResultsEn} ar={P.noResultsAr} />
           </div>
-          <p style={{ margin: '0 0 18px', fontSize: '14.5px', lineHeight: 1.7 }}>
-            <L en={P.noResultsBodyEn} ar={P.noResultsBodyAr} />
-          </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Link href="/applicability" style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', borderRadius: 21, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
               <L en="Check whether the rules apply" ar="التحقق من انطباق القواعد" />

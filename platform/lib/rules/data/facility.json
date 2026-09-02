@@ -1,5 +1,5 @@
 {
-  "$comment": "The cardiac-arrest instrument's facility service. Vocabulary rule (SPEC 2b): this instrument is READINESS -- الجاهزية -- and never التأهب. Status labels (Current/Lapsing/Lapsed, the standing lines) are PROVISIONAL: the policy prescribes no status vocabulary and final labels await Ministry approval (policy 10, SPEC status note); provisionalNote below must render wherever they appear. Mass-gathering outcome vocabulary never appears here.",
+  "$comment": "The cardiac-arrest instrument's facility service. Vocabulary rule (SPEC 2b): this instrument is READINESS -- الجاهزية -- and never التأهب. Status labels (Current/Lapsing/Lapsed, the standing lines) are PROVISIONAL: the policy prescribes no status vocabulary and final labels await Ministry approval (policy 10, SPEC status note); provisionalNote renders on the Ministry cardiac configuration screen, the label-owner side, not on the operator record (partner ruling, second sweep). Mass-gathering outcome vocabulary never appears here.",
   "categories": [
     {
       "key": "sports",
@@ -84,8 +84,8 @@
     }
   ],
   "categoryUnset": {
-    "en": "This is the answer, not a gap in it. Until the Ministry sets and publishes the value, nothing under this category is in force and no registration is owed. You have done everything available to you.",
-    "ar": "هذا هو الجواب، لا نقص فيه. وإلى أن تحدد الوزارة القيمة وتنشرها، لا يسري شيء بموجب هذه الفئة ولا يُستحق أي تسجيل. وقد فعلتم كل ما هو متاح لكم.",
+    "en": "Until the Ministry sets and publishes the value, nothing under this category is in force and no registration is owed. You have done everything available to you.",
+    "ar": "إلى أن تحدد الوزارة القيمة وتنشرها، لا يسري شيء بموجب هذه الفئة ولا يُستحق أي تسجيل. وقد فعلتم كل ما هو متاح لكم.",
     "interestEn": "Record an interest and notify us when it activates",
     "interestAr": "تسجيل اهتمام وإبلاغنا عند التفعيل"
   },
@@ -158,8 +158,8 @@
       "key": "coordinator",
       "en": "Facility cardiac-readiness coordinator",
       "ar": "منسق الجاهزية للاستجابة لحالات توقف القلب في المرفق",
-      "noteEn": "One named person for this facility. The same person appears on every device record and on the response plan.",
-      "noteAr": "شخص واحد مُسمّى لهذه المنشأة. ويظهر نفسه على كل سجل جهاز وعلى خطة الاستجابة."
+      "noteEn": "One named person for this facility.",
+      "noteAr": "شخص واحد مُسمّى لهذه المنشأة."
     },
     {
       "key": "alternate",
@@ -194,8 +194,8 @@
     }
   ],
   "coordinatorOneRecord": {
-    "en": "The coordinator recorded here is the coordinator on every device record and on the response plan. It is one record referenced by all of them, so the three can never disagree.",
-    "ar": "المنسّق المسجَّل هنا هو المنسّق على كل سجل جهاز وعلى خطة الاستجابة. وهو سجل واحد تُحيل إليه جميعها، فلا يمكن أن تتعارض الثلاثة."
+    "en": "Recorded once here, and used on every device record and on the response plan.",
+    "ar": "يُسجَّل مرة واحدة هنا، ويُعتمد على كل سجل جهاز وعلى خطة الاستجابة."
   },
   "deviceFields": [
     {
@@ -404,10 +404,6 @@
     "$comment": "The plan's name, from the ar Annex B title. SPEC 7's glossary says خطة الاستجابة لحالات توقف القلب; the annex itself says لطوارئ. The source outranks the summary; divergence reported.",
     "en": "Cardiac emergency response plan",
     "ar": "خطة الاستجابة لطوارئ توقف القلب"
-  },
-  "planDerivedNote": {
-    "en": "Not editable here. Every value below is read from the device records, so the plan and the registry cannot drift apart. Change a device to change this.",
-    "ar": "غير قابلة للتحرير هنا. وتُقرأ كل قيمة أدناه من سجلات الأجهزة، فلا يمكن أن تتباعد الخطة والسجل. غيّروا الجهاز ليتغير هذا."
   },
   "incident": {
     "noPatientName": {
@@ -632,10 +628,6 @@
       "annualMonths": 12,
       "checkCycleDays": 90,
       "lapseWindowDays": 60
-    },
-    "intro": {
-      "en": "Readiness is not a score and does not progress. Each obligation below is affirmed on a date and stops counting on a date.",
-      "ar": "الجاهزية ليست نتيجة ولا تتقدّم. كل موجب أدناه يُثبَّت بتاريخ ويتوقف احتسابه بتاريخ."
     },
     "columns": [
       {

@@ -158,8 +158,6 @@ export default async function DirectorReportPage({
                   <L en={POST_EVENT_CERTIFICATION_STATEMENT.en} ar={POST_EVENT_CERTIFICATION_STATEMENT.ar} />
                 </div>
               ) : null}
-              <div style={{ display: 'contents' }}>
-              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBlockEnd: 22 }}>
                 <div style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${organizerSigned ? 'solid var(--brand)' : 'dashed var(--muted)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 15, fontWeight: 500 }}>

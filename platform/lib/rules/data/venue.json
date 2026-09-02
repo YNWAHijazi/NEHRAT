@@ -76,56 +76,32 @@
   ],
   "changeAspects": [
     {
+      "$comment": "The five reassessment circumstances as selectable chips. Their what-this-affects strings (domain numbers, threshold figures) left the data with the screen's affects cards (partner ruling, second sweep): the operator's consequence is the reassessment panel, not the scoring model.",
       "key": "capacity",
       "en": "Approved or licensed capacity",
-      "ar": "السعة المعتمدة أو المرخّصة",
-      "affectsEn": "Domain 1 — maximum simultaneous attendance",
-      "affectsAr": "المجال 1 — الحد الأقصى للحضور المتزامن",
-      "consequenceEn": "Can cross the 10,000 and 20,000 minimum-level thresholds",
-      "consequenceAr": "قد يتجاوز عتبتَي 10,000 و20,000 للحد الأدنى للمستوى"
+      "ar": "السعة المعتمدة أو المرخّصة"
     },
     {
       "key": "layout",
       "en": "Layout",
-      "ar": "التصميم الداخلي",
-      "affectsEn": "Domain 5 — venue configuration",
-      "affectsAr": "المجال 5 — تكوين الموقع",
-      "consequenceEn": "",
-      "consequenceAr": ""
+      "ar": "التصميم الداخلي"
     },
     {
       "key": "crowd",
       "en": "Crowd configuration",
-      "ar": "تنظيم الجمهور",
-      "affectsEn": "Domain 3 — crowd configuration",
-      "affectsAr": "المجال 3 — تنظيم الجمهور",
-      "consequenceEn": "",
-      "consequenceAr": ""
+      "ar": "تنظيم الجمهور"
     },
     {
       "key": "activity",
       "en": "Event activity",
-      "ar": "نشاط الفعالية",
-      "affectsEn": "Domain 2 — event activity",
-      "affectsAr": "المجال 2 — نشاط الفعالية",
-      "consequenceEn": "Can trigger a minimum event level",
-      "consequenceAr": "قد يستدعي حداً أدنى لمستوى الفعالية"
+      "ar": "نشاط الفعالية"
     },
     {
       "key": "access",
       "en": "Patient-access arrangements",
-      "ar": "ترتيبات الوصول إلى المرضى",
-      "affectsEn": "Domain 7 — patient access and extraction",
-      "affectsAr": "المجال 7 — الوصول إلى المرضى وإخلاؤهم",
-      "consequenceEn": "",
-      "consequenceAr": ""
+      "ar": "ترتيبات الوصول إلى المرضى"
     }
   ],
-  "floorNote": {
-    "$comment": "Added at reviewer instruction (handoff 5 approval): said wherever an organizer could mistake the classification for an event certification.",
-    "en": "This classification sets a floor for events held at the venue: no event here can be classified below it. It does not certify any event — each event completes its own assessment and its own submission.",
-    "ar": "يحدد هذا التصنيف حداً أدنى للفعاليات المقامة في الموقع: لا يمكن تصنيف أي فعالية هنا دونه. وهو لا يعتمد أي فعالية — فكل فعالية تستكمل تقييمها الخاص وتقديمها الخاص."
-  },
   "registrationCriterion": {
     "$comment": "Protocol 3.1, English issue: a recurring event venue that regularly hosts organized events AND has an approved or licensed capacity of this many persons or more is classified annually. This threshold used to be read from the recur minimum condition; the partner ruling (English governs) removed that condition, and the venue instrument keeps the criterion, so the number lives here now.",
     "minLicensedCapacity": 1000

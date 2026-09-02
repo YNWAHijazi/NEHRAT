@@ -1,5 +1,5 @@
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { getDb } from '../../../../lib/db';
 
@@ -52,14 +52,13 @@ export default async function RegistryPage() {
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
         <L
-          en="Record identifier at creation; Ministry reference number at submission. Public lookup answers four fields only and is rate-limited with a second factor — this register is the authenticated side."
-          ar="معرّف السجل عند الإنشاء؛ والرقم المرجعي للوزارة عند التقديم. ويجيب البحث العام عن أربعة حقول فقط وبقيود — وهذا السجل هو الجانب الموثَّق."
+          en="Record identifier at creation; Ministry reference number at submission."
+          ar="معرّف السجل عند الإنشاء؛ والرقم المرجعي للوزارة عند التقديم."
         />
       </p>
       {section('Events', 'الفعاليات', events)}
       {section('Recurring venues', 'مواقع الفعاليات المتكررة', venues)}
       {section('Covered facilities', 'المرافق المشمولة', facilities)}
-      <MinistryFooter steps={[{ href: '/ministry/admin/configuration', en: 'Configuration and versioning', ar: 'الإعدادات والإصدارات', descEn: 'The values the registry derives from.', descAr: 'القيم التي يُستمد منها السجل.' }]} />
     </MinistryShell>
   );
 }

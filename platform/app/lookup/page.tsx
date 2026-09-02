@@ -59,16 +59,13 @@ export default async function LookupPage({
       <h1 data-sec-h1="" style={{ margin: '10px 0 10px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Verify a reference number" ar="التحقق من رقم مرجعي" />
       </h1>
-      <p style={{ margin: '0 0 8px', fontSize: '15.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
+      {/* The anti-enumeration explainer left (partner ruling, second sweep): the form
+          asks for the date; it does not have to justify asking. The BEHAVIOUR — no
+          answer without the second factor — is non-negotiable 5b and unchanged. */}
+      <p style={{ margin: '0 0 28px', fontSize: '15.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
         <L
-          en="Confirm that a Ministry reference exists, and what it says. No account, and using this creates no obligation."
-          ar="تأكدوا من وجود رقم مرجعي لدى الوزارة وممّا يفيده. من دون حساب، ولا ينشئ استخدام هذا أي موجب."
-        />
-      </p>
-      <p style={{ margin: '0 0 28px', fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-        <L
-          en="The event's start date is asked for as well as the reference. Somebody holding a genuine reference knows it, and asking for it is what stops the register being read by counting upwards."
-          ar="يُطلب تاريخ بدء الفعالية إلى جانب الرقم المرجعي. فمن يحمل رقماً حقيقياً يعرفه، وطلبه هو ما يمنع قراءة السجل بالعد التصاعدي."
+          en="Confirm that a Ministry reference exists, and what it says."
+          ar="تأكدوا من وجود رقم مرجعي لدى الوزارة وممّا يفيده."
         />
       </p>
 
@@ -99,8 +96,8 @@ export default async function LookupPage({
               </div>
               <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
                 <L
-                  en="Either no filed submission carries that reference, or the start date does not match it. Both answer the same way, so nothing here reveals which."
-                  ar="إما أنه لا تقديم مقدَّم يحمل ذلك الرقم، أو أن تاريخ البدء لا يطابقه. ويُجاب على الحالتين بالطريقة نفسها، فلا يكشف شيء هنا أيهما."
+                  en="Either no filed submission carries that reference, or the start date does not match it."
+                  ar="إما أنه لا تقديم مقدَّم يحمل ذلك الرقم، أو أن تاريخ البدء لا يطابقه."
                 />
               </p>
             </>
@@ -123,8 +120,8 @@ export default async function LookupPage({
               ))}
               <p style={{ margin: '16px 0 0', fontSize: '13px', lineHeight: 1.7, color: 'var(--muted)' }}>
                 <L
-                  en="These four facts are all the register discloses publicly. Contact details, documents and assessment answers are never returned."
-                  ar="هذه الوقائع الأربع هي كل ما يفصح عنه السجل علناً. أما بيانات الاتصال والمستندات وإجابات التقييم فلا تُعاد أبداً."
+                  en="The register discloses nothing further: no contact details, no documents, no assessment answers."
+                  ar="لا يفصح السجل عن شيء آخر: لا بيانات اتصال ولا مستندات ولا إجابات تقييم."
                 />
               </p>
             </>

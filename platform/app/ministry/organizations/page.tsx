@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { organizationsForReview } from '../../../lib/queries';
 import { can } from '../../../lib/rules';
@@ -30,10 +30,7 @@ export default async function OrganizationsPage({
         <L en="Organizations" ar="المؤسسات" />
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L
-          en="A pending organization can create, assess, gather and draft. Only Submit waits on this screen."
-          ar="يمكن للمؤسسة المعلّقة الإنشاء والتقييم والتجميع والمسودات. والتقديم وحده ينتظر هذه الشاشة."
-        />
+        <L en="Recording an organization opens filing for its organizer." ar="تسجيل المؤسسة يفتح التقديم لمنظّمها." />
       </p>
       <div data-region="orgs" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((o) => (
@@ -101,7 +98,6 @@ export default async function OrganizationsPage({
           </div>
         ) : null}
       </div>
-      <MinistryFooter steps={[{ href: '/ministry', en: 'Dashboard', ar: 'اللوحة', descEn: 'Every count, derived from the records.', descAr: 'كل الأعداد مستمدة من السجلات.' }]} />
     </MinistryShell>
   );
 }

@@ -103,7 +103,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'whole',
         mode: 'expectedDivergent',
         builtSelector: 'main',
-        note: 'Expected divergent by the partner simplification pass (2026-09-01): the dashboard is the rows — the "Awaiting your response" banner, the "Open a record, or start something new" footer and the three section narration lines were removed deliberately. Status lives on each row. The reference predates the ruling; the prototype is expected to follow it, and this flips back to a compare when it does. This entry was a full-page compare held at 5%.',
+        note: 'Expected divergent by the partner simplification pass (2026-09-01): the dashboard is the rows — the "Awaiting your response" banner, the "Open a record, or start something new" footer and the three section narration lines were removed deliberately. Status lives on each row. Second sweep (2026-09-02, partner ruling): the three empty-state service cards each lost their model-teaching second sentence, and the populated Facilities heading now uses المنشآت, consistent with the rest of the organizer surface. The reference predates the ruling; the prototype is expected to follow it, and this flips back to a compare when it does. This entry was a full-page compare held at 5%.',
       },
     ],
   },
@@ -126,7 +126,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'expectedDivergent',
         reference: { strategy: 'cardByText', text: 'Where this event stands' },
         builtSelector: '[data-region="rail"]',
-        note: 'Expected divergent by the partner simplification pass (2026-09-01): the stage meta lines were rewritten to lay language — "One of three outcomes" is now "Waiting for the Ministry", "Owed only after a reportable event or on Ministry request" is now "Not needed for this event", "Pending with the Ministry. Filing waits for it." is now "With the Ministry". The rail structure and states are unchanged and asserted in e2e/app/journeys.spec.ts. Was a compare held at 2%; flips back when the prototype adopts the lay strings.',
+        note: 'Expected divergent by the partner simplification pass (2026-09-01): the stage meta lines were rewritten to lay language — "One of three outcomes" is now "Waiting for the Ministry", "Owed only after a reportable event or on Ministry request" is now "Not needed for this event", "Pending with the Ministry. Filing waits for it." is now "With the Ministry". Second sweep (2026-09-02, partner ruling): the corner note dropped its "· stage 6 not applicable" tail — the sixth column already carries that label. The rail structure and states are unchanged and asserted in e2e/app/journeys.spec.ts. Was a compare held at 2%; flips back when the prototype adopts the lay strings.',
       },
       {
         name: 'record-header',
@@ -179,20 +179,20 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'expectedDivergent',
         reference: { strategy: 'headingBlock', text: 'Named EMS providers' },
         builtSelector: '[data-region="g2"]',
-        note: 'The named-provider rows and their nomination/declaration chips. Held at 2%.',
+        note: 'The named-provider rows and their nomination/declaration chips. Held at 2%. Second sweep (2026-09-02, partner ruling): the group note was rewritten plainer ("Each provider you name must answer before you can certify the submission.") and the invitation-link caption dropped its "The token is unguessable" clause.',
       },
       {
         name: 'g3',
         mode: 'expectedDivergent',
         reference: { strategy: 'headingBlock', text: 'Requirements you certify to' },
         builtSelector: '[data-region="g3"]',
-        note: 'Was a compare in English. Pass A found six recorded EN/AR divergences flagged in the data and rendered NOWHERE; requirements 7, 13 and 15 now carry a bilingual note stating what the other issue says and that the English is followed — the reference predates the note. Flips back to compare when the prototype adopts it (Pass C). The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
+        note: 'Was a compare in English. Pass A found six recorded EN/AR divergences flagged in the data and rendered NOWHERE; requirements 7, 13 and 15 now carry a bilingual note stating what the other issue says and that the English is followed — the reference predates the note. Flips back to compare when the prototype adopts it (Pass C). Second sweep (2026-09-02, partner ruling): the collapsed group\'s explainer lost its "Nothing is attached against these and there is nothing here to tick" sentence. The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
       },
       {
         name: 'g1',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="g1"]',
-        note: 'Expected divergent: the build replaces the prototype\'s inert action buttons with working attach forms, and the plan row carries its official Arabic name (SPEC 2b).',
+        note: 'Expected divergent: the build replaces the prototype\'s inert action buttons with working attach forms, and the plan row carries its official Arabic name (SPEC 2b). Second sweep (2026-09-02, partner ruling): the group note lost "It is never entered twice."',
       },
       {
         name: 'invite',
@@ -204,7 +204,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'inspections',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="inspections"]',
-        note: 'Expected divergent: inspection rows are Ministry-side data (Slice 6). The build shows the honest empty state; the prototype shows demonstration inspections.',
+        note: 'Expected divergent: inspection rows are Ministry-side data (Slice 6). The build shows the honest empty state; the prototype shows demonstration inspections. Second sweep (2026-09-02, partner ruling): the three-sentence explainer collapsed to one — "The conducting authority schedules these checks, and you will be told the date."',
       },
     ],
   },
@@ -233,7 +233,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'sections',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="sections"]',
-        note: 'Expected divergent: chip states reflect this account\'s real plan progress, not the prototype\'s demonstration mix, and the Arabic wording follows the plan\'s official name (SPEC 7). The build renders sixteen section rows, from PLAN_SECTIONS. UNVERIFIED as to whether those sixteen correspond to the prototype: this note used to assert they matched and nothing checked it — the reference-drift guard pins the ten minimum conditions and the nine domains, and the plan sections are NOT among them.',
+        note: 'Expected divergent: chip states reflect this account\'s real plan progress, not the prototype\'s demonstration mix, and the Arabic wording follows the plan\'s official name (SPEC 7). Second sweep (2026-09-02, partner ruling): the list explainer lost "You can return to them at any point before filing." The build renders sixteen section rows, from PLAN_SECTIONS. UNVERIFIED as to whether those sixteen correspond to the prototype: this note used to assert they matched and nothing checked it — the reference-drift guard pins the ten minimum conditions and the nine domains, and the plan sections are NOT among them.',
       },
     ],
   },
@@ -248,7 +248,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'form-card',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="form-card"]',
-        note: 'Expected divergent: declaration chips reflect the account\'s real saved form, the Arabic declarations are verbatim from the Arabic issue (decision 2/3), and the blocker list is derived, not demonstration copy.',
+        note: 'Expected divergent: declaration chips reflect the account\'s real saved form, the Arabic declarations are verbatim from the Arabic issue (decision 2/3), and the blocker list is derived, not demonstration copy. Second sweep (2026-09-02, partner ruling): the "Blocked while N items are outstanding" caption beside the File control was cut — the blocker panel above it is the reason, item by item — and the filed band now links to the acknowledgment instead of describing it.',
       },
       {
         name: 'package-docs',
@@ -334,14 +334,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     builtRoute: '/venues/new',
     signInAs: 'test_organizer',
     regions: [
-      {
-        name: 'required-note',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Every field is required', container: 'border-radius: 10px' },
-        builtSelector: '[data-region="required-note"]',
-        threshold: 0.03,
-        note: 'The required-fields note. Held at 3%: the first full-suite run after the Ministry slice measured 2.15% with the wording verified identical (the diff highlights only the REQUIRED kicker’s rasterization) -- a changed word in this small region measures far above 3%, so the ratchet still bites.',
-      },
+      // The required-note region entry was deleted with its region: the
+      // every-field-is-required banner left /venues/new in the partner's second
+      // sweep (the one optional field says so on its own label), so there is no
+      // longer anything to compare.
       {
         name: 'exempt-footnote',
         mode: 'compare',
@@ -359,7 +355,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'registration-form',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="registration-form"]',
-        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty, its two questions UNANSWERED, and shows no verdict until the determining facts are answered -- an unset input is not a determination. At reviewer instruction (Slice 5 review) each question is a separate Yes button and No button, not one control flipping between the answers. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data) and splits the venue name and address/municipality into bilingual input pairs.',
+        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty, its two questions UNANSWERED, and shows no verdict until the determining facts are answered -- an unset input is not a determination. At reviewer instruction (Slice 5 review) each question is a separate Yes button and No button, not one control flipping between the answers. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data) and splits the venue name and address/municipality into bilingual input pairs. Second sweep (2026-09-02, partner ruling): the issue tags ("English issue only") left the question labels -- English governs and the ruling is made; the tags remain in the data.',
       },
     ],
   },
@@ -412,14 +408,13 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'rail',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="rail"]',
-        note: "Expected divergent AT REVIEWER INSTRUCTION (Slice 3 approval): the reference rail reuses the event flow's stage names ('Requirements', 'Submitted') for steps a venue does not have; the build renames the stages to registration / assessment / classification recorded / valid / reassessment due, and shows the record's actual dates where the reference hand-writes disagreeing ones (stage 1: 2026-01-20 vs its own organization record; stage 2: 2026-03-02 vs its own history list's 2026-03-04). UNVERIFIED as to geometry and chip styling: no reference-side locator, so nothing has compared them.",
+        note: "Expected divergent AT REVIEWER INSTRUCTION (Slice 3 approval): the reference rail reuses the event flow's stage names ('Requirements', 'Submitted') for steps a venue does not have; the build renames the stages to registration / assessment / classification recorded / valid / reassessment due, and shows the record's actual dates where the reference hand-writes disagreeing ones (stage 1: 2026-01-20 vs its own organization record; stage 2: 2026-03-02 vs its own history list's 2026-03-04). Second sweep (2026-09-02, partner ruling): the corner stage-count note ('Stage 4 of 5 · reassessment opens ...') was cut -- the rail shows the current stage and the date sits on stage 5 and under the disabled action. UNVERIFIED as to geometry and chip styling: no reference-side locator, so nothing has compared them.",
       },
       {
         name: 'record-header',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Ministry reference number', container: 'justify-content: space-between' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="record-header"]',
-        note: 'Identity block, classification, validity figures and the state chip. Held at 2%.',
+        note: 'Expected divergent, partner ruling (second sweep, 2026-09-02): the five header facts became three -- Classification, Valid through, Status. The issue date lives on the rail’s classification stage and the day count is what the valid-through date says; "State" was renamed "Status" console-wide. The reference still shows all five. Was a compare held at 2%; flips back if the prototype adopts the cut.',
       },
       {
         name: 'history',
@@ -438,14 +433,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       {
         name: 'requirements',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="requirements"]',
-        note: "Expected divergent BY REFERENCE FIXTURE ARTIFACT: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips.",
-      },
-      {
-        name: 'floor-note',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="floor-note"]',
-        note: 'Expected divergent AT REVIEWER INSTRUCTION (Slice 3 brief): the classification sets a floor for events at the venue and certifies none of them, said where an organizer could mistake one for the other. The reference carries no such note.',
+        builtSelector: '[data-region="requirements-fold"]',
+        note: "Expected divergent BY REFERENCE FIXTURE ARTIFACT: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips. Second sweep (2026-09-02, partner ruling): the list is collapsed behind a details fold, so the locator is the fold -- the rows inside are hidden until opened.",
       },
     ],
   },
@@ -516,10 +505,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'standing',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Standing readiness', container: 'border-radius: 16px' },
         builtSelector: '[data-region="standing"]',
-        note: 'The standing line, derived from the ledger. Held at 2%.',
+        note: 'Expected divergent by the partner ruling (second sweep, 2026-09-02): the "Standing readiness" kicker is renamed "Status" -- the same rename the ruling applied to Standing everywhere. The derived line beneath it is unchanged and pinned by e2e/app/facility.spec.ts. Was a compare held at 2%; flips back when the prototype adopts the rename.',
       },
       {
         name: 'ledger',
@@ -527,12 +516,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         reference: { strategy: 'containerOfText', text: 'Electrode pad expiry', container: 'grid-template-columns: 1.4fr 1fr 1fr 0.9fr 0.8fr' },
         builtSelector: '[data-region="ledger"]',
         note: "The six obligations. Held at 2%. Known residuals inside the budget: the reference hand-writes pad/battery 'last affirmed' dates as install dates (2024-10-02, 2025-03-18) the record does not hold; the build shows when the device record was last affirmed. Stops-counting dates and statuses match the reference exactly.",
-      },
-      {
-        name: 'provisional-note',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="provisional"]',
-        note: 'Expected divergent, SPEC over pixel parity: the instrument prescribes no status vocabulary, and SPEC requires provisional status wording to be marked as such wherever it appears. The reference carries no such note.',
       },
       {
         name: 'devices',
@@ -593,10 +576,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'derived',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Defibrillator information', container: 'border-radius: 16px' },
         builtSelector: '[data-region="derived"]',
-        note: "The derived device section. Held at 2%. Known residuals inside the budget: the accessible row derives '2 of 3' where the reference appends '— one under review', and pediatric capability derives 'On 1 of 3' where the reference hand-writes 'Yes'.",
+        note: "Expected divergent by the partner ruling (second sweep, 2026-09-02): the cannot-drift-apart paragraph left the section -- the 'Derived from the registry' chip and the link to the device registry carry its substance. The rows still derive from the device records. Known residuals from the compare era: the accessible row derives '2 of 3' where the reference appends '— one under review', and pediatric capability derives 'On 1 of 3' where the reference hand-writes 'Yes'. Was a compare held at 2%; flips back when the prototype drops the paragraph.",
       },
       {
         name: 'plan-profile',
@@ -872,7 +855,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'compare',
         reference: { strategy: 'containerOfText', text: 'Verification informs', container: 'border-radius: 12px' },
         builtSelector: '[data-region="non-determinative"]',
-        note: 'Verification informs review and never decides it. Held at 2%.',
+        threshold: 0.03,
+        note: 'Verification informs review and never decides it. Held at 3%: the second-sweep full run measured 2.11% with the paragraph verified identical word for word (the diff highlights one line’s rasterization) -- a changed word measures far above 3%, so the vocabulary ratchet still bites.',
       },
     ],
   },

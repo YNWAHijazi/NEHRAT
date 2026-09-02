@@ -50,19 +50,14 @@ export default async function EditEventPage({
             </div>
           ) : null}
           <p style={{ margin: '0 0 24px', fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.7, maxWidth: '70ch' }}>
+            {/* Second sweep: the sentence explaining where classification figures
+                change was cut, and the filed-submission band below it was dead code —
+                a filed record redirects away from this screen at the top. */}
             <L
-              en="Names, dates, place and municipalities. Figures the classification depends on change through the assessment, where the level re-derives."
-              ar="الأسماء والتواريخ والمكان والبلديات. أما الأرقام التي يعتمد عليها التصنيف فتتغير عبر التقييم، حيث يُستنتج المستوى من جديد."
+              en="Names, dates, place and municipalities."
+              ar="الأسماء والتواريخ والمكان والبلديات."
             />
           </p>
-          {event.filed ? (
-            <div style={{ padding: '14px 20px', background: 'var(--accent-soft)', borderRadius: 10, marginBlockEnd: 24, fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
-              <L
-                en="Your submission is filed: a change to the dates or place is a material change — report it after saving."
-                ar="ملفكم مقدَّم: تغيير التواريخ أو المكان تغيير جوهري — أبلغوا عنه بعد الحفظ."
-              />
-            </div>
-          ) : null}
           <form action={editEventDetailsAction.bind(null, id)} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16 }}>
             <label><span style={label}><L en="Event name (English)" ar="اسم الفعالية (بالإنكليزية)" /></span>
               <input name="nameEn" required defaultValue={event.nameEn} style={input} /></label>

@@ -78,7 +78,7 @@ const DEMO_LOGINS: DemoLogin[] = [
   },
   {
     login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة', primary: true,
-    canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries., schedule inspections and record findings.',
+    canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries, schedule inspections and record findings.',
     canAr: 'تسجيل أي من النتائج الثلاث، والإسناد، واشتراط تدابير إضافية، والرد على الاستفسارات، وجدولة التفتيش وتسجيل نتائجه.',
     cannotEn: 'Change configuration or manage users.',
     cannotAr: 'تغيير الإعدادات أو إدارة المستخدمين.',
@@ -202,10 +202,13 @@ export default async function SignInPage({
                 <L en="Sign in to the service" ar="تسجيل الدخول إلى الخدمة" />
               )}
             </h1>
+            {/* "An individual account gives access to the platform" left (partner
+                ruling, second sweep): it narrated the card it sat on. The organization
+                gate stays — it is the one thing a new arrival cannot guess. */}
             <p style={{ margin: '0 0 26px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
               <L
-                en="An individual account gives access to the platform. An organization is registered separately and must be recorded by the Ministry before anything can be filed."
-                ar="يمنح الحساب الفردي الوصول إلى المنصة. تُسجَّل المؤسسة بشكل منفصل ويجب أن تسجّلها الوزارة قبل إمكانية تقديم أي ملف."
+                en="An organization is registered separately and must be recorded by the Ministry before anything can be filed."
+                ar="تُسجَّل المؤسسة بشكل منفصل ويجب أن تسجّلها الوزارة قبل إمكانية تقديم أي ملف."
               />
             </p>
 
@@ -319,8 +322,8 @@ export default async function SignInPage({
             </h2>
             <p style={{ margin: '0 0 20px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
               <L
-                en="Each opens a role's dashboard populated with example records, so the platform can be walked without creating records. These records are examples and never appear in a real account."
-                ar="يفتح كل حساب لوحة دوره مزوّدة بسجلات نموذجية، بحيث يمكن استعراض المنصة دون إنشاء سجلات. هذه السجلات أمثلة ولا تظهر أبداً في حساب حقيقي."
+                en="Each opens a role's dashboard with example records, so the platform can be walked without creating anything."
+                ar="يفتح كل حساب لوحة دوره بسجلات نموذجية، بحيث يمكن استعراض المنصة دون إنشاء أي شيء."
               />
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

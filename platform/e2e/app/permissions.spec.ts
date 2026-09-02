@@ -166,12 +166,15 @@ test.describe('an organizer never sees another organizer\'s records', () => {
 
 test.describe('nominated roles see only what they were named in', () => {
   test('an EMS provider cannot open an event it was not named in', async ({ page }) => {
-    // Real since Slice 5: the surface exists and test_ems holds two nominations.
+    // Real since Slice 5: the surface exists and test_ems holds nominations.
     await signInAs(page, LOGINS.ems);
     await expectRefusal(page, '/events/EV-0001/participation', /Event participation|المشاركة في الفعالية/i);
     await expectRefusal(page, '/events/EV-0001/declaration', /Readiness Declaration|إقرار جاهزية/i);
     // Not even the ORGANIZER'S OWN record: nomination scopes the route, not the role.
-    await expectRefusal(page, '/events/EV-0301/participation', /Event participation|المشاركة في الفعالية/i);
+    // EV-0455, because the second sweep seeded an unanswered nomination for this
+    // account on EV-0301 (the invited-party brief fixture) -- being named there is
+    // now correct, so the not-named example moved to an event nobody named it in.
+    await expectRefusal(page, '/events/EV-0455/participation', /Event participation|المشاركة في الفعالية/i);
   });
 
   test('a medical director cannot open an unnamed event', async ({ page }) => {

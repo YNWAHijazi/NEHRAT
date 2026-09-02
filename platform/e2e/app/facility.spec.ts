@@ -112,8 +112,10 @@ test.describe('the validity ledger derives', () => {
     await expect(page.locator('[data-region="standing"]')).toContainText(
       'Obligations are being met. 2 items lapse within 60 days.',
     );
-    // The provisional-vocabulary note renders wherever status wording appears.
-    await expect(page.locator('[data-region="provisional"]')).toContainText('provisional');
+    // The provisional-vocabulary caveat left the operator's record (partner ruling,
+    // second sweep): it is the Ministry's concern and renders on the cardiac
+    // configuration screen instead. Pinned absent here so it cannot creep back.
+    await expect(page.locator('[data-region="provisional"]')).toHaveCount(0);
   });
 
   test('the as-of pills preview the same derivation at a future date', async ({ page }) => {

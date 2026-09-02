@@ -30,6 +30,7 @@ let linkDemonstrationCounterparties: (db: DatabaseSync) => number;
 
 const TOKENS = [
   'demo-lrc-beirut-0418',
+  'demo-lrc-saida-0301',
   'demo-lrc-baalbeck-0362',
   'demo-director-0362',
   'demo-director-0244',
@@ -68,8 +69,8 @@ afterAll(() => {
 });
 
 describe('the counterparty linkage repair', () => {
-  it('a fresh seed links all four counterparty nominations', () => {
-    expect(linkedCount()).toBe(4);
+  it('a fresh seed links all five counterparty nominations', () => {
+    expect(linkedCount()).toBe(5);
     // The Baalbeck declaration arrives signed — the complete-row half of the
     // demonstration dashboard depends on it.
     const baalbeck = db
@@ -88,12 +89,17 @@ describe('the counterparty linkage repair', () => {
       `UPDATE invitations SET declaration = 'none', declaration_items = '[]', certification = '{}', signed_at = NULL
        WHERE token = 'demo-lrc-baalbeck-0362'`,
     ).run();
+    // And the other UPDATE-shaped seed fact of the same class: the 12K's
+    // cross-module facility reference (entered the seeder in Slice 4).
+    db.prepare(`UPDATE events SET venue_facility_id = NULL WHERE id = 'EV-0418'`).run();
     expect(linkedCount()).toBe(0);
 
     // The seeder's guard path — what runs on every boot of a standing database.
     seedDemonstration(db);
 
-    expect(linkedCount()).toBe(4);
+    expect(linkedCount()).toBe(5);
+    const ref = db.prepare(`SELECT venue_facility_id AS f FROM events WHERE id = 'EV-0418'`).get() as { f: string | null };
+    expect(ref.f).toBe('FC-0014');
     const baalbeck = db
       .prepare(`SELECT declaration FROM invitations WHERE token = 'demo-lrc-baalbeck-0362'`)
       .get() as { declaration: string };

@@ -161,7 +161,7 @@ export function DeviceRegistry({
           <input type="hidden" name="purpose" value={purpose} />
 
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-            <L en="Registration purpose — this determines what is asked below" ar="غاية التسجيل — تحدّد ما يُطلب أدناه" />
+            <L en="Registration purpose" ar="غاية التسجيل" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 26 }}>
             {content.devicePurposes.map((p) => {
@@ -180,9 +180,8 @@ export function DeviceRegistry({
             })}
           </div>
 
-          <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
-            <L en="Asked for this purpose" ar="المطلوب لهذه الغاية" />
-          </div>
+          {/* The "Asked for this purpose" kicker left the card (partner ruling,
+              second sweep): the fields that follow are the answer. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
             {purpose === 'initial' ? (
               <>
@@ -255,10 +254,7 @@ export function DeviceRegistry({
             </div>
             <div style={{ fontSize: '14.5px', marginBlockEnd: 4 }}>{coordinatorName || '—'}</div>
             <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L
-                en="Read from the facility record — the same coordinator as the response plan, by construction."
-                ar="يُقرأ من سجل المنشأة — وهو منسّق خطة الاستجابة نفسه بحكم البناء."
-              />
+              <L en="Read from the facility record." ar="يُقرأ من سجل المنشأة." />
             </div>
           </div>
 

@@ -104,13 +104,11 @@ export default async function OverviewPage() {
         ))}
       </div>
 
-      {/* PUBLIC TOOLS — visually subordinate, and each says no account, no obligation. */}
-      <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 4 }}>
+      {/* PUBLIC TOOLS — visually subordinate. (The "no account, no obligation" note
+          was cut by name in the partner's second sweep; the tools just work signed out.) */}
+      <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
         <L en={P.toolsEn} ar={P.toolsAr} />
       </div>
-      <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)' }}>
-        <L en={P.toolsNoteEn} ar={P.toolsNoteAr} />
-      </p>
       <div data-region="public-tools" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginBlockEnd: 44 }}>
         <Link href="/applicability" style={{ padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)' }}>
           <div style={{ fontSize: 16, fontWeight: 500 }}>

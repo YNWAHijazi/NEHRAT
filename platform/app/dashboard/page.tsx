@@ -149,7 +149,7 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
       </div>
       <div>
         <div style={secLabel}>
-          <L en="State" ar="الحالة" />
+          <L en="Status" ar="الحالة" />
         </div>
         <div style={{ display: 'flex', gap: 7, alignItems: 'start', fontSize: '14.5px' }}>
           <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}>
@@ -309,8 +309,8 @@ export default async function DashboardPage({
               </div>
               <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
                 <L
-                  en="Each event you hold is recorded here with its assessment, its level and its submission. Create the event first; the assessment determines the level and the level sets the deadline."
-                  ar="تُسجَّل هنا كل فعالية تقيمونها مع تقييمها ومستواها وتقديمها. أنشئوا الفعالية أولاً؛ فالتقييم يحدد المستوى، والمستوى يحدد المهلة."
+                  en="Each event you hold is recorded here with its assessment, its level and its submission."
+                  ar="تُسجَّل هنا كل فعالية تقيمونها مع تقييمها ومستواها وتقديمها."
                 />
               </p>
               <Link href="/events/new" style={serviceAction}>
@@ -323,8 +323,8 @@ export default async function DashboardPage({
               </div>
               <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
                 <L
-                  en="A venue that regularly hosts organized events and is licensed for 1,000 persons or more is classified annually. Its classification carries a minimum level into every event held there."
-                  ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر. ويحمل تصنيفه حداً أدنى للمستوى إلى كل فعالية تُقام فيه."
+                  en="A venue that regularly hosts organized events and is licensed for 1,000 persons or more is classified annually."
+                  ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر."
                 />
               </p>
               <Link href="/venues/new" style={serviceAction}>
@@ -337,8 +337,8 @@ export default async function DashboardPage({
               </div>
               <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
                 <L
-                  en="A covered facility registers once with its coordinator and each defibrillator, and keeps its response plan current — under cardiac-arrest readiness, separate from events."
-                  ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة — ضمن الجاهزية لتوقف القلب، بمعزل عن الفعاليات."
+                  en="A covered facility registers once with its coordinator and each defibrillator, and keeps its response plan current."
+                  ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة."
                 />
               </p>
               <Link href="/facilities/new" style={serviceAction}>
@@ -363,7 +363,7 @@ export default async function DashboardPage({
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-                    <L en="Facilities" ar="المرافق" />
+                    <L en="Facilities" ar="المنشآت" />
                   </h2>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 44 }}>
@@ -399,7 +399,7 @@ export default async function DashboardPage({
                         </div>
                         <div>
                           <div style={secLabel}>
-                            <L en="Standing" ar="الحالة القائمة" />
+                            <L en="Status" ar="الحالة" />
                           </div>
                           <div style={{ fontSize: '14.5px', lineHeight: 1.45, color }}>
                             <L en={f.stateEn} ar={f.stateAr} />
@@ -431,7 +431,7 @@ export default async function DashboardPage({
                       ['Venue', 'الموقع'],
                       ['Classification', 'التصنيف'],
                       ['Valid through', 'صالح حتى'],
-                      ['State', 'الحالة'],
+                      ['Status', 'الحالة'],
                     ] as const
                   ).map(([enH, arH]) => (
                     <div key={enH} data-th="" style={{ background: 'var(--surface2)', padding: '12px 18px', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -455,7 +455,7 @@ export default async function DashboardPage({
                           <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockStart: 3 }}>{v.id}</span>
                         </Link>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', color: 'var(--muted)' }}>
-                          <L en={`Level ${v.level} · issued ${v.issued}`} ar={`المستوى ${v.level} · صدر \u2066${v.issued}\u2069`} />
+                          <L en={`Level ${v.level}`} ar={`المستوى ${v.level}`} />
                         </div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: 15, fontVariantNumeric: 'tabular-nums', color: state.color }}>{v.validUntil}</div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '13.5px' }}>

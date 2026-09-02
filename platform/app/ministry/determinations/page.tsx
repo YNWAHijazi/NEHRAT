@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { getDb } from '../../../lib/db';
 import { MINISTRY_CONTENT } from '../../../lib/rules';
@@ -80,7 +80,6 @@ export default async function DeterminationsPage() {
           </div>
         </div>
       </div>
-      <MinistryFooter steps={[{ href: '/ministry/facilities/arrests', en: 'Reported arrest locations', ar: 'مواقع الحوادث المبلَّغة', descEn: 'Where a covered-facility designation is made.', descAr: 'حيث يُتخذ تحديد المرفق المشمول.' }]} />
     </MinistryShell>
   );
 }

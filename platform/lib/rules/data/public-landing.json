@@ -2,28 +2,11 @@
   "$comment": "Slice 0, the public landing. Copy taken from handoff 5/pages/Event Health Readiness.dc.html -- the reviewer prototype -- rather than written here. Where the prototype and a source document differ the source wins and the difference is recorded, as everywhere else in this build.",
   "heroEn": "The official national mechanism for health and medical preparedness at events and in designated facilities in Lebanon.",
   "heroAr": "الآلية الوطنية الرسمية للتأهب الصحي والطبي في الفعاليات وفي المنشآت المحددة في لبنان.",
-  "servicesIntroEn": "One platform carries two regulatory instruments: health and medical preparedness at mass-gathering events, and cardiac-arrest readiness in designated facilities. They share your organization record and your registered assets.",
-  "servicesIntroAr": "تحمل منصة واحدة صكّين تنظيميين: التأهب الصحي والطبي في الفعاليات الحاشدة، والجاهزية لتوقف القلب في المنشآت المحددة. ويتشاركان سجل مؤسستكم وأصولكم المسجّلة.",
-  "regulatedEn": "Regulated processes",
-  "regulatedAr": "العمليات الخاضعة للتنظيم",
-  "regulatedNoteEn": "All three run on one account. Each creates standing obligations of its own.",
-  "regulatedNoteAr": "تعمل الثلاث على حساب واحد. وينشئ كلٌّ منها موجبات مستمرة خاصة به.",
-  "meetEn": "Where the two instruments meet",
-  "meetAr": "حيث يلتقي الصكّان",
-  "meetBodyEn": "A stadium licensed for 1,200 that hosts weekly matches is a covered facility and a recurring venue at once. That is the ordinary case, not an unusual one.",
-  "meetBodyAr": "الملعب المرخص لـ 1,200 شخص والذي يستضيف مباريات أسبوعية هو منشأة مشمولة وموقع متكرر في آن واحد. وهذه هي الحالة الاعتيادية لا الاستثنائية.",
+  "$commentSecondSweep": "Partner ruling, second sweep: the model-teaching blocks the landing pass orphaned (servicesIntro, regulated, meet, the level arithmetic, the venue-assessment comparison, the public-tools disclaimer, the no-results advice, the facility rule intro) are removed rather than left as dead copy. What remains is what a screen still renders.",
   "toolsEn": "Public tools",
   "toolsAr": "الأدوات العامة",
-  "toolsNoteEn": "Open to anyone. No account, and using them creates no obligation.",
-  "toolsNoteAr": "متاحة للجميع. من دون حساب، ولا ينشئ استخدامها أي موجب.",
-  "levelTitleEn": "How an event level is determined",
-  "levelTitleAr": "كيف يُحدَّد مستوى الفعالية",
-  "levelScopeEn": "Mass-gathering events only",
-  "levelScopeAr": "الفعاليات الحاشدة فقط",
-  "levelBodyEn": "Nine domains are scored 0 to 2, giving a total out of 18. Certain event types also carry a minimum level that applies no matter how low the score. The final level is whichever of the two is higher.",
-  "levelBodyAr": "تُقيَّم تسعة نطاقات من 0 إلى 2، فيبلغ المجموع 18. كما تحمل أنواع معيّنة من الفعاليات حداً أدنى للمستوى يسري مهما انخفضت النتيجة. والمستوى النهائي هو الأعلى من الاثنين.",
-  "levelFacilityNoteEn": "Facilities are not scored. They classify by category under the cardiac-arrest instrument.",
-  "levelFacilityNoteAr": "لا تُقيَّم المنشآت بالنتيجة. بل تُصنَّف حسب الفئة بموجب صك الجاهزية لتوقف القلب.",
+  "scopeEn": "Registration is for sporting and recreational events and venues, and for the facilities the cardiac-readiness rules cover.",
+  "scopeAr": "التسجيل مخصص للفعاليات والمواقع الرياضية والترفيهية، وللمرافق المشمولة بقواعد الجاهزية القلبية.",
   "jurisdictionEn": "This platform records health and medical preparedness. It does not authorize events. Authorization remains with the legally competent authority, and nothing here replaces any other permit or approval required under Lebanese law.",
   "jurisdictionAr": "تسجّل هذه المنصة التأهب الصحي والطبي. وهي لا ترخّص الفعاليات. ويبقى الترخيص من صلاحية السلطة المختصة قانوناً، ولا يحل أي شيء هنا محل أي إذن أو موافقة أخرى مطلوبة بموجب القانون اللبناني.",
   "services": [
@@ -202,10 +185,11 @@
     {
       "en": "How Level 1, 2 and 3 are determined",
       "ar": "كيف تُحدَّد المستويات 1 و2 و3",
+      "$comment": "Routed to the certify-an-event detail since the second sweep: the landing's level explainer was cut, so 'home' pointed a search hit at a page that no longer answered it.",
       "kindEn": "Guidance",
       "kindAr": "إرشاد",
       "kw": "level levels 1 2 3 score nine domains nehrat minimum condition classification explainer risk assessment",
-      "go": "home"
+      "go": "service"
     },
     {
       "en": "Required documents by level",
@@ -268,8 +252,6 @@
   "referenceResultAr": "البحث عن رقم مرجعي",
   "noResultsEn": "Nothing here matches that.",
   "noResultsAr": "لا شيء هنا يطابق ذلك.",
-  "noResultsBodyEn": "Two things are worth trying. If you are asking whether the rules apply to something, the applicability check answers that directly. If you are asking something this platform does not cover, the Ministry answers it.",
-  "noResultsBodyAr": "هناك أمران يستحقان المحاولة. إذا كنتم تسألون عمّا إذا كانت القواعد تنطبق على شيء ما، فإن فحص الانطباق يجيب عن ذلك مباشرة. وإذا كان سؤالكم عمّا لا تغطيه هذه المنصة، فالوزارة هي التي تجيب عنه.",
   "contactEn": "Ask the Ministry",
   "contactAr": "سؤال الوزارة",
   "contactBodyEn": "The Ministry of Public Health answers questions about scope and designation. Ask before the event rather than after it.",
@@ -293,8 +275,8 @@
         "n": 3
       },
       {
-        "en": "Level 3 — invite each participating EMS provider to file its readiness declaration against the event.",
-        "ar": "المستوى 3 — ادعوا كل مزوّد إسعاف مشارك لتقديم إقرار جاهزيته على الفعالية.",
+        "en": "Level 3 — invite each participating EMS provider to file its readiness declaration.",
+        "ar": "المستوى 3 — ادعوا كل مزوّد إسعاف مشارك لتقديم إقرار جاهزيته.",
         "n": 4
       },
       {
@@ -335,8 +317,8 @@
         "n": 4
       },
       {
-        "en": "The classification stands for twelve months and sets a floor for organizers using the venue.",
-        "ar": "يسري التصنيف اثني عشر شهراً ويحدد حدّاً أدنى للمنظّمين الذين يستخدمون الموقع.",
+        "en": "The classification stands for twelve months and is the minimum level for events held at the venue.",
+        "ar": "يسري التصنيف اثني عشر شهراً وهو الحد الأدنى لمستوى الفعاليات التي تُقام في الموقع.",
         "n": 5
       },
       {
@@ -357,8 +339,8 @@
         "n": 2
       },
       {
-        "en": "Register each defibrillator as its own record — location, accessibility, pad and battery expiry.",
-        "ar": "سجّلوا كل جهاز كسجل مستقل — الموقع وإمكان الوصول وتاريخا انتهاء اللصاقات والبطارية.",
+        "en": "Register each defibrillator — location, accessibility, pad and battery expiry.",
+        "ar": "سجّلوا كل جهاز — الموقع وإمكان الوصول وتاريخا انتهاء اللصاقات والبطارية.",
         "n": 3
       },
       {
@@ -434,20 +416,12 @@
   "stepAr": "الخطوة",
   "whatHappensEn": "What happens",
   "whatHappensAr": "ماذا يحصل",
-  "venueAssessEn": "The same nine risk domains an event assessment uses, answered for one routine operating session rather than for a single event.",
-  "venueAssessAr": "المجالات التسعة نفسها التي يستخدمها تقييم الفعالية، مُجابة لفترة تشغيل اعتيادية واحدة لا لفعالية واحدة.",
-  "venueFloorEn": "A venue licensed for 1,000 or more starts at Level 2 as a minimum condition, whatever the score.",
-  "venueFloorAr": "الموقع المرخّص لألف شخص أو أكثر يبدأ من المستوى 2 كشرط من شروط الحد الأدنى، مهما كانت النتيجة.",
-  "facilityRuleIntroEn": "The Ministry sets the capacity threshold for public venues, revises the phased schedule, and may designate an individual facility.",
-  "facilityRuleIntroAr": "تحدد الوزارة عتبة السعة للأماكن العامة، وتنقّح الجدول المرحلي، ويجوز لها تحديد منشأة بعينها.",
+  "venueFloorEn": "A venue licensed for 1,000 or more starts at Level 2, whatever the score.",
+  "venueFloorAr": "الموقع المرخّص لألف شخص أو أكثر يبدأ من المستوى 2 مهما كانت النتيجة.",
   "obligationsTitleEn": "Continuing obligations",
   "obligationsTitleAr": "الموجبات المستمرة",
   "coveredTitleEn": "Covered facilities and the defibrillator requirement",
   "coveredTitleAr": "المنشآت المشمولة ومتطلب الجهاز",
-  "categoryEn": "Category",
-  "categoryAr": "فئة المنشأة",
-  "requirementEn": "Requirement",
-  "requirementAr": "المتطلب",
   "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page.",
   "venueScopeNoteEn": "This covers sports, athletic and aquatic venues.",
   "venueScopeNoteAr": "يشمل ذلك المواقع الرياضية والمائية."

@@ -95,9 +95,11 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
           </h1>
           <p style={{ margin: '0 0 32px', fontSize: 16, color: 'var(--muted)', lineHeight: 1.6 }}>
+            {/* Second sweep: "Due within seven days of the event" was cut here — the
+                obligation card below carries the due date as a date. */}
             <L
-              en={`${event.nameEn}, held ${event.endDate ?? ''}. Due within seven days of the event.`}
-              ar={`${event.nameAr}، أُجريت في ⁦${event.endDate ?? ''}⁩. مستحق خلال سبعة أيام من الفعالية.`}
+              en={`${event.nameEn}, held ${event.endDate ?? ''}.`}
+              ar={`${event.nameAr}، أُجريت في ⁦${event.endDate ?? ''}⁩.`}
             />
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>

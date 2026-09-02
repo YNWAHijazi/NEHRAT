@@ -201,9 +201,11 @@ for (const lang of LANGUAGES) {
       const waiting = page.locator('[data-region="waiting-on-ministry"]');
       await expect(waiting).toBeVisible();
       await expect(waiting).toContainText(lang === 'ar' ? 'الجدول المرحلي' : 'The phased schedule');
-      // The unset state is the answer, not a gap in it.
+      // The unset state is the answer, not a gap in it — said plainly since the
+      // partner's second sweep: nothing in force until the Ministry publishes the
+      // value, and operators notified when it is.
       await expect(waiting).toContainText(
-        lang === 'ar' ? 'هذا هو الجواب' : 'This is the answer, not a gap in it',
+        lang === 'ar' ? 'لا شيء سارٍ على هذه الفئة' : 'Nothing is in force against this category',
       );
 
       // THE LOOKUP SCREEN, in front of the endpoint. Four fields and no more.

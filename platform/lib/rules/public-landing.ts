@@ -13,8 +13,9 @@
  * is a first-class answer (non-negotiable 3), not a gap in one.
  *
  * Everything here is data from the reviewer's prototype. Nothing is computed against
- * an account, and nothing is stored: using this tool creates no obligation, which the
- * screens say in those words.
+ * an account, and nothing is stored: using this tool creates no obligation. (The
+ * screens used to say so in those words; the partner's second sweep cut the sentence
+ * by name, and the fact is carried by the behaviour alone.)
  */
 
 import landingJson from './data/public-landing.json';

@@ -56,16 +56,19 @@ export default async function ContactPage() {
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
           <L en="How to reach them" ar="كيفية التواصل معهم" />
         </div>
+        {/* The self-justifying clause ("a number shown here that turned out to be
+            wrong...") left, partner ruling, second sweep. The fact stays: the platform
+            carries no channel of its own. */}
         <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.7 }}>
           <L
-            en="Use the Ministry of Public Health's own published contact channels. This platform does not carry messages to the Ministry, and it does not publish contact details of its own — a number shown here that turned out to be wrong would be worse than none."
-            ar="استخدموا قنوات التواصل التي تنشرها وزارة الصحة العامة نفسها. فهذه المنصة لا تنقل الرسائل إلى الوزارة، ولا تنشر بيانات اتصال خاصة بها — إذ إن رقماً يظهر هنا ويتبيّن أنه خاطئ أسوأ من عدم وجود رقم."
+            en="Use the Ministry of Public Health's own published contact channels. This platform does not carry messages to the Ministry and does not publish contact details of its own."
+            ar="استخدموا قنوات التواصل التي تنشرها وزارة الصحة العامة نفسها. فهذه المنصة لا تنقل الرسائل إلى الوزارة ولا تنشر بيانات اتصال خاصة بها."
           />
         </p>
         <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
           <L
-            en="If you already hold a Ministry reference number, the record itself answers most questions and can be checked without an account."
-            ar="إذا كنتم تحملون رقماً مرجعياً من الوزارة، فالسجل نفسه يجيب عن معظم الأسئلة ويمكن التحقق منه من دون حساب."
+            en="If you already hold a Ministry reference number, the record itself answers most questions."
+            ar="إذا كنتم تحملون رقماً مرجعياً من الوزارة، فالسجل نفسه يجيب عن معظم الأسئلة."
           />
         </p>
         <Link href="/lookup" style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, marginBlockStart: 14, border: '1px solid var(--line)', borderRadius: 20, fontSize: '13.5px', color: 'var(--ink)' }}>

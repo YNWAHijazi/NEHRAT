@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { notFound, redirect } from 'next/navigation';
 import { currentAccount } from '../../../lib/auth';
 import { ministryConfig } from '../../../lib/queries';
@@ -28,8 +28,8 @@ export default async function OrderLanePage() {
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
         <L
-          en="A configurable, non-determinative lane. It informs the Ministry; it never records an outcome, and it never extends into the facility side. While the lane is on, its attestations gate only the satisfied outcome — the other two outcomes remain available to the reviewer at all times."
-          ar="مسار قابل للإعداد وغير حاسم. يُعلم الوزارة ولا يسجّل أي نتيجة، ولا يمتد إلى جانب المنشآت. وعند تشغيله، تحجب تصديقاته النتيجة المستوفاة فقط — وتبقى النتيجتان الأخريان متاحتين للمراجع في كل وقت."
+          en="The lane informs the Ministry; it never records an outcome and never reaches the facility side."
+          ar="يُعلم المسار الوزارة؛ ولا يسجّل أي نتيجة ولا يصل إلى جانب المرافق."
         />
       </p>
       {!active ? (
@@ -39,8 +39,8 @@ export default async function OrderLanePage() {
           </div>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.75 }}>
             <L
-              en="The lane is off — its default. No verification is performed, no Order reviewer holds access, and no record appears here. Turning it on is a capability decision under Master admin; turning it off again suspends any active Order reviewer's access rather than leaving them listed as active."
-              ar="المسار مطفأ — وهذا وضعه الافتراضي. لا يُجرى أي تحقق، ولا يملك أي مراجع من النقابة وصولاً، ولا يظهر أي سجل هنا. وتفعيله قرار قدرات ضمن الإدارة العليا؛ وإطفاؤه مجدداً يوقف وصول أي مراجع نشط بدل تركه مدرجاً كنشط."
+              en="The lane is off — its default. No verification is performed, no Order reviewer holds access, and no record appears here. It is turned on under Master admin."
+              ar="المسار مطفأ — وهذا وضعه الافتراضي. لا يُجرى أي تحقق، ولا يملك أي مراجع من النقابة وصولاً، ولا يظهر أي سجل هنا. ويُشغَّل ضمن الإدارة العليا."
             />
           </p>
         </div>
@@ -52,10 +52,6 @@ export default async function OrderLanePage() {
           />
         </div>
       )}
-      <MinistryFooter steps={[
-        { href: '/ministry/admin/users', en: 'Users and roles', ar: 'المستخدمون والأدوار', descEn: "Where the Order reviewer's suspension shows.", descAr: 'حيث يظهر إيقاف مراجع النقابة.' },
-        { href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'Outcome authority stays here, lane on or off.', descAr: 'تبقى سلطة النتائج هنا، سواء فُعّل المسار أم لا.' },
-      ]} />
     </MinistryShell>
   );
 }

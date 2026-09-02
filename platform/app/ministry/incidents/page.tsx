@@ -1,5 +1,5 @@
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { getDb } from '../../../lib/db';
 import { seriousIncidentsForMinistry } from '../../../lib/queries';
@@ -160,7 +160,6 @@ export default async function IncidentsPage() {
           </div>
         </div>
       </div>
-      <MinistryFooter steps={[{ href: '/ministry/facilities/arrests', en: 'Reported arrest locations', ar: 'مواقع الحوادث المبلَّغة', descEn: 'The same reports, grouped by place and category.', descAr: 'التقارير نفسها مجمَّعة بحسب المكان والفئة.' }]} />
     </MinistryShell>
   );
 }

@@ -80,12 +80,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           made two of the three read as less considered than the first. */}
       {key === 'certify-an-event' ? (
         <>
+          {/* The scoring-model paragraph left (partner ruling, second sweep): the
+              assessment explains itself when taken, and a visitor reading the service
+              needs the nine subjects, not the arithmetic. */}
           <h2 style={h2}>
             <L en="What the assessment covers" ar="ما يشمله التقييم" />
           </h2>
-          <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-            <L en={P.levelBodyEn} ar={P.levelBodyAr} />
-          </p>
           <div data-region="domains" style={listBox}>
             {DOMAINS.map((d) => (
               <div key={d.number} style={row}>
@@ -130,16 +130,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             ))}
           </div>
 
-          {/* THE SAME NINE DOMAINS, answered for a routine operating session. The venue
-              screen used to say nothing about its assessment at all, which made the
-              annual classification look like a formality rather than the same
-              instrument the event uses. */}
+          {/* The instrument-comparison paragraph left (partner ruling, second sweep):
+              the nine subjects speak for themselves. */}
           <h2 style={h2}>
             <L en="What the assessment covers" ar="ما يشمله التقييم" />
           </h2>
-          <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-            <L en={P.venueAssessEn} ar={P.venueAssessAr} />
-          </p>
           <div data-region="domains" style={listBox}>
             {DOMAINS.map((d) => (
               <div key={d.number} style={row}>
@@ -159,9 +154,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           <h2 style={h2}>
             <L en={P.coveredTitleEn} ar={P.coveredTitleAr} />
           </h2>
-          <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
-            <L en={P.facilityRuleIntroEn} ar={P.facilityRuleIntroAr} />
-          </p>
+          {/* The Ministry-configuration intro left (partner ruling, second sweep):
+              each category row already says which Ministry value it turns on. */}
           {/* CATEGORY AND RULE TOGETHER. A list of categories alone tells an operator
               which box they are in and not what follows from it -- and for three of the
               six what follows is that the Ministry has not set a value yet. */}

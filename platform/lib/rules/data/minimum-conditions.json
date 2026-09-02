@@ -229,9 +229,9 @@
     "scoreAr": "لأن مجموع الإجابات {score} نقطة.",
     "bothEn": "The points and a minimum condition both give this level.",
     "bothAr": "يعطي مجموع النقاط وأحد الحدود الدنيا هذا المستوى نفسه.",
-    "comparisonEn": "Points: Level {scoreLevel}. Minimum condition: Level {conditionLevel}. The higher applies.",
-    "comparisonAr": "النقاط: المستوى {scoreLevel}. الحد الأدنى: المستوى {conditionLevel}. ويُعتمد الأعلى.",
-    "scoreOnlyEn": "Points: Level {scoreLevel}. No minimum condition applies.",
-    "scoreOnlyAr": "النقاط: المستوى {scoreLevel}. ولا ينطبق أي حد أدنى."
+    "comparisonEn": "Points: Level {scoreLevel} ({score} of {max}). Minimum condition: Level {conditionLevel}. The higher applies.",
+    "comparisonAr": "النقاط: المستوى {scoreLevel} ({score} من {max}). الحد الأدنى: المستوى {conditionLevel}. ويُعتمد الأعلى.",
+    "scoreOnlyEn": "Points: Level {scoreLevel} ({score} of {max}). No minimum condition applies.",
+    "scoreOnlyAr": "النقاط: المستوى {scoreLevel} ({score} من {max}). ولا ينطبق أي حد أدنى."
   }
 }

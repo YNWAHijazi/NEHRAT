@@ -41,8 +41,8 @@ export default async function OrganizationPage({
           </h1>
           <p style={{ margin: '0 0 36px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)' }}>
             <L
-              en="The organization is recorded by the Ministry. You may create events, complete assessments, gather requirements and draft the plan while recording is pending; only submission waits for it."
-              ar="تسجّل الوزارة المؤسسة. يمكنكم إنشاء الفعاليات وإكمال التقييمات وتجميع المتطلبات وصياغة الخطة أثناء انتظار التسجيل؛ التقديم وحده ينتظره."
+              en="You can create events, complete assessments and draft the plan while the Ministry records the organization; only submission waits for it."
+              ar="يمكنكم إنشاء الفعاليات وإكمال التقييمات وصياغة الخطة بينما تسجّل الوزارة المؤسسة؛ التقديم وحده ينتظره."
             />
           </p>
 

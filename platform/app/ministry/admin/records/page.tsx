@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../../components/MinistryShell';
+import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { adminRecords } from '../../../../lib/queries';
 import { archiveRecordAction } from '../../../ministry-actions';
@@ -179,12 +179,6 @@ export default async function AdminRecordsPage({
           );
         })}
       </div>
-
-      <MinistryFooter
-        steps={[
-          { href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة', descEn: 'What is waiting for a reviewer.', descAr: 'ما ينتظر مراجعاً.' },
-        ]}
-      />
     </MinistryShell>
   );
 }

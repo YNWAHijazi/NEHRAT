@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { L } from '../../../components/L';
-import { MinistryFooter, MinistryShell } from '../../../components/MinistryShell';
+import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { reviewQueue } from '../../../lib/queries';
 import { MINISTRY_CONTENT } from '../../../lib/rules';
@@ -16,15 +16,9 @@ export default async function ReviewQueuePage() {
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
-      <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
+      <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Review queue" ar="قائمة المراجعة" />
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L
-          en="Grey chips are internal workflow states and are not determinations. A determination is one of the three outcomes, recorded on the submission itself."
-          ar="الرقاقات الرمادية حالات عمل داخلية وليست نتائج. النتيجة هي إحدى النتائج الثلاث، وتُسجَّل على التقديم نفسه."
-        />
-      </p>
 
       {/* Eight columns, the reference's own proportions and its own headings. The build
           had six: Organizer was folded into the first cell as a sub-line and Days was
@@ -108,12 +102,6 @@ export default async function ReviewQueuePage() {
         ) : null}
       </div>
 
-      <MinistryFooter
-        steps={[
-          { href: '/ministry', en: 'Dashboard', ar: 'اللوحة', descEn: 'Every count, derived from the records.', descAr: 'كل الأعداد مستمدة من السجلات.' },
-          { href: '/ministry/changes', en: 'Changes and notifications', ar: 'التغييرات والإشعارات', descEn: 'Material changes and declined nominations.', descAr: 'التغييرات الجوهرية والترشيحات المعتذَر عنها.' },
-        ]}
-      />
     </MinistryShell>
   );
 }

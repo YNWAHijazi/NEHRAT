@@ -70,8 +70,8 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
           <div style={{ maxWidth: 820, marginBlock: 34, padding: '32px 36px', border: '1px dashed var(--line)', borderRadius: 12 }}>
             <p style={{ margin: 0, fontSize: '15.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
               <L
-                en="No acknowledgment exists yet. It is issued at the moment the submission is filed, and the reference number it carries is what the authorising authority asks for."
-                ar="لا يوجد إشعار بعد. يصدر لحظة تقديم الملف، والرقم المرجعي الذي يحمله هو ما تطلبه السلطة المرخِّصة."
+                en="No acknowledgment exists yet. It is issued when the submission is filed."
+                ar="لا يوجد إشعار بعد. يصدر عند تقديم الملف."
               />
             </p>
           </div>
