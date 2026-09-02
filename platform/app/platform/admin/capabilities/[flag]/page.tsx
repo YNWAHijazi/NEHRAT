@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { L } from '../../../../../components/L';
 import { MinistryShell } from '../../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../../lib/ministry-auth';
-import { capabilityActs, capabilityChecks, capabilityConfigFor, ministryConfig } from '../../../../../lib/queries';
-import { ALL_FLAGS, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, type FeatureFlag } from '../../../../../lib/rules/flags';
-import { saveCapabilityConfigAction, setFeatureFlagAction } from '../../../../ministry-actions';
+import { capabilityActs, capabilityChecks, capabilityConfigFor, ministryConfig, vendorsAll } from '../../../../../lib/queries';
+import { ALL_FLAGS, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
+import { addVendorAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
 
 /**
  * One capability, one page: what it is and what turning it on changes, the
@@ -57,6 +57,21 @@ export default async function CapabilityPage({
       {notice === 'config' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The configuration has been stored." ar="حُفظ الإعداد." />
+        </div>
+      ) : null}
+      {notice === 'vendor-added' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The vendor is listed." ar="أُدرج المزوّد." />
+        </div>
+      ) : null}
+      {notice === 'vendor-updated' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The listing state has been recorded." ar="سُجّلت حالة الإدراج." />
+        </div>
+      ) : null}
+      {error === 'vendor' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="Both names and a category from the list are required." ar="الاسمان معاً وفئة من القائمة مطلوبة." />
         </div>
       ) : null}
       {error === 'missing' ? (
@@ -216,6 +231,93 @@ export default async function CapabilityPage({
               );
             })}
           </div>
+        </div>
+      ) : null}
+
+      {/* THE DIRECTORY'S CONTENT is its configuration: vendors, added here and
+          never self-registered. Managing the list works while the capability is
+          off -- the readiness check wants a listed vendor before it can turn on
+          -- and nothing here is public until it is on. */}
+      {flag === 'vendorDirectory' ? (
+        <div data-region="vendor-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+            <L en="Vendors" ar="المزوّدون" />
+          </h2>
+          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+            <L
+              en={`Added by the administrator, never self-registered. Delisting keeps the row. Every public listing states: ${vendorDisclaimer().en}`}
+              ar={`يضيفهم المسؤول ولا يسجّلون أنفسهم. والشطب يُبقي الصف. وتذكر كل قائمة عامة: ${vendorDisclaimer().ar}`}
+            />
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
+            {vendorsAll().length === 0 ? (
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
+                <L en="No vendor is listed yet." ar="لا مزوّد مُدرجاً بعد." />
+              </p>
+            ) : null}
+            {vendorsAll().map((v) => {
+              const cat = vendorCategories().find((c) => c.key === v.category);
+              return (
+                <div key={v.id} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ flex: 1, minWidth: 240 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                      <L en={v.nameEn} ar={v.nameAr} />
+                    </div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
+                      <L en={cat?.en ?? v.category} ar={cat?.ar ?? v.category} />
+                      {v.area ? <span> · {v.area}</span> : null}
+                      {v.contact ? <span> · {v.contact}</span> : null}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{ padding: '3px 10px', borderRadius: 999, background: v.listed ? 'var(--brand-soft)' : 'var(--surface2)', border: v.listed ? 0 : '1px solid var(--line)', color: v.listed ? 'var(--brand)' : 'var(--muted)', fontSize: '12px' }}>
+                      {v.listed ? <L en="Listed" ar="مُدرج" /> : <L en="Delisted" ar="مشطوب" />}
+                    </span>
+                    <form action={setVendorListedAction}>
+                      <input type="hidden" name="id" value={v.id} />
+                      <input type="hidden" name="listed" value={v.listed ? 'no' : 'yes'} />
+                      <button type="submit" style={{ height: 30, paddingInline: 12, border: '1px solid var(--line)', borderRadius: 15, background: 'var(--bg)', color: 'var(--ink)', fontSize: '12px', cursor: 'pointer' }}>
+                        {v.listed ? <L en="Delist" ar="شطب" /> : <L en="Relist" ar="إعادة إدراج" />}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <form action={addVendorAction} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 10 }}>
+              {[
+                ['nameEn', 'Name (English)', 'الاسم (بالإنكليزية)'],
+                ['nameAr', 'Name (Arabic)', 'الاسم (بالعربية)'],
+                ['contact', 'Contact', 'جهة الاتصال'],
+                ['area', 'Area served', 'المنطقة المخدومة'],
+              ].map(([name, en, ar]) => (
+                <label key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                    <L en={en!} ar={ar!} />
+                  </span>
+                  <input name={name} style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }} />
+                </label>
+              ))}
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  <L en="Category" ar="الفئة" />
+                </span>
+                <select name="category" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
+                  <option value=""></option>
+                  {vendorCategories().map((c) => (
+                    <option key={c.key} value={c.key}>{c.en}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div>
+              <button type="submit" style={{ height: 34, paddingInline: 16, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                <L en="Add the vendor" ar="إضافة المزوّد" />
+              </button>
+            </div>
+          </form>
         </div>
       ) : null}
 

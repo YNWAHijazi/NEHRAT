@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
+import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
 import { SourceDivergence } from '../../../../components/SourceDivergence';
 import { InviteForm } from './InviteForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
@@ -702,6 +703,8 @@ export default async function RequirementsPage({
             </div>
           )}
         </details>
+
+        <VendorDirectoryLink />
 
       </main>
     </>

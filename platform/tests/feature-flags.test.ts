@@ -108,6 +108,13 @@ describe('commercial and AI capability', () => {
       // amount renders only while the capability is on. The submission-package
       // side reads the gate, not a flag, so it is not on this list.
       .filter((f) => !f.endsWith('app/services/[service]/page.tsx'))
+      // The vendor directory (its commit): the public route answers not-found
+      // while the capability is off, and the ONE operator-facing link is a single
+      // component returning null while off -- the two operator screens render the
+      // component and consult nothing, deliberately, so this list stays short.
+      // e2e/app/capabilities.spec.ts walks off-absent and on-present for both.
+      .filter((f) => !f.endsWith('app/vendors/page.tsx'))
+      .filter((f) => !f.endsWith('components/VendorDirectoryLink.tsx'))
       .map(relative);
     expect(
       offenders,
@@ -177,6 +184,23 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
       const keys = flagDetail(flag).requiredConfig.map((f) => f.key);
       expect(keys).toEqual(['model', 'dataScope', 'humanConfirm', 'monthlyCeilingUsd', 'onCeiling']);
     }
+  });
+
+  it('the vendor directory carries the regulation’s five categories and the disclaimer, bilingually', async () => {
+    const { vendorCategories, vendorDisclaimer } = await import('../lib/rules/flags');
+    expect(vendorCategories().map((c) => c.key)).toEqual([
+      'defibrillatorSupply',
+      'padsAndBatteries',
+      'ambulanceServices',
+      'resuscitationTraining',
+      'eventMedicalCover',
+    ]);
+    for (const c of vendorCategories()) {
+      expect(c.en.trim().length).toBeGreaterThan(0);
+      expect(c.ar.trim().length).toBeGreaterThan(0);
+    }
+    expect(vendorDisclaimer().en).toBe('Listing is commercial and is not Ministry endorsement.');
+    expect(vendorDisclaimer().ar.trim().length).toBeGreaterThan(0);
   });
 
   it('every capability page carries bilingual title, description and detail', () => {

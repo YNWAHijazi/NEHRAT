@@ -193,7 +193,38 @@
           "labelEn": "At least one listed vendor",
           "labelAr": "مزوّد مُدرج واحد على الأقل"
         }
-      ]
+      ],
+      "categories": [
+        {
+          "key": "defibrillatorSupply",
+          "en": "Defibrillator supply",
+          "ar": "توريد أجهزة إزالة الرجفان"
+        },
+        {
+          "key": "padsAndBatteries",
+          "en": "Pads and batteries",
+          "ar": "اللصاقات والبطاريات"
+        },
+        {
+          "key": "ambulanceServices",
+          "en": "Ambulance services",
+          "ar": "خدمات الإسعاف"
+        },
+        {
+          "key": "resuscitationTraining",
+          "en": "Resuscitation training",
+          "ar": "التدريب على الإنعاش"
+        },
+        {
+          "key": "eventMedicalCover",
+          "en": "Event medical cover",
+          "ar": "التغطية الطبية للفعاليات"
+        }
+      ],
+      "disclaimer": {
+        "en": "Listing is commercial and is not Ministry endorsement.",
+        "ar": "الإدراج تجاري وليس تزكية من الوزارة."
+      }
     },
     "sponsoredListings": {
       "titleEn": "Sponsored listings",

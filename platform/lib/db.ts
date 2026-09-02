@@ -697,6 +697,20 @@ function migrate(d: DatabaseSync): void {
       is_demo INTEGER NOT NULL DEFAULT 0
     );
 
+    -- A commercial vendor in the directory, added by the administrator -- never
+    -- self-registered (the directory is capability content, not a register).
+    -- Delisting keeps the row: what was once public stays accountable.
+    CREATE TABLE IF NOT EXISTS vendors (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name_en TEXT NOT NULL, name_ar TEXT NOT NULL,
+      category TEXT NOT NULL,
+      contact TEXT NOT NULL DEFAULT '',
+      area TEXT NOT NULL DEFAULT '',
+      listed INTEGER NOT NULL DEFAULT 1,
+      added_by TEXT NOT NULL,
+      added_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     -- A received application-fee payment. Only PAYMENTS are stored: what is DUE
     -- derives live from the fee configuration in force, so a fee revision
     -- reprices unpaid submissions and never a paid one -- a recorded payment

@@ -101,6 +101,28 @@ export function flagGroup(flag: FeatureFlag): FlagGroup {
   return g;
 }
 
+export interface VendorCategory {
+  key: string;
+  en: string;
+  ar: string;
+}
+
+/**
+ * The directory's categories, from the regulation's vendor kinds -- data, never
+ * a literal in a screen. The admin form, the public page and the AED
+ * purchase-link resolution all read this one list.
+ */
+export function vendorCategories(): VendorCategory[] {
+  return (flagsJson as unknown as { details: { vendorDirectory: { categories: VendorCategory[] } } }).details
+    .vendorDirectory.categories;
+}
+
+/** Every listing states it: listing is commercial and is not Ministry endorsement. */
+export function vendorDisclaimer(): { en: string; ar: string } {
+  return (flagsJson as unknown as { details: { vendorDirectory: { disclaimer: { en: string; ar: string } } } })
+    .details.vendorDirectory.disclaimer;
+}
+
 /** One reason the toggle is not live, named. The page renders every one it gets. */
 export interface EnableBlocker {
   kind: 'decision' | 'dependency' | 'field' | 'check';

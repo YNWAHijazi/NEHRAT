@@ -2044,11 +2044,47 @@ export function capabilityConfigFor(flag: string): Map<string, string> {
 
 /**
  * The readiness checks the enable rule consumes -- facts, not configuration.
- * The directory and advertising commits give these real evaluators; until those
- * tables exist nothing is listed, and false is the true answer.
+ * The advertising commit gives placementAndAd its real evaluator; until that
+ * table exists nothing is placed, and false is the true answer.
  */
 export function capabilityChecks(): Record<string, boolean> {
-  return { listedVendor: false, placementAndAd: false };
+  const listed = (getDb().prepare(`SELECT COUNT(*) AS n FROM vendors WHERE listed = 1`).get() as { n: number }).n;
+  return { listedVendor: listed > 0, placementAndAd: false };
+}
+
+export interface VendorRow {
+  id: number;
+  nameEn: string;
+  nameAr: string;
+  category: string;
+  contact: string;
+  area: string;
+  listed: boolean;
+  addedBy: string;
+  addedAt: string;
+}
+
+/** Every vendor, listed and delisted, for the administrator's management view. */
+export function vendorsAll(): VendorRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, name_en, name_ar, category, contact, area, listed, added_by, added_at FROM vendors ORDER BY category, name_en`)
+    .all() as unknown as { id: number; name_en: string; name_ar: string; category: string; contact: string; area: string; listed: number; added_by: string; added_at: string }[];
+  return rows.map((r) => ({
+    id: r.id,
+    nameEn: r.name_en,
+    nameAr: r.name_ar,
+    category: r.category,
+    contact: r.contact,
+    area: r.area,
+    listed: r.listed === 1,
+    addedBy: r.added_by,
+    addedAt: r.added_at.slice(0, 10),
+  }));
+}
+
+/** The public directory: listed vendors only. */
+export function listedVendors(): VendorRow[] {
+  return vendorsAll().filter((v) => v.listed);
 }
 
 export interface CapabilityActRow {

@@ -157,6 +157,59 @@ test.describe('the capability shape', () => {
     await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
   });
 
+  test('vendor directory: a listed vendor readies the toggle, the public page and links exist only while on', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // The directory's content is its configuration: add a vendor while OFF.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    const manager = page.locator('[data-region="vendor-manager"]');
+    await manager.locator('input[name="nameEn"]').fill('Cedar Medical Supplies');
+    await manager.locator('input[name="nameAr"]').fill('لوازم الأرز الطبية');
+    await manager.locator('select[name="category"]').selectOption('defibrillatorSupply');
+    await manager.locator('input[name="contact"]').fill('01 000 000');
+    await manager.locator('input[name="area"]').fill('Beirut');
+    await manager.locator('button:has-text("Add the vendor")').click();
+    await page.waitForURL(/notice=vendor-added/);
+
+    // The readiness check flips to met and the toggle is live.
+    await expect(page.locator('[data-region="capability-checks"]')).toContainText('Met');
+    await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
+
+    // Listed but OFF: the public route does not exist, the operator link is absent.
+    const offResponse = await gotoRidingRestarts(page, '/vendors');
+    expect(offResponse?.status()).toBe(404);
+
+    // On: the public page carries the category, the vendor and the disclaimer.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+    await gotoRidingRestarts(page, '/vendors');
+    await expect(page.locator('[data-region="vendor-directory"]')).toContainText('Commercial vendor directory');
+    await expect(page.locator('body')).toContainText('Cedar Medical Supplies');
+    await expect(page.locator('body')).toContainText('Defibrillator supply');
+    await expect(page.locator('[data-region="vendor-disclaimer"]')).toContainText('Listing is commercial and is not Ministry endorsement.');
+
+    // The two operator screens carry the one quiet link, disclaimer attached.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
+    await expect(page.locator('[data-region="vendor-directory-link"]')).toContainText('Commercial vendor directory');
+    await gotoRidingRestarts(page, '/facilities/FC-0014/devices');
+    await expect(page.locator('[data-region="vendor-directory-link"]')).toContainText('not Ministry endorsement');
+
+    // Off again: the route 404s and the link is ABSENT, not greyed. The vendor
+    // row stays -- content persists, the capability governs rendering.
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    const backOff = await gotoRidingRestarts(page, '/vendors');
+    expect(backOff?.status()).toBe(404);
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
+    await expect(page.locator('[data-region="vendor-directory-link"]')).toHaveCount(0);
+  });
+
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');

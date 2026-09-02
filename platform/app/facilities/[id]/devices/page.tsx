@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
+import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
 import { DeviceRegistry } from './DeviceRegistry';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { facilityDetail, facilityDevices, facilityPersons, unreadCountFor } from '../../../../lib/queries';
@@ -60,6 +61,8 @@ export default async function DeviceRegistryPage({
           coordinatorName={coordinator?.nameOrPosition ?? ''}
           today={beirutToday()}
         />
+
+        <VendorDirectoryLink />
 
       </main>
     </>

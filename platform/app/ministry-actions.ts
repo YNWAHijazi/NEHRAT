@@ -15,7 +15,7 @@ import { getDb } from '../lib/db';
 import { beirutToday } from '../lib/clock';
 import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
 import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
-import { ALL_FLAGS, effectiveFlag, flagDetail, missingForEnable, type FeatureFlag } from '../lib/rules/flags';
+import { ALL_FLAGS, effectiveFlag, flagDetail, missingForEnable, vendorCategories, type FeatureFlag } from '../lib/rules/flags';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import { currentAccount } from '../lib/auth';
 import {
@@ -580,6 +580,39 @@ export async function setFeatureFlagAction(formData: FormData): Promise<void> {
   revalidatePath('/platform/admin');
   revalidatePath(`/platform/admin/capabilities/${flag}`);
   redirect(`/platform/admin/capabilities/${flag}?notice=${state}`);
+}
+
+/**
+ * Adds a commercial vendor to the directory. Administrator-added, never
+ * self-registered; the category comes from the regulation's list in the data.
+ */
+export async function addVendorAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageFlags');
+  const nameEn = String(formData.get('nameEn') ?? '').trim();
+  const nameAr = String(formData.get('nameAr') ?? '').trim();
+  const category = String(formData.get('category') ?? '');
+  const contact = String(formData.get('contact') ?? '').trim();
+  const area = String(formData.get('area') ?? '').trim();
+  if (!nameEn || !nameAr || !vendorCategories().some((c) => c.key === category)) {
+    redirect('/platform/admin/capabilities/vendorDirectory?error=vendor');
+  }
+  getDb()
+    .prepare(`INSERT INTO vendors (name_en, name_ar, category, contact, area, listed, added_by, added_at) VALUES (?, ?, ?, ?, ?, 1, ?, now_stamp())`)
+    .run(nameEn, nameAr, category, contact, area, actor.displayName);
+  revalidatePath('/platform/admin/capabilities/vendorDirectory');
+  revalidatePath('/vendors');
+  redirect('/platform/admin/capabilities/vendorDirectory?notice=vendor-added');
+}
+
+/** Delists or relists a vendor. The row stays: what was once public stays accountable. */
+export async function setVendorListedAction(formData: FormData): Promise<void> {
+  await requireMinistry('manageFlags');
+  const id = Number(formData.get('id') ?? 0);
+  const listed = String(formData.get('listed') ?? '') === 'yes' ? 1 : 0;
+  getDb().prepare(`UPDATE vendors SET listed = ? WHERE id = ?`).run(listed, id);
+  revalidatePath('/platform/admin/capabilities/vendorDirectory');
+  revalidatePath('/vendors');
+  redirect('/platform/admin/capabilities/vendorDirectory?notice=vendor-updated');
 }
 
 /**
