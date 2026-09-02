@@ -2055,7 +2055,48 @@ export function capabilityChecks(): Record<string, boolean> {
       .prepare(`SELECT COUNT(*) AS n FROM sponsorships s JOIN vendors v ON v.id = s.vendor_id WHERE v.listed = 1 AND s.starts <= ? AND ? <= s.ends`)
       .get(today, today) as { n: number }
   ).n;
-  return { listedVendor: listed > 0, activeSponsorship: sponsored > 0, placementAndAd: false };
+  const placed = (
+    getDb()
+      .prepare(`SELECT COUNT(*) AS n FROM adverts WHERE starts <= ? AND ? <= ends`)
+      .get(today, today) as { n: number }
+  ).n;
+  return { listedVendor: listed > 0, activeSponsorship: sponsored > 0, placementAndAd: placed > 0 };
+}
+
+export interface AdvertRow {
+  id: number;
+  placement: string;
+  imageUrl: string;
+  linkUrl: string;
+  alt: string;
+  starts: string;
+  ends: string;
+  addedBy: string;
+  active: boolean;
+}
+
+/** Every advert, for the administrator's management view. */
+export function advertsAll(): AdvertRow[] {
+  const today = beirutTodayFn();
+  const rows = getDb()
+    .prepare(`SELECT id, placement, image_url, link_url, alt, starts, ends, added_by FROM adverts ORDER BY starts DESC, id DESC`)
+    .all() as unknown as { id: number; placement: string; image_url: string; link_url: string; alt: string; starts: string; ends: string; added_by: string }[];
+  return rows.map((r) => ({
+    id: r.id,
+    placement: r.placement,
+    imageUrl: r.image_url,
+    linkUrl: r.link_url,
+    alt: r.alt,
+    starts: r.starts,
+    ends: r.ends,
+    addedBy: r.added_by,
+    active: r.starts <= today && today <= r.ends,
+  }));
+}
+
+/** The adverts in period for one placement -- what the foot of that page shows. */
+export function activeAdvertsFor(placement: string): AdvertRow[] {
+  return advertsAll().filter((a) => a.active && a.placement === placement);
 }
 
 export interface VendorRow {

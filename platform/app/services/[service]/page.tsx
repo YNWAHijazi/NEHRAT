@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { L } from '../../../components/L';
 import { PublicShell } from '../../../components/PublicShell';
 import { currentAccount } from '../../../lib/auth';
+import { AdFooter } from '../../../components/AdFooter';
 import { capabilityConfigFor, ministryConfig } from '../../../lib/queries';
 import {
   DOMAINS,
@@ -234,6 +235,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           <L en="Sign in to begin" ar="تسجيل الدخول للبدء" />
         </Link>
       </div>
+
+      <AdFooter placement="serviceDetail" />
     </PublicShell>
   );
 }

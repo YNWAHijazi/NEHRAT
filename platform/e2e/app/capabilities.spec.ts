@@ -297,6 +297,48 @@ test.describe('the capability shape', () => {
     await page.waitForURL(/notice=off/);
   });
 
+  test('advertising: the foot of public pages only, labelled, and the filing screen never carries one', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // The check names itself; booking an advert in period readies the toggle.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/advertising');
+    await expect(page.locator('[data-region="capability-toggle"]')).toContainText('placement holding an advert in period');
+    const manager = page.locator('[data-region="advert-manager"]');
+    await manager.locator('select[name="placement"]').selectOption('publicLanding');
+    await manager.locator('input[name="imageUrl"]').fill('data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==');
+    await manager.locator('input[name="linkUrl"]').fill('https://example.com/autumn');
+    await manager.locator('input[name="alt"]').fill('Cedar Medical autumn range');
+    await manager.locator('input[name="starts"]').fill('2026-08-01');
+    await manager.locator('input[name="ends"]').fill('2026-12-31');
+    await manager.locator('button:has-text("Book the advert")').click();
+    await page.waitForURL(/notice=advert-added/);
+    await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+
+    // The foot of the landing page carries it, labelled -- and only its own
+    // placement: the vendors placement holds nothing, so nothing renders there.
+    await gotoRidingRestarts(page, '/');
+    const foot = page.locator('[data-region="ad-footer"]');
+    await expect(foot).toContainText('Advertisement');
+    await expect(foot.locator('img[alt="Cedar Medical autumn range"]')).toHaveCount(1);
+
+    // A screen where someone is filing carries none -- the constraint is
+    // structural, and this walks it with the capability ON.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    await expect(page.locator('[data-region="ad-footer"]')).toHaveCount(0);
+
+    // Off: the foot is empty again. The booking stays; the capability governs.
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/advertising');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    await gotoRidingRestarts(page, '/');
+    await expect(page.locator('[data-region="ad-footer"]')).toHaveCount(0);
+  });
+
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');

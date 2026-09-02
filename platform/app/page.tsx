@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { L } from '../components/L';
+import { AdFooter } from '../components/AdFooter';
 import { PublicShell } from '../components/PublicShell';
 import { currentAccount } from '../lib/auth';
 import { PUBLIC_LANDING } from '../lib/rules';
@@ -133,6 +134,8 @@ export default async function OverviewPage() {
           </div>
         </Link>
       </div>
+
+      <AdFooter placement="publicLanding" />
 
     </PublicShell>
   );

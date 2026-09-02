@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { L } from '../../../../../components/L';
 import { MinistryShell } from '../../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../../lib/ministry-auth';
-import { capabilityActs, capabilityChecks, capabilityConfigFor, listedVendors, ministryConfig, sponsorshipsAll, vendorsAll } from '../../../../../lib/queries';
-import { ALL_FLAGS, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
-import { addSponsorshipAction, addVendorAction, endSponsorshipAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
+import { advertsAll, capabilityActs, capabilityChecks, capabilityConfigFor, listedVendors, ministryConfig, sponsorshipsAll, vendorsAll } from '../../../../../lib/queries';
+import { ALL_FLAGS, adPlacements, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
+import { addAdvertAction, addSponsorshipAction, addVendorAction, endAdvertAction, endSponsorshipAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
 
 /**
  * One capability, one page: what it is and what turning it on changes, the
@@ -77,6 +77,21 @@ export default async function CapabilityPage({
       {notice === 'sponsorship-ended' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The period closes at the end of today." ar="تُغلق الفترة بنهاية اليوم." />
+        </div>
+      ) : null}
+      {notice === 'advert-added' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The advert is booked." ar="حُجز الإعلان." />
+        </div>
+      ) : null}
+      {notice === 'advert-ended' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The period closes at the end of today." ar="تُغلق الفترة بنهاية اليوم." />
+        </div>
+      ) : null}
+      {error === 'advert' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="A placement from the list, an image, a link, its wording, and a period are all required." ar="موضع من القائمة وصورة ورابط ونصه وفترة، كلها مطلوبة." />
         </div>
       ) : null}
       {error === 'sponsorship' ? (
@@ -408,6 +423,100 @@ export default async function CapabilityPage({
             <button type="submit" style={{ height: 34, paddingInline: 16, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
               <L en="Book the sponsorship" ar="حجز الرعاية" />
             </button>
+          </form>
+        </div>
+      ) : null}
+
+      {/* ADVERTS are this capability's content: image, link, period, placement.
+          The placement select offers ONLY the structural list -- the foot of the
+          public pages -- which is what keeps the constraint a constraint. */}
+      {flag === 'advertising' ? (
+        <div data-region="advert-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+            <L en="Adverts" ar="الإعلانات" />
+          </h2>
+          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+            <L
+              en="An advert is an image, a link, a period and a placement — and the placements are the feet of the public pages, structurally: there is nowhere else one can go."
+              ar="الإعلان صورة ورابط وفترة وموضع — والمواضع هي أسفل الصفحات العامة، بنيوياً: لا مكان آخر يذهب إليه."
+            />
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
+            {advertsAll().length === 0 ? (
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
+                <L en="No advert is booked." ar="لا إعلان محجوزاً." />
+              </p>
+            ) : null}
+            {advertsAll().map((ad) => {
+              const pl = adPlacements().find((p) => p.key === ad.placement);
+              return (
+                <div key={ad.id} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ flex: 1, minWidth: 240 }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500 }}>{ad.alt}</span>
+                    <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
+                      <L en={pl?.en ?? ad.placement} ar={pl?.ar ?? ad.placement} />
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {ad.starts} — {ad.ends}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{ padding: '3px 10px', borderRadius: 999, background: ad.active ? 'var(--brand-soft)' : 'var(--surface2)', border: ad.active ? 0 : '1px solid var(--line)', color: ad.active ? 'var(--brand)' : 'var(--muted)', fontSize: '12px' }}>
+                      {ad.active ? <L en="In period" ar="ضمن الفترة" /> : <L en="Out of period" ar="خارج الفترة" />}
+                    </span>
+                    {ad.active ? (
+                      <form action={endAdvertAction}>
+                        <input type="hidden" name="id" value={ad.id} />
+                        <button type="submit" style={{ height: 30, paddingInline: 12, border: '1px solid var(--line)', borderRadius: 15, background: 'var(--bg)', color: 'var(--ink)', fontSize: '12px', cursor: 'pointer' }}>
+                          <L en="End at close of today" ar="إنهاء بنهاية اليوم" />
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <form action={addAdvertAction} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 10 }}>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  <L en="Placement" ar="الموضع" />
+                </span>
+                <select name="placement" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
+                  <option value=""></option>
+                  {adPlacements().map((p) => (
+                    <option key={p.key} value={p.key}>{p.en}</option>
+                  ))}
+                </select>
+              </label>
+              {[
+                ['imageUrl', 'Image address', 'عنوان الصورة'],
+                ['linkUrl', 'Link address', 'عنوان الرابط'],
+                ['alt', 'Image wording (alt text)', 'نص الصورة البديل'],
+              ].map(([name, en, ar]) => (
+                <label key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                    <L en={en!} ar={ar!} />
+                  </span>
+                  <input name={name} style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }} />
+                </label>
+              ))}
+              {[
+                ['starts', 'From', 'من'],
+                ['ends', 'To', 'إلى'],
+              ].map(([name, en, ar]) => (
+                <label key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                    <L en={en!} ar={ar!} />
+                  </span>
+                  <input name={name} type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+                </label>
+              ))}
+            </div>
+            <div>
+              <button type="submit" style={{ height: 34, paddingInline: 16, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                <L en="Book the advert" ar="حجز الإعلان" />
+              </button>
+            </div>
           </form>
         </div>
       ) : null}

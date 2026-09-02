@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { AdFooter } from '../../components/AdFooter';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
 import { currentAccount } from '../../lib/auth';
@@ -71,6 +72,8 @@ export default async function VendorDirectoryPage() {
           <L en="No vendor is listed." ar="لا مزوّد مُدرجاً." />
         </p>
       ) : null}
+
+      <AdFooter placement="vendorDirectory" />
     </PublicShell>
   );
 }

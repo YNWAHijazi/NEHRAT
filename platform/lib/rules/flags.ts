@@ -123,6 +123,30 @@ export function vendorDisclaimer(): { en: string; ar: string } {
     .details.vendorDirectory.disclaimer;
 }
 
+export interface AdPlacement {
+  key: string;
+  en: string;
+  ar: string;
+}
+
+/**
+ * THE PLACEMENT LIST IS STRUCTURAL, NOT A GUIDELINE: an advert renders only
+ * through a placement on this list, each bound to the foot of one public
+ * surface -- never a screen where someone is filing, reviewing or reporting an
+ * incident. A guard test pins which files may mount the ad component; adding a
+ * surface means adding a placement here and answering to that guard.
+ */
+export function adPlacements(): AdPlacement[] {
+  return (flagsJson as unknown as { details: { advertising: { placements: AdPlacement[] } } }).details.advertising
+    .placements;
+}
+
+/** Every advert is labelled as one, always. */
+export function adLabel(): { en: string; ar: string } {
+  return (flagsJson as unknown as { details: { advertising: { adLabel: { en: string; ar: string } } } }).details
+    .advertising.adLabel;
+}
+
 /** One reason the toggle is not live, named. The page renders every one it gets. */
 export interface EnableBlocker {
   kind: 'decision' | 'dependency' | 'field' | 'check';

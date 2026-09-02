@@ -15,7 +15,7 @@ import { getDb } from '../lib/db';
 import { beirutToday } from '../lib/clock';
 import { ACTIVATION_EXPIRY_HOURS } from '../lib/password';
 import { administrationBar, isAssignableRole } from '../lib/rules/accounts';
-import { ALL_FLAGS, effectiveFlag, flagDetail, missingForEnable, vendorCategories, type FeatureFlag } from '../lib/rules/flags';
+import { ALL_FLAGS, adPlacements, effectiveFlag, flagDetail, missingForEnable, vendorCategories, type FeatureFlag } from '../lib/rules/flags';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import { currentAccount } from '../lib/auth';
 import {
@@ -645,6 +645,39 @@ export async function endSponsorshipAction(formData: FormData): Promise<void> {
   revalidatePath('/platform/admin/capabilities/sponsoredListings');
   revalidatePath('/vendors');
   redirect('/platform/admin/capabilities/sponsoredListings?notice=sponsorship-ended');
+}
+
+/**
+ * Books an advert: an image, a link, a period and a placement -- and the
+ * placement must be on the structural list. There is no way to place one
+ * anywhere else, which is what structural means.
+ */
+export async function addAdvertAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageFlags');
+  const placement = String(formData.get('placement') ?? '');
+  const imageUrl = String(formData.get('imageUrl') ?? '').trim();
+  const linkUrl = String(formData.get('linkUrl') ?? '').trim();
+  const alt = String(formData.get('alt') ?? '').trim();
+  const starts = String(formData.get('starts') ?? '').trim();
+  const ends = String(formData.get('ends') ?? '').trim();
+  if (!adPlacements().some((pl) => pl.key === placement) || !imageUrl || !linkUrl || !alt || !starts || !ends || starts > ends) {
+    redirect('/platform/admin/capabilities/advertising?error=advert');
+  }
+  getDb()
+    .prepare(`INSERT INTO adverts (placement, image_url, link_url, alt, starts, ends, added_by, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, now_stamp())`)
+    .run(placement, imageUrl, linkUrl, alt, starts, ends, actor.displayName);
+  revalidatePath('/platform/admin/capabilities/advertising');
+  redirect('/platform/admin/capabilities/advertising?notice=advert-added');
+}
+
+/** Ends an advert: the period closes at the end of today, the row stays. */
+export async function endAdvertAction(formData: FormData): Promise<void> {
+  await requireMinistry('manageFlags');
+  const id = Number(formData.get('id') ?? 0);
+  const today = beirutToday();
+  getDb().prepare(`UPDATE adverts SET ends = ? WHERE id = ? AND ends > ?`).run(today, id, today);
+  revalidatePath('/platform/admin/capabilities/advertising');
+  redirect('/platform/admin/capabilities/advertising?notice=advert-ended');
 }
 
 /**

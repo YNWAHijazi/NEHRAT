@@ -119,6 +119,10 @@ describe('commercial and AI capability', () => {
       // purchase links and the directory they resolve to are on, and its only
       // destinations are listed directory vendors -- never an external address.
       .filter((f) => !f.endsWith('components/AedWhereToBuy.tsx'))
+      // Advertising (its commit): the ONLY component that renders an advert,
+      // keyed by the structural placement list; the test below pins which files
+      // may mount it, which is what makes the placement list structural.
+      .filter((f) => !f.endsWith('components/AdFooter.tsx'))
       .map(relative);
     expect(
       offenders,
@@ -216,6 +220,30 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
     }
     expect(vendorDisclaimer().en).toBe('Listing is commercial and is not Ministry endorsement.');
     expect(vendorDisclaimer().ar.trim().length).toBeGreaterThan(0);
+  });
+
+  it('the placement list is structural: adverts mount only at the foot of the named public pages', async () => {
+    const { adPlacements, adLabel } = await import('../lib/rules/flags');
+    // The list itself: three public feet, bilingual, and the label that every
+    // advert carries.
+    expect(adPlacements().map((p) => p.key)).toEqual(['publicLanding', 'serviceDetail', 'vendorDirectory']);
+    expect(adLabel().en).toBe('Advertisement');
+    expect(adLabel().ar.trim().length).toBeGreaterThan(0);
+
+    // WHO MAY MOUNT THE COMPONENT, pinned exactly. A new mount is a code change
+    // that fails here and must justify itself against the constraint: the foot
+    // of a public page, never a screen where someone is filing, reviewing or
+    // reporting an incident. This is what "structural, not a guideline" means.
+    const mounts = [...filesUnder('app', ['.tsx', '.ts']), ...filesUnder('components', ['.tsx', '.ts'])]
+      .filter((f) => !f.endsWith('components/AdFooter.tsx'))
+      .filter((f) => /AdFooter/.test(read(f)))
+      .map(relative)
+      .sort();
+    expect(mounts).toEqual(['app/page.tsx', 'app/services/[service]/page.tsx', 'app/vendors/page.tsx']);
+    // And none of those is a filing, reviewing or reporting surface.
+    for (const f of mounts) {
+      expect(/app\/(events|ministry|facilities|venues|platform)\//.test(f), `${f} must be a public surface`).toBe(false);
+    }
   });
 
   it('every capability page carries bilingual title, description and detail', () => {

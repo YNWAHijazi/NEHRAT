@@ -253,7 +253,28 @@
           "labelEn": "At least one placement holding an advert in period",
           "labelAr": "موضع واحد على الأقل فيه إعلان ضمن فترته"
         }
-      ]
+      ],
+      "placements": [
+        {
+          "key": "publicLanding",
+          "en": "Public landing, foot of the page",
+          "ar": "الصفحة العامة الرئيسية، أسفل الصفحة"
+        },
+        {
+          "key": "serviceDetail",
+          "en": "Service detail pages, foot of the page",
+          "ar": "صفحات تفاصيل الخدمات، أسفل الصفحة"
+        },
+        {
+          "key": "vendorDirectory",
+          "en": "Vendor directory, foot of the page",
+          "ar": "دليل المزوّدين، أسفل الصفحة"
+        }
+      ],
+      "adLabel": {
+        "en": "Advertisement",
+        "ar": "إعلان"
+      }
     },
     "aedPurchaseLinks": {
       "titleEn": "AED purchase links",

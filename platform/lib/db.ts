@@ -723,6 +723,21 @@ function migrate(d: DatabaseSync): void {
       added_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- An advert: an image, a link, a period and a placement. The placement must
+    -- be on the structural list in the capability data -- the foot of a public
+    -- page, never a screen where someone files, reviews or reports.
+    CREATE TABLE IF NOT EXISTS adverts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      placement TEXT NOT NULL,
+      image_url TEXT NOT NULL,
+      link_url TEXT NOT NULL,
+      alt TEXT NOT NULL DEFAULT '',
+      starts TEXT NOT NULL,
+      ends TEXT NOT NULL,
+      added_by TEXT NOT NULL,
+      added_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     -- A received application-fee payment. Only PAYMENTS are stored: what is DUE
     -- derives live from the fee configuration in force, so a fee revision
     -- reprices unpaid submissions and never a paid one -- a recorded payment
