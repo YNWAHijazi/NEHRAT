@@ -770,6 +770,9 @@ function migrate(d: DatabaseSync): void {
   addColumn('venues', 'archived_by', 'archived_by TEXT');
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
+  // Reapply (partner ruling, 2026-09-02): a new event prefilled from a concluded
+  // one names what it was copied from.
+  addColumn('events', 'copied_from', 'copied_from TEXT');
   addColumn('serious_incident_notifications', 'occurred_at', "occurred_at TEXT NOT NULL DEFAULT ''");
   addColumn('invitations', 'closed_at', 'closed_at TEXT');
   // Cancellation and postponement (Protocol 8.5 / 9(vii)): a lifecycle on the event,
@@ -844,6 +847,9 @@ function migrate(d: DatabaseSync): void {
   addColumn('venues', 'archived_by', 'archived_by TEXT');
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
+  // Reapply (partner ruling, 2026-09-02): a new event prefilled from a concluded
+  // one names what it was copied from.
+  addColumn('events', 'copied_from', 'copied_from TEXT');
   addColumn('password_resets', 'issued_by', 'issued_by INTEGER REFERENCES accounts(id)');
 
   // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.

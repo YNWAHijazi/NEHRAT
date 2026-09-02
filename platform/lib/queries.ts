@@ -55,6 +55,8 @@ export interface EventRow {
   lifecycle: 'active' | 'cancelled' | 'postponed';
   /** Set when a Ministry administrator archived the record (read-only thereafter). */
   archivedAt: string | null;
+  /** The concluded event this record was copied from by Reapply, or null. */
+  copiedFrom: string | null;
   lifecycleAt: string | null;
   lifecycleNote: string | null;
   postponedTo: string | null;
@@ -78,6 +80,7 @@ interface EventDbRow {
   lifecycle_note?: string | null;
   postponed_to?: string | null;
   archived_at?: string | null;
+  copied_from?: string | null;
   end_date: string | null;
   moph_reference: string | null;
   filed: number;
@@ -238,6 +241,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     venueFacilityId: row.venue_facility_id,
     lifecycle: (row.lifecycle ?? 'active') as EventRow['lifecycle'],
     archivedAt: row.archived_at ?? null,
+    copiedFrom: row.copied_from ?? null,
     lifecycleAt: row.lifecycle_at ? row.lifecycle_at.slice(0, 10) : null,
     lifecycleNote: row.lifecycle_note ?? null,
     postponedTo: row.postponed_to ?? null,
@@ -247,7 +251,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
 const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, moph_reference, filed,
    demo_state_en, demo_state_ar, demo_due, demo_due_label_en, demo_due_label_ar,
    demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id,
-   lifecycle, lifecycle_at, lifecycle_note, postponed_to, archived_at`;
+   lifecycle, lifecycle_at, lifecycle_note, postponed_to, archived_at, copied_from`;
 
 function orgRecordedFor(accountId: number): boolean {
   const r = getDb()

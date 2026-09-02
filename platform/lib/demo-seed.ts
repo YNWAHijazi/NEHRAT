@@ -531,6 +531,27 @@ export function seedDemonstration(db: DatabaseSync): void {
   seedPlan('EV-0301', allSections, 'saida-night-run-plan.pdf', allMi);
   seedPlan('EV-0244', allSections, 'saida-run-plan.pdf', allMi);
 
+  // THE ANSWERS BEHIND EV-0244's LEVEL, for the same reason EV-0362 has them --
+  // and Reapply copies them: a marathon deriving Level 3 twice over (score 13 in
+  // the 12-18 band, and the 21.1 km running floor), so a reapplied record's level
+  // demonstrably RE-DERIVES rather than being inherited.
+  db.prepare(
+    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, created_at)
+     VALUES (?, 1, ?, ?, '{}', ?, ?)`,
+  ).run(
+    'EV-0244',
+    JSON.stringify([2, 2, 2, 1, 2, 1, 2, 1, 2]),
+    JSON.stringify({
+      expectedMaxSimultaneousAttendance: 9000,
+      eventDisciplines: ['running'],
+      courseDistanceKm: 42.2,
+      venueLicensedCapacity: null,
+      venueIsNightclubOrDanceVenue: false,
+    }),
+    NEHRAT_TOOL_VERSION,
+    d('2026-05-28'),
+  );
+
   insertInvitation.run(
     'demo-lrc-baalbeck-0362', 'EV-0362', 'ems',
     'Lebanese Red Cross — Baalbeck', 'الصليب الأحمر اللبناني — بعلبك',

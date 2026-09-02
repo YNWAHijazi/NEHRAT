@@ -268,6 +268,93 @@ function refuseIfArchived(eventId: string): void {
   }
 }
 
+/**
+ * REAPPLY (partner ruling, 2026-09-02): a new event prefilled from a concluded one —
+ * the event information, the assessment answers, the disciplines, the named
+ * providers. Everything except the dates, which the organizer must enter.
+ *
+ * NOTHING CARRIES OVER AS APPROVED. This is a new record with its own identifier:
+ * the level re-derives from whatever the answers now say, every requirement is met
+ * again, nominations start unanswered on fresh tokens, and the submission is new —
+ * the filing gates apply as if nothing preceded it. The old record stays untouched
+ * in Previous services; the new one names what it was copied from. Reading a
+ * concluded record to copy it is the one act an archived record permits — it edits
+ * nothing and refiles nothing.
+ */
+export async function reapplyEventAction(sourceEventId: string): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, sourceEventId)) redirect('/dashboard');
+  const db = getDb();
+  const src = db
+    .prepare(
+      `SELECT name_en, name_ar, event_type, venue_route, municipalities, opening_time, closing_time,
+              expected_participants, expected_spectators, expected_staff, recurring_fixed_venue,
+              venue_facility_id, end_date, is_demo
+       FROM events WHERE id = ?`,
+    )
+    .get(sourceEventId) as
+    | {
+        name_en: string; name_ar: string; event_type: string | null; venue_route: string | null;
+        municipalities: string | null; opening_time: string | null; closing_time: string | null;
+        expected_participants: number | null; expected_spectators: number | null; expected_staff: number | null;
+        recurring_fixed_venue: number; venue_facility_id: string | null; end_date: string | null; is_demo: number;
+      }
+    | undefined;
+  if (!src) redirect('/dashboard');
+  // Only a CONCLUDED event reapplies -- a live one is simply continued.
+  if (!src.end_date || src.end_date >= beirutToday()) redirect(`/events/${sourceEventId}`);
+
+  const assessment = db
+    .prepare(`SELECT answers, inputs FROM assessments WHERE event_id = ? ORDER BY version DESC LIMIT 1`)
+    .get(sourceEventId) as { answers: string; inputs: string } | undefined;
+
+  const newId = nextRecordId('EV');
+  db.prepare(
+    `INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date,
+       event_type, venue_route, municipalities, opening_time, closing_time,
+       expected_participants, expected_spectators, expected_staff,
+       previous_edition, recurring_fixed_venue, venue_facility_id, filed, is_demo, copied_from)
+     VALUES (?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 0, ?, ?)`,
+  ).run(
+    newId, account.id, src.name_en, src.name_ar,
+    src.event_type, src.venue_route, src.municipalities, src.opening_time, src.closing_time,
+    src.expected_participants, src.expected_spectators, src.expected_staff,
+    src.recurring_fixed_venue, src.venue_facility_id, src.is_demo, sourceEventId,
+  );
+
+  if (assessment) {
+    const answers = JSON.parse(assessment.answers) as DomainAnswers;
+    const inputs = JSON.parse(assessment.inputs) as MinimumConditionInputs;
+    // Derived FRESH from the copied answers -- never inherited from the old record.
+    const derivation = deriveLevel({ answers, inputs });
+    db.prepare(
+      `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version)
+       VALUES (?, 1, ?, ?, ?, ?)`,
+    ).run(newId, assessment.answers, assessment.inputs, JSON.stringify(derivation), NEHRAT_TOOL_VERSION);
+  }
+
+  // The named parties return as FRESH nominations: unanswered, on new unguessable
+  // tokens, unlinked -- a nomination is not a confirmation, and last year's answer
+  // is not this year's.
+  const parties = db
+    .prepare(
+      `SELECT kind, name_en, name_ar, email FROM invitations
+       WHERE event_id = ? AND status IN ('nominated','confirmed') ORDER BY invited_at`,
+    )
+    .all(sourceEventId) as unknown as { kind: string; name_en: string; name_ar: string; email: string }[];
+  const insertInvitation = db.prepare(
+    `INSERT INTO invitations (token, event_id, kind, name_en, name_ar, email, status, declaration)
+     VALUES (?, ?, ?, ?, ?, ?, 'nominated', 'none')`,
+  );
+  for (const inv of parties) {
+    insertInvitation.run(randomBytes(24).toString('hex'), newId, inv.kind, inv.name_en, inv.name_ar, inv.email);
+  }
+
+  revalidatePath('/dashboard');
+  redirect(`/events/${newId}?notice=reapplied`);
+}
+
 /** The venue lane's half of the same rule: an archived venue record is read-only. */
 function refuseIfVenueArchived(venueId: string): void {
   const row = getDb().prepare(`SELECT archived_at FROM venues WHERE id = ?`).get(venueId) as

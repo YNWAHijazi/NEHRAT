@@ -70,6 +70,10 @@
   "$commentAllowed": "The ban on 'approved' is on the DETERMINATION -- the Ministry never approves or rejects. These phrases use the word in its ordinary regulatory sense and come verbatim from the instruments; each is listed with the sense it carries so the exception cannot quietly widen.",
   "allowedPhrases": [
     {
+      "phrase": "carries over as approved",
+      "why": "The Reapply sentence the partner dictated verbatim (2026-09-02): it DENIES approval carrying over, which is the ban's own point -- nothing is approved, the level re-derives."
+    },
+    {
       "phrase": "approved or licensed capacity",
       "why": "Protocol 3 and the venue instrument: the capacity a venue is licensed for. Not a determination."
     },

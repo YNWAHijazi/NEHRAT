@@ -109,9 +109,14 @@ describe('the sweep covers rendered source too', () => {
   });
 
   it('finds no banned English term in a component', () => {
+    // The same allowlist the data sweep honours: each listed phrase carries its
+    // reason in banned-terms.json, and blanking it first means a NEW occurrence
+    // of the bare term still fails.
+    const scrub = (v: string): string =>
+      banned.allowedPhrases.reduce((acc, a) => acc.replace(new RegExp(a.phrase, 'gi'), ''), v);
     const offenders: string[] = [];
     for (const file of rendered) {
-      const text = read(file);
+      const text = scrub(read(file));
       for (const term of banned.terms) {
         if (new RegExp(`["'\`][^"'\`]*\\b${term.en}\\b[^"'\`]*["'\`]`, 'i').test(text)) {
           offenders.push(`${relative(file)} -- ${term.en}`);

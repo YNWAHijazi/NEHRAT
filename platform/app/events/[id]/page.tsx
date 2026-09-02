@@ -8,6 +8,7 @@ import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice
 import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
+import { reapplyEventAction } from '../../actions';
 import {
   archiveWindowDays,
   assessmentsFor,
@@ -266,6 +267,7 @@ export default async function EventRecordPage({
 
   const event = eventFor(account.id, id);
   if (!event) notFound();
+  const notice = (await searchParams)?.notice;
 
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
@@ -397,6 +399,31 @@ export default async function EventRecordPage({
             )}
           </div>
         ) : null}
+        {notice === 'reapplied' ? (
+          <div data-region="reapplied-notice" style={{ padding: '20px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 20, fontSize: 15, lineHeight: 1.7 }}>
+            <L
+              en={`A new event, copied from ${event.copiedFrom ?? 'the previous record'}. Nothing from the previous event carries over as approved. The level is derived again from your answers. Enter the dates — the filing deadline derives from them.`}
+              ar={`فعالية جديدة، منسوخة من ${event.copiedFrom ?? 'السجل السابق'}. لا شيء من الفعالية السابقة يُعتمد كما هو. ويُستنتج المستوى من جديد من إجاباتكم. أدخلوا التواريخ — فمهلة التقديم تُشتق منها.`}
+            />
+          </div>
+        ) : null}
+        {/* REAPPLY: the one action a concluded record offers -- it edits nothing and
+            refiles nothing; it starts a NEW record prefilled from this one. */}
+        {event.endDate !== null && event.endDate < today ? (
+          <div data-region="reapply" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', padding: '16px 22px', border: '1px dashed var(--line)', borderRadius: 12, marginBlockEnd: 20 }}>
+            <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+              <L
+                en="Holding this event again? Reapply starts a new event prefilled from this one — everything except the dates. Nothing from the previous event carries over as approved. The level is derived again from your answers."
+                ar="هل ستقام هذه الفعالية مجدداً؟ تبدأ إعادة التقديم فعالية جديدة معبأة مسبقاً من هذه — كل شيء عدا التواريخ. لا شيء من الفعالية السابقة يُعتمد كما هو. ويُستنتج المستوى من جديد من إجاباتكم."
+              />
+            </span>
+            <form action={reapplyEventAction.bind(null, event.id)}>
+              <button type="submit" style={{ height: 44, paddingInline: 22, border: '1px solid var(--brand)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--brand)', cursor: 'pointer' }}>
+                <L en="Reapply" ar="إعادة التقديم" />
+              </button>
+            </form>
+          </div>
+        ) : null}
         {event.lifecycle === 'cancelled' ? (
           <div data-region="lifecycle-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--bad)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7 }}>
             <L
@@ -482,6 +509,13 @@ export default async function EventRecordPage({
                   <L en="Record ID" ar="معرّف السجل" />
                 </div>
                 <div style={{ fontSize: '14.5px', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{event.id}</div>
+                {event.copiedFrom ? (
+                  <div data-region="copied-from" style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>
+                    <Link href={`/events/${event.copiedFrom}`} style={{ color: 'var(--muted)', textDecoration: 'underline' }}>
+                      <L en={`Copied from ${event.copiedFrom}`} ar={`منسوخة من ${event.copiedFrom}`} />
+                    </Link>
+                  </div>
+                ) : null}
               </div>
               <div>
                 <div style={{ ...upLabel, fontSize: 11, marginBlockEnd: 3 }}>
