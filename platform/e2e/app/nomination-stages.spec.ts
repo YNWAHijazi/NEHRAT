@@ -68,9 +68,13 @@ test.describe('stage one — what you are being asked to take on', () => {
     const event = page.locator('[data-region="briefing-event"]');
     await expect(event).toContainText('Beirut Coastal 12K');
     await expect(event).toContainText('Level 2');
-    for (const label of ['Organizer', 'Dates', 'Opening and closing', 'Venue, route, or location', 'Municipality']) {
+    for (const label of ['Organizer', 'Dates', 'Opening and closing', 'Venue, route, or location', 'Municipality', 'Expected attendance']) {
       await expect(event, `the briefing omits ${label}`).toContainText(label);
     }
+    // The figure that set the level, from the latest assessment (partner ruling:
+    // the counterparty summary includes expected participants). EV-0418's seeded
+    // assessment expects 4,500 at the same time.
+    await expect(event).toContainText('4,500');
 
     // The organizer's filing deadline -- the nominee's deadline in practice.
     await expect(page.locator('[data-region="briefing-deadline"]')).toBeVisible();
@@ -188,6 +192,25 @@ test.describe('stage three — the account, after the answer and never as part o
     // Walking away does not undo it: the answer stands and the link comes back here.
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}`);
     await expect(page.locator('[data-region="accepted-no-account"]')).toBeVisible();
+
+    // AND THE ACCOUNT LANDS ON THE BRIEF. The defect this pins: every post-account
+    // redirect sent counterparties to /events/[id], a route with no EMS surface at
+    // all — a brand-new provider's very first signed-in screen was not-found. In the
+    // same test as the accept, because a worker-restart retry re-runs beforeAll with
+    // a fresh, unanswered nomination: a separate test would inherit the wrong state.
+    await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}/account`);
+    const create = page.locator('[data-region="create-account"]');
+    await expect(create).toBeVisible();
+    await create.locator('input[name="fullName"]').fill('Stage Walk Operations');
+    await create.locator('input[name="email"]').fill('stages-account@example.lb');
+    await create.locator('input[name="password"]').fill('Walk-the-stages-2026');
+    await create.locator('button[type="submit"]').click();
+
+    await page.waitForURL(/\/events\/EV-0418\/brief/);
+    await expect(page.locator('[data-region="brief-notice"]')).toBeVisible();
+    await expect(page.locator('[data-region="briefing"]')).toBeVisible();
+    // The same scope stage one showed, including the attendance figure.
+    await expect(page.locator('[data-region="briefing-event"]')).toContainText('Expected attendance');
   });
 });
 

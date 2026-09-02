@@ -39,8 +39,8 @@
     "declineWarning": {
       "titleEn": "Declining removes your agency as a named provider for this event.",
       "titleAr": "الاعتذار يزيل جهتكم كمزوّد مُسمّى لهذه الفعالية.",
-      "bodyEn": "That is a material change to the organizer's submission. The organizer must notify the Ministry of it and may need to identify another provider before the event can proceed.",
-      "bodyAr": "وهذا تغيير جوهري في ملف المنظّم. على المنظّم إبلاغ الوزارة به وقد يحتاج إلى تحديد مزوّد آخر قبل أن تمضي الفعالية."
+      "bodyEn": "The organizer is told, with your reason as written, and may need to name another provider. If their submission is already filed, this is a material change they must report to the Ministry.",
+      "bodyAr": "يُبلَّغ المنظّم بسببكم كما كُتب، وقد يحتاج إلى تسمية مزوّد آخر. وإذا كان ملفه مقدَّماً، فهذا تغيير جوهري عليه إبلاغ الوزارة به."
     },
     "profileFields": [
       {
@@ -642,8 +642,8 @@
       }
     ],
     "soleNote": {
-      "en": "No one else can address this. The organizer cannot file the Level 3 package without it, and no other party is named against it in the requirements matrix.",
-      "ar": "لا يمكن لأحد غيركم معالجة هذا. ولا يمكن للمنظّم تقديم حزمة المستوى 3 من دونه، ولا يُسمّى أي طرف آخر مقابله في مصفوفة المتطلبات."
+      "en": "Only you can complete this. The organizer cannot file without it.",
+      "ar": "لا يمكن لغيركم إنجاز هذا. ولا يمكن للمنظّم التقديم من دونه."
     },
     "govIntro": {
       "en": "At Level 3 this content is yours to write. What you enter here writes into the organizer's event health and medical plan; neither of you writes it twice.",
@@ -746,6 +746,10 @@
         "en": "Municipality",
         "ar": "البلدية"
       },
+      "expected": {
+        "en": "Expected attendance",
+        "ar": "الحضور المتوقع"
+      },
       "level": {
         "en": "Level",
         "ar": "المستوى"
@@ -761,14 +765,14 @@
     "deadlineTitleAr": "مهلة التقديم لدى المنظّم",
     "deadlineBodyEn": "The organizer must file the health and medical preparedness package by this date. Your answer is needed before then.",
     "deadlineBodyAr": "على المنظّم تقديم حزمة التأهب الصحي والطبي بحلول هذا التاريخ. ويلزم ردّكم قبله.",
-    "deadlineFiledEn": "The package has already been filed. Your answer still stands to be recorded, and a change to it is a material change the organizer reports to the Ministry.",
-    "deadlineFiledAr": "قُدِّمت الحزمة سابقاً. ولا يزال ردّكم يُسجَّل، وأي تغيير فيه تغيير جوهري يبلّغ المنظّم الوزارة به.",
+    "deadlineFiledEn": "The organizer has already filed for this event. Your answer still counts, and the organizer is told of it.",
+    "deadlineFiledAr": "قدّم المنظّم ملف هذه الفعالية سابقاً. ولا يزال ردّكم معتبَراً، ويُبلَّغ المنظّم به.",
     "deadlineUnknownEn": "No filing deadline can be shown: the event has no start date recorded yet.",
     "deadlineUnknownAr": "لا يمكن عرض مهلة التقديم: لم يُسجَّل تاريخ بدء للفعالية بعد.",
     "requirementsTitleEn": "The requirements this level puts on you",
     "requirementsTitleAr": "المتطلبات التي يضعها هذا المستوى عليكم",
-    "requirementsIntroEn": "Derived from the requirements matrix at this level. Rows marked as yours alone name no other party: nobody else can discharge them.",
-    "requirementsIntroAr": "مُشتقة من مصفوفة المتطلبات عند هذا المستوى. والبنود الموسومة بأنها لكم وحدكم لا تُسمّي أي طرف آخر: ولا يمكن لأحد غيركم الوفاء بها.",
+    "requirementsIntroEn": "What your organization is asked to do at this level. An item marked yours alone can be done by nobody else.",
+    "requirementsIntroAr": "ما يُطلب من مؤسستكم عند هذا المستوى. والبند الموسوم بأنه لكم وحدكم لا يمكن لغيركم القيام به.",
     "soleEn": "Yours alone",
     "soleAr": "لكم وحدكم",
     "sharedEn": "Shared",

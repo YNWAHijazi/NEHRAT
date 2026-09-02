@@ -41,11 +41,70 @@ function sh(referenceDate: string, shift: number): string {
   return t.toISOString().slice(0, 10);
 }
 
+/**
+ * THE COUNTERPARTY LINKAGE, repairable on its own. The invitation→account linkage
+ * entered the seeder after the accounts and invitations did, and the seeder's guard is
+ * all-or-nothing: a database seeded before then keeps test_ems and test_director with
+ * zero linked nominations forever, which renders both role dashboards empty — the
+ * defect the partner review reported. Guarded on account_id IS NULL so it never
+ * clobbers a row a walkthrough has since acted on, it is safe to run on every boot
+ * and from the provisioning command alike. It links what exists: a database missing
+ * the demonstration invitation rows themselves needs a reseed, not a repair.
+ */
+export function linkDemonstrationCounterparties(db: DatabaseSync): number {
+  const account = (login: string): number | null =>
+    (db.prepare(`SELECT id FROM accounts WHERE login = ? AND is_demo = 1`).get(login) as
+      | { id: number }
+      | undefined)?.id ?? null;
+  const ems = account('test_ems');
+  const director = account('test_director');
+  const shift = shiftDays();
+  let changed = 0;
+
+  if (ems !== null) {
+    changed += db
+      .prepare(`UPDATE invitations SET account_id = ? WHERE token = 'demo-lrc-beirut-0418' AND account_id IS NULL`)
+      .run(ems).changes as number;
+    changed += db
+      .prepare(
+        `UPDATE invitations SET account_id = ?, declaration = 'signed',
+           declaration_items = ?, certification = ?, signed_at = ?
+         WHERE token = 'demo-lrc-baalbeck-0362' AND account_id IS NULL`,
+      )
+      .run(
+        ems,
+        JSON.stringify(Array.from({ length: 10 }, () => true)),
+        JSON.stringify({
+          provider: 'Lebanese Red Cross — Beirut branch',
+          representative: 'S. Karam',
+          position: 'Branch operations director',
+          phone: '03 774 120',
+          date: sh('2026-08-13', shift),
+        }),
+        sh('2026-08-13', shift),
+      ).changes as number;
+  }
+  if (director !== null) {
+    changed += db
+      .prepare(
+        `UPDATE invitations SET account_id = ? WHERE token IN ('demo-director-0362', 'demo-director-0244') AND account_id IS NULL`,
+      )
+      .run(director).changes as number;
+  }
+  return changed;
+}
+
 export function seedDemonstration(db: DatabaseSync): void {
   const seeded = db
     .prepare(`SELECT id FROM accounts WHERE login = 'test_organizer'`)
     .get() as { id: number } | undefined;
-  if (seeded) return;
+  if (seeded) {
+    // Already provisioned — but repair the counterparty linkage a pre-linkage
+    // database is missing, so a standing instance heals on boot instead of showing
+    // the demonstration EMS and Director accounts empty dashboards.
+    linkDemonstrationCounterparties(db);
+    return;
+  }
 
   const shift = shiftDays();
   const d = (ref: string): string => sh(ref, shift);
@@ -485,25 +544,9 @@ export function seedDemonstration(db: DatabaseSync): void {
   // ---- Slice 5: the counterparty roles ----
   // test_ems is the Lebanese Red Cross operational account: named on the Level 2
   // 12K (participation owed -- operational detail not yet supplied) and on the
-  // Level 3 Baalbeck festival (declaration signed, all ten items).
-  db.prepare(`UPDATE invitations SET account_id = ? WHERE token = 'demo-lrc-beirut-0418'`).run(ems);
-  db.prepare(
-    `UPDATE invitations SET account_id = ?, declaration = 'signed',
-       declaration_items = ?, certification = ?, signed_at = ?
-     WHERE token = 'demo-lrc-baalbeck-0362'`,
-  ).run(
-    ems,
-    JSON.stringify(Array.from({ length: 10 }, () => true)),
-    JSON.stringify({
-      provider: 'Lebanese Red Cross — Beirut branch',
-      representative: 'S. Karam',
-      position: 'Branch operations director',
-      phone: '03 774 120',
-      date: d('2026-08-13'),
-    }),
-    d('2026-08-13'),
-  );
-  db.prepare(`UPDATE invitations SET account_id = ? WHERE token IN ('demo-director-0362', 'demo-director-0244')`).run(director);
+  // Level 3 Baalbeck festival (declaration signed, all ten items). The linkage lives
+  // in its own function so a standing database can be repaired without reseeding.
+  linkDemonstrationCounterparties(db);
 
   const insertProfile = db.prepare(
     `INSERT INTO role_profiles (account_id, fields) VALUES (?, ?)`,

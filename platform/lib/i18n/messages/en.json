@@ -15,7 +15,6 @@
     "materialChangeBeforeFiling": "Available once the submission is filed",
     "venueReassessmentNotYetOpen": "Opens {date}, {days} days before expiry",
     "declarationItemsOutstanding": "{count} of {total} items still to confirm",
-    "nominationNotConfirmed": "A nomination is not a confirmation",
     "awaitingMinistryValue": "Nothing is in force under this rule until the Ministry sets and publishes the value. Operators are notified when it does.",
     "postEventNeedsEventDate": "Available after the event ends. The event date has not been recorded.",
     "assessmentIncomplete": "The level is derived once every domain is answered and every required figure is captured.",

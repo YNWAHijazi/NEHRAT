@@ -27,7 +27,7 @@
 
 import { resolve } from 'node:path';
 import { getDb } from '../lib/db';
-import { seedDemonstration } from '../lib/demo-seed';
+import { linkDemonstrationCounterparties, seedDemonstration } from '../lib/demo-seed';
 import { hashPassword, checkPasswordPolicy } from '../lib/password';
 
 /**
@@ -104,6 +104,21 @@ function main(): void {
     .all() as unknown as { login: string }[];
 
   if (existing.length > 0) {
+    // Not a plain refusal any more: an instance provisioned before the counterparty
+    // linkage entered the seeder holds test_ems and test_director with zero linked
+    // nominations, and re-provisioning is exactly what must not happen. Repair the
+    // linkage, say which it was, and refuse the reseeding either way.
+    const repaired = linkDemonstrationCounterparties(db);
+    if (repaired > 0) {
+      process.stdout.write(
+        `\nALREADY PROVISIONED — COUNTERPARTY LINKAGE REPAIRED\n\n` +
+          `  database: ${target}\n\n` +
+          `  ${repaired} demonstration nomination(s) were not linked to their\n` +
+          `  accounts, so the EMS and Director demonstration dashboards rendered\n` +
+          `  empty. They are linked now. No account, event or invitation was added.\n`,
+      );
+      return;
+    }
     process.stderr.write(
       `\nREFUSING: THIS INSTANCE ALREADY HOLDS DEMONSTRATION ACCOUNTS\n\n` +
         `  database: ${target}\n\n` +

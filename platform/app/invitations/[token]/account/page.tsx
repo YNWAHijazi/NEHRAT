@@ -50,8 +50,17 @@ export default async function NominationAccountPage({
   if (invitation.status === 'nominated') redirect(`/invitations/${token}`);
 
   const account = await currentAccount();
-  // Already linked, or already signed in: this screen has nothing to offer.
-  if (account) redirect(`/events/${invitation.eventId}`);
+  // Already linked, or already signed in: this screen has nothing to offer. A
+  // counterparty's landing is the brief — /events/[id] itself has no surface for an
+  // EMS account and 404s (rule 6). Anyone else (an organizer holding their own
+  // nominee's link) goes to the event record as before.
+  if (account) {
+    redirect(
+      account.role === 'ems' || account.role === 'director'
+        ? `/events/${invitation.eventId}/brief`
+        : `/events/${invitation.eventId}`,
+    );
+  }
   if (invitation.accountId !== null) redirect('/signin');
 
   const N = ROLES_CONTENT.nomination;

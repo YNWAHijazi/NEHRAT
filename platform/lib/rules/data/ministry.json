@@ -400,7 +400,7 @@
       "en": "Platform owner",
       "ar": "مالك المنصة"
     },
-    "$comment": "Every role a person can hold, not only the Ministry-side ones. The counterparty roles were absent, so the account console rendered them as raw keys -- 'organizer', 'ems' -- in its rows and its role selector. A console that administers all nine roles must be able to name all nine.",
+    "$comment": "Every role a person can hold, not only the Ministry-side ones. The counterparty roles were absent, so the account console rendered them as raw keys -- 'organizer', 'ems' -- in its rows and its role selector. A console that administers all eight roles must be able to name all eight (nine before the inspector merged into reviewer, partner ruling 2026-09-01).",
     "organizer": {
       "en": "Organizer",
       "ar": "المنظِّم"

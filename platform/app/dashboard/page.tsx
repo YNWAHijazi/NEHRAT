@@ -231,6 +231,11 @@ export default async function DashboardPage({
         <GovernmentBand />
         <Header account={account} organization={null} unreadCount={unreadRole} showBack={false} />
         <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+          {notice === 'withdrawn' ? (
+            <div data-region="withdrawn-notice" style={{ padding: '18px 24px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
+              <L en="You have withdrawn from the event. The organizer has been told." ar="انسحبتم من الفعالية. وأُبلغ المنظّم." />
+            </div>
+          ) : null}
           <RoleDashboard
             rows={rows}
             countEn={`${rows.length} events · ${owed} need a response from you`}

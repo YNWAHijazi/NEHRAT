@@ -41,6 +41,9 @@ export default async function InvitationPage({
   const briefing = nominationBriefing(token);
   const content = ROLES_CONTENT;
   const isDirector = invitation.kind === 'director';
+  // A declined, withdrawn or removed nomination is closed: the banner says so, and
+  // the event's facts and document links are not re-served to a party no longer in it.
+  const live = invitation.status === 'nominated' || invitation.status === 'confirmed';
 
 
   return (
@@ -54,24 +57,24 @@ export default async function InvitationPage({
           {invitation.status === 'withdrawn' ? (
             <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
               <L
-                en="This nomination has been withdrawn by the organizer. It was withdrawn before it was answered, so nothing is owed by anyone: this link no longer accepts a response or a registration."
-                ar="سحب المنظّم هذا الترشيح. وقد سُحب قبل الإجابة عليه، فلا شيء مستحق على أحد: لم يعد هذا الرابط يقبل رداً أو تسجيلاً."
+                en="The organizer withdrew this nomination before it was answered. This link no longer accepts a response, and nothing is needed from you."
+                ar="سحب المنظّم هذا الترشيح قبل الإجابة عليه. لم يعد هذا الرابط يقبل رداً، ولا يُطلب منكم شيء."
               />
             </div>
           ) : null}
           {invitation.status === 'removed' ? (
             <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
               <L
-                en="The organizer has removed this confirmed participation — a material change on their submission, which they report to the Ministry. Your record of this event is closed and nothing further is owed on it."
-                ar="أزال المنظّم هذه المشاركة المؤكَّدة — وهو تغيير جوهري في تقديمه يبلّغ الوزارة به. أُغلق سجلكم لهذه الفعالية ولا شيء مستحق عليه بعد الآن."
+                en="The organizer has removed your participation in this event. Nothing more is needed from you."
+                ar="أزال المنظّم مشاركتكم في هذه الفعالية. ولا يُطلب منكم شيء بعد الآن."
               />
             </div>
           ) : null}
           {invitation.status === 'declined' || notice === 'declined' ? (
             <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
               <L
-                en="This nomination has been declined. The organizer has been notified — declining is a material change the organizer must report to the Ministry."
-                ar="اعتُذر عن هذا الترشيح. وأُبلغ المنظّم — فالاعتذار تغيير جوهري على المنظّم إبلاغ الوزارة به."
+                en="This nomination has been declined. The organizer has been told, with the reason as written."
+                ar="اعتُذر عن هذا الترشيح. وأُبلغ المنظّم بالسبب كما كُتب."
               />
             </div>
           ) : null}
@@ -129,7 +132,7 @@ export default async function InvitationPage({
             </p>
           ) : null}
 
-          {briefing ? (
+          {briefing && live ? (
             <Briefing
               briefing={briefing}
               token={token}
@@ -140,7 +143,7 @@ export default async function InvitationPage({
             />
           ) : null}
 
-          {isDirector ? (
+          {isDirector && live ? (
             <div data-region="accepting" style={{ padding: '32px 36px', border: '2px solid var(--brand)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 14 }}>
                 <L en="What you would be accepting" ar="ما ستقبلونه" />

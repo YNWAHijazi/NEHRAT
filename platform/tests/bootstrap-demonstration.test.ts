@@ -85,9 +85,10 @@ describe('the demonstration bootstrap', () => {
     // would have shown it was the path, and the success message omitted it.
     expect(BOOTSTRAP).toContain("process.env['DATABASE_PATH']");
     expect(BOOTSTRAP).toContain('REFUSING: DATABASE_PATH IS NOT SET');
-    // Both outcomes name the path: the success line and the already-provisioned refusal.
+    // Every outcome names the path: the success line, the already-provisioned
+    // refusal, and the linkage-repair outcome that stands between them.
     const named = BOOTSTRAP.split('database: ${target}').length - 1;
-    expect(named, 'every outcome must state the database it acted on').toBe(2);
+    expect(named, 'every outcome must state the database it acted on').toBe(3);
   });
 
   it('addresses cannot be mistaken for mailboxes that receive', () => {

@@ -248,7 +248,10 @@ for (const lang of LANGUAGES) {
       await signInAs(page, 'test_moph_admin');
       await gotoRidingRestarts(page, '/ministry/admin/records');
       await expect(page.locator('[data-region="admin-tabs"] a')).toHaveCount(4);
-      await expect(page.locator('[data-region="records"] > a').first()).toBeVisible();
+      // RULING (partner review, 2026-09-01): concluded events archive. A records row
+      // is a <div> wrapping the link and the archive control -- a form cannot sit
+      // inside an anchor -- so the row's link is one level deeper than it was.
+      await expect(page.locator('[data-region="records"] > div > a').first()).toBeVisible();
       await gotoRidingRestarts(page, '/ministry/admin/records/EV-0362');
       await expect(page.locator('[data-region="file-answers"]')).toBeVisible();
       await expect(page.locator('[data-region="file-determinations"]')).toBeVisible();

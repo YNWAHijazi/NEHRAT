@@ -236,7 +236,8 @@ export default async function EventRecordPage({ params }: { params: Promise<{ id
   // missing id (rule 6).
   if (account.role === 'director') {
     const invitation = invitationForEvent(account.id, id, 'director');
-    if (!invitation) notFound();
+    // A declined nomination ends the entitlement by the holder's own answer.
+    if (!invitation || invitation.status === 'declined') notFound();
     const governance = governanceFor(id);
     const providers = getDb()
       .prepare(`SELECT declaration FROM invitations WHERE event_id = ? AND kind = 'ems'`)

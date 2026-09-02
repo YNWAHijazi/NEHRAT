@@ -28,13 +28,18 @@ test.describe('the console', () => {
   test('Records shows every record, filed or not, and filters', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/records');
-    const rows = page.locator('[data-region="records"] > a');
+    // RULING (partner review, 2026-09-01): the archive of concluded events. Each row
+    // is now a <div> holding the record's link PLUS its archive control or archived
+    // note -- a form cannot live inside an anchor, so the row stopped being a bare
+    // <a> child. The row count is the count of record LINKS inside those wrappers;
+    // the empty-state div carries no link, so it still counts as zero rows.
+    const rows = page.locator('[data-region="records"] > div > a');
     const all = await rows.count();
     expect(all).toBeGreaterThanOrEqual(5);
 
     // A filtered view has a URL, so it can be sent to somebody.
     await gotoRidingRestarts(page, '/ministry/admin/records?level=3');
-    const levelThree = await page.locator('[data-region="records"] > a').count();
+    const levelThree = await page.locator('[data-region="records"] > div > a').count();
     expect(levelThree).toBeGreaterThan(0);
     expect(levelThree).toBeLessThan(all);
 
@@ -42,7 +47,7 @@ test.describe('the console', () => {
     await expect(page.locator('[data-region="records"]')).toContainText('Byblos Harbour Swim');
 
     await gotoRidingRestarts(page, '/ministry/admin/records?q=Baalbeck');
-    await expect(page.locator('[data-region="records"] > a')).toHaveCount(1);
+    await expect(page.locator('[data-region="records"] > div > a')).toHaveCount(1);
   });
 
   test('the complete file carries every part, nothing summarised', async ({ page }) => {

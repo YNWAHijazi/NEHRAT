@@ -32,7 +32,18 @@ export default async function ParticipationPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
+      {/* Back goes to the event summary, the screen this requirement belongs to.
+          /events/[id] itself has no EMS surface. A closed nomination has no brief
+          either, so its back path is the generic Dashboard pill. */}
+      <Header
+        account={account}
+        organization={null}
+        unreadCount={unread}
+        showBack={true}
+        {...(invitation.status === 'nominated' || invitation.status === 'confirmed'
+          ? { back: { href: `/events/${id}/brief`, en: 'Event summary', ar: 'ملخص الفعالية' } }
+          : {})}
+      />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           {notice === 'sent' ? (
@@ -69,8 +80,8 @@ export default async function ParticipationPage({
               <form action={withdrawParticipationAction.bind(null, invitation.token)} style={{ marginBlockStart: 10, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                 <span style={{ flex: 1, minWidth: 260, fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
                   <L
-                    en="Withdrawing after confirming is a material change on the organizer's record: they are notified with your reason as written, and where their submission is filed they must report the change and name another provider."
-                    ar="الانسحاب بعد التأكيد تغيير جوهري في سجل المنظّم: يُبلَّغ بسببكم كما كُتب، وحيث يكون ملفه مقدَّماً عليه الإبلاغ عن التغيير وتسمية مزوّد آخر."
+                    en="If you withdraw, the organizer is told, with your reason as written, and may need to name another provider. For a filed submission this is a material change they must report."
+                    ar="إذا انسحبتم، يُبلَّغ المنظّم بسببكم كما كُتب، وقد يحتاج إلى تسمية مزوّد آخر. وللملف المقدَّم هذا تغيير جوهري عليه الإبلاغ عنه."
                   />
                 </span>
                 <input name="reason" required aria-label="Reason" style={{ flexBasis: '100%', height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />

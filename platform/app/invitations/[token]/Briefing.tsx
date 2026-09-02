@@ -87,6 +87,14 @@ export function Briefing({
     { key: 'times', label: N.labels.times, value: or(times) },
     { key: 'venue', label: N.labels.venue, value: or(briefing.venueRoute) },
     { key: 'municipality', label: N.labels.municipality, value: or(briefing.municipalities) },
+    {
+      key: 'expected',
+      label: N.labels.expected,
+      value:
+        briefing.expectedAttendance !== null
+          ? { en: briefing.expectedAttendance.toLocaleString('en-US'), ar: briefing.expectedAttendance.toLocaleString('en-US') }
+          : unset,
+    },
     { key: 'level', label: N.labels.level, value: level ? { en: `Level ${level}`, ar: `المستوى ${level}` } : unset },
     { key: 'namedAs', label: N.labels.namedAs, value: { en: namedEn, ar: namedAr } },
   ];

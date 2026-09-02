@@ -1216,9 +1216,10 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
       `/events/${inv.event_id}/requirements`,
     );
-    // Stage three. A signed-in holder is already where they need to be; anyone else
-    // is offered an account -- offered, not required.
-    if (account) redirect(`/events/${inv.event_id}?notice=accepted`);
+    // Stage three. A signed-in holder lands on the standing brief -- the clean event
+    // summary every counterparty role can read; anyone else is offered an account --
+    // offered, not required.
+    if (account) redirect(`/events/${inv.event_id}/brief?notice=accepted`);
     redirect(`/invitations/${token}/account`);
   }
   if (response === 'decline') {
@@ -1284,7 +1285,7 @@ export async function registerAgainstInvitationAction(
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
   if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
-  if (inv.account_id !== null) redirect(`/events/${inv.event_id}`);
+  if (inv.account_id !== null) redirect(`/events/${inv.event_id}/brief`);
 
   const name = String(formData.get('fullName') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
@@ -1315,7 +1316,7 @@ export async function registerAgainstInvitationAction(
   const accountId = created.lastInsertRowid as number;
   db.prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(accountId, token);
   await startSession(accountId);
-  redirect(`/events/${inv.event_id}?notice=registered`);
+  redirect(`/events/${inv.event_id}/brief?notice=registered`);
 }
 
 /** Stage three, the other path: an account already exists, so link this nomination to it. */
@@ -1349,7 +1350,7 @@ export async function signInAgainstInvitationAction(
   getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
   await forgetSignInFields();
   await startSession(row.id);
-  redirect(`/events/${inv.event_id}?notice=linked`);
+  redirect(`/events/${inv.event_id}/brief?notice=linked`);
 }
 
 function ownedInvitation(accountId: number, token: string): boolean {

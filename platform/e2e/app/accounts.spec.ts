@@ -25,16 +25,28 @@ import { signInAs } from '../helpers/signin';
 const unique = (prefix: string): string => `${prefix}.${Date.now().toString(36)}@example.lb`;
 
 test.describe('the console sees every account', () => {
-  test('all nine roles, not the five Ministry ones', async ({ page }) => {
+  test('all eight roles, not the four Ministry ones', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/users');
     const users = page.locator('[data-region="users"]');
     await expect(users).toBeVisible();
     // The counterparty roles were invisible here: they exist, they sign in, and an
     // administrator asked to manage the accounts could not see them.
-    for (const role of ['Organizer', 'EMS provider', 'Event Medical Director', 'Reviewer', 'Inspector']) {
+    //
+    // RULING (partner review, 2026-09-01): the inspector role is MERGED into reviewer.
+    // One Ministry role reviews, flags for inspection, self-assigns the visit and
+    // records findings; there is no separate inspector account any more, so this test
+    // stopped expecting one and now pins the FULL set of eight -- every role in
+    // lib/rules roleLabels, Ministry side and counterparty side alike.
+    for (const role of [
+      'Organizer', 'EMS provider', 'Event Medical Director', 'First-response unit',
+      'Reviewer', 'Administrator', 'Order of Physicians reviewer', 'Platform owner',
+    ]) {
       await expect(users, `${role} is missing from the console`).toContainText(role);
     }
+    // And the retired role must not resurface: an "Inspector" row here would mean the
+    // merge regressed somewhere between the schema migration and this screen.
+    await expect(users).not.toContainText('Inspector');
   });
 
   test('every row says where the account came from', async ({ page }) => {

@@ -70,9 +70,20 @@ test.describe('the nomination loop', () => {
       page.locator('[data-region="g2"] > div > div', { hasText: 'Civil Defence — Beirut' }),
     ).toContainText('Removed');
 
-    // One confirmed provider remains; the provider gate stays satisfied on it alone.
+    // One confirmed provider remains; neither party this flow acted on gates filing.
+    //
+    // PARTY-SCOPED, NOT A BLANKET SWEEP (first full-suite run since the Ministry
+    // slice, 2026-09-02). The blanket form -- no "a nomination is not a confirmation"
+    // anywhere on the page -- collided with nomination-stages.spec.ts, which
+    // legitimately nominates its own provider (Stage Walk Medical) on this same
+    // event and leaves it unanswered until late in its own serial order; under two
+    // workers that file's blocker line is honestly on this screen. What THIS flow
+    // must prove is that withdraw and remove each closed their own party's gate:
+    // the withdrawn and the removed party are gone from the submission screen
+    // entirely -- a stronger per-party pin than the blocker line alone.
     await gotoRidingRestarts(page, '/events/EV-0418/submit');
-    await expect(page.locator('body')).not.toContainText('a nomination is not a confirmation');
+    await expect(page.locator('body')).not.toContainText('Coastal Medical Transport');
+    await expect(page.locator('body')).not.toContainText('Civil Defence — Beirut');
 
     // And a replacement can be nominated without touching who remains.
     await gotoRidingRestarts(page, '/events/EV-0418/requirements');

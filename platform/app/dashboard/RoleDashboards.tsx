@@ -72,7 +72,8 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
       return {
         key: inv.token,
         href: isL3 ? `/events/${inv.eventId}/declaration` : `/events/${inv.eventId}/participation`,
-        ...(inv.status === 'confirmed' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
+        // Invited or accepted: the brief reads from nomination onward (partner ruling).
+        ...(inv.status === 'confirmed' || inv.status === 'nominated' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,
         date: inv.eventStart ?? '', level, chips,
@@ -115,7 +116,7 @@ export function directorRows(
       const reportDue = inv.eventEnd ? addDaysIso(inv.eventEnd, POST_EVENT_REPORT.windowDays) : '';
       return {
         key: inv.token,
-        ...(inv.status === 'confirmed' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
+        ...(inv.status === 'confirmed' || inv.status === 'nominated' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         href: reportOwed || done ? `/events/${inv.eventId}/report` : `/events/${inv.eventId}`,
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,

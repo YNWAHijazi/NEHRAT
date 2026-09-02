@@ -31,20 +31,33 @@ import { ROLES_CONTENT } from '../../../../lib/rules';
  * silently is worse than none: a party who read the arrangements in August and acts on
  * them in September must be able to see whether what they read is what stands.
  */
-export default async function EventBriefPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EventBriefPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
+  const { notice } = await searchParams;
 
   // The nomination IS the entitlement. Not the role, not a membership: this account
-  // holds a confirmed nomination on this event, or there is nothing here for it.
+  // holds a live nomination on this event, or there is nothing here for it. Live means
+  // invited or accepted (partner ruling): a party reads the event from the moment it
+  // is named — the token page shows the same scope to the same holder — and a
+  // declined, withdrawn or removed party no longer reads it at all.
   const kind = account.role === 'director' ? 'director' : 'ems';
   const invitation = invitationForEvent(account.id, id, kind);
-  if (!invitation || invitation.status !== 'confirmed') notFound();
+  if (!invitation || (invitation.status !== 'confirmed' && invitation.status !== 'nominated')) notFound();
 
   const briefing = nominationBriefing(invitation.token);
   if (!briefing) notFound();
-  const plan = nomineePlanSlice(id);
+  // The plan slice opens on acceptance. An invited party reads the same scope the
+  // token page shows; the arrangements inside the organizer's plan are for parties
+  // that have said yes.
+  const plan = invitation.status === 'confirmed' ? nomineePlanSlice(id) : null;
   const N = ROLES_CONTENT.nomination;
   const unread = unreadCountFor(account.id);
 
@@ -54,6 +67,25 @@ export default async function EventBriefPage({ params }: { params: Promise<{ id:
       <Header account={account} organization={null} unreadCount={unread} showBack />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
+          {notice === 'accepted' || notice === 'registered' || notice === 'linked' ? (
+            <div data-region="brief-notice" style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
+              {notice === 'accepted' ? (
+                <L en="Accepted. The organizer has been told." ar="تم القبول. وأُبلغ المنظّم." />
+              ) : notice === 'registered' ? (
+                <L en="Your account is set up. This event is now on your dashboard." ar="أُعدّ حسابكم. وهذه الفعالية الآن على لوحتكم." />
+              ) : (
+                <L en="This nomination is now linked to your account." ar="رُبط هذا الترشيح بحسابكم." />
+              )}
+            </div>
+          ) : null}
+          {invitation.status === 'nominated' ? (
+            <div data-region="brief-unanswered" style={{ padding: '18px 24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
+              <L en="You have not answered this nomination yet." ar="لم تجيبوا على هذا الترشيح بعد." />{' '}
+              <a href={`/invitations/${invitation.token}`} style={{ textDecoration: 'underline' }}>
+                <L en="Answer it here." ar="الإجابة من هنا." />
+              </a>
+            </div>
+          ) : null}
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
             <L en={N.standingTitleEn} ar={N.standingTitleAr} />
           </h1>
@@ -72,6 +104,7 @@ export default async function EventBriefPage({ params }: { params: Promise<{ id:
             namedAr={invitation.nameAr}
           />
 
+          {invitation.status === 'confirmed' ? (
           <div data-region="plan-slice" style={{ marginBlockEnd: 28 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 8px' }}>
               <h2 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
@@ -133,6 +166,7 @@ export default async function EventBriefPage({ params }: { params: Promise<{ id:
               </>
             )}
           </div>
+          ) : null}
         </div>
       </main>
     </>

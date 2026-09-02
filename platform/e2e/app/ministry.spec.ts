@@ -202,21 +202,46 @@ test.describe('the pinned vocabulary', () => {
 test.describe('the organizer reads the same determination', () => {
   // The unification the reviewer ordered: a recorded outcome is what the organizer's
   // dashboard and event screen show -- never a stale seeded presentation string.
+  //
+  // STALE PIN UPDATED (partner ruling, organizer simplification, 2026-09-01): the
+  // dashboard's "Awaiting your response" banner -- where the recorded note used to
+  // render -- was removed ("status lives on each row"), so this test no longer pins
+  // the note on /dashboard. The note's home is now the printable determination the
+  // record's own card opens, and it is pinned THERE, verbatim, with the route to it
+  // asserted so the organizer can actually reach the words. Same intent, same
+  // strength: the reviewer's recorded words, never a hard-coded demonstration demand.
   test('the dashboard state and the event rail carry the recorded outcome', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/dashboard');
     const body = page.locator('body');
-    // EV-0362 carries a recorded revision; the seeded 'Information required' must not show.
+    // EV-0362 carries a recorded revision; the seeded 'Information required' must not
+    // show. Both halves pinned: the recorded wording present, the stale string absent
+    // (case-sensitive, so the lowercase 'information' inside the outcome cannot match).
     await expect(body).toContainText('Additional information or revision required');
-    // The awaiting-your-response panel shows the RECORDED note verbatim -- it used to
-    // hard-code a demonstration demand regardless of what the reviewer wrote.
-    await expect(body).toContainText('The medical deployment map has not been attached');
+    await expect(body).not.toContainText('Information required');
     // EV-0244 (Tripoli Marathon) carries a recorded satisfied outcome; EV-0301
     // (Saida Night Run) carries incomplete. Both are the organizer's own records.
     await expect(body).toContainText('Health and medical preparedness requirements satisfied');
+    await expect(body).toContainText('Submission received but incomplete');
+
     await gotoRidingRestarts(page, '/events/EV-0362');
-    // Stage 5 of the rail is the outcome, done, in the compliance form's wording.
+    // Stage 5 of the rail is the outcome, done, in the compliance form's wording, and
+    // the record's determination card carries the same wording plus the route to the
+    // printable record -- the reachability the removed banner used to provide.
     await expect(page.locator('body')).toContainText('Additional information or revision required');
+    const card = page.locator('[data-region="determination-card"]');
+    await expect(card).toContainText('Additional information or revision required');
+    await expect(card.locator('a[href="/events/EV-0362/determination"]')).toContainText(
+      'Open the determination record',
+    );
+
+    // The RECORDED note, verbatim, where it now lives. It used to be a hard-coded
+    // demonstration demand regardless of what the reviewer wrote; the pin follows
+    // the note to the determination record rather than being dropped.
+    await gotoRidingRestarts(page, '/events/EV-0362/determination');
+    const cert = page.locator('[data-region="certificate"]');
+    await expect(cert).toContainText('Additional information or revision required');
+    await expect(cert).toContainText('The medical deployment map has not been attached');
   });
 });
 

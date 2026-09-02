@@ -38,7 +38,9 @@ export async function GET(
     .prepare(`SELECT event_id, kind, status FROM invitations WHERE token = ?`)
     .get(token) as { event_id: string; kind: 'ems' | 'director'; status: string } | undefined;
   if (!inv) return notFound();
-  if (inv.status === 'withdrawn' || inv.status === 'removed') return notFound();
+  // Declined ends the entitlement just as withdrawal or removal does: the token
+  // stops serving the organizer's documents when its holder is no longer in the event.
+  if (inv.status === 'withdrawn' || inv.status === 'removed' || inv.status === 'declined') return notFound();
   if (!nomineeMayReadDocument(inv.kind, docKey)) return notFound();
 
   const row = db

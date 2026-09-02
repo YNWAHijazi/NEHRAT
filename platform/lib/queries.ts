@@ -1209,6 +1209,9 @@ export interface NominationBriefing {
   openingTime: string | null; closingTime: string | null;
   venueRoute: string | null; municipalities: string | null;
   eventType: string | null;
+  /** Everyone expected at the same time — the figure that set the level, from the
+      latest assessment, so a re-assessment moves what the nominee reads. */
+  expectedAttendance: number | null;
   filed: boolean;
   /** Everyone else named on this event, with the state of their own nomination. */
   otherParties: {
@@ -1249,6 +1252,23 @@ export function nominationBriefing(token: string): NominationBriefing | null {
        LEFT JOIN organizations o ON o.account_id = e.account_id WHERE e.id = ?`,
     )
     .get(inv.event_id) as { name_en: string | null; name_ar: string | null } | undefined;
+
+  // The attendance figure comes from the latest assessment's inputs, not the Part A
+  // columns: a re-assessment revises the inputs and the nominee must read the figure
+  // the level currently stands on.
+  const assessment = db
+    .prepare(`SELECT inputs FROM assessments WHERE event_id = ? ORDER BY version DESC LIMIT 1`)
+    .get(inv.event_id) as { inputs: string } | undefined;
+  let expectedAttendance: number | null = null;
+  if (assessment) {
+    try {
+      const inputs = JSON.parse(assessment.inputs) as { expectedMaxSimultaneousAttendance?: unknown };
+      const n = inputs.expectedMaxSimultaneousAttendance;
+      expectedAttendance = typeof n === 'number' && Number.isFinite(n) ? n : null;
+    } catch {
+      expectedAttendance = null;
+    }
+  }
 
   const parties = db
     .prepare(
@@ -1297,6 +1317,7 @@ export function nominationBriefing(token: string): NominationBriefing | null {
     venueRoute: ev.venue_route,
     municipalities: ev.municipalities,
     eventType: ev.event_type,
+    expectedAttendance,
     filed: ev.filed === 1,
     otherParties: parties
       // A withdrawn or removed party is not "who else is named" -- they are not.
