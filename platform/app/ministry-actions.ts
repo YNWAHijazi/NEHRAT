@@ -623,7 +623,7 @@ export async function reverseOrganizationRecordingAction(orgId: number, formData
  * determination is the regulatory instrument, that is not a convenience worth having.
  *
  * EVERY ROLE, not five. The console listed Ministry-side accounts only, so an
- * organizer, a provider, a Director or a first-response unit could not be seen here,
+ * organizer, a provider or a Director could not be seen here,
  * let alone suspended.
  *
  * THE TWO UNTOUCHABLE ROWS are unchanged and now enforced through lib/rules: nobody
@@ -693,7 +693,7 @@ export async function addMinistryUserAction(formData: FormData): Promise<void> {
     .run(`acct_${randomBytes(6).toString('hex')}`, email, name, initials, role, actor.isDemo ? 1 : 0);
   const token = issueActivation(created.lastInsertRowid as number, actor.id);
   revalidatePath('/ministry/admin/users');
-  redirect(`/ministry/admin/users?notice=invited&token=${token}`);
+  redirect(`/ministry/admin/users?notice=invited&pending=1`);
 }
 
 /** Re-issues the link for an account that never activated. */
@@ -709,7 +709,7 @@ export async function reissueActivationAction(login: string): Promise<void> {
   if (!row || row.password_hash !== null) redirect('/ministry/admin/users?error=already-active');
   const token = issueActivation(target.id, actor.id);
   revalidatePath('/ministry/admin/users');
-  redirect(`/ministry/admin/users?notice=reissued&token=${token}`);
+  redirect(`/ministry/admin/users?notice=reissued&pending=1`);
 }
 
 export async function changeUserRoleAction(login: string, formData: FormData): Promise<void> {

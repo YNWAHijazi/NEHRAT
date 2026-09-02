@@ -40,7 +40,6 @@ const DEMO_LOGINS = new Set([
   'test_organizer_pending',
   'test_ems',
   'test_director',
-  'test_response',
   'test_moph',
   'test_moph_admin',
   'test_owner',
@@ -1173,6 +1172,13 @@ export async function removeProviderAction(eventId: string, formData: FormData):
  * account; declining requires a reason and is a material change the organizer must
  * report; a modification request keeps the nomination open with the reason attached.
  */
+
+/** The counterparty's one page for an event: the Director's event page, or the
+    provider's task page (participation forwards Level 3 on to the declaration). */
+function counterpartyLanding(kind: 'ems' | 'director', eventId: string): string {
+  return kind === 'director' ? `/events/${eventId}` : `/events/${eventId}/participation`;
+}
+
 /**
  * The nominee's answer -- STAGE TWO OF THREE, and it stands alone.
  *
@@ -1219,7 +1225,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     // Stage three. A signed-in holder lands on the standing brief -- the clean event
     // summary every counterparty role can read; anyone else is offered an account --
     // offered, not required.
-    if (account) redirect(`/events/${inv.event_id}/brief?notice=accepted`);
+    if (account) redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=accepted`);
     redirect(`/invitations/${token}/account`);
   }
   if (response === 'decline') {
@@ -1285,7 +1291,7 @@ export async function registerAgainstInvitationAction(
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
   if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
-  if (inv.account_id !== null) redirect(`/events/${inv.event_id}/brief`);
+  if (inv.account_id !== null) redirect(counterpartyLanding(inv.kind, inv.event_id));
 
   const name = String(formData.get('fullName') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
@@ -1316,7 +1322,7 @@ export async function registerAgainstInvitationAction(
   const accountId = created.lastInsertRowid as number;
   db.prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(accountId, token);
   await startSession(accountId);
-  redirect(`/events/${inv.event_id}/brief?notice=registered`);
+  redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=registered`);
 }
 
 /** Stage three, the other path: an account already exists, so link this nomination to it. */
@@ -1350,7 +1356,7 @@ export async function signInAgainstInvitationAction(
   getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
   await forgetSignInFields();
   await startSession(row.id);
-  redirect(`/events/${inv.event_id}/brief?notice=linked`);
+  redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=linked`);
 }
 
 function ownedInvitation(accountId: number, token: string): boolean {
@@ -1476,54 +1482,6 @@ export async function saveRoleProfileAction(formData: FormData): Promise<void> {
   redirect('/profile?notice=saved');
 }
 
-/* ---- First-response unit (cardiac-arrest instrument) ---- */
-
-export async function saveFrReadinessAction(
-  payload: { confirmations: Record<string, boolean[]>; sign: boolean },
-): Promise<{ ok: true }> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  getDb()
-    .prepare(
-      `INSERT INTO fr_readiness (account_id, confirmations, signed_at, updated_at)
-       VALUES (?, ?, ?, now_stamp())
-       ON CONFLICT(account_id) DO UPDATE SET confirmations = excluded.confirmations,
-         signed_at = COALESCE(excluded.signed_at, fr_readiness.signed_at), updated_at = excluded.updated_at`,
-    )
-    .run(account.id, JSON.stringify(payload.confirmations), payload.sign ? nowStamp() : null);
-  revalidatePath('/first-response/readiness');
-  return { ok: true };
-}
-
-/**
- * One report per patient, five sections, no patient name. Two routes: the platform
- * form, or the unit's own patient-care report attached where it captures everything
- * required -- both land here.
- */
-export async function submitFrReportAction(
-  payload: {
-    mode: 'platform' | 'attach';
-    attachedFile: string | null;
-    covered: Record<string, boolean>;
-    values: Record<string, string>;
-  },
-): Promise<{ ok: true } | { error: string }> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (payload.mode === 'attach' && !payload.attachedFile) return { error: 'file-missing' };
-  getDb()
-    .prepare(
-      `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload)
-       VALUES (?, ?, ?, ?, ?)`,
-    )
-    .run(
-      account.id, payload.mode, payload.attachedFile,
-      JSON.stringify(payload.covered), JSON.stringify(payload.values),
-    );
-  revalidatePath('/first-response/readiness');
-  return { ok: true };
-}
-
 /* ---- Event Medical Director ---- */
 
 function directorFor(accountId: number, eventId: string): boolean {
@@ -1550,7 +1508,7 @@ export async function saveGovernanceAction(eventId: string, formData: FormData):
     )
     .run(eventId, JSON.stringify(sections));
   revalidatePath(`/events/${eventId}/governance`);
-  redirect(`/events/${eventId}/governance?notice=saved`);
+  redirect(`/events/${eventId}?notice=saved`);
 }
 
 /** The second signature. At Level 3 the report is not complete with one. */

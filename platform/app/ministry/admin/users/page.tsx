@@ -26,10 +26,10 @@ import {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string; error?: string; token?: string; seg?: string; q?: string }>;
+  searchParams: Promise<{ notice?: string; error?: string; seg?: string; q?: string; pending?: string }>;
 }) {
   const account = await requireMinistryPage('manageUsers');
-  const { notice, error, token: issuedToken, seg, q } = await searchParams;
+  const { notice, error, seg, q, pending: pendingOnly } = await searchParams;
   const ACCOUNTS_CONSOLE = MINISTRY_CONTENT.adminConsole;
   const all = administeredAccounts(account.isDemo);
 
@@ -39,15 +39,17 @@ export default async function UsersPage({
   const segmentOf = (role: string): string =>
     ['reviewer', 'ministry_admin', 'platform_owner', 'order'].includes(role)
       ? 'ministry'
-      : ['organizer', 'ems', 'director', 'response'].includes(role)
+      : ['organizer', 'ems', 'director'].includes(role)
         ? role
         : 'other';
   const needle = (q ?? '').trim().toLowerCase();
   const users = all.filter((u) => {
     if (seg && seg !== '' && segmentOf(u.role) !== seg) return false;
+    if (pendingOnly === '1' && !isPending({ hasPassword: u.hasPassword, wasInvited: u.wasInvited })) return false;
     if (needle === '') return true;
     return `${u.displayName} ${u.email ?? ''}`.toLowerCase().includes(needle);
   });
+  const pendingCount = all.filter((u) => isPending({ hasPassword: u.hasPassword, wasInvited: u.wasInvited })).length;
   const segments = bilingualMap(ACCOUNTS_CONSOLE.segments);
   const segmentCounts = new Map<string, number>();
   for (const u of all) segmentCounts.set(segmentOf(u.role), (segmentCounts.get(segmentOf(u.role)) ?? 0) + 1);
@@ -93,6 +95,13 @@ export default async function UsersPage({
           </span>
           <input name="q" defaultValue={q ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
         </label>
+        {/* Pending invitations as a first-class filter (partner requirement,
+            counterparty pass 2026-09-02): the console can answer "who has not
+            activated yet" without scanning the list. */}
+        <label data-region="pending-filter" style={{ display: 'inline-flex', gap: 7, alignItems: 'center', height: 36, fontSize: 13 }}>
+          <input type="checkbox" name="pending" value="1" defaultChecked={pendingOnly === '1'} />
+          <L en={`Awaiting activation (${pendingCount})`} ar={`بانتظار التفعيل (${pendingCount})`} />
+        </label>
         <button type="submit" style={{ height: 36, paddingInline: 16, border: 0, borderRadius: 18, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
           <L en={ACCOUNTS_CONSOLE.filterApplyEn} ar={ACCOUNTS_CONSOLE.filterApplyAr} />
         </button>
@@ -118,19 +127,9 @@ export default async function UsersPage({
         </div>
       ) : null}
 
-      {issuedToken ? (
-        <div data-region="issued-link" style={{ padding: '18px 22px', border: '2px solid var(--brand)', borderRadius: 12, marginBlockEnd: 20, maxWidth: 860 }}>
-          <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-            <L en={A.inviteLinkLabelEn} ar={A.inviteLinkLabelAr} />
-          </div>
-          <code dir="ltr" style={{ display: 'block', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px', overflowWrap: 'anywhere', userSelect: 'all' }}>
-            {`/activate/${issuedToken}`}
-          </code>
-          <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 6, maxWidth: '80ch' }}>
-            <L en={A.inviteLinkNoteEn} ar={A.inviteLinkNoteAr} />
-          </div>
-        </div>
-      ) : null}
+      {/* The one-time issued-link block is gone: the standing activation link and
+          its expiry render on the pending row itself, so it survives the redirect
+          and the token no longer rides the query string. */}
 
       <div data-region="users" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32, maxWidth: 860 }}>
         {users.map((u) => {
@@ -267,14 +266,37 @@ export default async function UsersPage({
                   {/* A PENDING ACCOUNT IS NOT A DEAD END: the link is re-issuable, and
                       the row says what re-issuing costs. */}
                   {pending ? (
-                    <form action={reissueActivationAction.bind(null, u.login)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
-                      <button type="submit" style={{ height: 30, paddingInline: 11, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 15, fontSize: 12, color: 'var(--accent-ink)', cursor: 'pointer' }}>
-                        <L en={A.reissueEn} ar={A.reissueAr} />
-                      </button>
-                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                        <L en={A.reissueNoteEn} ar={A.reissueNoteAr} />
-                      </span>
-                    </form>
+                    <span style={{ display: 'block' }}>
+                      {/* THE STANDING LINK, on the row (partner requirement): it used
+                          to be shown once, on the post-create screen, and was
+                          unrecoverable afterwards -- and the raw token rode the
+                          redirect query string into history and logs. */}
+                      {u.activationToken ? (
+                        <span data-region="standing-activation" style={{ display: 'block', marginBlockEnd: 8 }}>
+                          <code dir="ltr" style={{ display: 'block', padding: '7px 10px', background: 'var(--surface2)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 12, overflowWrap: 'anywhere', userSelect: 'all' }}>
+                            {`/activate/${u.activationToken}`}
+                          </code>
+                          <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBlockStart: 4 }}>
+                            <L en={A.inviteLinkNoteEn} ar={A.inviteLinkNoteAr} />{' '}
+                            {u.activationExpires ? (
+                              <L en={`Expires ${u.activationExpires}.`} ar={`ينتهي في ⁦${u.activationExpires}⁩.`} />
+                            ) : null}
+                          </span>
+                        </span>
+                      ) : (
+                        <span data-region="expired-activation" style={{ display: 'block', marginBlockEnd: 8, fontSize: 12, color: 'var(--bad)' }}>
+                          <L en="The activation link has expired. Issue a new one." ar="انتهت صلاحية رابط التفعيل. أصدروا رابطاً جديداً." />
+                        </span>
+                      )}
+                      <form action={reissueActivationAction.bind(null, u.login)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+                        <button type="submit" style={{ height: 30, paddingInline: 11, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 15, fontSize: 12, color: 'var(--accent-ink)', cursor: 'pointer' }}>
+                          <L en={A.reissueEn} ar={A.reissueAr} />
+                        </button>
+                        <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                          <L en={A.reissueNoteEn} ar={A.reissueNoteAr} />
+                        </span>
+                      </form>
+                    </span>
                   ) : null}
                 </span>
               )}

@@ -168,7 +168,6 @@ export function seedDemonstration(db: DatabaseSync): void {
   ).lastInsertRowid as number;
   const ems = insertAccount.run('test_ems', 'S. Karam', 'SK', 'ems').lastInsertRowid as number;
   const director = insertAccount.run('test_director', 'Dr N. Salameh', 'NS', 'director').lastInsertRowid as number;
-  const response = insertAccount.run('test_response', 'M. Aoun', 'MA', 'response').lastInsertRowid as number;
   insertAccount.run('test_moph', 'L. Nassar', 'LN', 'reviewer');
   insertAccount.run('test_moph_admin', 'R. Sfeir', 'RS', 'ministry_admin');
   insertAccount.run('test_owner', 'Platform operations', 'PO', 'platform_owner');
@@ -635,33 +634,8 @@ export function seedDemonstration(db: DatabaseSync): void {
     'missing', null, null, null, null, 'Not yet added by either side', 'لم يُضفه أي من الطرفين بعد', d('2026-08-13'),
   );
 
-  // The first-response unit: readiness partly confirmed (the reference's showcase
-  // state) and one dataset report filed by the attach route.
-  db.prepare(
-    `INSERT INTO fr_readiness (account_id, confirmations, signed_at, updated_at)
-     VALUES (?, ?, NULL, ?)`,
-  ).run(
-    response,
-    JSON.stringify({
-      equipment: [true, true, true, true, true],
-      competence: [true, true, true, true, true, true, false],
-      operational: [true, true, true, false, false],
-    }),
-    d('2026-08-01'),
-  );
-  db.prepare(
-    `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload, created_at)
-     VALUES (?, 'attach', 'unit3-pcr-2026-0841.pdf', ?, ?, ?)`,
-  ).run(
-    response,
-    JSON.stringify({ incident: true, response: true, defibrillation: true, outcome: true, agency: false }),
-    JSON.stringify({
-      'agency.agencyName': 'Unit 3 — first response', 'agency.unitId': 'U3',
-      'agency.completedBy': 'M. Aoun', 'agency.phone': '03 118 402',
-      'agency.email': 'unit3@example.lb', 'agency.submitted': d('2026-08-20'),
-    }),
-    d('2026-08-20'),
-  );
+  // The first-response unit's readiness record and its own showcase report left
+  // with the role (partner ruling, counterparty pass 2026-09-02).
 
   // The Director's governance text for Baalbeck: written, started, and not written --
   // the reference's three states.
@@ -809,12 +783,14 @@ export function seedDemonstration(db: DatabaseSync): void {
     'The patient became unresponsive on the gym floor; the AED advised no shock and EMS transported.',
     d('2026-08-11'),
   );
+  // Agency cardiac-arrest reports, received out of band (PAD §8.5): no platform
+  // account authors them since the first-response role left. The repeat place is
+  // what the designation demonstration (power 8) turns on.
   const insertFrReport = db.prepare(
-    `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload, created_at)
-     VALUES (?, 'platform', NULL, '{}', ?, ?)`,
+    `INSERT INTO fr_reports (account_id, mode, attached_file, covered, payload, is_demo, created_at)
+     VALUES (NULL, 'platform', NULL, '{}', ?, 1, ?)`,
   );
   insertFrReport.run(
-    response,
     JSON.stringify({
       'incident.caseNumber': 'U3-0712', 'incident.date': d('2026-02-19'), 'incident.time': '08:10',
       'incident.location': 'Beirut Central Terminal', 'incident.address': 'Beirut',
@@ -825,7 +801,6 @@ export function seedDemonstration(db: DatabaseSync): void {
     d('2026-02-19'),
   );
   insertFrReport.run(
-    response,
     JSON.stringify({
       'incident.caseNumber': 'U3-0798', 'incident.date': d('2026-07-03'), 'incident.time': '17:52',
       'incident.location': 'Beirut Central Terminal', 'incident.address': 'Beirut',

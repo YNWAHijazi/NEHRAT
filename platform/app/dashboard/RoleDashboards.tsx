@@ -14,16 +14,6 @@ import { addDaysIso, POST_EVENT_REPORT } from '../../lib/rules';
 interface RowShape {
   key: string;
   href: string;
-  /**
-   * THE STANDING VIEW of the event, for a party whose nomination is confirmed.
-   *
-   * Everything a counterparty was told about the event lived on the nomination token
-   * -- a link in their mail, read once, before they had an account. After accepting
-   * they had this row and no route back to the facts they accepted on. Absent while a
-   * nomination is unanswered: there is no standing view of an event nobody has
-   * accepted, and the token still carries the briefing.
-   */
-  briefHref?: string;
   nameEn: string; nameAr: string;
   orgEn: string; orgAr: string;
   date: string;
@@ -72,8 +62,6 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
       return {
         key: inv.token,
         href: isL3 ? `/events/${inv.eventId}/declaration` : `/events/${inv.eventId}/participation`,
-        // Invited or accepted: the brief reads from nomination onward (partner ruling).
-        ...(inv.status === 'confirmed' || inv.status === 'nominated' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,
         date: inv.eventStart ?? '', level, chips,
@@ -116,7 +104,6 @@ export function directorRows(
       const reportDue = inv.eventEnd ? addDaysIso(inv.eventEnd, POST_EVENT_REPORT.windowDays) : '';
       return {
         key: inv.token,
-        ...(inv.status === 'confirmed' || inv.status === 'nominated' ? { briefHref: `/events/${inv.eventId}/brief` } : {}),
         href: reportOwed || done ? `/events/${inv.eventId}/report` : `/events/${inv.eventId}`,
         nameEn: inv.eventNameEn, nameAr: inv.eventNameAr,
         orgEn: inv.organizationNameEn, orgAr: inv.organizationNameAr,
@@ -225,12 +212,6 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
               </div>
             </div>
           </Link>
-          {/* Outside the row's own Link, because a link cannot nest in a link. */}
-          {e.briefHref ? (
-            <Link href={e.briefHref} data-region="standing-view" style={{ fontSize: '12.5px', color: 'var(--brand)', paddingInlineStart: 26, marginBlockStart: -4 }}>
-              <L en={ROLES_CONTENT.nomination.openStandingEn} ar={ROLES_CONTENT.nomination.openStandingAr} />
-            </Link>
-          ) : null}
           </div>
         ))}
       </div>

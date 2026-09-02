@@ -46,9 +46,8 @@ describe('the two untouchable rows', () => {
 describe('the assignable roles', () => {
   it('cover every role a person can hold, and never the platform owner', () => {
     // The console listed four of nine. An organizer, a provider, a Director and a
-    // first-response unit could not be seen here at all, let alone suspended.
     expect([...ASSIGNABLE_ROLES].sort()).toEqual(
-      ['director', 'ems', 'ministry_admin', 'order', 'organizer', 'response', 'reviewer'].sort(),
+      ['director', 'ems', 'ministry_admin', 'order', 'organizer', 'reviewer'].sort(),
     );
     expect(isAssignableRole('platform_owner')).toBe(false);
     expect(isAssignableRole('nonsense')).toBe(false);

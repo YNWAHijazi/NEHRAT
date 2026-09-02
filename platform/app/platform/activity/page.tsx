@@ -23,7 +23,7 @@ export default async function PlatformActivityPage() {
     { n: counts.facilities, en: 'Covered facilities', ar: 'مرافق مشمولة' },
     { n: counts.devices, en: 'Registered defibrillators', ar: 'أجهزة مسجّلة' },
     { n: counts.incidents, en: 'Facility incident reports', ar: 'تقارير حوادث مرافق' },
-    { n: counts.frReports, en: 'First-response dataset reports', ar: 'تقارير بيانات استجابة أولية' },
+    { n: counts.frReports, en: 'Agency cardiac-arrest reports', ar: 'تقارير توقف القلب من الجهات' },
   ];
   return (
     <MinistryShell account={account} back={{ href: '/platform/admin', en: 'Master admin', ar: 'الإدارة العليا' }} consoleEn="Platform owner" consoleAr="مالك المنصة">

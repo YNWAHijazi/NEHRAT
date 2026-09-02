@@ -79,8 +79,10 @@ existence, event name, level, current status. Never contact details, documents o
 token. An endpoint that answers an incrementing sequence is not acceptable. Inside an
 authenticated session sequential ids are correct.
 
-**6. Nomination, never self-registration.** EMS providers, Event Medical Directors and
-first-response units are named by the organizer and self-register against an invitation.
+**6. Nomination, never self-registration.** EMS providers and Event Medical Directors are
+named by the organizer and self-register against an invitation. (First-response units left
+the platform — partner ruling, counterparty pass 2026-09-02; their reports reach the
+Ministry out of band.)
 Invitation links carry an **unguessable token, never a sequential id**. None sees an event it was
 not named in. Declining is a material change the organizer must report.
 

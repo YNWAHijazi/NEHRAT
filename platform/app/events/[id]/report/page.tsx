@@ -3,7 +3,8 @@ import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { ReturnReportBlock } from './ReturnReportBlock';
 import { currentAccount } from '../../../../lib/auth';
-import { invitationForEvent, postEventReportFor, unreadCountFor } from '../../../../lib/queries';
+import { invitationForEvent, nominationBriefing, nomineePlanSlice, postEventReportFor, unreadCountFor } from '../../../../lib/queries';
+import { Briefing } from '../../../invitations/[token]/Briefing';
 import { beirutToday } from '../../../../lib/clock';
 import { POST_EVENT_CERTIFICATION_STATEMENT, POST_EVENT_ACTIVITY_FIELDS, POST_EVENT_REPORT, POST_EVENT_SIGNIFICANT, ROLES_CONTENT, postEventReportWindow } from '../../../../lib/rules';
 import { signPostEventReportAction } from '../../../actions';
@@ -39,11 +40,14 @@ export default async function DirectorReportPage({
   const overdueDays = due && today > due ? Math.round((Date.parse(today) - Date.parse(due)) / 86400000) : 0;
   const directorSigned = Boolean(report?.directorSignedAt);
   const organizerSigned = Boolean(report?.organizerSignedAt);
+  const briefing = nominationBriefing(invitation.token);
+  const confirmed = invitation.status === 'confirmed';
 
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={null} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
+      {/* Back always means the dashboard in a counterparty flow (partner ruling). */}
+      <Header account={account} organization={null} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 940 }}>
           {notice === 'signed' ? (
@@ -63,15 +67,21 @@ export default async function DirectorReportPage({
               <L en="Returned to the organizer with your reason." ar="أُعيد إلى المنظّم مع السبب." />
             </div>
           ) : null}
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-            <L
-              en={`${invitation.eventNameEn} · ${invitation.organizationNameEn} · event end date ${invitation.eventEnd ?? ''} · Level 3`}
-              ar={`${invitation.eventNameAr} · ${invitation.organizationNameAr} · تاريخ انتهاء الفعالية ⁦${invitation.eventEnd ?? ''}⁩ · المستوى 3`}
+          {briefing ? (
+            <Briefing
+              briefing={briefing}
+              token={invitation.token}
+              kind="director"
+              level={invitation.eventLevel}
+              namedEn={invitation.nameEn}
+              namedAr={invitation.nameAr}
+              confirmed={confirmed}
+              plan={confirmed ? nomineePlanSlice(id) : null}
             />
-          </div>
-          <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+          ) : null}
+          <h2 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
-          </h1>
+          </h2>
           <p style={{ margin: '0 0 28px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
             <L en={content.reportIntro.en} ar={content.reportIntro.ar} />
           </p>

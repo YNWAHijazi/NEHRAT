@@ -128,7 +128,6 @@ const WALKS: { login: string; routes: string[] }[] = [
   },
   { login: 'test_ems', routes: ['/dashboard', '/events/EV-0362/declaration', '/events/EV-0362/documents', '/profile'] },
   { login: 'test_director', routes: ['/dashboard', '/events/EV-0362', '/events/EV-0362/governance', '/events/EV-0362/report', '/credentials'] },
-  { login: 'test_response', routes: ['/first-response/readiness'] },
   {
     login: 'test_moph',
     routes: [

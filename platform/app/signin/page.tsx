@@ -70,13 +70,6 @@ const DEMO_LOGINS: DemoLogin[] = [
     cannotAr: 'الاطلاع على أي فعالية لم يُسمَّ فيها.',
   },
   {
-    login: 'test_response', en: 'First-response unit', ar: 'وحدة الاستجابة الأولية',
-    canEn: 'Keep the readiness checklist and file incident reports.',
-    canAr: 'إمساك قائمة الجاهزية وتقديم تقارير الحوادث.',
-    cannotEn: 'See mass-gathering submissions; this is the cardiac lane.',
-    cannotAr: 'الاطلاع على تقديمات الفعاليات الجماهيرية؛ فهذا مسار توقف القلب.',
-  },
-  {
     login: 'test_moph', en: 'Ministry reviewer', ar: 'مراجع الوزارة', primary: true,
     canEn: 'Record any of the three outcomes, assign, require additional measures, answer enquiries, schedule inspections and record findings.',
     canAr: 'تسجيل أي من النتائج الثلاث، والإسناد، واشتراط تدابير إضافية، والرد على الاستفسارات، وجدولة التفتيش وتسجيل نتائجه.',

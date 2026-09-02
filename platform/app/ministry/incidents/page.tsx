@@ -145,8 +145,8 @@ export default async function IncidentsPage() {
               return (
                 <div key={`u-${i}`} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 10, fontSize: '14.5px' }}>
                   <L
-                    en={`First-response dataset report${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · own patient-care report attached' : ''}`}
-                    ar={`تقرير بيانات استجابة أولية${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · أُرفق تقرير رعاية المرضى الخاص' : ''}`}
+                    en={`Agency cardiac-arrest report${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · own patient-care report attached' : ''}`}
+                    ar={`تقرير توقف قلب من جهة${payload['incident.location'] ? ` — ${payload['incident.location']}` : ''}${r.mode === 'attach' ? ' · أُرفق تقرير رعاية المرضى الخاص' : ''}`}
                   />
                   <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>{payload['incident.date'] ?? r.created_at.slice(0, 10)}</span>
                 </div>

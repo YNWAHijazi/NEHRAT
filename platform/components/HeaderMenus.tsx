@@ -43,13 +43,18 @@ export function HeaderMenus({
   organizationNameEn,
   organizationNameAr,
   unreadCount,
+  role = 'organizer',
 }: {
   displayName: string;
   initials: string;
   organizationNameEn: string | null;
   organizationNameAr: string | null;
   unreadCount: number;
+  role?: string;
 }) {
+  // A counterparty holds a profile, not an organization record — the menu offered
+  // them "Organization details" and /organization refused them (counterparty pass).
+  const counterparty = role === 'ems' || role === 'director';
   const router = useRouter();
   const [acctOpen, setAcctOpen] = useState(false);
 
@@ -162,10 +167,10 @@ export function HeaderMenus({
             </div>
             <button
               type="button"
-              onClick={() => { setAcctOpen(false); router.push('/organization'); }}
+              onClick={() => { setAcctOpen(false); router.push(counterparty ? '/profile' : '/organization'); }}
               style={{ width: '100%', textAlign: 'start', padding: '12px 16px', background: 'none', border: 0, borderBlockEnd: '1px solid var(--line)', fontSize: 14, cursor: 'pointer' }}
             >
-              <L en="Organization details" ar="تفاصيل المؤسسة" />
+              {counterparty ? <L en="Profile" ar="الملف التعريفي" /> : <L en="Organization details" ar="تفاصيل المؤسسة" />}
             </button>
             <button
               type="button"

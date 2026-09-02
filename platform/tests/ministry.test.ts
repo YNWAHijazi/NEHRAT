@@ -87,7 +87,7 @@ describe('the permission matrix', () => {
   });
 
   it('the public roles hold no ministry action', () => {
-    for (const role of ['organizer', 'ems', 'director', 'response']) {
+    for (const role of ['organizer', 'ems', 'director']) {
       for (const row of permissionMatrix()) {
         expect(row.roles[role], `${role} must not hold ${row.action.key}`).toBe(false);
       }

@@ -153,7 +153,6 @@
     "organizer": [],
     "ems": [],
     "director": [],
-    "response": [],
     "reviewer": [
       "viewMinistry",
       "viewQueue",
@@ -412,10 +411,6 @@
     "director": {
       "en": "Event Medical Director",
       "ar": "المدير الطبي للفعالية"
-    },
-    "response": {
-      "en": "First-response unit",
-      "ar": "وحدة الاستجابة الأولى"
     }
   },
   "reviewPlan": {
@@ -701,10 +696,6 @@
       "director": {
         "en": "Medical directors",
         "ar": "المديرون الطبيون"
-      },
-      "response": {
-        "en": "First-response units",
-        "ar": "وحدات الاستجابة الأولى"
       },
       "other": {
         "en": "Other",

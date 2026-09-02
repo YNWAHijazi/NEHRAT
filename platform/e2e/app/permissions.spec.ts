@@ -22,7 +22,6 @@ const LOGINS = {
   organizer: 'test_organizer',
   ems: 'test_ems',
   director: 'test_director',
-  response: 'test_response',
   reviewer: 'test_moph',
   admin: 'test_moph_admin',
 } as const;
@@ -186,23 +185,17 @@ test.describe('nominated roles see only what they were named in', () => {
     await expectRefusal(page, '/events/EV-0418/report', /Post-event medical report|التقرير الطبي/i);
   });
 
-  test('the two EMS-side actors never share a surface', async ({ page }) => {
-    // The first-response unit's account cannot open the provider surfaces, and the
-    // provider's account cannot open the unit's -- different instruments (SPEC).
-    await signInAs(page, LOGINS.response);
-    await expectRefusal(page, '/events/EV-0362/declaration', /Readiness Declaration|إقرار جاهزية/i);
-    await signInAs(page, LOGINS.ems);
-    const r = await gotoRidingRestarts(page, '/first-response/readiness');
-    const refused = page.url().includes('/signin') || page.url().includes('/dashboard') || [401, 403, 404].includes(r?.status() ?? 0);
-    expect(refused, 'the EMS provider account reached the first-response surface').toBe(true);
-  });
+  // The two-EMS-side-actors separation test retired with the first-response role
+  // (partner ruling, counterparty pass 2026-09-02): the second actor no longer
+  // exists, and /first-response/* answers 404 for everyone -- a refusal there
+  // would prove nothing about role gating.
 });
 
 test.describe('signed out', () => {
   test('every built authenticated surface bounces to sign-in', async ({ page }) => {
     // Only surfaces that EXIST are asserted -- a 404 on an unbuilt route would pass
     // vacuously. Extend this list as slices land.
-    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/first-response/readiness', '/first-response/reports/new', '/events/EV-0362/declaration', '/events/EV-0362/governance', '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/admin/cardiac', '/platform/admin', '/platform/activity']) {
+    for (const path of ['/dashboard', '/organization', '/notifications', '/events/EV-0418', '/events/new', '/venues/new', '/venues/VN-0032', '/venues/VN-0032/assessment', '/venues/VN-0032/change', '/facilities/new', '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan', '/profile', '/credentials', '/events/EV-0362/declaration', '/events/EV-0362/governance', '/ministry', '/ministry/queue', '/ministry/submissions/EV-0362', '/ministry/admin/cardiac', '/platform/admin', '/platform/activity']) {
       const response = await gotoRidingRestarts(page, path);
       const refused =
         page.url().includes('/signin') || [401, 403].includes(response?.status() ?? 0);

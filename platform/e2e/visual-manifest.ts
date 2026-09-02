@@ -702,7 +702,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'shared-note',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="shared-note"]',
-        note: "Expected divergent, the build over the prototype: the prototype's note says the first-response digital service 'opens in a later phase'; it is now its own account and sign-in, and the note says so.",
+        note: "Expected divergent, the build over the prototype: the prototype's note says the first-response digital service 'opens in a later phase'; the role has since LEFT the platform entirely (partner ruling, counterparty pass 2026-09-02) and the note now says the agencies' obligations are met through their own arrangements, not here.",
       },
     ],
   },
@@ -780,39 +780,22 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_director',
     regions: [
       {
-        name: 'requirements',
+        name: 'briefing',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="requirements"]',
-        note: "Expected divergent, computed over hand-written: the five rows and their values derive from the requirements matrix (SPEC: responsible parties are computed) where the reference hand-writes prose values and states; row 19 shows the Organizer as a co-holder per the source's 'Organizer / Event Medical Director for Level 3', which the reference dropped. UNVERIFIED as to requirement 15's treatment: no reference-side locator.",
+        builtSelector: '[data-region="briefing"]',
+        note: "Expected divergent, partner ruling (counterparty pass, 2026-09-02): the Director's event page became the one page -- compact event facts with View more at the top, where the reference opens on the requirement cards. The full requirement rows the matrix names moved under View more (briefing-requirements), still computed, never hand-written. UNVERIFIED as to layout: no reference-side locator for the compact strip.",
       },
-      {
-        name: 'certified-about',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="certified-about"]',
-        note: "Expected divergent, the record over the showcase: the signed count derives from the event's actual named agencies (1 of 1) where the reference hand-writes 'Two of the three named agencies'.",
-      },
-    ],
-  },
-  {
-    id: 'director-gov',
-    referenceFile: 'Medical Director.dc.html',
-    referenceTab: 'Clinical governance and command',
-    builtRoute: '/events/EV-0362/governance',
-    signInAs: 'test_director',
-    regions: [
       {
         name: 'gov-sections',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Clinical-governance arrangements', container: 'flex-direction: column' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="gov-sections"]',
-        note: "The three sections with their asks and writes-into lines. Held at 2%. Known residual inside the budget: the briefing date renders as a date (2026-09-18) where the reference wrote '18 September' -- deadlines as dates is the copy rule.",
+        note: "Was the compare on /events/[id]/governance (held at 2%); the route dissolved into the one page (partner ruling, counterparty pass, 2026-09-02) and the three sections now render beside the event facts, a different geometry from the reference's standalone screen. Flips back to a compare if the prototype adopts the one-page shape.",
       },
       {
-        name: 'where',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Where this appears', container: 'border-radius: 12px' },
-        builtSelector: '[data-region="where"]',
-        note: "Where the Director's text lands, and that the organizer cannot overwrite it. Held at 2%.",
+        name: 'report-row',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="report-row"]',
+        note: "Partner ruling (counterparty pass, 2026-09-02): the requirement cards that looked like buttons are gone; the report reaches the Director through this one stated row. The reference carries no such row.",
       },
     ],
   },
@@ -860,56 +843,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
     ],
   },
-  {
-    id: 'fr-readiness',
-    referenceFile: 'EMS Agency.dc.html',
-    referenceTab: 'First-response readiness',
-    builtRoute: '/first-response/readiness',
-    signInAs: 'test_response',
-    regions: [
-      {
-        name: 'different-actor',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'This is a different actor', container: 'border-radius: 12px' },
-        builtSelector: '[data-region="different-actor"]',
-        threshold: 0.03,
-        note: 'The two EMS-side actors never share a surface. Held at 3%: the first full-suite run after the Ministry slice measured 2.05% with the paragraph verified identical word for word (the diff highlights one line’s rasterization) -- a changed word measures far above 3%, so the ratchet still bites.',
-      },
-      {
-        name: 'bls-lists',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="bls-equipment"]',
-        note: "Expected divergent, the source over the prototype: the four readiness lists render the policy's own items (adult pads and protective equipment present; the prototype's invented oxygen and airway rows gone), with Arabic verbatim from the Arabic issue. Counts are the source's: 5, 7, 5, and 6 procedure steps.",
-      },
-      {
-        name: 'procedure',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="procedure"]',
-        note: "Expected divergent, the source over the prototype: the six steps are the policy's written-procedure items, not the prototype's dramatised paraphrase, and the non-transport rule renders as the source's own sentence beneath the table.",
-      },
-    ],
-  },
-  {
-    id: 'fr-dataset',
-    referenceFile: 'EMS Agency.dc.html',
-    referenceTab: 'Minimum dataset',
-    builtRoute: '/first-response/reports/new',
-    signInAs: 'test_response',
-    regions: [
-      {
-        name: 'routes',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="routes"]',
-        note: 'Expected divergent BY DECISION 3: the attach-route sentence takes the Arabic issue\'s wording (annex part one, section five) over the prototype\'s paraphrase; the English and the two route pills are present and unchanged, but UNVERIFIED as to layout: no reference-side locator.',
-      },
-      {
-        name: 'sections',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="sections"]',
-        note: "Expected divergent, the source over the prototype: the five sections and their fields are the minimum dataset's own (A-E), with the onsite device distinguished from the unit's in section C. The prototype's invented Sex and Presumed-cause fields are DROPPED -- the dataset limits itself and the policy forbids adding patient fields. The form starts empty (rule 8).",
-      },
-    ],
-  },
+  // The fr-readiness and fr-dataset mappings left with the first-response role
+  // (partner ruling, counterparty pass 2026-09-02). The reference pages remain in
+  // the pack; nothing on the platform renders them any more.
   // --- Slice 6: the Ministry console ---
   {
     id: 'ministry-dashboard',
@@ -1140,7 +1076,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'groups',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="groups"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Incidents grouped by place and category from the seeded facility and first-response reports; the repeat, not-covered place carries the designate action -- the mechanism by which it becomes covered.",
+        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Incidents grouped by place and category from the seeded facility incidents and out-of-band agency reports; the repeat, not-covered place carries the designate action -- the mechanism by which it becomes covered.",
       },
     ],
   },

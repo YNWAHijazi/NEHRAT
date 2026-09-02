@@ -64,17 +64,20 @@ test.describe('stage one — what you are being asked to take on', () => {
     const briefing = page.locator('[data-region="briefing"]');
     await expect(briefing).toBeVisible();
 
-    // The event, in enough detail to decide on: not five facts.
+    // THE COMPACT STRIP (partner ruling, counterparty pass): name, date, venue,
+    // expected attendance, level — readable without opening anything. EV-0418's
+    // seeded assessment expects 4,500 at the same time.
     const event = page.locator('[data-region="briefing-event"]');
     await expect(event).toContainText('Beirut Coastal 12K');
     await expect(event).toContainText('Level 2');
-    for (const label of ['Organizer', 'Dates', 'Opening and closing', 'Venue, route, or location', 'Municipality', 'Expected attendance']) {
-      await expect(event, `the briefing omits ${label}`).toContainText(label);
+    await expect(event).toContainText('4,500 expected');
+
+    // EVERYTHING ELSE BEHIND VIEW MORE — one expander, opened once here.
+    await page.locator('[data-region="briefing-more"] > summary').click();
+    const more = page.locator('[data-region="briefing-facts"]');
+    for (const label of ['Organizer', 'Opening and closing', 'Municipality', 'You are named as']) {
+      await expect(more, `the expanded facts omit ${label}`).toContainText(label);
     }
-    // The figure that set the level, from the latest assessment (partner ruling:
-    // the counterparty summary includes expected participants). EV-0418's seeded
-    // assessment expects 4,500 at the same time.
-    await expect(event).toContainText('4,500');
 
     // The organizer's filing deadline -- the nominee's deadline in practice.
     await expect(page.locator('[data-region="briefing-deadline"]')).toBeVisible();
@@ -193,11 +196,12 @@ test.describe('stage three — the account, after the answer and never as part o
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}`);
     await expect(page.locator('[data-region="accepted-no-account"]')).toBeVisible();
 
-    // AND THE ACCOUNT LANDS ON THE BRIEF. The defect this pins: every post-account
-    // redirect sent counterparties to /events/[id], a route with no EMS surface at
-    // all — a brand-new provider's very first signed-in screen was not-found. In the
-    // same test as the accept, because a worker-restart retry re-runs beforeAll with
-    // a fresh, unanswered nomination: a separate test would inherit the wrong state.
+    // AND THE ACCOUNT LANDS ON THE ONE PAGE (partner ruling, counterparty pass):
+    // the task page for the event, event facts at the top, the work beneath. The
+    // defect the earlier shape pinned — a first signed-in screen that was
+    // not-found — stays pinned by the same walk. In the same test as the accept,
+    // because a worker-restart retry re-runs beforeAll with a fresh, unanswered
+    // nomination: a separate test would inherit the wrong state.
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}/account`);
     const create = page.locator('[data-region="create-account"]');
     await expect(create).toBeVisible();
@@ -206,34 +210,34 @@ test.describe('stage three — the account, after the answer and never as part o
     await create.locator('input[name="password"]').fill('Walk-the-stages-2026');
     await create.locator('button[type="submit"]').click();
 
-    await page.waitForURL(/\/events\/EV-0418\/brief/);
-    await expect(page.locator('[data-region="brief-notice"]')).toBeVisible();
+    await page.waitForURL(/\/events\/EV-0418\/participation/);
+    await expect(page.locator('[data-region="landing-notice"]')).toBeVisible();
     await expect(page.locator('[data-region="briefing"]')).toBeVisible();
-    // The same scope stage one showed, including the attendance figure.
-    await expect(page.locator('[data-region="briefing-event"]')).toContainText('Expected attendance');
+    // The compact strip carries the attendance figure; the task sits beneath it.
+    await expect(page.locator('[data-region="briefing-event"]')).toContainText('4,500 expected');
+    await expect(page.locator('[data-region="ops-detail"]')).toBeVisible();
   });
 });
 
-test.describe('the standing view, after accepting', () => {
-  test('the accepted party reads the event again, with the four plan sections and a version', async ({ page }) => {
-    // Everything a counterparty was told lived on the nomination token -- a link in
-    // their mail, read once, before they had an account. After accepting they had a
-    // dashboard row and no route back to the facts they accepted on.
+test.describe('the one page, after accepting', () => {
+  test('the dashboard row opens the task page: facts on top, the declaration beneath, the plan slice behind View more', async ({ page }) => {
+    // ONE LEVEL OF DEPTH (partner ruling, counterparty pass): dashboard → the event's
+    // one page → dashboard. The standing /brief dissolved into the task pages; its
+    // route survives as a redirect for old links, asserted below.
     await signInAs(page, 'test_ems');
     await gotoRidingRestarts(page, '/dashboard');
-    // REACHABLE FROM THE DASHBOARD ROW, which is the half that was missing.
-    const link = page.locator('[data-region="standing-view"]').first();
-    await expect(link).toBeVisible();
-    await link.click();
-    await page.waitForURL(/\/events\/EV-\d+\/brief$/);
+    // The row itself is the way in — no separate standing-view link any more.
+    await page.locator('[data-region="complete"] a', { hasText: 'Baalbeck Summer Festival' }).first().click();
+    await page.waitForURL(/\/events\/EV-0362\/declaration/);
 
-    // The slice is then read on EV-0362, the seeded event that HAS a plan. EV-0418
-    // has none, and its brief correctly shows the not-written-yet state -- which is
-    // the right behaviour and the wrong fixture for asserting the four sections.
+    // The old /brief address still lands somewhere real.
     await gotoRidingRestarts(page, '/events/EV-0362/brief');
+    await page.waitForURL(/\/events\/EV-0362\/declaration/);
 
-    // Same scope as stage one, kept current.
+    // Facts on top; the ten items on the same page; the slice behind View more.
     await expect(page.locator('[data-region="briefing"]')).toBeVisible();
+    await expect(page.locator('[data-region="items"]')).toBeVisible();
+    await page.locator('[data-region="briefing-more"] > summary').click();
     await expect(page.locator('[data-region="briefing-requirements"]')).toBeVisible();
 
     const slice = page.locator('[data-region="plan-slice"]');
@@ -257,21 +261,26 @@ test.describe('the standing view, after accepting', () => {
     await expect(page.locator('[data-region="plan-version"]')).toContainText(/Version \d+, last saved \d{4}-\d{2}-\d{2}/);
   });
 
-  test('a party with no confirmed nomination on the event cannot open its brief', async ({ page }) => {
+  test('a party with no nomination on the event cannot open its page', async ({ page }) => {
     // The nomination is the entitlement, not the role.
     await signInAs(page, 'test_ems');
     const response = await gotoRidingRestarts(page, '/events/EV-0244/brief');
     expect(response?.status()).toBe(404);
+    const task = await gotoRidingRestarts(page, '/events/EV-0244/participation');
+    expect(task?.status()).toBe(404);
   });
 
-  test('an INVITED party reads the brief before answering — without the plan slice', async ({ page }) => {
+  test('an INVITED party reads the page before answering — the choice on it, the plan slice not', async ({ page }) => {
     // Partner ruling: invited, and permanently after accepting. demo-lrc-saida-0301
     // is seeded nominated and linked, the state the walkthrough could not reach.
     await signInAs(page, 'test_ems');
     await gotoRidingRestarts(page, '/events/EV-0301/brief');
+    await page.waitForURL(/\/events\/EV-0301\/participation/);
     await expect(page.locator('[data-region="briefing"]')).toBeVisible();
-    await expect(page.locator('[data-region="brief-unanswered"]')).toContainText('not answered');
+    // The answer choice sits on the same page as the facts.
+    await expect(page.locator('[data-region="respond"]')).toBeVisible();
     // The arrangements inside the organizer's plan open on acceptance, not before.
+    await page.locator('[data-region="briefing-more"] > summary').click();
     await expect(page.locator('[data-region="plan-slice"]')).toHaveCount(0);
   });
 

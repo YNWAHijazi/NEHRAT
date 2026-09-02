@@ -4,7 +4,7 @@ import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
-import { invitationForEvent, governanceFor, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
+import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
 import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
@@ -226,31 +226,38 @@ function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn
   );
 }
 
-export default async function EventRecordPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EventRecordPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ notice?: string }>;
+}) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
 
-  // The Director's view of the same route: what the matrix names them for. An
-  // account that was not nominated on this event gets not-found, exactly like a
-  // missing id (rule 6).
+  // The Director's ONE PAGE on the same route: the event's facts, the governance
+  // sections they write, the report when it is owed (partner ruling, counterparty
+  // pass). An account that was not nominated on this event gets not-found, exactly
+  // like a missing id (rule 6).
   if (account.role === 'director') {
     const invitation = invitationForEvent(account.id, id, 'director');
     // A declined nomination ends the entitlement by the holder's own answer.
     if (!invitation || invitation.status === 'declined') notFound();
     const governance = governanceFor(id);
-    const providers = getDb()
-      .prepare(`SELECT declaration FROM invitations WHERE event_id = ? AND kind = 'ems'`)
-      .all(id) as unknown as { declaration: string }[];
     const report = postEventReportFor(invitation.organizerAccountId, id);
+    const confirmed = invitation.status === 'confirmed';
     return (
       <DirectorEventView
         account={account}
         invitation={invitation}
         unread={unreadCountFor(account.id)}
         governance={governance}
-        providerStats={{ named: providers.length, signed: providers.filter((x) => x.declaration === 'signed').length }}
         reportSigned={report ? { organizer: Boolean(report.organizerSignedAt), director: Boolean(report.directorSignedAt) } : null}
+        briefing={nominationBriefing(invitation.token)}
+        plan={confirmed ? nomineePlanSlice(id) : null}
+        notice={(await searchParams)?.notice}
       />
     );
   }

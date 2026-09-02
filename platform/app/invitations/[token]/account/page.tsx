@@ -51,13 +51,13 @@ export default async function NominationAccountPage({
 
   const account = await currentAccount();
   // Already linked, or already signed in: this screen has nothing to offer. A
-  // counterparty's landing is the brief — /events/[id] itself has no surface for an
-  // EMS account and 404s (rule 6). Anyone else (an organizer holding their own
+  // counterparty lands on its one page for the event — the Director's event page,
+  // or the provider's task page. Anyone else (an organizer holding their own
   // nominee's link) goes to the event record as before.
   if (account) {
     redirect(
-      account.role === 'ems' || account.role === 'director'
-        ? `/events/${invitation.eventId}/brief`
+      account.role === 'ems'
+        ? `/events/${invitation.eventId}/participation`
         : `/events/${invitation.eventId}`,
     );
   }

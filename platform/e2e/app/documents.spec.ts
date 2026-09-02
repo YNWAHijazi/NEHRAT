@@ -88,12 +88,6 @@ test.describe('and nobody else does', () => {
     expect(response.status()).toBe(404);
   });
 
-  test('a first-response unit holds no submission-reading power and gets 404', async ({ page }) => {
-    await signInAs(page, 'test_response');
-    const response = await page.request.get(DOC);
-    expect(response.status()).toBe(404);
-  });
-
   test('a document key with no stored file answers 404, never a broken stream', async ({ page }) => {
     await signInAs(page, 'test_moph');
     const response = await page.request.get('/api/documents/EV-0362/insuranceCertificate');

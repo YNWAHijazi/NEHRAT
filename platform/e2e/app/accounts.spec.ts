@@ -25,7 +25,7 @@ import { signInAs } from '../helpers/signin';
 const unique = (prefix: string): string => `${prefix}.${Date.now().toString(36)}@example.lb`;
 
 test.describe('the console sees every account', () => {
-  test('all eight roles, not the four Ministry ones', async ({ page }) => {
+  test('all seven roles, not the four Ministry ones', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/users');
     const users = page.locator('[data-region="users"]');
@@ -33,20 +33,21 @@ test.describe('the console sees every account', () => {
     // The counterparty roles were invisible here: they exist, they sign in, and an
     // administrator asked to manage the accounts could not see them.
     //
-    // RULING (partner review, 2026-09-01): the inspector role is MERGED into reviewer.
-    // One Ministry role reviews, flags for inspection, self-assigns the visit and
-    // records findings; there is no separate inspector account any more, so this test
-    // stopped expecting one and now pins the FULL set of eight -- every role in
-    // lib/rules roleLabels, Ministry side and counterparty side alike.
+    // RULINGS: the inspector role MERGED into reviewer (partner review, 2026-09-01),
+    // and the first-response role LEFT the platform (counterparty pass, 2026-09-02)
+    // -- agency readiness and reporting are the agencies' own job. Seven roles
+    // remain: every role in lib/rules roleLabels, Ministry side and counterparty
+    // side alike.
     for (const role of [
-      'Organizer', 'EMS provider', 'Event Medical Director', 'First-response unit',
+      'Organizer', 'EMS provider', 'Event Medical Director',
       'Reviewer', 'Administrator', 'Order of Physicians reviewer', 'Platform owner',
     ]) {
       await expect(users, `${role} is missing from the console`).toContainText(role);
     }
-    // And the retired role must not resurface: an "Inspector" row here would mean the
-    // merge regressed somewhere between the schema migration and this screen.
+    // And the retired roles must not resurface: an "Inspector" or "First-response
+    // unit" row here would mean a migration regressed somewhere.
     await expect(users).not.toContainText('Inspector');
+    await expect(users).not.toContainText('First-response unit');
   });
 
   test('every row says where the account came from', async ({ page }) => {
@@ -95,16 +96,29 @@ test.describe('creating an account', () => {
     await form.locator('button[type="submit"]').click();
     await page.waitForURL(/notice=invited/);
 
-    // The link is handed over, once, and it names where it goes.
-    const issued = page.locator('[data-region="issued-link"]');
-    await expect(issued).toBeVisible();
-    const href = (await issued.locator('code').innerText()).trim();
-    expect(href).toMatch(/^\/activate\/[0-9a-f]{64}$/);
-
-    // The account is listed, pending, with a route out of that state.
+    // THE STANDING LINK lives on the row itself (partner requirement, counterparty
+    // pass 2026-09-02) -- not a one-time block, and the raw token no longer rides
+    // the redirect query string into history and logs.
+    expect(page.url()).not.toMatch(/token=/);
     const row = page.locator('[data-region="users"] > div', { hasText: name });
     await expect(row).toContainText('Pending');
-    await expect(row).toContainText('Issue a new link');
+    const href = (await row.locator('[data-region="standing-activation"] code').innerText()).trim();
+    expect(href).toMatch(/^\/activate\/[0-9a-f]{64}$/);
+    // The link's lifetime is stated, not silent.
+    await expect(row).toContainText(/Expires \d{4}-\d{2}-\d{2}/);
+
+    // RE-ISSUING supersedes: the new link differs, and the console still shows one.
+    await row.locator('button:has-text("Issue a new link")').click();
+    await page.waitForURL(/notice=reissued/);
+    const row2 = page.locator('[data-region="users"] > div', { hasText: name });
+    const href2 = (await row2.locator('[data-region="standing-activation"] code').innerText()).trim();
+    expect(href2).toMatch(/^\/activate\/[0-9a-f]{64}$/);
+    expect(href2).not.toBe(href);
+    // The superseded link is DEAD -- reissuing is what stops it working.
+    const dead = await page.request.get(href);
+    expect(dead.status()).toBeLessThan(500);
+    await gotoRidingRestarts(page, href);
+    await expect(page.locator('[data-region="activation-dead"]')).toBeVisible();
   });
 
   test('the link sets the holder\'s own password and signs them in', async ({ page, context }) => {
@@ -117,7 +131,12 @@ test.describe('creating an account', () => {
     await form.locator('select[name="role"]').selectOption('reviewer');
     await form.locator('button[type="submit"]').click();
     await page.waitForURL(/notice=invited/);
-    const link = (await page.locator('[data-region="issued-link"] code').innerText()).trim();
+    const link = (
+      await page
+        .locator('[data-region="users"] > div', { hasText: 'Activation Walk' })
+        .locator('[data-region="standing-activation"] code')
+        .innerText()
+    ).trim();
 
     // The recipient is not the administrator: a fresh session, on the link alone.
     await context.clearCookies();

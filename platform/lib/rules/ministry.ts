@@ -25,7 +25,6 @@ export type MinistryRole =
   | 'organizer'
   | 'ems'
   | 'director'
-  | 'response'
   | 'reviewer'
   | 'ministry_admin'
   | 'order'

@@ -4,7 +4,10 @@ import { L } from '../../../../components/L';
 import { DeclarationForm } from './DeclarationForm';
 import { reopenDeclarationAction, withdrawParticipationAction } from '../../../actions';
 import { currentAccount } from '../../../../lib/auth';
-import { invitationForEvent, invitationsForAccount, materialChangesFor, roleProfileFor, unreadCountFor } from '../../../../lib/queries';
+import { invitationForEvent, materialChangesFor, nominationBriefing, nomineePlanSlice, roleProfileFor, unreadCountFor } from '../../../../lib/queries';
+import { Briefing } from '../../../invitations/[token]/Briefing';
+import { RespondForm } from '../../../invitations/[token]/RespondForm';
+import { SharedDocuments } from '../SharedDocuments';
 import { getDb } from '../../../../lib/db';
 import { DECLARATION_ITEMS, ROLES_CONTENT, filingDeadline , emsDeclarationGate} from '../../../../lib/rules';
 
@@ -16,8 +19,10 @@ import { DECLARATION_ITEMS, ROLES_CONTENT, filingDeadline , emsDeclarationGate} 
  */
 export default async function DeclarationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ notice?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -37,10 +42,14 @@ export default async function DeclarationPage({
   if (emsDeclarationGate(invitation.eventLevel).behaviour !== 'enabled') {
     redirect(`/events/${id}/participation`);
   }
+  const { notice } = await searchParams;
   const unread = unreadCountFor(account.id);
   const content = ROLES_CONTENT.ems;
   const profile = roleProfileFor(account.id);
-  void invitationsForAccount;
+  const briefing = nominationBriefing(invitation.token);
+  const confirmed = invitation.status === 'confirmed';
+  const live = confirmed || invitation.status === 'nominated';
+  const plan = confirmed ? nomineePlanSlice(id) : null;
 
   const fileBy = invitation.eventStart
     ? filingDeadline(3, new Date(`${invitation.eventStart}T12:00:00+03:00`)).date
@@ -53,29 +62,47 @@ export default async function DeclarationPage({
   return (
     <>
       <GovernmentBand />
-      {/* Back goes to the event summary, the screen this requirement belongs to.
-          /events/[id] itself has no EMS surface. A closed nomination has no brief
-          either, so its back path is the generic Dashboard pill. */}
-      <Header
-        account={account}
-        organization={null}
-        unreadCount={unread}
-        showBack={true}
-        {...(invitation.status === 'nominated' || invitation.status === 'confirmed'
-          ? { back: { href: `/events/${id}/brief`, en: 'Event summary', ar: 'ملخص الفعالية' } }
-          : {})}
-      />
+      {/* Back always means the dashboard in a counterparty flow (partner ruling). */}
+      <Header account={account} organization={null} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-            <L
-              en={`${invitation.eventNameEn} · ${invitation.organizationNameEn} · ${invitation.eventStart ?? ''}`}
-              ar={`${invitation.eventNameAr} · ${invitation.organizationNameAr} · ⁦${invitation.eventStart ?? ''}⁩`}
+          {notice === 'accepted' || notice === 'registered' || notice === 'linked' ? (
+            <div data-region="landing-notice" style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
+              {notice === 'accepted' ? (
+                <L en="Accepted. The organizer has been told." ar="تم القبول. وأُبلغ المنظّم." />
+              ) : notice === 'registered' ? (
+                <L en="Your account is set up. This event is now on your dashboard." ar="أُعدّ حسابكم. وهذه الفعالية الآن على لوحتكم." />
+              ) : (
+                <L en="This nomination is now linked to your account." ar="رُبط هذا الترشيح بحسابكم." />
+              )}
+            </div>
+          ) : null}
+          {notice === 'reopened' ? (
+            <div style={{ padding: '18px 24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="The declaration is a draft again. Review the ten items and sign when they hold." ar="عاد الإقرار مسودة. راجعوا البنود العشرة ووقّعوا عندما تصح." />
+            </div>
+          ) : null}
+
+          {briefing ? (
+            <Briefing
+              briefing={briefing}
+              token={invitation.token}
+              kind="ems"
+              level={invitation.eventLevel}
+              namedEn={invitation.nameEn}
+              namedAr={invitation.nameAr}
+              confirmed={confirmed}
+              plan={plan}
             />
-          </div>
-          <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+          ) : null}
+
+          <h2 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="EMS Readiness Declaration" ar="إقرار جاهزية خدمات الطوارئ الطبية" />
-          </h1>
+          </h2>
+
+          {invitation.status === 'nominated' ? (
+            <RespondForm token={invitation.token} kind="ems" eventLevel={invitation.eventLevel} />
+          ) : null}
           <p style={{ margin: '0 0 28px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '72ch' }}>
             <L
               en={`Completed and signed by each participating agency separately.${fileBy ? ` The organizer files by ${fileBy} and cannot file without this.` : ''}`}
@@ -83,6 +110,14 @@ export default async function DeclarationPage({
             />
           </p>
 
+          {!live ? (
+            <div style={{ padding: '20px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, fontSize: 15, lineHeight: 1.65, maxWidth: '76ch' }}>
+              <L en="Your part in this event is closed. Nothing more is needed from you." ar="أُغلق دوركم في هذه الفعالية. ولا يُطلب منكم شيء بعد الآن." />
+            </div>
+          ) : null}
+
+          {confirmed ? (
+          <>
           <div data-region="responsibility" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '80ch' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
               <L en="What your agency is accepting" ar="ما تقبله جهتكم" />
@@ -117,7 +152,7 @@ export default async function DeclarationPage({
               <div style={{ fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 14 }}>
                 <L en="From the organizer's submission" ar="من ملف المنظّم" />
               </div>
-              <a href={`/events/${id}/documents`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
+              <a href="#documents" style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
                 <L en="Open the shared documents" ar="فتح المستندات المشتركة" />
               </a>
             </div>
@@ -152,6 +187,8 @@ export default async function DeclarationPage({
               representative: profile['representative'] ?? '',
             }}
           />
+          </>
+          ) : null}
 
           {invitation.status === 'confirmed' ? (
             <details style={{ marginBlockStart: 28 }}>
@@ -173,6 +210,12 @@ export default async function DeclarationPage({
                 </button>
               </form>
             </details>
+          ) : null}
+
+          {confirmed ? (
+            <div style={{ marginBlockStart: 32 }}>
+              <SharedDocuments eventId={id} token={invitation.token} />
+            </div>
           ) : null}
         </div>
       </main>

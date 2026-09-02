@@ -1460,41 +1460,6 @@ export function sharedDocumentsForReview(
   }));
 }
 
-export interface FrReadinessRow {
-  confirmations: { equipment?: boolean[]; competence?: boolean[]; operational?: boolean[] };
-  signedAt: string | null;
-  updatedAt: string;
-}
-
-export function frReadinessFor(accountId: number): FrReadinessRow | null {
-  const r = getDb()
-    .prepare(`SELECT confirmations, signed_at, updated_at FROM fr_readiness WHERE account_id = ?`)
-    .get(accountId) as { confirmations: string; signed_at: string | null; updated_at: string } | undefined;
-  if (!r) return null;
-  return { confirmations: JSON.parse(r.confirmations) as FrReadinessRow['confirmations'], signedAt: r.signed_at, updatedAt: r.updated_at };
-}
-
-export interface FrReportRow {
-  id: number;
-  mode: 'platform' | 'attach';
-  attachedFile: string | null;
-  covered: Record<string, boolean>;
-  payload: Record<string, string>;
-  createdAt: string;
-}
-
-export function frReportsFor(accountId: number): FrReportRow[] {
-  const rows = getDb()
-    .prepare(`SELECT id, mode, attached_file, covered, payload, created_at FROM fr_reports WHERE account_id = ? ORDER BY created_at DESC`)
-    .all(accountId) as unknown as { id: number; mode: 'platform' | 'attach'; attached_file: string | null; covered: string; payload: string; created_at: string }[];
-  return rows.map((r) => ({
-    id: r.id, mode: r.mode, attachedFile: r.attached_file,
-    covered: JSON.parse(r.covered) as Record<string, boolean>,
-    payload: JSON.parse(r.payload) as Record<string, string>,
-    createdAt: r.created_at,
-  }));
-}
-
 export function roleProfileFor(accountId: number): Record<string, string> {
   const r = getDb()
     .prepare(`SELECT fields FROM role_profiles WHERE account_id = ?`)
@@ -1972,10 +1937,11 @@ export function arrestLocations(viewerIsDemo: boolean): ArrestGroup[] {
     const month = (payload['date'] ?? r.created_at).slice(0, 7);
     add(r.name_en, r.name_ar, r.category_key, r.municipality_en, month, r.fid);
   }
+  // Agency reports arrive out of band since the first-response role left (partner
+  // ruling, counterparty pass 2026-09-02): scoped by their own is_demo flag, not an
+  // authoring account.
   const frReports = db
-    .prepare(
-      `SELECT r.payload, r.created_at FROM fr_reports r JOIN accounts a ON a.id = r.account_id WHERE a.is_demo = ?`,
-    )
+    .prepare(`SELECT r.payload, r.created_at FROM fr_reports r WHERE r.is_demo = ?`)
     .all(flag) as unknown as { payload: string; created_at: string }[];
   for (const r of frReports) {
     const payload = JSON.parse(r.payload) as Record<string, string>;
@@ -2417,6 +2383,8 @@ export interface AdministeredAccountRow {
   fromNomination: boolean;
   /** A live activation link, if one is outstanding. */
   activationToken: string | null;
+  /** When the live activation link stops working (date), or null. */
+  activationExpires: string | null;
   holdings: AccountHoldings;
   /**
    * The most recent session this account opened, or null if it never has.
@@ -2442,6 +2410,10 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
                 WHERE p.account_id = a.id AND p.kind = 'activation'
                   AND p.used_at IS NULL AND p.expires_at > now_stamp()
                 ORDER BY p.created_at DESC LIMIT 1) AS activation_token,
+              (SELECT p.expires_at FROM password_resets p
+                WHERE p.account_id = a.id AND p.kind = 'activation'
+                  AND p.used_at IS NULL AND p.expires_at > now_stamp()
+                ORDER BY p.created_at DESC LIMIT 1) AS activation_expires,
               (SELECT COUNT(*) FROM events e WHERE e.account_id = a.id) AS c_events,
               (SELECT COUNT(*) FROM organizations o WHERE o.account_id = a.id) AS c_orgs,
               (SELECT COUNT(*) FROM invitations i
@@ -2461,6 +2433,7 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
     id: number; login: string; email: string | null; display_name: string; role: string;
     is_demo: number; suspended: number; created_at: string; has_password: number;
     was_invited: number; from_nomination: number; activation_token: string | null;
+    activation_expires: string | null;
     c_events: number; c_orgs: number; c_nominations: number; c_determinations: number;
     c_inspections: number; c_venues: number; c_facilities: number; last_seen: string | null;
   }[];
@@ -2478,6 +2451,7 @@ export function administeredAccounts(viewerIsDemo: boolean): AdministeredAccount
     wasInvited: r.was_invited === 1,
     fromNomination: r.from_nomination === 1,
     activationToken: r.activation_token,
+    activationExpires: r.activation_expires ? r.activation_expires.slice(0, 10) : null,
     lastSeen: r.last_seen ? r.last_seen.slice(0, 16) : null,
     holdings: {
       events: r.c_events,

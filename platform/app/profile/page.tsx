@@ -31,11 +31,6 @@ export default async function ProfilePage({
       <Header account={account} organization={null} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
-          {notice === 'accepted' ? (
-            <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="Nomination accepted. Complete your profile — it is reused across every event." ar="قُبل الترشيح. استكملوا ملفكم — يُعاد استخدامه في كل فعالية." />
-            </div>
-          ) : null}
           {notice === 'saved' ? (
             <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
               <L en="Profile saved." ar="حُفظ الملف." />

@@ -37,7 +37,6 @@ export const ASSIGNABLE_ROLES = [
   'organizer',
   'ems',
   'director',
-  'response',
   'reviewer',
   
   'ministry_admin',

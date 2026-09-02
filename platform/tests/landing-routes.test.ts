@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest';
 import { landingRouteFor, usesOrganizerSurface } from '../lib/rules';
 
 const EVERY_ROLE = [
-  'organizer', 'ems', 'director', 'response',
+  'organizer', 'ems', 'director',
   'reviewer', 'ministry_admin', 'order', 'platform_owner',
 ] as const;
 
@@ -37,9 +37,11 @@ describe('the landing route', () => {
     }
   });
 
-  it('sends the first-response unit to its own surface, not to a refusal', () => {
+  it('a remnant first-response account has nowhere to land but sign-in', () => {
+    // The role left the platform (partner ruling, counterparty pass 2026-09-02);
+    // a suspended remnant row falls through to the sign-in screen, never a guess.
     expect(usesOrganizerSurface('response')).toBe(false);
-    expect(landingRouteFor('response')).toBe('/first-response/readiness');
+    expect(landingRouteFor('response')).toBe('/signin');
   });
 
   it('gives every role a route, and an unknown role the sign-in screen', () => {

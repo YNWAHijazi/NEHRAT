@@ -197,6 +197,7 @@ export function Header({
               organizationNameEn={organization?.nameEn ?? null}
               organizationNameAr={organization?.nameAr ?? null}
               unreadCount={unreadCount}
+              role={account.role}
             />
           ) : null}
         </div>

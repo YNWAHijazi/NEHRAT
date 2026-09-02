@@ -7,7 +7,7 @@ import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
 import { archivedEventsFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
-import { REASSESSMENT_WINDOW, landingRouteFor, usesOrganizerSurface } from '../../lib/rules';
+import { REASSESSMENT_WINDOW, usesOrganizerSurface } from '../../lib/rules';
 import {
   beirutToday,
   daysBetween,
@@ -197,11 +197,6 @@ export default async function DashboardPage({
   // indistinguishable from non-existence, so a role cannot map what sits above its
   // permission. A Ministry reviewer does not organize events, and the Start a service
   // menu below therefore cannot render for one -- it is unreachable rather than hidden.
-  //
-  // The first-response unit is sent on to its own surface rather than refused -- it has
-  // a landing route here, it just is not this one. That redirect comes FIRST, so the
-  // refusal below never swallows a role that has somewhere to go.
-  if (account.role === 'response') redirect(landingRouteFor(account.role));
   if (!usesOrganizerSurface(account.role)) notFound();
   if (account.role === 'ems' || account.role === 'director') {
     const invitations = invitationsForAccount(account.id);

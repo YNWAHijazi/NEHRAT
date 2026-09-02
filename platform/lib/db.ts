@@ -94,7 +94,7 @@ function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
   const defaulted: [string, string][] = [
     ['accounts', 'created_at'], ['password_resets', 'created_at'], ['sessions', 'created_at'],
     ['events', 'created_at'], ['assessments', 'created_at'], ['event_attachments', 'attached_at'],
-    ['invitations', 'invited_at'], ['shared_documents', 'added_at'], ['fr_readiness', 'updated_at'],
+    ['invitations', 'invited_at'], ['shared_documents', 'added_at'],
     ['fr_reports', 'created_at'], ['role_profiles', 'updated_at'], ['event_governance', 'updated_at'],
     ['plans', 'updated_at'], ['submission_versions', 'archived_at'], ['material_changes', 'reported_at'],
     ['serious_incident_notifications', 'notified_at'], ['venues', 'created_at'],
@@ -131,6 +131,9 @@ function migrate(d: DatabaseSync): void {
       password_hash TEXT,
       display_name TEXT NOT NULL,
       initials TEXT NOT NULL DEFAULT '',
+      -- 'response' stays in the CHECK for schema tolerance only: the first-response
+      -- role left the platform (partner ruling, counterparty pass 2026-09-02), the
+      -- migration suspends any remnant row, and nothing creates the role again.
       role TEXT NOT NULL CHECK (role IN ('organizer','ems','director','response','reviewer','ministry_admin','order','platform_owner')),
       is_demo INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -266,24 +269,21 @@ function migrate(d: DatabaseSync): void {
       added_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
-    -- First-response unit (cardiac-arrest instrument): its own account, no facility
-    -- records, no event nominations. Readiness confirmations per group, and one
-    -- dataset report per patient -- by the platform form or an attached
-    -- patient-care report that captures everything required.
-    CREATE TABLE IF NOT EXISTS fr_readiness (
-      account_id INTEGER PRIMARY KEY REFERENCES accounts(id),
-      confirmations TEXT NOT NULL DEFAULT '{}',   -- JSON: {equipment:[..],competence:[..],operational:[..]}
-      signed_at TEXT,
-      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
+    -- AGENCY CARDIAC-ARREST REPORTS (PAD §8.5, §9). The first-response ROLE and its
+    -- screens left the platform (partner ruling, counterparty pass 2026-09-02:
+    -- readiness representation is the agencies' own job); the REPORT LANE stays as a
+    -- Ministry-side record — the policy lets an agency report through "its existing
+    -- paper or electronic patient-care report", so rows arrive out of band and no
+    -- account authors them. account_id survives, nullable, for rows that predate the
+    -- ruling. Repeat reports at an uncovered place still feed designation (power 8).
     CREATE TABLE IF NOT EXISTS fr_reports (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      account_id INTEGER NOT NULL REFERENCES accounts(id),
+      account_id INTEGER REFERENCES accounts(id),
       mode TEXT NOT NULL DEFAULT 'platform' CHECK (mode IN ('platform','attach')),
       attached_file TEXT,
       covered TEXT NOT NULL DEFAULT '{}',         -- JSON: section key -> covered by the attachment
       payload TEXT NOT NULL DEFAULT '{}',         -- JSON: section.field -> value
+      is_demo INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -892,6 +892,53 @@ function migrate(d: DatabaseSync): void {
       )`,
       'token, event_id, kind, name_en, name_ar, email, status, declaration, account_id, response_note, ops_detail, declaration_items, certification, signed_at, invited_at, answered_at, closed_at',
     );
+  }
+
+  // THE FIRST-RESPONSE ROLE LEFT THE PLATFORM (partner ruling, counterparty pass
+  // 2026-09-02): readiness representation is the agencies' own job, and their
+  // cardiac-arrest reports reach the Ministry out of band (PAD §8.5 allows the
+  // agency's existing patient-care report). The report LANE survives as a
+  // Ministry-side record; the role, its screens and its demonstration account do
+  // not. A standing database is brought forward here, idempotently:
+  //   1. fr_reports gains is_demo (backfilled from the authoring account) and loses
+  //      the NOT NULL on account_id, so a report needs no platform account;
+  //   2. demonstration rows are detached from the demonstration unit account;
+  //   3. fr_readiness — a representation nobody owes here any more — is dropped;
+  //   4. the demonstration first-response account is deleted, and any real one is
+  //      suspended rather than destroyed. The accounts CHECK still allows the value
+  //      'response' so suspended rows stay valid; nothing creates the role again.
+  addColumn('fr_reports', 'is_demo', 'is_demo INTEGER NOT NULL DEFAULT 0');
+  const frSql = (d
+    .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'fr_reports'`)
+    .get() as { sql: string } | undefined)?.sql ?? '';
+  if (frSql.includes('account_id INTEGER NOT NULL')) {
+    d.exec(`UPDATE fr_reports SET is_demo = COALESCE((SELECT a.is_demo FROM accounts a WHERE a.id = fr_reports.account_id), is_demo)`);
+    rebuildTable(
+      'fr_reports',
+      `CREATE TABLE fr_reports_next (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        account_id INTEGER REFERENCES accounts(id),
+        mode TEXT NOT NULL DEFAULT 'platform' CHECK (mode IN ('platform','attach')),
+        attached_file TEXT,
+        covered TEXT NOT NULL DEFAULT '{}',
+        payload TEXT NOT NULL DEFAULT '{}',
+        is_demo INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+      'id, account_id, mode, attached_file, covered, payload, is_demo, created_at',
+    );
+  }
+  const responseIds = (d.prepare(`SELECT id, is_demo FROM accounts WHERE role = 'response'`).all() as unknown as { id: number; is_demo: number }[]);
+  if (responseIds.length > 0) {
+    d.exec(`UPDATE fr_reports SET account_id = NULL WHERE account_id IN (SELECT id FROM accounts WHERE role = 'response')`);
+    d.exec(`DROP TABLE IF EXISTS fr_readiness`);
+    d.exec(`DELETE FROM sessions WHERE account_id IN (SELECT id FROM accounts WHERE role = 'response' AND is_demo = 1)`);
+    d.exec(`DELETE FROM password_resets WHERE account_id IN (SELECT id FROM accounts WHERE role = 'response' AND is_demo = 1)`);
+    d.exec(`DELETE FROM role_profiles WHERE account_id IN (SELECT id FROM accounts WHERE role = 'response' AND is_demo = 1)`);
+    d.exec(`DELETE FROM accounts WHERE role = 'response' AND is_demo = 1`);
+    d.exec(`UPDATE accounts SET suspended = 1 WHERE role = 'response'`);
+  } else {
+    d.exec(`DROP TABLE IF EXISTS fr_readiness`);
   }
 }
 

@@ -11,7 +11,6 @@ import {
   DECLARATION_ITEMS,
   ROLES_CONTENT,
   declarationGate,
-  directorRequirements,
   orderLaneActive,
 } from '../lib/rules/roles';
 import { requirementsForParty } from '../lib/rules/requirements';
@@ -19,24 +18,27 @@ import { NOMINEE_PLAN_SECTIONS, nomineeMayReadDocument, nomineeMayReadSection } 
 import { PLAN_SECTIONS } from '../lib/rules/content';
 
 describe("the Director's requirements, derived from the matrix", () => {
+  // Pinned through requirementsForParty — the one derivation every counterparty
+  // surface reads since the directorRequirements wrapper was deleted with the
+  // requirement cards it fed (partner ruling, counterparty pass 2026-09-02).
   it('names five requirements at Level 3', () => {
-    expect(directorRequirements(3).map((r) => r.n)).toEqual([8, 12, 15, 16, 19]);
+    expect(requirementsForParty(3, 'D').map((r) => r.n)).toEqual([8, 12, 15, 16, 19]);
   });
 
   it('requirement 15 is the only sole row -- no other party is named against it', () => {
-    const sole = directorRequirements(3).filter((r) => r.sole);
+    const sole = requirementsForParty(3, 'D').filter((r) => r.sole);
     expect(sole.map((r) => r.n)).toEqual([15]);
-    expect(sole[0]?.others).toEqual([]);
+    expect(sole[0]?.partyKeys).toEqual(['D']);
   });
 
-  it('shared rows carry the other parties by name, computed not written', () => {
-    const r16 = directorRequirements(3).find((r) => r.n === 16);
-    expect(r16?.others.map((o) => o.en)).toContain('Organizer');
+  it('shared rows carry the other parties, computed not written', () => {
+    const r16 = requirementsForParty(3, 'D').find((r) => r.n === 16);
+    expect(r16?.partyKeys).toContain('O');
   });
 
   it('is EMPTY below Level 3 -- the role does not exist there', () => {
-    expect(directorRequirements(2)).toEqual([]);
-    expect(directorRequirements(1)).toEqual([]);
+    expect(requirementsForParty(2, 'D')).toEqual([]);
+    expect(requirementsForParty(1, 'D')).toEqual([]);
   });
 });
 
@@ -58,44 +60,11 @@ describe('the declaration signing gate', () => {
   });
 });
 
-describe('the minimum dataset (data minimisation)', () => {
-  const fields = ROLES_CONTENT.firstResponse.datasetSections.flatMap((s) =>
-    s.fields.map((f) => ({ section: s.key, ...f })),
-  );
+// The first-response role left the platform (partner ruling, counterparty pass
+// 2026-09-02): its dataset and readiness content went with it, and the agency
+// cardiac-arrest report lane survives Ministry-side only. The data-minimisation
+// property those tests held now lives in the PAD source alone.
 
-  it('is five sections, one report per patient', () => {
-    expect(ROLES_CONTENT.firstResponse.datasetSections.map((s) => s.key)).toEqual([
-      'incident', 'response', 'defibrillation', 'outcome', 'agency',
-    ]);
-  });
-
-  it('carries no patient name, sex or presumed-cause field -- the dataset limits itself', () => {
-    const keys = fields.map((f) => f.key.toLowerCase());
-    expect(keys).not.toContain('patientname');
-    expect(keys).not.toContain('sex');
-    expect(keys).not.toContain('presumedcause');
-    // The only patient datum is the age group, exactly as the dataset specifies.
-    const patientFields = fields.filter((f) => f.en.toLowerCase().includes('patient'));
-    expect(patientFields.map((f) => f.key)).toEqual(['ageGroup', 'transported']);
-  });
-
-  it('distinguishes the onsite device from the unit’s own', () => {
-    const defib = ROLES_CONTENT.firstResponse.datasetSections.find((s) => s.key === 'defibrillation');
-    const onsite = defib?.fields.filter((f) => f.key.startsWith('onsite')) ?? [];
-    const unit = defib?.fields.filter((f) => f.key.startsWith('unit')) ?? [];
-    expect(onsite.length).toBe(3);
-    expect(unit.length).toBe(2);
-  });
-});
-
-describe('the first-response readiness lists match the source counts', () => {
-  it('equipment 5, competence 7, operational 5, procedure 6', () => {
-    expect(ROLES_CONTENT.firstResponse.equipment).toHaveLength(5);
-    expect(ROLES_CONTENT.firstResponse.competence).toHaveLength(7);
-    expect(ROLES_CONTENT.firstResponse.operational).toHaveLength(5);
-    expect(ROLES_CONTENT.firstResponse.procedure).toHaveLength(6);
-  });
-});
 
 describe('the Order of Physicians lane', () => {
   it('ships off -- activation is a Ministry act recorded as data', () => {

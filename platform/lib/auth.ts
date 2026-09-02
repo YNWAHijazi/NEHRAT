@@ -22,7 +22,6 @@ export interface Account {
     | 'organizer'
     | 'ems'
     | 'director'
-    | 'response'
     | 'reviewer'
     | 'ministry_admin'
     | 'order'

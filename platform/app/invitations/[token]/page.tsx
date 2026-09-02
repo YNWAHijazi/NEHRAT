@@ -143,24 +143,15 @@ export default async function InvitationPage({
             />
           ) : null}
 
-          {isDirector && live ? (
-            <div data-region="accepting" style={{ padding: '32px 36px', border: '2px solid var(--brand)', borderRadius: 16, marginBlockEnd: 20 }}>
-              <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 14 }}>
-                <L en="What you would be accepting" ar="ما ستقبلونه" />
-              </div>
-              <p style={{ margin: '0 0 24px', fontSize: 19, lineHeight: 1.65, maxWidth: '66ch' }}>
+          {/* Details, then the choice (partner ruling, counterparty pass): the
+              Director's personal-responsibility sentence stays directly above the
+              answer -- it is what accepting MEANS, not narration -- compact, with the
+              requirement rows themselves behind the briefing's View more. */}
+          {isDirector && live && invitation.status === 'nominated' ? (
+            <div data-region="accepting" style={{ marginBlockEnd: 16, maxWidth: '70ch' }}>
+              <p style={{ margin: 0, fontSize: '15.5px', lineHeight: 1.65 }}>
                 <L en={content.director.accepting.en} ar={content.director.accepting.ar} />
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {content.director.alsoAccepting.map((a) => (
-                  <div key={a.en} style={{ display: 'flex', gap: 12, alignItems: 'start' }}>
-                    <span style={{ flex: 'none', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', marginBlockStart: 9 }} />
-                    <span style={{ fontSize: '15.5px', lineHeight: 1.65 }}>
-                      <L en={a.en} ar={a.ar} />
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           ) : null}
 

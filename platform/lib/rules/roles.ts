@@ -21,46 +21,10 @@ export const ROLES_CONTENT = rolesJson;
 
 /* ---------------- the Director's requirements, derived ---------------- */
 
-export interface DirectorRequirement {
-  n: number;
-  en: string;
-  ar: string;
-  valueEn: string;
-  valueAr: string;
-  /** True where the Director is the ONLY named party -- requirement 15. */
-  sole: boolean;
-  /** The other named parties, absent for a sole requirement. */
-  others: { en: string; ar: string }[];
-}
 
 import { requirementsForParty } from './requirements';
 
 const PARTIES = bilingualMap(matrixJson.parties);
-
-/**
- * The rows naming the Event Medical Director at the level. At any level below 3 the
- * result is EMPTY -- the role does not exist there, and a screen showing this list
- * at Level 2 is wrong twice over.
- *
- * DELEGATES to requirementsForParty. This used to walk the matrix itself, and when
- * the nomination briefing needed the same thing for an EMS provider a second walk was
- * written beside it -- two derivations of one rule, which is how they drift. The
- * general one is the only one; this keeps the Director's shape (it carries `others`,
- * which the briefing does not need) and stops deciding anything for itself.
- */
-export function directorRequirements(level: Level): DirectorRequirement[] {
-  return requirementsForParty(level, 'D').map((r) => ({
-    n: r.n,
-    en: r.en,
-    ar: r.ar,
-    valueEn: r.valueEn,
-    valueAr: r.valueAr,
-    sole: r.sole,
-    others: r.partyKeys
-      .filter((k) => k !== 'D')
-      .map((k) => PARTIES[k] ?? { en: k, ar: k }),
-  }));
-}
 
 /* ---------------- the declaration signing gate ---------------- */
 
@@ -73,15 +37,22 @@ export interface DeclarationItem {
 export const DECLARATION_ITEMS: readonly DeclarationItem[] = complianceJson.sectionB.items;
 
 /**
- * The recorded divergence on section B item 10 (README divergence 6): the Arabic
- * issue adds that the agency confirmed its READINESS to perform the role. Follow
- * the English, report the difference where the item is signed.
+ * The recorded EN/AR divergences on section B items, shown where each item is
+ * signed. Item 10 is README divergence 6 (the Arabic adds confirmed readiness to
+ * perform the role); item 7 was found in the counterparty source sweep of
+ * 2026-09-02 (the Arabic requires coordination carried out and a means of contact
+ * identified, not only communication established). The English is followed in
+ * both; the difference is recorded and awaits a Ministry decision.
  */
-export const DECLARATION_ITEM10_DIVERGENCE: { index: number; en: string; ar: string } | null = (() => {
-  const c = complianceJson as { item10DivergenceEn?: string; item10DivergenceAr?: string };
-  return c.item10DivergenceEn && c.item10DivergenceAr
-    ? { index: 9, en: c.item10DivergenceEn, ar: c.item10DivergenceAr }
-    : null;
+export const DECLARATION_ITEM_DIVERGENCES: readonly { index: number; en: string; ar: string }[] = (() => {
+  const c = complianceJson as {
+    item7DivergenceEn?: string; item7DivergenceAr?: string;
+    item10DivergenceEn?: string; item10DivergenceAr?: string;
+  };
+  const out: { index: number; en: string; ar: string }[] = [];
+  if (c.item7DivergenceEn && c.item7DivergenceAr) out.push({ index: 6, en: c.item7DivergenceEn, ar: c.item7DivergenceAr });
+  if (c.item10DivergenceEn && c.item10DivergenceAr) out.push({ index: 9, en: c.item10DivergenceEn, ar: c.item10DivergenceAr });
+  return out;
 })();
 
 export interface DeclarationGate {
@@ -141,7 +112,9 @@ export function usesOrganizerSurface(role: string): boolean {
  */
 export function landingRouteFor(role: string): string {
   if (usesOrganizerSurface(role)) return '/dashboard';
-  if (role === 'response') return '/first-response/readiness';
+  // 'response' fell through to /signin when the first-response role left the
+  // platform (partner ruling, counterparty pass 2026-09-02) -- a suspended remnant
+  // account has no surface to land on.
   if (role === 'reviewer' || role === 'ministry_admin') return '/ministry';
   if (role === 'order') return '/ministry/order';
   // Unchanged from what the demonstration sign-in already did.

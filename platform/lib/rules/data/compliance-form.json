@@ -62,8 +62,7 @@
     {
       "en": "For Level 2 and Level 3 events, participating emergency medical service or medical providers and their operational contacts have been identified",
       "minLevel": 1,
-      "ar": "بالنسبة إلى فعاليات المستويين الثاني والثالث، جرى تحديد الجهات المشاركة في تقديم خدمات الإسعاف أو الرعاية الطبية ومسؤولي الاتصال التشغيليين لديها.",
-      "blockedBy": "unansweredProviders"
+      "ar": "بالنسبة إلى فعاليات المستويين الثاني والثالث، جرى تحديد الجهات المشاركة في تقديم خدمات الإسعاف أو الرعاية الطبية ومسؤولي الاتصال التشغيليين لديها."
     },
     {
       "en": "For Level 3 events, a licensed physician Event Medical Director has been appointed",
@@ -180,6 +179,8 @@
     ],
     "item10Divergence": "Arabic adds: وأكدت جاهزيتها لتنفيذه -- confirmed its readiness to perform it (README divergence 6)."
   },
+  "item7DivergenceEn": "The Arabic issue's item 7 requires coordination with the Event Medical Director to have been carried out and the means of contacting him identified — stronger than the English's established communication. The English is followed; the difference is recorded and awaits a Ministry decision. Found in the counterparty source sweep, 2026-09-02; not among the README's eight.",
+  "item7DivergenceAr": "يشترط البند 7 في الإصدار العربي أن يكون التنسيق مع المدير الطبي للفعالية قد تم وأن تُحدَّد وسيلة الاتصال به — أي أكثر من مجرد قيام الاتصال في الإصدار الإنكليزي. يُتَّبع الإنكليزي، ويُسجَّل الفرق بانتظار قرار الوزارة.",
   "item10DivergenceEn": "The Arabic issue adds that the agency has confirmed its readiness to perform the role, not only reviewed and confirmed it — a stronger obligation. The English is followed; the difference is recorded and awaits a Ministry decision.",
   "item10DivergenceAr": "يضيف الإصدار العربي أن الجهة أكدت جاهزيتها لتنفيذ الدور، لا مراجعته وتأكيده فحسب — وهو موجب أشدّ. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
 }
