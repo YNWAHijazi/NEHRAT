@@ -210,6 +210,52 @@ test.describe('the capability shape', () => {
     await expect(page.locator('[data-region="vendor-directory-link"]')).toHaveCount(0);
   });
 
+  test('sponsored listings: a booked period readies the toggle, and the label rides the capability, not the row', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // Both blockers named: the dependency and the missing sponsorship.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/sponsoredListings');
+    const toggle = page.locator('[data-region="capability-toggle"]');
+    await expect(toggle).toContainText('Needs Vendor directory on first.');
+    await expect(toggle).toContainText('sponsorship in period');
+
+    // Directory on (the Cedar vendor from the previous walk readies it).
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+
+    // Book the sponsorship over the review clock's today, and the toggle is live.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/sponsoredListings');
+    const manager = page.locator('[data-region="sponsorship-manager"]');
+    await manager.locator('select[name="vendorId"]').selectOption({ label: 'Cedar Medical Supplies' });
+    await manager.locator('input[name="starts"]').fill('2026-08-01');
+    await manager.locator('input[name="ends"]').fill('2026-12-31');
+    await manager.locator('button:has-text("Book the sponsorship")').click();
+    await page.waitForURL(/notice=sponsorship-added/);
+    await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+
+    // The sponsored row is labelled, top of its category.
+    await gotoRidingRestarts(page, '/vendors');
+    const row = page.locator('[data-region="vendors-defibrillatorSupply"] [data-sponsored]');
+    await expect(row).toContainText('Sponsored');
+
+    // Sponsored listings off: the directory stays, the label and position go.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/sponsoredListings');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    await gotoRidingRestarts(page, '/vendors');
+    await expect(page.locator('body')).toContainText('Cedar Medical Supplies');
+    await expect(page.locator('[data-sponsored]')).toHaveCount(0);
+
+    // Directory off too: the tenant leaves as it arrived.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+  });
+
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');

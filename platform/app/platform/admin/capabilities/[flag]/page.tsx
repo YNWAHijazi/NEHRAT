@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { L } from '../../../../../components/L';
 import { MinistryShell } from '../../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../../lib/ministry-auth';
-import { capabilityActs, capabilityChecks, capabilityConfigFor, ministryConfig, vendorsAll } from '../../../../../lib/queries';
+import { capabilityActs, capabilityChecks, capabilityConfigFor, listedVendors, ministryConfig, sponsorshipsAll, vendorsAll } from '../../../../../lib/queries';
 import { ALL_FLAGS, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
-import { addVendorAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
+import { addSponsorshipAction, addVendorAction, endSponsorshipAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
 
 /**
  * One capability, one page: what it is and what turning it on changes, the
@@ -67,6 +67,21 @@ export default async function CapabilityPage({
       {notice === 'vendor-updated' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The listing state has been recorded." ar="سُجّلت حالة الإدراج." />
+        </div>
+      ) : null}
+      {notice === 'sponsorship-added' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The sponsorship is booked." ar="حُجزت الرعاية." />
+        </div>
+      ) : null}
+      {notice === 'sponsorship-ended' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The period closes at the end of today." ar="تُغلق الفترة بنهاية اليوم." />
+        </div>
+      ) : null}
+      {error === 'sponsorship' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="A listed vendor and a period, first date not after the last, are required." ar="مزوّد مُدرج وفترة لا يسبق آخرها أولها مطلوبان." />
         </div>
       ) : null}
       {error === 'vendor' ? (
@@ -317,6 +332,82 @@ export default async function CapabilityPage({
                 <L en="Add the vendor" ar="إضافة المزوّد" />
               </button>
             </div>
+          </form>
+        </div>
+      ) : null}
+
+      {/* SPONSORSHIPS are this capability's content: one listed vendor, one
+          period. Booked here while off -- the readiness check wants one in
+          period before the toggle is live -- and labelled wherever it renders. */}
+      {flag === 'sponsoredListings' ? (
+        <div data-region="sponsorship-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
+          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+            <L en="Sponsorships" ar="الرعايات" />
+          </h2>
+          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+            <L
+              en="A sponsored vendor holds the top of its category for the period, labelled as sponsored wherever it appears — always. Ending one closes the period; the row stays."
+              ar="يحتل المزوّد المموَّل صدارة فئته طوال الفترة، ويوسم بأنه مموَّل حيثما ظهر — دائماً. وإنهاء الرعاية يغلق الفترة؛ ويبقى الصف."
+            />
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
+            {sponsorshipsAll().length === 0 ? (
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
+                <L en="No sponsorship is booked." ar="لا رعاية محجوزة." />
+              </p>
+            ) : null}
+            {sponsorshipsAll().map((s) => (
+              <div key={s.id} style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1, minWidth: 240 }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500 }}>
+                    <L en={s.vendorNameEn} ar={s.vendorNameAr} />
+                  </span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    {' '}· {s.starts} — {s.ends}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span style={{ padding: '3px 10px', borderRadius: 999, background: s.active ? 'var(--brand-soft)' : 'var(--surface2)', border: s.active ? 0 : '1px solid var(--line)', color: s.active ? 'var(--brand)' : 'var(--muted)', fontSize: '12px' }}>
+                    {s.active ? <L en="In period" ar="ضمن الفترة" /> : <L en="Out of period" ar="خارج الفترة" />}
+                  </span>
+                  {s.active ? (
+                    <form action={endSponsorshipAction}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button type="submit" style={{ height: 30, paddingInline: 12, border: '1px solid var(--line)', borderRadius: 15, background: 'var(--bg)', color: 'var(--ink)', fontSize: '12px', cursor: 'pointer' }}>
+                        <L en="End at close of today" ar="إنهاء بنهاية اليوم" />
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+          <form action={addSponsorshipAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                <L en="Listed vendor" ar="مزوّد مُدرج" />
+              </span>
+              <select name="vendorId" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
+                <option value=""></option>
+                {listedVendors().map((v) => (
+                  <option key={v.id} value={v.id}>{v.nameEn}</option>
+                ))}
+              </select>
+            </label>
+            {[
+              ['starts', 'From', 'من'],
+              ['ends', 'To', 'إلى'],
+            ].map(([name, en, ar]) => (
+              <label key={name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  <L en={en!} ar={ar!} />
+                </span>
+                <input name={name} type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+              </label>
+            ))}
+            <button type="submit" style={{ height: 34, paddingInline: 16, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+              <L en="Book the sponsorship" ar="حجز الرعاية" />
+            </button>
           </form>
         </div>
       ) : null}

@@ -160,6 +160,17 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
     }
   });
 
+  it('sponsored listings needs both its dependency and a sponsorship in period', () => {
+    const d = flagDetail('sponsoredListings');
+    expect(d.dependsOn).toBe('vendorDirectory');
+    expect(d.requiredChecks?.map((c) => c.key)).toEqual(['activeSponsorship']);
+    const bothMissing = missingForEnable('sponsoredListings', new Map(), noChecks);
+    expect(bothMissing.map((m) => m.kind)).toEqual(['dependency', 'check']);
+    const checkOnly = missingForEnable('sponsoredListings', new Map(), { flagOn: () => true, checks: {} });
+    expect(checkOnly).toEqual([expect.objectContaining({ kind: 'check', en: expect.stringContaining('sponsorship in period') })]);
+    expect(missingForEnable('sponsoredListings', new Map(), { flagOn: () => true, checks: { activeSponsorship: true } })).toEqual([]);
+  });
+
   it('a readiness check that is not met blocks, named', () => {
     const missing = missingForEnable('vendorDirectory', new Map(), noChecks);
     expect(missing).toEqual([

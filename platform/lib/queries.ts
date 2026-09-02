@@ -2049,7 +2049,13 @@ export function capabilityConfigFor(flag: string): Map<string, string> {
  */
 export function capabilityChecks(): Record<string, boolean> {
   const listed = (getDb().prepare(`SELECT COUNT(*) AS n FROM vendors WHERE listed = 1`).get() as { n: number }).n;
-  return { listedVendor: listed > 0, placementAndAd: false };
+  const today = beirutTodayFn();
+  const sponsored = (
+    getDb()
+      .prepare(`SELECT COUNT(*) AS n FROM sponsorships s JOIN vendors v ON v.id = s.vendor_id WHERE v.listed = 1 AND s.starts <= ? AND ? <= s.ends`)
+      .get(today, today) as { n: number }
+  ).n;
+  return { listedVendor: listed > 0, activeSponsorship: sponsored > 0, placementAndAd: false };
 }
 
 export interface VendorRow {
@@ -2085,6 +2091,47 @@ export function vendorsAll(): VendorRow[] {
 /** The public directory: listed vendors only. */
 export function listedVendors(): VendorRow[] {
   return vendorsAll().filter((v) => v.listed);
+}
+
+export interface SponsorshipRow {
+  id: number;
+  vendorId: number;
+  vendorNameEn: string;
+  vendorNameAr: string;
+  vendorListed: boolean;
+  starts: string;
+  ends: string;
+  addedBy: string;
+  /** In period today, on the Beirut clock. */
+  active: boolean;
+}
+
+/** Every sponsorship, for the administrator's management view. */
+export function sponsorshipsAll(): SponsorshipRow[] {
+  const today = beirutTodayFn();
+  const rows = getDb()
+    .prepare(
+      `SELECT s.id, s.vendor_id, s.starts, s.ends, s.added_by, v.name_en, v.name_ar, v.listed
+       FROM sponsorships s JOIN vendors v ON v.id = s.vendor_id
+       ORDER BY s.starts DESC, s.id DESC`,
+    )
+    .all() as unknown as { id: number; vendor_id: number; starts: string; ends: string; added_by: string; name_en: string; name_ar: string; listed: number }[];
+  return rows.map((r) => ({
+    id: r.id,
+    vendorId: r.vendor_id,
+    vendorNameEn: r.name_en,
+    vendorNameAr: r.name_ar,
+    vendorListed: r.listed === 1,
+    starts: r.starts,
+    ends: r.ends,
+    addedBy: r.added_by,
+    active: r.listed === 1 && r.starts <= today && today <= r.ends,
+  }));
+}
+
+/** Vendor ids holding a sponsored position today. The directory page sorts and labels from this. */
+export function sponsoredVendorIds(): Set<number> {
+  return new Set(sponsorshipsAll().filter((s) => s.active).map((s) => s.vendorId));
 }
 
 export interface CapabilityActRow {

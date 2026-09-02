@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
 import { currentAccount } from '../../lib/auth';
-import { listedVendors, ministryConfig } from '../../lib/queries';
+import { listedVendors, ministryConfig, sponsoredVendorIds } from '../../lib/queries';
 import { effectiveFlag, vendorCategories, vendorDisclaimer } from '../../lib/rules';
 
 /**
@@ -18,6 +18,10 @@ export default async function VendorDirectoryPage() {
   const account = await currentAccount();
   const vendors = listedVendors();
   const disclaimer = vendorDisclaimer();
+  // Sponsored positions: top of the category and labelled, wherever the row
+  // appears, always -- and only while THAT capability is on. Off, the directory
+  // renders plain and no position is held.
+  const sponsored = effectiveFlag('sponsoredListings', config) ? sponsoredVendorIds() : new Set<number>();
 
   return (
     <PublicShell signedIn={account !== null}>
@@ -29,7 +33,9 @@ export default async function VendorDirectoryPage() {
       </p>
 
       {vendorCategories().map((cat) => {
-        const inCategory = vendors.filter((v) => v.category === cat.key);
+        const inCategory = vendors
+          .filter((v) => v.category === cat.key)
+          .sort((a, b) => Number(sponsored.has(b.id)) - Number(sponsored.has(a.id)));
         if (inCategory.length === 0) return null;
         return (
           <div key={cat.key} data-region={`vendors-${cat.key}`} style={{ marginBlockEnd: 28 }}>
@@ -39,8 +45,13 @@ export default async function VendorDirectoryPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden' }}>
               {inCategory.map((v) => (
                 <div key={v.id} style={{ background: 'var(--bg)', padding: '15px 19px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>
+                  <span style={{ fontSize: '15px', fontWeight: 500, display: 'flex', gap: 10, alignItems: 'baseline', flexWrap: 'wrap' }}>
                     <L en={v.nameEn} ar={v.nameAr} />
+                    {sponsored.has(v.id) ? (
+                      <span data-sponsored="" style={{ padding: '2px 9px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
+                        <L en="Sponsored" ar="مموَّل" />
+                      </span>
+                    ) : null}
                   </span>
                   <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
                     {[v.area, v.contact].filter(Boolean).join(' · ') || '—'}

@@ -616,6 +616,38 @@ export async function setVendorListedAction(formData: FormData): Promise<void> {
 }
 
 /**
+ * Books a sponsored position: one listed vendor, one period. The position is a
+ * label and an ordering, never a removal of the label.
+ */
+export async function addSponsorshipAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('manageFlags');
+  const vendorId = Number(formData.get('vendorId') ?? 0);
+  const starts = String(formData.get('starts') ?? '').trim();
+  const ends = String(formData.get('ends') ?? '').trim();
+  const vendor = getDb().prepare(`SELECT listed FROM vendors WHERE id = ?`).get(vendorId) as { listed: number } | undefined;
+  if (!vendor || vendor.listed !== 1 || !starts || !ends || starts > ends) {
+    redirect('/platform/admin/capabilities/sponsoredListings?error=sponsorship');
+  }
+  getDb()
+    .prepare(`INSERT INTO sponsorships (vendor_id, starts, ends, added_by, added_at) VALUES (?, ?, ?, ?, now_stamp())`)
+    .run(vendorId, starts, ends, actor.displayName);
+  revalidatePath('/platform/admin/capabilities/sponsoredListings');
+  revalidatePath('/vendors');
+  redirect('/platform/admin/capabilities/sponsoredListings?notice=sponsorship-added');
+}
+
+/** Ends a sponsorship: the period closes at the end of today, the row stays. */
+export async function endSponsorshipAction(formData: FormData): Promise<void> {
+  await requireMinistry('manageFlags');
+  const id = Number(formData.get('id') ?? 0);
+  const today = beirutToday();
+  getDb().prepare(`UPDATE sponsorships SET ends = ? WHERE id = ? AND ends > ?`).run(today, id, today);
+  revalidatePath('/platform/admin/capabilities/sponsoredListings');
+  revalidatePath('/vendors');
+  redirect('/platform/admin/capabilities/sponsoredListings?notice=sponsorship-ended');
+}
+
+/**
  * Stores a capability's configuration, one ministry_config row per declared
  * field (`capability:<flag>:<field>`). Only fields the data file declares are
  * written; an emptied field is removed, returning it to unset -- the enable

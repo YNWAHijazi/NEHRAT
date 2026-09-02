@@ -232,7 +232,14 @@
       "whatEn": "Lets a directory vendor hold a sponsored position for a period. A sponsored row is labelled as sponsored wherever it appears, always. Needs the vendor directory on — there is nothing to sponsor without it.",
       "whatAr": "يتيح لمزوّد في الدليل موقعاً مموَّلاً لفترة محددة. ويُوسم الصف المموَّل بذلك حيثما ظهر، دائماً. يتطلب تشغيل دليل المزوّدين — فلا شيء يُموَّل من دونه.",
       "requiredConfig": [],
-      "dependsOn": "vendorDirectory"
+      "dependsOn": "vendorDirectory",
+      "requiredChecks": [
+        {
+          "key": "activeSponsorship",
+          "labelEn": "At least one sponsorship in period for a listed vendor",
+          "labelAr": "رعاية واحدة على الأقل ضمن فترتها لمزوّد مُدرج"
+        }
+      ]
     },
     "advertising": {
       "titleEn": "Advertising",

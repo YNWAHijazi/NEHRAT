@@ -711,6 +711,18 @@ function migrate(d: DatabaseSync): void {
       added_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- A sponsored position: one directory vendor, one period. Sponsorship is a
+    -- POSITION AND A LABEL, never a removal of the label -- a sponsored row says
+    -- so wherever it appears, always.
+    CREATE TABLE IF NOT EXISTS sponsorships (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vendor_id INTEGER NOT NULL REFERENCES vendors(id),
+      starts TEXT NOT NULL,
+      ends TEXT NOT NULL,
+      added_by TEXT NOT NULL,
+      added_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     -- A received application-fee payment. Only PAYMENTS are stored: what is DUE
     -- derives live from the fee configuration in force, so a fee revision
     -- reprices unpaid submissions and never a paid one -- a recorded payment
