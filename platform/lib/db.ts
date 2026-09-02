@@ -697,6 +697,22 @@ function migrate(d: DatabaseSync): void {
       is_demo INTEGER NOT NULL DEFAULT 0
     );
 
+    -- A received application-fee payment. Only PAYMENTS are stored: what is DUE
+    -- derives live from the fee configuration in force, so a fee revision
+    -- reprices unpaid submissions and never a paid one -- a recorded payment
+    -- discharges its service's fee outright. Written only through the payment
+    -- seam (lib/payments.ts), where a provider integration lands.
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      record_id TEXT NOT NULL,          -- EV-/VN-/FC- record the fee attaches to
+      service TEXT NOT NULL CHECK (service IN ('certifyEvent','registerVenue','registerFacility')),
+      amount TEXT NOT NULL,             -- verbatim, never floated
+      currency TEXT NOT NULL,
+      provider TEXT NOT NULL,
+      provider_reference TEXT NOT NULL DEFAULT '',
+      paid_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     -- Turning a platform capability on or off is a licensing act, not a toggle
     -- flip: who, when, and the configuration at that moment. These rows ARE the
     -- record the activity trail reads -- there is no separate audit copy.

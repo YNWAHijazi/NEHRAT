@@ -6,10 +6,35 @@
 
 import { organizationFor } from './auth';
 import { clockNow } from './clock';
-import { beirutToday, documentStateFor, eventFor, invitationsFor, latestOutcomeFor, submissionFor, assessmentsFor } from './queries';
-import { declarationsAreComplete, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
+import { paymentFor } from './payments';
+import { beirutToday, capabilityConfigFor, documentStateFor, eventFor, invitationsFor, latestOutcomeFor, ministryConfig, submissionFor, assessmentsFor } from './queries';
+import { applicationFee, declarationsAreComplete, effectiveFlag, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
 
-export function submissionGateFor(accountId: number, eventId: string): SubmissionGate & { level: Level | null } {
+/**
+ * The application fee facts for one event: the fee in force for its level and
+ * whether a recorded payment discharges it. Null while no fee is in force --
+ * the shipped state, since the capability ships off.
+ */
+function feeFactsFor(
+  eventId: string,
+  level: Level | null,
+): { amount: string; currency: string; paid: boolean; paidAt: string | null } | null {
+  const config = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+  const fee = applicationFee(
+    'certifyEvent',
+    level,
+    effectiveFlag('applicationFees', config),
+    capabilityConfigFor('applicationFees'),
+  );
+  if (fee === null) return null;
+  const payment = paymentFor(eventId, 'certifyEvent');
+  return { amount: fee.amount, currency: fee.currency, paid: payment !== null, paidAt: payment?.paidAt ?? null };
+}
+
+export function submissionGateFor(
+  accountId: number,
+  eventId: string,
+): SubmissionGate & { level: Level | null; fee: { amount: string; currency: string; paid: boolean; paidAt: string | null } | null } {
   const event = eventFor(accountId, eventId);
   const organization = organizationFor(accountId);
   const versions = assessmentsFor(accountId, eventId);
@@ -26,7 +51,9 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
         },
       ],
       expedited: false,
+      awaitingPayment: false,
       level,
+      fee: null,
     };
   }
 
@@ -34,6 +61,7 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
   const submission = submissionFor(accountId, eventId);
   const documentState = documentStateFor(accountId, eventId, level);
 
+  const fee = feeFactsFor(eventId, level);
   const gateCtx: EventGateContext = {
     finalLevel: level,
     eventEndDate: event.endDate,
@@ -81,6 +109,7 @@ export function submissionGateFor(accountId: number, eventId: string): Submissio
     declarationsComplete,
     today: beirutToday(),
     filingDeadline: deadline?.date ?? null,
+    fee: fee === null ? null : { amount: fee.amount, currency: fee.currency, paid: fee.paid },
   });
-  return { ...gate, level };
+  return { ...gate, level, fee };
 }

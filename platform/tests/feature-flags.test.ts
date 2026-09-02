@@ -101,6 +101,13 @@ describe('commercial and AI capability', () => {
       .filter((f) => !f.endsWith('app/platform/admin/capabilities/[flag]/page.tsx'))
       .filter((f) => !f.endsWith('components/FlagsPanel.tsx'))
       .filter((f) => !f.endsWith('app/ministry-actions.ts'))
+      // The FIRST content consumer (application-fees commit): the service detail
+      // fee line derives from the fee rule, whose off-state answer is the same
+      // `Fee: None.` the page always carried -- e2e/app/public-landing.spec.ts
+      // asserts it in the shipped state, e2e/app/capabilities.spec.ts asserts the
+      // amount renders only while the capability is on. The submission-package
+      // side reads the gate, not a flag, so it is not on this list.
+      .filter((f) => !f.endsWith('app/services/[service]/page.tsx'))
       .map(relative);
     expect(
       offenders,
@@ -110,12 +117,17 @@ describe('commercial and AI capability', () => {
 });
 
 describe('the enable rule: a capability with no configuration cannot be enabled', () => {
-  it('names every missing configuration field', () => {
+  it('names every missing configuration field — conditional fields only when their condition holds', () => {
+    const unconditional = flagDetail('applicationFees').requiredConfig.filter((f) => !f.requiredIf);
     const missing = missingForEnable('applicationFees', new Map(), noChecks);
-    expect(missing.length).toBe(flagDetail('applicationFees').requiredConfig.length);
+    expect(missing.length).toBe(unconditional.length);
     expect(missing.every((m) => m.kind === 'field')).toBe(true);
     expect(missing[0]!.en).toContain('Currency');
     expect(missing[0]!.ar).toContain('العملة');
+    // Varying by level makes the per-level fees required, and they are named.
+    const varies = missingForEnable('applicationFees', new Map([['variesByLevel', 'yes']]), noChecks);
+    expect(varies.some((m) => m.en.includes('Level 2'))).toBe(true);
+    expect(varies.some((m) => m.en.includes('Level 3'))).toBe(true);
   });
 
   it('clears when every field holds a value — zero is a value', () => {

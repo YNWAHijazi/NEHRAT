@@ -109,8 +109,8 @@
         },
         {
           "key": "feeCertifyEvent",
-          "labelEn": "Fee — certify an event",
-          "labelAr": "الرسم — اعتماد فعالية",
+          "labelEn": "Fee — certify an event (Level 1 when the fee varies by level)",
+          "labelAr": "الرسم — اعتماد فعالية (المستوى 1 عندما يتغير الرسم بحسب المستوى)",
           "kind": "number"
         },
         {
@@ -134,6 +134,26 @@
             "no",
             "yes"
           ]
+        },
+        {
+          "key": "feeCertifyEventL2",
+          "labelEn": "Fee — certify an event, Level 2 (required when the fee varies by level)",
+          "labelAr": "الرسم — اعتماد فعالية، المستوى 2 (مطلوب عندما يتغير الرسم بحسب المستوى)",
+          "kind": "number",
+          "requiredIf": {
+            "key": "variesByLevel",
+            "value": "yes"
+          }
+        },
+        {
+          "key": "feeCertifyEventL3",
+          "labelEn": "Fee — certify an event, Level 3 (required when the fee varies by level)",
+          "labelAr": "الرسم — اعتماد فعالية، المستوى 3 (مطلوب عندما يتغير الرسم بحسب المستوى)",
+          "kind": "number",
+          "requiredIf": {
+            "key": "variesByLevel",
+            "value": "yes"
+          }
         }
       ]
     },

@@ -111,6 +111,11 @@ export interface SubmissionFacts {
   /** Today vs the filing deadline (Asia/Beirut dates, YYYY-MM-DD). */
   today: string;
   filingDeadline: string | null;
+  /**
+   * The application fee in force and whether its payment is recorded. Null while
+   * no fee is in force (capability off, unset, or zero) -- the shipped state.
+   */
+  fee: { amount: string; currency: string; paid: boolean } | null;
 }
 
 export type BlockerKind =
@@ -122,6 +127,7 @@ export type BlockerKind =
   | 'directorUnanswered'
   | 'declarationsIncomplete'
   | 'certificationIncomplete'
+  | 'feeUnpaid'
   | 'eventCancelled';
 
 export interface SubmissionBlocker {
@@ -142,6 +148,12 @@ export interface SubmissionGate {
    * the submission proceeds, marked expedited, and expedited review waives nothing.
    */
   expedited: boolean;
+  /**
+   * The state between complete and filed: everything the level requires is in
+   * place and only the fee's payment is outstanding. False whenever anything
+   * else still blocks -- a package that is not complete is not awaiting payment.
+   */
+  awaitingPayment: boolean;
 }
 
 export function submissionGate(facts: SubmissionFacts): SubmissionGate {
@@ -227,10 +239,26 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
     });
   }
 
+  // THE FEE, LAST: awaiting payment is the state between complete and filed,
+  // so it is true only when the fee blocker stands alone.
+  const otherwiseComplete = blockers.length === 0;
+  if (facts.fee && !facts.fee.paid) {
+    blockers.push({
+      kind: 'feeUnpaid',
+      itemEn: `Application fee — awaiting payment: ${facts.fee.amount} ${facts.fee.currency}`,
+      itemAr: `رسم الطلب — بانتظار السداد: ${facts.fee.amount} ${facts.fee.currency}`,
+    });
+  }
+
   const expedited =
     facts.filingDeadline !== null && facts.today > facts.filingDeadline;
 
-  return { canFile: blockers.length === 0, blockers, expedited };
+  return {
+    canFile: blockers.length === 0,
+    blockers,
+    expedited,
+    awaitingPayment: otherwiseComplete && facts.fee !== null && !facts.fee.paid,
+  };
 }
 
 /* ---------------- the one next action ---------------- */
@@ -242,6 +270,7 @@ export type NextActionKind =
   | 'declarations'
   | 'director'
   | 'waitingOnOthers'
+  | 'awaitingPayment'
   | 'ready';
 
 export interface NextAction {
@@ -380,6 +409,24 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
         'كل ما عدا ذلك في هذه الفعالية مستوفى. ويُستكمل النموذج على المنصة ولا يُرفَق.',
       buttonEn: 'Open the form',
       buttonAr: 'فتح النموذج',
+    };
+  }
+
+  // The state between complete and filed: only the fee's payment is outstanding,
+  // and it is not the organizer's move on the platform -- filing completes when
+  // the payment is recorded.
+  if (has('feeUnpaid')) {
+    return {
+      kind: 'awaitingPayment',
+      href: 'submit',
+      tone: 'accent',
+      titleEn: 'Awaiting payment',
+      titleAr: 'بانتظار السداد',
+      bodyEn:
+        'Everything the level requires is in place. The application fee is due, and filing completes when its payment is recorded.',
+      bodyAr: 'كل ما يقتضيه المستوى مستوفى. ورسم الطلب مستحق، ويكتمل التقديم عند تسجيل سداده.',
+      buttonEn: 'Open the submission package',
+      buttonAr: 'فتح حزمة التقديم',
     };
   }
 

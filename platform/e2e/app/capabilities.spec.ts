@@ -31,7 +31,7 @@ test.describe('the capability shape', () => {
     const toggle = page.locator('[data-region="capability-toggle"]');
     await expect(toggle.locator('button[disabled]')).toHaveCount(1);
     await expect(toggle).toContainText('Configuration missing: Currency.');
-    await expect(toggle).toContainText('Configuration missing: Fee — certify an event.');
+    await expect(toggle).toContainText('Configuration missing: Fee — certify an event (Level 1 when the fee varies by level).');
 
     // Configure -- a zero fee is a value, an unset one is not.
     const config = page.locator('[data-region="capability-config"]');
@@ -104,6 +104,57 @@ test.describe('the capability shape', () => {
     await gotoRidingRestarts(page, '/ministry/admin/configuration');
     await expect(page.locator('main')).not.toContainText('Capability switches');
     await expect(page.locator('[data-region="flags"]')).toHaveCount(0);
+  });
+
+  test('application fees: nothing renders while off, the amount renders while on, and filing names the unpaid fee', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // A real fee, stored. The capability stays OFF -- and configured-but-off
+    // still renders exactly what always rendered: nothing commercial.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/applicationFees');
+    const config = page.locator('[data-region="capability-config"]');
+    await config.locator('select[name="currency"]').selectOption('USD');
+    await config.locator('input[name="feeCertifyEvent"]').fill('100');
+    await config.locator('input[name="feeRegisterVenue"]').fill('0');
+    await config.locator('input[name="feeRegisterFacility"]').fill('0');
+    await config.locator('select[name="variesByLevel"]').selectOption('no');
+    await config.locator('button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+    await gotoRidingRestarts(page, '/services/certify-an-event');
+    await expect(page.locator('[data-region="fee-lines"]')).toContainText('Fee: None.');
+    await expect(page.locator('[data-region="fee-lines"]')).not.toContainText('100');
+
+    // On: the fee appears on the service page before an organizer starts...
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/applicationFees');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+    await gotoRidingRestarts(page, '/services/certify-an-event');
+    await expect(page.locator('[data-region="fee-lines"]')).toContainText('Fee: 100 USD.');
+
+    // ...and on the submission package as an amount due, with filing naming it.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    const due = page.locator('[data-region="amount-due"]');
+    await expect(due).toContainText('Application fee');
+    await expect(due).toContainText('Amount due: 100 USD');
+    await expect(due).toContainText('No payment channel is configured on the platform yet');
+    await expect(page.locator('body')).toContainText('Application fee — awaiting payment: 100 USD');
+
+    // Off again, fee cleared: the tenant leaves as it arrived, and the region
+    // is ABSENT for the organizer, not greyed.
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/applicationFees');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    await page.locator('[data-region="capability-config"] input[name="feeCertifyEvent"]').fill('0');
+    await page.locator('[data-region="capability-config"] button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+    await gotoRidingRestarts(page, '/services/certify-an-event');
+    await expect(page.locator('[data-region="fee-lines"]')).toContainText('Fee: None.');
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
   });
 
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {

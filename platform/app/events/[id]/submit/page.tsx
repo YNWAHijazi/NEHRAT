@@ -141,6 +141,44 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
 
         </div>
 
+        {/* THE AMOUNT DUE, on the package (rendered only while a fee is in
+            force -- the capability ships off and this region with it). Between
+            complete and filed sits awaiting payment: filing completes when the
+            payment is recorded through the payment seam, and no payment channel
+            renders here because none is integrated. */}
+        {gate.fee ? (
+          <div data-region="amount-due" style={{ maxWidth: 900, padding: '19px 23px', border: `1px solid ${gate.fee.paid ? 'var(--line)' : 'var(--accent-ink)'}`, borderRadius: 12, marginBlockEnd: 44 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: 16, fontWeight: 500 }}>
+                <L en="Application fee" ar="رسم الطلب" />
+              </span>
+              <span style={{ fontSize: 16, fontVariantNumeric: 'tabular-nums' }}>
+                {gate.fee.paid ? (
+                  <L en={`Paid — ${gate.fee.paidAt ?? ''}`} ar={`مسدَّد — ⁦${gate.fee.paidAt ?? ''}⁩`} />
+                ) : (
+                  <L en={`Amount due: ${gate.fee.amount} ${gate.fee.currency}`} ar={`المبلغ المستحق: ${gate.fee.amount} ${gate.fee.currency}`} />
+                )}
+              </span>
+            </div>
+            {gate.awaitingPayment ? (
+              <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.65, maxWidth: '80ch' }}>
+                <L
+                  en="Awaiting payment. Everything the level requires is in place; filing completes when the payment is recorded."
+                  ar="بانتظار السداد. كل ما يقتضيه المستوى مستوفى؛ ويكتمل التقديم عند تسجيل السداد."
+                />
+              </p>
+            ) : null}
+            {!gate.fee.paid ? (
+              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '80ch' }}>
+                <L
+                  en="No payment channel is configured on the platform yet. The Ministry announces how the fee is paid; the record is updated when payment is received."
+                  ar="لا قناة سداد مهيّأة على المنصة بعد. تعلن الوزارة كيفية سداد الرسم؛ ويُحدَّث السجل عند استلام السداد."
+                />
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div style={{ maxWidth: 900 }}>
           <h2 style={{ margin: '0 0 18px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Compliance and submission" ar="الامتثال والتقديم" />

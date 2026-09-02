@@ -3,12 +3,16 @@ import { notFound } from 'next/navigation';
 import { L } from '../../../components/L';
 import { PublicShell } from '../../../components/PublicShell';
 import { currentAccount } from '../../../lib/auth';
+import { capabilityConfigFor, ministryConfig } from '../../../lib/queries';
 import {
   DOMAINS,
   FACILITY_CONTENT,
   PUBLIC_LANDING,
   documentsForLevel,
+  effectiveFlag,
   requirementsForLevel,
+  serviceFeeLines,
+  type FeeService,
 } from '../../../lib/rules';
 
 /**
@@ -68,9 +72,22 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
       <p style={{ margin: '0 0 8px', fontSize: '17px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '70ch' }}>
         <L en={def.descEn} ar={def.descAr} />
       </p>
-      <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)' }}>
-        <L en="Fee: None." ar="الرسم: لا يوجد." />
-      </p>
+      {/* THE FEE LINE DERIVES (application-fees capability). While the capability
+          is off -- the shipped state -- the rule returns the one line this page
+          always carried: `Fee: None.`, in exactly those words (non-negotiable 12).
+          With a fee in force the amount renders here, before an organizer starts,
+          and again on the submission package as an amount due. */}
+      <div data-region="fee-lines" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {serviceFeeLines(
+          (key === 'certify-an-event' ? 'certifyEvent' : key === 'register-a-venue' ? 'registerVenue' : 'registerFacility') as FeeService,
+          effectiveFlag('applicationFees', new Map([...ministryConfig()].map(([k, v]) => [k, v.value]))),
+          capabilityConfigFor('applicationFees'),
+        ).map((line) => (
+          <p key={line.en} style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)' }}>
+            <L en={line.en} ar={line.ar} />
+          </p>
+        ))}
+      </div>
 
       {/* WHAT THE SERVICE COVERS. Each screen answers the same question in its own
           terms -- the event by its nine domains and its documents, the venue by the

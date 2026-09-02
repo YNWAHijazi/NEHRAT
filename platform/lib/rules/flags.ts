@@ -51,6 +51,8 @@ export interface ConfigField {
   labelAr: string;
   kind: 'text' | 'number' | 'select';
   options?: string[];
+  /** Required only while another field holds this value (e.g. per-level fees). */
+  requiredIf?: { key: string; value: string };
 }
 
 export interface ReadinessCheck {
@@ -132,6 +134,7 @@ export function missingForEnable(
     });
   }
   for (const field of d.requiredConfig) {
+    if (field.requiredIf && capabilityConfig.get(field.requiredIf.key) !== field.requiredIf.value) continue;
     const value = capabilityConfig.get(field.key);
     if (value === undefined || value.trim() === '') {
       blockers.push({

@@ -16,6 +16,7 @@ export * from './scope';
 export * from './public-lookup';
 export * from './gates';
 export * from './flags';
+export * from './fees';
 export * from './requirements';
 export * from './submission';
 export * from './content';
