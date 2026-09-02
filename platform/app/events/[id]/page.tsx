@@ -9,6 +9,7 @@ import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
 import {
+  archiveWindowDays,
   assessmentsFor,
   beirutToday,
   daysBetween,
@@ -21,6 +22,7 @@ import {
   levelWhy,
   MAX_SCORE_PER_DOMAIN,
   eventFilingDeadline,
+  isArchivedRecord,
   eventMedicalDirectorGate, eventStage, nextAction, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
   LIFECYCLE_CONTENT, materialChangeGate, seriousIncidentGate,
   postEventReportGate,
@@ -273,6 +275,14 @@ export default async function EventRecordPage({
   const why = derivation ? levelWhy(derivation, latest?.inputs.eventDisciplines) : null;
   const today = beirutToday();
 
+  // Shelved by the Ministry or the owner, or concluded past the archive window on
+  // its own -- one rule, the same one the mutating actions refuse on.
+  const recordArchived = isArchivedRecord(
+    { archivedAt: event.archivedAt, endDate: event.endDate },
+    today,
+    archiveWindowDays(),
+  );
+
   const gateCtx: EventGateContext = {
     finalLevel: derivation?.finalLevel ?? event.level,
     eventEndDate: event.endDate,
@@ -280,6 +290,7 @@ export default async function EventRecordPage({
     filed: event.filed,
     lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
+    archived: recordArchived,
     now: clockNow(),
   };
 
@@ -371,12 +382,19 @@ export default async function EventRecordPage({
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         {/* The lifecycle band beats everything: a cancelled or postponed record says
             so before anything else, with the consequence stated. */}
-        {event.archivedAt !== null ? (
+        {recordArchived ? (
           <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
-            <L
-              en={`Archived by the Ministry on ${event.archivedAt.slice(0, 10)}. This record is read-only; nothing further is owed on it.`}
-              ar={`أُرشف هذا السجل لدى الوزارة في ⁦${event.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
-            />
+            {event.archivedAt !== null ? (
+              <L
+                en={`Archived by the Ministry on ${event.archivedAt.slice(0, 10)}. This record is read-only; nothing further is owed on it.`}
+                ar={`أُرشف هذا السجل لدى الوزارة في ⁦${event.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+              />
+            ) : (
+              <L
+                en={`This event concluded and was moved to Previous services ${archiveWindowDays()} days after it ended. The record is read-only; nothing further is owed on it.`}
+                ar={`انتهت هذه الفعالية ونُقلت إلى الخدمات السابقة بعد ${archiveWindowDays()} يوماً من انتهائها. والسجل للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+              />
+            )}
           </div>
         ) : null}
         {event.lifecycle === 'cancelled' ? (
@@ -402,7 +420,7 @@ export default async function EventRecordPage({
             button. Derived from the SAME blockers the Submit gate names, so the panel
             and the screen it opens can never disagree. The waiting state is the one
             that matters -- amber that is somebody else's move says so. */}
-        {!event.filed && event.lifecycle === 'active' && event.archivedAt === null ? (
+        {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
           <Link
             href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
             data-region="next-action"
@@ -704,7 +722,7 @@ export default async function EventRecordPage({
                 </div>
               ))}
             </div>
-            {event.lifecycle !== 'cancelled' && event.archivedAt === null ? (
+            {event.lifecycle !== 'cancelled' && !recordArchived ? (
               <div style={{ marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
                 <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>
                   <L en="Run the assessment again" ar="إعادة إجراء التقييم" />
@@ -719,7 +737,7 @@ export default async function EventRecordPage({
           </>
         ) : null}
 
-        {event.lifecycle !== 'cancelled' && event.archivedAt === null ? (
+        {event.lifecycle !== 'cancelled' && !recordArchived ? (
           <div style={{ marginBlockEnd: 28 }}>
             {/* ABSENT once filed, not greyed: after filing, editing the details never
                 applies again -- Report a material change is the instrument's route, and

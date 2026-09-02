@@ -5,7 +5,7 @@ import { L } from '../../components/L';
 import { StartServiceMenu } from '../../components/StartServiceMenu';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
-import { archivedEventsFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
+import { archivedEventsFor, archivedVenuesFor, archivedFacilitiesFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
 import { REASSESSMENT_WINDOW, usesOrganizerSurface } from '../../lib/rules';
 import {
@@ -243,6 +243,9 @@ export default async function DashboardPage({
   const organization = organizationFor(account.id);
   const events = eventsFor(account.id);
   const archived = archivedEventsFor(account.id);
+  const archivedVenues = archivedVenuesFor(account.id);
+  const archivedFacilities = archivedFacilitiesFor(account.id);
+  const previousCount = archived.length + archivedVenues.length + archivedFacilities.length;
   const venues = venuesFor(account.id);
   const facilities = facilitiesFor(account.id);
   const unread = unreadCountFor(account.id);
@@ -468,30 +471,75 @@ export default async function DashboardPage({
         )}
 
 
-        {archived.length > 0 ? (
-          <details data-region="previous-requests" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
+        {previousCount > 0 ? (
+          <details data-region="previous-services" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
             <summary style={{ cursor: 'pointer', fontSize: 16, fontWeight: 600, letterSpacing: '-.015em' }}>
-              <L en={`Previous requests (${archived.length})`} ar={`الطلبات السابقة (${archived.length})`} />
+              <L en={`Previous services (${previousCount})`} ar={`الخدمات السابقة (${previousCount})`} />
             </summary>
-            <div style={{ marginBlockStart: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ marginBlockStart: 14, display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
-                <L en="Archived by the Ministry after the event concluded. Read-only." ar="أُرشفت من الوزارة بعد انتهاء الفعالية. للقراءة فقط." />
+                <L en="Concluded records. Read-only." ar="سجلات منتهية. للقراءة فقط." />
               </div>
-              {archived.map((e) => (
-                <Link key={e.id} href={`/events/${e.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--ink)' }}>
-                  <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
-                    <L en={e.nameEn} ar={e.nameAr} />
-                  </span>
-                  <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    {e.id} · {e.endDate ?? '—'}
-                  </span>
-                  {e.level !== null ? (
-                    <span style={{ fontSize: '12.5px', color: `var(--l${e.level})` }}>
-                      <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
-                    </span>
-                  ) : null}
-                </Link>
-              ))}
+              {archived.length > 0 ? (
+                <div data-region="previous-events">
+                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+                    <L en="Events" ar="الفعاليات" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {archived.map((e) => (
+                      <Link key={e.id} href={`/events/${e.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--muted)' }}>
+                        <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                          <L en={e.nameEn} ar={e.nameAr} />
+                        </span>
+                        <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
+                          {e.id} · {e.endDate ?? '—'}
+                        </span>
+                        {e.level !== null ? (
+                          <span style={{ fontSize: '12.5px' }}>
+                            <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
+                          </span>
+                        ) : null}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {archivedVenues.length > 0 ? (
+                <div data-region="previous-venues">
+                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+                    <L en="Venues" ar="المواقع" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {archivedVenues.map((v) => (
+                      <Link key={v.id} href={`/venues/${v.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--muted)' }}>
+                        <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                          <L en={v.nameEn} ar={v.nameAr} />
+                        </span>
+                        <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
+                          {v.id}{v.validUntil ? ` · ${v.validUntil}` : ''}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {archivedFacilities.length > 0 ? (
+                <div data-region="previous-facilities">
+                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+                    <L en="Facilities" ar="المنشآت" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {archivedFacilities.map((f) => (
+                      <Link key={f.id} href={`/facilities/${f.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--muted)' }}>
+                        <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                          <L en={f.nameEn} ar={f.nameAr} />
+                        </span>
+                        <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>{f.id}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </details>
         ) : null}

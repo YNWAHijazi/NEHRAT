@@ -838,6 +838,12 @@ function migrate(d: DatabaseSync): void {
   // the origin derivable later. An account nobody can account for is the thing this
   // column exists to prevent.
   addColumn('password_resets', 'kind', "kind TEXT NOT NULL DEFAULT 'reset'");
+  // Previous services (partner ruling, 2026-09-02): venues and facilities join the
+  // organizer's archived section; the columns mirror events' archive pair.
+  addColumn('venues', 'archived_at', 'archived_at TEXT');
+  addColumn('venues', 'archived_by', 'archived_by TEXT');
+  addColumn('facilities', 'archived_at', 'archived_at TEXT');
+  addColumn('facilities', 'archived_by', 'archived_by TEXT');
   addColumn('password_resets', 'issued_by', 'issued_by INTEGER REFERENCES accounts(id)');
 
   // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.

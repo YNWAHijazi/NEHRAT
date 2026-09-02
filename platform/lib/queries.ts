@@ -16,7 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination-access';
@@ -256,23 +256,46 @@ function orgRecordedFor(accountId: number): boolean {
   return r?.status === 'recorded';
 }
 
-export function eventsFor(accountId: number): EventRow[] {
-  const orgRecorded = orgRecordedFor(accountId);
-  // Archived records leave the main dashboard (partner review); they live in the
-  // collapsed Previous requests section, via archivedEventsFor below.
-  const rows = getDb()
-    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? AND archived_at IS NULL ORDER BY created_at DESC`)
-    .all(accountId) as unknown as EventDbRow[];
-  return rows.map((r) => toEventRow(r, orgRecorded));
+/**
+ * The archive window in force: the Ministry's configured value where one is
+ * published, the platform default from lifecycle.json otherwise (partner ruling,
+ * 2026-09-02 -- a configured value, not a constant).
+ */
+export function archiveWindowDays(): number {
+  const v = ministryConfig().get('archiveWindowDays')?.value;
+  const n = v == null ? NaN : Number(v);
+  return Number.isFinite(n) && n > 0 ? n : ARCHIVE_WINDOW.windowDays;
 }
 
-/** The owner's archived records: read-only rows under "Previous requests". */
-export function archivedEventsFor(accountId: number): EventRow[] {
+/**
+ * One partition, one rule: a record is on the main dashboard OR under Previous
+ * services, decided by isArchivedRecord alone -- shelved by the Ministry or the
+ * owner, or concluded past the archive window on its own.
+ */
+function partitionedEventsFor(accountId: number): { live: EventRow[]; archived: EventRow[] } {
   const orgRecorded = orgRecordedFor(accountId);
+  const today = beirutTodayFn();
+  const window = archiveWindowDays();
   const rows = getDb()
-    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? AND archived_at IS NOT NULL ORDER BY end_date DESC`)
+    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE account_id = ? ORDER BY created_at DESC`)
     .all(accountId) as unknown as EventDbRow[];
-  return rows.map((r) => toEventRow(r, orgRecorded));
+  const live: EventRow[] = [];
+  const archived: EventRow[] = [];
+  for (const r of rows) {
+    const row = toEventRow(r, orgRecorded);
+    (isArchivedRecord({ archivedAt: row.archivedAt, endDate: row.endDate }, today, window) ? archived : live).push(row);
+  }
+  archived.sort((a, b) => (b.endDate ?? '').localeCompare(a.endDate ?? ''));
+  return { live, archived };
+}
+
+export function eventsFor(accountId: number): EventRow[] {
+  return partitionedEventsFor(accountId).live;
+}
+
+/** The owner's concluded records: read-only rows under "Previous services". */
+export function archivedEventsFor(accountId: number): EventRow[] {
+  return partitionedEventsFor(accountId).archived;
 }
 
 /** Scoped to the owner: a foreign id returns null exactly like a missing one. */
@@ -313,7 +336,15 @@ export interface VenueRow {
 
 export function venuesFor(accountId: number): VenueRow[] {
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, level, issued, valid_until FROM venues WHERE account_id = ?`)
+    .prepare(`SELECT id, name_en, name_ar, level, issued, valid_until FROM venues WHERE account_id = ? AND archived_at IS NULL`)
+    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; level: number | null; issued: string | null; valid_until: string | null }[];
+  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, level: r.level, issued: r.issued, validUntil: r.valid_until }));
+}
+
+/** Archived venues, for the Previous services section: read-only rows. */
+export function archivedVenuesFor(accountId: number): VenueRow[] {
+  const rows = getDb()
+    .prepare(`SELECT id, name_en, name_ar, level, issued, valid_until FROM venues WHERE account_id = ? AND archived_at IS NOT NULL ORDER BY archived_at DESC`)
     .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; level: number | null; issued: string | null; valid_until: string | null }[];
   return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, level: r.level, issued: r.issued, validUntil: r.valid_until }));
 }
@@ -395,7 +426,7 @@ export function facilityLedgerFor(facilityId: string, today: string): FacilityLe
 export function facilitiesFor(accountId: number): FacilityRow[] {
   const today = beirutTodayFn();
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, category_key FROM facilities WHERE account_id = ?`)
+    .prepare(`SELECT id, name_en, name_ar, category_key FROM facilities WHERE account_id = ? AND archived_at IS NULL`)
     .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; category_key: string }[];
   return rows.map((r) => {
     const cat = facilityCategory(r.category_key);
@@ -424,6 +455,15 @@ export function facilitiesFor(accountId: number): FacilityRow[] {
   });
 }
 
+/** Archived facilities, for the Previous services section: id and names only. */
+export function archivedFacilitiesFor(accountId: number): { id: string; nameEn: string; nameAr: string }[] {
+  return (
+    getDb()
+      .prepare(`SELECT id, name_en, name_ar FROM facilities WHERE account_id = ? AND archived_at IS NOT NULL ORDER BY archived_at DESC`)
+      .all(accountId) as unknown as { id: string; name_en: string; name_ar: string }[]
+  ).map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar }));
+}
+
 /* ---------------- Slice 4: the facility service ---------------- */
 
 export interface FacilityDetail {
@@ -435,13 +475,14 @@ export interface FacilityDetail {
   operatingHours: string; phone: string; email: string;
   accessPoint: string; emsNumber: string;
   createdAt: string;
+  archivedAt: string | null;
 }
 
 export function facilityDetail(accountId: number, facilityId: string): FacilityDetail | null {
   const r = getDb()
     .prepare(
       `SELECT id, name_en, name_ar, category_key, address, municipality_en, municipality_ar,
-              operating_hours, phone, email, access_point, ems_number, created_at
+              operating_hours, phone, email, access_point, ems_number, created_at, archived_at
        FROM facilities WHERE id = ? AND account_id = ?`,
     )
     .get(facilityId, accountId) as
@@ -449,6 +490,7 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
         id: string; name_en: string; name_ar: string; category_key: string; address: string;
         municipality_en: string; municipality_ar: string; operating_hours: string;
         phone: string; email: string; access_point: string; ems_number: string; created_at: string;
+        archived_at: string | null;
       }
     | undefined;
   if (!r) return null;
@@ -457,6 +499,7 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
     address: r.address, municipalityEn: r.municipality_en, municipalityAr: r.municipality_ar,
     operatingHours: r.operating_hours, phone: r.phone, email: r.email,
     accessPoint: r.access_point, emsNumber: r.ems_number, createdAt: r.created_at,
+    archivedAt: r.archived_at ?? null,
   };
 }
 
@@ -999,6 +1042,7 @@ export interface VenueDetail extends VenueRow {
   regularlyHosts: boolean;
   isNightclub: boolean;
   mophReference: string | null;
+  archivedAt: string | null;
   createdAt: string;
 }
 
@@ -1007,7 +1051,7 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
     .prepare(
       `SELECT id, name_en, name_ar, category, address_municipality_en, address_municipality_ar, responsible_contact,
               licensed_capacity, regularly_hosts, is_nightclub, level, issued, valid_until,
-              moph_reference, created_at
+              moph_reference, created_at, archived_at
        FROM venues WHERE id = ? AND account_id = ?`,
     )
     .get(venueId, accountId) as
@@ -1016,7 +1060,7 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
         address_municipality_en: string; address_municipality_ar: string; responsible_contact: string;
         licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number;
         level: number | null; issued: string | null; valid_until: string | null;
-        moph_reference: string | null; created_at: string;
+        moph_reference: string | null; created_at: string; archived_at: string | null;
       }
     | undefined;
   if (!r) return null;
@@ -1031,6 +1075,7 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
     isNightclub: r.is_nightclub === 1,
     level: r.level, issued: r.issued, validUntil: r.valid_until,
     mophReference: r.moph_reference, createdAt: r.created_at,
+    archivedAt: r.archived_at ?? null,
   };
 }
 

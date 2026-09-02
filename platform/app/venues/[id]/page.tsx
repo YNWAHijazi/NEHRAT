@@ -269,15 +269,24 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
             floor still binds inside the derivation, where it is enforced, not
             narrated. */}
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'start', marginBlockEnd: 32 }}>
-          <GatedAction gate={gate} href={`/venues/${venue.id}/assessment`} en="Start the annual reassessment" ar="بدء إعادة التقييم السنوي" />
-          <Link
-            href={`/venues/${venue.id}/change`}
-            style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
-          >
-            <L en="Report a change" ar="الإبلاغ عن تغيير" />
-          </Link>
-        </div>
+        {venue.archivedAt !== null ? (
+          <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 32, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+            <L
+              en={`Archived by the Ministry on ${venue.archivedAt.slice(0, 10)}. This record is read-only; nothing further is owed on it.`}
+              ar={`أُرشف هذا السجل لدى الوزارة في ⁦${venue.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+            />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'start', marginBlockEnd: 32 }}>
+            <GatedAction gate={gate} href={`/venues/${venue.id}/assessment`} en="Start the annual reassessment" ar="بدء إعادة التقييم السنوي" />
+            <Link
+              href={`/venues/${venue.id}/change`}
+              style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+            >
+              <L en="Report a change" ar="الإبلاغ عن تغيير" />
+            </Link>
+          </div>
+        )}
 
         {classified ? (
           <>

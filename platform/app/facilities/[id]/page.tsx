@@ -155,6 +155,14 @@ export default async function FacilityReadinessPage({
           </div>
         </div>
 
+        {facility.archivedAt !== null ? (
+          <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
+            <L
+              en={`Archived by the Ministry on ${facility.archivedAt.slice(0, 10)}. This record is read-only; its obligations are no longer tracked here.`}
+              ar={`أُرشف هذا السجل لدى الوزارة في ⁦${facility.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولم تعد موجباته تُتابع هنا.`}
+            />
+          </div>
+        ) : null}
         <div data-region="standing" style={{ padding: '28px 32px', border: `1px solid ${standingLine.border}`, background: standingLine.bg, borderRadius: 16, marginBlockEnd: 14 }}>
           {/* "Standing readiness" became "Status" (partner ruling, second sweep --
               the round that renamed Standing to Status everywhere). */}
@@ -214,9 +222,9 @@ export default async function FacilityReadinessPage({
                 </span>
               </div>,
               <div key={`${row.key}-action`} style={{ background: 'var(--bg)', padding: 18, fontSize: 14 }}>
-                <Link href={ACTION_ROUTE[row.key]?.(facility.id) ?? `/facilities/${facility.id}`}>
+                {facility.archivedAt === null ? (<Link href={ACTION_ROUTE[row.key]?.(facility.id) ?? `/facilities/${facility.id}`}>
                   <L en={o?.actionEn ?? ''} ar={o?.actionAr ?? ''} />
-                </Link>
+                </Link>) : null}
               </div>,
             ];
           })}

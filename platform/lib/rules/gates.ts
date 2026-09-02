@@ -234,6 +234,37 @@ import lifecycleJson from './data/lifecycle.json';
 
 export const LIFECYCLE_CONTENT = lifecycleJson;
 
+/* ---------------- the Previous-services archive ---------------- */
+
+/**
+ * The default archive window: how many days after an event ends it leaves the
+ * organizer's main dashboard for the collapsed Previous services section on its
+ * own (partner ruling, 2026-09-02). A platform value, configured rather than
+ * constant -- the Ministry overrides it via the archiveWindowDays config key,
+ * combined in lib/queries archiveWindowDays().
+ */
+export const ARCHIVE_WINDOW: { windowDays: number } = lifecycleJson.archive;
+
+/**
+ * Whether a record reads as archived: shelved by the Ministry or the platform
+ * owner (archivedAt), or concluded long enough ago that the window has elapsed.
+ * Archived records are read-only -- every event gate resolves ABSENT on them and
+ * every mutating action refuses, through the same one rule, so the automatic
+ * path cannot behave differently from the administrator's act.
+ */
+export function isArchivedRecord(
+  rec: { archivedAt: string | null; endDate: string | null },
+  today: string,
+  windowDays: number,
+): boolean {
+  if (rec.archivedAt !== null) return true;
+  if (rec.endDate === null) return false;
+  const cutoff = new Date(Date.parse(`${rec.endDate}T00:00:00Z`) + windowDays * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  return cutoff <= today;
+}
+
 export type EventLifecycle = 'active' | 'cancelled' | 'postponed';
 
 /**

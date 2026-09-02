@@ -9,11 +9,12 @@
  */
 
 import { redirect } from 'next/navigation';
-import { nowStamp } from '../lib/clock';
+import { beirutToday, nowStamp } from '../lib/clock';
 
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
+import { archiveWindowDays } from '../lib/queries';
 import { UPLOADS_CONTENT, maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
 import { missingCertificationFields } from '../lib/rules/certification';
 import { verbatimQuote } from '../lib/rules/verbatim';
@@ -32,7 +33,7 @@ import { forgetSignInFields, rememberSignInFields,
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
   facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
-  declarationGate, landingRouteFor } from '../lib/rules';
+  declarationGate, isArchivedRecord, landingRouteFor } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -256,10 +257,31 @@ export interface AssessmentSubmission {
  * drift between actions -- the same lesson as the database-path fallback.
  */
 function refuseIfArchived(eventId: string): void {
-  const row = getDb().prepare(`SELECT archived_at FROM events WHERE id = ?`).get(eventId) as
+  const row = getDb().prepare(`SELECT archived_at, end_date FROM events WHERE id = ?`).get(eventId) as
+    | { archived_at: string | null; end_date: string | null }
+    | undefined;
+  if (
+    row &&
+    isArchivedRecord({ archivedAt: row.archived_at, endDate: row.end_date }, beirutToday(), archiveWindowDays())
+  ) {
+    redirect(`/events/${eventId}?error=archived`);
+  }
+}
+
+/** The venue lane's half of the same rule: an archived venue record is read-only. */
+function refuseIfVenueArchived(venueId: string): void {
+  const row = getDb().prepare(`SELECT archived_at FROM venues WHERE id = ?`).get(venueId) as
     | { archived_at: string | null }
     | undefined;
-  if (row?.archived_at) redirect(`/events/${eventId}?error=archived`);
+  if (row?.archived_at) redirect(`/venues/${venueId}?error=archived`);
+}
+
+/** And the facility lane's: an archived facility record is read-only. */
+function refuseIfFacilityArchived(facilityId: string): void {
+  const row = getDb().prepare(`SELECT archived_at FROM facilities WHERE id = ?`).get(facilityId) as
+    | { archived_at: string | null }
+    | undefined;
+  if (row?.archived_at) redirect(`/facilities/${facilityId}?error=archived`);
 }
 
 /**
@@ -784,6 +806,7 @@ export async function saveVenueAssessmentAction(
   venueId: string,
   payload: VenueAssessmentPayload,
 ): Promise<{ level: number } | { error: string }> {
+  refuseIfVenueArchived(venueId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedVenue(account.id, venueId)) return { error: 'not-found' };
@@ -841,6 +864,7 @@ export async function saveVenueAssessmentAction(
 }
 
 export async function reportVenueChangeAction(venueId: string, formData: FormData): Promise<void> {
+  refuseIfVenueArchived(venueId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
@@ -922,6 +946,7 @@ export async function recordFacilityInterestAction(formData: FormData): Promise<
  * date) and logs the update with the facility representative who signed it.
  */
 export async function saveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<void> {
+  refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -980,6 +1005,7 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
 
 /** Annex B section 5, signed by the coordinator. Drives the drill and annual rows. */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
+  refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1012,6 +1038,7 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
 
 /** Coordinator review: stamps updated_at, the ledger's affirmation date. */
 export async function saveFacilityPersonsAction(facilityId: string, formData: FormData): Promise<void> {
+  refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1036,6 +1063,7 @@ export async function submitFacilityIncidentAction(
   facilityId: string,
   formData: FormData,
 ): Promise<{ error: 'name-detected' } | void> {
+  refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');

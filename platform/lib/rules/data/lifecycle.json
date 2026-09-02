@@ -1,9 +1,18 @@
 {
   "$comment": "Cancellation and postponement (Protocol 8.5 / 9(vii); required by three instruments and previously absent from the build). A lifecycle on the event, never a deletion: the record and any Ministry reference survive. A cancelled event files nothing further. A postponed event's recorded determination DOES NOT CARRY to the new date -- the screen says so wherever the determination or the postponement shows.",
   "states": {
-    "active": { "en": "Active", "ar": "قائمة" },
-    "cancelled": { "en": "Cancelled", "ar": "ملغاة" },
-    "postponed": { "en": "Postponed", "ar": "مؤجَّلة" }
+    "active": {
+      "en": "Active",
+      "ar": "قائمة"
+    },
+    "cancelled": {
+      "en": "Cancelled",
+      "ar": "ملغاة"
+    },
+    "postponed": {
+      "en": "Postponed",
+      "ar": "مؤجَّلة"
+    }
   },
   "cancel": {
     "titleEn": "Cancel the event",
@@ -54,5 +63,9 @@
     "toAr": "إلى {newDate}",
     "noDateEn": "no new date yet",
     "noDateAr": "لا تاريخ جديداً بعد"
+  },
+  "archive": {
+    "$comment": "The Previous-services window (partner ruling, 2026-09-02): a concluded event leaves the organizer's main dashboard for the collapsed Previous services section this many days after it ends -- automatically, alongside archive-by-administrator and archive-by-owner. A PLATFORM value, not regulation, and configured rather than constant: the Ministry overrides it with the ministry_config key archiveWindowDays; this figure is the default in force until it does.",
+    "windowDays": 30
   }
 }

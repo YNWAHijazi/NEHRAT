@@ -455,6 +455,50 @@ export async function archiveRecordAction(formData: FormData): Promise<void> {
   redirect('/ministry/admin/records?notice=archived');
 }
 
+/**
+ * Archive a venue whose classification has EXPIRED -- the venue lane's "concluded"
+ * (partner ruling, Previous services, 2026-09-02). A venue inside its validity or
+ * its reassessment window is a live obligation, and shelving a live obligation
+ * hides it; the control is absent there, and this action refuses it.
+ */
+export async function archiveVenueRecordAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('archiveRecord');
+  const venueId = String(formData.get('venueId') ?? '');
+  const row = getDb()
+    .prepare(`SELECT id, valid_until, archived_at, is_demo FROM venues WHERE id = ?`)
+    .get(venueId) as { id: string; valid_until: string | null; archived_at: string | null; is_demo: number } | undefined;
+  if (!row || (row.is_demo === 1) !== actor.isDemo) redirect('/ministry/admin/registry?error=unknown');
+  if (row.archived_at) redirect('/ministry/admin/registry?notice=already-archived');
+  if (!row.valid_until || row.valid_until >= beirutToday()) {
+    redirect('/ministry/admin/registry?error=not-concluded');
+  }
+  getDb()
+    .prepare(`UPDATE venues SET archived_at = now_stamp(), archived_by = ? WHERE id = ?`)
+    .run(actor.displayName, venueId);
+  revalidatePath('/ministry/admin/registry');
+  redirect('/ministry/admin/registry?notice=archived');
+}
+
+/**
+ * Archive a facility. The cardiac instrument gives a facility no concluded state,
+ * so this is the administrator's judgment alone; the control states the
+ * consequence -- the facility's standing obligations stop being tracked here.
+ */
+export async function archiveFacilityRecordAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('archiveRecord');
+  const facilityId = String(formData.get('facilityId') ?? '');
+  const row = getDb()
+    .prepare(`SELECT id, archived_at, is_demo FROM facilities WHERE id = ?`)
+    .get(facilityId) as { id: string; archived_at: string | null; is_demo: number } | undefined;
+  if (!row || (row.is_demo === 1) !== actor.isDemo) redirect('/ministry/admin/registry?error=unknown');
+  if (row.archived_at) redirect('/ministry/admin/registry?notice=already-archived');
+  getDb()
+    .prepare(`UPDATE facilities SET archived_at = now_stamp(), archived_by = ? WHERE id = ?`)
+    .run(actor.displayName, facilityId);
+  revalidatePath('/ministry/admin/registry');
+  redirect('/ministry/admin/registry?notice=archived');
+}
+
 
 /**
  * Record a capability-flag decision. Guarded like the Order lane: manageFlags, which
