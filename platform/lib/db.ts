@@ -770,6 +770,10 @@ function migrate(d: DatabaseSync): void {
   addColumn('venues', 'archived_by', 'archived_by TEXT');
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
+  // Partner ruling (2026-09-03): ending a facility's coverage is a DETERMINATION,
+  // not housekeeping -- it carries the Ministry's reason, and the activity trail
+  // reads it as an act. Coverage returns by designation, never by un-archiving.
+  addColumn('facilities', 'archived_reason', 'archived_reason TEXT');
   // Reapply (partner ruling, 2026-09-02): a new event prefilled from a concluded
   // one names what it was copied from.
   addColumn('events', 'copied_from', 'copied_from TEXT');
@@ -847,6 +851,10 @@ function migrate(d: DatabaseSync): void {
   addColumn('venues', 'archived_by', 'archived_by TEXT');
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
+  // Partner ruling (2026-09-03): ending a facility's coverage is a DETERMINATION,
+  // not housekeeping -- it carries the Ministry's reason, and the activity trail
+  // reads it as an act. Coverage returns by designation, never by un-archiving.
+  addColumn('facilities', 'archived_reason', 'archived_reason TEXT');
   // Reapply (partner ruling, 2026-09-02): a new event prefilled from a concluded
   // one names what it was copied from.
   addColumn('events', 'copied_from', 'copied_from TEXT');

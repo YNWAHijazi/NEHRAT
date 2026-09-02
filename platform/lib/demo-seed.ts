@@ -383,6 +383,21 @@ export function seedDemonstration(db: DatabaseSync): void {
     'North service gate', '01 372 802', d('2026-05-20'),
   );
 
+  // The coverage-determination fixture (partner ruling, 2026-09-03): a second
+  // facility exists so the no-longer-covered act can be walked end to end without
+  // mutating FC-0014, which half the facility suite reads.
+  db.prepare(
+    `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
+       municipality_en, municipality_ar, operating_hours, phone, email,
+       access_point, ems_number, created_at, is_demo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+  ).run(
+    'FC-0021', organizer, 'Jounieh Aquatic Centre', 'مركز جونية المائي',
+    'sports', 'Rue du Port', 'Jounieh', 'جونية', '07:00 – 22:00',
+    '09 640 118', 'operations@jouniehaquatic.example.lb',
+    'Main entrance', '09 640 118', d('2026-07-02'),
+  );
+
   const insertPerson = db.prepare(
     `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email, updated_at)
      VALUES (?, ?, ?, ?, ?, ?)`,

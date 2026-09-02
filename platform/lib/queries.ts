@@ -480,13 +480,14 @@ export interface FacilityDetail {
   accessPoint: string; emsNumber: string;
   createdAt: string;
   archivedAt: string | null;
+  archivedReason: string | null;
 }
 
 export function facilityDetail(accountId: number, facilityId: string): FacilityDetail | null {
   const r = getDb()
     .prepare(
       `SELECT id, name_en, name_ar, category_key, address, municipality_en, municipality_ar,
-              operating_hours, phone, email, access_point, ems_number, created_at, archived_at
+              operating_hours, phone, email, access_point, ems_number, created_at, archived_at, archived_reason
        FROM facilities WHERE id = ? AND account_id = ?`,
     )
     .get(facilityId, accountId) as
@@ -494,7 +495,7 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
         id: string; name_en: string; name_ar: string; category_key: string; address: string;
         municipality_en: string; municipality_ar: string; operating_hours: string;
         phone: string; email: string; access_point: string; ems_number: string; created_at: string;
-        archived_at: string | null;
+        archived_at: string | null; archived_reason: string | null;
       }
     | undefined;
   if (!r) return null;
@@ -504,6 +505,7 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
     operatingHours: r.operating_hours, phone: r.phone, email: r.email,
     accessPoint: r.access_point, emsNumber: r.ems_number, createdAt: r.created_at,
     archivedAt: r.archived_at ?? null,
+    archivedReason: r.archived_reason ?? null,
   };
 }
 
@@ -2318,12 +2320,17 @@ export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRo
          SELECT o.recorded_at, 'organization', 'Ministry', o.name_en, o.status,
                 '/ministry/organizations'
            FROM organizations o WHERE o.is_demo = ? AND o.recorded_at IS NOT NULL
+         UNION ALL
+         SELECT f.archived_at, 'coverage', COALESCE(f.archived_by, 'Ministry'), f.name_en,
+                'No longer covered — ' || COALESCE(f.archived_reason, ''),
+                '/ministry/admin/registry'
+           FROM facilities f WHERE f.is_demo = ? AND f.archived_at IS NOT NULL
        )
        WHERE at IS NOT NULL
        ORDER BY at DESC
        LIMIT ?`,
     )
-    .all(d, d, d, d, d, limit) as unknown as {
+    .all(d, d, d, d, d, d, limit) as unknown as {
     at: string; kind: string; actor: string | null; subject: string; detail: string | null; href: string | null;
   }[];
   return rows.map((r) => ({

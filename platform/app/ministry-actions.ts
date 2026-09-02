@@ -340,7 +340,12 @@ export async function designateCoveredAction(formData: FormData): Promise<void> 
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
   ).run(nameEn, nameAr, category, municipality, facilityId, actor.displayName, actor.isDemo ? 1 : 0);
   if (facilityId) {
-    const fac = db.prepare(`SELECT account_id, is_demo FROM facilities WHERE id = ?`).get(facilityId) as { account_id: number; is_demo: number } | undefined;
+    const fac = db.prepare(`SELECT account_id, is_demo, archived_at FROM facilities WHERE id = ?`).get(facilityId) as { account_id: number; is_demo: number; archived_at: string | null } | undefined;
+    if (fac?.archived_at) {
+      // Coverage returns by designation (partner ruling, 2026-09-03): the facility
+      // comes back LIVE -- the designation row is the act that brought it back.
+      db.prepare(`UPDATE facilities SET archived_at = NULL, archived_by = NULL, archived_reason = NULL WHERE id = ?`).run(facilityId);
+    }
     if (fac) {
       db.prepare(
         `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
@@ -480,23 +485,28 @@ export async function archiveVenueRecordAction(formData: FormData): Promise<void
 }
 
 /**
- * Archive a facility. The cardiac instrument gives a facility no concluded state,
- * so this is the administrator's judgment alone; the control states the
- * consequence -- the facility's standing obligations stop being tracked here.
+ * END A FACILITY'S COVERAGE (partner ruling, 2026-09-03). A covered facility's
+ * obligations are permanent -- the building does not stop existing -- so there is
+ * no concluded state to archive. Ending coverage is a DETERMINATION that this
+ * facility is no longer covered: it requires the Ministry's reason, it is read by
+ * the activity trail as an act, and coverage returns by DESIGNATION
+ * (designateCoveredAction below), never by un-archiving.
  */
-export async function archiveFacilityRecordAction(formData: FormData): Promise<void> {
+export async function endFacilityCoverageAction(formData: FormData): Promise<void> {
   const actor = await requireMinistry('archiveRecord');
   const facilityId = String(formData.get('facilityId') ?? '');
+  const reason = String(formData.get('reason') ?? '').trim();
   const row = getDb()
     .prepare(`SELECT id, archived_at, is_demo FROM facilities WHERE id = ?`)
     .get(facilityId) as { id: string; archived_at: string | null; is_demo: number } | undefined;
   if (!row || (row.is_demo === 1) !== actor.isDemo) redirect('/ministry/admin/registry?error=unknown');
-  if (row.archived_at) redirect('/ministry/admin/registry?notice=already-archived');
+  if (row.archived_at) redirect('/ministry/admin/registry?notice=already-ended');
+  if (!reason) redirect('/ministry/admin/registry?error=reason');
   getDb()
-    .prepare(`UPDATE facilities SET archived_at = now_stamp(), archived_by = ? WHERE id = ?`)
-    .run(actor.displayName, facilityId);
+    .prepare(`UPDATE facilities SET archived_at = now_stamp(), archived_by = ?, archived_reason = ? WHERE id = ?`)
+    .run(actor.displayName, reason, facilityId);
   revalidatePath('/ministry/admin/registry');
-  redirect('/ministry/admin/registry?notice=archived');
+  redirect('/ministry/admin/registry?notice=coverage-ended');
 }
 
 

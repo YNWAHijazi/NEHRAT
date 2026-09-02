@@ -3,7 +3,7 @@ import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import { getDb } from '../../../../lib/db';
 import { beirutToday } from '../../../../lib/clock';
-import { archiveVenueRecordAction, archiveFacilityRecordAction } from '../../../ministry-actions';
+import { archiveVenueRecordAction, endFacilityCoverageAction } from '../../../ministry-actions';
 
 /**
  * The national registry: record identifiers and reference numbers across all
@@ -71,6 +71,16 @@ export default async function RegistryPage({
           ar="معرّف السجل عند الإنشاء؛ والرقم المرجعي للوزارة عند التقديم."
         />
       </p>
+      {notice === 'coverage-ended' ? (
+        <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="Recorded: this facility is no longer covered. The reason is on the activity trail, and coverage returns by designation." ar="سُجِّل: لم يعد هذا المرفق مشمولاً. والسبب في سجل النشاط، وتعود الشمولية بالتحديد." />
+        </div>
+      ) : null}
+      {error === 'reason' ? (
+        <div style={{ padding: '14px 20px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="A reason is required — ending coverage is a determination, and it is recorded." ar="السبب مطلوب — إنهاء الشمولية قرار، ويُسجَّل." />
+        </div>
+      ) : null}
       {notice === 'archived' ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Archived. The record moved to the owner's Previous services and is read-only." ar="أُرشف. انتقل السجل إلى الخدمات السابقة لدى صاحبه وصار للقراءة فقط." />
@@ -108,17 +118,20 @@ export default async function RegistryPage({
         'المرافق المشمولة',
         facilities.map((f) => ({
           ...f,
-          // No concluded state exists for a facility in the instrument, so this is
-          // the administrator's judgment; the consequence is stated on the notice.
+          // ENDING COVERAGE IS A DETERMINATION (partner ruling, 2026-09-03): a
+          // facility's obligations are permanent, so there is nothing to archive --
+          // the act says this facility is no longer covered, carries the Ministry's
+          // reason, and the activity trail reads it. Coverage returns by designation.
           control: f.archived_at ? (
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-              <L en={`Archived ${f.archived_at.slice(0, 10)}`} ar={`أُرشف في ⁦${f.archived_at.slice(0, 10)}⁩`} />
+              <L en={`No longer covered — ${f.archived_at.slice(0, 10)}`} ar={`لم يعد مشمولاً — ⁦${f.archived_at.slice(0, 10)}⁩`} />
             </span>
           ) : (
-            <form action={archiveFacilityRecordAction}>
+            <form action={endFacilityCoverageAction} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <input type="hidden" name="facilityId" value={f.id} />
+              <input name="reason" required aria-label="Reason" placeholder="Reason" style={{ height: 28, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 12, width: 200 }} />
               <button type="submit" style={{ height: 28, paddingInline: 11, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 14, fontSize: 12, cursor: 'pointer' }}>
-                <L en="Archive" ar="أرشفة" />
+                <L en="No longer covered" ar="لم يعد مشمولاً" />
               </button>
             </form>
           ),

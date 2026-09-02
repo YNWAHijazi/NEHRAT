@@ -158,8 +158,8 @@ export default async function FacilityReadinessPage({
         {facility.archivedAt !== null ? (
           <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
             <L
-              en={`Archived by the Ministry on ${facility.archivedAt.slice(0, 10)}. This record is read-only; its obligations are no longer tracked here.`}
-              ar={`أُرشف هذا السجل لدى الوزارة في ⁦${facility.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولم تعد موجباته تُتابع هنا.`}
+              en={`No longer covered by the Ministry, ${facility.archivedAt.slice(0, 10)}${facility.archivedReason ? `: ${facility.archivedReason}` : ''}. This record is read-only; its obligations are no longer tracked here. Coverage returns by Ministry designation.`}
+              ar={`لم يعد مشمولاً لدى الوزارة، ⁦${facility.archivedAt.slice(0, 10)}⁩${facility.archivedReason ? `: ${facility.archivedReason}` : ''}. والسجل للقراءة فقط؛ ولم تعد موجباته تُتابع هنا. وتعود الشمولية بتحديد من الوزارة.`}
             />
           </div>
         ) : null}
