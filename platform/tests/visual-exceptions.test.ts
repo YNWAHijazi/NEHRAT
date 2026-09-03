@@ -129,7 +129,15 @@ describe('visual exceptions cannot self-certify', () => {
     // used to smuggle live claims past. A retracting note must ALSO not be asserting
     // something new: it may say what it used to claim, never what it now claims.
     const retracting = exceptions.filter(({ region }) => RETRACTION.test(region.note ?? ''));
-    expect(retracting.length, 'no retractions found -- the pattern may be stale').toBeGreaterThan(0);
+    // ZERO IS THE HEALTHY STATE NOW: the twenty-four withdrawn-claim exceptions
+    // left the ledger (partner instruction, 2026-09-03), so no retracting note
+    // remains. The floor that guarded this pattern against going stale moves to a
+    // self-test -- the regex must still recognise a retraction, so a future one
+    // cannot slip past a rotted pattern.
+    expect(
+      RETRACTION.test('This note previously asserted that geometry, vocabulary and gating followed the reference.'),
+      'the retraction pattern no longer matches its own canonical sentence',
+    ).toBe(true);
     const offenders = retracting
       .filter(({ region }) => {
         const note = region.note ?? '';
@@ -216,9 +224,9 @@ describe('every manifest region names something that exists', () => {
     // The partner simplification pass made the whole dashboard expected-divergent
     // (banner, footer and narration removed by ruling); its region is `main`, the
     // one page-level element, and flips back to data-region compares when the
-    // prototype adopts the ruling.
+    // prototype adopts the ruling. ministry-registry.screen left this list with
+    // the withdrawn-claim deletions (partner instruction, 2026-09-03).
     'organizer-dashboard.whole -- main',
-    'ministry-registry.screen -- main',
   ];
 
   it('knows which regions are computed', () => {

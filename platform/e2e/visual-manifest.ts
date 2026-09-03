@@ -8,6 +8,21 @@
  *
  * Slice 1 entries are listed already so building a screen without wiring its comparison
  * shows up as a still-null route in review, not as silence.
+ *
+ * THE WITHDRAWN-CLAIM EXCEPTIONS LEFT THE LEDGER (partner instruction, 2026-09-03).
+ * Twenty-four expectedDivergent regions carried a note admitting no reference-side
+ * locator existed and the fidelity claim was withdrawn -- an exception with a
+ * withdrawn claim is worse than no entry, because it still counts as coverage in
+ * the total. Each was investigated against the prototype DOM: every one turned on
+ * a recorded prototype defect (the console's invented parallel dataset, the
+ * seven-row cardiac configuration, the Order lane drawn active) or a partner-ruled
+ * restructure the reference predates (the counterparty one-page ruling, the
+ * capability shape, the inspector merge), so a pixel compare would measure
+ * divergence that is DECIDED, not drift. All twenty-four were deleted rather than
+ * authored; sixteen console mappings emptied by that left with them. What remains
+ * below is only what is actually compared or actually asserted. Behavioural
+ * coverage of the deleted screens lives in e2e/app/*.spec.ts, which is where it
+ * always really was.
  */
 
 import type { ReferenceFile } from './helpers/reference';
@@ -405,12 +420,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_organizer',
     regions: [
       {
-        name: 'rail',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="rail"]',
-        note: "Expected divergent AT REVIEWER INSTRUCTION (Slice 3 approval): the reference rail reuses the event flow's stage names ('Requirements', 'Submitted') for steps a venue does not have; the build renames the stages to registration / assessment / classification recorded / valid / reassessment due, and shows the record's actual dates where the reference hand-writes disagreeing ones (stage 1: 2026-01-20 vs its own organization record; stage 2: 2026-03-02 vs its own history list's 2026-03-04). Second sweep (2026-09-02, partner ruling): the corner stage-count note ('Stage 4 of 5 · reassessment opens ...') was cut -- the rail shows the current stage and the date sits on stage 5 and under the disabled action. UNVERIFIED as to geometry and chip styling: no reference-side locator, so nothing has compared them.",
-      },
-      {
         name: 'record-header',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="record-header"]',
@@ -548,12 +557,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: "The device table. Held at 2%. Known residual inside the budget: AED-003's Accessible and Readiness cells derive from the record where the reference hand-writes 'Under Ministry review'.",
       },
       {
-        name: 'device-card',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="device-card"]',
-        note: "Expected divergent, non-negotiable 8 over pixel parity: the reference card arrives prefilled with AED-002 showcase values in read-only inputs; the build is the working form and opens on a new, empty device record. The five purposes, the coordinator read-only from the one record, and the representative signature are all present. UNVERIFIED as to their layout: no reference-side locator.",
-      },
-      {
         name: 'scan-panel',
         mode: 'absentExpected',
         markerText: 'Scan the device',
@@ -670,21 +673,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     ],
   },
   {
-    id: 'ems-dashboard',
-    referenceFile: 'EMS Agency.dc.html',
-    referenceTab: 'Dashboard',
-    builtRoute: '/dashboard',
-    signInAs: 'test_ems',
-    regions: [
-      {
-        name: 'outstanding',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="outstanding"]',
-        note: "Expected divergent, the record over the showcase: the reference rows carry per-event organizer identities (Baalbeck International Festival) the demonstration data does not hold -- every seeded event belongs to the one showcase organizer (ROADMAP's demonstration-account table). UNVERIFIED as to row geometry, chips and the owed/level/by columns: no reference-side locator.",
-      },
-    ],
-  },
-  {
     id: 'ems-profile',
     referenceFile: 'EMS Agency.dc.html',
     referenceTab: 'Agency profile',
@@ -780,12 +768,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_director',
     regions: [
       {
-        name: 'briefing',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="briefing"]',
-        note: "Expected divergent, partner ruling (counterparty pass, 2026-09-02): the Director's event page became the one page -- compact event facts with View more at the top, where the reference opens on the requirement cards. The full requirement rows the matrix names moved under View more (briefing-requirements), still computed, never hand-written. UNVERIFIED as to layout: no reference-side locator for the compact strip.",
-      },
-      {
         name: 'gov-sections',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="gov-sections"]',
@@ -847,27 +829,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
   // (partner ruling, counterparty pass 2026-09-02). The reference pages remain in
   // the pack; nothing on the platform renders them any more.
   // --- Slice 6: the Ministry console ---
-  {
-    id: 'ministry-dashboard',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Dashboard",
-    builtRoute: "/ministry",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'counters',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="counters"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The counters derive (7 live counters vs the reference's 8 hand-written); each opens the surface it counts.",
-      },
-      {
-        name: 'facility-band',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="facility-band"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The separate cardiac lane with its provisional-wording note, populated from the seeded facility and arrest reports.",
-      },
-    ],
-  },
   {
     id: 'ministry-queue',
     referenceFile: 'Ministry Review.dc.html',
@@ -953,247 +914,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         // changed character fails the build regardless of this hold.
         threshold: 0.13,
         note: 'A complete attestation row: title, state chip, authority and the attested-by line. Geometry held at 13% for the named control divergences; strings e2e-ratcheted.',
-      },
-      {
-        name: 'outcome',
-        mode: 'expectedDivergent',
-        // WAS [data-region="outcome"], the recording control. EV-0362 carries a
-        // determination, and recording is now ONCE: after a determination is recorded
-        // the three radios are gone and the screen shows what was determined, by whom
-        // and when, with revision as a separate deliberate act. So the region on this
-        // fixture is the standing determination, which is what the built screen shows
-        // where the prototype shows a control. The divergence is larger than it was
-        // and it is the point of the change, not a drift from it.
-        builtSelector: '[data-region="standing-determination"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The three outcomes with 'satisfied' disabled and the blocking inspection NAMED against it, the other two enabled, and the two limit sentences beneath -- the reference's gate, on the record's own blockers.",
-      },
-      {
-        name: 'inspections',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="inspections"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The inspector's items; findings are not an outcome. THIS NOTE ONCE CLAIMED the reference's attestation panel summarized organizer content already compared on the organizer side -- with no locator, so nothing ever checked it, and it was FALSE: the panel is a blocking gate, six items with an assigned authority, and it concealed a missing feature for a whole slice. The gate is now built (lib/rules/attestations.ts) and carries its own compared regions below. The plan half of the old claim is re-verified in the exceptions audit, not assumed.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-organizations',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Organizations",
-    builtRoute: "/ministry/organizations",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'orgs',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="orgs"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. One pending organization (the seeded pending account) vs the reference's five.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-determinations',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Determinations and designations",
-    builtRoute: "/ministry/determinations",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'outcome-register',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="outcome-register"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The register derives from the determinations table; the reference hand-writes rows.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-changes',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Changes and notifications",
-    builtRoute: "/ministry/changes",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'changes',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="changes"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Material changes and declined nominations from the records.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-incidents',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Incidents and reports",
-    builtRoute: "/ministry/incidents",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'cardiac',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="cardiac"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The two instruments listed side by side, never merged; the cardiac column carries no event vocabulary.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-enquiries',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Enquiries",
-    builtRoute: "/ministry/enquiries",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'enquiries',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="enquiries"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. One open, one answered -- the reference's two threads, seeded on the demonstration events; answering changes no outcome.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-facilities',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Facility oversight",
-    builtRoute: "/ministry/facilities",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'corrective',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="corrective"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Corrective actions with no computed due date while the timeline value is unset -- the unset state is the answer, and publishing the value flips the copy (e2e-asserted).",
-      },
-    ],
-  },
-  {
-    id: 'ministry-arrests',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Reported arrest locations",
-    builtRoute: "/ministry/facilities/arrests",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'groups',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="groups"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Incidents grouped by place and category from the seeded facility incidents and out-of-band agency reports; the repeat, not-covered place carries the designate action -- the mechanism by which it becomes covered.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-order',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Order of Physicians lane",
-    builtRoute: "/ministry/order",
-    signInAs: 'test_moph',
-    regions: [
-      {
-        name: 'lane-off',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="lane-off"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The reference shows the lane active with two records; off is the default, and the off state is the whole screen (SPEC).",
-      },
-    ],
-  },
-  {
-    id: 'ministry-config',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Configuration and versioning",
-    builtRoute: "/ministry/admin/configuration",
-    signInAs: 'test_moph_admin',
-    regions: [
-      {
-        name: 'config-values',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="config-values"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The values every screen derives from, read from the instrument data itself; the console reads and versions, it does not edit in place.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-cardiac',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Cardiac-arrest configuration",
-    builtRoute: "/ministry/admin/cardiac",
-    signInAs: 'test_moph_admin',
-    regions: [
-      {
-        name: 'powers',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="powers"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. TEN powers per the source where the reference carries the earlier seven-row count; each value has an unset state, set-and-publish, and an effective date, and the Slice 4 provisional cycles ride under power ten.",
-      },
-      {
-        name: 'in-force-note',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="in-force-note"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The two categories in force without any configured value, stated so they are not read as gaps.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-users',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Users and roles",
-    builtRoute: "/ministry/admin/users",
-    signInAs: 'test_moph_admin',
-    regions: [
-      {
-        name: 'users',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="users"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The Order reviewer listed SUSPENDED while the lane is off, never active.",
-      },
-      {
-        name: 'matrix',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="matrix"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The permission matrix rendered from the data that enforces it -- absent from the reference, added so the console shows what the server refuses.",
-      },
-    ],
-  },
-  {
-    id: 'ministry-registry',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "National registry",
-    builtRoute: "/ministry/admin/registry",
-    signInAs: 'test_moph_admin',
-    regions: [
-      {
-        name: 'screen',
-        mode: 'expectedDivergent',
-        builtSelector: 'main',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Registry rows derive from the records; the reference hand-writes them.",
-      },
-    ],
-  },
-  {
-    id: 'platform-admin',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Master admin",
-    builtRoute: "/platform/admin",
-    signInAs: 'test_owner',
-    regions: [
-      {
-        name: 'flags',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="flags"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. The capability list carries no control (shape ruling, 2026-09-02): each row opens the capability's own page, where the toggle sits above its configuration and cannot be enabled without it -- exercised by e2e/app/capabilities.spec.ts. The one control on this screen is the Order lane.",
-      },
-    ],
-  },
-  {
-    id: 'platform-activity',
-    referenceFile: 'Ministry Review.dc.html',
-    referenceTab: "Platform activity",
-    builtRoute: "/platform/activity",
-    signInAs: 'test_owner',
-    regions: [
-      {
-        name: 'counts',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="counts"]',
-        note: "Expected divergent, the demonstration-account table over the showcase: the Ministry prototype invents a parallel dataset (six queue events, four facilities, five arrest places, its own reviewers) that ROADMAP's demo table does not seed -- 'the queue, one submission mid-review'. Every figure on the built screen derives from the seeded records. UNVERIFIED as to layout: this region has no reference-side locator, so no pixel of it has ever been compared. This note previously asserted that geometry, vocabulary and gating followed the reference -- the identical sentence stood on twenty-one console regions, and when the comparison was finally authored by hand for the review queue the two sides had eight columns against six. Treat the claim as withdrawn until a locator exists. Gating and vocabulary ARE exercised behaviourally by e2e/app/ministry.spec.ts. Counts only: no organizer, account, event or patient named, nothing filterable to one organization -- SPEC 2c's narrow reading, e2e-asserted against name leakage.",
       },
     ],
   },
