@@ -57,6 +57,13 @@ export interface EventRow {
   archivedAt: string | null;
   /** The concluded event this record was copied from by Reapply, or null. */
   copiedFrom: string | null;
+  /**
+   * The previous edition's event date (its start), shown beside the new card so
+   * a second running reads as one at a glance (partner instruction, 2026-09-03).
+   * The records stay separate -- one per authorisation, each with its own
+   * reference -- this is display, not lineage merging.
+   */
+  previousEditionDate: string | null;
   lifecycleAt: string | null;
   lifecycleNote: string | null;
   postponedTo: string | null;
@@ -242,6 +249,9 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     lifecycle: (row.lifecycle ?? 'active') as EventRow['lifecycle'],
     archivedAt: row.archived_at ?? null,
     copiedFrom: row.copied_from ?? null,
+    previousEditionDate: row.copied_from
+      ? ((getDb().prepare(`SELECT start_date FROM events WHERE id = ?`).get(row.copied_from) as { start_date: string | null } | undefined)?.start_date ?? null)
+      : null,
     lifecycleAt: row.lifecycle_at ? row.lifecycle_at.slice(0, 10) : null,
     lifecycleNote: row.lifecycle_note ?? null,
     postponedTo: row.postponed_to ?? null,

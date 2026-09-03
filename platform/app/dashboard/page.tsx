@@ -106,6 +106,14 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
         <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <span>{event.id}</span>
           {event.mophReference ? <span>· {event.mophReference}</span> : null}
+          {/* A second running reads as one at a glance: the previous edition's
+              date beside the new record's identity. The records stay separate --
+              one per authorisation, each with its own reference. */}
+          {event.copiedFrom && event.previousEditionDate ? (
+            <span data-region="previous-edition">
+              · <L en={`Previous edition ${event.previousEditionDate}`} ar={`النسخة السابقة ⁦${event.previousEditionDate}⁩`} />
+            </span>
+          ) : null}
         </div>
         {event.stages.length > 0 ? (
           <>

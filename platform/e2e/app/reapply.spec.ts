@@ -49,6 +49,14 @@ test.describe('reapply from a concluded event', () => {
     await expect(page.locator('body')).toContainText('Dr. N. Salameh');
     await expect(page.locator('body')).not.toContainText('Confirmed —');
 
+    // THE SECOND RUNNING READS AS ONE AT A GLANCE (partner instruction,
+    // 2026-09-03): the new card carries the previous edition's date beside its
+    // identity, from copied_from. Display, not lineage merging -- the records
+    // stay separate, one per authorisation.
+    await gotoRidingRestarts(page, '/dashboard');
+    const newCard = page.locator(`a[href="/events/${newId}"]`);
+    await expect(newCard.locator('[data-region="previous-edition"]')).toContainText(/Previous edition \d{4}-\d{2}-\d{2}/);
+
     // THE SOURCE IS UNTOUCHED: same determination, no copied-from line, still
     // offering Reapply for the next time.
     await gotoRidingRestarts(page, '/events/EV-0244');
