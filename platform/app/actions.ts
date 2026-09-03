@@ -249,6 +249,9 @@ export interface AssessmentSubmission {
   partA: PartAFields;
   answers: DomainAnswers;
   inputs: MinimumConditionInputs;
+  /** Annex A Part F: the organizer declaration's certifying fields. */
+  representative: string;
+  position: string;
 }
 
 /**
@@ -327,6 +330,9 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
     const answers = JSON.parse(assessment.answers) as DomainAnswers;
     const inputs = JSON.parse(assessment.inputs) as MinimumConditionInputs;
     // Derived FRESH from the copied answers -- never inherited from the old record.
+    // The Part F declaration is NOT copied: nothing carries over as certified,
+    // and the columns' empty default is the honest state until the organizer
+    // reassesses and declares again.
     const derivation = deriveLevel({ answers, inputs });
     db.prepare(
       `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version)
@@ -387,6 +393,11 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.startDate || !payload.endDate) {
     return { error: 'dates-required' };
   }
+  // A certification with an empty field is not a certification (the rule the
+  // compliance form already enforces). Part F's fields are required to save.
+  if (!payload.representative.trim() || !payload.position.trim()) {
+    return { error: 'certification-required' };
+  }
 
   const db = getDb();
   const eventId = nextRecordId('EV');
@@ -417,14 +428,16 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
     account.isDemo ? 1 : 0,
   );
   db.prepare(
-    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version)
-     VALUES (?, 1, ?, ?, ?, ?)`,
+    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, representative, position)
+     VALUES (?, 1, ?, ?, ?, ?, ?, ?)`,
   ).run(
     eventId,
     JSON.stringify(payload.answers),
     JSON.stringify(payload.inputs),
     JSON.stringify(derivation),
     NEHRAT_TOOL_VERSION,
+    payload.representative.trim(),
+    payload.position.trim(),
   );
   revalidatePath('/dashboard');
   return { eventId };
@@ -435,7 +448,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
  */
 export async function reassessAction(
   eventId: string,
-  payload: Pick<AssessmentSubmission, 'answers' | 'inputs'>,
+  payload: Pick<AssessmentSubmission, 'answers' | 'inputs' | 'representative' | 'position'>,
 ): Promise<{ version: number } | { error: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -444,6 +457,10 @@ export async function reassessAction(
     .prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`)
     .get(eventId, account.id);
   if (!owned) return { error: 'not-found' };
+  // Part F certifies EVERY version: a reassessment is a new declaration.
+  if (!payload.representative.trim() || !payload.position.trim()) {
+    return { error: 'certification-required' };
+  }
 
   const derivation = deriveLevel({ answers: payload.answers, inputs: payload.inputs });
   const latest = db
@@ -451,9 +468,9 @@ export async function reassessAction(
     .get(eventId) as { v: number | null };
   const version = (latest.v ?? 0) + 1;
   db.prepare(
-    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-  ).run(eventId, version, JSON.stringify(payload.answers), JSON.stringify(payload.inputs), JSON.stringify(derivation), NEHRAT_TOOL_VERSION);
+    `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, representative, position)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(eventId, version, JSON.stringify(payload.answers), JSON.stringify(payload.inputs), JSON.stringify(derivation), NEHRAT_TOOL_VERSION, payload.representative.trim(), payload.position.trim());
   revalidatePath(`/events/${eventId}`);
   return { version };
 }
@@ -911,6 +928,9 @@ export async function saveVenueAssessmentAction(
   };
   const derivation = deriveLevel({ answers: payload.answers, inputs });
   if (!derivation.complete || derivation.finalLevel === null) return { error: 'incomplete' };
+  // Part F certifies the venue assessment too: the declaration's fields are
+  // required to record (the same one-rule the compliance form enforces).
+  if (!payload.representative.trim() || !payload.position.trim()) return { error: 'incomplete' };
 
   // THE REGISTRATION FEE GATES THE CLASSIFICATION (register closure, 2026-09-03):
   // the venue's filing moment is here, where the Ministry reference mints and the

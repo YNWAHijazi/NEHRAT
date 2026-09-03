@@ -36,6 +36,10 @@ export default async function ReassessPage({ params }: { params: Promise<{ id: s
           conditions={[...MINIMUM_CONDITIONS]}
           bands={[...BANDS]}
           maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN}
+          organizerName={(() => {
+            const org = organizationFor(account.id);
+            return org ? { en: org.nameEn, ar: org.nameAr } : null;
+          })()}
           reassess={{
             eventId: id,
             answers: latest ? [...latest.answers] : Array<0 | 1 | 2 | null>(DOMAIN_COUNT).fill(null),

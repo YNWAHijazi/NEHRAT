@@ -425,6 +425,17 @@ export default async function SubmissionReviewPage({
             <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)' }}>
               <L en="The answers as the organizer gave them." ar="الإجابات كما قدّمها المنظّم." />
             </p>
+            {/* PART F, read back: who certified this version. Absent on versions
+                recorded before the declaration surface existed -- an empty
+                certification is not asserted, it is simply not there. */}
+            {assessment && assessment.representative ? (
+              <p data-region="part-f-certified" style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)' }}>
+                <L
+                  en={`Part F declared by ${assessment.representative}, ${assessment.position} — ${assessment.recordedAt}.`}
+                  ar={`الجزء و أقرّ به ${assessment.representative}، ${assessment.position} — ⁦${assessment.recordedAt}⁩.`}
+                />
+              </p>
+            ) : null}
             {!assessment ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
                 <L en={AA.noneEn} ar={AA.noneAr} />

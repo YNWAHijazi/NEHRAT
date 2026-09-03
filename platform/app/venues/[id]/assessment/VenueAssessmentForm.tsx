@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { saveVenueAssessmentAction } from '../../../actions';
 import type { Band, Domain, MinimumCondition } from '../../../../lib/rules/load';
+import { PART_F } from '../../../../lib/rules/load';
 import { deriveLevel } from '../../../../lib/rules/derive';
 import { levelWhy } from '../../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../../lib/rules/types';
@@ -64,6 +65,7 @@ export function VenueAssessmentForm({
   const [representative, setRepresentative] = useState('');
   const [position, setPosition] = useState('');
   const [error, setError] = useState(false);
+  const declarationComplete = representative.trim() !== '' && position.trim() !== '';
 
   const inputs: MinimumConditionInputs = useMemo(
     () => ({
@@ -245,6 +247,13 @@ export function VenueAssessmentForm({
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Operator declaration" ar="إقرار الجهة المشغّلة" />
         </div>
+        {/* THE ASSESSMENT TOOL'S PART F's statement, verbatim from each issue -- the same
+            instrument certifies a venue's routine-operations assessment. The
+            fields below are required to record; the signature line stays with
+            open decision #9. */}
+        <p data-region="part-f-statement" style={{ margin: '0 0 16px', fontSize: '14.5px', lineHeight: 1.65, maxWidth: '74ch' }}>
+          <L en={PART_F.statementEn} ar={PART_F.statementAr} />
+        </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
@@ -288,7 +297,7 @@ export function VenueAssessmentForm({
       ) : null}
       <button
         type="button"
-        disabled={!derivation.complete || pending || feeDue !== null}
+        disabled={!derivation.complete || !declarationComplete || pending || feeDue !== null}
         onClick={submit}
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: derivation.complete && !feeDue ? 'var(--brand)' : 'var(--surface2)', color: derivation.complete && !feeDue ? 'var(--bg)' : 'var(--muted)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete && !feeDue ? 'pointer' : 'not-allowed' }}
       >
@@ -301,6 +310,10 @@ export function VenueAssessmentForm({
       ) : !derivation.complete ? (
         <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
           <L en="Answer every domain and the attendance figure first." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور أولاً." />
+        </p>
+      ) : !declarationComplete ? (
+        <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
+          <L en="Complete the declaration to record: authorized representative and position." ar="أكملوا الإقرار للتسجيل: الممثل المفوض والصفة." />
         </p>
       ) : null}
     </div>

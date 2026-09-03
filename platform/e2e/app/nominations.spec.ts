@@ -115,6 +115,9 @@ test.describe('cancellation and postponement', () => {
     const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
     const count = await zeros.count();
     for (let i = 0; i < count; i += 1) await zeros.nth(i).click();
+    // Annex A Part F: the declaration's fields are required to save.
+    await fill('Authorized representative', 'R. Haddad');
+    await fill('Position', 'Events director');
     await page.locator('button:has-text("Save the assessment and open the event record")').click();
     await page.waitForURL(/\/events\/EV-\d+$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
@@ -173,6 +176,9 @@ test.describe('creation to determination, end to end', () => {
     const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
     const count = await zeros.count();
     for (let i = 0; i < count; i += 1) await zeros.nth(i).click();
+    // Annex A Part F: the declaration's fields are required to save.
+    await fill('Authorized representative', 'R. Haddad');
+    await fill('Position', 'Events director');
     await page.locator('button:has-text("Save the assessment and open the event record")').click();
     await page.waitForURL(/\/events\/EV-\d+$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;

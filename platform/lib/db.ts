@@ -1040,6 +1040,13 @@ function migrate(d: DatabaseSync): void {
   // standing databases; payment discharge stays on the ONE seam, so the
   // payments service CHECK widens to the booking kinds -- a standing database
   // created under the narrower CHECK rebuilds.
+  // ANNEX A PART F (register closure, 2026-09-03): the organizer declaration is
+  // captured with the assessment version it certifies. Blank on rows written
+  // before the surface existed, and blank on reapply copies -- nothing carries
+  // over as certified.
+  addColumn('assessments', 'representative', "representative TEXT NOT NULL DEFAULT ''");
+  addColumn('assessments', 'position', "position TEXT NOT NULL DEFAULT ''");
+
   addColumn('sponsorships', 'amount', "amount TEXT NOT NULL DEFAULT ''");
   addColumn('sponsorships', 'currency', "currency TEXT NOT NULL DEFAULT ''");
   addColumn('adverts', 'amount', "amount TEXT NOT NULL DEFAULT ''");

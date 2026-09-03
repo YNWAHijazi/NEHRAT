@@ -83,6 +83,12 @@ for (const lang of LANGUAGES) {
       expect(zeroCount).toBeGreaterThanOrEqual(9);
       for (let i = 0; i < zeroCount; i += 1) await zeros.nth(i).click();
 
+      // Annex A Part F: the declaration's fields are required to save.
+
+      await fillLabelled(page, 'Authorized representative', 'R. Haddad');
+
+      await fillLabelled(page, 'Position', 'Events director');
+
       await page.locator('button:has-text("Save the assessment and open the event record"), button:has-text("حفظ التقييم وفتح سجل الفعالية")').first().click();
       await page.waitForURL(/\/events\/EV-\d+/);
       const eventId = new URL(page.url()).pathname.split('/')[2]!;

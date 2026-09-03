@@ -221,5 +221,37 @@
       ]
     }
   ],
-  "toolVersion": "NEHRAT v1.0 (July 2026 issue)"
+  "toolVersion": "NEHRAT v1.0 (July 2026 issue)",
+  "partF": {
+    "$comment": "The assessment tool's Part F, from the two issues under the ENGLISH-GOVERNS ruling (partner, 2026-09-03): the rendered Arabic carries the Arabic issue's wording for the limbs the English issue also has, and nothing more. The Arabic issue's statement adds two qualifiers -- recorded in setAsideAr below, never rendered. The signature line is one of the six surfaces held by open decision #9 (what a signature is): the statement and the certifying fields are captured, the signature control is deliberately not invented here.",
+    "titleEn": "Part F — Organizer Declaration",
+    "titleAr": "الجزء و — إقرار المنظم",
+    "statementEn": "I certify that the information provided in this assessment is complete and accurate.",
+    "statementAr": "أقر بأن المعلومات الواردة في هذا التقييم كاملة ودقيقة.",
+    "labels": {
+      "organizer": {
+        "en": "Organizer",
+        "ar": "المنظم أو الجهة المشغّلة"
+      },
+      "representative": {
+        "en": "Authorized representative",
+        "ar": "الممثل المفوض"
+      },
+      "position": {
+        "en": "Position",
+        "ar": "الصفة"
+      },
+      "date": {
+        "en": "Date",
+        "ar": "التاريخ"
+      }
+    },
+    "dateNoteEn": "Recorded with the assessment when it is saved.",
+    "dateNoteAr": "يُسجَّل مع التقييم عند حفظه.",
+    "setAsideAr": {
+      "text": "وصحيحة بحسب علمي",
+      "noteEn": "The Arabic issue's statement adds 'and correct to my knowledge'. Set aside under the English-governs ruling (2026-09-03); recorded here for the Ministry, not rendered.",
+      "noteAr": "يضيف الإصدار العربي عبارة «وصحيحة بحسب علمي». وُضعت جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03)؛ وهي مسجَّلة هنا للوزارة ولا تُعرض."
+    }
+  }
 }

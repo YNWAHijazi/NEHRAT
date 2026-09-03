@@ -72,6 +72,14 @@ export const DOMAIN_COUNT: number = domainsJson.domainCount;
 /** Which issue of the instrument scores assessments; stamped onto every assessment row. */
 export const NEHRAT_TOOL_VERSION: string = domainsJson.toolVersion;
 
+/**
+ * Annex A Part F -- the organizer declaration, verbatim from each issue. The
+ * Arabic issue's statement carries two qualifiers the English does not; the
+ * divergence is recorded in the data and awaits a Ministry decision. The
+ * signature line stays with open decision #9.
+ */
+export const PART_F = domainsJson.partF;
+
 export const MAX_SCORE_PER_DOMAIN: number = domainsJson.maxScorePerDomain;
 
 export const MINIMUM_CONDITIONS: readonly MinimumCondition[] =

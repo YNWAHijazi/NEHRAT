@@ -33,6 +33,7 @@ import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { createEventAction, reassessAction } from '../../actions';
 import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
+import { PART_F } from '../../../lib/rules/load';
 import { deriveLevel } from '../../../lib/rules/derive';
 import { levelWhy } from '../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
@@ -117,17 +118,23 @@ export function AssessmentForm({
   bands,
   maxScore,
   reassess,
+  organizerName,
 }: {
   domains: Domain[];
   conditions: MinimumCondition[];
   bands: Band[];
   maxScore: number;
   reassess?: { eventId: string; answers: (0 | 1 | 2 | null)[]; inputs: MinimumConditionInputs };
+  /** The organization's name for Part F's Organizer line, when one is recorded. */
+  organizerName?: { en: string; ar: string } | null;
 }) {
   void conditions;
   void bands;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [representative, setRepresentative] = useState('');
+  const [position, setPosition] = useState('');
+  const certificationComplete = representative.trim() !== '' && position.trim() !== '';
   const [nameEn, setNameEn] = useState('');
   const [nameAr, setNameAr] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -224,6 +231,8 @@ export function AssessmentForm({
         const result = await reassessAction(reassess.eventId, {
           answers: answers as DomainAnswers,
           inputs,
+          representative,
+          position,
         });
         if ('error' in result) setError(result.error);
         else router.push(`/events/${reassess.eventId}?notice=reassessed`);
@@ -251,6 +260,8 @@ export function AssessmentForm({
         },
         answers: answers as DomainAnswers,
         inputs,
+        representative,
+        position,
       });
       if ('error' in result) setError(result.error);
       else router.push(`/events/${result.eventId}`);
@@ -492,20 +503,72 @@ export function AssessmentForm({
         )}
       </div>
 
+      {/* THE ASSESSMENT TOOL'S PART F -- the organizer declaration, verbatim from each issue
+          (the Arabic issue's statement carries qualifiers the English does not;
+          the divergence is recorded in the data and awaits a Ministry decision).
+          Every version is certified fresh: reassessing declares again. The
+          signature line stays with open decision #9 -- captured fields, no
+          invented signature control, same as the compliance certification. */}
+      <div data-region="part-f" style={{ padding: '22px 26px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24 }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 19, fontWeight: 600, letterSpacing: '-.02em' }}>
+          <L en={PART_F.titleEn} ar={PART_F.titleAr} />
+        </h2>
+        <p style={{ margin: '0 0 16px', fontSize: '14.5px', lineHeight: 1.65, maxWidth: '74ch' }}>
+          <L en={PART_F.statementEn} ar={PART_F.statementAr} />
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 11.5, color: 'var(--muted)', marginBlockEnd: 4 }}>
+              <L en={PART_F.labels.organizer.en} ar={PART_F.labels.organizer.ar} />
+            </div>
+            <div style={{ fontSize: '14px', paddingBlock: 7 }}>
+              {organizerName ? <L en={organizerName.en} ar={organizerName.ar} /> : <L en="—" ar="—" />}
+            </div>
+          </div>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+              <L en={PART_F.labels.representative.en} ar={PART_F.labels.representative.ar} />
+            </span>
+            <input value={representative} onChange={(e) => setRepresentative(e.target.value)} style={{ height: 36, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 18, fontSize: 14 }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+              <L en={PART_F.labels.position.en} ar={PART_F.labels.position.ar} />
+            </span>
+            <input value={position} onChange={(e) => setPosition(e.target.value)} style={{ height: 36, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 18, fontSize: 14 }} />
+          </label>
+          <div>
+            <div style={{ fontSize: 11.5, color: 'var(--muted)', marginBlockEnd: 4 }}>
+              <L en={PART_F.labels.date.en} ar={PART_F.labels.date.ar} />
+            </div>
+            <div style={{ fontSize: '12.5px', color: 'var(--muted)', paddingBlock: 8, lineHeight: 1.5 }}>
+              <L en={PART_F.dateNoteEn} ar={PART_F.dateNoteAr} />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {error ? (
         <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--bad)' }}>
           {error === 'name-required' ? (
             <L en="The event name is required in both languages." ar="اسم الفعالية مطلوب باللغتين." />
+          ) : error === 'certification-required' ? (
+            <L en="The declaration's representative and position are required." ar="ممثل الإقرار وصفته مطلوبان." />
           ) : (
             <L en="The start and end dates are required." ar="تاريخا البداية والنهاية مطلوبان." />
           )}
         </p>
       ) : null}
+      {derivation.complete && !certificationComplete ? (
+        <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
+          <L en="Part F — complete the declaration to save: authorized representative and position." ar="الجزء و — أكملوا الإقرار للحفظ: الممثل المفوض والصفة." />
+        </p>
+      ) : null}
       <button
         type="button"
-        disabled={!derivation.complete || pending}
+        disabled={!derivation.complete || !certificationComplete || pending}
         onClick={submit}
-        style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete ? 'pointer' : 'not-allowed' }}
+        style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: derivation.complete && certificationComplete ? 'var(--brand)' : 'var(--surface2)', color: derivation.complete && certificationComplete ? 'var(--bg)' : 'var(--muted)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete && certificationComplete ? 'pointer' : 'not-allowed' }}
       >
         {reassess ? (
           <L en="Save as a new assessment version" ar="حفظ كنسخة تقييم جديدة" />

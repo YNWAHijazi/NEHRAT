@@ -140,14 +140,14 @@ export function derivationForReview(eventId: string): LevelDerivation | null {
  */
 export function assessmentAnswersForReview(
   eventId: string,
-): { answers: DomainAnswers; inputs: MinimumConditionInputs; toolVersion: string; recordedAt: string } | null {
+): { answers: DomainAnswers; inputs: MinimumConditionInputs; toolVersion: string; recordedAt: string; representative: string; position: string } | null {
   const row = getDb()
     .prepare(
-      `SELECT answers, inputs, nehrat_tool_version, created_at FROM assessments
+      `SELECT answers, inputs, nehrat_tool_version, created_at, representative, position FROM assessments
        WHERE event_id = ? ORDER BY version DESC, id DESC LIMIT 1`,
     )
     .get(eventId) as
-    | { answers: string; inputs: string; nehrat_tool_version: string; created_at: string }
+    | { answers: string; inputs: string; nehrat_tool_version: string; created_at: string; representative: string; position: string }
     | undefined;
   if (!row) return null;
   return {
@@ -155,6 +155,11 @@ export function assessmentAnswersForReview(
     inputs: JSON.parse(row.inputs) as MinimumConditionInputs,
     toolVersion: row.nehrat_tool_version,
     recordedAt: row.created_at.slice(0, 10),
+    // Part F: who certified this version. Empty on rows written before the
+    // declaration surface existed, and on reapply copies -- nothing carries
+    // over as certified.
+    representative: row.representative,
+    position: row.position,
   };
 }
 

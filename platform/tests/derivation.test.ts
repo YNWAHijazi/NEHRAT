@@ -294,3 +294,26 @@ describe('the level is derived, never chosen', () => {
     });
   });
 });
+
+describe('Annex A Part F, verbatim from each issue', () => {
+  it('carries the statement exactly, and the AR divergence is recorded, not reconciled', async () => {
+    const { PART_F } = await import('../lib/rules/load');
+    // EN issue, line 144 of source-documents/en/02.
+    expect(PART_F.statementEn).toBe('I certify that the information provided in this assessment is complete and accurate.');
+    // ENGLISH GOVERNS (partner ruling, 2026-09-03): the rendered Arabic carries
+    // the Arabic issue's wording for the limbs the English also has, and nothing
+    // more. The Arabic issue's extra qualifiers are RECORDED as a set-aside and
+    // must never migrate back into the rendered statement.
+    expect(PART_F.statementAr).toBe('أقر بأن المعلومات الواردة في هذا التقييم كاملة ودقيقة.');
+    const setAside = (PART_F as unknown as { setAsideAr: { text: string; noteEn: string } }).setAsideAr;
+    expect(setAside.text).toBe('وصحيحة بحسب علمي');
+    expect(setAside.noteEn).toContain('English-governs');
+    expect(PART_F.statementAr).not.toContain(setAside.text);
+    expect(PART_F.titleEn).toBe('Part F — Organizer Declaration');
+    expect(PART_F.titleAr).toBe('الجزء و — إقرار المنظم');
+    for (const key of ['organizer', 'representative', 'position', 'date'] as const) {
+      expect(PART_F.labels[key].en.trim().length).toBeGreaterThan(0);
+      expect(PART_F.labels[key].ar.trim().length).toBeGreaterThan(0);
+    }
+  });
+});
