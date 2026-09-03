@@ -274,6 +274,44 @@ test.describe('cardiac configuration', () => {
     await gotoRidingRestarts(page, '/ministry/facilities');
     await expect(page.locator('body')).toContainText('Due dates run 30 days');
   });
+
+  test('published reporting procedures render where reporting happens', async ({ page }, testInfo) => {
+    // POWER 5's value finally has a consumer (register closure, 2026-09-03):
+    // publish the procedures on the cardiac console, then read them on the
+    // operator's incident-report screen. Absent before publication -- nothing
+    // is in force -- and present, dated and attributed after. The absence half
+    // runs on the first attempt only: a retry after a failed attempt inherits
+    // the publish that attempt already landed, and that inheritance is state,
+    // not a defect.
+    if (testInfo.retry === 0) {
+      await signInAs(page, 'test_organizer');
+      await gotoRidingRestarts(page, '/facilities/FC-0014/incidents/new');
+      await expectAbsent(page, {
+        absent: '[data-region="reporting-procedures"]',
+        anchor: /Facility cardiac-arrest incident report/,
+        because: 'nothing is in force before the Ministry publishes the procedures',
+      });
+    }
+
+    await signInAs(page, 'test_moph_admin');
+    await gotoRidingRestarts(page, '/ministry/admin/cardiac');
+    const power5 = page
+      .locator('[data-region="powers"] > div')
+      .filter({ hasText: 'reporting procedures' })
+      .first();
+    const row = power5.locator('form').filter({ has: page.locator('input[name="key"][value="reportingProcedures"]') });
+    await row.locator('input[name="value"]').fill('Report by the platform form within 24 hours; the EMS guide number stands in for outages.');
+    await row.locator('input[name="effective"]').fill('2026-09-01');
+    await row.locator('button[type="submit"]').click();
+    await page.waitForURL('**/ministry/admin/cardiac?notice=published');
+
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/facilities/FC-0014/incidents/new');
+    const band = page.locator('[data-region="reporting-procedures"]');
+    await expect(band).toContainText('Reporting procedures in force');
+    await expect(band).toContainText('within 24 hours');
+    await expect(band).toContainText('Effective 2026-09-01');
+  });
 });
 
 test.describe('the Order lane and its reviewer', () => {

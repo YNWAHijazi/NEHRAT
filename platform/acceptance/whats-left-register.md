@@ -89,9 +89,15 @@ the sequential-reference register is walkable until the process warms. The
 event-date second factor is the only durable defence today. The decision on the
 durable mechanism is §1 (#17); the exposure is live now.
 
-Annex A Part F's certification statement renders nowhere. The expedited flag is
-derived and stored but no console surface reads it. Cardiac powers 1, 2, 4, 5
-and 9 publish into a void — no consumer. §13 ¶2(b) configured but never
+Annex A Part F and the expedited flag closed with their own commits
+(2026-09-03). The cardiac-powers register row (1, 2, 4, 5, 9 publishing into a void) turned
+out three-fifths stale on closure (2026-09-03): power 1 has been consumed by
+the education category gate since it landed, power 4 by the facility record's
+category-requirements band, and power 9 is an act that publishes no value at
+all. What was real: power 5's reporting-procedures text (now rendered on the
+incident-report screen, dated and attributed, absent while unset) and power 2,
+whose consumer exists but starves without the malls capacity field — closed
+with that field's own commit. §13 ¶2(b) configured but never
 evaluated; §13 ¶2(c) has no Ministry request control. Annex B §6.2's
 status-change routes (after AED use; on readiness request) missing; the
 incident report omits category and address; device readiness checks not asked
