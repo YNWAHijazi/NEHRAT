@@ -80,7 +80,18 @@ Postgres and data residency (node:sqlite is the review store; the swap is
 confined to db + queries). The Order reviewer's console. A facility reference
 scheme. Ministry account minting stays a script — no console create-user.
 
-## 3 · Recorded build gaps still live
+## 3 · Recorded build gaps still live — FROZEN (partner ruling, 2026-09-03)
+
+Closure stopped here by instruction: what remains in this section is
+completeness against the regulation, not function, and none of it blocks a
+walkthrough. The list stands as it stands. Closed before the freeze: the fee
+gates, the ledger pruning, the five never-compared screens, Part F, the
+expedited flag, the cardiac-powers row, and Protocol 13's three limbs with the
+request control. Still open below the security gap: §6.2's status-change
+routes, the incident report's category and address, device readiness at
+initial registration, the malls capacity field, the Level-1 measures selector,
+configuration versioning and history, registry drill-downs, PAD §12
+cross-references, the organizer small items, and the dual-number helper.
 
 **Live security gap: the public lookup's enumeration guard is theatre after any
 deploy.** The rate limit is a per-process in-memory counter — it dies on every
