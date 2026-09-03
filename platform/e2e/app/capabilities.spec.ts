@@ -387,6 +387,18 @@ test.describe('the capability shape', () => {
   });
 
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
+    // THE OWNER CANNOT REACH THEM (partner ruling, 2026-09-03): licensing
+    // capability is the owner's job, configuring the Ministry's instrument is
+    // not. The page 404s, and the way in is ABSENT on the shared Configuration
+    // tab -- not greyed -- while the registry link stays.
+    await signInAs(page, 'test_owner');
+    const ownerTry = await gotoRidingRestarts(page, '/ministry/admin/cardiac');
+    expect(ownerTry?.status()).toBe(404);
+    await gotoRidingRestarts(page, '/ministry/admin/configuration');
+    const links = page.locator('[data-region="config-links"]');
+    await expect(links.locator('a[href="/ministry/admin/registry"]')).toHaveCount(1);
+    await expect(links.locator('a[href="/ministry/admin/cardiac"]')).toHaveCount(0);
+
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');
     const region = page.locator('[data-region="registry-capabilities"]');

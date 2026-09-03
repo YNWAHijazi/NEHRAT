@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
-import { BANDS, DEFERRED, MINISTRY_CONTENT, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, filingDeadlineRule, type Level } from '../../../../lib/rules';
+import { BANDS, DEFERRED, MINISTRY_CONTENT, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, can, filingDeadlineRule, type Level } from '../../../../lib/rules';
 
 /**
  * Configuration and versioning -- the mass-gathering instrument's values, read
@@ -31,9 +31,15 @@ export default async function ConfigurationPage() {
       {/* The two configuration surfaces that are not tabs, reachable from here
           since the sequence footers were cut (partner ruling, second sweep). */}
       <div data-region="config-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 20 }}>
-        <Link href="/ministry/admin/cardiac" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
-          <L en="Cardiac-arrest configuration" ar="إعدادات الجاهزية لتوقف القلب" />
-        </Link>
+        {/* Absent for the owner, not greyed (partner ruling, 2026-09-03): the
+            owner's job is licensing capability, not configuring the Ministry's
+            instrument, so configureCardiac never applies to that role and the
+            way in does not exist for it. */}
+        {can(account.role, 'configureCardiac') ? (
+          <Link href="/ministry/admin/cardiac" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+            <L en="Cardiac-arrest configuration" ar="إعدادات الجاهزية لتوقف القلب" />
+          </Link>
+        ) : null}
         <Link href="/ministry/admin/registry" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
           <L en="National registry" ar="السجل الوطني" />
         </Link>

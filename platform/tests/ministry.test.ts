@@ -72,18 +72,22 @@ describe('the permission matrix', () => {
     // 2026-09-01): the owner sees the four administration tabs alongside the master
     // administrator, synced — configuration, activity, users, records. What did NOT
     // move: the owner records no outcome, no attestation, no corrective action, and
-    // holds no reviewer surface. The exact grant is pinned so a later widening is a
+    // holds no reviewer surface. And configureCardiac LEFT the grant (partner
+    // ruling, 2026-09-03): the owner's job is licensing capability, not configuring
+    // the Ministry's instrument — the two AED registry switches under cardiac are
+    // the Ministry's alone. The exact grant is pinned so a later widening is a
     // deliberate edit here, not a drift.
     const ownerActions = permissionMatrix()
       .filter((row) => row.roles['platform_owner'])
       .map((row) => row.action.key)
       .sort();
     expect(ownerActions).toEqual(
-      ['archiveRecord', 'configureCardiac', 'configureMassGathering', 'manageFlags', 'manageUsers', 'viewPlatformActivity', 'viewRegistry'].sort(),
+      ['archiveRecord', 'configureMassGathering', 'manageFlags', 'manageUsers', 'viewPlatformActivity', 'viewRegistry'].sort(),
     );
     expect(can('platform_owner', 'recordOutcome')).toBe(false);
     expect(can('platform_owner', 'recordAttestation' as never)).toBe(false);
     expect(can('platform_owner', 'viewQueue')).toBe(false);
+    expect(can('platform_owner', 'configureCardiac')).toBe(false);
   });
 
   it('the public roles hold no ministry action', () => {
