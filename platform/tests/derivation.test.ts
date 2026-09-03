@@ -317,3 +317,30 @@ describe('Annex A Part F, verbatim from each issue', () => {
     }
   });
 });
+
+describe('English governs, everywhere — the standing ruling (2026-09-03)', () => {
+  it('no rendered string carries an Arabic-issue extra limb, and every set-aside is recorded', async () => {
+    const compliance = (await import('../lib/rules/data/compliance-form.json')).default as {
+      sectionB: { items: { en: string; ar: string; setAsideAr?: string }[] };
+    };
+    const item7 = compliance.sectionB.items[6]!;
+    const item10 = compliance.sectionB.items[9]!;
+    expect(item7.ar).not.toContain('التنسيق');
+    expect(item7.setAsideAr).toContain('وتحديد وسيلة الاتصال');
+    expect(item10.ar).not.toContain('جاهزيتها');
+    expect(item10.setAsideAr).toContain('وأكدت جاهزيتها');
+
+    const matrix = (await import('../lib/rules/data/requirements-matrix.json')).default as unknown as {
+      requirements: { n?: number; number?: number; en: string; ar: string; setAsideAr?: string; setAsideEn?: string }[];
+    };
+    const row = (n: number) => matrix.requirements.find((r) => (r.n ?? r.number) === n)!;
+    expect(row(7).ar).toBe('ترتيبات سيارات الإسعاف');
+    expect(row(7).setAsideAr).toContain('والنقل');
+    // Row 13: the built ENGLISH had carried the Arabic issue's extra limb too.
+    // The English issue reads "notified" alone, and now so does the build.
+    expect(row(13).en).toBe('Participating EMS provider notified');
+    expect(row(13).setAsideEn).toContain('coordinated');
+    expect(row(13).ar).not.toContain('التنسيق');
+    expect(row(15).ar).not.toContain('محددة');
+  });
+});

@@ -57,13 +57,19 @@ surfaces. Nothing else on this register has that leverage.
   accept only ems/director.
 - Whether the owner keeps the organizer surface it currently also holds.
 
-### The EN/AR divergence set (~12, each awaiting a Ministry decision)
+### The EN/AR divergence set — SETTLED by standing ruling (2026-09-03)
 
-The two Annex C omissions (insurance declaration; Telephone), requirements
-7/13/15 wording, item 10's "confirmed readiness", the responsibility sentence,
-Level 1's "not routinely required" vs "only when requested", section A's
-reworded Arabic, the insurance declaration's provisional Arabic, transport
-"does not" vs "not authorized".
+English governs, everywhere, without exception: where the Arabic issue says
+more, says it more strongly, or orders things differently, the rendered Arabic
+carries the English limbs only, and the set-aside wording is recorded in the
+data beside each string for the Ministry. Applied to every recorded divergence
+(Part F's extra qualifiers; items 7 and 10 of the readiness declaration;
+requirement rows 7, 13 and 15 — row 13's built English had carried the Arabic
+limb too and shed it; the two Annex C omissions, where English governing means
+the fields render). Future divergences take the same rule on discovery, without
+a per-item decision. Two divergences were source-internal rather than EN/AR and
+stay open elsewhere in this register: the responsibility sentence, and Level
+1's "not routinely required" vs "only when requested".
 
 ## 2 · Deliberately not built, waiting on the above
 

@@ -1,6 +1,6 @@
 {
   "$comment": "Annex C. English from the reference prototype (which renders the ban-compliant wording); Arabic verbatim from the Arabic issue where it carries the item. The insurance declaration and the Telephone field are English-only -- known divergences 1 and 2; follow the English and record it.",
-  "$commentArabicCopyRule": "Section A's Arabic departs from the Arabic issue's LITERAL wording in the same three places the English departs from the English issue, and for the same reason. The instruments write 'Annex A (NEHRAT) has been completed', 'the applicable Annex B requirements', 'or EHMP'; the copy rule forbids naming an annex to a user and forbids EHMP as an acronym. The English was rewritten when this file was built; the Arabic was left verbatim, so for months the Arabic named two annexes the English did not -- a parity break in register, caught by extending the banned-terms sweep to this directory. The Arabic now says تقييم المخاطر, المتطلبات الدنيا and خطة التأهب الصحي والطبي للفعالية. This is a deliberate divergence from the Arabic issue, recorded here, and it is a Ministry decision to ratify -- not a translation choice.",
+  "$commentArabicCopyRule": "Section A's Arabic departs from the Arabic issue's LITERAL wording in the same three places the English departs from the English issue, and for the same reason. The instruments write 'Annex A (NEHRAT) has been completed', 'the applicable Annex B requirements', 'or EHMP'; the copy rule forbids naming an annex to a user and forbids EHMP as an acronym. The English was rewritten when this file was built; the Arabic was left verbatim, so for months the Arabic named two annexes the English did not -- a parity break in register, caught by extending the banned-terms sweep to this directory. The Arabic now says تقييم المخاطر, المتطلبات الدنيا and خطة التأهب الصحي والطبي للفعالية. This is a deliberate divergence from the Arabic issue, recorded here, and it now stands under the English-governs ruling (2026-09-03): the Arabic follows the English limbs.",
   "header": [
     {
       "key": "eventName",
@@ -94,8 +94,8 @@
       ],
       "$commentEvidence": "evidenceAttached WAS A TEXT BOX HERE, and the word 'yes' satisfied it. A field asking whether evidence is attached, answered by typing yes, evidences nothing. It is now an attachment -- insuranceEvidence in the attachments catalogue -- rendered as a row on this declaration, and the declaration cannot be made without a file behind it.",
       "attachmentKey": "insuranceEvidence",
-      "divergenceNoteEn": "The Arabic issue of the compliance form carries no insurance declaration at all. The English is followed, so this item is declared here; the Arabic wording is a translation pending a Ministry decision.",
-      "divergenceNoteAr": "لا يتضمن الإصدار العربي من نموذج الامتثال أي إقرار تأمين. ويُتبع النص الإنكليزي، فيُقَرّ هذا البند هنا؛ والصياغة العربية ترجمة بانتظار قرار الوزارة."
+      "divergenceNoteEn": "The Arabic issue of the compliance form carries no insurance declaration at all. The English governs (standing ruling, 2026-09-03), so this item is declared here; the Arabic wording is a translation of the English.",
+      "divergenceNoteAr": "لا يتضمن الإصدار العربي من نموذج الامتثال أي إقرار تأمين. يُعتمد النص الإنكليزي (قاعدة قائمة، 2026-09-03)، فيُقَرّ هذا البند هنا؛ والصياغة العربية ترجمة عنه."
     },
     {
       "en": "The required emergency escalation or major-incident and mass-casualty arrangements are included",
@@ -123,8 +123,8 @@
         "ar": "الهاتف",
         "arabicIsTranslation": true,
         "divergence": "Arabic Annex C omits Telephone from both certification blocks (README divergence 2).",
-        "divergenceNoteEn": "The Arabic issue omits Telephone from both certification blocks. The English is followed; the difference is recorded and awaits a Ministry decision.",
-        "divergenceNoteAr": "يغفل الإصدار العربي حقل الهاتف من كتلتَي التصديق. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
+        "divergenceNoteEn": "The Arabic issue omits Telephone from both certification blocks. The English governs (standing ruling, 2026-09-03); the omission is recorded here for the Ministry and Telephone is captured.",
+        "divergenceNoteAr": "يغفل الإصدار العربي حقل الهاتف من كتلتَي التصديق. يُعتمد النص الإنكليزي (قاعدة قائمة، 2026-09-03)؛ والإغفال مسجَّل هنا للوزارة ويُلتقط الهاتف."
       },
       {
         "key": "position",
@@ -162,7 +162,8 @@
       },
       {
         "en": "Communication with the Event Medical Director established.",
-        "ar": "تم التنسيق مع المدير الطبي للفعالية وتحديد وسيلة الاتصال به."
+        "ar": "تم إجراء الاتصال بالمدير الطبي للفعالية.",
+        "setAsideAr": "تم التنسيق مع المدير الطبي للفعالية وتحديد وسيلة الاتصال به."
       },
       {
         "en": "Procedure for requesting additional EMS resources established.",
@@ -174,13 +175,14 @@
       },
       {
         "en": "The agency has reviewed and confirmed its role in the major-incident / mass-casualty response plan.",
-        "ar": "راجعت الجهة دورها في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية وأكدت جاهزيتها لتنفيذه."
+        "ar": "راجعت الجهة دورها في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية وأكدته.",
+        "setAsideAr": "راجعت الجهة دورها في خطة الاستجابة للحوادث الجسيمة وحوادث الإصابات الجماعية وأكدت جاهزيتها لتنفيذه."
       }
     ],
     "item10Divergence": "Arabic adds: وأكدت جاهزيتها لتنفيذه -- confirmed its readiness to perform it (README divergence 6)."
   },
-  "item7DivergenceEn": "The Arabic issue's item 7 requires coordination with the Event Medical Director to have been carried out and the means of contacting him identified — stronger than the English's established communication. The English is followed; the difference is recorded and awaits a Ministry decision. Found in the counterparty source sweep, 2026-09-02; not among the README's eight.",
-  "item7DivergenceAr": "يشترط البند 7 في الإصدار العربي أن يكون التنسيق مع المدير الطبي للفعالية قد تم وأن تُحدَّد وسيلة الاتصال به — أي أكثر من مجرد قيام الاتصال في الإصدار الإنكليزي. يُتَّبع الإنكليزي، ويُسجَّل الفرق بانتظار قرار الوزارة.",
-  "item10DivergenceEn": "The Arabic issue adds that the agency has confirmed its readiness to perform the role, not only reviewed and confirmed it — a stronger obligation. The English is followed; the difference is recorded and awaits a Ministry decision.",
-  "item10DivergenceAr": "يضيف الإصدار العربي أن الجهة أكدت جاهزيتها لتنفيذ الدور، لا مراجعته وتأكيده فحسب — وهو موجب أشدّ. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
+  "item7DivergenceEn": "The Arabic issue's item 7 requires coordination to have been carried out and a means of contact identified — more than the English's established communication. Set aside under the English-governs ruling (2026-09-03): the rendered Arabic carries the English limbs; the Arabic issue's wording is recorded here for the Ministry.",
+  "item7DivergenceAr": "يشترط البند 7 في الإصدار العربي أن يكون التنسيق قد تم وأن تُحدَّد وسيلة الاتصال — أي أكثر من إجراء الاتصال في الإصدار الإنكليزي. وُضع جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03): تعرض العربية حدود النص الإنكليزي؛ وصياغة الإصدار العربي مسجَّلة هنا للوزارة.",
+  "item10DivergenceEn": "The Arabic issue adds that the agency has confirmed its readiness to perform the role, not only reviewed and confirmed it. Set aside under the English-governs ruling (2026-09-03): the rendered Arabic carries the English limbs; the Arabic issue's wording is recorded here for the Ministry.",
+  "item10DivergenceAr": "يضيف الإصدار العربي أن الجهة أكدت جاهزيتها لتنفيذ الدور، لا مراجعته وتأكيده فحسب. وُضع جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03): تعرض العربية حدود النص الإنكليزي؛ وصياغة الإصدار العربي مسجَّلة هنا للوزارة."
 }

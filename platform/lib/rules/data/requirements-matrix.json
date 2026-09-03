@@ -209,7 +209,7 @@
     {
       "n": 7,
       "en": "Ambulance arrangements",
-      "ar": "ترتيبات سيارات الإسعاف والنقل",
+      "ar": "ترتيبات سيارات الإسعاف",
       "prototypeAr": "ترتيبات الإسعاف",
       "parties": [
         [
@@ -242,8 +242,9 @@
         }
       ],
       "divergence": "Arabic adds transport: ترتيبات سيارات الإسعاف والنقل (README divergence 3).",
-      "divergenceNoteEn": "The Arabic issue of this requirement reads “ambulance and transport arrangements”. The English is followed; the difference is recorded and awaits a Ministry decision.",
-      "divergenceNoteAr": "يقرأ الإصدار العربي لهذا المتطلب «ترتيبات سيارات الإسعاف والنقل». ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
+      "divergenceNoteEn": "The Arabic issue reads “ambulance and transport arrangements”. Set aside under the English-governs ruling (2026-09-03): the rendered Arabic carries the English limbs; the Arabic issue's wording is recorded here for the Ministry.",
+      "divergenceNoteAr": "يقرأ الإصدار العربي «ترتيبات سيارات الإسعاف والنقل». وُضع جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03): تعرض العربية حدود النص الإنكليزي؛ وصياغة الإصدار العربي مسجَّلة هنا للوزارة.",
+      "setAsideAr": "ترتيبات سيارات الإسعاف والنقل"
     },
     {
       "n": 8,
@@ -420,8 +421,8 @@
     },
     {
       "n": 13,
-      "en": "Participating EMS provider notified and coordinated with",
-      "ar": "إخطار جهة خدمات الطوارئ الطبية المشاركة والتنسيق معها",
+      "en": "Participating EMS provider notified",
+      "ar": "إخطار جهة خدمات الطوارئ الطبية المشاركة",
       "prototypeAr": "إخطار مزوّد الإسعاف المشارك والتنسيق معه",
       "parties": [
         [
@@ -454,8 +455,10 @@
         }
       ],
       "divergence": "Arabic adds coordination: والتنسيق معها -- a stronger obligation (README divergence 4).",
-      "divergenceNoteEn": "The Arabic issue requires notification and coordination with the provider, not notification alone — a stronger obligation. The English is followed; the difference is recorded and awaits a Ministry decision.",
-      "divergenceNoteAr": "يشترط الإصدار العربي الإخطار والتنسيق مع الجهة، لا الإخطار وحده — وهو موجب أشدّ. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
+      "divergenceNoteEn": "The Arabic issue requires notification AND coordination; the built English had carried that extra limb too. The English issue reads “Participating EMS agency notified”. Set aside under the English-governs ruling (2026-09-03): the rendered Arabic carries the English limbs; the Arabic issue's wording is recorded here for the Ministry.",
+      "divergenceNoteAr": "يشترط الإصدار العربي الإخطار والتنسيق معاً، وكان النص الإنكليزي المبني يحمل هذه الزيادة أيضاً. يقرأ الإصدار الإنكليزي «إخطار جهة خدمات الطوارئ الطبية المشاركة». وُضع جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03): تعرض العربية حدود النص الإنكليزي؛ وصياغة الإصدار العربي مسجَّلة هنا للوزارة.",
+      "setAsideEn": "Participating EMS provider notified and coordinated with",
+      "setAsideAr": "إخطار جهة خدمات الطوارئ الطبية المشاركة والتنسيق معها"
     },
     {
       "n": 14,
@@ -494,7 +497,7 @@
     {
       "n": 15,
       "en": "Event medical command function",
-      "ar": "وظيفة محددة للقيادة الطبية",
+      "ar": "وظيفة القيادة الطبية للفعالية",
       "prototypeAr": "وظيفة القيادة الطبية للفعالية",
       "parties": [
         null,
@@ -515,8 +518,9 @@
         }
       ],
       "divergence": "Arabic requires a DEFINED command function: وظيفة محددة للقيادة الطبية (README divergence 5).",
-      "divergenceNoteEn": "The Arabic issue requires a defined medical-command function, not a command function alone. The English is followed; the difference is recorded and awaits a Ministry decision.",
-      "divergenceNoteAr": "يشترط الإصدار العربي وظيفة محددة للقيادة الطبية، لا وظيفة قيادة فحسب. ويُتبع النص الإنكليزي، والفارق مسجَّل بانتظار قرار الوزارة."
+      "divergenceNoteEn": "The Arabic issue requires a DEFINED medical-command function. Set aside under the English-governs ruling (2026-09-03): the rendered Arabic carries the English limbs; the Arabic issue's wording is recorded here for the Ministry.",
+      "divergenceNoteAr": "يشترط الإصدار العربي وظيفة محددة للقيادة الطبية. وُضع جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03): تعرض العربية حدود النص الإنكليزي؛ وصياغة الإصدار العربي مسجَّلة هنا للوزارة.",
+      "setAsideAr": "وظيفة محددة للقيادة الطبية"
     },
     {
       "n": 16,
