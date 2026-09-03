@@ -4,7 +4,7 @@ import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
-import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
+import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFacts, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
 import { submissionGateFor } from '../../../lib/submission-facts';
 import { getDb } from '../../../lib/db';
 import { clockNow } from '../../../lib/clock';
@@ -30,6 +30,7 @@ import {
   type EventGateContext,
   type Gate,
   MINISTRY_CONTENT,
+  postEventReportRequired,
 } from '../../../lib/rules';
 import enMessages from '../../../lib/i18n/messages/en.json';
 import arMessages from '../../../lib/i18n/messages/ar.json';
@@ -328,11 +329,20 @@ export default async function EventRecordPage({
   const assessed = derivation?.complete === true || (derivation === null && event.level !== null);
   const latestDate = latest?.createdAt.slice(0, 10) ?? '';
   const reportSubmitted = postEventReportFor(account.id, id)?.submittedAt != null;
+  // Protocol 13 p2, all three limbs (register closure, 2026-09-03): Level 3
+  // always; a notified reportable event at Level 1 or 2; a Ministry request.
+  const reportFacts = postEventReportFacts(id);
+  const reportRequirement = postEventReportRequired({
+    finalLevel: level,
+    seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    ministryRequested: reportFacts.ministryRequested,
+  });
   const stageInfo = eventStage({
     assessed,
     filed: event.filed,
     outcome: event.outcome,
     finalLevel: level,
+    reportRequired: reportRequirement.required,
     eventEndDate: event.endDate,
     reportSubmitted,
     now: clockNow(),
@@ -356,11 +366,11 @@ export default async function EventRecordPage({
     event.outcome
       ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: event.stateEn, metaAr: event.stateAr }
       : { k: event.filed ? 'current' : 'todo', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'Waiting for the Ministry', metaAr: 'بانتظار الوزارة' },
-    level === 3
+    reportRequirement.required
       ? stage === POST_EVENT_STAGE
         ? { k: 'current', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Open now — within 7 days of the event', metaAr: 'مفتوح الآن — خلال 7 أيام من الفعالية' }
-        : { k: reportSubmitted ? 'done' : 'todo', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Within 7 days of the event', metaAr: 'خلال 7 أيام من الفعالية' }
-      : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: 'Not needed for this event', metaAr: 'غير مطلوب لهذه الفعالية' },
+        : { k: reportSubmitted ? 'done' : 'todo', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: reportRequirement.limb === 'level3' ? 'Within 7 days of the event' : reportRequirement.en, metaAr: reportRequirement.limb === 'level3' ? 'خلال 7 أيام من الفعالية' : reportRequirement.ar }
+      : { k: 'na', en: 'Post-event report', ar: 'التقرير الطبي لما بعد الفعالية', metaEn: reportRequirement.en, metaAr: reportRequirement.ar },
   ];
   // The tail that repeated the sixth column's own "Not applicable" label was cut
   // in the second simplification sweep -- the rail already says it.

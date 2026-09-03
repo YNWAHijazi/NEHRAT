@@ -758,6 +758,17 @@ function migrate(d: DatabaseSync): void {
       paid_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    -- Protocol 13 p2(c): the Ministry's request for a post-event medical
+    -- report, per event. The row IS the record the requirement rule reads --
+    -- no flag column shadowing it. One request stands; repeating it changes
+    -- nothing, so the insert is guarded by the reader, not a constraint.
+    CREATE TABLE IF NOT EXISTS post_event_report_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      requested_by TEXT NOT NULL,
+      requested_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     -- Turning a platform capability on or off is a licensing act, not a toggle
     -- flip: who, when, and the configuration at that moment. These rows ARE the
     -- record the activity trail reads -- there is no separate audit copy.

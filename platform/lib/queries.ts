@@ -16,7 +16,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, postEventReportRequired, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination-access';
@@ -194,11 +194,19 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
       : null;
   const reportSubmitted =
     (getDb().prepare(`SELECT submitted_at FROM post_event_reports WHERE event_id = ?`).get(row.id) as { submitted_at: string | null } | undefined)?.submitted_at != null;
+  // Protocol 13 p2, all three limbs -- not only Level 3 (register closure, 2026-09-03).
+  const reportFacts = postEventReportFacts(row.id);
+  const reportRequired = postEventReportRequired({
+    finalLevel: level,
+    seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    ministryRequested: reportFacts.ministryRequested,
+  }).required;
   const stageInfo = eventStage({
     assessed,
     filed,
     outcome,
     finalLevel: level,
+    reportRequired,
     eventEndDate: row.end_date,
     reportSubmitted,
     now: clockNowFn(),
@@ -217,7 +225,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
         : filed
           ? 'done'
           : 'todo',
-    stageInfo.stage === POST_EVENT_STAGE ? 'current' : level === 3 ? 'todo' : 'na',
+    stageInfo.stage === POST_EVENT_STAGE ? 'current' : reportRequired ? (reportSubmitted ? 'done' : 'todo') : 'na',
   ];
   return {
     id: row.id,
@@ -1019,6 +1027,31 @@ export function seriousIncidentNotificationsFor(accountId: number, eventId: stri
     .prepare(`SELECT incident_type, occurred_at, notified_at FROM serious_incident_notifications WHERE event_id = ? ORDER BY notified_at DESC`)
     .all(eventId) as unknown as { incident_type: SeriousIncidentRow['incidentType']; occurred_at: string; notified_at: string }[];
   return rows.map((r) => ({ incidentType: r.incident_type, occurredAt: r.occurred_at, notifiedAt: r.notified_at }));
+}
+
+/**
+ * Protocol 13 p2's non-level limbs, as facts for the requirement rule: has a
+ * reportable event been notified for this event, and has the Ministry requested
+ * the report. Unscoped by account -- the console and the organizer read the
+ * same facts.
+ */
+export function postEventReportFacts(eventId: string): {
+  seriousIncidentNotified: boolean;
+  ministryRequested: boolean;
+  requestedBy: string | null;
+  requestedAt: string | null;
+} {
+  const db = getDb();
+  const notified = (db.prepare(`SELECT COUNT(*) AS n FROM serious_incident_notifications WHERE event_id = ?`).get(eventId) as { n: number }).n > 0;
+  const req = db
+    .prepare(`SELECT requested_by, requested_at FROM post_event_report_requests WHERE event_id = ? ORDER BY requested_at ASC, id ASC LIMIT 1`)
+    .get(eventId) as { requested_by: string; requested_at: string } | undefined;
+  return {
+    seriousIncidentNotified: notified,
+    ministryRequested: req !== undefined,
+    requestedBy: req?.requested_by ?? null,
+    requestedAt: req ? req.requested_at.slice(0, 10) : null,
+  };
 }
 
 /** Kept for the post-event page's cross-reference: the earliest notification date, if any. */

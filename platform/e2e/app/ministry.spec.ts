@@ -314,6 +314,32 @@ test.describe('cardiac configuration', () => {
   });
 });
 
+test.describe('the post-event report can be requested (Protocol 13 p2c)', () => {
+  test('requesting makes it required, the organizer reads why, and Level 3 needs no request', async ({ page }) => {
+    // A Level 3 submission is already required by level: the panel says so
+    // instead of offering a request that would change nothing.
+    await signInAs(page, 'test_moph');
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
+    await expect(page.locator('[data-region="request-report"]')).toContainText('Already required without a request');
+
+    // EV-0301 is Level 2 with nothing reportable: the reviewer requests.
+    await gotoRidingRestarts(page, '/ministry/submissions/EV-0301');
+    const panel = page.locator('[data-region="request-report"]');
+    await panel.locator('button:has-text("Request the report")').click();
+    await page.waitForURL(/notice=report-requested/);
+    await expect(page.locator('[data-region="request-report"]')).toContainText(/Requested by .+ — \d{4}-\d{2}-\d{2}/);
+
+    // The organizer's record now shows the report as required, with the limb
+    // named on the rail -- no longer "Not needed for this event" -- and the
+    // notification names the record route.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/events/EV-0301');
+    await expect(page.locator('body')).toContainText('Required — the Ministry has requested it.');
+    await gotoRidingRestarts(page, '/notifications');
+    await expect(page.locator('body')).toContainText('Post-event medical report requested');
+  });
+});
+
 test.describe('the Order lane and its reviewer', () => {
   test('the lane off shows the Order reviewer suspended, not active', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');

@@ -8,6 +8,7 @@ import {
   assessmentsFor,
   eventFor,
   invitationsFor,
+  postEventReportFacts,
   postEventReportFor,
   seriousIncidentNotificationFor,
   unreadCountFor,
@@ -17,6 +18,7 @@ import {
   POST_EVENT_ACTIVITY_FIELDS,
   POST_EVENT_SIGNIFICANT,
   postEventReportGate,
+  postEventReportRequired,
   postEventReportWindow,
   type EventGateContext,
   type Level,
@@ -58,6 +60,12 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
   const window = event.endDate
     ? postEventReportWindow(new Date(`${event.endDate}T12:00:00+03:00`))
     : null;
+  const facts = postEventReportFacts(id);
+  const requirement = postEventReportRequired({
+    finalLevel: (assessmentsFor(account.id, id)[0]?.derivation.finalLevel ?? event.level) as Level | null,
+    seriousIncidentNotified: facts.seriousIncidentNotified,
+    ministryRequested: facts.ministryRequested,
+  });
   const report = postEventReportFor(account.id, id);
   const director = invitationsFor(account.id, id).find(
     (i) => i.kind === 'director' && i.status === 'confirmed',
@@ -178,6 +186,12 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
                   en={`Due ${window?.due.date ?? ''}. Required after every Level 3 event, after a reportable event at Level 1 or 2, or on Ministry request.`}
                   ar={`مستحق في ⁦${window?.due.date ?? ''}⁩. مطلوب بعد كل فعالية من المستوى 3، وبعد واقعة واجبة الإبلاغ في المستوى 1 أو 2، أو بطلب الوزارة.`}
                 />
+              </div>
+              {/* THE ANSWER FOR THIS EVENT, from the one rule -- the three limbs
+                  stopped being copy and started being evaluated (register
+                  closure, 2026-09-03). */}
+              <div data-region="report-requirement" style={{ fontSize: '13.5px', lineHeight: 1.6, marginBlockStart: 8 }}>
+                <L en={`For this event: ${requirement.en}`} ar={`لهذه الفعالية: ${requirement.ar}`} />
               </div>
             </div>
           </div>

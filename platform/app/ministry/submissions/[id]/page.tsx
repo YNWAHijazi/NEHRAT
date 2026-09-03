@@ -6,6 +6,7 @@ import { PLAN_DOC_KEY, humanSize } from '../../../../lib/rules/uploads';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
 import {
+  postEventReportFacts,
   addedMeasuresFor,
   attachmentsForReview,
   attestationRecordsFor,
@@ -36,6 +37,7 @@ import {
   documentsForLevel,
   outcomeAvailability,
   type Level,
+  postEventReportRequired,
 } from '../../../../lib/rules';
 import {
   assignReviewAction,
@@ -48,6 +50,7 @@ import {
   recordOutcomeAction,
   requireMeasureAction,
   reviseOutcomeAction,
+  requestPostEventReportAction,
 } from '../../../ministry-actions';
 
 /**
@@ -114,6 +117,13 @@ export default async function SubmissionReviewPage({
   const internal = MINISTRY_CONTENT.internalStates[review.state];
   const mayRecord = can(account.role, 'recordOutcome');
   const mayMeasure = can(account.role, 'requireMeasures');
+  // Protocol 13 p2 for THIS submission -- the same rule the organizer's record reads.
+  const reportFacts = postEventReportFacts(id);
+  const reportRequirement = postEventReportRequired({
+    finalLevel: review.level,
+    seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    ministryRequested: reportFacts.ministryRequested,
+  });
   const mayInspect = can(account.role, 'scheduleInspection');
   const catalog = review.level ? documentsForLevel(review.level) : [];
 
@@ -149,6 +159,11 @@ export default async function SubmissionReviewPage({
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة' }}>
+      {notice === 'report-requested' ? (
+        <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
+          <L en="The post-event medical report has been requested. The organizer is notified, and the record now shows it as required." ar="طُلب التقرير الطبي لما بعد الفعالية. أُبلغ المنظّم، ويُظهر السجل الآن أنه مطلوب." />
+        </div>
+      ) : null}
       {notice === 'recorded' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="The outcome has been recorded and the organizer notified." ar="سُجّلت النتيجة وأُبلغ المنظّم." />
@@ -899,6 +914,52 @@ export default async function SubmissionReviewPage({
                 </div>
               </form>
             )}
+          </div>
+
+          {/* PROTOCOL 13 p2(c), the control the copy promised (register closure,
+              2026-09-03): the Ministry requests the post-event medical report.
+              A standing request is a record and renders as one -- the button
+              does not repeat it. */}
+          {/* data-action-panel only while an ACTION exists here: with the
+              requirement already standing (by limb or by prior request) the
+              block is a stated fact, and the walker's structural rule is right
+              that a fact is not an action panel. */}
+          <div {...(reportRequirement.required ? {} : { 'data-action-panel': 'requestReport' })} style={{ display: 'contents' }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
+            </h2>
+            <div data-region="request-report" style={{ marginBlockEnd: 28, maxWidth: '78ch' }}>
+              {reportRequirement.limb === 'request' || reportFacts.ministryRequested ? (
+                <div style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.6 }}>
+                  <L
+                    en={`Requested by ${reportFacts.requestedBy ?? ''} — ${reportFacts.requestedAt ?? ''}. The organizer was notified; the report opens the day after the event ends.`}
+                    ar={`طلبه ${reportFacts.requestedBy ?? ''} — ⁦${reportFacts.requestedAt ?? ''}⁩. أُبلغ المنظّم؛ ويُفتح التقرير في اليوم التالي لانتهاء الفعالية.`}
+                  />
+                </div>
+              ) : reportRequirement.required ? (
+                <div style={{ padding: '13px 17px', background: 'var(--surface2)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
+                  <L
+                    en={`Already required without a request: ${reportRequirement.en} The organizer owes it after the event ends, within the report window.`}
+                    ar={`مطلوب أصلاً من دون طلب: ${reportRequirement.ar} ويقع على المنظّم بعد انتهاء الفعالية، ضمن نافذة التقرير.`}
+                  />
+                </div>
+              ) : mayMeasure ? (
+                <form action={requestPostEventReportAction} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                  <input type="hidden" name="eventId" value={review.eventId} />
+                  <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                    <L
+                      en="Not required for this event by level or by a reportable event. Requesting it makes it required, and the organizer is notified."
+                      ar="غير مطلوب لهذه الفعالية بحسب المستوى أو بواقعة واجبة الإبلاغ. وطلبه يجعله مطلوباً، ويُبلَّغ المنظّم."
+                    />
+                  </span>
+                  <button type="submit" style={{ height: 34, paddingInline: 16, border: '1px solid var(--brand)', borderRadius: 17, background: 'var(--bg)', color: 'var(--brand)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                    <L en="Request the report" ar="طلب التقرير" />
+                  </button>
+                </form>
+              ) : (
+                <OwnerNote panel="measures" />
+              )}
+            </div>
           </div>
 
           <div data-action-panel="measures" style={{ display: 'contents' }}>

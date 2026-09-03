@@ -366,6 +366,45 @@ export async function designateCoveredAction(formData: FormData): Promise<void> 
 }
 
 /**
+ * Protocol 13 p2(c): the Ministry requests the post-event medical report. The
+ * request is a record the requirement rule reads, per event; the organizer is
+ * notified with the record route. One request stands -- a second click changes
+ * nothing and says so. Held by requireMeasures: requesting a report of the
+ * organizer is the same class of reviewer act as requiring additional measures.
+ */
+export async function requestPostEventReportAction(formData: FormData): Promise<void> {
+  const actor = await requireMinistry('requireMeasures');
+  const eventId = String(formData.get('eventId') ?? '');
+  const db = getDb();
+  const event = db.prepare(`SELECT id, account_id, name_en, name_ar, is_demo FROM events WHERE id = ?`).get(eventId) as
+    | { id: string; account_id: number; name_en: string; name_ar: string; is_demo: number }
+    | undefined;
+  if (!event || (event.is_demo === 1) !== actor.isDemo) redirect('/ministry/queue');
+  const standing = db.prepare(`SELECT id FROM post_event_report_requests WHERE event_id = ?`).get(eventId);
+  if (!standing) {
+    db.prepare(`INSERT INTO post_event_report_requests (event_id, requested_by, requested_at) VALUES (?, ?, now_stamp())`).run(
+      eventId,
+      actor.displayName,
+    );
+    db.prepare(
+      `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+       VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
+    ).run(
+      event.account_id,
+      'Post-event medical report requested',
+      'طُلب التقرير الطبي لما بعد الفعالية',
+      `The Ministry has requested the post-event medical report for ${event.name_en}. It opens the day after the event ends and is due within the report window.`,
+      `طلبت الوزارة التقرير الطبي لما بعد الفعالية لـ${event.name_ar}. يُفتح في اليوم التالي لانتهاء الفعالية ويستحق ضمن نافذة التقرير.`,
+      `/events/${eventId}/post-event`,
+      event.is_demo,
+    );
+  }
+  revalidatePath(`/ministry/submissions/${eventId}`);
+  revalidatePath(`/events/${eventId}`);
+  redirect(`/ministry/submissions/${eventId}?notice=report-requested`);
+}
+
+/**
  * The two AED registry capabilities -- geolocation registry, automated upkeep
  * notifications -- are Ministry powers, not platform capabilities (partner
  * ruling, 2026-09-02: they moved here from the owner's capability list). A

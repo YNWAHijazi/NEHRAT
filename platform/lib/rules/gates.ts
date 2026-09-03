@@ -128,6 +128,8 @@ export function eventStage(input: {
   filed: boolean;
   outcome: string | null;
   finalLevel: Level | null;
+  /** Protocol 13 p2, all three limbs -- postEventReportRequired's answer. */
+  reportRequired: boolean;
   eventEndDate: string | null;
   reportSubmitted: boolean;
   now: Date;
@@ -135,7 +137,7 @@ export function eventStage(input: {
   if (!input.assessed) return { stage: 2, en: 'Assessment', ar: 'التقييم' };
   if (!input.filed) return { stage: 3, en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات' };
   if (
-    input.finalLevel === 3 &&
+    input.reportRequired &&
     !input.reportSubmitted &&
     input.eventEndDate !== null &&
     input.now.getTime() >= postEventReportWindow(endInstant(input.eventEndDate)).opens.instant.getTime()
@@ -144,6 +146,39 @@ export function eventStage(input: {
   }
   if (input.outcome) return { stage: 5, en: 'Ministry outcome recorded', ar: 'تسجيل نتيجة الوزارة' };
   return { stage: 4, en: 'Submitted', ar: 'التقديم' };
+}
+
+/**
+ * WHO OWES A POST-EVENT REPORT -- Protocol 13 p2's three limbs, evaluated at
+ * last (register closure, 2026-09-03). Required after every Level 3 event
+ * (2a); after a reportable event at Level 1 or 2 -- the recorded 24-hour
+ * serious-incident notification IS the reportable event (2b); or on Ministry
+ * request (2c). The copy has named all three since Slice 2; only the first was
+ * ever evaluated. One rule, consumed by the record's stage rail, the report
+ * screen and the console alike -- the gate's TIMING (opens the day after the
+ * event ends) stays in postEventReportGate and is a separate question from
+ * whether the report is owed at all.
+ */
+export function postEventReportRequired(input: {
+  finalLevel: Level | null;
+  seriousIncidentNotified: boolean;
+  ministryRequested: boolean;
+}): { required: boolean; limb: 'level3' | 'reportable' | 'request' | null; en: string; ar: string } {
+  if (input.finalLevel === 3) {
+    return { required: true, limb: 'level3', en: 'Required after every Level 3 event.', ar: 'مطلوب بعد كل فعالية من المستوى 3.' };
+  }
+  if (input.seriousIncidentNotified) {
+    return {
+      required: true,
+      limb: 'reportable',
+      en: 'Required — a reportable event was notified for this event.',
+      ar: 'مطلوب — أُبلغ عن حدث موجب للإبلاغ في هذه الفعالية.',
+    };
+  }
+  if (input.ministryRequested) {
+    return { required: true, limb: 'request', en: 'Required — the Ministry has requested it.', ar: 'مطلوب — طلبته الوزارة.' };
+  }
+  return { required: false, limb: null, en: 'Not needed for this event.', ar: 'غير مطلوب لهذه الفعالية.' };
 }
 
 /** Material change: a state gate. Disabled until the submission is filed. */
