@@ -91,13 +91,34 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'public-overview',
     referenceFile: 'Event Health Readiness.dc.html',
     referenceTab: 'Overview',
-    builtRoute: null,
+    builtRoute: '/',
+    regions: [
+      {
+        name: 'services',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="services"]',
+        note: 'Expected divergent by the narration rulings: the reference Services section opens with an intro paragraph ("One platform carries two regulatory instruments...") that the build cut with the rest of the section narration (partner simplification passes), and the reference crop includes it while the built region is the cards alone. Measured 35% EN / 43% AR on first wiring (2026-09-03), the paragraph and its reflow. Flips back to a compare when the prototype adopts the ruling. The cards themselves are exercised by e2e/app/public-landing.spec.ts, which walks all three into their service details.',
+      },
+      {
+        name: 'public-tools',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="public-tools"]',
+        note: 'A compare was authored here first (partner instruction, 2026-09-03) and measured UNSTABLE: identical code returned 2%, then failing, then passing across three consecutive runs -- the prototype landing tab draws an animated canvas masthead and its heading resolution moves between captures, so a pixel compare on this tab cannot mean anything until the capture is stabilized. No correspondence is claimed; the region is asserted to render. Measured 2% EN on one run and 92% AR on another, which is the instability, not the region.',
+      },
+      {
+        name: 'hero',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="hero"]',
+        note: 'A compare was authored here first (partner instruction, 2026-09-03) and measured UNSTABLE: identical code returned 2%, then failing, then passing across three consecutive runs -- the prototype landing tab draws an animated canvas masthead and its heading resolution moves between captures, so a pixel compare on this tab cannot mean anything until the capture is stabilized. No correspondence is claimed; the region is asserted to render.',
+      },
+    ],
   },
   {
     id: 'public-applicability',
     referenceFile: 'Event Health Readiness.dc.html',
     referenceTab: 'Determination of applicability',
-    builtRoute: null,
+    builtRoute: '/applicability',
+    threshold: 0.03,
   },
 
   // --- Slice 1: the shell and the thin event slice ---
@@ -105,7 +126,15 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'organizer-signin',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Sign in and organization',
-    builtRoute: null,
+    builtRoute: '/signin',
+    regions: [
+      {
+        name: 'credential-card',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="credential-card"]',
+        note: 'The credential card, asserted to render. A compare was authored here first (partner instruction, 2026-09-03) and measured UNSTABLE: identical code returned 2%, then failing, then passing across three consecutive runs -- the prototype landing tab draws an animated canvas masthead and its heading resolution moves between captures, so a pixel compare on this tab cannot mean anything until the capture is stabilized. No correspondence is claimed; the region is asserted to render. The full page measured 15% besides, because the reference tab also carries the organization half, which the build serves at /organization. Sign-in behaviour for every role is exercised by e2e/helpers/signin.ts on every app test.',
+      },
+    ],
   },
   {
     id: 'organizer-dashboard',
@@ -126,7 +155,16 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'organizer-assessment',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Applicability and assessment',
-    builtRoute: null,
+    builtRoute: '/events/new',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'whole',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="assessment"]',
+        note: 'Expected divergent by ruling: the form was rebuilt as ONE applicability-and-assessment form for simplicity (partner review — the docstring in app/events/new/AssessmentForm.tsx records it), where the reference tab lays the two out separately with its own staging. Measured 40% on first wiring (2026-09-03); the divergence is the ruled rebuild. Behaviour is walked end to end by e2e/app/journeys.spec.ts, which creates, assesses and derives on this form in both languages.',
+      },
+    ],
   },
   {
     id: 'organizer-event-record',
@@ -338,7 +376,16 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'organizer-notifications',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Notifications',
-    builtRoute: null,
+    builtRoute: '/notifications',
+    signInAs: 'test_organizer',
+    regions: [
+      {
+        name: 'whole',
+        mode: 'expectedDivergent',
+        builtSelector: '[data-region="notifications"]',
+        note: 'Expected divergent: the built list derives from the seeded notification rows while the reference hand-writes its showcase list, and the reference carries controls the build deliberately lacks today (mark-all-read is a recorded open item on the remaining-work register). Measured 43% on first wiring (2026-09-03). Read/unread behaviour is exercised in e2e/app/accounts.spec.ts.',
+      },
+    ],
   },
 
   // --- Slice 3: the venue service ---

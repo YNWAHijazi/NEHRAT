@@ -43,7 +43,7 @@ export default async function NotificationsPage({
     <>
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+      <main data-pad="" data-region="notifications" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Notifications" ar="الإشعارات" />
         </h1>

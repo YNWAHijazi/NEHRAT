@@ -176,7 +176,7 @@ export default async function SignInPage({
       <Header account={null} organization={null} unreadCount={0} showBack />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
-          <div style={{ padding: 35, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div data-region="credential-card" style={{ padding: 35, background: 'var(--surface2)', borderRadius: 16 }}>
             {/* Mode chips: the reference shows sign-in as active for both signin and reset. */}
             <div style={{ display: 'flex', gap: 6, marginBlockEnd: 22 }}>
               <Link href="/signin" aria-pressed={mode !== 'signup'} style={modeChipStyle(mode !== 'signup')}>
