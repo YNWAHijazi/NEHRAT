@@ -34,9 +34,16 @@ import {
 const SERVICES = ['certify-an-event', 'register-a-venue', 'register-a-facility'] as const;
 type Service = (typeof SERVICES)[number];
 
-export function generateStaticParams(): { service: string }[] {
-  return SERVICES.map((service) => ({ service }));
-}
+/**
+ * DYNAMIC, DELIBERATELY (deployment fix, 2026-09-04). The fee line reads the
+ * capability configuration from the database, so this page stopped being
+ * prerenderable the day the fee rule landed: at build time the deployment's
+ * volume is not mounted, the database cannot open, and the prerender fails the
+ * whole build -- which is exactly what happened on the first deploy after the
+ * fees commit. Static rendering was also quietly wrong: a prerendered fee line
+ * would freeze at build and never reflect a configuration change.
+ */
+export const dynamic = 'force-dynamic';
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ service: string }> }) {
   const account = await currentAccount();
