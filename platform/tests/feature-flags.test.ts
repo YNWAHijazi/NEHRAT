@@ -123,6 +123,17 @@ describe('commercial and AI capability', () => {
       // keyed by the structural placement list; the test below pins which files
       // may mount it, which is what makes the placement list structural.
       .filter((f) => !f.endsWith('components/AdFooter.tsx'))
+      // Registration fees (register closure, 2026-09-03): the venue's filing
+      // moment names the amount due and holds the classification control; the
+      // facility record carries the amount as a state, never a gate -- no
+      // readiness obligation waits on money, and the band says so. Both render
+      // nothing while the capability is off.
+      .filter((f) => !f.endsWith('app/venues/[id]/assessment/page.tsx'))
+      .filter((f) => !f.endsWith('app/facilities/[id]/page.tsx'))
+      // ...and the venue gate ENFORCED server-side in the action, not only
+      // rendered: the action recomputes rather than trusting the screen, the
+      // same shape as the event filing gate.
+      .filter((f) => !f.endsWith('app/actions.ts'))
       .map(relative);
     expect(
       offenders,

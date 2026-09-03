@@ -912,6 +912,19 @@ export async function saveVenueAssessmentAction(
   const derivation = deriveLevel({ answers: payload.answers, inputs });
   if (!derivation.complete || derivation.finalLevel === null) return { error: 'incomplete' };
 
+  // THE REGISTRATION FEE GATES THE CLASSIFICATION (register closure, 2026-09-03):
+  // the venue's filing moment is here, where the Ministry reference mints and the
+  // classification issues. With a venue fee in force and unpaid, both wait --
+  // named on the screen before this is reachable, and refused here regardless.
+  {
+    const { applicationFee, effectiveFlag } = await import('../lib/rules');
+    const { capabilityConfigFor, ministryConfig } = await import('../lib/queries');
+    const { paymentFor } = await import('../lib/payments');
+    const config = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+    const fee = applicationFee('registerVenue', null, effectiveFlag('applicationFees', config), capabilityConfigFor('applicationFees'));
+    if (fee !== null && paymentFor(venueId, 'registerVenue') === null) return { error: 'fee-unpaid' };
+  }
+
   const { beirutToday } = await import('../lib/clock');
   const effective = beirutToday();
   const { REASSESSMENT_WINDOW } = await import('../lib/rules');

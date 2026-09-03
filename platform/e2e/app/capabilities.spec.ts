@@ -231,8 +231,13 @@ test.describe('the capability shape', () => {
     await manager.locator('select[name="vendorId"]').selectOption({ label: 'Cedar Medical Supplies' });
     await manager.locator('input[name="starts"]').fill('2026-08-01');
     await manager.locator('input[name="ends"]').fill('2026-12-31');
+    await manager.locator('input[name="amount"]').fill('400');
+    await manager.locator('select[name="currency"]').selectOption('USD');
     await manager.locator('button:has-text("Book the sponsorship")').click();
     await page.waitForURL(/notice=sponsorship-added/);
+    // A booking carries its price and its money state, from the one seam.
+    await expect(page.locator('[data-region="sponsorship-manager"]')).toContainText('400 USD');
+    await expect(page.locator('[data-region="sponsorship-manager"] [data-paystate]')).toContainText('Unpaid');
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
     await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
     await page.waitForURL(/notice=on/);
@@ -311,8 +316,12 @@ test.describe('the capability shape', () => {
     await manager.locator('input[name="alt"]').fill('Cedar Medical autumn range');
     await manager.locator('input[name="starts"]').fill('2026-08-01');
     await manager.locator('input[name="ends"]').fill('2026-12-31');
+    await manager.locator('input[name="amount"]').fill('250');
+    await manager.locator('select[name="currency"]').selectOption('USD');
     await manager.locator('button:has-text("Book the advert")').click();
     await page.waitForURL(/notice=advert-added/);
+    await expect(page.locator('[data-region="advert-manager"]')).toContainText('250 USD');
+    await expect(page.locator('[data-region="advert-manager"] [data-paystate]')).toContainText('Unpaid');
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
     await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
     await page.waitForURL(/notice=on/);
@@ -384,6 +393,56 @@ test.describe('the capability shape', () => {
     await page.waitForURL(/notice=config/);
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(1);
     await expect(page.locator('[data-region="open-decision"]')).toContainText('unmade decision');
+  });
+
+  test('registration fees: the venue classification waits, the facility carries a state, and off means neither', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // Venue and facility fees set, capability on.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/applicationFees');
+    const config = page.locator('[data-region="capability-config"]');
+    await config.locator('select[name="currency"]').selectOption('USD');
+    await config.locator('input[name="feeCertifyEvent"]').fill('0');
+    await config.locator('input[name="feeRegisterVenue"]').fill('50');
+    await config.locator('input[name="feeRegisterFacility"]').fill('25');
+    await config.locator('select[name="variesByLevel"]').selectOption('no');
+    await config.locator('button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+
+    // THE VENUE'S FILING MOMENT WAITS: the reassessment-open venue names the
+    // amount due and the recording control is disabled with the reason.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/venues/VN-0011/assessment');
+    await expect(page.locator('[data-region="amount-due"]')).toContainText('Amount due: 50 USD');
+    await expect(page.locator('button:has-text("Record the classification")')).toBeDisabled();
+    await expect(page.locator('body')).toContainText('Registration fee — awaiting payment: 50 USD');
+
+    // THE FACILITY CARRIES A STATE, NOT A GATE: the amount due on the record,
+    // with the sentence that no readiness obligation waits on it.
+    await gotoRidingRestarts(page, '/facilities/FC-0014');
+    await expect(page.locator('[data-region="amount-due"]')).toContainText('Amount due: 25 USD');
+    await expect(page.locator('[data-region="amount-due"]')).toContainText('No readiness obligation waits on this');
+
+    // Off, fees zeroed: both surfaces shed the region entirely.
+    await signInAs(page, 'test_owner');
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/applicationFees');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+    await page.locator('[data-region="capability-config"] input[name="feeRegisterVenue"]').fill('0');
+    await page.locator('[data-region="capability-config"] input[name="feeRegisterFacility"]').fill('0');
+    await page.locator('[data-region="capability-config"] button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/venues/VN-0011/assessment');
+    await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
+    // The fee reason is gone; what may still hold the control is the ordinary
+    // completeness rule, which is not this commit's subject.
+    await expect(page.locator('body')).not.toContainText('Registration fee — awaiting payment');
+    await gotoRidingRestarts(page, '/facilities/FC-0014');
+    await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
   });
 
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {

@@ -36,6 +36,7 @@ export function VenueAssessmentForm({
   venueFacts,
   initialAnswers,
   initialAttendance,
+  feeDue,
   effectivePreview,
   validPreview,
   triggers,
@@ -50,6 +51,8 @@ export function VenueAssessmentForm({
   venueFacts: { licensedCapacity: number | null; regularlyHosts: boolean; isNightclub: boolean };
   initialAnswers: (0 | 1 | 2 | null)[] | null;
   initialAttendance: number | null;
+  /** The registration fee still owed, or null while none is in force or it is paid. */
+  feeDue: { amount: string; currency: string } | null;
   effectivePreview: string;
   validPreview: string;
   triggers: { en: string; ar: string }[];
@@ -263,15 +266,39 @@ export function VenueAssessmentForm({
           <L en="Answer every domain and the attendance figure before recording the classification." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور قبل تسجيل التصنيف." />
         </p>
       ) : null}
+      {/* THE REGISTRATION FEE, named before the control it holds. Absent while
+          no fee is in force -- the shipped state. */}
+      {feeDue ? (
+        <div data-region="amount-due" style={{ padding: '15px 19px', border: '1px solid var(--accent-ink)', borderRadius: 10, marginBlockEnd: 14, maxWidth: '74ch' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+              <L en="Registration fee" ar="رسم التسجيل" />
+            </span>
+            <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
+              <L en={`Amount due: ${feeDue.amount} ${feeDue.currency}`} ar={`المبلغ المستحق: ${feeDue.amount} ${feeDue.currency}`} />
+            </span>
+          </div>
+          <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
+            <L
+              en="The classification is recorded when the payment is. No payment channel is configured on the platform yet; the Ministry announces how the fee is paid, and the record is updated when payment is received."
+              ar="يُسجَّل التصنيف عند تسجيل السداد. لا قناة سداد مهيّأة على المنصة بعد؛ تعلن الوزارة كيفية سداد الرسم، ويُحدَّث السجل عند استلام السداد."
+            />
+          </p>
+        </div>
+      ) : null}
       <button
         type="button"
-        disabled={!derivation.complete || pending}
+        disabled={!derivation.complete || pending || feeDue !== null}
         onClick={submit}
-        style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: derivation.complete ? 'var(--brand)' : 'var(--surface2)', color: derivation.complete ? 'var(--bg)' : 'var(--muted)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete ? 'pointer' : 'not-allowed' }}
+        style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: derivation.complete && !feeDue ? 'var(--brand)' : 'var(--surface2)', color: derivation.complete && !feeDue ? 'var(--bg)' : 'var(--muted)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete && !feeDue ? 'pointer' : 'not-allowed' }}
       >
         <L en="Record the classification" ar="تسجيل التصنيف" />
       </button>
-      {!derivation.complete ? (
+      {feeDue ? (
+        <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
+          <L en={`Registration fee — awaiting payment: ${feeDue.amount} ${feeDue.currency}`} ar={`رسم التسجيل — بانتظار السداد: ${feeDue.amount} ${feeDue.currency}`} />
+        </p>
+      ) : !derivation.complete ? (
         <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
           <L en="Answer every domain and the attendance figure first." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور أولاً." />
         </p>

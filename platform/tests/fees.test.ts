@@ -143,4 +143,18 @@ describe('the payment seam', () => {
     expect(paymentFor('EV-9999', 'registerVenue')).toBeNull();
     expect(paymentFor('EV-9998', 'certifyEvent')).toBeNull();
   });
+
+  it('the one seam also settles commercial bookings — sponsorship and advert kinds', async () => {
+    const { recordPaymentReceived, paymentFor } = await import('../lib/payments');
+    recordPaymentReceived({
+      recordId: 'SP-1',
+      service: 'sponsorship',
+      amount: '400',
+      currency: 'USD',
+      provider: 'test-provider',
+      providerReference: 'ref-2',
+    });
+    expect(paymentFor('SP-1', 'sponsorship')?.amount).toBe('400');
+    expect(paymentFor('AD-1', 'advert')).toBeNull();
+  });
 });

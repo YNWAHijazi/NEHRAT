@@ -2,12 +2,13 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { VenueAssessmentForm } from './VenueAssessmentForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
-import { unreadCountFor, venueAssessmentsFor, venueById, venueChangeSinceAssessment } from '../../../../lib/queries';
+import { capabilityConfigFor, ministryConfig, unreadCountFor, venueAssessmentsFor, venueById, venueChangeSinceAssessment } from '../../../../lib/queries';
+import { paymentFor } from '../../../../lib/payments';
 import { beirutToday } from '../../../../lib/clock';
 import { venueReassessmentGate } from '../../../../lib/rules/gates';
 import { BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS, REASSESSMENT_WINDOW } from '../../../../lib/rules/load';
 import { formatIsoDate } from '../../../../lib/rules/deadlines';
-import { VENUE_REASSESSMENT_TRIGGERS } from '../../../../lib/rules';
+import { VENUE_REASSESSMENT_TRIGGERS, applicationFee, effectiveFlag } from '../../../../lib/rules';
 
 /**
  * The annual assessment route. The reassessment gate decides whether this screen is
@@ -44,6 +45,16 @@ export default async function VenueAssessmentPage({
     addMonths(today, REASSESSMENT_WINDOW.venueClassificationMonths),
   );
 
+  // THE REGISTRATION FEE (register closure, 2026-09-03): the venue's filing
+  // moment is the classification issuing here, so with a venue fee in force and
+  // unpaid the amount is named on this screen and the recording control waits.
+  // Null while no fee is in force -- the shipped state.
+  const feeConfig = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+  const venueFee = applicationFee('registerVenue', null, effectiveFlag('applicationFees', feeConfig), capabilityConfigFor('applicationFees'));
+  const feeDue = venueFee !== null && paymentFor(venue.id, 'registerVenue') === null
+    ? { amount: venueFee.amount, currency: venueFee.currency }
+    : null;
+
   return (
     <>
       <GovernmentBand />
@@ -64,6 +75,7 @@ export default async function VenueAssessmentPage({
           }}
           initialAnswers={last ? [...last.answers] : null}
           initialAttendance={last ? last.inputs.expectedMaxSimultaneousAttendance : null}
+          feeDue={feeDue}
           effectivePreview={effectivePreview}
           validPreview={validPreview}
           triggers={[...VENUE_REASSESSMENT_TRIGGERS]}

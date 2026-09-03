@@ -91,12 +91,12 @@ export default async function CapabilityPage({
       ) : null}
       {error === 'advert' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="A placement from the list, an image, a link, its wording, and a period are all required." ar="موضع من القائمة وصورة ورابط ونصه وفترة، كلها مطلوبة." />
+          <L en="A placement from the list, an image, a link, its wording, a period, and a price with its currency are all required." ar="موضع من القائمة وصورة ورابط ونصه وفترة وسعر مع عملته، كلها مطلوبة." />
         </div>
       ) : null}
       {error === 'sponsorship' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="A listed vendor and a period, first date not after the last, are required." ar="مزوّد مُدرج وفترة لا يسبق آخرها أولها مطلوبان." />
+          <L en="A listed vendor, a period with the first date not after the last, and a price with its currency are all required." ar="مزوّد مُدرج، وفترة لا يسبق آخرها أولها، وسعر مع عملته، كلها مطلوبة." />
         </div>
       ) : null}
       {error === 'vendor' ? (
@@ -390,9 +390,14 @@ export default async function CapabilityPage({
                   </span>
                   <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
                     {' '}· {s.starts} — {s.ends}
+                    {s.amount ? ` · ${s.amount} ${s.currency}` : null}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  {/* The booking's money state, from the one payment seam. */}
+                  <span data-paystate="" style={{ padding: '3px 10px', borderRadius: 999, background: s.paidAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: s.paidAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12px' }}>
+                    {s.paidAt ? <L en={`Paid ${s.paidAt}`} ar={`مسدَّد ⁦${s.paidAt}⁩`} /> : <L en="Unpaid" ar="غير مسدَّد" />}
+                  </span>
                   <span style={{ padding: '3px 10px', borderRadius: 999, background: s.active ? 'var(--brand-soft)' : 'var(--surface2)', border: s.active ? 0 : '1px solid var(--line)', color: s.active ? 'var(--brand)' : 'var(--muted)', fontSize: '12px' }}>
                     {s.active ? <L en="In period" ar="ضمن الفترة" /> : <L en="Out of period" ar="خارج الفترة" />}
                   </span>
@@ -431,6 +436,22 @@ export default async function CapabilityPage({
                 <input name={name} type="date" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
               </label>
             ))}
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                <L en="Price" ar="السعر" />
+              </span>
+              <input name="amount" type="number" step="any" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, width: 110, fontVariantNumeric: 'tabular-nums' }} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                <L en="Currency" ar="العملة" />
+              </span>
+              <select name="currency" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
+                <option value=""></option>
+                <option value="USD">USD</option>
+                <option value="LBP">LBP</option>
+              </select>
+            </label>
             <button type="submit" style={{ height: 34, paddingInline: 16, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
               <L en="Book the sponsorship" ar="حجز الرعاية" />
             </button>
@@ -466,10 +487,13 @@ export default async function CapabilityPage({
                     <span style={{ fontSize: '14px', fontWeight: 500 }}>{ad.alt}</span>
                     <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
                       <L en={pl?.en ?? ad.placement} ar={pl?.ar ?? ad.placement} />
-                      <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {ad.starts} — {ad.ends}</span>
+                      <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {ad.starts} — {ad.ends}{ad.amount ? ` · ${ad.amount} ${ad.currency}` : null}</span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span data-paystate="" style={{ padding: '3px 10px', borderRadius: 999, background: ad.paidAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: ad.paidAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12px' }}>
+                      {ad.paidAt ? <L en={`Paid ${ad.paidAt}`} ar={`مسدَّد ⁦${ad.paidAt}⁩`} /> : <L en="Unpaid" ar="غير مسدَّد" />}
+                    </span>
                     <span style={{ padding: '3px 10px', borderRadius: 999, background: ad.active ? 'var(--brand-soft)' : 'var(--surface2)', border: ad.active ? 0 : '1px solid var(--line)', color: ad.active ? 'var(--brand)' : 'var(--muted)', fontSize: '12px' }}>
                       {ad.active ? <L en="In period" ar="ضمن الفترة" /> : <L en="Out of period" ar="خارج الفترة" />}
                     </span>
@@ -497,6 +521,22 @@ export default async function CapabilityPage({
                   {adPlacements().map((p) => (
                     <option key={p.key} value={p.key}>{p.en}</option>
                   ))}
+                </select>
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  <L en="Price" ar="السعر" />
+                </span>
+                <input name="amount" type="number" step="any" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13, fontVariantNumeric: 'tabular-nums' }} />
+              </label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>
+                  <L en="Currency" ar="العملة" />
+                </span>
+                <select name="currency" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
+                  <option value=""></option>
+                  <option value="USD">USD</option>
+                  <option value="LBP">LBP</option>
                 </select>
               </label>
               {[

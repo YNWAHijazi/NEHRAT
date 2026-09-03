@@ -4,6 +4,7 @@ import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import {
+  capabilityConfigFor,
   facilityDetail,
   facilityDevices,
   facilityLedgerFor,
@@ -12,9 +13,12 @@ import {
   publishedCycles,
   ministryConfig,
 } from '../../../lib/queries';
+import { paymentFor } from '../../../lib/payments';
 import { beirutToday } from '../../../lib/clock';
 import {
   FACILITY_CONTENT,
+  applicationFee,
+  effectiveFlag,
   facilityCategory,
   facilityStanding,
   addDaysIso,
@@ -163,6 +167,34 @@ export default async function FacilityReadinessPage({
             />
           </div>
         ) : null}
+        {/* THE REGISTRATION FEE, as a state on the record (register closure,
+            2026-09-03). A facility has no reference-minting moment -- the
+            reference scheme is deliberately deferred -- so the fee is an amount
+            due on the record, not a gate: no readiness obligation ever waits on
+            money. Absent while no fee is in force or once paid. */}
+        {(() => {
+          const feeConfig = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+          const fee = applicationFee('registerFacility', null, effectiveFlag('applicationFees', feeConfig), capabilityConfigFor('applicationFees'));
+          if (fee === null || paymentFor(facility.id, 'registerFacility') !== null) return null;
+          return (
+            <div data-region="amount-due" style={{ padding: '17px 22px', border: '1px solid var(--accent-ink)', borderRadius: 12, marginBlockEnd: 14 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                  <L en="Registration fee" ar="رسم التسجيل" />
+                </span>
+                <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
+                  <L en={`Amount due: ${fee.amount} ${fee.currency}`} ar={`المبلغ المستحق: ${fee.amount} ${fee.currency}`} />
+                </span>
+              </div>
+              <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
+                <L
+                  en="No readiness obligation waits on this: devices, the plan and reporting continue as required. No payment channel is configured on the platform yet; the record is updated when payment is received."
+                  ar="لا موجب تأهب ينتظر هذا: تستمر الأجهزة والخطة والإبلاغ كما هو مطلوب. لا قناة سداد مهيّأة على المنصة بعد؛ ويُحدَّث السجل عند استلام السداد."
+                />
+              </p>
+            </div>
+          );
+        })()}
         <div data-region="standing" style={{ padding: '28px 32px', border: `1px solid ${standingLine.border}`, background: standingLine.bg, borderRadius: 16, marginBlockEnd: 14 }}>
           {/* "Standing readiness" became "Status" (partner ruling, second sweep --
               the round that renamed Standing to Status everywhere). */}

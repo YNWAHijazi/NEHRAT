@@ -14,9 +14,17 @@
 import { getDb } from './db';
 import type { FeeService } from './rules';
 
+/**
+ * What a payment can discharge: one of the three application fees, or a
+ * commercial booking (a sponsorship or an advert, addressed SP-<id> / AD-<id>).
+ * One seam for all of them -- a provider integration lands on the same write
+ * whichever kind of money it moves.
+ */
+export type PaymentService = FeeService | 'sponsorship' | 'advert';
+
 export interface PaymentReceipt {
   recordId: string;
-  service: FeeService;
+  service: PaymentService;
   amount: string;
   currency: string;
   provider: string;
@@ -41,7 +49,7 @@ export interface PaymentRow {
 }
 
 /** The recorded payment discharging this record's fee, or null while none is. */
-export function paymentFor(recordId: string, service: FeeService): PaymentRow | null {
+export function paymentFor(recordId: string, service: PaymentService): PaymentRow | null {
   const row = getDb()
     .prepare(
       `SELECT amount, currency, provider, paid_at FROM payments

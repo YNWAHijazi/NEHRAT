@@ -719,6 +719,8 @@ function migrate(d: DatabaseSync): void {
       vendor_id INTEGER NOT NULL REFERENCES vendors(id),
       starts TEXT NOT NULL,
       ends TEXT NOT NULL,
+      amount TEXT NOT NULL DEFAULT '',
+      currency TEXT NOT NULL DEFAULT '',
       added_by TEXT NOT NULL,
       added_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -734,6 +736,8 @@ function migrate(d: DatabaseSync): void {
       alt TEXT NOT NULL DEFAULT '',
       starts TEXT NOT NULL,
       ends TEXT NOT NULL,
+      amount TEXT NOT NULL DEFAULT '',
+      currency TEXT NOT NULL DEFAULT '',
       added_by TEXT NOT NULL,
       added_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
@@ -746,7 +750,7 @@ function migrate(d: DatabaseSync): void {
     CREATE TABLE IF NOT EXISTS payments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       record_id TEXT NOT NULL,          -- EV-/VN-/FC- record the fee attaches to
-      service TEXT NOT NULL CHECK (service IN ('certifyEvent','registerVenue','registerFacility')),
+      service TEXT NOT NULL CHECK (service IN ('certifyEvent','registerVenue','registerFacility','sponsorship','advert')),
       amount TEXT NOT NULL,             -- verbatim, never floated
       currency TEXT NOT NULL,
       provider TEXT NOT NULL,
@@ -1028,6 +1032,36 @@ function migrate(d: DatabaseSync): void {
     d.exec(`UPDATE accounts SET suspended = 1 WHERE role = 'response'`);
   } else {
     d.exec(`DROP TABLE IF EXISTS fr_readiness`);
+  }
+
+  // COMMERCIAL BOOKINGS CARRY THEIR PRICE (register closure, 2026-09-03): a
+  // sponsorship or advert with no recorded amount is a booking whoever
+  // demonstrates the commercial features would trip over. Additive columns for
+  // standing databases; payment discharge stays on the ONE seam, so the
+  // payments service CHECK widens to the booking kinds -- a standing database
+  // created under the narrower CHECK rebuilds.
+  addColumn('sponsorships', 'amount', "amount TEXT NOT NULL DEFAULT ''");
+  addColumn('sponsorships', 'currency', "currency TEXT NOT NULL DEFAULT ''");
+  addColumn('adverts', 'amount', "amount TEXT NOT NULL DEFAULT ''");
+  addColumn('adverts', 'currency', "currency TEXT NOT NULL DEFAULT ''");
+  const paySql = (d
+    .prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'payments'`)
+    .get() as { sql: string } | undefined)?.sql ?? '';
+  if (paySql !== '' && !paySql.includes("'sponsorship'")) {
+    rebuildTable(
+      'payments',
+      `CREATE TABLE payments_next (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        record_id TEXT NOT NULL,
+        service TEXT NOT NULL CHECK (service IN ('certifyEvent','registerVenue','registerFacility','sponsorship','advert')),
+        amount TEXT NOT NULL,
+        currency TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        provider_reference TEXT NOT NULL DEFAULT '',
+        paid_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`,
+      'id, record_id, service, amount, currency, provider, provider_reference, paid_at',
+    );
   }
 }
 

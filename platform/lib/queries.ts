@@ -2081,6 +2081,11 @@ export interface AdvertRow {
   alt: string;
   starts: string;
   ends: string;
+  /** The booked price -- a booking carries its price, always. */
+  amount: string;
+  currency: string;
+  /** Date the payment seam recorded settlement, or null while unpaid. */
+  paidAt: string | null;
   addedBy: string;
   active: boolean;
 }
@@ -2089,8 +2094,13 @@ export interface AdvertRow {
 export function advertsAll(): AdvertRow[] {
   const today = beirutTodayFn();
   const rows = getDb()
-    .prepare(`SELECT id, placement, image_url, link_url, alt, starts, ends, added_by FROM adverts ORDER BY starts DESC, id DESC`)
-    .all() as unknown as { id: number; placement: string; image_url: string; link_url: string; alt: string; starts: string; ends: string; added_by: string }[];
+    .prepare(
+      `SELECT a.id, a.placement, a.image_url, a.link_url, a.alt, a.starts, a.ends, a.amount, a.currency, a.added_by,
+              (SELECT p.paid_at FROM payments p WHERE p.record_id = 'AD-' || a.id AND p.service = 'advert'
+                ORDER BY p.paid_at DESC, p.id DESC LIMIT 1) AS paid_at
+       FROM adverts a ORDER BY a.starts DESC, a.id DESC`,
+    )
+    .all() as unknown as { id: number; placement: string; image_url: string; link_url: string; alt: string; starts: string; ends: string; amount: string; currency: string; added_by: string; paid_at: string | null }[];
   return rows.map((r) => ({
     id: r.id,
     placement: r.placement,
@@ -2099,6 +2109,9 @@ export function advertsAll(): AdvertRow[] {
     alt: r.alt,
     starts: r.starts,
     ends: r.ends,
+    amount: r.amount,
+    currency: r.currency,
+    paidAt: r.paid_at ? r.paid_at.slice(0, 10) : null,
     addedBy: r.added_by,
     active: r.starts <= today && today <= r.ends,
   }));
@@ -2152,6 +2165,11 @@ export interface SponsorshipRow {
   vendorListed: boolean;
   starts: string;
   ends: string;
+  /** The booked price -- a booking carries its price, always. */
+  amount: string;
+  currency: string;
+  /** Date the payment seam recorded settlement, or null while unpaid. */
+  paidAt: string | null;
   addedBy: string;
   /** In period today, on the Beirut clock. */
   active: boolean;
@@ -2162,11 +2180,13 @@ export function sponsorshipsAll(): SponsorshipRow[] {
   const today = beirutTodayFn();
   const rows = getDb()
     .prepare(
-      `SELECT s.id, s.vendor_id, s.starts, s.ends, s.added_by, v.name_en, v.name_ar, v.listed
+      `SELECT s.id, s.vendor_id, s.starts, s.ends, s.amount, s.currency, s.added_by, v.name_en, v.name_ar, v.listed,
+              (SELECT p.paid_at FROM payments p WHERE p.record_id = 'SP-' || s.id AND p.service = 'sponsorship'
+                ORDER BY p.paid_at DESC, p.id DESC LIMIT 1) AS paid_at
        FROM sponsorships s JOIN vendors v ON v.id = s.vendor_id
        ORDER BY s.starts DESC, s.id DESC`,
     )
-    .all() as unknown as { id: number; vendor_id: number; starts: string; ends: string; added_by: string; name_en: string; name_ar: string; listed: number }[];
+    .all() as unknown as { id: number; vendor_id: number; starts: string; ends: string; amount: string; currency: string; added_by: string; name_en: string; name_ar: string; listed: number; paid_at: string | null }[];
   return rows.map((r) => ({
     id: r.id,
     vendorId: r.vendor_id,
@@ -2175,6 +2195,9 @@ export function sponsorshipsAll(): SponsorshipRow[] {
     vendorListed: r.listed === 1,
     starts: r.starts,
     ends: r.ends,
+    amount: r.amount,
+    currency: r.currency,
+    paidAt: r.paid_at ? r.paid_at.slice(0, 10) : null,
     addedBy: r.added_by,
     active: r.listed === 1 && r.starts <= today && today <= r.ends,
   }));

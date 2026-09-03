@@ -624,13 +624,17 @@ export async function addSponsorshipAction(formData: FormData): Promise<void> {
   const vendorId = Number(formData.get('vendorId') ?? 0);
   const starts = String(formData.get('starts') ?? '').trim();
   const ends = String(formData.get('ends') ?? '').trim();
+  const amount = String(formData.get('amount') ?? '').trim();
+  const currency = String(formData.get('currency') ?? '').trim();
   const vendor = getDb().prepare(`SELECT listed FROM vendors WHERE id = ?`).get(vendorId) as { listed: number } | undefined;
-  if (!vendor || vendor.listed !== 1 || !starts || !ends || starts > ends) {
+  // A booking carries its price (register closure, 2026-09-03): amount and
+  // currency are required, and the amount must be a positive figure.
+  if (!vendor || vendor.listed !== 1 || !starts || !ends || starts > ends || !currency || !(Number(amount) > 0)) {
     redirect('/platform/admin/capabilities/sponsoredListings?error=sponsorship');
   }
   getDb()
-    .prepare(`INSERT INTO sponsorships (vendor_id, starts, ends, added_by, added_at) VALUES (?, ?, ?, ?, now_stamp())`)
-    .run(vendorId, starts, ends, actor.displayName);
+    .prepare(`INSERT INTO sponsorships (vendor_id, starts, ends, amount, currency, added_by, added_at) VALUES (?, ?, ?, ?, ?, ?, now_stamp())`)
+    .run(vendorId, starts, ends, amount, currency, actor.displayName);
   revalidatePath('/platform/admin/capabilities/sponsoredListings');
   revalidatePath('/vendors');
   redirect('/platform/admin/capabilities/sponsoredListings?notice=sponsorship-added');
@@ -660,12 +664,14 @@ export async function addAdvertAction(formData: FormData): Promise<void> {
   const alt = String(formData.get('alt') ?? '').trim();
   const starts = String(formData.get('starts') ?? '').trim();
   const ends = String(formData.get('ends') ?? '').trim();
-  if (!adPlacements().some((pl) => pl.key === placement) || !imageUrl || !linkUrl || !alt || !starts || !ends || starts > ends) {
+  const amount = String(formData.get('amount') ?? '').trim();
+  const currency = String(formData.get('currency') ?? '').trim();
+  if (!adPlacements().some((pl) => pl.key === placement) || !imageUrl || !linkUrl || !alt || !starts || !ends || starts > ends || !currency || !(Number(amount) > 0)) {
     redirect('/platform/admin/capabilities/advertising?error=advert');
   }
   getDb()
-    .prepare(`INSERT INTO adverts (placement, image_url, link_url, alt, starts, ends, added_by, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, now_stamp())`)
-    .run(placement, imageUrl, linkUrl, alt, starts, ends, actor.displayName);
+    .prepare(`INSERT INTO adverts (placement, image_url, link_url, alt, starts, ends, amount, currency, added_by, added_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now_stamp())`)
+    .run(placement, imageUrl, linkUrl, alt, starts, ends, amount, currency, actor.displayName);
   revalidatePath('/platform/admin/capabilities/advertising');
   redirect('/platform/admin/capabilities/advertising?notice=advert-added');
 }
