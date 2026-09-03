@@ -2836,6 +2836,8 @@ export interface SubmissionReview {
   mophReference: string | null;
   /** 1 on first filing; a re-file after a revision outcome increments it. */
   version: number;
+  /** Protocol 8.4: filed past the deadline and accepted as expedited. Waives nothing. */
+  expedited: boolean;
   state: 'queued' | 'assigned' | 'progress';
   reviewer: string;
   providers: { nameEn: string; nameAr: string; status: string; declaration: string; signedAt: string | null }[];
@@ -2847,7 +2849,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
   const r = db
     .prepare(
       `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.demo_level,
-              s.filed_at, s.moph_reference, s.version AS s_version,
+              s.filed_at, s.moph_reference, s.version AS s_version, s.expedited,
               rs.state AS r_state, rs.reviewer AS r_reviewer,
               o.name_en AS org_en, o.name_ar AS org_ar
        FROM submissions s
@@ -2859,7 +2861,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     .get(eventId, demoFlag(viewerIsDemo)) as
     | {
         id: string; name_en: string; name_ar: string; start_date: string | null; demo_level: number | null;
-        filed_at: string | null; moph_reference: string | null; s_version: number;
+        filed_at: string | null; moph_reference: string | null; s_version: number; expedited: number;
         r_state: SubmissionReview['state'] | null; r_reviewer: string | null;
         org_en: string | null; org_ar: string | null;
       }
@@ -2877,6 +2879,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
     mophReference: r.moph_reference,
     version: r.s_version,
+    expedited: r.expedited === 1,
     state: r.r_state ?? 'queued',
     reviewer: r.r_reviewer ?? '',
     providers: providers.map((p) => ({

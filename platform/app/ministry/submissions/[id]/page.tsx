@@ -174,6 +174,16 @@ export default async function SubmissionReviewPage({
             <L en={review.nameEn} ar={review.nameAr} />
           </h1>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockStart: 10 }}>
+            {/* THE EXPEDITED FLAG, finally read by the console (register closure,
+                2026-09-03): derived and stored at filing since the gate existed,
+                and no reviewer surface ever showed it. A reviewer assessing a
+                late filing sees it was accepted as expedited -- and that
+                expedited review waives nothing. */}
+            {review.expedited ? (
+              <span data-region="expedited-chip" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: 13 }}>
+                <L en="Filed past the filing deadline — accepted as expedited. Expedited review waives nothing." ar="قُدّم بعد مهلة التقديم — وقُبل على أساس معجَّل. والمراجعة المعجَّلة لا تُسقط شيئاً." />
+              </span>
+            ) : null}
             {review.level !== null ? (
               <span style={{ padding: '3px 9px', borderRadius: 13, borderInlineStart: `2px solid var(--l${review.level})`, background: `var(--l${review.level}s)`, fontSize: 13 }}>
                 <L en={`Level ${review.level}`} ar={`المستوى ${review.level}`} />
