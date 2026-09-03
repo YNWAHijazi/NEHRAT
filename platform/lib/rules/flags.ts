@@ -147,6 +147,15 @@ export function adLabel(): { en: string; ar: string } {
     .advertising.adLabel;
 }
 
+/**
+ * NN14 stated where the assistive toggles live: the assistants are deliberately
+ * not built, and this governance precedes their existence rather than
+ * pretending it activates them.
+ */
+export function assistiveNotBuilt(): { en: string; ar: string } {
+  return (flagsJson as unknown as { assistiveNotBuilt: { en: string; ar: string } }).assistiveNotBuilt;
+}
+
 /** One reason the toggle is not live, named. The page renders every one it gets. */
 export interface EnableBlocker {
   kind: 'decision' | 'dependency' | 'field' | 'check';

@@ -339,6 +339,53 @@ test.describe('the capability shape', () => {
     await expect(page.locator('[data-region="ad-footer"]')).toHaveCount(0);
   });
 
+  test('assistive capabilities: governance precedes the assistant, and the act snapshots it', async ({ page }) => {
+    test.setTimeout(120_000);
+    await signInAs(page, 'test_owner');
+
+    // The page says plainly that the assistant is deliberately not built, and
+    // the toggle waits on the full governance -- model, data reach,
+    // confirmation, ceiling, and what happens at the ceiling.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/aiUserReadinessAssistant');
+    await expect(page.locator('[data-region="not-built"]')).toContainText('deliberately not built');
+    const toggle = page.locator('[data-region="capability-toggle"]');
+    await expect(toggle.locator('button[disabled]')).toHaveCount(1);
+    await expect(toggle).toContainText('Configuration missing: Model.');
+    await expect(toggle).toContainText('Monthly spend ceiling');
+
+    const config = page.locator('[data-region="capability-config"]');
+    await config.locator('select[name="model"]').selectOption('claude-haiku-4-5');
+    await config.locator('input[name="dataScope"]').fill('The signed-in operator’s own records and the published instruments.');
+    await config.locator('select[name="humanConfirm"]').selectOption('yes');
+    await config.locator('input[name="monthlyCeilingUsd"]').fill('200');
+    await config.locator('select[name="onCeiling"]').selectOption('notify-and-pause');
+    await config.locator('button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+
+    // The licensing act records the governance at that moment.
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn on")').click();
+    await page.waitForURL(/notice=on/);
+    const acts = page.locator('[data-region="capability-acts"]');
+    await expect(acts).toContainText('model: claude-haiku-4-5');
+    await expect(acts).toContainText('monthlyCeilingUsd: 200');
+    await page.locator('[data-region="capability-toggle"] button:has-text("Turn off")').click();
+    await page.waitForURL(/notice=off/);
+
+    // Platform intelligence: the full governance does NOT unblock the unmade
+    // decision -- configure it completely and the toggle stays disabled.
+    await gotoRidingRestarts(page, '/platform/admin/capabilities/aiPlatformIntelligenceAssistant');
+    const piConfig = page.locator('[data-region="capability-config"]');
+    await piConfig.locator('select[name="model"]').selectOption('claude-haiku-4-5');
+    await piConfig.locator('input[name="dataScope"]').fill('Unresolved.');
+    await piConfig.locator('select[name="humanConfirm"]').selectOption('yes');
+    await piConfig.locator('input[name="monthlyCeilingUsd"]').fill('100');
+    await piConfig.locator('select[name="onCeiling"]').selectOption('pause');
+    await piConfig.locator('button:has-text("Store the configuration")').click();
+    await page.waitForURL(/notice=config/);
+    await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(1);
+    await expect(page.locator('[data-region="open-decision"]')).toContainText('unmade decision');
+  });
+
   test('the two AED registry capabilities are Ministry switches under cardiac configuration', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');

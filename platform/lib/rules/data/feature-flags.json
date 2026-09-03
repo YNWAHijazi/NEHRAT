@@ -496,5 +496,9 @@
         "reasonAr": "مداه قرار لم يُتَّخذ. تمنح مواصفات المنتج هذا المساعد رؤية كاملة للمستأجر؛ بينما يُلزم قرارُ نشاط المنصة المالكَ بالأعداد فقط. وهما متناقضان، ولا تحسمه هذه الصفحة ولا هذا البناء. تبقى القدرة معطَّلة حتى يُتَّخذ القرار."
       }
     }
+  },
+  "assistiveNotBuilt": {
+    "en": "The assistant itself is deliberately not built. What each assistant may see needs its own conversation, sequenced after the Ministry console — so this page governs the assistant before it exists: the model, the data it can reach, whether a person confirms before anything is written, and the monthly spend ceiling are what it will be held to. Turning the capability on activates nothing until the assistant is built, and the assistant will not be built beyond what is set here.",
+    "ar": "المساعد نفسه غير مبني عمداً. فما يجوز لكل مساعد أن يراه يحتاج إلى نقاشه الخاص، بعد لوحة الوزارة — لذا تحكم هذه الصفحة المساعدَ قبل وجوده: النموذج، والبيانات التي يصل إليها، وتأكيد شخصٍ قبل كتابة أي شيء، وسقف الإنفاق الشهري هي ما سيُلزَم به. وتشغيل القدرة لا يُفعِّل شيئاً حتى يُبنى المساعد، ولن يُبنى المساعد بما يتجاوز ما حُدِّد هنا."
   }
 }

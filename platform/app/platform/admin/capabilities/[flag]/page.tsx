@@ -4,7 +4,7 @@ import { L } from '../../../../../components/L';
 import { MinistryShell } from '../../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../../lib/ministry-auth';
 import { advertsAll, capabilityActs, capabilityChecks, capabilityConfigFor, listedVendors, ministryConfig, sponsorshipsAll, vendorsAll } from '../../../../../lib/queries';
-import { ALL_FLAGS, adPlacements, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
+import { ALL_FLAGS, adPlacements, assistiveNotBuilt, effectiveFlag, flagDetail, flagGroup, groupTitle, missingForEnable, vendorCategories, vendorDisclaimer, type FeatureFlag } from '../../../../../lib/rules/flags';
 import { addAdvertAction, addSponsorshipAction, addVendorAction, endAdvertAction, endSponsorshipAction, saveCapabilityConfigAction, setFeatureFlagAction, setVendorListedAction } from '../../../../ministry-actions';
 
 /**
@@ -171,6 +171,17 @@ export default async function CapabilityPage({
           ar="يُسجَّل تشغيلها أو إطفاؤها: مَن ومتى وما كان الإعداد في تلك اللحظة."
         />
       </p>
+
+      {/* THE ASSISTANT IS DELIBERATELY NOT BUILT (non-negotiable 14): this
+          governance precedes its existence, and the page says so rather than
+          letting the toggle imply an assistant that is not there. */}
+      {flagGroup(flag) === 'assistive' ? (
+        <div data-region="not-built" style={{ padding: '16px 20px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--muted)', borderRadius: 10, marginBlockEnd: 24, maxWidth: 860 }}>
+          <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, maxWidth: '84ch' }}>
+            <L en={assistiveNotBuilt().en} ar={assistiveNotBuilt().ar} />
+          </p>
+        </div>
+      ) : null}
 
       {/* An unmade decision, surfaced, not resolved. */}
       {detail.blocked ? (

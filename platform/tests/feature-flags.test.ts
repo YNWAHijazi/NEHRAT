@@ -246,6 +246,13 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
     }
   });
 
+  it('the assistants are deliberately not built, and the statement says so in both languages', async () => {
+    const { assistiveNotBuilt } = await import('../lib/rules/flags');
+    expect(assistiveNotBuilt().en).toContain('deliberately not built');
+    expect(assistiveNotBuilt().en).toContain('activates nothing until the assistant is built');
+    expect(assistiveNotBuilt().ar).toContain('غير مبني عمداً');
+  });
+
   it('every capability page carries bilingual title, description and detail', () => {
     for (const flag of ALL_FLAGS) {
       const d = flagDetail(flag);
