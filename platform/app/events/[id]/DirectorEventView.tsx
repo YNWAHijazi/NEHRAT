@@ -99,10 +99,6 @@ export function DirectorEventView({
 
           {confirmed ? (
             <>
-              <p style={{ margin: '0 0 24px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-                <L en={content.govIntro.en} ar={content.govIntro.ar} />
-              </p>
-
               <form action={saveGovernanceAction.bind(null, invitation.eventId)}>
                 <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
                   {content.govSections.map((g) => {

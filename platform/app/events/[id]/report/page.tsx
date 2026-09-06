@@ -79,10 +79,6 @@ export default async function DirectorReportPage({
           <h2 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
           </h2>
-          <p style={{ margin: '0 0 28px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-            <L en={content.reportIntro.en} ar={content.reportIntro.ar} />
-          </p>
-
           {due ? (
             <div data-region="due" style={{ padding: '26px 30px', border: `2px solid ${directorSigned ? 'var(--brand)' : 'var(--bad)'}`, background: directorSigned ? 'var(--brand-soft)' : 'var(--bad-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
               <div style={{ fontSize: 19, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>

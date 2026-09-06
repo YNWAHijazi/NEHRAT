@@ -162,6 +162,16 @@ export default async function HelpPage() {
         </p>
       ) : null}
 
+      <h2 id="director" style={h2}>
+        <L en="The Event Medical Director" ar="المدير الطبي للفعالية" />
+      </h2>
+      <p style={p}>
+        <L en={ROLES_CONTENT.director.govIntro.en} ar={ROLES_CONTENT.director.govIntro.ar} />
+      </p>
+      <p style={p}>
+        <L en={ROLES_CONTENT.director.reportIntro.en} ar={ROLES_CONTENT.director.reportIntro.ar} />
+      </p>
+
       <h2 id="submission" style={h2}>
         <L en="The submission package" ar="حزمة التقديم" />
       </h2>
