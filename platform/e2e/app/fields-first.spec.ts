@@ -24,6 +24,9 @@ const FORM_PAGES: { route: string; label: string; as?: string }[] = [
   { route: '/events/EV-0362/declaration', label: 'the EMS declaration', as: 'test_ems' },
   // The Director's governance page, signed in as the named physician.
   { route: '/events/EV-0362', label: 'the Director governance', as: 'test_director' },
+  // The public forms need no session: applicability and the reference lookup.
+  { route: '/applicability?subject=event', label: 'the applicability check', as: '' },
+  { route: '/lookup', label: 'the reference lookup', as: '' },
 ];
 
 test.describe('fields come first on a phone', () => {
@@ -31,7 +34,8 @@ test.describe('fields come first on a phone', () => {
 
   for (const { route, label, as } of FORM_PAGES) {
     test(`${label} puts its first control within ${BUDGET_PX}px at 375px`, async ({ page }) => {
-      await signInAs(page, as ?? 'test_organizer');
+      if (as === undefined) await signInAs(page, 'test_organizer');
+      else if (as !== '') await signInAs(page, as);
       await gotoRidingRestarts(page, route);
       const top = await page.evaluate(() => {
         const main = document.querySelector('main');
