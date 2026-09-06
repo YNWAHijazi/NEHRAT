@@ -8,14 +8,13 @@
  * expedited, and expedited review waives nothing (Protocol 8.4).
  */
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { DocumentViewer } from '../../../../components/DocumentViewer';
 import { attachDocumentAction } from '../../../actions';
 import { acceptAttribute, catalogueEntry, missingCertificationFields } from '../../../../lib/rules';
 import { fileSubmissionAction, saveComplianceAction } from '../../../actions';
-import { SourceDivergence } from '../../../../components/SourceDivergence';
 import type { SubmissionRow } from '../../../../lib/queries';
 import type { SubmissionBlocker } from '../../../../lib/rules';
 
@@ -51,7 +50,6 @@ export function SubmitForm({
   expedited,
   revisionOpen,
   headerRows,
-  telephoneDivergence,
   certificationStatement,
 }: {
   eventId: string;
@@ -63,7 +61,6 @@ export function SubmitForm({
   /** Filed, and the latest Ministry outcome asks for more -- the form reopens for a re-file. */
   revisionOpen: boolean;
   /** The recorded EN/AR divergence on the certification telephone, or null. */
-  telephoneDivergence: { en: string; ar: string } | null;
   /** The compliance form's certifying words, shown above the fields they are signed with. */
   certificationStatement: { en: string; ar: string } | null;
   headerRows: { en: string; ar: string; valueEn: string; valueAr: string }[];
@@ -99,22 +96,32 @@ export function SubmitForm({
   // Locked once filed -- except while a revision or incomplete outcome holds the form open.
   const locked = filed && !revisionOpen;
 
-  const save = () => {
+  // AUTOSAVE (fields-only ruling, 2026-09-04): one button on this form -- File.
+  // Saving is not the organizer's job; the form saves as they type, debounced,
+  // and the quiet Saved indicator is the receipt the tests wait on.
+  const dirty = useRef(false);
+  useEffect(() => {
+    if (locked) return;
+    if (!dirty.current) { dirty.current = true; return; }
     setSaved(false);
-    startTransition(async () => {
-      const result = await saveComplianceAction(eventId, {
-        declarations: ticked,
-        insurance,
-        representative,
-        telephone,
-        position,
+    const t = setTimeout(() => {
+      startTransition(async () => {
+        const result = await saveComplianceAction(eventId, {
+          declarations: ticked,
+          insurance,
+          representative,
+          telephone,
+          position,
+        });
+        if ('ok' in result) {
+          setSaved(true);
+          router.refresh();
+        }
       });
-      if ('ok' in result) {
-        setSaved(true);
-        router.refresh();
-      }
-    });
-  };
+    }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticked, insurance, representative, telephone, position]);
 
   const file = () => {
     setFileError(false);
@@ -172,9 +179,6 @@ export function SubmitForm({
                   />
                   <span style={{ lineHeight: 1.5, flex: 1 }}>
                     <L en={d.en} ar={d.ar} />
-                    {d.divergenceNoteEn && d.divergenceNoteAr ? (
-                      <SourceDivergence en={d.divergenceNoteEn} ar={d.divergenceNoteAr} />
-                    ) : null}
                   </span>
                   <span style={{ flex: 'none', fontSize: 13, color: on ? 'var(--brand)' : 'var(--muted)' }}>
                     {on ? <L en="Declared" ar="مُقَرّ به" /> : <L en="Not declared" ar="غير مُقَرّ به" />}
@@ -286,25 +290,14 @@ export function SubmitForm({
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Telephone" ar="الهاتف" />
-              {telephoneDivergence ? (
-                <SourceDivergence en={telephoneDivergence.en} ar={telephoneDivergence.ar} />
-              ) : null}
             </span>
             <input value={telephone} disabled={locked} onChange={(e) => setTelephone(e.target.value)} style={inputStyle} />
           </label>
         </div>
         {!locked ? (
-          <div style={{ marginBlockStart: 20, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={save}
-              style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', cursor: 'pointer' }}
-            >
-              <L en="Save the form" ar="حفظ النموذج" />
-            </button>
+          <div aria-live="polite" style={{ marginBlockStart: 14, minHeight: 20 }}>
             {saved ? (
-              <span style={{ fontSize: '13.5px', color: 'var(--brand)' }}>
+              <span data-region="autosaved" style={{ fontSize: '13.5px', color: 'var(--brand)' }}>
                 <L en="Saved." ar="حُفظ." />
               </span>
             ) : null}
@@ -342,10 +335,10 @@ export function SubmitForm({
           ) : null}
           {blockers.length > 0 ? (
             <div style={{ padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch' }}>
-              <div style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
                 <L
-                  en={`The compliance and submission form cannot be certified yet — ${blockers.length} ${blockers.length === 1 ? 'item' : 'items'} outstanding`}
-                  ar={`لا يمكن التصديق على نموذج الامتثال والتقديم بعد — ${blockers.length} بنود غير مستوفاة`}
+                  en={`${blockers.length} outstanding`}
+                  ar={`${blockers.length} غير مستوفى`}
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -398,7 +391,13 @@ export function SubmitForm({
               }}
             >
               {revisionOpen ? (
-                <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
+                blockers.length > 0 ? (
+                  <L en={`File the revised submission — ${blockers.length} outstanding`} ar={`تقديم الملف المعدَّل — ${blockers.length} غير مستوفى`} />
+                ) : (
+                  <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
+                )
+              ) : blockers.length > 0 ? (
+                <L en={`File the submission — ${blockers.length} outstanding`} ar={`تقديم الملف — ${blockers.length} غير مستوفى`} />
               ) : (
                 <L en="File the submission" ar="تقديم الملف" />
               )}

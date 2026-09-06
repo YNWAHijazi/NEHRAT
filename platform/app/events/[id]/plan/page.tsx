@@ -14,7 +14,7 @@ import {
   planVersionsFor,
   unreadCountFor,
 } from '../../../../lib/queries';
-import { GUIDANCE_DEPTH, GUIDANCE_TEMPLATE, GUIDANCE_WORKFLOW, MAJOR_INCIDENT_ITEMS, PLAN_SECTIONS, type Level } from '../../../../lib/rules';
+import { MAJOR_INCIDENT_ITEMS, PLAN_SECTIONS, type Level } from '../../../../lib/rules';
 
 export default async function PlanPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
@@ -32,9 +32,6 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   if (level === null) redirect(`/events/${id}`);
 
   const plan = planFor(account.id, id);
-  // Where the event stands in the Guidance's eight-step workflow, from real state:
-  // assessed -> preparing the plan (4); filed -> conduct (7); the report ends it (8).
-  const workflowStage = !versions[0]?.derivation.complete ? 2 : event.filed ? 7 : 4;
   // 12: renders only where the venue is itself a registered covered facility.
   const facility = event.venueFacilityId ? facilityById(account.id, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
@@ -62,24 +59,11 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
-        <p style={{ margin: '0 0 40px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-          <L
-            en="Write the plan in the platform, or attach the document you already hold and confirm its coverage."
-            ar="اكتبوا الخطة في المنصة، أو أرفقوا المستند الذي تملكونه وأكّدوا تغطيته."
-          />
-        </p>
-
         <PlanForm
           eventId={id}
           level={level}
           sectionsDef={[...PLAN_SECTIONS]}
           miDef={[...MAJOR_INCIDENT_ITEMS]}
-          template={[...GUIDANCE_TEMPLATE.sections]}
-          workflow={[...GUIDANCE_WORKFLOW.steps]}
-          workflowStage={workflowStage}
-          depth={[...GUIDANCE_DEPTH.rows]}
-          nonBindingEn={GUIDANCE_TEMPLATE.nonBindingEn}
-          nonBindingAr={GUIDANCE_TEMPLATE.nonBindingAr}
           initial={plan}
           facility={facility}
           referenceFacts={referenceFacts}
@@ -91,9 +75,6 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
             <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en="Versions" ar="النسخ" />
             </h2>
-            <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L en="Each save archives the version it replaced." ar="كل حفظ يؤرشف النسخة التي حلّ محلها." />
-            </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {plan ? (
                 <div style={{ border: '1px solid var(--brand)', borderRadius: 10, padding: '10px 14px', fontSize: '13.5px', display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'baseline' }}>

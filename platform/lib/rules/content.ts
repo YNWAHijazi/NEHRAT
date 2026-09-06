@@ -121,6 +121,30 @@ export const COMPLIANCE_CERTIFICATION_DIVERGENCE: { en: string; ar: string } | n
 })();
 
 /**
+ * EVERY RECORDED SOURCE DIVERGENCE, ONE LIST, FOR THE MINISTRY'S SURFACE
+ * (fields-only ruling, 2026-09-04). These notes used to ride the forms beside
+ * the fields they describe; an end-user page carries fields and actions only,
+ * and a divergence between the two issues of an instrument is the Ministry's
+ * concern, not the organizer's. Aggregated here from the same data fields the
+ * forms used to read, so nothing was retyped and nothing can drift.
+ */
+export function recordedDivergences(): { en: string; ar: string }[] {
+  const out: { en: string; ar: string }[] = [];
+  if (COMPLIANCE_CERTIFICATION_DIVERGENCE) out.push(COMPLIANCE_CERTIFICATION_DIVERGENCE);
+  const sectionA = (complianceJson as { sectionA?: { items?: { divergenceNoteEn?: string; divergenceNoteAr?: string }[] } }).sectionA?.items ?? [];
+  for (const item of sectionA) {
+    if (item.divergenceNoteEn && item.divergenceNoteAr) out.push({ en: item.divergenceNoteEn, ar: item.divergenceNoteAr });
+  }
+  const c = complianceJson as {
+    item7DivergenceEn?: string; item7DivergenceAr?: string;
+    item10DivergenceEn?: string; item10DivergenceAr?: string;
+  };
+  if (c.item7DivergenceEn && c.item7DivergenceAr) out.push({ en: c.item7DivergenceEn, ar: c.item7DivergenceAr });
+  if (c.item10DivergenceEn && c.item10DivergenceAr) out.push({ en: c.item10DivergenceEn, ar: c.item10DivergenceAr });
+  return out;
+}
+
+/**
  * The certification statements, verbatim from the instruments. Both existed in the
  * data and reached no screen: people signed without the certifying words in front of
  * them. Annex C certifies the submission; Annex D certifies the post-event report.

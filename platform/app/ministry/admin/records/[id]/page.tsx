@@ -25,6 +25,7 @@ import {
   bilingualMap,
   catalogueEntry,
   humanSize,
+  recordedDivergences,
 } from '../../../../../lib/rules';
 
 /**
@@ -90,6 +91,24 @@ export default async function AdminRecordFilePage({ params }: { params: Promise<
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en={review.nameEn} ar={review.nameAr} />
       </h1>
+
+      {/* THE RECORDED SOURCE DIVERGENCES (fields-only ruling, 2026-09-04):
+          these notes left the organizer's and counterparties' forms -- a
+          divergence between the two issues is the Ministry's concern -- and
+          live here, on the file, plus the set-asides recorded in the data
+          under the English-governs ruling. */}
+      <details data-region="recorded-divergences" style={{ background: 'var(--surface2)', borderRadius: 12, padding: '4px 0', marginBlockEnd: 8 }}>
+        <summary style={{ cursor: 'pointer', padding: '12px 22px', fontSize: '13.5px', fontWeight: 500 }}>
+          <L en={`Recorded source divergences (${recordedDivergences().length})`} ar={`فروق المصدر المسجَّلة (${recordedDivergences().length})`} />
+        </summary>
+        <div style={{ padding: '4px 22px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {recordedDivergences().map((d) => (
+            <p key={d.en} style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
+              <L en={d.en} ar={d.ar} />
+            </p>
+          ))}
+        </div>
+      </details>
 
       {/* HOW THE LEVEL WAS DETERMINED — both results and which governed. */}
       <div data-region="file-derivation" style={{ padding: '18px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 8 }}>

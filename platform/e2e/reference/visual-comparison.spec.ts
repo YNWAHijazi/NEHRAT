@@ -252,6 +252,11 @@ for (const mapping of VISUAL_MANIFEST) {
       await page.addStyleTag({
         content: '[data-dock]{display:none !important} nextjs-portal{display:none !important}',
       });
+      // Ruled additions the reference predates, masked BY NAME (builtMask --
+      // the mirror of referenceMask) so thresholds stay tight.
+      for (const mask of mapping.builtMask ?? []) {
+        await page.addStyleTag({ content: mask.css });
+      }
       await page.waitForTimeout(150);
       const builtShot = await page.screenshot({ fullPage: true });
       writeFileSync(join(OUTPUT, `${mapping.id}.${lang}.built.png`), builtShot);

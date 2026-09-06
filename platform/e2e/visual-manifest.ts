@@ -76,6 +76,13 @@ export interface VisualMapping {
    * because the prototype runtime re-renders and would restore a removed node.
    */
   referenceMask?: { css: string; why: string }[];
+  /**
+   * CSS hiding parts of the BUILT page before capture -- only for RULED
+   * additions the reference predates (each entry names the ruling), so a
+   * compare stays tight instead of swallowing the ruling inside a fat
+   * threshold. The mirror of referenceMask.
+   */
+  builtMask?: { css: string; why: string }[];
   /** When present, the comparison is per-region and no full-page ratio is asserted. */
   regions?: VisualRegion[];
   /**
@@ -119,6 +126,12 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceTab: 'Determination of applicability',
     builtRoute: '/applicability',
     threshold: 0.03,
+    builtMask: [
+      {
+        css: '[data-region="need-help"]{display:none !important}',
+        why: 'The Need help footer link rides every page by the fields-only ruling (2026-09-04); the reference predates it, and unmasked it moved this compare from 2.5% to 8%. Masked by name so the 3% stays meaningful.',
+      },
+    ],
   },
 
   // --- Slice 1: the shell and the thin event slice ---
@@ -217,13 +230,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_organizer',
     regions: [
       {
-        name: 'counters',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'documents left to attach', container: 'display: flex' },
-        builtSelector: '[data-region="counters"]',
-        note: 'The two actionable counters. Held at 2%.',
-      },
-      {
         name: 'g2',
         // Was a straight compare. Pass B finding B-1 (the nomination loop could not be
         // closed from the UI) was fixed at reviewer order by surfacing the invitation
@@ -269,24 +275,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_organizer',
     regions: [
       {
-        name: 'workflow',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Planning workflow', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="workflow"]',
-        note: 'The Guidance\'s eight-step workflow card. Held at 2%.',
-      },
-      {
-        name: 'depth-table',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Planning depth by event level', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="depth"]',
-        note: 'The depth-by-level table, prototype wording verbatim with the level column highlighted as the prototype does. Held at 2%. (An earlier 6% allowance hid a real defect: the extractor degraded a unicode escape into literal text and the longer string wrapped an extra line.)',
-      },
-      {
         name: 'sections',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="sections"]',
-        note: 'Expected divergent: chip states reflect this account\'s real plan progress, not the prototype\'s demonstration mix, and the Arabic wording follows the plan\'s official name (SPEC 7). Second sweep (2026-09-02, partner ruling): the list explainer lost "You can return to them at any point before filing." The build renders sixteen section rows, from PLAN_SECTIONS. UNVERIFIED as to whether those sixteen correspond to the prototype: this note used to assert they matched and nothing checked it — the reference-drift guard pins the ten minimum conditions and the nine domains, and the plan sections are NOT among them.',
+        note: 'Expected divergent by the fields-only ruling (2026-09-04): the plan page is the form -- the sixteen items opening to their fields, the route control, the facility reference as one collapsed line. The reference tab carries the guidance blocks, the workflow card and the depth table, all of which moved to the reference page behind the footer\'s Need help link (their compares left with them -- a compare on a region the ruling removed would only measure the ruling). The sixteen rows render from PLAN_SECTIONS.',
       },
     ],
   },

@@ -83,9 +83,9 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await fill(page, 'Telephone', '+961 1 000 000');
     await fill(page, 'Position', 'Events director');
 
-    // Blockers are server-derived: save, let the refresh recompute, then file.
-    await page.locator('button:has-text("Save the form")').click();
-    await expect(page.locator('text=Saved.')).toBeVisible();
+    // Blockers are server-derived: the form AUTOSAVES (fields-only ruling,
+    // 2026-09-04) -- the quiet Saved receipt is the wait, then file.
+    await expect(page.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
     const fileBtn = page.locator('button:has-text("File the submission")');
     // 30s: measured too tight at 15 on the full run once the console grew.
     await expect(fileBtn).toBeEnabled({ timeout: 30_000 });

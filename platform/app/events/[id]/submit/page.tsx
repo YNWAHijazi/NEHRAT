@@ -16,7 +16,7 @@ import {
   venueRouteFor,
 } from '../../../../lib/queries';
 import { submissionGateFor } from '../../../../lib/submission-facts';
-import { COMPLIANCE_DECLARATIONS, COMPLIANCE_CERTIFICATION_DIVERGENCE, COMPLIANCE_CERTIFICATION_STATEMENT, COMPLIANCE_HEADER, documentsForLevel, type Level } from '../../../../lib/rules';
+import { COMPLIANCE_DECLARATIONS, COMPLIANCE_CERTIFICATION_STATEMENT, COMPLIANCE_HEADER, documentsForLevel, type Level } from '../../../../lib/rules';
 
 export default async function SubmitPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
@@ -80,21 +80,6 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
               ar={`يستوجب المستوى ${level} المستندات أدناه. يُستكمل نموذج الامتثال والتقديم هنا ولا يُرفَق.`}
             />
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '14.5px', color: 'var(--muted)', maxWidth: '74ch' }}>
-            <span style={{ flex: 'none', padding: '3px 9px', border: '1px solid var(--line)', borderRadius: 999, fontSize: 11, letterSpacing: '.05em', textTransform: 'uppercase' }}>
-              <L en="Required" ar="مطلوب" />
-            </span>
-            <span style={{ lineHeight: 1.6 }}>
-              {/* The certify-gate clause that used to follow was cut in the second
-                  simplification sweep: the blocker panel below states it, item by
-                  item, at the moment it matters. */}
-              <L
-                en="Every field is required unless marked optional."
-                ar="كل حقل مطلوب إلا ما وُسم اختيارياً."
-              />
-            </span>
-          </div>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
             {documents.map((d) => {
               const done = documentState[d.key] === true;
@@ -199,7 +184,6 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           blockers={gate.blockers}
           expedited={gate.expedited}
           revisionOpen={event.filed && revisionOpenFor(id)}
-          telephoneDivergence={COMPLIANCE_CERTIFICATION_DIVERGENCE}
           certificationStatement={COMPLIANCE_CERTIFICATION_STATEMENT}
           headerRows={headerRows}
         />

@@ -112,7 +112,7 @@ for (const lang of LANGUAGES) {
       await fillLabelled(page, 'Authorized representative', 'R. Haddad');
       await fillLabelled(page, 'Telephone', '+961 1 000 000');
       await fillLabelled(page, 'Position', 'Events director');
-      await page.locator('button:has-text("Save the form"), button:has-text("حفظ النموذج")').first().click();
+      // The form AUTOSAVES (fields-only ruling, 2026-09-04); no Save button exists.
       // WAIT FOR THE SAVE, NOT FOR THE NETWORK TO GO QUIET. The filing gate is derived
       // on the server from what was saved, so networkidle can be reached before the
       // save has landed -- and under a full run it was, which read as a gate refusing

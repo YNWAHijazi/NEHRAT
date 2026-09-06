@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
-import { SourceDivergence } from '../../../../components/SourceDivergence';
 import { InviteForm } from './InviteForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
@@ -50,19 +49,16 @@ const upLabel: React.CSSProperties = {
  * Director is absent below Level 3, so a real number here would renumber the groups
  * underneath it for Level 3 organizers only.
  */
-function SectionHeading({ n, en, ar, noteEn, noteAr }: { n?: number; en: string; ar: string; noteEn: string; noteAr: string }) {
+function SectionHeading({ n, en, ar }: { n?: number; en: string; ar: string }) {
+  // FIELDS ONLY (partner ruling, 2026-09-04): the group heading is structure;
+  // the explanatory note under it was guidance and left for the reference page.
   return (
-    <>
-      <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em', display: 'flex', gap: 14, alignItems: 'baseline' }}>
-        <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }} aria-hidden={n === undefined}>{n}</span>
-        <span>
-          <L en={en} ar={ar} />
-        </span>
-      </h2>
-      <p style={{ margin: '0 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
-        <L en={noteEn} ar={noteAr} />
-      </p>
-    </>
+    <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em', display: 'flex', gap: 14, alignItems: 'baseline' }}>
+      <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }} aria-hidden={n === undefined}>{n}</span>
+      <span>
+        <L en={en} ar={ar} />
+      </span>
+    </h2>
   );
 }
 
@@ -82,10 +78,7 @@ function InvitationLinkBlock({ token }: { token: string }) {
         {path}
       </code>
       <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 6, maxWidth: '80ch' }}>
-        <L
-          en="They answer through it. Share it only with the party it names."
-          ar="من خلاله يجيبون. فلا تشاركوه إلا مع الطرف الذي يسمّيه."
-        />
+        <L en="Share it only with the party it names." ar="لا تشاركوه إلا مع الطرف الذي يسمّيه." />
       </div>
     </div>
   );
@@ -141,17 +134,6 @@ export default async function RequirementsPage({
     (i) => i.status === 'declined' || i.status === 'withdrawn' || i.status === 'removed',
   );
 
-  // Only what is genuinely ATTACHED counts here. The plan and the compliance form are
-  // completed on the platform, and counting them as documents-left-to-attach made this
-  // counter read 4 while the record's next-action panel -- deriving from the same
-  // catalogue's `attach` flag -- correctly said 2. Same fact, one source.
-  const attachOutstanding = documents.filter(
-    (d) => d.attach === true && !d.optional && !d.thirdParty && !documentState[d.key],
-  ).length;
-  // A declined party HAS answered -- the counter must not contradict the gate that
-  // explains it (the event record derives the same way).
-  const agencyPending = invitations.filter((p) => p.status === 'nominated').length;
-  const agencyPendColor = agencyPending > 0 ? 'var(--bad)' : 'var(--brand)';
 
   // Group 3: the certify-to rows -- everything the matrix carries at this level that is
   // neither an attached document nor a named-party row. Requirement 15 (the command
@@ -195,22 +177,6 @@ export default async function RequirementsPage({
           />
         </p>
 
-        {/* The two actionable counters, from the reference. */}
-        <div data-region="counters" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBlockEnd: 44 }}>
-          <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
-            <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
-            <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-              <L en="documents left to attach" ar="مستنداً بقي إرفاقه" />
-            </div>
-          </div>
-          <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${agencyPendColor}`, borderRadius: 12 }}>
-            <div style={{ fontSize: 30, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
-            <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-              <L en="named agencies yet to answer" ar="جهة مُسمّاة لم تُجب بعد" />
-            </div>
-          </div>
-        </div>
-
         {ministryMeasures.length > 0 ? (
           <div data-region="ministry-measures" style={{ marginBlockEnd: 40 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
@@ -251,8 +217,6 @@ export default async function RequirementsPage({
           n={1}
           en="Documents to attach"
           ar="المستندات المطلوب إرفاقها"
-          noteEn="Anything attached here appears as complete in the submission package."
-          noteAr="كل ما يُرفق هنا يظهر مكتملاً في حزمة التقديم."
         />
         <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
           <L en={acceptHint().en} ar={acceptHint().ar} />
@@ -384,8 +348,6 @@ export default async function RequirementsPage({
           n={2}
           en="Named EMS providers"
           ar="مزوّدو الإسعاف المُسمّون"
-          noteEn="Each provider you name must answer before you can certify the submission."
-          noteAr="على كل مزوّد تسمّونه أن يُجيب قبل أن تصدّقوا على التقديم."
         />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
           {providers.map((p) => {
@@ -484,8 +446,6 @@ export default async function RequirementsPage({
             <SectionHeading
               en="Event Medical Director"
               ar="المدير الطبي للفعالية"
-              noteEn="A licensed physician, nominated here. The event medical command function is theirs alone, and the Level 3 package cannot be filed without them."
-              noteAr="طبيب مرخّص يُرشَّح هنا. وظيفة القيادة الطبية للفعالية له وحده، ولا يمكن تقديم ملف المستوى 3 من دونه."
             />
             {director ? (
               <div style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${director.status === 'confirmed' ? 'var(--brand)' : director.status === 'declined' ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
@@ -498,9 +458,6 @@ export default async function RequirementsPage({
                     {' · '}
                     <L en={commandRow.respEn} ar={commandRow.respAr} />
                   </div>
-                  {commandRow.divergenceNoteEn && commandRow.divergenceNoteAr ? (
-                    <SourceDivergence en={commandRow.divergenceNoteEn} ar={commandRow.divergenceNoteAr} />
-                  ) : null}
                   {governance['command']?.trim() ? (
                     <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
                       <L en="The Director has written the medical-command arrangements; the text is in the plan." ar="كتب المدير ترتيبات القيادة الطبية؛ والنص في الخطة." />
@@ -639,9 +596,6 @@ export default async function RequirementsPage({
                         <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5, marginBlockStart: 2 }}>
                           <L en={r.valueEn} ar={r.valueAr} />
                         </span>
-                        {r.divergenceNoteEn && r.divergenceNoteAr ? (
-                          <SourceDivergence en={r.divergenceNoteEn} ar={r.divergenceNoteAr} />
-                        ) : null}
                       </span>
                       <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, textAlign: 'end' }}>
                         <L en={r.respEn} ar={r.respAr} />
