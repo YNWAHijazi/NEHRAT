@@ -878,9 +878,10 @@ export async function registerVenueAction(formData: FormData): Promise<void> {
   const capacity = Number(String(formData.get('capacity') ?? '').replace(/[^0-9]/g, '')) || null;
   const regularlyHosts = formData.get('regularlyHosts') === 'yes';
   const isNightclub = formData.get('isNightclub') === 'yes';
-  if (!nameEn || capacity === null || capacity < RECURRING_VENUE_MIN_CAPACITY || !regularlyHosts) {
-    redirect('/venues/new?notice=outside');
-  }
+  // NO APPLICABILITY GATE (partner ruling, 2026-09-05): registering mints the
+  // record. The capacity and regularly-hosts answers are stored because the
+  // annual assessment derives from them, not to refuse the registration.
+  if (!nameEn) redirect('/venues/new');
   const venueId = nextRecordId('VN');
   getDb()
     .prepare(
@@ -888,7 +889,7 @@ export async function registerVenueAction(formData: FormData): Promise<void> {
          address_municipality_ar, responsible_contact, licensed_capacity, regularly_hosts, is_nightclub, is_demo)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .run(venueId, account.id, nameEn, nameAr, category, addressEn, addressAr, contact, capacity, 1, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
+    .run(venueId, account.id, nameEn, nameAr, category, addressEn, addressAr, contact, capacity, regularlyHosts ? 1 : 0, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
   revalidatePath('/dashboard');
   redirect(`/venues/${venueId}/assessment`);
 }
@@ -906,6 +907,54 @@ export interface VenueAssessmentPayload {
  * expiry date twelve months on (the Arabic issue's wording). The record identifier
  * exists from registration; the Ministry reference is issued at first classification.
  */
+/**
+ * A venue's requirement documents (partner ruling, 2026-09-05). Venues carried
+ * requirements marked attachable and NO control that could attach one -- the
+ * record counted them and pointed at the assessment. This is the event's attach
+ * flow, on the venue record: same refusals, same storage shape, same return.
+ */
+export async function attachVenueDocumentAction(venueId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
+  refuseIfVenueArchived(venueId);
+  const docKey = String(formData.get('docKey') ?? '');
+  const file = formData.get('file');
+  const back = `/venues/${venueId}`;
+  if (!docKey || !(file instanceof File)) redirect(back);
+
+  const refusal = refuseUpload({ type: file.type, size: file.size });
+  if (refusal) redirect(`${back}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
+  const bytes = Buffer.from(await file.arrayBuffer());
+  if (bytes.length > maxUploadBytes()) redirect(`${back}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
+
+  getDb()
+    .prepare(
+      `INSERT INTO venue_attachments (venue_id, doc_key, file_name, content_type, byte_size, bytes)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT (venue_id, doc_key) DO UPDATE SET
+         file_name = excluded.file_name, content_type = excluded.content_type,
+         byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
+    )
+    .run(venueId, docKey, file.name.trim(), file.type, bytes.length, bytes);
+  revalidatePath(back);
+  redirect(back);
+}
+
+/** Removing one: the row goes, the requirement returns to outstanding. */
+export async function removeVenueAttachmentAction(venueId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
+  refuseIfVenueArchived(venueId);
+  const docKey = String(formData.get('docKey') ?? '');
+  if (docKey) {
+    getDb().prepare(`DELETE FROM venue_attachments WHERE venue_id = ? AND doc_key = ?`).run(venueId, docKey);
+  }
+  revalidatePath(`/venues/${venueId}`);
+  redirect(`/venues/${venueId}`);
+}
+
 export async function saveVenueAssessmentAction(
   venueId: string,
   payload: VenueAssessmentPayload,

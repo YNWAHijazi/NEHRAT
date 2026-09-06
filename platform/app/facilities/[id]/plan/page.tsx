@@ -191,6 +191,26 @@ export default async function FacilityPlanPage({
           existing={confirmation}
         />
 
+        {/* Step 5 of the registration continues to step 6 -- the registered
+
+            record (partner ruling, 2026-09-05). */}
+
+        <div data-region="continue-to-record" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 32 }}>
+
+          <a
+
+            href={`/facilities/${facility.id}`}
+
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}
+
+          >
+
+            <L en="Continue to the facility record" ar="المتابعة إلى سجل المنشأة" />
+
+          </a>
+
+        </div>
+
       </main>
     </>
   );

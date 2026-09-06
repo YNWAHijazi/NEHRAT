@@ -84,6 +84,15 @@ export function PlanForm({
     [sections, sectionsDef, mode],
   );
 
+  // WHAT IS STILL OUTSTANDING, on the button (partner ruling, 2026-09-05). The
+  // plan counts as complete only when every section is addressed and, at Level 2
+  // and 3, every major-incident item is ticked -- that rule already gates FILING
+  // (lib/rules/submission.ts planIsComplete). It was simply invisible here. Save
+  // still works at any time: a plan is written over sessions and each save keeps
+  // its version.
+  const miOutstanding = level >= 2 ? miDef.filter((i) => mi[String(i.n)]?.covered !== true).length : 0;
+  const outstanding = sectionsDef.length - doneCount + miOutstanding;
+
   const save = () => {
     setSaved(false);
     startTransition(async () => {
@@ -253,11 +262,31 @@ export function PlanForm({
           Protocol's checklist -- the fields themselves. */}
       {!collapsed ? (
         <div data-region="sections" style={{ marginBlockEnd: 28 }}>
-          {doneCount > 0 ? (
-            <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L en={`${doneCount} of 16 addressed`} ar={`عولج ${doneCount} من 16`} />
-            </div>
-          ) : null}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 8 }}>
+            <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+              {doneCount > 0 ? <L en={`${doneCount} of 16 addressed`} ar={`عولج ${doneCount} من 16`} /> : null}
+            </span>
+            {/* SELECT ALL (partner ruling, 2026-09-05): confirming an attached
+                plan covers all sixteen is one decision, not sixteen clicks. Only
+                in attach mode -- written sections are written, not ticked. */}
+            {mode === 'attach' ? (
+              <button
+                type="button"
+                data-region="sections-all"
+                onClick={() => {
+                  const all = doneCount === sectionsDef.length;
+                  setSections((prev) => {
+                    const next = { ...prev };
+                    for (const s of sectionsDef) next[String(s.n)] = { ...next[String(s.n)], covered: !all };
+                    return next;
+                  });
+                }}
+                style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}
+              >
+                {doneCount === sectionsDef.length ? <L en="Clear all" ar="مسح الكل" /> : <L en="Select all" ar="تحديد الكل" />}
+              </button>
+            ) : null}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {sectionsDef.map((s) => {
               const st = sections[String(s.n)];
@@ -334,9 +363,22 @@ export function PlanForm({
           only; absent below. */}
       {level >= 2 ? (
         <div data-region="major-incident" style={{ marginBlockEnd: 28 }}>
-          <h2 style={{ margin: '0 0 10px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Major-incident and mass-casualty plan" ar="خطة الحوادث الجسيمة وحوادث الإصابات الجماعية" />
-          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 10 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
+              <L en="Major-incident and mass-casualty plan" ar="خطة الحوادث الجسيمة وحوادث الإصابات الجماعية" />
+            </h2>
+            <button
+              type="button"
+              data-region="mi-all"
+              onClick={() => {
+                const all = miDef.every((i) => mi[String(i.n)]?.covered === true);
+                setMi(() => Object.fromEntries(miDef.map((i) => [String(i.n), { covered: !all }])));
+              }}
+              style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}
+            >
+              {miDef.every((i) => mi[String(i.n)]?.covered === true) ? <L en="Clear all" ar="مسح الكل" /> : <L en="Select all" ar="تحديد الكل" />}
+            </button>
+          </div>
           {governance['incidentRole']?.trim() ? (
             <div style={{ marginBlockEnd: 8, padding: '10px 14px', border: '1px solid var(--brand)', borderInlineStart: '3px solid var(--brand)', borderRadius: 8, background: 'var(--brand-soft)' }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 6 }}>
@@ -379,7 +421,11 @@ export function PlanForm({
         onClick={save}
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}
       >
-        <L en="Save the plan" ar="حفظ الخطة" />
+        {outstanding > 0 ? (
+          <L en={`Save the plan — ${outstanding} outstanding`} ar={`حفظ الخطة — ${outstanding} غير مستوفى`} />
+        ) : (
+          <L en="Save the plan — complete" ar="حفظ الخطة — مكتملة" />
+        )}
       </button>
     </div>
   );

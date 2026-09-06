@@ -89,10 +89,6 @@
     "interestEn": "Record an interest and notify us when it activates",
     "interestAr": "تسجيل اهتمام وإبلاغنا عند التفعيل"
   },
-  "venueCross": {
-    "en": "A sports facility that regularly hosts organized events and is licensed for 1,000 or more is also a recurring venue. Both apply, each with its own registration, and where their requirements differ the higher governs.",
-    "ar": "المنشأة الرياضية التي تستضيف بانتظام فعاليات منظّمة والمرخّصة لألف شخص أو أكثر هي أيضاً موقع فعاليات متكرر. وينطبق الإطاران، لكل منهما تسجيله، وحيث تختلف متطلباتهما يسري الأعلى."
-  },
   "profileFields": [
     {
       "key": "name",
@@ -114,7 +110,29 @@
     {
       "key": "hours",
       "en": "Operating hours",
-      "ar": "ساعات العمل"
+      "ar": "ساعات العمل",
+      "options": [
+        {
+          "en": "24 hours, every day",
+          "ar": "24 ساعة، كل يوم"
+        },
+        {
+          "en": "Daytime, every day",
+          "ar": "نهاراً، كل يوم"
+        },
+        {
+          "en": "Daytime, weekdays only",
+          "ar": "نهاراً، أيام العمل فقط"
+        },
+        {
+          "en": "Evenings and weekends",
+          "ar": "مساءً وعطلة نهاية الأسبوع"
+        },
+        {
+          "en": "Seasonal, or when an event is held",
+          "ar": "موسمياً، أو عند إقامة فعالية"
+        }
+      ]
     },
     {
       "key": "phone",
@@ -137,9 +155,7 @@
     {
       "key": "accessPoint",
       "en": "Main entrance or ambulance access point",
-      "ar": "المدخل الرئيسي أو نقطة وصول خدمات الطوارئ الطبية",
-      "hintEn": "Describe it as a crew would find it.",
-      "hintAr": "صفوها كما تجدها الفرقة."
+      "ar": "المدخل الرئيسي أو نقطة وصول خدمات الطوارئ الطبية"
     },
     {
       "key": "emsNumber",
@@ -150,8 +166,7 @@
   "crewCallout": {
     "labelEn": "What a responding crew needs",
     "labelAr": "ما تحتاجه فرقة الاستجابة",
-    "en": "These two are not administrative detail. The access point is where an ambulance is directed on the night, and the number asked for is the one this facility actually dials — not a national default.",
-    "ar": "هذان البندان ليسا تفصيلاً إدارياً. فنقطة الوصول هي المكان الذي تُوجَّه إليه سيارة الإسعاف ليلتها، والرقم المطلوب هو الرقم الذي تتصل به هذه المنشأة فعلاً — لا رقماً وطنياً افتراضياً."
+    "$comment": "The label stays as the yellow section's heading; its explanatory paragraph and the access-point hint were removed (partner ruling, 2026-09-05) -- the fields say what they need."
   },
   "persons": [
     {

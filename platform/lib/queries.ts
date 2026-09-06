@@ -2060,6 +2060,16 @@ export function arrestLocations(viewerIsDemo: boolean): ArrestGroup[] {
   return out.sort((a, b) => b.count - a.count);
 }
 
+/** A venue's attached requirement documents, keyed by catalogue doc key. */
+export function venueAttachmentsFor(accountId: number, venueId: string): { docKey: string; fileName: string; attachedAt: string }[] {
+  const owned = getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId);
+  if (!owned) return [];
+  const rows = getDb()
+    .prepare(`SELECT doc_key, file_name, attached_at FROM venue_attachments WHERE venue_id = ? ORDER BY attached_at DESC`)
+    .all(venueId) as unknown as { doc_key: string; file_name: string; attached_at: string }[];
+  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at.slice(0, 10) }));
+}
+
 export interface ConfigValueRow {
   key: string;
   value: string;

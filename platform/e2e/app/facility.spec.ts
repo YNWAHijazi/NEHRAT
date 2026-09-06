@@ -38,16 +38,17 @@ test.describe('the category determination', () => {
     await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toHaveCount(0);
   });
 
-  test('a sports facility proceeds, with the recurring-venue cross-reference beside it', async ({ page }) => {
+  test('a sports facility proceeds, and the recurring-venue cross-sell is gone', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
     await page.getByRole('button', { name: /Gyms, fitness centres/ }).click();
 
     await expect(page.locator('[data-region="determination"]')).toContainText('In force now');
-    await expect(page.locator('[data-region="venue-cross"]')).toContainText(
-      'Register a recurring venue as well',
-    );
+    // REMOVED BY RULING (partner, 2026-09-05): registering a facility does not
+    // advertise the venue instrument. The determination and the way on are the
+    // screen; the anchor proves the page rendered before asserting the absence.
+    await expect(page.locator('[data-region="venue-cross"]')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
   });
 

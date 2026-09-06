@@ -11,8 +11,11 @@ import {
   venueById,
   venueChangeSinceAssessment,
   venueChangesFor,
+  venueAttachmentsFor,
 } from '../../../lib/queries';
 import { requirementsForLevel, venueReassessmentGate, REASSESSMENT_WINDOW, type Gate, type Level } from '../../../lib/rules';
+import { attachVenueDocumentAction, removeVenueAttachmentAction } from '../../actions';
+import { acceptAttribute } from '../../../lib/rules/uploads';
 import enMessages from '../../../lib/i18n/messages/en.json';
 import arMessages from '../../../lib/i18n/messages/ar.json';
 
@@ -155,7 +158,11 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
   // reassessment date already sits on stage 5 and under the disabled action.
 
   const requirements = level ? requirementsForLevel(level) : [];
-  const attachOutstanding = requirements.filter((r) => r.attach).length;
+  // What is already on file, keyed by requirement number -- the row shows the
+  // file when there is one and the picker when there is not.
+  const attachedByKey = Object.fromEntries(
+    venueAttachmentsFor(account.id, venue.id).map((a) => [a.docKey, a.fileName]),
+  ) as Record<string, string | undefined>;
 
   const history: { en: string; ar: string; date: string }[] = [
     ...changes.map((c) => ({
@@ -290,41 +297,14 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
 
         {classified ? (
           <>
-            <div data-region="counters" style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginBlockEnd: 32 }}>
-              <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12 }}>
-                <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--brand)' }}>{requirements.length}</div>
-                <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                  <L en="requirements apply at this level" ar="متطلباً ينطبق على هذا المستوى" />
-                </div>
-              </div>
-              <div style={{ flex: 1, minWidth: 240, paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--accent)', borderRadius: 12 }}>
-                <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{attachOutstanding}</div>
-                <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                  <L en="document requirements not yet on file" ar="متطلبات مستندية ليست في الملف بعد" />
-                </div>
-                {/* Where the count acts: venue documents travel with the assessment,
-                    not with this record -- a counter with no control here was a dead
-                    end, so the counter says where its work is done. */}
-                {attachOutstanding > 0 ? (
-                  <div style={{ fontSize: '12.5px', marginBlockStart: 8 }}>
-                    <Link href={`/venues/${venue.id}/assessment`} style={{ textDecoration: 'underline' }}>
-                      <L en="Provided with the annual assessment" ar="تُقدَّم مع التقييم السنوي" />
-                    </Link>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Collapsed by default and stripped of its how-to-read note (partner
-                ruling, second sweep): the record's own facts come first, and the
-                rows explain themselves when opened. */}
-            <details data-region="requirements-fold" style={{ marginBlockEnd: 44 }}>
-            <summary style={{ cursor: 'pointer', listStyle: 'none', margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+            {/* STRAIGHT TO THE REQUIREMENTS (partner ruling, 2026-09-05): the
+                counters left, the fold opened, and each attachable requirement
+                now carries the control that satisfies it -- the event's shape.
+                A venue had requirements marked attachable and nowhere to attach. */}
+            <div data-region="requirements-fold" style={{ marginBlockEnd: 44 }}>
+            <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en={`Requirements for Level ${level}`} ar={`متطلبات المستوى ${level}`} />
-              <span style={{ marginInlineStart: 12, fontSize: 14, fontWeight: 400, color: 'var(--brand)' }}>
-                <L en="Show" ar="عرض" />
-              </span>
-            </summary>
+            </h2>
             <div data-region="requirements" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {requirements.map((r) => (
                 <div key={r.n} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${r.ems ? 'dashed' : 'solid'} ${r.ems ? 'var(--muted)' : 'var(--brand)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -343,11 +323,32 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
                     <span style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, minWidth: 0 }}>
                       <L en={r.respEn} ar={r.respAr} />
                     </span>
+                    {r.attach && !venue.archivedAt ? (
+                      attachedByKey[String(r.n)] ? (
+                        <form action={removeVenueAttachmentAction.bind(null, venue.id)} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input type="hidden" name="docKey" value={String(r.n)} />
+                          <span style={{ fontSize: '12.5px', color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>
+                            {attachedByKey[String(r.n)]}
+                          </span>
+                          <button type="submit" style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                            <L en="Remove" ar="إزالة" />
+                          </button>
+                        </form>
+                      ) : (
+                        <form action={attachVenueDocumentAction.bind(null, venue.id)} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input type="hidden" name="docKey" value={String(r.n)} />
+                          <input type="file" name="file" accept={acceptAttribute()} required style={{ fontSize: '12.5px', maxWidth: 220 }} />
+                          <button type="submit" style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
+                            <L en="Attach" ar="إرفاق" />
+                          </button>
+                        </form>
+                      )
+                    ) : null}
                   </div>
                 </div>
               ))}
             </div>
-            </details>
+            </div>
           </>
         ) : null}
 

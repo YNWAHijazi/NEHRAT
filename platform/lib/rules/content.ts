@@ -89,7 +89,6 @@ export interface VenueChangeAspect {
   ar: string;
 }
 
-export const VENUE_APPLICABILITY_INTRO: { en: string; ar: string } = venueJson.applicabilityIntro;
 export const VENUE_CAPACITY_FIELD: BilingualField = venueJson.capacityField;
 export const VENUE_REGISTRATION_FIELDS: readonly BilingualField[] = venueJson.registrationFields;
 export const VENUE_REASSESSMENT_TRIGGERS: readonly { en: string; ar: string }[] = venueJson.reassessmentTriggers;

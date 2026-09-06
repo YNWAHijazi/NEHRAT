@@ -400,12 +400,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: 'Registering a venue does not exempt events held there. Held at 2%.',
       },
       {
-        name: 'applicability-intro',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="applicability-intro"]',
-        note: "Expected divergent BY THE REFERENCE'S OWN DEFECT: the prototype intro reads 'completes the the risk assessment assessment' (both languages carry the doubling) -- an artifact of substituting the instrument's name out of the sentence. The build renders the sentence once (venue.json applicabilityIntro).",
-      },
-      {
         name: 'registration-form',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="registration-form"]',
@@ -472,13 +466,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: 'Assessment history rows. Held at 2%.',
       },
       {
-        name: 'counters',
-        mode: 'expectedDivergent',
-        reference: { strategy: 'containerOfText', text: 'requirements apply at this level', container: 'display: flex' },
-        builtSelector: '[data-region="counters"]',
-        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): the reference's counter reads 'attachments outstanding' on a record with no attach mechanism anywhere -- a counter claiming work that could not be done. The built counter names what it counts and links to the annual assessment, where the documents actually travel. UNVERIFIED as to pixels since the flip.",
-      },
-      {
         name: 'requirements',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="requirements-fold"]',
@@ -519,10 +506,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'crew-callout',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'What a responding crew needs', container: 'border-radius: 16px' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="crew-callout"]',
-        note: 'The access point and the number the facility actually dials. Held at 2%.',
+        note: 'Expected divergent by ruling (partner, 2026-09-05): the yellow block keeps its heading and its two fields, and its explanatory paragraph and the access-point hint were removed -- the fields say what they need. Measured 39% against the reference, all of it that prose. Flips back to a compare when the prototype adopts the ruling.',
       },
       {
         name: 'profile-form',

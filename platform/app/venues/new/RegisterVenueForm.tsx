@@ -1,9 +1,10 @@
 'use client';
 
 /**
- * The registration card, from the reference: the five identity fields, the capacity,
- * the regularly-hosts question. Eligibility shows live -- eligible routes to the first
- * annual assessment; ineligible is a note, never a determination.
+ * The registration card: the identity fields, the capacity, and the two questions
+ * the assessment derives from -- then Submit (partner ruling, 2026-09-05). The
+ * live eligibility verdict and its "outside the annual assessment / contact the
+ * Ministry" outcome are gone: registering is not the place to refuse an operator.
  */
 
 import { useState } from 'react';
@@ -11,7 +12,6 @@ import { L } from '../../../components/L';
 import { YesNoPair } from '../../../components/YesNoPair';
 import { registerVenueAction } from '../../actions';
 import {
-  RECURRING_VENUE_MIN_CAPACITY,
   VENUE_CAPACITY_FIELD,
   VENUE_ELIGIBILITY_QUESTIONS,
   type EligibilityQuestion,
@@ -48,12 +48,6 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
   const [capacity, setCapacity] = useState('');
   const [regular, setRegular] = useState<boolean | null>(null);
   const [nightclub, setNightclub] = useState<boolean | null>(null);
-  const capNumber = Number(capacity.replace(/[^0-9]/g, '')) || 0;
-  const eligible = capNumber >= RECURRING_VENUE_MIN_CAPACITY && regular === true;
-  // The outside-the-process note is a statement about the details given; until the
-  // determining facts are answered there is nothing to state (rule 0's spirit: an
-  // unset input is not a determination).
-  const answered = capacity.trim() !== '' && regular !== null;
 
   return (
     <form action={registerVenueAction}>
@@ -109,37 +103,12 @@ export function RegisterVenueForm({ fields }: { fields: Field[] }) {
         </div>
       </div>
 
-      {!eligible && !answered ? null : eligible ? (
-        <div style={{ padding: '26px 30px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 20 }}>
-          <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 10 }}>
-            <L en="This venue completes the annual assessment." ar="يستكمل هذا الموقع التقييم السنوي." />
-          </div>
-          <div style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', marginBlockEnd: 16 }}>
-            <L
-              en="The assessment covers one routine operating session and stands for twelve months."
-              ar="يشمل التقييم فترة تشغيل اعتيادية واحدة ويسري اثني عشر شهراً."
-            />
-          </div>
-          <button
-            type="submit"
-            style={{ height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}
-          >
-            <L en="Open the annual assessment" ar="فتح التقييم السنوي" />
-          </button>
-        </div>
-      ) : (
-        <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16 }}>
-          <div style={{ fontSize: 16, lineHeight: 1.65, marginBlockEnd: 12 }}>
-            <L
-              en="On these details the venue is outside the annual assessment. Where that is uncertain, the Ministry decides."
-              ar="بحسب هذه المعطيات يقع الموقع خارج التقييم السنوي. وعند عدم اليقين، تقرر الوزارة."
-            />
-          </div>
-          <a href="/notifications" style={{ fontSize: 15, borderBlockEnd: '1px solid var(--brand)', paddingBlockEnd: 2 }}>
-            <L en="Contact the Ministry about applicability" ar="مراسلة الوزارة بشأن الانطباق" />
-          </a>
-        </div>
-      )}
+      <button
+        type="submit"
+        style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}
+      >
+        <L en="Submit" ar="إرسال" />
+      </button>
     </form>
   );
 }

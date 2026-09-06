@@ -63,6 +63,24 @@ export default async function DeviceRegistryPage({
           today={beirutToday()}
         />
 
+        {/* THE FLOW CONTINUES (partner ruling, 2026-09-05): registering a device
+            used to end here, and steps 5 and 6 of the registration were reachable
+            only by knowing the address. Devices are step 4; this is the way on. */}
+        <div data-region="continue-to-plan" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 32 }}>
+          <a
+            href={`/facilities/${facility.id}/plan`}
+            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}
+          >
+            <L en="Continue to the response plan" ar="المتابعة إلى خطة الاستجابة" />
+          </a>
+          <a
+            href={`/facilities/${facility.id}`}
+            style={{ height: 48, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 24, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+          >
+            <L en="The facility record" ar="سجل المنشأة" />
+          </a>
+        </div>
+
         <AedWhereToBuy />
 
         <VendorDirectoryLink />

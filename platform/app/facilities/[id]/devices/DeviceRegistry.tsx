@@ -139,6 +139,26 @@ export function DeviceRegistry({
         })}
       </div>
 
+      {/* REGISTER ANOTHER (partner ruling, 2026-09-05): a facility has as many
+          devices as it has; the registry needed a way to say "one more" without
+          leaving the page. Selecting a row edits that device; this clears the
+          card back to a blank initial registration. */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 16 }}>
+        <button
+          type="button"
+          data-region="add-device"
+          onClick={() => { setSelected(null); setPurpose('initial'); }}
+          style={{ height: 40, paddingInline: 18, border: `1px solid ${isInitial ? 'var(--brand)' : 'var(--line)'}`, background: isInitial ? 'var(--brand-soft)' : 'var(--bg)', color: isInitial ? 'var(--brand)' : 'var(--ink)', borderRadius: 20, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
+        >
+          <L en="+ Register another device" ar="+ تسجيل جهاز آخر" />
+        </button>
+        {devices.length > 0 ? (
+          <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
+            <L en={`${devices.length} registered`} ar={`${devices.length} مسجّل`} />
+          </span>
+        ) : null}
+      </div>
+
       <form action={saveFacilityDeviceAction.bind(null, facilityId)}>
         <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>

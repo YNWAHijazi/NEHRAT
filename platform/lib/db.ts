@@ -98,7 +98,7 @@ function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
     ['fr_reports', 'created_at'], ['role_profiles', 'updated_at'], ['event_governance', 'updated_at'],
     ['plans', 'updated_at'], ['submission_versions', 'archived_at'], ['material_changes', 'reported_at'],
     ['serious_incident_notifications', 'notified_at'], ['venues', 'created_at'],
-    ['venue_assessments', 'created_at'], ['venue_changes', 'reported_at'], ['facilities', 'created_at'],
+    ['venue_assessments', 'created_at'], ['venue_changes', 'reported_at'], ['venue_attachments', 'attached_at'], ['facilities', 'created_at'],
     ['facility_persons', 'updated_at'], ['facility_devices', 'updated_at'], ['facility_devices', 'created_at'],
     ['facility_device_updates', 'created_at'], ['facility_plan_confirmations', 'created_at'],
     ['facility_incidents', 'created_at'], ['facility_requests', 'created_at'],
@@ -223,6 +223,20 @@ function migrate(d: DatabaseSync): void {
       file_name TEXT NOT NULL,
       attached_at TEXT NOT NULL DEFAULT (datetime('now')),
       PRIMARY KEY (event_id, doc_key)
+    );
+
+    -- A venue's requirement documents. Venues had requirements marked attachable
+    -- and NOWHERE to attach them (partner ruling, 2026-09-05): the record counted
+    -- them and pointed at the assessment, which is not the same as a control.
+    CREATE TABLE IF NOT EXISTS venue_attachments (
+      venue_id TEXT NOT NULL REFERENCES venues(id),
+      doc_key TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      content_type TEXT NOT NULL DEFAULT '',
+      byte_size INTEGER NOT NULL DEFAULT 0,
+      bytes BLOB,
+      attached_at TEXT NOT NULL DEFAULT (datetime('now')),
+      PRIMARY KEY (venue_id, doc_key)
     );
 
     -- Nomination, never self-registration: the token is the invitation (unguessable,

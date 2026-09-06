@@ -115,8 +115,18 @@ export default async function RequirementsPage({
     redirect(`/events/${id}`);
   }
 
-  const documents = documentsForLevel(level);
   const documentState = documentStateFor(account.id, id, level);
+  // OUTSTANDING FIRST, THE FORM LAST (partner ruling, 2026-09-05). The
+  // compliance and submission form is completed on the submission package, so
+  // its row is a way OUT of this screen -- it belongs after the work that has to
+  // happen first. Within the rest, what is still owed sorts above what is done.
+  const documents = [...documentsForLevel(level)].sort((a, b) => {
+    const formLast = (d: { key: string }) => (d.key === 'complianceForm' ? 1 : 0);
+    if (formLast(a) !== formLast(b)) return formLast(a) - formLast(b);
+    const owed = (d: { key: string; optional?: boolean }) =>
+      documentState[d.key] === true || d.optional === true ? 1 : 0;
+    return owed(a) - owed(b);
+  });
   const attachments = attachmentsFor(account.id, id);
   const fileNames = Object.fromEntries(attachments.map((a) => [a.docKey, a.fileName]));
   const invitations = invitationsFor(account.id, id);

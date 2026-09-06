@@ -99,20 +99,22 @@ const actionGrid: React.CSSProperties = {
 const actionCell: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 6,
+  gap: 3,
   alignItems: 'stretch',
 };
 
 const actionPill: React.CSSProperties = {
   // A FLOOR, not a fixed height: the Arabic issue of a label is not the English
-  // one's length, and a fixed 44px clips the second line rather than growing.
-  minHeight: 44,
-  paddingBlock: 8,
-  paddingInline: 22,
+  // one's length, and a fixed height clips the second line rather than growing.
+  // Tightened (partner ruling, 2026-09-05): these three rows are waiting states,
+  // not the page's subject, and they were taking a phone screen between them.
+  minHeight: 34,
+  paddingBlock: 6,
+  paddingInline: 16,
   border: '1px solid var(--line)',
   background: 'var(--bg)',
-  borderRadius: 22,
-  fontSize: '14.5px',
+  borderRadius: 17,
+  fontSize: '13.5px',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -130,8 +132,8 @@ const actionPill: React.CSSProperties = {
 const actionPillDisabled: React.CSSProperties = { ...actionPill, color: 'var(--muted)' };
 
 const actionReason: React.CSSProperties = {
-  fontSize: 12,
-  lineHeight: 1.5,
+  fontSize: '11.5px',
+  lineHeight: 1.4,
   color: 'var(--muted)',
 };
 

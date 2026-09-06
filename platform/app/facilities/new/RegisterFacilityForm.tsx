@@ -60,22 +60,41 @@ export function RegisterFacilityForm({
   const picked: FacilityCategory | null = catKey === null ? null : governed(catKey);
   const ended = picked !== null && categoryEndsJourney(picked);
 
-  const field = (key: string, en: string, ar: string, dir?: 'rtl', hintEn?: string, hintAr?: string) => (
+  // A field is a text input unless the data gives it choices (partner ruling,
+  // 2026-09-05: operating hours is chosen, not typed) -- then it is a select,
+  // and the chosen option's English text is what the record stores.
+  const field = (
+    key: string,
+    en: string,
+    ar: string,
+    dir?: 'rtl',
+    options?: { en: string; ar: string }[],
+  ) => (
     <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.45 }}>
         <L en={en} ar={ar} />
       </span>
-      <input
-        {...(dir ? { dir } : {})}
-        value={profile[key] ?? ''}
-        onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
-        style={inputStyle}
-      />
-      {hintEn && hintAr ? (
-        <span style={{ fontSize: '12.5px', lineHeight: 1.55, color: 'var(--muted)' }}>
-          <L en={hintEn} ar={hintAr} />
-        </span>
-      ) : null}
+      {options ? (
+        <select
+          value={profile[key] ?? ''}
+          onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
+          style={{ ...inputStyle, paddingInlineEnd: 34 }}
+        >
+          <option value=""></option>
+          {options.map((o) => (
+            <option key={o.en} value={o.en}>
+              {o.en}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          {...(dir ? { dir } : {})}
+          value={profile[key] ?? ''}
+          onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
+          style={inputStyle}
+        />
+      )}
     </label>
   );
 
@@ -105,7 +124,8 @@ export function RegisterFacilityForm({
           </h2>
           <div data-region="profile-form" style={{ padding: '31px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>
             {content.profileFields.flatMap((f) => {
-              const base = field(f.key, f.en, f.ar);
+              const opts = ('options' in f ? f.options : undefined) as { en: string; ar: string }[] | undefined;
+              const base = field(f.key, f.en, f.ar, undefined, opts);
               if (!('bilingual' in f) || !f.bilingual) return [base];
               return [base, field(`${f.key}Ar`, `${f.en} (Arabic)`, `${f.ar} (بالعربية)`, 'rtl')];
             })}
@@ -114,13 +134,8 @@ export function RegisterFacilityForm({
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
               <L en={content.crewCallout.labelEn} ar={content.crewCallout.labelAr} />
             </div>
-            <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.7, maxWidth: '74ch' }}>
-              <L en={content.crewCallout.en} ar={content.crewCallout.ar} />
-            </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 18 }}>
-              {content.accessFields.map((f) =>
-                field(f.key, f.en, f.ar, undefined, ('hintEn' in f ? f.hintEn : undefined) as string | undefined, ('hintAr' in f ? f.hintAr : undefined) as string | undefined),
-              )}
+              {content.accessFields.map((f) => field(f.key, f.en, f.ar))}
             </div>
           </div>
           <button
@@ -216,19 +231,6 @@ export function RegisterFacilityForm({
                 </div>
               ) : null}
 
-              {picked.alsoRecurringVenue ? (
-                <div data-region="venue-cross" style={{ padding: '28px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 16 }}>
-                  <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 12 }}>
-                    <L en="This building may also be a recurring venue" ar="قد يكون هذا المبنى أيضاً موقع فعاليات دورياً" />
-                  </div>
-                  <p style={{ margin: '0 0 18px', fontSize: '15.5px', lineHeight: 1.7, maxWidth: '70ch' }}>
-                    <L en={content.venueCross.en} ar={content.venueCross.ar} />
-                  </p>
-                  <a href="/venues/new" style={{ height: 42, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 21, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
-                    <L en="Register a recurring venue as well" ar="تسجيل موقع فعاليات متكرر أيضاً" />
-                  </a>
-                </div>
-              ) : null}
 
               {!ended ? (
                 <button
