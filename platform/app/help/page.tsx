@@ -2,6 +2,9 @@ import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
 import { currentAccount } from '../../lib/auth';
 import {
+  DECLARATION_ITEMS,
+  DECLARATION_ITEM_DIVERGENCES,
+  ROLES_CONTENT,
   GUIDANCE_DEPTH,
   GUIDANCE_TEMPLATE,
   GUIDANCE_WORKFLOW,
@@ -130,6 +133,34 @@ export default async function HelpPage() {
           ))}
         </div>
       </div>
+
+      <h2 id="ems-declaration" style={h2}>
+        <L en="The EMS Readiness Declaration" ar="إقرار جاهزية خدمات الطوارئ الطبية" />
+      </h2>
+      <p style={p}>
+        <L
+          en="Completed and signed by each participating agency separately. What the agency accepts by signing:"
+          ar="تستكمله وتوقّعه كل جهة مشاركة على حدة. وما تقبله الجهة بتوقيعها:"
+        />
+      </p>
+      <p style={{ ...p, fontWeight: 500 }}>
+        <L en={ROLES_CONTENT.ems.responsibilitySentence.en} ar={ROLES_CONTENT.ems.responsibilitySentence.ar} />
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockStart: 12 }}>
+        {DECLARATION_ITEMS.map((item, i) => (
+          <div key={i} style={cell}>
+            {i + 1}. <L en={item.en} ar={item.ar} />
+          </div>
+        ))}
+      </div>
+      {DECLARATION_ITEM_DIVERGENCES.length > 0 ? (
+        <p style={{ ...p, color: 'var(--muted)', fontSize: '12.5px', marginBlockStart: 12 }}>
+          <L
+            en="Where the two issues of the instrument differ on these items, the English governs and the difference is recorded for the Ministry."
+            ar="حيث يختلف إصدارا الأداة في هذه البنود، يُعتمد النص الإنكليزي ويُسجَّل الفرق للوزارة."
+          />
+        </p>
+      ) : null}
 
       <h2 id="submission" style={h2}>
         <L en="The submission package" ar="حزمة التقديم" />

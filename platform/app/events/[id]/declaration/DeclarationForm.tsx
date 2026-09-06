@@ -10,8 +10,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { missingCertificationFields } from '../../../../lib/rules';
-import { SourceDivergence } from '../../../../components/SourceDivergence';
-import { DECLARATION_ITEM_DIVERGENCES } from '../../../../lib/rules';
+import { } from '../../../../lib/rules';
 import { saveDeclarationDraftAction, signDeclarationAction } from '../../../actions';
 import { ROLES_CONTENT, declarationGate, type DeclarationItem } from '../../../../lib/rules';
 
@@ -96,9 +95,6 @@ export function DeclarationForm({
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', flex: 'none', minWidth: 18 }}>{i + 1}</span>
               <span style={{ fontSize: 16, lineHeight: 1.55 }}>
                 <L en={item.en} ar={item.ar} />
-                {DECLARATION_ITEM_DIVERGENCES.filter((d) => d.index === i).map((d) => (
-                  <SourceDivergence key={d.index} en={d.en} ar={d.ar} />
-                ))}
               </span>
             </button>
           );
@@ -114,11 +110,7 @@ export function DeclarationForm({
             <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                 <L en={f.en} ar={f.ar} />
-                {'issue' in f && f.issue === 'en-only' ? (
-                  <span style={{ display: 'inline-block', marginInlineStart: 8, padding: '0 6px', border: '1px solid var(--line)', borderRadius: 3, fontSize: 10.5, letterSpacing: '.04em', textTransform: 'uppercase' }}>
-                    <L en="English issue only" ar="الإصدار الإنكليزي فقط" />
-                  </span>
-                ) : null}
+
               </span>
               <input
                 type={f.key === 'date' ? 'date' : 'text'}

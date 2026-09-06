@@ -82,6 +82,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await fill(page, 'Authorized representative', 'R. Haddad');
     await fill(page, 'Telephone', '+961 1 000 000');
     await fill(page, 'Position', 'Events director');
+    await page.keyboard.press('Tab'); // blur -> flush the last field's autosave
 
     // Blockers are server-derived: the form AUTOSAVES (fields-only ruling,
     // 2026-09-04) -- the quiet Saved receipt is the wait, then file.

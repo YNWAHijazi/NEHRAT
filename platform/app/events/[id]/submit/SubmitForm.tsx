@@ -73,6 +73,7 @@ export function SubmitForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [, startAutosave] = useTransition();
   const applicable = useMemo(
     () => declarations.filter((d) => d.minLevel <= level),
     [declarations, level],
@@ -96,40 +97,82 @@ export function SubmitForm({
   // Locked once filed -- except while a revision or incomplete outcome holds the form open.
   const locked = filed && !revisionOpen;
 
+  // THE BUTTON JUDGES ITS OWN FIELDS FROM CLIENT STATE (fields-only ruling,
+  // 2026-09-04). The declarations and the certification are edited on THIS form,
+  // so their completeness is known here without a round-trip -- the button no
+  // longer waits for an autosave to land and a refresh to recompute the
+  // server's view of what the user just typed. External blockers (documents, the
+  // plan, named providers, the organization, the fee) stay server-derived; the
+  // server re-validates everything on File regardless.
+  const declComplete = applicable.every((_, i) => ticked[String(i)] === true);
+  const certComplete = missingCert.size === 0;
+  // The form's OWN blockers, known from client state: the declarations, the
+  // certification, and the compliance-form DOCUMENT -- which is just the
+  // server's duplicate name for those two being complete, so it clears from the
+  // same client facts rather than waiting for a save-and-refresh round-trip.
+  const externalBlockers = blockers.filter(
+    (b) =>
+      b.kind !== 'declarationsIncomplete' &&
+      b.kind !== 'certificationIncomplete' &&
+      !(b.kind === 'documentMissing' && b.docKey === 'complianceForm'),
+  );
+  const outstanding =
+    externalBlockers.length + (declComplete ? 0 : 1) + (certComplete ? 0 : 1);
+  const canFile = outstanding === 0 && !locked;
+
   // AUTOSAVE (fields-only ruling, 2026-09-04): one button on this form -- File.
-  // Saving is not the organizer's job; the form saves as they type, debounced,
-  // and the quiet Saved indicator is the receipt the tests wait on.
+  // Saving is not the organizer's job; the form saves as they type. A debounce
+  // batches typing, and a live ref of the latest values lets a blur FLUSH the
+  // pending save immediately -- so leaving the last field always persists it,
+  // and no navigation can strand an in-flight debounce. The quiet Saved
+  // indicator is the receipt.
+  const latest = useRef({ declarations: ticked, insurance, representative, telephone, position });
+  latest.current = { declarations: ticked, insurance, representative, telephone, position };
   const dirty = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Once File is pressed, autosave stands down: a resolving autosave's
+  // router.refresh() would otherwise race the navigation to the acknowledgment
+  // and strand the user on this page.
+  const filing = useRef(false);
+  const persist = () => {
+    if (locked || filing.current) return;
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    startAutosave(async () => {
+      const result = await saveComplianceAction(eventId, latest.current);
+      if ('ok' in result && !filing.current) {
+        setSaved(true);
+        router.refresh();
+      }
+    });
+  };
+  // Flush on blur ALWAYS persists the latest snapshot -- not gated on a
+  // pending timer, because React may not have committed the debounce effect by
+  // the time focus leaves the last field. persist() sends latest.current, so a
+  // blur can never save a stale value, and the Saved receipt only appears once
+  // that save resolves.
+  const flush = () => { if (!locked) persist(); };
   useEffect(() => {
     if (locked) return;
     if (!dirty.current) { dirty.current = true; return; }
     setSaved(false);
-    const t = setTimeout(() => {
-      startTransition(async () => {
-        const result = await saveComplianceAction(eventId, {
-          declarations: ticked,
-          insurance,
-          representative,
-          telephone,
-          position,
-        });
-        if ('ok' in result) {
-          setSaved(true);
-          router.refresh();
-        }
-      });
-    }, 700);
-    return () => clearTimeout(t);
+    timer.current = setTimeout(persist, 700);
+    return () => { if (timer.current) clearTimeout(timer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticked, insurance, representative, telephone, position]);
 
   const file = () => {
     setFileError(false);
+    filing.current = true;
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     startTransition(async () => {
+      // Persist the latest before filing: the gate is derived server-side, so a
+      // click must not race a pending autosave. One save, then file.
+      await saveComplianceAction(eventId, latest.current);
       const result = await fileSubmissionAction(eventId);
       if ('reference' in result) {
         router.push(`/events/${eventId}/acknowledgment`);
       } else {
+        filing.current = false;
         setFileError(true);
         router.refresh();
       }
@@ -196,6 +239,7 @@ export function SubmitForm({
                             value={insurance[f.key] ?? ''}
                             disabled={locked}
                             onChange={(e) => setInsurance((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                            onBlur={flush}
                             style={inputStyle}
                           />
                         </label>
@@ -271,6 +315,7 @@ export function SubmitForm({
               required
               aria-invalid={!locked && missingCert.has('representative')}
               onChange={(e) => setRepresentative(e.target.value)}
+              onBlur={flush}
               style={{ ...inputStyle, ...(!locked && missingCert.has('representative') ? { border: '1px solid var(--bad)' } : {}) }}
             />
           </label>
@@ -284,6 +329,7 @@ export function SubmitForm({
               required
               aria-invalid={!locked && missingCert.has('position')}
               onChange={(e) => setPosition(e.target.value)}
+              onBlur={flush}
               style={{ ...inputStyle, ...(!locked && missingCert.has('position') ? { border: '1px solid var(--bad)' } : {}) }}
             />
           </label>
@@ -291,7 +337,7 @@ export function SubmitForm({
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Telephone" ar="الهاتف" />
             </span>
-            <input value={telephone} disabled={locked} onChange={(e) => setTelephone(e.target.value)} style={inputStyle} />
+            <input value={telephone} disabled={locked} onChange={(e) => setTelephone(e.target.value)} onBlur={flush} style={inputStyle} />
           </label>
         </div>
         {!locked ? (
@@ -333,16 +379,20 @@ export function SubmitForm({
               />
             </div>
           ) : null}
-          {blockers.length > 0 ? (
+          {outstanding > 0 ? (
             <div style={{ padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch' }}>
               <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
                 <L
-                  en={`${blockers.length} outstanding`}
-                  ar={`${blockers.length} غير مستوفى`}
+                  en={`${outstanding} outstanding`}
+                  ar={`${outstanding} غير مستوفى`}
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {blockers.map((b) => {
+                {[
+                  ...externalBlockers,
+                  ...(certComplete ? [] : [{ kind: 'certificationIncomplete' as const, itemEn: 'Organizer certification — not complete', itemAr: 'تصديق المنظِّم — غير مكتمل' }]),
+                  ...(declComplete ? [] : [{ kind: 'declarationsIncomplete' as const, itemEn: 'The compliance declarations are not all confirmed', itemAr: 'لم تُؤكَّد جميع إقرارات الامتثال' }]),
+                ].map((b) => {
                   // Each blocker links to the screen that clears it -- a named item
                   // the organizer cannot act on from here is a corridor, not a gate.
                   const href =
@@ -376,28 +426,28 @@ export function SubmitForm({
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginBlockEnd: 12 }}>
             <button
               type="button"
-              disabled={blockers.length > 0 || pending}
+              disabled={!canFile || pending}
               onClick={file}
               style={{
                 height: 48,
                 paddingInline: 26,
                 border: 0,
                 borderRadius: 24,
-                background: blockers.length > 0 ? 'var(--surface2)' : 'var(--brand)',
-                color: blockers.length > 0 ? 'var(--muted)' : 'var(--bg)',
+                background: !canFile ? 'var(--surface2)' : 'var(--brand)',
+                color: !canFile ? 'var(--muted)' : 'var(--bg)',
                 fontSize: 15,
                 fontWeight: 500,
-                cursor: blockers.length > 0 ? 'not-allowed' : 'pointer',
+                cursor: !canFile ? 'not-allowed' : 'pointer',
               }}
             >
               {revisionOpen ? (
-                blockers.length > 0 ? (
-                  <L en={`File the revised submission — ${blockers.length} outstanding`} ar={`تقديم الملف المعدَّل — ${blockers.length} غير مستوفى`} />
+                outstanding > 0 ? (
+                  <L en={`File the revised submission — ${outstanding} outstanding`} ar={`تقديم الملف المعدَّل — ${outstanding} غير مستوفى`} />
                 ) : (
                   <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
                 )
-              ) : blockers.length > 0 ? (
-                <L en={`File the submission — ${blockers.length} outstanding`} ar={`تقديم الملف — ${blockers.length} غير مستوفى`} />
+              ) : outstanding > 0 ? (
+                <L en={`File the submission — ${outstanding} outstanding`} ar={`تقديم الملف — ${outstanding} غير مستوفى`} />
               ) : (
                 <L en="File the submission" ar="تقديم الملف" />
               )}

@@ -112,21 +112,16 @@ for (const lang of LANGUAGES) {
       await fillLabelled(page, 'Authorized representative', 'R. Haddad');
       await fillLabelled(page, 'Telephone', '+961 1 000 000');
       await fillLabelled(page, 'Position', 'Events director');
-      // The form AUTOSAVES (fields-only ruling, 2026-09-04); no Save button exists.
-      // WAIT FOR THE SAVE, NOT FOR THE NETWORK TO GO QUIET. The filing gate is derived
-      // on the server from what was saved, so networkidle can be reached before the
-      // save has landed -- and under a full run it was, which read as a gate refusing
-      // a complete package. Then reload, so the gate is recomputed rather than
-      // re-rendered from whatever the client last held.
-      // BOTH LANGUAGES ARE ALWAYS IN THE DOM -- that is how the bilingual component
-      // works, and CSS hides the one not in use. So a text locator must pick the
-      // language the journey is running in: matching either resolves to two elements,
-      // and matching the English one in an Arabic journey finds a hidden span.
-      await expect(
-        page.locator(lang === 'ar' ? 'text=حُفظ.' : 'text=Saved.').first(),
-      ).toBeVisible({ timeout: 30_000 });
-      await gotoRidingRestarts(page, `/events/${eventId}/submit`);
-
+      // BLUR THE LAST FIELD so its autosave flushes (fields-only ruling,
+      // 2026-09-04): the form saves on blur, and a stale "Saved." from an
+      // earlier field must not let the journey reload before this one persists.
+      await page.keyboard.press('Tab');
+      // The form AUTOSAVES; no Save button exists.
+      // THE FILE BUTTON JUDGES ITS OWN FIELDS FROM CLIENT STATE (fields-only
+      // ruling, 2026-09-04): once the declarations are ticked and the
+      // certification filled, it enables without waiting for an autosave to land
+      // -- and File saves-then-files, so the click never races a pending save.
+      // No reload, no "Saved." wait: the button IS the readiness signal.
       const fileBtn = page.locator('button:has-text("File the submission"), button:has-text("تقديم الملف")').first();
       await expect(fileBtn).toBeEnabled({ timeout: 40_000 });
       await fileBtn.click();

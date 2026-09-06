@@ -118,15 +118,6 @@ export default async function DeclarationPage({
 
           {confirmed ? (
           <>
-          <div data-region="responsibility" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '80ch' }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
-              <L en="What your agency is accepting" ar="ما تقبله جهتكم" />
-            </div>
-            <div style={{ fontSize: 16, lineHeight: 1.7 }}>
-              <L en={content.responsibilitySentence.en} ar={content.responsibilitySentence.ar} />
-            </div>
-          </div>
-
           <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBlockEnd: 32 }}>
             <div style={{ padding: '25px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>

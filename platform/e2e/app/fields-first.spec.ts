@@ -15,19 +15,21 @@ import { signInAs } from '../helpers/signin';
 
 const BUDGET_PX = 900;
 
-const FORM_PAGES: { route: string; label: string }[] = [
+const FORM_PAGES: { route: string; label: string; as?: string }[] = [
   { route: '/events/EV-0418/plan', label: 'the plan' },
   { route: '/events/EV-0418/submit', label: 'the submission package' },
   { route: '/events/new', label: 'the assessment' },
   { route: '/events/EV-0418/requirements', label: 'requirements and attachments' },
+  // The EMS declaration, signed in as the named provider on its live event.
+  { route: '/events/EV-0362/declaration', label: 'the EMS declaration', as: 'test_ems' },
 ];
 
 test.describe('fields come first on a phone', () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
-  for (const { route, label } of FORM_PAGES) {
+  for (const { route, label, as } of FORM_PAGES) {
     test(`${label} puts its first control within ${BUDGET_PX}px at 375px`, async ({ page }) => {
-      await signInAs(page, 'test_organizer');
+      await signInAs(page, as ?? 'test_organizer');
       await gotoRidingRestarts(page, route);
       const top = await page.evaluate(() => {
         const main = document.querySelector('main');

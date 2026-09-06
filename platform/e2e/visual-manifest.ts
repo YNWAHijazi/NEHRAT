@@ -763,13 +763,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     signInAs: 'test_ems',
     regions: [
       {
-        name: 'responsibility',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'What your agency is accepting', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="responsibility"]',
-        note: "The responsibility sentence -- Protocol 7's fuller list including patient care. Held at 2%.",
-      },
-      {
         name: 'items',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="items"]',
@@ -779,7 +772,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'certification',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="certification"]',
-        note: 'Expected divergent, the source over the prototype: Telephone carries the en-only tag (the Arabic issue of the compliance form omits it from both certification blocks -- README divergence 2), and Signature is not collected as a text field; signing IS the signature.',
+        note: 'Expected divergent, the source over the prototype: the certification is the fields only (fields-only ruling, 2026-09-04). The en-only provenance tag on Telephone left for the Ministry\'s file page with every other divergence; Signature is not collected as a text field, signing IS the signature.',
       },
     ],
   },

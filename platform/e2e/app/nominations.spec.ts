@@ -200,6 +200,7 @@ test.describe('creation to determination, end to end', () => {
     await page.locator('label:has-text("Authorized representative") input').fill('R. Haddad');
     await page.locator('label:has-text("Telephone") input').first().fill('+961 1 000 000');
     await page.locator('label:has-text("Position") input').fill('Events director');
+    await page.keyboard.press('Tab'); // blur -> flush the last field's autosave
     // The form AUTOSAVES (fields-only ruling, 2026-09-04); the receipt is the wait.
     await expect(page.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
     const fileBtn = page.locator('button:has-text("File the submission")');
