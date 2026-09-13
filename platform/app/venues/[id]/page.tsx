@@ -183,12 +183,12 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div data-region="rail" style={{ marginBlockEnd: 28, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
-          <div style={{ marginBlockEnd: 18 }}>
+        <details data-region="rail" style={{ marginBlockEnd: 28, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
+          <summary style={{ marginBlockEnd: 18 }}>
             <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
               <L en="Where this venue stands" ar="موضع هذا الموقع" />
             </span>
-          </div>
+          </summary>
           <div data-rail="" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
             {stages.map((s, i) => {
               const st = STAGE_STYLE[s.k];
@@ -210,7 +210,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
               );
             })}
           </div>
-        </div>
+        </details>
 
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>

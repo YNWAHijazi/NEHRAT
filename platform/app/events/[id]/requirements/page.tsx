@@ -1,8 +1,11 @@
+import { InfoNote } from '../../../../components/InfoNote';
+import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
 import { InviteForm } from './InviteForm';
+import { InvitationLinkBlock } from './InvitationLinkBlock';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
   assessmentsFor,
@@ -17,6 +20,7 @@ import {
 } from '../../../../lib/queries';
 import {
   documentsForLevel,
+  levelWhy,
   catalogueEntry,
   certifyRowGroups,
   commandFunctionRow, requirementsForLevel,
@@ -62,28 +66,6 @@ function SectionHeading({ n, en, ar }: { n?: number; en: string; ar: string }) {
   );
 }
 
-/**
- * Requirements and attachments: one page, four numbered groups, in the order they need
- * acting on. Everything derives from the level; a requirement that does not apply is
- * absent, not shown as "not required" (non-negotiable #10).
- */
-function InvitationLinkBlock({ token }: { token: string }) {
-  const path = `/invitations/${token}`;
-  return (
-    <div style={{ width: '100%', marginBlockStart: 12, paddingBlockStart: 12, borderBlockStart: '1px dashed var(--line)' }}>
-      <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-        <L en="The invitation link — hand it to the nominated party" ar="رابط الدعوة — سلّموه إلى الطرف المُسمّى" />
-      </div>
-      <code dir="ltr" style={{ display: 'block', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px', overflowWrap: 'anywhere', userSelect: 'all' }}>
-        {path}
-      </code>
-      <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockStart: 6, maxWidth: '80ch' }}>
-        <L en="Share it only with the party it names." ar="لا تشاركوه إلا مع الطرف الذي يسمّيه." />
-      </div>
-    </div>
-  );
-}
-
 export default async function RequirementsPage({
   params,
   searchParams,
@@ -115,18 +97,18 @@ export default async function RequirementsPage({
     redirect(`/events/${id}`);
   }
 
+  const comparison = versions[0] ? levelWhy(versions[0].derivation).comparison : null;
   const documentState = documentStateFor(account.id, id, level);
-  // OUTSTANDING FIRST, THE FORM LAST (partner ruling, 2026-09-05). The
-  // compliance and submission form is completed on the submission package, so
-  // its row is a way OUT of this screen -- it belongs after the work that has to
-  // happen first. Within the rest, what is still owed sorts above what is done.
-  const documents = [...documentsForLevel(level)].sort((a, b) => {
-    const formLast = (d: { key: string }) => (d.key === 'complianceForm' ? 1 : 0);
-    if (formLast(a) !== formLast(b)) return formLast(a) - formLast(b);
-    const owed = (d: { key: string; optional?: boolean }) =>
-      documentState[d.key] === true || d.optional === true ? 1 : 0;
-    return owed(a) - owed(b);
-  });
+  // Only organizer uploads and the plan belong here. Generated records, provider
+  // declarations, and final certification live in their respective sections.
+  const documents = documentsForLevel(level)
+    .filter((doc) => doc.attach || doc.key === 'plan')
+    .sort((a, b) => {
+      const completeOrOptional = (d: { key: string; optional?: boolean }) =>
+        documentState[d.key] === true || d.optional === true ? 1 : 0;
+      return completeOrOptional(a) - completeOrOptional(b);
+    });
+  const firstOpenDocument = documents.find((doc) => !doc.optional && documentState[doc.key] !== true)?.key;
   const attachments = attachmentsFor(account.id, id);
   const fileNames = Object.fromEntries(attachments.map((a) => [a.docKey, a.fileName]));
   const invitations = invitationsFor(account.id, id);
@@ -182,10 +164,24 @@ export default async function RequirementsPage({
         </h1>
         <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
           <L
-            en={`Everything Level ${level} requires of you.`}
-            ar={`كل ما يقتضيه منكم المستوى ${level}.`}
+            en="Add your documents, invite your medical team, then review your submission."
+            ar="أضيفوا مستنداتكم، وادعوا فريقكم الطبي، ثم راجعوا ملف التقديم."
           />
         </p>
+
+        {comparison ? <p data-region="derivation" style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 20 }}><L en={comparison.en} ar={comparison.ar} /></p> : null}
+        <EmailDeliveryNotice status={typeof q.mail === 'string' ? q.mail : undefined} />
+        <nav data-region="preparation-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBlockEnd: 32 }}>
+          {[
+            { href: '#documents', en: level === 1 ? '1. Documents' : '1. Documents and plan', ar: level === 1 ? '١. المستندات' : '١. المستندات والخطة' },
+            { href: '#medical-team', en: '2. Medical team', ar: '٢. الفريق الطبي' },
+            { href: '#review', en: '3. Review and submit', ar: '٣. المراجعة والتقديم' },
+          ].map((item) => (
+            <a key={item.href} href={item.href} style={{ padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)', fontSize: 14 }}>
+              <L en={item.en} ar={item.ar} />
+            </a>
+          ))}
+        </nav>
 
         {ministryMeasures.length > 0 ? (
           <div data-region="ministry-measures" style={{ marginBlockEnd: 40 }}>
@@ -222,11 +218,11 @@ export default async function RequirementsPage({
         ) : null}
 
         {/* Group 1 — Documents to attach */}
-        <div data-region="g1">
+        <div data-region="g1" id="documents" style={{ scrollMarginBlockStart: 24 }}>
         <SectionHeading
           n={1}
-          en="Documents to attach"
-          ar="المستندات المطلوب إرفاقها"
+          en={level === 1 ? "Documents" : "Documents and plan"}
+          ar={level === 1 ? "المستندات" : "المستندات والخطة"}
         />
         <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
           <L en={acceptHint().en} ar={acceptHint().ar} />
@@ -250,16 +246,16 @@ export default async function RequirementsPage({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 52 }}>
           {documents.map((doc) => {
             const done = documentState[doc.key] === true;
-            const color = done ? 'var(--brand)' : doc.thirdParty ? 'var(--bad)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
-            const chipBg = done ? 'var(--brand-soft)' : doc.thirdParty ? 'var(--bad-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
-            const stateEn = done ? 'Attached' : doc.thirdParty ? 'Awaiting the EMS provider' : doc.optional ? 'Optional' : 'Outstanding';
-            const stateAr = done ? 'مُرفق' : doc.thirdParty ? 'بانتظار مزوّد الإسعاف' : doc.optional ? 'اختياري' : 'غير مُرفق';
-            const signedCount = providers.filter((p) => p.declaration === 'signed').length;
-            const fileNoteEn = doc.system ? doc.noteEn : doc.thirdParty ? `${signedCount} of ${providers.length} signed` : fileNames[doc.key];
-            const fileNoteAr = doc.system ? doc.noteAr : doc.thirdParty ? `وُقّع ${signedCount} من ${providers.length}` : fileNames[doc.key];
+            const color = done ? 'var(--brand)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
+            const chipBg = done ? 'var(--brand-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
+            const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Outstanding';
+            const stateAr = done ? (doc.platform ? 'مكتمل' : 'مُرفق') : doc.optional ? 'اختياري' : 'غير مُرفق';
+            const fileNoteEn = fileNames[doc.key];
+            const fileNoteAr = fileNames[doc.key];
             return (
-              <div key={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${doc.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ flex: 1, minWidth: 240, display: 'flex', gap: 12, alignItems: 'start' }}>
+              <details name="event-documents" key={doc.key} open={doc.key === firstOpenDocument} data-document={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 12 }}>
+                <summary style={{ cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ flex: '1 1 240px', minWidth: 0, display: 'flex', gap: 12, alignItems: 'start' }}>
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}>
                     <path d="M6.5 4h8l3.5 3.5V20h-11.5z" />
                     <path d="M9.5 11.5h6M9.5 15.5h4" />
@@ -269,21 +265,17 @@ export default async function RequirementsPage({
                       <L en={doc.en} ar={doc.ar} />
                     </div>
                     {fileNoteEn && fileNoteAr ? (
-                      <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>
+                      <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>
                         <L en={fileNoteEn} ar={fileNoteAr} />
                       </div>
                     ) : null}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none', flexWrap: 'wrap' }}>
                   <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
                     <L en={stateEn} ar={stateAr} />
                   </span>
-                  {doc.system ? (
-                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-                      <L en="No action needed" ar="لا إجراء مطلوب" />
-                    </span>
-                  ) : null}
+                </summary>
+                <div style={{ display: 'flex', gap: 12, marginBlockStart: 16, alignItems: 'center', maxWidth: '100%', minWidth: 0, flexWrap: 'wrap' }}>
                   {doc.platform ? (
                     <a
                       href={doc.key === 'plan' ? `/events/${id}/plan` : `/events/${id}/submit`}
@@ -295,7 +287,7 @@ export default async function RequirementsPage({
                   {doc.attach && !done ? (
                     <form
                       action={attachDocumentAction.bind(null, id)}
-                      style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
+                      style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
                     >
                       <input type="hidden" name="docKey" value={doc.key} />
                       <input
@@ -304,7 +296,7 @@ export default async function RequirementsPage({
                         required
                         accept={acceptAttribute()}
                         aria-label="Attach the document"
-                        style={{ fontSize: 13, maxWidth: 230 }}
+                        style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }}
                       />
                       <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, cursor: 'pointer' }}>
                         <L en="Attach" ar="إرفاق" />
@@ -323,9 +315,9 @@ export default async function RequirementsPage({
                         </span>
                       </summary>
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 8 }}>
-                        <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                           <input type="hidden" name="docKey" value={doc.key} />
-                          <input type="file" name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 230 }} />
+                          <input type="file" name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }} />
                           <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                             <L en="Replace" ar="استبدال" />
                           </button>
@@ -346,19 +338,25 @@ export default async function RequirementsPage({
                     </details>
                   ) : null}
                 </div>
-              </div>
+              </details>
             );
           })}
         </div>
         </div>
 
         {/* Group 2 — Named EMS providers, and the invitation that belongs here (SPEC 5c) */}
-        <div data-region="g2">
+        <div data-region="g2" id="medical-team" style={{ scrollMarginBlockStart: 24 }}>
         <SectionHeading
           n={2}
           en="Named EMS providers"
           ar="مزوّدو الإسعاف المُسمّون"
         />
+        {level === 3 ? (
+          <InfoNote>
+            <L en="Each participating EMS provider completes their own readiness declaration. Track their response and signature below."
+              ar="يستكمل كل مزوّد إسعاف مشارك إقرار الجاهزية الخاص به. تابعوا الردّ والتوقيع أدناه." />
+          </InfoNote>
+        ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
           {providers.map((p) => {
             const part = partChip[p.status];
@@ -374,7 +372,7 @@ export default async function RequirementsPage({
                   : 'var(--brand)';
             return (
               <div key={p.token} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${edge} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                   <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                     <L en={p.nameEn} ar={p.nameAr} />
                   </div>
@@ -427,7 +425,7 @@ export default async function RequirementsPage({
                     </summary>
                     <form action={removeProviderAction.bind(null, id)} style={{ marginBlockStart: 10, padding: '12px 16px', background: 'var(--accent-soft)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                       <input type="hidden" name="token" value={p.token} />
-                      <span style={{ flex: 1, minWidth: 240, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
+                      <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
                         {event.filed ? (
                           <L en="Removing a confirmed party is a material change, and your submission is filed: the party will be notified, and a change report to the Ministry is required." ar="إزالة طرف مؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ الطرف، ويلزم إبلاغ الوزارة عن التغيير." />
                         ) : (
@@ -459,7 +457,7 @@ export default async function RequirementsPage({
             />
             {director ? (
               <div style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${director.status === 'confirmed' ? 'var(--brand)' : director.status === 'declined' ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
-                <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                   <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                     <L en={director.nameEn} ar={director.nameAr} />
                   </div>
@@ -498,7 +496,7 @@ export default async function RequirementsPage({
                     </summary>
                     <form action={removeProviderAction.bind(null, id)} style={{ marginBlockStart: 10, padding: '12px 16px', background: 'var(--accent-soft)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                       <input type="hidden" name="token" value={director.token} />
-                      <span style={{ flex: 1, minWidth: 240, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
+                      <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
                         {event.filed ? (
                           <L en="Removing the confirmed Director is a material change, and your submission is filed: they will be notified, a change report is required, and the Level 3 package cannot be re-filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ، ويلزم إبلاغ عن التغيير، ولا يمكن إعادة تقديم ملف المستوى 3 دون مدير." />
                         ) : (
@@ -527,20 +525,30 @@ export default async function RequirementsPage({
           </>
         ) : null}
 
+        <section id="review" data-region="review-submission" style={{ scrollMarginBlockStart: 24, padding: 24, background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32 }}>
+          <SectionHeading n={3} en="Review and submit" ar="المراجعة والتقديم" />
+          <InfoNote>
+            <L en="Your risk assessment is included automatically. Review the package and complete your declarations. You can save your progress while waiting for others."
+              ar="يُدرَج تقييم المخاطر تلقائياً. راجعوا الملف وأكملوا إقراراتكم. يمكنكم حفظ تقدّمكم أثناء انتظار الآخرين." />
+          </InfoNote>
+          <a href={`/events/${id}/submit`} style={{ display: 'inline-flex', padding: '12px 20px', borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15 }}>
+            <L en="Review submission" ar="مراجعة ملف التقديم" />
+          </a>
+        </section>
+
         {/* Group 3 — Requirements you certify to */}
         {/* Groups 3 and 4 are not the organizer's work: one is reading, the other is
             somebody visiting them. Both collapse to a header with a derived count, so
             the two groups that ARE work are what the page leads with. */}
         <details data-region="g3" style={{ marginBlockEnd: 20 }}>
           <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', paddingBlock: 10 }}>
-            <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>3</span>
             <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en="Requirements you certify to" ar="المتطلبات التي تصدّقون عليها" />
             </span>
             <span style={{ fontSize: 14, color: 'var(--muted)' }}>
               <L
-                en={`${certifyRows.length} requirements, nothing to do`}
-                ar={`${certifyRows.length} متطلباً، لا إجراء عليها`}
+                en={`${certifyRows.length} requirements to review`}
+                ar={`${certifyRows.length} متطلباً للمراجعة`}
               />
             </span>
             <span style={{ marginInlineStart: 'auto', fontSize: 14, color: 'var(--brand)' }}>
@@ -619,7 +627,6 @@ export default async function RequirementsPage({
 
         <details data-region="inspections" style={{ marginBlockEnd: 44 }}>
           <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', paddingBlock: 10 }}>
-            <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>4</span>
             <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
               <L en="Inspections and visits" ar="التفتيش والزيارات" />
             </span>
@@ -656,10 +663,10 @@ export default async function RequirementsPage({
             <div style={{ background: 'var(--surface2)', borderRadius: 10, overflow: 'hidden', maxWidth: '74ch', padding: 1 }}>
               {inspections.map((ins, i) => (
                 <div key={ins.id} style={{ padding: '14px 18px', borderBlockStart: i === 0 ? '0' : '1px solid var(--line)', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ flex: 1, minWidth: 240, fontSize: '15.5px', lineHeight: 1.45 }}>
+                  <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '15.5px', lineHeight: 1.45 }}>
                     <L en={ins.titleEn} ar={ins.titleAr} />
                   </span>
-                  <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', overflowWrap: 'anywhere' }}>
                     {ins.date ?? ''}
                   </span>
                 </div>

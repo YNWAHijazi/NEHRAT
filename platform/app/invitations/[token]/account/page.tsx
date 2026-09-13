@@ -8,27 +8,10 @@ import { ROLES_CONTENT } from '../../../../lib/rules';
 import {
   registerAgainstInvitationAction,
   signInAgainstInvitationAction,
+  respondToInvitationAction,
 } from '../../../actions';
 
-/**
- * STAGE THREE: the account, after the answer and never as part of it.
- *
- * ACCEPTING MUST NEVER BE THE SAME CLICK AS BEING SIGNED IN (reviewer, 2026-08-28).
- * Before this, one submit recorded the response, created an account and started a
- * session -- so a party could not answer a nomination without choosing a password,
- * and could not DECLINE without registering with the platform in order to say no.
- *
- * The answer is already recorded by the time anyone arrives here. This screen offers
- * an account; it does not require one. A party who closes the page has still accepted,
- * and this link brings them back.
- *
- * TWO PATHS, because the second is the common one after the first event: a provider or
- * a physician nominated again already holds an account and must not be told to make
- * another. Signing in links this nomination to it.
- *
- * The role comes from the NOMINATION, never from anything typed here -- self-
- * registration against the invitation, not against the platform at large (rule 6).
- */
+/** Complete acceptance through account creation or sign-in; a token alone is insufficient. */
 export default async function NominationAccountPage({
   params,
   searchParams,
@@ -45,23 +28,19 @@ export default async function NominationAccountPage({
   if (invitation.status === 'withdrawn' || invitation.status === 'removed') {
     redirect(`/invitations/${token}`);
   }
-  // There is no account to make against an unanswered nomination: making it first is
-  // exactly the order the ruling forbids.
-  if (invitation.status === 'nominated') redirect(`/invitations/${token}`);
+  // Pending invitations remain pending until the account flow completes.
+
 
   const account = await currentAccount();
   // Already linked, or already signed in: this screen has nothing to offer. A
   // counterparty lands on its one page for the event — the Director's event page,
   // or the provider's task page. Anyone else (an organizer holding their own
   // nominee's link) goes to the event record as before.
-  if (account) {
-    redirect(
-      account.role === 'ems'
-        ? `/events/${invitation.eventId}/participation`
-        : `/events/${invitation.eventId}`,
-    );
+  const expectedRole = invitation.kind === 'ems' ? 'ems' : 'director';
+  if (account?.role === expectedRole && invitation.accountId === account.id && invitation.status === 'confirmed') {
+    redirect(account.role === 'ems' ? `/events/${invitation.eventId}/participation` : `/events/${invitation.eventId}`);
   }
-  if (invitation.accountId !== null) redirect('/signin');
+  if (invitation.accountId !== null && invitation.accountId !== account?.id) redirect('/signin');
 
   const N = ROLES_CONTENT.nomination;
   const declined = invitation.status === 'declined';
@@ -91,8 +70,7 @@ export default async function NominationAccountPage({
       <Header account={null} organization={null} unreadCount={0} showBack={false} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 720 }}>
-          {/* The answer is recorded. Say so first: the account is a separate offer and
-              the party must not think their response is still pending on it. */}
+          {/* Be explicit that registration is required before acceptance completes. */}
           <div
             data-region="answer-recorded"
             style={{ padding: '20px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: 15, lineHeight: 1.65 }}
@@ -103,7 +81,7 @@ export default async function NominationAccountPage({
                 ar="سُجِّل ردّكم وأُبلغ المنظّم. ولا يلزمكم حساب، ولا شيء مستحق عليكم بعد الآن في هذه الفعالية."
               />
             ) : (
-              <L en={N.stage3AcceptedEn} ar={N.stage3AcceptedAr} />
+              <L en="An account is required to complete acceptance." ar="يلزم حساب لاستكمال قبول الدعوة." />
             )}
           </div>
 
@@ -116,15 +94,11 @@ export default async function NominationAccountPage({
           ) : (
             <>
               <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
-                <L en={N.stage3TitleEn} ar={N.stage3TitleAr} />
+                <L en="Complete your acceptance" ar="استكمال قبول الدعوة" />
               </h1>
               <p style={{ margin: '0 0 8px', fontSize: '16.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '68ch' }}>
-                <L en={N.stage3IntroEn} ar={N.stage3IntroAr} />
+                <L en="Create an account or sign in to accept this invitation and access your tasks." ar="أنشئوا حساباً أو سجّلوا الدخول لقبول هذه الدعوة والوصول إلى مهامكم." />
               </p>
-              <p style={{ margin: '0 0 28px', fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '68ch' }}>
-                <L en={N.stage3LaterEn} ar={N.stage3LaterAr} />
-              </p>
-
               {error === 'account' ? (
                 <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
                   <L
@@ -155,6 +129,15 @@ export default async function NominationAccountPage({
                 </div>
               ) : null}
 
+              {account?.role === expectedRole ? (
+                <form action={respondToInvitationAction.bind(null, token)} style={{ marginBlockEnd: 24 }}>
+                  <input type="hidden" name="response" value="accept" />
+                  <button type="submit" style={{ padding: '12px 20px', border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)' }}>
+                    <L en="Accept with my account" ar="قبول الدعوة بحسابي" />
+                  </button>
+                </form>
+              ) : null}
+
               <form
                 action={registerAgainstInvitationAction.bind(null, token)}
                 data-region="create-account"
@@ -165,7 +148,7 @@ export default async function NominationAccountPage({
                     <input name="fullName" required style={field} />
                   </Label>
                   <Label en="Email" ar="البريد الإلكتروني">
-                    <input name="email" type="email" required style={field} />
+                    <input name="email" type="email" required defaultValue={invitation.email} style={field} />
                   </Label>
                   <Label en="Password" ar="كلمة المرور">
                     <input name="password" type="password" required style={field} />
@@ -175,7 +158,7 @@ export default async function NominationAccountPage({
                   type="submit"
                   style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
                 >
-                  <L en={N.stage3CreateEn} ar={N.stage3CreateAr} />
+                  <L en="Create account and accept" ar="إنشاء الحساب وقبول الدعوة" />
                 </button>
               </form>
 
@@ -202,7 +185,7 @@ export default async function NominationAccountPage({
                     type="submit"
                     style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', borderRadius: 22, background: 'var(--bg)', fontSize: '14.5px', cursor: 'pointer' }}
                   >
-                    <L en="Sign in and link this nomination" ar="تسجيل الدخول وربط هذا الترشيح" />
+                    <L en="Sign in and accept" ar="تسجيل الدخول وقبول الدعوة" />
                   </button>
                 </form>
               </div>

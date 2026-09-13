@@ -22,7 +22,7 @@ test.describe('the capability shape', () => {
     const flags = page.locator('[data-region="flags"]');
     await expect(flags).toContainText('Commercial');
     await expect(flags).toContainText('Assistive');
-    await expect(flags.locator('button')).toHaveCount(0);
+    await expect(flags.locator('button:not(.info-note-trigger)')).toHaveCount(0);
     await expect(flags).toContainText('Application fees');
 
     // The capability's own page: toggle disabled, naming every missing field.
@@ -76,8 +76,7 @@ test.describe('the capability shape', () => {
 
     // The directory itself waits on a listed vendor -- a fact, not a field.
     await gotoRidingRestarts(page, '/platform/admin/capabilities/vendorDirectory');
-    await expect(page.locator('[data-region="capability-checks"]')).toContainText('At least one listed vendor');
-    await expect(page.locator('[data-region="capability-checks"]')).toContainText('Not yet met');
+    await expect(page.locator('[data-region="enable-blockers"]')).toContainText('vendor');
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(1);
 
     // Platform intelligence: the contradiction is surfaced as an open decision,
@@ -173,7 +172,8 @@ test.describe('the capability shape', () => {
     await page.waitForURL(/notice=vendor-added/);
 
     // The readiness check flips to met and the toggle is live.
-    await expect(page.locator('[data-region="capability-checks"]')).toContainText('Met');
+    await expect(page.locator('[data-region="capability-toggle"]').getByRole('button', { name: 'Turn on', exact: true })).toBeVisible();
+    await expect(page.locator('[data-region="enable-blockers"]')).toHaveCount(0);
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(0);
 
     // Listed but OFF: the public route does not exist, the operator link is absent.

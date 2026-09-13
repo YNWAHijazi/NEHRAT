@@ -8,6 +8,8 @@
  * or invents a gate.
  */
 
+import { deliverPasswordReset } from '../lib/password-reset';
+import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
 import { beirutToday, nowStamp } from '../lib/clock';
 
@@ -22,7 +24,6 @@ import {
   checkPasswordPolicy,
   hashPassword,
   verifyPassword,
-  RESET_EXPIRY_MINUTES,
 } from '../lib/password';
 import { forgetSignInFields, rememberSignInFields,
   currentAccount,
@@ -133,29 +134,11 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   redirect(organization ? `/organization?name=${encodeURIComponent(organization)}` : '/organization');
 }
 
-/**
- * Issues a reset token: expires per policy (one hour), single-use. The review build has
- * no mail transport, so the confirmation screen says the link was recorded; sending is
- * deployment configuration.
- */
+/** Send recovery mail without disclosing whether an address has an account. */
 export async function requestPasswordResetAction(formData: FormData): Promise<void> {
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
-  if (email) {
-    const row = getDb().prepare(`SELECT id FROM accounts WHERE email = ?`).get(email) as
-      | { id: number }
-      | undefined;
-    if (row) {
-      const token = randomBytes(32).toString('hex');
-      getDb()
-        .prepare(
-          `INSERT INTO password_resets (token, account_id, expires_at)
-           VALUES (?, ?, datetime('now', ?))`,
-        )
-        .run(token, row.id, `+${RESET_EXPIRY_MINUTES} minutes`);
-    }
-  }
-  // The answer is uniform whether or not the email exists.
-  redirect('/signin?mode=reset&notice=reset-sent');
+  const result = await deliverPasswordReset(email);
+  redirect(`/signin?mode=reset&notice=${result === 'unavailable' ? 'reset-unavailable' : 'reset-sent'}`);
 }
 
 /**
@@ -597,6 +580,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   const kind = String(formData.get('kind') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
+  let mail = '';
   if ((kind === 'ems' || kind === 'director') && name && email) {
     const token = randomBytes(24).toString('hex');
     getDb()
@@ -604,9 +588,13 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
         `INSERT INTO invitations (token, event_id, kind, name_en, name_ar, email) VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(token, eventId, kind, name, name, email);
+    mail = await sendLinkEmail({ to: email, path: `/invitations/${token}`, isDemo: account.isDemo,
+      subject: 'Event invitation / دعوة للمشاركة في فعالية',
+      text: 'You have been invited to an event. Open the link to review the event and relevant documents. To accept, create an account or sign in.\n\nدُعيتم للمشاركة في فعالية. افتحوا الرابط لمراجعة التفاصيل والمستندات ذات الصلة. لقبول الدعوة، أنشئوا حساباً أو سجّلوا الدخول.',
+    });
   }
   revalidatePath(`/events/${eventId}/requirements`);
-  redirect(`/events/${eventId}/requirements`);
+  redirect(`/events/${eventId}/requirements?mail=${mail}`);
 }
 
 export interface PlanPayload {
@@ -777,6 +765,7 @@ export async function savePostEventReportAction(eventId: string, payload: PostEv
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  if (getDb().prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { error: 'already-submitted' };
   // Event-side data minimisation (Protocol 14): the narrative field is name-screened,
   // the same rule the facility incident report carries.
   const { detectPersonalName } = await import('../lib/rules/pii');
@@ -792,7 +781,9 @@ export async function savePostEventReportAction(eventId: string, payload: PostEv
          lessons_none = excluded.lessons_none, lessons_text = excluded.lessons_text,
          -- Revising the report ANSWERS a Director's return: the returned state
          -- clears, and the Director signs the revised version.
-         director_returned_at = NULL, director_return_note = NULL`,
+         director_returned_at = NULL, director_return_note = NULL,
+         organizer_signed_at = NULL, director_signed_at = NULL
+         WHERE post_event_reports.submitted_at IS NULL`,
     )
     .run(eventId, JSON.stringify(payload.activity), JSON.stringify(payload.significant), payload.lessonsNone ? 1 : 0, payload.lessonsText);
   revalidatePath(`/events/${eventId}/post-event`);
@@ -805,6 +796,7 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
   const db = getDb();
+  if (db.prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { ok: true };
   // The DERIVED level, like every other call site -- demo_level is the fallback for
   // seeded rows only. Reading demo_level alone let a derived Level 3 event submit its
   // report on one signature.
@@ -1376,19 +1368,7 @@ function counterpartyLanding(kind: 'ems' | 'director', eventId: string): string 
   return kind === 'director' ? `/events/${eventId}` : `/events/${eventId}/participation`;
 }
 
-/**
- * The nominee's answer -- STAGE TWO OF THREE, and it stands alone.
- *
- * ACCEPTING IS NEVER THE SAME CLICK AS BEING SIGNED IN (reviewer ruling, 2026-08-28).
- * This action used to create an account, start a session and record the response in
- * one submit: a party could not answer a nomination without simultaneously choosing a
- * password. Declining required registering with the platform in order to say no.
- *
- * The token is the credential (rule 6), and it is sufficient for all three answers.
- * An accepted nomination whose holder has not yet registered is a real state --
- * status confirmed, account_id NULL -- and stage three (/invitations/[token]/account)
- * is where that link is made, or not. The answer stands either way.
- */
+/** Read the invitation without an account; accepting requires an appropriate signed-in account. */
 export async function respondToInvitationAction(token: string, formData: FormData): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
@@ -1406,6 +1386,10 @@ export async function respondToInvitationAction(token: string, formData: FormDat
   const eventName = db.prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
 
   if (response === 'accept') {
+    // Acceptance requires the nominee's account (owner workflow, 2026-09-11).
+    const expectedRole = inv.kind === 'ems' ? 'ems' : 'director';
+    if (!account || account.role !== expectedRole) redirect(`/invitations/${token}/account`);
+    if (inv.account_id !== null && inv.account_id !== account.id) redirect('/dashboard');
     db.prepare(
       // COALESCE, not overwrite: a nomination already linked to an account keeps it.
       `UPDATE invitations SET status = 'confirmed', account_id = COALESCE(?, account_id),
@@ -1419,9 +1403,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
       `/events/${inv.event_id}/requirements`,
     );
-    // Stage three. A signed-in holder lands on the standing brief -- the clean event
-    // summary every counterparty role can read; anyone else is offered an account --
-    // offered, not required.
+    // The linked nominee lands on their own event tasks.
     if (account) redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=accepted`);
     redirect(`/invitations/${token}/account`);
   }
@@ -1430,7 +1412,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     db.prepare(
       `UPDATE invitations SET status = 'declined', account_id = COALESCE(?, account_id),
          response_note = ?, answered_at = now_stamp() WHERE token = ?`,
-    ).run(account?.id ?? null, reason, token);
+    ).run(account?.role === (inv.kind === 'ems' ? 'ems' : 'director') ? account.id : null, reason, token);
     // Declining is a MATERIAL CHANGE the organizer must report (rule 6) -- but only
     // a FILED submission has anything on file to change. Before filing, the
     // instruction is simply to name another party; the change route would bounce.
@@ -1454,7 +1436,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     // Not a nomination state: the nomination stays open with the note attached.
     db.prepare(
       `UPDATE invitations SET response_note = ?, account_id = COALESCE(?, account_id) WHERE token = ?`,
-    ).run(reason, account?.id ?? null, token);
+    ).run(reason, account?.role === (inv.kind === 'ems' ? 'ems' : 'director') ? account.id : null, token);
     notifyOrganizerOf(
       inv.event_id,
       `A named party requests a modification — ${eventName.name_en}`,
@@ -1468,19 +1450,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
   redirect(`/invitations/${token}`);
 }
 
-/**
- * STAGE THREE: the account, after the answer and never as part of it.
- *
- * Self-registration AGAINST the invitation (rule 6) -- the role comes from the
- * nomination, never from anything the registrant types. Two paths, because a party
- * nominated to a second event already has an account and must not be told to make
- * another: create one, or sign in to the one that exists and have the nomination
- * linked to it.
- *
- * Reachable only from a nomination that has been ANSWERED. There is no account to
- * make against an unanswered one, and making the account first would put us back
- * where the ruling found us.
- */
+/** Register against the invitation, then complete its acceptance. Existing users sign in instead. */
 export async function registerAgainstInvitationAction(
   token: string,
   formData: FormData,
@@ -1506,7 +1476,7 @@ export async function registerAgainstInvitationAction(
   const created = db
     .prepare(
       `INSERT INTO accounts (login, email, password_hash, display_name, initials, role, is_demo)
-       VALUES (?, ?, ?, ?, ?, ?, 0)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       `user_${randomBytes(6).toString('hex')}`,
@@ -1515,10 +1485,16 @@ export async function registerAgainstInvitationAction(
       name,
       initials,
       inv.kind === 'ems' ? 'ems' : 'director',
+      (db.prepare('SELECT is_demo FROM events WHERE id = ?').get(inv.event_id) as { is_demo: number }).is_demo,
     );
   const accountId = created.lastInsertRowid as number;
   db.prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(accountId, token);
   await startSession(accountId);
+  if (inv.status === 'nominated') {
+    const acceptance = new FormData();
+    acceptance.set('response', 'accept');
+    await respondToInvitationAction(token, acceptance);
+  }
   redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=registered`);
 }
 
@@ -1550,9 +1526,16 @@ export async function signInAgainstInvitationAction(
   const expected = inv.kind === 'ems' ? 'ems' : 'director';
   if (row.role !== expected) redirect(`/invitations/${token}/account?error=role`);
 
+  if (inv.account_id !== null && inv.account_id !== row.id) redirect('/dashboard');
+
   getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
   await forgetSignInFields();
   await startSession(row.id);
+  if (inv.status === 'nominated') {
+    const acceptance = new FormData();
+    acceptance.set('response', 'accept');
+    await respondToInvitationAction(token, acceptance);
+  }
   redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=linked`);
 }
 
@@ -1714,7 +1697,9 @@ export async function signPostEventReportAction(eventId: string): Promise<void> 
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
   getDb()
-    .prepare(`UPDATE post_event_reports SET director_signed_at = now_stamp() WHERE event_id = ?`)
+    .prepare(`UPDATE post_event_reports SET director_signed_at = now_stamp(),
+      submitted_at = CASE WHEN organizer_signed_at IS NOT NULL THEN now_stamp() ELSE NULL END
+      WHERE event_id = ? AND submitted_at IS NULL AND director_returned_at IS NULL`)
     .run(eventId);
   revalidatePath(`/events/${eventId}/report`);
   redirect(`/events/${eventId}/report?notice=signed`);
@@ -1725,11 +1710,12 @@ export async function returnPostEventReportAction(eventId: string, formData: For
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  if (getDb().prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) redirect(`/events/${eventId}/report`);
   const reason = String(formData.get('reason') ?? '').trim();
   // RECORDED on the report row, not just notified: the Director's own screen shows
   // the returned state, and the organizer's screen shows the reason verbatim.
   getDb()
-    .prepare(`UPDATE post_event_reports SET director_returned_at = now_stamp(), director_return_note = ? WHERE event_id = ?`)
+    .prepare(`UPDATE post_event_reports SET director_returned_at = now_stamp(), director_return_note = ?, director_signed_at = NULL, organizer_signed_at = NULL WHERE event_id = ? AND submitted_at IS NULL`)
     .run(reason, eventId);
   const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string };
   notifyOrganizerOf(

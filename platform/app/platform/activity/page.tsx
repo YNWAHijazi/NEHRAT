@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
@@ -33,12 +34,12 @@ export default async function PlatformActivityPage() {
       <p data-region="scope" style={{ margin: '0 0 8px', fontSize: 14, color: 'var(--muted)', maxWidth: '86ch', lineHeight: 1.65 }}>
         <L en={MINISTRY_CONTENT.activityScope.en} ar={MINISTRY_CONTENT.activityScope.ar} />
       </p>
-      <p data-region="demo-exclusion" style={{ margin: '0 0 24px', fontSize: '12.5px', color: 'var(--muted)', maxWidth: '86ch', lineHeight: 1.6 }}>
+      <InfoNote>
         <L
           en="Demonstration rows are excluded from every figure here, in every session: these are national volumes, never example data."
           ar="تُستبعد السجلات التوضيحية من كل رقم هنا، وفي كل جلسة: هذه أحجام وطنية، لا بيانات أمثلة."
         />
-      </p>
+      </InfoNote>
       <div data-region="counts" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', maxWidth: 1000 }}>
         {rows.map((r) => (
           <div key={r.en} style={{ background: 'var(--bg)', padding: '20px 22px' }}>

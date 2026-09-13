@@ -83,7 +83,7 @@ export default async function RegistryPage({
       ) : null}
       {notice === 'archived' ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="Archived. The record moved to the owner's Previous services and is read-only." ar="أُرشف. انتقل السجل إلى الخدمات السابقة لدى صاحبه وصار للقراءة فقط." />
+          <L en="Archived. The record is now read-only in the owner's Archive." ar="أُرشف. أصبح السجل للقراءة فقط في أرشيف صاحبه." />
         </div>
       ) : null}
       {error === 'not-concluded' ? (

@@ -94,6 +94,7 @@ export default async function MinistryDashboardPage() {
       {/* The dashboard is the console's index: the surfaces without a counter are
           still reachable from it, as plain links. The per-screen sequence footers
           were cut on the partner's second-sweep ruling. */}
+      <Link href="/ministry/reports" style={{ display: 'inline-block', marginBlockEnd: 20 }}><L en="Review post-event reports" ar="مراجعة تقارير ما بعد الفعاليات" /></Link>
       <div data-region="console-links" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 32 }}>
         {[
           { href: '/ministry/applicability', en: 'Applicability and referrals', ar: 'الانطباق والإحالات' },

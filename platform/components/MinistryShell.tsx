@@ -35,7 +35,7 @@ export function MinistryShell({
     <>
       <GovernmentBand />
       <header data-noprint="" style={{ position: 'sticky', top: 0, zIndex: 60, background: 'var(--bg)', borderBlockEnd: '1px solid var(--line)' }}>
-        <div data-pad="" style={{ maxWidth: 1320, marginInline: 'auto', padding: '10px 32px', display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div data-pad="" style={{ maxWidth: 1320, marginInline: 'auto', padding: '10px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
           <Link href="/ministry" style={{ display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ink)' }}>
             <span aria-hidden="true" style={{ width: 30, height: 30, borderRadius: '50%', border: '1.5px solid var(--brand)', display: 'grid', placeItems: 'center' }}>
               <span style={{ width: 13, height: 13, background: 'var(--brand)', clipPath: 'polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)' }} />

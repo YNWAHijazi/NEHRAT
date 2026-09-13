@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
@@ -35,12 +36,12 @@ export default async function RegisterVenuePage() {
 
           <RegisterVenueForm fields={[...VENUE_REGISTRATION_FIELDS]} />
 
-          <div data-region="exempt-footnote" style={{ padding: '23px 27px', background: 'var(--surface2)', borderRadius: 12, marginBlockStart: 20, fontSize: 15, lineHeight: 1.65, color: 'var(--muted)' }}>
+          <div data-region="exempt-footnote"><InfoNote>
             <L
               en="A specific event held at this venue may still enter the process on its own criteria. Registering a venue does not exempt events held there."
               ar="قد تدخل فعالية بعينها تُقام في هذا الموقع في الآلية بحسب معاييرها الخاصة. تسجيل الموقع لا يعفي الفعاليات التي تُقام فيه."
             />
-          </div>
+          </InfoNote></div>
         </div>
 
       </main>

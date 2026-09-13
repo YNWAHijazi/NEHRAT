@@ -89,7 +89,7 @@ for (const lang of LANGUAGES) {
 
       await fillLabelled(page, 'Position', 'Events director');
 
-      await page.locator('button:has-text("Save the assessment and open the event record"), button:has-text("حفظ التقييم وفتح سجل الفعالية")').first().click();
+      await page.locator('button:has-text("Continue to requirements"), button:has-text("المتابعة إلى المتطلبات")').first().click();
       await page.waitForURL(/\/events\/EV-\d+/);
       const eventId = new URL(page.url()).pathname.split('/')[2]!;
       // BOTH RESULTS AND WHICH GOVERNED -- never the final level alone.

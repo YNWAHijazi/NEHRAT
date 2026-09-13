@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers';
+import { InfoNote } from '../../../../../components/InfoNote';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { L } from '../../../../../components/L';
@@ -28,6 +30,7 @@ export default async function CapabilityPage({
   searchParams: Promise<{ notice?: string; error?: string }>;
 }) {
   const account = await requireMinistryPage('manageFlags');
+  const language = (await cookies()).get('lang')?.value === 'ar' ? 'ar' : 'en';
   const { flag: rawFlag } = await params;
   const { notice, error } = await searchParams;
   if (!ALL_FLAGS.includes(rawFlag as FeatureFlag)) notFound();
@@ -121,7 +124,9 @@ export default async function CapabilityPage({
             </span>
           </div>
           <h1 data-sec-h1="" style={{ margin: 0, fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
-            <L en={detail.titleEn} ar={detail.titleAr} />
+            <L en={detail.titleEn} ar={detail.titleAr} /> <InfoNote>
+        <L en={detail.whatEn} ar={detail.whatAr} />
+      </InfoNote>
           </h1>
         </div>
 
@@ -162,15 +167,8 @@ export default async function CapabilityPage({
         </div>
       </div>
 
-      <p style={{ margin: '0 0 14px', fontSize: 14, lineHeight: 1.65, maxWidth: '84ch' }}>
-        <L en={detail.whatEn} ar={detail.whatAr} />
-      </p>
-      <p style={{ margin: '0 0 24px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '84ch' }}>
-        <L
-          en="Turning this on or off is recorded: who, when, and the configuration at that moment."
-          ar="يُسجَّل تشغيلها أو إطفاؤها: مَن ومتى وما كان الإعداد في تلك اللحظة."
-        />
-      </p>
+
+
 
       {/* THE ASSISTANT IS DELIBERATELY NOT BUILT (non-negotiable 14): this
           governance precedes its existence, and the page says so rather than
@@ -212,11 +210,11 @@ export default async function CapabilityPage({
       {detail.requiredConfig.length > 0 ? (
         <div data-region="capability-config" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Configuration" ar="الإعداد" />
-          </h2>
-          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+            <L en="Configuration" ar="الإعداد" /> <InfoNote>
             <L en="Every field is required before the capability can be enabled. Clearing a field returns it to unset." ar="كل حقل مطلوب قبل تشغيل القدرة. ومسح الحقل يعيده إلى غير محدد." />
-          </p>
+          </InfoNote>
+          </h2>
+
           <form action={saveCapabilityConfigAction} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <input type="hidden" name="flag" value={flag} />
             {detail.requiredConfig.map((field) => {
@@ -254,27 +252,6 @@ export default async function CapabilityPage({
         </div>
       ) : null}
 
-      {(detail.requiredChecks ?? []).length > 0 ? (
-        <div data-region="capability-checks" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
-          <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="What it needs before it can be enabled" ar="ما تحتاجه قبل التشغيل" />
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 10 }}>
-            {(detail.requiredChecks ?? []).map((check) => {
-              const met = checks[check.key] === true;
-              return (
-                <div key={check.key} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', alignItems: 'center', fontSize: '13.5px' }}>
-                  <L en={check.labelEn} ar={check.labelAr} />
-                  <span style={{ padding: '3px 10px', borderRadius: 999, background: met ? 'var(--brand-soft)' : 'var(--accent-soft)', color: met ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
-                    {met ? <L en="Met" ar="مستوفى" /> : <L en="Not yet met" ar="غير مستوفى بعد" />}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-
       {/* THE DIRECTORY'S CONTENT is its configuration: vendors, added here and
           never self-registered. Managing the list works while the capability is
           off -- the readiness check wants a listed vendor before it can turn on
@@ -282,14 +259,14 @@ export default async function CapabilityPage({
       {flag === 'vendorDirectory' ? (
         <div data-region="vendor-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Vendors" ar="المزوّدون" />
-          </h2>
-          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
+            <L en="Vendors" ar="المزوّدون" /> <InfoNote>
             <L
               en={`Added by the administrator, never self-registered. Delisting keeps the row. Every public listing states: ${vendorDisclaimer().en}`}
               ar={`يضيفهم المسؤول ولا يسجّلون أنفسهم. والشطب يُبقي الصف. وتذكر كل قائمة عامة: ${vendorDisclaimer().ar}`}
             />
-          </p>
+          </InfoNote>
+          </h2>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
             {vendorsAll().length === 0 ? (
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
@@ -348,7 +325,7 @@ export default async function CapabilityPage({
                 <select name="category" style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 17, fontSize: 13 }}>
                   <option value=""></option>
                   {vendorCategories().map((c) => (
-                    <option key={c.key} value={c.key}>{c.en}</option>
+                    <option key={c.key} value={c.key}>{c[language]}</option>
                   ))}
                 </select>
               </label>
@@ -574,11 +551,11 @@ export default async function CapabilityPage({
 
       <div data-region="capability-acts" style={{ maxWidth: 860 }}>
         <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-          <L en="Acts on this capability" ar="الإجراءات على هذه القدرة" />
+          <L en="Change history" ar="سجل التغييرات" />
         </h2>
         {acts.length === 0 ? (
           <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)' }}>
-            <L en="None recorded. This capability has never been turned on." ar="لا شيء مسجَّل. لم تُشغَّل هذه القدرة قط." />
+            <L en="No changes yet." ar="لا تغييرات بعد." />
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockStart: 10 }}>

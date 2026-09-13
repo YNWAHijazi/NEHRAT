@@ -284,12 +284,12 @@ describe('the event record names ONE next action, from the gate\'s own blockers'
     expect(planAction.href).toBe('plan');
   });
 
-  it('waiting on somebody else says so, and says nothing is owed meanwhile', () => {
+  it('waiting on somebody else offers a clear follow-up', () => {
     const a = nextAction([b('providerUnanswered')]);
     expect(a.kind).toBe('waitingOnOthers');
-    expect(a.titleEn).toBe('Wait for the named provider to answer');
-    expect(a.bodyEn).toContain('Nothing is owed by you meanwhile');
-    expect(a.bodyEn).toContain('A nomination is not a confirmation');
+    expect(a.titleEn).toBe('Follow up on the pending response');
+    expect(a.bodyEn).toContain('Your preparation is complete');
+    expect(a.bodyEn).toContain('response or declaration is pending');
   });
 
   it('the organizer\'s own work outranks waiting on others', () => {
@@ -298,10 +298,24 @@ describe('the event record names ONE next action, from the gate\'s own blockers'
     expect(nextAction([b('providerUnanswered'), b('directorMissing')]).kind).toBe('director');
   });
 
-  it('a pending organization outranks everything: nothing else unblocks filing', () => {
-    const a = nextAction([b('organizationPending'), b('documentMissing', 'siteMap')]);
+  it('pending registration allows preparation before showing the registration wait', () => {
+    expect(nextAction([b('organizationPending'), b('documentMissing', 'siteMap')]).kind).toBe('documents');
+    expect(nextAction([b('organizationPending'), b('documentMissing', 'plan')]).kind).toBe('plan');
+    expect(nextAction([b('organizationPending'), b('directorMissing')]).kind).toBe('director');
+    expect(nextAction([b('organizationPending'), b('declarationsIncomplete')]).kind).toBe('declarations');
+    const a = nextAction([b('organizationPending')]);
     expect(a.kind).toBe('organizationPending');
     expect(a.href).toBe('organization');
+  });
+
+  it('organizer declarations and certification can be completed while responses are pending', () => {
+    for (const own of ['declarationsIncomplete', 'certificationIncomplete'] as const) {
+      const action = nextAction([b('providerUnanswered'), b('directorUnanswered'), b(own)]);
+      expect(action.kind).toBe('declarations');
+      expect(action.href).toBe('submit');
+    }
+    // Certification alone must never claim the package is ready to file.
+    expect(nextAction([b('certificationIncomplete')]).kind).toBe('declarations');
   });
 
   it('every state carries both languages and a button', () => {

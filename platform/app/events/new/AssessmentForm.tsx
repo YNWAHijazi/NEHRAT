@@ -264,7 +264,7 @@ export function AssessmentForm({
         position,
       });
       if ('error' in result) setError(result.error);
-      else router.push(`/events/${result.eventId}`);
+      else router.push(`/events/${result.eventId}/requirements`);
     });
   };
 
@@ -573,7 +573,7 @@ export function AssessmentForm({
         {reassess ? (
           <L en="Save as a new assessment version" ar="حفظ كنسخة تقييم جديدة" />
         ) : (
-          <L en="Save the assessment and open the event record" ar="حفظ التقييم وفتح سجل الفعالية" />
+          <L en="Continue to requirements" ar="المتابعة إلى المتطلبات" />
         )}
       </button>
     </div>

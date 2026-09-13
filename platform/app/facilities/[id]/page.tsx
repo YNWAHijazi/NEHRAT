@@ -224,6 +224,21 @@ export default async function FacilityReadinessPage({
           </div>
         ) : null}
 
+        {facility.archivedAt === null ? (
+          <section data-region="facility-tasks" style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24 }}>
+            <h2 style={{ fontSize: 20, marginBlockStart: 0 }}><L en="Your next tasks" ar="مهامكم التالية" /></h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {ledger.filter((row) => row.status !== 'current').map((row) => {
+                const requirement = obligationByKey.get(row.key);
+                return <Link key={row.key} href={ACTION_ROUTE[row.key]?.(facility.id) ?? `/facilities/${facility.id}/plan`} style={{ padding: 14, background: 'var(--bg)', borderRadius: 10, color: 'var(--ink)' }}>
+                  <L en={requirement?.en ?? row.key} ar={requirement?.ar ?? row.key} /> · <L en={content.statuses[row.status].en} ar={content.statuses[row.status].ar} />
+                </Link>;
+              })}
+              {ledger.every((row) => row.status === 'current') ? <L en="All recorded requirements are current." ar="جميع المتطلبات المسجّلة سارية." /> : null}
+            </div>
+          </section>
+        ) : null}
+
         <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
           <L en="Validity record" ar="سجل الصلاحية" />
         </h2>

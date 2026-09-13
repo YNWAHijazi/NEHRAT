@@ -21,12 +21,26 @@ sign-in screen) or create an account.
 
 ## Data store — read this before deploying anything
 
-**`node:sqlite` (a file under `var/`) is the review-build store, not the production
-database.** It exists so the build runs anywhere Node runs, with zero setup, while the
-platform is being reviewed. Production persistence is Postgres, and standing it up waits
-on the Ministry's data-residency answer (where the national register may be hosted, and
-under whose control). Nothing in `lib/` besides `db.ts` touches SQLite directly, so the
-swap is confined to one file plus the queries layer.
+**The deployed application currently uses SQLite on a Railway persistent volume.**
+Development defaults to `var/dev.db`; production requires `DATABASE_PATH`. On
+2026-09-11 the deployed path was verified as `/data/nehrat-demonstration.db`.
+Local development databases are not copies of production, and GitHub does not back up
+the live database. Supabase Postgres is the planned destination; migration is not yet
+implemented. Database access also exists in authentication, server actions, and route
+handlers, so this is not a connection-string-only change. See
+[the transition record](acceptance/supabase-transition.md) for verified inventory and sequencing.
+
+Create a consistent backup, including committed WAL data and uploaded documents:
+
+```sh
+npm run db:backup -- --source /path/to/database.db --output-dir var/new-backup
+```
+
+The output directory must not exist; its parent must exist. The command refuses
+overwrites and writes a private SQLite snapshot, schema inventory, and verification
+manifest. The source is opened read-only, with no application migrations or seeding.
+In deployment, `DATABASE_PATH` may replace `--source`. This is an operator command,
+not a scheduled backup service; retain an off-host copy and verify restoration.
 
 The same applies to credentials: passwords are hashed (scrypt) and the policy is data in
 `lib/rules/data/auth-policy.json`, but real credential policy — SSO, email verification,

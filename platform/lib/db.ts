@@ -786,6 +786,23 @@ function migrate(d: DatabaseSync): void {
     -- Turning a platform capability on or off is a licensing act, not a toggle
     -- flip: who, when, and the configuration at that moment. These rows ARE the
     -- record the activity trail reads -- there is no separate audit copy.
+    CREATE TABLE IF NOT EXISTS post_event_report_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL REFERENCES events(id),
+      report_submitted_at TEXT NOT NULL,
+      reviewed_by INTEGER NOT NULL REFERENCES accounts(id),
+      reviewed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(event_id, report_submitted_at)
+    );
+
+    CREATE TABLE IF NOT EXISTS email_deliveries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipient TEXT NOT NULL,
+      status TEXT NOT NULL,
+      is_demo INTEGER NOT NULL DEFAULT 0,
+      attempted_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS capability_acts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       flag TEXT NOT NULL,

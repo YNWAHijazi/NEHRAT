@@ -1,18 +1,6 @@
 'use client';
 
-/**
- * STAGE TWO: the answer, and only the answer.
- *
- * This form used to carry the account fields too, and its submit button both
- * responded to the nomination and created an account with a session. Accepting was
- * therefore the same click as being signed in, and DECLINING required registering
- * with the platform in order to say no. The reviewer's ruling of 2026-08-28 separates
- * them: the token is the credential (rule 6) and it is sufficient for all three
- * answers. The account comes after, on its own screen, and only if the party wants
- * one.
- *
- * All three responses are offered to BOTH kinds. The Director used to be offered two.
- */
+/** Read first, choose a response, then complete acceptance through the account screen. */
 
 import { useState } from 'react';
 import { L } from '../../../components/L';

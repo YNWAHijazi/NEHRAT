@@ -27,8 +27,8 @@ test.describe('reapply from a concluded event', () => {
     await gotoRidingRestarts(page, '/events/EV-0244');
     const reapply = page.locator('[data-region="reapply"]');
     await expect(reapply).toBeVisible();
-    await expect(reapply).toContainText('Nothing from the previous event carries over as approved.');
-    await reapply.locator('button:has-text("Reapply")').click();
+    await expect(reapply).toContainText('Enter new dates and review the requirements before submitting.');
+    await reapply.locator('button:has-text("Duplicate event")').click();
     await page.waitForURL(/\/events\/EV-\d+\?notice=reapplied/);
 
     // A NEW record with its own identifier, naming its source.

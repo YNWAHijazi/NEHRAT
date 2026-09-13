@@ -13,3 +13,6 @@ platform/e2e/output/
 var/
 next-env.d.ts
 .next-probe/
+.next-preview/
+
+.next-v1-build/

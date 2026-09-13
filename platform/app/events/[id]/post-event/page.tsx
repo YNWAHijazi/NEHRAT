@@ -1,3 +1,4 @@
+import { getDb } from '../../../../lib/db';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -40,6 +41,9 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
   const event = eventFor(account.id, id);
   if (!event) notFound();
 
+  const reportReview = getDb().prepare(`SELECT r.reviewed_at FROM post_event_report_reviews r
+    JOIN post_event_reports p ON p.event_id = r.event_id AND p.submitted_at = r.report_submitted_at
+    WHERE r.event_id = ?`).get(id) as { reviewed_at: string } | undefined;
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
   const versions = assessmentsFor(account.id, id);
@@ -196,7 +200,8 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          <PostEventForm
+          {reportReview ? <p role="status" style={{ padding: 18, background: 'var(--brand-soft)', borderRadius: 12 }}><L en="The Ministry has accepted your post-event report." ar="قبلت الوزارة تقرير ما بعد الفعالية." /> · {reportReview.reviewed_at}</p> : null}
+        <PostEventForm
             eventId={id}
             level={level}
             activityFields={[...POST_EVENT_ACTIVITY_FIELDS]}

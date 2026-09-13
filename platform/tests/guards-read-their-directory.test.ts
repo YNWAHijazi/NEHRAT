@@ -51,6 +51,8 @@ const readsDirectory = (src: string): boolean =>
  * named file is the ONLY possible input, not that sweeping would be inconvenient.
  */
 const NAMED_INPUTS_ALLOWED: Record<string, string> = {
+  'database-backup.test.ts':
+    'Exercises one backup command and reads only its generated manifest from a temporary fixture. This is an integration test of an output artifact, not a source-directory guard.',
   'reference-drift.test.ts':
     'Pins a specific snapshot against the specific prototype files it was extracted from. Naming them IS the check -- a drift guard that swept a directory would not know which file each pin belongs to.',
   'guards-read-their-directory.test.ts':
@@ -90,6 +92,6 @@ describe('a guard reads its directory rather than naming its inputs', () => {
     expect(
       Object.keys(NAMED_INPUTS_ALLOWED).length,
       'The allowlist is growing. Each entry is a guard with a hand-written blind spot.',
-    ).toBeLessThanOrEqual(3);
+    ).toBeLessThanOrEqual(4);
   });
 });

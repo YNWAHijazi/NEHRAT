@@ -198,16 +198,16 @@ const STAGE_STYLE: Record<StageKind, { color: string; edge: string; ink: string;
 
 function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn: string; noteAr: string }) {
   return (
-    <div data-region="rail" style={{ marginBlockEnd: 28, padding: '23px 27px', background: 'var(--surface2)', borderRadius: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
+    <details data-region="rail" style={{ marginBlockEnd: 28, padding: '16px 22px', background: 'var(--surface2)', borderRadius: 16 }}>
+      <summary style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
         <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-          <L en="Where this event stands" ar="موضع هذه الفعالية" />
+          <L en="View event progress" ar="عرض مراحل الفعالية" />
         </span>
         <span style={{ fontSize: 13, color: 'var(--muted)' }}>
           <L en={noteEn} ar={noteAr} />
         </span>
-      </div>
-      <div data-rail="" style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 12 }}>
+      </summary>
+      <div data-rail="" style={{ marginBlockStart: 18, display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 12 }}>
         {stages.map((s, i) => {
           const st = STAGE_STYLE[s.k];
           return (
@@ -228,7 +228,7 @@ function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn
           );
         })}
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -425,13 +425,13 @@ export default async function EventRecordPage({
           <div data-region="reapply" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', padding: '16px 22px', border: '1px dashed var(--line)', borderRadius: 12, marginBlockEnd: 20 }}>
             <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
               <L
-                en="Holding this event again? Reapply starts a new event prefilled from this one — everything except the dates. Nothing from the previous event carries over as approved. The level is derived again from your answers."
-                ar="هل ستقام هذه الفعالية مجدداً؟ تبدأ إعادة التقديم فعالية جديدة معبأة مسبقاً من هذه — كل شيء عدا التواريخ. لا شيء من الفعالية السابقة يُعتمد كما هو. ويُستنتج المستوى من جديد من إجاباتكم."
+                en="Reuse these details for your next event. Enter new dates and review the requirements before submitting."
+                ar="استخدموا هذه البيانات لفعاليتكم المقبلة. أدخلوا التواريخ الجديدة وراجعوا المتطلبات قبل التقديم."
               />
             </span>
             <form action={reapplyEventAction.bind(null, event.id)}>
               <button type="submit" style={{ height: 44, paddingInline: 22, border: '1px solid var(--brand)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--brand)', cursor: 'pointer' }}>
-                <L en="Reapply" ar="إعادة التقديم" />
+                <L en="Duplicate event" ar="نسخ الفعالية" />
               </button>
             </form>
           </div>
@@ -455,63 +455,6 @@ export default async function EventRecordPage({
             </Link>
           </div>
         ) : null}
-        {/* ONE next action, above the rail: what to do, why the rest can wait, one
-            button. Derived from the SAME blockers the Submit gate names, so the panel
-            and the screen it opens can never disagree. The waiting state is the one
-            that matters -- amber that is somebody else's move says so. */}
-        {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
-          <Link
-            href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
-            data-region="next-action"
-            data-next-action={action.kind}
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 20,
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '22px 26px',
-              border: `1px solid ${action.tone === 'brand' ? 'var(--brand)' : 'var(--accent)'}`,
-              background: action.tone === 'brand' ? 'var(--brand-soft)' : 'var(--accent-soft)',
-              borderRadius: 16,
-              marginBlockEnd: 20,
-              color: 'var(--ink)',
-              textDecoration: 'none',
-            }}
-          >
-            <span style={{ flex: 1, minWidth: 280 }}>
-              <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: action.tone === 'brand' ? 'var(--brand)' : 'var(--accent-ink)', marginBlockEnd: 6 }}>
-                <L en="Your next action" ar="إجراؤكم التالي" />
-              </span>
-              <span style={{ display: 'block', fontSize: 17, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 6 }}>
-                <L en={action.titleEn} ar={action.titleAr} />
-              </span>
-              <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '72ch' }}>
-                <L en={action.bodyEn} ar={action.bodyAr} />
-              </span>
-            </span>
-            <span
-              style={{
-                flex: 'none',
-                height: 44,
-                paddingInline: 22,
-                borderRadius: 22,
-                background: action.tone === 'brand' ? 'var(--brand)' : 'var(--bg)',
-                color: action.tone === 'brand' ? 'var(--bg)' : 'var(--ink)',
-                border: action.tone === 'brand' ? '0' : '1px solid var(--line)',
-                fontSize: '14.5px',
-                fontWeight: 500,
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              <L en={action.buttonEn} ar={action.buttonAr} />
-            </span>
-          </Link>
-        ) : null}
-
-        <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
-
         {/* Identity header, from the reference */}
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>
@@ -608,10 +551,64 @@ export default async function EventRecordPage({
               href={`/events/${id}/determination`}
               style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
             >
-              <L en={CERT.openEn} ar={CERT.openAr} />
+              <L en={standingDetermination.outcome === 'satisfied' ? "View / print preparedness certificate" : CERT.openEn} ar={standingDetermination.outcome === 'satisfied' ? "عرض / طباعة شهادة التأهب" : CERT.openAr} />
             </a>
           </div>
         ) : null}
+
+        {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
+        {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
+          <Link
+            href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
+            data-region="next-action"
+            data-next-action={action.kind}
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 20,
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '22px 26px',
+              border: `1px solid ${action.tone === 'brand' ? 'var(--brand)' : 'var(--accent)'}`,
+              background: action.tone === 'brand' ? 'var(--brand-soft)' : 'var(--accent-soft)',
+              borderRadius: 16,
+              marginBlockEnd: 20,
+              color: 'var(--ink)',
+              textDecoration: 'none',
+            }}
+          >
+            <span style={{ flex: '1 1 280px', minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: action.tone === 'brand' ? 'var(--brand)' : 'var(--accent-ink)', marginBlockEnd: 6 }}>
+                <L en="Your next action" ar="إجراؤكم التالي" />
+              </span>
+              <span style={{ display: 'block', fontSize: 17, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 6 }}>
+                <L en={action.titleEn} ar={action.titleAr} />
+              </span>
+              <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '72ch' }}>
+                <L en={action.bodyEn} ar={action.bodyAr} />
+              </span>
+            </span>
+            <span
+              style={{
+                flex: 'none',
+                height: 44,
+                paddingInline: 22,
+                borderRadius: 22,
+                background: action.tone === 'brand' ? 'var(--brand)' : 'var(--bg)',
+                color: action.tone === 'brand' ? 'var(--bg)' : 'var(--ink)',
+                border: action.tone === 'brand' ? '0' : '1px solid var(--line)',
+                fontSize: '14.5px',
+                fontWeight: 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              <L en={action.buttonEn} ar={action.buttonAr} />
+            </span>
+          </Link>
+        ) : null}
+
+        <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
         {filing?.conditional && filing.conditionEn && filing.conditionAr ? (
           <p style={{ margin: '0 0 32px', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '78ch' }}>

@@ -118,8 +118,8 @@ test.describe('cancellation and postponement', () => {
     // Annex A Part F: the declaration's fields are required to save.
     await fill('Authorized representative', 'R. Haddad');
     await fill('Position', 'Events director');
-    await page.locator('button:has-text("Save the assessment and open the event record")').click();
-    await page.waitForURL(/\/events\/EV-\d+$/);
+    await page.locator('button:has-text("Continue to requirements")').click();
+    await page.waitForURL(/\/events\/EV-\d+\/requirements$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
     // Postpone first -- no new date; the band says the determination cannot carry.
@@ -179,8 +179,8 @@ test.describe('creation to determination, end to end', () => {
     // Annex A Part F: the declaration's fields are required to save.
     await fill('Authorized representative', 'R. Haddad');
     await fill('Position', 'Events director');
-    await page.locator('button:has-text("Save the assessment and open the event record")').click();
-    await page.waitForURL(/\/events\/EV-\d+$/);
+    await page.locator('button:has-text("Continue to requirements")').click();
+    await page.waitForURL(/\/events\/EV-\d+\/requirements$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
     // Level 1 package: attach the arrangements, declare six, file.

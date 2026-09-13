@@ -1,3 +1,5 @@
+import { InfoNote } from '../../../../components/InfoNote';
+import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
@@ -26,10 +28,10 @@ import {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string; error?: string; seg?: string; q?: string; pending?: string }>;
+  searchParams: Promise<{ notice?: string; mail?: string; error?: string; seg?: string; q?: string; pending?: string }>;
 }) {
   const account = await requireMinistryPage('manageUsers');
-  const { notice, error, seg, q, pending: pendingOnly } = await searchParams;
+  const { notice, mail, error, seg, q, pending: pendingOnly } = await searchParams;
   const ACCOUNTS_CONSOLE = MINISTRY_CONTENT.adminConsole;
   const all = administeredAccounts(account.isDemo);
 
@@ -71,10 +73,45 @@ export default async function UsersPage({
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en={A.titleEn} ar={A.titleAr} />
       </h1>
+      <EmailDeliveryNotice status={mail} />
       <AdminTabs current="/ministry/admin/users" />
-      <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
+      <InfoNote>
         <L en={A.introEn} ar={A.introAr} />
-      </p>
+      </InfoNote>
+
+      {/* CREATE AN ACCOUNT. The platform issues an activation link; the person sets
+          their own password. No administrator sets or sees one. */}
+      <details data-region="add-user" open style={{ marginBlockEnd: 32, maxWidth: 860 }}>
+        <summary style={{ cursor: 'pointer', fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+          <span>
+            <L en={A.inviteTitleEn} ar={A.inviteTitleAr} />
+          </span>
+        </summary>
+        <form action={addMinistryUserAction} style={{ marginBlockStart: 12, padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'end' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 160 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Full name" ar="الاسم الكامل" /></span>
+            <input name="name" required style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Email" ar="البريد الإلكتروني" /></span>
+            <input name="email" type="email" required style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Role" ar="الدور" /></span>
+            <select name="role" required style={{ height: 34, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
+              {assignable.map((r) => (
+                <option key={r} value={r}>{roleLabels[r]?.en ?? r}</option>
+              ))}
+            </select>
+          </label>
+          <button type="submit" style={{ height: 34, paddingInline: 14, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+            <L en="Create the account" ar="إنشاء الحساب" />
+          </button>
+          <span style={{ flexBasis: '100%', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+            <L en={A.inviteBodyEn} ar={A.inviteBodyAr} />
+          </span>
+        </form>
+      </details>
 
       {/* Segment and search, as a GET form so a filtered view has a URL. */}
       <form method="get" data-region="user-filters" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'end', padding: '14px 18px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 18, maxWidth: 860 }}>
@@ -305,39 +342,6 @@ export default async function UsersPage({
         })}
       </div>
 
-      {/* CREATE AN ACCOUNT. The platform issues an activation link; the person sets
-          their own password. No administrator sets or sees one. */}
-      <details data-region="add-user" style={{ marginBlockEnd: 32, maxWidth: 860 }}>
-        <summary style={{ cursor: 'pointer', fontSize: '13.5px', color: 'var(--muted)', listStyle: 'none' }}>
-          <span style={{ textDecoration: 'underline' }}>
-            <L en={A.inviteTitleEn} ar={A.inviteTitleAr} />
-          </span>
-        </summary>
-        <form action={addMinistryUserAction} style={{ marginBlockStart: 12, padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'end' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 160 }}>
-            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Full name" ar="الاسم الكامل" /></span>
-            <input name="name" required style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 180 }}>
-            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Email" ar="البريد الإلكتروني" /></span>
-            <input name="email" type="email" required style={{ height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Role" ar="الدور" /></span>
-            <select name="role" required style={{ height: 34, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
-              {assignable.map((r) => (
-                <option key={r} value={r}>{roleLabels[r]?.en ?? r}</option>
-              ))}
-            </select>
-          </label>
-          <button type="submit" style={{ height: 34, paddingInline: 14, border: 0, borderRadius: 17, background: 'var(--brand)', color: 'var(--bg)', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
-            <L en="Create the account" ar="إنشاء الحساب" />
-          </button>
-          <span style={{ flexBasis: '100%', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
-            <L en={A.inviteBodyEn} ar={A.inviteBodyAr} />
-          </span>
-        </form>
-      </details>
       {!laneActive ? (
         <div data-region="order-suspension" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 32, fontSize: '13.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
           <L en={MINISTRY_CONTENT.orderSuspension.en} ar={MINISTRY_CONTENT.orderSuspension.ar} />

@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
 import { rememberedSignInFields } from '../../lib/auth';
 import { demonstrationAccountsExist } from '../../lib/queries';
@@ -23,11 +24,8 @@ type Mode = 'signin' | 'signup' | 'reset';
  * The demonstration logins, each stating WHAT IT CAN AND CANNOT DO at the point of
  * sign-in rather than in a document nobody has open.
  *
- * The Ministry reviewer is the primary Ministry login and is marked as such: it is the
- * only role that records a determination. The administrator configures and manages
- * users and CANNOT record an outcome -- correct, and confusing to be handed as the one
- * Ministry account, because the submission screen then shows no outcome block at all
- * and the feature reads as missing rather than withheld.
+ * The reviewer focuses on submissions. The administrator also records outcomes;
+ * the owner holds administration access but does not record outcomes or attestations.
  */
 type DemoLogin = {
   login: string;
@@ -78,17 +76,17 @@ const DEMO_LOGINS: DemoLogin[] = [
   },
     {
     login: 'test_moph_admin', en: 'Ministry administrator', ar: 'مدير النظام في الوزارة',
-    canEn: 'Configure the instrument and the cardiac policy, manage users, record organizations, answer enquiries, assign submissions, require measures and record corrective actions.',
-    canAr: 'ضبط الإطار وسياسة توقف القلب، وإدارة المستخدمين، وتثبيت المؤسسات، والرد على الاستفسارات، وإسناد التقديمات، واشتراط التدابير، وتسجيل الإجراءات التصحيحية.',
-    cannotEn: 'Record any outcome. Use the reviewer above for determinations.',
-    cannotAr: 'تسجيل أي نتيجة. استخدموا المراجع أعلاه للقرارات.',
+    canEn: 'Manage users and records, configure requirements, review submissions and record outcomes.',
+    canAr: 'إدارة المستخدمين والسجلات، وضبط المتطلبات، ومراجعة التقديمات وتسجيل النتائج.',
+    cannotEn: 'Access platform-owner controls.',
+    cannotAr: 'الوصول إلى أدوات مالك المنصة.',
   },
   {
     login: 'test_owner', en: 'Platform owner', ar: 'مالك المنصة',
-    canEn: 'See counts of platform activity and the state of commercial flags.',
-    canAr: 'الاطلاع على أعداد نشاط المنصة وحالة المفاتيح التجارية.',
-    cannotEn: 'See the contents of any record. Counts only.',
-    cannotAr: 'الاطلاع على مضمون أي سجل. الأعداد فقط.',
+    canEn: 'Manage users, inspect records and view platform activity counts.',
+    canAr: 'إدارة المستخدمين، والاطلاع على السجلات وأعداد نشاط المنصة.',
+    cannotEn: 'Record Ministry outcomes or attestations, or configure cardiac policy.',
+    cannotAr: 'تسجيل نتائج الوزارة أو التصديقات، أو ضبط سياسة توقف القلب.',
   },
 ];
 
@@ -198,18 +196,21 @@ export default async function SignInPage({
             {/* "An individual account gives access to the platform" left (partner
                 ruling, second sweep): it narrated the card it sat on. The organization
                 gate stays — it is the one thing a new arrival cannot guess. */}
+            {mode === 'signup' ? (
             <p style={{ margin: '0 0 26px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
               <L
                 en="An organization is registered separately and must be recorded by the Ministry before anything can be filed."
                 ar="تُسجَّل المؤسسة بشكل منفصل ويجب أن تسجّلها الوزارة قبل إمكانية تقديم أي ملف."
               />
             </p>
+            ) : null}
 
+            {params.notice === 'reset-unavailable' ? <p role="alert"><L en="Password recovery email is unavailable. Contact support for help." ar="بريد استعادة كلمة المرور غير متاح. تواصلوا مع الدعم للمساعدة." /> <Link href="/help"><L en="Contact support" ar="التواصل مع الدعم" /></Link></p> : null}
             {params.notice === 'reset-sent' ? (
               <div style={{ padding: '14px 18px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.6 }}>
                 <L
-                  en="If an account exists for that address, a reset link has been issued to it."
-                  ar="إذا وُجد حساب بهذا العنوان، فقد صدر إليه رابط إعادة تعيين."
+                  en="If this address has an active account, check your inbox for a reset link."
+                  ar="إذا كان لهذا العنوان حساب نشط، تحقّقوا من بريدكم للحصول على رابط إعادة التعيين."
                 />
               </div>
             ) : null}
@@ -313,12 +314,12 @@ export default async function SignInPage({
             <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
               <L en="Demonstration accounts" ar="حسابات العرض التوضيحي" />
             </h2>
-            <p style={{ margin: '0 0 20px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <InfoNote>
               <L
                 en="Each opens a role's dashboard with example records, so the platform can be walked without creating anything."
                 ar="يفتح كل حساب لوحة دوره بسجلات نموذجية، بحيث يمكن استعراض المنصة دون إنشاء أي شيء."
               />
-            </p>
+            </InfoNote>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {DEMO_LOGINS.map((demo) => (
                 <form key={demo.login} action={demoSignInAction}>

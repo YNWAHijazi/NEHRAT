@@ -192,7 +192,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'expectedDivergent',
         reference: { strategy: 'cardByText', text: 'Where this event stands' },
         builtSelector: '[data-region="rail"]',
-        note: 'Expected divergent by the partner simplification pass (2026-09-01): the stage meta lines were rewritten to lay language — "One of three outcomes" is now "Waiting for the Ministry", "Owed only after a reportable event or on Ministry request" is now "Not needed for this event", "Pending with the Ministry. Filing waits for it." is now "With the Ministry". Second sweep (2026-09-02, partner ruling): the corner note dropped its "· stage 6 not applicable" tail — the sixth column already carries that label. The rail structure and states are unchanged and asserted in e2e/app/journeys.spec.ts. Was a compare held at 2%; flips back when the prototype adopts the lay strings.',
+        note: 'Expected divergent by the organizer simplification request (2026-09-11): the current-stage note remains visible while the six-stage timeline expands on demand. Stage states and regulatory content are preserved. Interaction is covered in organizer-simplicity.spec.ts.',
       },
       {
         name: 'record-header',
@@ -251,7 +251,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'g1',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="g1"]',
-        note: 'Expected divergent: the build replaces the prototype\'s inert action buttons with working attach forms, and the plan row carries its official Arabic name (SPEC 2b). Second sweep (2026-09-02, partner ruling): the group note lost "It is never entered twice."',
+        note: 'Expected divergent under organizer simplification (2026-09-11): this section contains only uploads and the plan, sorted missing first. Provider declarations live with the medical team; generated assessment and final certification are covered by the review section. Working attachment controls remain.',
       },
       {
         name: 'invite',

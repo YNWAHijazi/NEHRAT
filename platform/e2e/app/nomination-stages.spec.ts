@@ -43,8 +43,9 @@ async function makeNomination(page: Page, name: string): Promise<string> {
   await invite.locator('button[type="submit"]').first().click();
   await page.waitForURL('**/requirements**');
   const row = page.locator('[data-region="g2"] > div > div', { hasText: name });
+  await row.locator('[data-invitation-link] summary').click();
   const link = await row.locator('code').first().innerText();
-  const token = link.trim().replace('/invitations/', '');
+  const token = new URL(link.trim(), 'http://localhost').pathname.replace('/invitations/', '');
   expect(token, 'no invitation token was rendered for the new nomination').not.toBe('');
   return token;
 }
@@ -170,17 +171,17 @@ test.describe('stage two — the answer, on the token, with no account', () => {
 });
 
 test.describe('stage three — the account, after the answer and never as part of it', () => {
-  test('an unanswered nomination has no account screen -- that is the forbidden order', async ({ page }) => {
+  test('a pending nomination offers registration before acceptance', async ({ page }) => {
     const response = await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}/account`);
     expect(response?.status()).toBeLessThan(400);
     // Bounced back to the nomination: there is nothing to register against yet.
-    await expect(page).toHaveURL(new RegExp(`/invitations/${EMS_TOKEN}$`));
+    await expect(page.locator('[data-region="create-account"]')).toBeVisible();
   });
 
   // MUTATING, AND LAST. It answers the one unanswered seeded nomination, so it runs
   // after every test that needs it unanswered. The file is serial under the app
   // project's fullyParallel: false, so declaration order is execution order.
-  test('accepting records the answer and offers an account without requiring one', async ({ page }) => {
+  test('acceptance remains pending until an account is created', async ({ page }) => {
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}`);
     await page.locator('[data-region="respond"] button', { hasText: 'Accept' }).first().click();
     await page.locator('button:has-text("Accept the nomination")').click();
@@ -194,7 +195,7 @@ test.describe('stage three — the account, after the answer and never as part o
 
     // Walking away does not undo it: the answer stands and the link comes back here.
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}`);
-    await expect(page.locator('[data-region="accepted-no-account"]')).toBeVisible();
+    await expect(page.locator('[data-region="respond"]')).toBeVisible();
 
     // AND THE ACCOUNT LANDS ON THE ONE PAGE (partner ruling, counterparty pass):
     // the task page for the event, event facts at the top, the work beneath. The

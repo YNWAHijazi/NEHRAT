@@ -1,3 +1,4 @@
+import { InfoNote } from './InfoNote';
 import Link from 'next/link';
 import { L } from './L';
 import { FLAG_GROUPS, effectiveFlag, flagDescription, flagDetail, groupFlags, groupNote, groupTitle } from '../lib/rules/flags';
@@ -25,11 +26,11 @@ export function FlagsPanel() {
         return (
           <div key={group} data-region={`flags-${group}`}>
             <h2 style={{ margin: '0 0 4px', fontSize: 19, fontWeight: 600, letterSpacing: '-.02em' }}>
-              <L en={title.en} ar={title.ar} />
-            </h2>
-            <p style={{ margin: '0 0 10px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '84ch' }}>
+              <L en={title.en} ar={title.ar} /> <InfoNote>
               <L en={note.en} ar={note.ar} />
-            </p>
+            </InfoNote>
+            </h2>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {groupFlags(group).map((flag) => {
                 const on = effectiveFlag(flag, config);

@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
@@ -313,12 +314,12 @@ export default async function DashboardPage({
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Events" ar="الفعاليات" />
               </div>
-              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
+              <InfoNote>
                 <L
                   en="Each event you hold is recorded here with its assessment, its level and its submission."
                   ar="تُسجَّل هنا كل فعالية تقيمونها مع تقييمها ومستواها وتقديمها."
                 />
-              </p>
+              </InfoNote>
               <Link href="/events/new" style={serviceAction}>
                 <L en="Create an event" ar="إنشاء فعالية" />
               </Link>
@@ -327,12 +328,12 @@ export default async function DashboardPage({
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Venues" ar="المواقع" />
               </div>
-              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
+              <InfoNote>
                 <L
                   en="A venue that regularly hosts organized events and is licensed for 1,000 persons or more is classified annually."
                   ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر."
                 />
-              </p>
+              </InfoNote>
               <Link href="/venues/new" style={serviceAction}>
                 <L en="Register a venue" ar="تسجيل موقع" />
               </Link>
@@ -341,12 +342,12 @@ export default async function DashboardPage({
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Facilities" ar="المنشآت" />
               </div>
-              <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', flex: 1 }}>
+              <InfoNote>
                 <L
                   en="A covered facility registers once with its coordinator and each defibrillator, and keeps its response plan current."
                   ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة."
                 />
-              </p>
+              </InfoNote>
               <Link href="/facilities/new" style={serviceAction}>
                 <L en="Register a facility" ar="تسجيل منشأة" />
               </Link>
@@ -482,7 +483,7 @@ export default async function DashboardPage({
         {previousCount > 0 ? (
           <details data-region="previous-services" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
             <summary style={{ cursor: 'pointer', fontSize: 16, fontWeight: 600, letterSpacing: '-.015em' }}>
-              <L en={`Previous services (${previousCount})`} ar={`الخدمات السابقة (${previousCount})`} />
+              <L en={`Archive (${previousCount})`} ar={`الأرشيف (${previousCount})`} />
             </summary>
             <div style={{ marginBlockStart: 14, display: 'flex', flexDirection: 'column', gap: 18 }}>
               <div style={{ fontSize: '12.5px', color: 'var(--muted)' }}>

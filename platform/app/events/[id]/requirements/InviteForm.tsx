@@ -47,8 +47,8 @@ export function InviteForm({ eventId, kind }: { eventId: string; kind: 'ems' | '
       </button>
       <p style={{ flexBasis: '100%', margin: '6px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
         <L
-          en="The invitation link carries an unguessable token. The invited party creates their own account against it; accepting links them to this event."
-          ar="يحمل رابط الدعوة رمزاً لا يمكن تخمينه. تنشئ الجهة المدعوة حسابها الخاص من خلاله؛ وبقبولها ترتبط بهذه الفعالية."
+          en="Create the invitation, then share its link with the named party."
+          ar="أنشئوا الدعوة، ثم شاركوا رابطها مع الجهة المُسمّاة."
         />
       </p>
     </form>

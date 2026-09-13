@@ -1,9 +1,12 @@
+import { InfoNote } from '../../../components/InfoNote';
+import { getDb } from '../../../lib/db';
+import { emailConfigured } from '../../../lib/email';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { FlagsPanel } from '../../../components/FlagsPanel';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { ministryConfig } from '../../../lib/queries';
-import { orderLaneActive } from '../../../lib/rules';
+import { DEFERRED, orderLaneActive } from '../../../lib/rules';
 import { setOrderLaneAction } from '../../ministry-actions';
 
 /**
@@ -21,6 +24,10 @@ export default async function MasterAdminPage({
 }) {
   const account = await requireMinistryPage('manageFlags');
   const { notice } = await searchParams;
+  const totals = ['accounts', 'events', 'venues', 'facilities'].map((table) =>
+    (getDb().prepare(`SELECT COUNT(*) AS n FROM ${table} WHERE is_demo = ?`).get(account.isDemo ? 1 : 0) as { n: number }).n);
+  const mailStats = getDb().prepare(`SELECT status, COUNT(*) AS n FROM email_deliveries WHERE is_demo = ? GROUP BY status`).all(account.isDemo ? 1 : 0) as unknown as { status: string; n: number }[];
+
   const laneConfig = ministryConfig().get('orderLane');
   const laneActive = laneConfig ? laneConfig.value === 'on' : orderLaneActive();
 
@@ -36,8 +43,8 @@ export default async function MasterAdminPage({
       </h1>
       <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
         <L
-          en="Capability, not content: these capabilities exist because the platform is licensed, and they ship off. Nothing commercial renders in this tenant while they are."
-          ar="قدرة لا محتوى: توجد هذه القدرات لأن المنصة مرخَّصة، وتُشحن مطفأة. ولا يظهر أي محتوى تجاري في هذا المستأجر ما دامت كذلك."
+          en="Manage users, records, activity and optional services."
+          ar="إدارة المستخدمين والسجلات والنشاط والخدمات الاختيارية."
         />
       </p>
 
@@ -49,13 +56,36 @@ export default async function MasterAdminPage({
           ['/ministry/admin/activity', 'Activity', 'النشاط'],
           ['/ministry/admin/users', 'Users and roles', 'المستخدمون والأدوار'],
           ['/ministry/admin/records', 'Records', 'السجلات'],
+          ['/ministry/reports', 'Post-event reports', 'تقارير ما بعد الفعاليات'],
         ].map(([href, en, ar]) => (
           <a key={href} href={href} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
             <L en={en!} ar={ar!} />
           </a>
         ))}
       </div>
+      <div data-region="owner-overview" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginBlockEnd: 24 }}>
+        {[
+          { en: 'Users', ar: 'المستخدمون', href: '/ministry/admin/users' },
+          { en: 'Events', ar: 'الفعاليات', href: '/ministry/admin/records' },
+          { en: 'Venues', ar: 'المواقع', href: '/ministry/admin/records' },
+          { en: 'Facilities', ar: 'المرافق', href: '/ministry/admin/records' },
+        ].map((item, index) => <a key={item.en} href={item.href} style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>
+          <div style={{ fontSize: 28 }}>{totals[index]}</div><L en={item.en} ar={item.ar} />
+        </a>)}
+      </div>
+      <section data-region="email-status" style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24 }}>
+        <h2 style={{ marginBlockStart: 0, fontSize: 18 }}><L en="Invitation email" ar="بريد الدعوات" /></h2>
+        {emailConfigured() ? <L en="Sender configured" ar="المرسِل مُعدّ" /> : <L en="Sender not configured yet" ar="لم يُعدّ المرسِل بعد" />}
+        <p><L en={`Sent: ${mailStats.find((r) => r.status === 'sent')?.n ?? 0} · Failed: ${mailStats.find((r) => r.status === 'failed')?.n ?? 0}`} ar={`أُرسلت: ${mailStats.find((r) => r.status === 'sent')?.n ?? 0} · تعذّر إرسالها: ${mailStats.find((r) => r.status === 'failed')?.n ?? 0}`} /></p>
+      </section>
       <FlagsPanel />
+      <details data-region="deferred" style={{ marginBlockEnd: 24, maxWidth: 860 }}>
+        <summary style={{ cursor: 'pointer', fontSize: 14 }}><L en="Planned capabilities" ar="القدرات المخطّط لها" /></summary>
+        {DEFERRED.map((item) => <div key={item.key} style={{ paddingBlock: 12 }}>
+          <L en={item.en} ar={item.ar} />
+          <InfoNote><L en={item.reasonEn} ar={item.reasonAr} />{' '}<L en={item.conditionEn} ar={item.conditionAr} /></InfoNote>
+        </div>)}
+      </details>
       
       <div data-region="order-lane" style={{ padding: '20px 24px', border: `1px solid ${laneActive ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, maxWidth: 860 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 8 }}>
@@ -69,12 +99,12 @@ export default async function MasterAdminPage({
             </button>
           </form>
         </div>
-        <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
+        <InfoNote>
           <L
             en="Authorised external reviewer access, scoped to assigned Level 3 items, non-determinative, never the facility lane. Turning it off suspends the Order reviewer account under Users and roles rather than leaving it listed as active."
             ar="وصول مراجع خارجي مُخوَّل، محصور بالبنود المسندة في المستوى 3، غير حاسم، ولا يصل مسار المرافق أبداً. وإطفاؤه يوقف حساب مراجع النقابة في المستخدمين والأدوار بدل تركه مدرجاً كنشط."
           />
-        </p>
+        </InfoNote>
       </div>
       {/* No sequence footers (partner ruling, second sweep) — a quiet link instead. */}
       <div style={{ marginBlockStart: 28 }}>

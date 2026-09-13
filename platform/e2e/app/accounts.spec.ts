@@ -80,7 +80,7 @@ test.describe('creating an account', () => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/users');
     const form = page.locator('[data-region="add-user"]');
-    await form.locator('summary').click();
+    await expect(form.locator('input[name="email"]')).toBeVisible();
 
     // THE POINT: no password field exists on this screen at all.
     await expectAbsent(page, {
@@ -125,7 +125,7 @@ test.describe('creating an account', () => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/users');
     const form = page.locator('[data-region="add-user"]');
-    await form.locator('summary').click();
+    await expect(form.locator('input[name="email"]')).toBeVisible();
     await form.locator('input[name="name"]').fill('Activation Walk');
     await form.locator('input[name="email"]').fill(unique('activation.walk'));
     await form.locator('select[name="role"]').selectOption('reviewer');

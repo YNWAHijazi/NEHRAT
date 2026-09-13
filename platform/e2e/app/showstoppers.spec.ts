@@ -50,7 +50,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     // Annex A Part F: the declaration's fields are required to save.
     await fill(page, 'Authorized representative', 'R. Haddad');
     await fill(page, 'Position', 'Events director');
-    await page.locator('button:has-text("Save the assessment and open the event record")').click();
+    await page.locator('button:has-text("Continue to requirements")').click();
     await page.waitForURL(/\/events\/EV-\d+/);
     const eventUrl = new URL(page.url());
     const eventId = eventUrl.pathname.split('/')[2]!;

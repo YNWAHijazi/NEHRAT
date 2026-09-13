@@ -35,6 +35,10 @@ export default async function AdminRecordsPage({
   });
 
   const outcomes = MINISTRY_CONTENT.outcomes;
+  const exportParams = new URLSearchParams();
+  if (level) exportParams.set('level', level);
+  if (status) exportParams.set('status', status);
+  if (q) exportParams.set('q', q);
   const field: React.CSSProperties = {
     height: 36,
     paddingInline: 10,
@@ -104,11 +108,14 @@ export default async function AdminRecordsPage({
         </Link>
       </form>
 
-      <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockEnd: 10 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', color: 'var(--muted)', marginBlockEnd: 10 }}>
         <L
           en={A.countEn.replace('{n}', String(records.length))}
           ar={A.countAr.replace('{n}', String(records.length))}
         />
+        <a href={`/api/admin/records/export?${exportParams}`} download style={{ color: 'var(--brand)', paddingBlock: 10, textDecoration: 'underline' }}>
+          <L en="Export these records (CSV)" ar="تصدير هذه السجلات (CSV)" />
+        </a>
       </div>
 
       <div data-region="records" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

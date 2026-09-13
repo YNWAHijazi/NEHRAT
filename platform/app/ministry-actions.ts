@@ -8,6 +8,7 @@
  * action at all.
  */
 
+import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
@@ -964,8 +965,12 @@ export async function addMinistryUserAction(formData: FormData): Promise<void> {
     )
     .run(`acct_${randomBytes(6).toString('hex')}`, email, name, initials, role, actor.isDemo ? 1 : 0);
   const token = issueActivation(created.lastInsertRowid as number, actor.id);
+  const mail = await sendLinkEmail({ to: email, path: `/activate/${token}`, isDemo: actor.isDemo,
+    subject: 'Activate your platform account / تفعيل حسابكم',
+    text: 'Welcome. Set your password using the link below.\n\nمرحباً بكم. ضعوا كلمة مروركم عبر الرابط أدناه.',
+  });
   revalidatePath('/ministry/admin/users');
-  redirect(`/ministry/admin/users?notice=invited&pending=1`);
+  redirect(`/ministry/admin/users?notice=invited&pending=1&mail=${mail}`);
 }
 
 /** Re-issues the link for an account that never activated. */
@@ -980,8 +985,13 @@ export async function reissueActivationAction(login: string): Promise<void> {
   // password; an administrator issuing one here would be a way to take the account.
   if (!row || row.password_hash !== null) redirect('/ministry/admin/users?error=already-active');
   const token = issueActivation(target.id, actor.id);
+  const recipient = getDb().prepare('SELECT email FROM accounts WHERE id = ?').get(target.id) as { email: string };
+  const mail = await sendLinkEmail({ to: recipient.email, path: `/activate/${token}`, isDemo: actor.isDemo,
+    subject: 'Activate your platform account / تفعيل حسابكم',
+    text: 'Use this replacement link to set your password.\n\nاستخدموا هذا الرابط الجديد لوضع كلمة مروركم.',
+  });
   revalidatePath('/ministry/admin/users');
-  redirect(`/ministry/admin/users?notice=reissued&pending=1`);
+  redirect(`/ministry/admin/users?notice=reissued&pending=1&mail=${mail}`);
 }
 
 export async function changeUserRoleAction(login: string, formData: FormData): Promise<void> {
@@ -1153,4 +1163,20 @@ export async function determineApplicabilityAction(recordId: number, formData: F
     .run(determination, reasons, determination === 'in_scope' && designated ? 1 : 0, actor.displayName, recordId);
   revalidatePath('/ministry/applicability');
   redirect('/ministry/applicability?notice=determined');
+}
+
+/** Acknowledges the submitted report; this does not alter the event determination. */
+export async function acceptPostEventReportAction(eventId: string): Promise<void> {
+  const actor = await requireMinistry('recordOutcome');
+  const db = getDb();
+  const report = db.prepare(`SELECT p.submitted_at FROM post_event_reports p
+    JOIN events e ON e.id = p.event_id WHERE e.id = ? AND e.is_demo = ? AND p.submitted_at IS NOT NULL`).get(eventId, actor.isDemo ? 1 : 0) as { submitted_at: string } | undefined;
+  if (!report) redirect('/ministry/reports');
+  const saved = db.prepare(`INSERT OR IGNORE INTO post_event_report_reviews
+    (event_id, report_submitted_at, reviewed_by) VALUES (?, ?, ?)`).run(eventId, report.submitted_at, actor.id);
+  if (saved.changes > 0) notifyEventOwner(eventId, 'Post-event report accepted', 'قُبل تقرير ما بعد الفعالية',
+    'The Ministry has reviewed and accepted your post-event report.', 'راجعت الوزارة تقرير ما بعد الفعالية وقبلته.', `/events/${eventId}/post-event`);
+  revalidatePath('/ministry/reports');
+  revalidatePath(`/events/${eventId}/post-event`);
+  redirect('/ministry/reports');
 }
