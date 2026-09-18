@@ -56,13 +56,19 @@ test.describe('the organizer surface belongs to the organizer', () => {
   // Events, Venues, Facilities and a Start a service menu -- controls for a job that
   // role does not do. The refusal and the landing are both asserted, because fixing
   // one without the other leaves the surface reachable by typing the address.
-  for (const [name, login] of [
-    ['a reviewer', LOGINS.reviewer],
-    ['a Ministry administrator', LOGINS.admin],
+  for (const [name, login, home] of [
+    ['a reviewer', LOGINS.reviewer, '/ministry'],
+    ['a Ministry administrator', LOGINS.admin, '/ministry'],
+    ['the platform owner', 'test_owner', '/platform/admin'],
   ] as const) {
     test(`${name} is refused the organizer dashboard`, async ({ page }) => {
       await signInAs(page, login);
       await expectRefusal(page, '/dashboard', /Start a service|ابدأ خدمة/i);
+      const recovery = page.getByRole('link', { name: 'Dashboard', exact: true });
+      await expect(recovery).toHaveAttribute('href', home);
+      await recovery.click();
+      await expect(page).toHaveURL(new RegExp(`${home}$`));
+      await expect(page.getByRole('heading', { name: 'There is no record here', exact: true })).toHaveCount(0);
     });
   }
 

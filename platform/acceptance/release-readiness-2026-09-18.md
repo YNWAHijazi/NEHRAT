@@ -19,6 +19,7 @@ This release addresses the partner's September 15 screenshots and reviews the or
 - Archived records refuse mutations even from old tabs, including invitation, plan, compliance and report actions.
 - Removed or withdrawn nominations cannot submit operational details or declarations through stale forms. Already signed declarations are not silently overwritten.
 - Unexpected page errors provide a retry and a route back to the dashboard.
+- The not-found page returns Ministry and owner accounts to their own home screen, avoiding a loop through the organizer dashboard.
 - Resend HTTPS sending is implemented and tested with simulated provider responses; existing SMTP fallback remains supported.
 - Updated vulnerable dependencies. The installation audit reported zero known vulnerabilities.
 - Removed the accidentally tracked Railway SSH files from future commits while keeping the local files. The exposed key was not registered in the checked Railway account or workspace. The separate active Railway key was preserved. No Git history rewrite was performed.
@@ -32,10 +33,15 @@ This release addresses the partner's September 15 screenshots and reviews the or
 | English/Arabic reference suite | All 65 checks resolved: 63 passed in the full run; two venue checks passed after correcting an outdated expectation that still required the permanent explanation removed in the September 13 simplification. The new help behavior was also exercised in both languages. |
 | Final production build and production-mode regression tests | Build passed; all four production-mode tests passed, including byte-identical 20 MB uploads in English and Arabic. Mobile captures were visually reviewed. |
 | Final affected-journey check | Seven additional checks passed: nomination withdrawal/removal, cancellation, filing through all three Ministry outcomes, desktop/mobile help, administrative visibility and unavailable-email recovery. |
+| Final recovery correction | All 16 permission tests passed, including a new owner recovery case, and the production build passed again. The app suite now contains 173 tests. |
 | TypeScript and diff validation | Passed. |
 | Live data upgrade rehearsal | Passed on a disposable copy: all existing data in 49 tables preserved; integrity and foreign-key checks passed. |
 
 The first unsplit browser run exhausted this laptop's available disk after 97 passing tests. It was not counted as a successful run. Generated caches were cleared and the complete app suite was run successfully in two fresh-server shards. No personal documents or working databases were deleted.
+
+## Live release check
+
+Implementation commit `9194d47` deployed successfully to Railway as deployment `89266fd9-ef18-42f8-9fcd-8377a8500ec6`. Live sign-in and the organizer dashboard were checked. A synthetic 20 MB PDF uploaded through the live demonstration account and its stored SHA-256 matched the local file (`aab8e7001a546b9611ce0162323de4a98998bde3302887e71b69a2f0b83c89ce`). The original demonstration map was then restored. The partner's `Test 1` event was not edited. The final recovery-link correction follows in a separate commit; Railway's deployment history identifies the current release.
 
 ## Data and operating limits
 
