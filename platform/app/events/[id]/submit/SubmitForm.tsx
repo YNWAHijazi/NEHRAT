@@ -8,6 +8,7 @@
  * expedited, and expedited review waives nothing (Protocol 8.4).
  */
 
+import { UploadInput } from '../../../../components/UploadInput';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
@@ -281,7 +282,7 @@ export function SubmitForm({
                           <form action={attachDocumentAction.bind(null, eventId)} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 10 }}>
                             <input type="hidden" name="docKey" value={d.attachmentKey} />
                             <input type="hidden" name="returnTo" value={`/events/${eventId}/submit`} />
-                            <input type="file" name="file" required accept={acceptAttribute()} aria-label="Attach the evidence of insurance" style={{ fontSize: 13, maxWidth: 240 }} />
+                            <UploadInput  name="file" required accept={acceptAttribute()} aria-label="Attach the evidence of insurance" style={{ fontSize: 13, maxWidth: 240 }} />
                             <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                               {evidence ? <L en="Replace" ar="استبدال" /> : <L en="Attach" ar="إرفاق" />}
                             </button>

@@ -44,8 +44,10 @@ not a scheduled backup service; retain an off-host copy and verify restoration.
 
 The same applies to credentials: passwords are hashed (scrypt) and the policy is data in
 `lib/rules/data/auth-policy.json`, but real credential policy — SSO, email verification,
-complexity — is a Ministry decision. The review build's mail transport does not exist;
-password-reset links are recorded, not sent.
+complexity — is a Ministry decision. Invitations, account activation and password recovery use Resend over HTTPS when
+`RESEND_API_KEY`, `MAIL_FROM` and `APP_BASE_URL` are configured. Generic SMTP remains
+available as an alternative. Demo accounts never send mail. See
+[Resend setup](acceptance/resend-setup.md) and `email.env.example`.
 
 The demonstration seeder runs only outside production (`lib/db.ts` guards it on
 NODE_ENV, and no variable re-enables it). Demonstration rows are real rows carrying

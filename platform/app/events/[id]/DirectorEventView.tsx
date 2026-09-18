@@ -99,6 +99,7 @@ export function DirectorEventView({
 
           {confirmed ? (
             <>
+              {invitation.eventLevel === 3 ? <Link data-region="director-plan" href={`/events/${invitation.eventId}/plan`} style={{ display: 'inline-flex', padding: '13px 22px', background: 'var(--brand)', color: 'var(--bg)', borderRadius: 24, marginBlockEnd: 20 }}><L en="Prepare the medical plan" ar="إعداد الخطة الطبية" /></Link> : null}
               <form action={saveGovernanceAction.bind(null, invitation.eventId)}>
                 <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
                   {content.govSections.map((g) => {

@@ -1,3 +1,4 @@
+import { UploadInput } from '../../../components/UploadInput';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
@@ -337,7 +338,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
                       ) : (
                         <form action={attachVenueDocumentAction.bind(null, venue.id)} style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                           <input type="hidden" name="docKey" value={String(r.n)} />
-                          <input type="file" name="file" accept={acceptAttribute()} required style={{ fontSize: '12.5px', maxWidth: 220 }} />
+                          <UploadInput  name="file" accept={acceptAttribute()} required style={{ fontSize: '12.5px', maxWidth: 220 }} />
                           <button type="submit" style={{ height: 32, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
                             <L en="Attach" ar="إرفاق" />
                           </button>

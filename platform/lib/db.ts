@@ -901,8 +901,13 @@ function migrate(d: DatabaseSync): void {
   addColumn('events', 'lifecycle_note', 'lifecycle_note TEXT');
   addColumn('events', 'postponed_to', 'postponed_to TEXT');
   addColumn('organizations', 'return_reason', 'return_reason TEXT');
-  // Suspension: access off, record intact. currentAccount refuses a suspended
-  // session, so suspension takes effect on the next request, not the next sign-in.
+  // Shared-plan history retains its author and the previous attachment itself.
+  addColumn('plans', 'updated_by', 'updated_by INTEGER REFERENCES accounts(id)');
+  addColumn('plan_versions', 'saved_by', 'saved_by INTEGER REFERENCES accounts(id)');
+  addColumn('plan_versions', 'attached_content_type', 'attached_content_type TEXT');
+  addColumn('plan_versions', 'attached_byte_size', 'attached_byte_size INTEGER');
+  addColumn('plan_versions', 'attached_bytes', 'attached_bytes BLOB');
+  // Suspension takes effect on the next request, not the next sign-in.
   addColumn('accounts', 'suspended', 'suspended INTEGER NOT NULL DEFAULT 0');
   addColumn('facility_requests', 'close_note', 'close_note TEXT');
   addColumn('facility_requests', 'closed_by', 'closed_by TEXT');

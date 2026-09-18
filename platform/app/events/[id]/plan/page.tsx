@@ -1,3 +1,5 @@
+import { planEditorOwnerId } from '../../../../lib/plan-access';
+import { PLAN_DOC_KEY } from '../../../../lib/rules/uploads';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -20,20 +22,22 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
-  const event = eventFor(account.id, id);
+  const ownerId = planEditorOwnerId(account, id);
+  if (ownerId === null) notFound();
+  const event = eventFor(ownerId, id);
   if (!event) notFound();
 
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
-  const versions = assessmentsFor(account.id, id);
+  const versions = assessmentsFor(ownerId, id);
   const level = (versions[0]?.derivation.finalLevel ?? event.level) as Level | null;
-  const priorVersions = planVersionsFor(account.id, id);
+  const priorVersions = planVersionsFor(ownerId, id);
   const governance = governanceFor(id);
   if (level === null) redirect(`/events/${id}`);
 
-  const plan = planFor(account.id, id);
+  const plan = planFor(ownerId, id);
   // 12: renders only where the venue is itself a registered covered facility.
-  const facility = event.venueFacilityId ? facilityById(account.id, event.venueFacilityId) : null;
+  const facility = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
   // reference, never a copy. The shortfalls derive in lib/rules from these facts
   // plus the two event facts the organizer answers on the plan.
@@ -59,6 +63,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
+        {level === 3 ? <p style={{ fontSize: 14, color: 'var(--muted)' }}><L en="The Medical Director leads medical planning. You share this plan; the organizer submits the package." ar="يقود المدير الطبي التخطيط الطبي. تعملون على خطة مشتركة، ويقدّم المنظّم الملف." /></p> : null}
         <PlanForm
           eventId={id}
           level={level}
@@ -108,11 +113,13 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
                         <L en={`Version ${v.version}`} ar={`النسخة ${v.version}`} />
                       </span>
                       <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{v.savedAt.slice(0, 10)}</span>
+                      {v.savedBy ? <span>{v.savedBy}</span> : null}
                       <span style={{ color: 'var(--muted)' }}>
                         <L en={`${addressed} of 16 sections addressed`} ar={`${addressed} من 16 قسماً مُعالَج`} />
                       </span>
                     </summary>
                     <div style={{ marginBlockStart: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {v.attachedHasFile ? <a href={`/api/documents/${id}/${PLAN_DOC_KEY}?version=${v.version}`} target="_blank" rel="noopener noreferrer"><L en="Open this version’s attachment" ar="فتح مرفق هذه النسخة" /></a> : null}
                       {PLAN_SECTIONS.map((s) => {
                         const sec = v.sections[String(s.n)];
                         if (!sec?.text && sec?.covered !== true) return null;

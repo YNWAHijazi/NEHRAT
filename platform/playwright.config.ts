@@ -165,9 +165,11 @@ export default defineConfig({
             // ERR_CONNECTION_RESET on whichever tests hit it -- consistently the
             // same screens because memory accumulates over the same sequence. The
             // watchdog triggers relative to the heap ceiling, so an 8GB ceiling
-            // moves the restart far beyond what one full run accumulates. A cap,
-            // not a reservation.
-            NODE_OPTIONS: '--max-old-space-size=8192',
+            // originally moved the restart beyond a full run, but a September 2026
+            // full run exhausted local swap/disk. Bound it and split the run below.
+            // Bound memory on an 8 GB laptop. Release checks run the app suite in
+            // two shards, each with a fresh server, to avoid accumulating every route.
+            NODE_OPTIONS: '--max-old-space-size=4096',
           },
         },
       }

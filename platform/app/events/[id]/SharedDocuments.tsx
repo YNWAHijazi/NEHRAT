@@ -1,3 +1,4 @@
+import { UploadInput } from '../../../components/UploadInput';
 import { L } from '../../../components/L';
 import { AddDocumentForm } from './documents/AddDocumentForm';
 import { sharedDocumentsFor } from '../../../lib/queries';
@@ -65,7 +66,7 @@ export function SharedDocuments({ eventId, token }: { eventId: string; token: st
                 </span>
                 {d.source === 'requested' || d.source === 'missing' ? (
                   <form action={answerDocumentRequestAction.bind(null, token, d.id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <input type="file" name="file" required accept={acceptAttribute()} aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
+                    <UploadInput  name="file" required accept={acceptAttribute()} aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
                     <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                       <L en={s.ctaEn} ar={s.ctaAr} />
                     </button>

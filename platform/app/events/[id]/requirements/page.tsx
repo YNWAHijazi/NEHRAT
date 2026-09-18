@@ -1,3 +1,4 @@
+import { UploadInput } from '../../../../components/UploadInput';
 import { InfoNote } from '../../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
 import { notFound, redirect } from 'next/navigation';
@@ -290,8 +291,8 @@ export default async function RequirementsPage({
                       style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
                     >
                       <input type="hidden" name="docKey" value={doc.key} />
-                      <input
-                        type="file"
+                      <UploadInput
+
                         name="file"
                         required
                         accept={acceptAttribute()}
@@ -317,7 +318,7 @@ export default async function RequirementsPage({
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 8 }}>
                         <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                           <input type="hidden" name="docKey" value={doc.key} />
-                          <input type="file" name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }} />
+                          <UploadInput  name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }} />
                           <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                             <L en="Replace" ar="استبدال" />
                           </button>

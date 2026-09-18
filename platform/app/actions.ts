@@ -9,6 +9,7 @@
  */
 
 import { deliverPasswordReset } from '../lib/password-reset';
+import { planEditorOwnerId } from '../lib/plan-access';
 import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
 import { beirutToday, nowStamp } from '../lib/clock';
@@ -440,6 +441,7 @@ export async function reassessAction(
     .prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`)
     .get(eventId, account.id);
   if (!owned) return { error: 'not-found' };
+  refuseIfArchived(eventId);
   // Part F certifies EVERY version: a reassessment is a new declaration.
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
@@ -539,10 +541,13 @@ export async function attachDocumentAction(
 export async function uploadPlanFileAction(
   eventId: string,
   formData: FormData,
-): Promise<{ ok: true; fileName: string } | { error: string; en: string; ar: string }> {
+): Promise<{ ok: true; fileName: string; version: number } | { error: string; en: string; ar: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (!ownedEvent(account.id, eventId)) return { error: 'not-found', en: '', ar: '' };
+  if (planEditorOwnerId(account, eventId) === null) return { error: 'not-found', en: '', ar: '' };
+  refuseIfArchived(eventId);
+  const version = (getDb().prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
+  if (Number(formData.get('baseVersion')) !== version) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
   const file = formData.get('file');
   if (!(file instanceof File)) return { error: 'no-file', en: '', ar: '' };
   const refusal = refuseUpload({ type: file.type, size: file.size });
@@ -551,20 +556,24 @@ export async function uploadPlanFileAction(
   if (bytes.length > maxUploadBytes()) {
     return { error: 'tooLarge', en: UPLOADS_CONTENT.copy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: UPLOADS_CONTENT.copy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) };
   }
-  getDb()
-    .prepare(
-      `INSERT INTO plans (event_id, mode, sections, major_incident, attached_file,
-         attached_content_type, attached_byte_size, attached_bytes)
-       VALUES (?, 'attach', '{}', '{}', ?, ?, ?, ?)
-       ON CONFLICT (event_id) DO UPDATE SET
-         attached_file = excluded.attached_file,
-         attached_content_type = excluded.attached_content_type,
-         attached_byte_size = excluded.attached_byte_size,
-         attached_bytes = excluded.attached_bytes`,
-    )
-    .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
+  const savedVersion = writePlanVersion(eventId, version, account.id, (db) => {
+    db
+      .prepare(
+        `INSERT INTO plans (event_id, mode, sections, major_incident, attached_file,
+           attached_content_type, attached_byte_size, attached_bytes)
+         VALUES (?, 'attach', '{}', '{}', ?, ?, ?, ?)
+         ON CONFLICT (event_id) DO UPDATE SET
+           attached_file = excluded.attached_file,
+           attached_content_type = excluded.attached_content_type,
+           attached_byte_size = excluded.attached_byte_size,
+           attached_bytes = excluded.attached_bytes, version = plans.version + 1, updated_at = now_stamp()`,
+      )
+      .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
+  });
+  if (savedVersion === null) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
   revalidatePath(`/events/${eventId}/plan`);
-  return { ok: true, fileName: file.name.trim() };
+  revalidatePath(`/events/${eventId}/requirements`);
+  return { ok: true, fileName: file.name.trim(), version: savedVersion };
 }
 
 /**
@@ -598,6 +607,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
 }
 
 export interface PlanPayload {
+  baseVersion: number;
   mode: 'write' | 'attach';
   refConfirmed: boolean;
   refAdmitsChildren: boolean;
@@ -607,46 +617,74 @@ export interface PlanPayload {
   majorIncident: Record<string, { covered?: boolean }>;
 }
 
+/** Keep the preceding text and attachment bytes before either shared-plan mutation. */
+function snapshotPlan(eventId: string): void {
+  getDb().prepare(`INSERT INTO plan_versions (event_id, version, mode, ref_confirmed, ref_admits_children,
+    ref_temporary_areas, sections, attached_file, major_incident, saved_at, saved_by,
+    attached_content_type, attached_byte_size, attached_bytes)
+    SELECT event_id, version, mode, ref_confirmed, ref_admits_children,
+    ref_temporary_areas, sections, attached_file, major_incident, updated_at, updated_by,
+    attached_content_type, attached_byte_size, attached_bytes FROM plans WHERE event_id = ?`).run(eventId);
+}
+
+/** The conflict check, history and current row commit together, including file bytes. */
+function writePlanVersion(eventId: string, baseVersion: number, actorId: number, write: (db: ReturnType<typeof getDb>) => void): number | null {
+  const db = getDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const version = (db.prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
+    if (baseVersion !== version) {
+      db.exec('ROLLBACK');
+      return null;
+    }
+    snapshotPlan(eventId);
+    write(db);
+    db.prepare('UPDATE plans SET updated_by = ? WHERE event_id = ?').run(actorId, eventId);
+    db.exec('COMMIT');
+    return version + 1;
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
+}
+
 /** Saves the plan. The row being replaced is archived first -- prior versions stay readable. */
-export async function savePlanAction(eventId: string, payload: PlanPayload): Promise<{ ok: true } | { error: string }> {
+export async function savePlanAction(eventId: string, payload: PlanPayload): Promise<{ ok: true; version: number } | { error: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
-  const db = getDb();
-  db.prepare(
-    `INSERT INTO plan_versions (event_id, version, mode, ref_confirmed, ref_admits_children,
-       ref_temporary_areas, sections, attached_file, major_incident, saved_at)
-     SELECT event_id, version, mode, ref_confirmed, ref_admits_children,
-       ref_temporary_areas, sections, attached_file, major_incident, updated_at
-     FROM plans WHERE event_id = ?`,
-  ).run(eventId);
-  db
-    .prepare(
-      `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
-         sections, attached_file, major_incident, version)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
-       ON CONFLICT (event_id) DO UPDATE SET
-         mode = excluded.mode, ref_confirmed = excluded.ref_confirmed,
-         ref_admits_children = excluded.ref_admits_children,
-         ref_temporary_areas = excluded.ref_temporary_areas, sections = excluded.sections,
-         attached_file = excluded.attached_file, major_incident = excluded.major_incident,
-         version = plans.version + 1, updated_at = now_stamp()`,
-    )
-    .run(
-      eventId, payload.mode, payload.refConfirmed ? 1 : 0,
-      payload.refAdmitsChildren ? 1 : 0, payload.refTemporaryAreas ? 1 : 0,
-      JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident),
-    );
-  // Switching back to writing the plan drops the stored file with the name: a
-  // document nothing points at is a document nobody can account for.
-  if (payload.attachedFile === null) {
-    db.prepare(
-      `UPDATE plans SET attached_content_type = NULL, attached_byte_size = NULL,
-         attached_bytes = NULL WHERE event_id = ?`,
-    ).run(eventId);
-  }
+  if (planEditorOwnerId(account, eventId) === null) return { error: 'not-found' };
+  refuseIfArchived(eventId);
+  const version = writePlanVersion(eventId, payload.baseVersion, account.id, (db) => {
+    db
+      .prepare(
+        `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
+           sections, attached_file, major_incident, version)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
+         ON CONFLICT (event_id) DO UPDATE SET
+           mode = excluded.mode, ref_confirmed = excluded.ref_confirmed,
+           ref_admits_children = excluded.ref_admits_children,
+           ref_temporary_areas = excluded.ref_temporary_areas, sections = excluded.sections,
+           attached_file = excluded.attached_file, major_incident = excluded.major_incident,
+           version = plans.version + 1, updated_at = now_stamp()`,
+      )
+      .run(
+        eventId, payload.mode, payload.refConfirmed ? 1 : 0,
+        payload.refAdmitsChildren ? 1 : 0, payload.refTemporaryAreas ? 1 : 0,
+        JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident),
+      );
+    // Switching back to writing the plan drops the stored file with the name: a
+    // document nothing points at is a document nobody can account for.
+    if (payload.attachedFile === null) {
+      db.prepare(
+        `UPDATE plans SET attached_content_type = NULL, attached_byte_size = NULL,
+           attached_bytes = NULL WHERE event_id = ?`,
+      ).run(eventId);
+    }
+  });
+  if (version === null) return { error: 'conflict' };
   revalidatePath(`/events/${eventId}/plan`);
-  return { ok: true };
+  revalidatePath(`/events/${eventId}/requirements`);
+  return { ok: true, version };
 }
 
 export interface CompliancePayload {
@@ -661,6 +699,7 @@ export async function saveComplianceAction(eventId: string, payload: ComplianceP
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  refuseIfArchived(eventId);
   const filedRow = getDb().prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number } | undefined;
   if (filedRow?.filed === 1) {
     const { revisionOpenFor } = await import('../lib/queries');
@@ -689,6 +728,7 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  refuseIfArchived(eventId);
 
   const db = getDb();
   const already = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number } | undefined;
@@ -765,6 +805,7 @@ export async function savePostEventReportAction(eventId: string, payload: PostEv
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  refuseIfArchived(eventId);
   if (getDb().prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { error: 'already-submitted' };
   // Event-side data minimisation (Protocol 14): the narrative field is name-screened,
   // the same rule the facility incident report carries.
@@ -795,6 +836,7 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  refuseIfArchived(eventId);
   const db = getDb();
   if (db.prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { ok: true };
   // The DERIVED level, like every other call site -- demo_level is the fallback for
@@ -1248,10 +1290,10 @@ export async function submitFacilityIncidentAction(
 
 /* ---------------- Slice 5: the counterparty roles ---------------- */
 
-function invitationRow(token: string): { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string } | null {
+function invitationRow(token: string): { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string; declaration: string } | null {
   return (getDb()
-    .prepare(`SELECT event_id, kind, account_id, status FROM invitations WHERE token = ?`)
-    .get(token) ?? null) as { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string } | null;
+    .prepare(`SELECT event_id, kind, account_id, status, declaration FROM invitations WHERE token = ?`)
+    .get(token) ?? null) as { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string; declaration: string } | null;
 }
 
 function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string): void {
@@ -1372,6 +1414,7 @@ function counterpartyLanding(kind: 'ems' | 'director', eventId: string): string 
 export async function respondToInvitationAction(token: string, formData: FormData): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
+  refuseIfArchived(inv.event_id);
   // A withdrawn or removed nomination is dead for responding AND for registering:
   // the token page shows the closed state; nothing can be done against it.
   if (inv.status === 'withdrawn' || inv.status === 'removed') {
@@ -1457,6 +1500,7 @@ export async function registerAgainstInvitationAction(
 ): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
+  refuseIfArchived(inv.event_id);
   if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
   if (inv.account_id !== null) redirect(counterpartyLanding(inv.kind, inv.event_id));
 
@@ -1505,6 +1549,7 @@ export async function signInAgainstInvitationAction(
 ): Promise<void> {
   const inv = invitationRow(token);
   if (!inv) redirect('/signin');
+  refuseIfArchived(inv.event_id);
   if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
 
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
@@ -1540,9 +1585,15 @@ export async function signInAgainstInvitationAction(
 }
 
 function ownedInvitation(accountId: number, token: string): boolean {
-  return Boolean(
-    getDb().prepare(`SELECT token FROM invitations WHERE token = ? AND account_id = ?`).get(token, accountId),
+  const owns = Boolean(
+    getDb().prepare(`SELECT i.token FROM invitations i JOIN accounts a ON a.id = i.account_id
+      WHERE i.token = ? AND i.account_id = ? AND i.status = 'confirmed' AND a.role = i.kind`).get(token, accountId),
   );
+  if (owns) {
+    const inv = invitationRow(token);
+    if (inv) refuseIfArchived(inv.event_id);
+  }
+  return owns;
 }
 
 /** Level 2: operational detail for the organizer's plan. No declaration exists. */
@@ -1598,6 +1649,8 @@ export async function signDeclarationAction(
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedInvitation(account.id, token)) return { error: 'not-found' };
+  const existing = invitationRow(token);
+  if (existing?.declaration === 'signed') return { ok: true };
   const gate = declarationGate(payload.items);
   if (!gate.canSign) return { error: 'items-outstanding' };
   // THE CERTIFICATION BLOCK, which nothing checked. A declaration signed with an
@@ -1677,6 +1730,7 @@ export async function saveGovernanceAction(eventId: string, formData: FormData):
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   const sections: Record<string, string> = {};
   for (const key of ['clinical', 'command', 'incidentRole']) {
     sections[key] = String(formData.get(key) ?? '');
@@ -1696,6 +1750,7 @@ export async function signPostEventReportAction(eventId: string): Promise<void> 
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   getDb()
     .prepare(`UPDATE post_event_reports SET director_signed_at = now_stamp(),
       submitted_at = CASE WHEN organizer_signed_at IS NOT NULL THEN now_stamp() ELSE NULL END
@@ -1710,6 +1765,7 @@ export async function returnPostEventReportAction(eventId: string, formData: For
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
   if (getDb().prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) redirect(`/events/${eventId}/report`);
   const reason = String(formData.get('reason') ?? '').trim();
   // RECORDED on the report row, not just notified: the Director's own screen shows
@@ -1879,6 +1935,7 @@ export async function withdrawParticipationAction(token: string, formData: FormD
     .prepare(`SELECT token, event_id, kind, status FROM invitations WHERE token = ? AND account_id = ?`)
     .get(token, account.id) as { token: string; event_id: string; kind: 'ems' | 'director'; status: string } | undefined;
   if (!inv || inv.status !== 'confirmed') redirect('/dashboard');
+  refuseIfArchived(inv.event_id);
   db.prepare(
     `UPDATE invitations SET status = 'declined', response_note = ?, answered_at = now_stamp() WHERE token = ?`,
   ).run(reason, token);
@@ -1914,6 +1971,7 @@ export async function reopenDeclarationAction(token: string): Promise<void> {
     .prepare(`SELECT token, event_id, signed_at FROM invitations WHERE token = ? AND account_id = ? AND declaration = 'signed'`)
     .get(token, account.id) as { token: string; event_id: string; signed_at: string | null } | undefined;
   if (!inv) redirect('/dashboard');
+  refuseIfArchived(inv.event_id);
   // Only a change dated after the signature re-opens; the control renders only
   // then, and the action re-checks rather than trusting the screen.
   const change = db
@@ -1954,10 +2012,7 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const db = getDb();
-  const inv = db
-    .prepare(`SELECT token FROM invitations WHERE token = ? AND account_id = ?`)
-    .get(token, account.id) as { token: string } | undefined;
-  if (!inv) redirect('/dashboard');
+  if (!ownedInvitation(account.id, token)) redirect('/dashboard');
   const file = formData.get('file');
   const eventOf = (): string =>
     (db.prepare(`SELECT event_id FROM invitations WHERE token = ?`).get(token) as { event_id: string }).event_id;

@@ -394,10 +394,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       // longer anything to compare.
       {
         name: 'exempt-footnote',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'A specific event held at this venue', container: 'border-radius: 12px' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="exempt-footnote"]',
-        note: 'Registering a venue does not exempt events held there. Held at 2%.',
+        note: 'The September 13 quiet-help change, requested by the owner, moved this explanation into an information control. The prototype still shows a permanent paragraph. This intentional change cannot be pixel-compared to that paragraph; quiet-help.spec.ts verifies the full explanation remains accessible in English and Arabic, including on mobile.',
       },
       {
         name: 'registration-form',

@@ -43,6 +43,7 @@ import { can } from '../../../../../lib/rules/ministry';
 import { demonstrationFilter } from '../../../../../lib/rules/scope';
 import { PLAN_DOC_KEY, servedType } from '../../../../../lib/rules/uploads';
 import { nomineeMayReadDocument } from '../../../../../lib/rules/nomination-access';
+import { planEditorOwnerId } from '../../../../../lib/plan-access';
 
 const notFound = (): NextResponse => new NextResponse('Not found', { status: 404 });
 
@@ -53,7 +54,7 @@ interface Stored {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ eventId: string; docKey: string }> },
 ): Promise<NextResponse> {
   const { eventId, docKey } = await params;
@@ -81,11 +82,19 @@ export async function GET(
     )
     .get(eventId, account.id) as { kind: 'ems' | 'director' } | undefined;
   const nomineeMayRead = nomination !== undefined && nomineeMayReadDocument(nomination.kind, docKey);
-  if (!owns && !ministryMayRead && !nomineeMayRead) return notFound();
+  // A confirmed Level 3 Director prepares the shared plan and must be able to open it.
+  // This does not widen anonymous invitation access or expose other attachments.
+  const planEditorMayRead = docKey === PLAN_DOC_KEY && planEditorOwnerId(account, eventId) !== null;
+  if (!owns && !ministryMayRead && !nomineeMayRead && !planEditorMayRead) return notFound();
 
+  const version = new URL(request.url).searchParams.get('version');
+  if (version !== null && (docKey !== PLAN_DOC_KEY || !/^[1-9]\d*$/.test(version) || !Number.isSafeInteger(Number(version)))) return notFound();
   const row = (
     docKey === PLAN_DOC_KEY
-      ? db
+      ? version !== null ? db.prepare(
+          `SELECT attached_file AS fileName, attached_content_type AS contentType,
+                  attached_bytes AS bytes FROM plan_versions WHERE event_id = ? AND version = ? ORDER BY id DESC LIMIT 1`,
+        ).get(eventId, Number(version)) : db
           .prepare(
             `SELECT attached_file AS fileName, attached_content_type AS contentType,
                     attached_bytes AS bytes FROM plans WHERE event_id = ?`,

@@ -323,7 +323,7 @@ export function AssessmentForm({
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 20 }}>
         <Field labelEn="Event type" labelAr="نوع الفعالية">
-          <select value={typeKey} onChange={(e) => setTypeKey(e.target.value)} style={{ ...inputStyle, appearance: 'auto' }}>
+          <select value={typeKey} onChange={(e) => { setTypeKey(e.target.value); setExtraDisciplines([]); }} style={{ ...inputStyle, appearance: 'auto' }}>
             <option value="" disabled />
             {EVENT_TYPES.map((t) => (
               <option key={t.key} value={t.key}>
@@ -345,10 +345,10 @@ export function AssessmentForm({
       </div>
 
       {chosenType ? (
-        <div style={{ marginBlockEnd: 24 }}>
-          <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 8 }}>
-            <L en="Does it also include any of these?" ar="هل تتضمن أيضاً أياً من هذه؟" />
-          </div>
+        <details data-region="additional-activities" open={reassess && extraDisciplines.length > 0 ? true : undefined} style={{ marginBlockEnd: 24 }}>
+          <summary style={{ cursor: 'pointer', fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 8 }}>
+            <L en="Add another activity (optional)" ar="إضافة نشاط آخر (اختياري)" />
+          </summary>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {EXTRA_DISCIPLINES.filter((d) => !(chosenType.disciplines as readonly string[]).includes(d.key)).map((d) => {
               const on = extraDisciplines.includes(d.key);
@@ -367,7 +367,7 @@ export function AssessmentForm({
               );
             })}
           </div>
-        </div>
+        </details>
       ) : null}
 
       {reassess ? (
@@ -418,6 +418,16 @@ export function AssessmentForm({
                 </button>
               );
             })}
+
+            {partA.previousEdition ? <fieldset data-region="previous-history" style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 16 }}>
+              <legend><L en="Previous event history" ar="التاريخ السابق للفعالية" /></legend>
+              <p style={{ fontSize: 13, color: 'var(--muted)' }}><L en="Select the most serious history from any previous edition. If it is already in your Archive, you can duplicate that event instead." ar="اختاروا أخطر ما حدث في أي نسخة سابقة. إذا كانت الفعالية في أرشيفكم، يمكنكم نسخها لبدء نسخة جديدة." /></p>
+              {domains[8]?.options.map((option) => <button key={option.score} type="button" aria-pressed={answers[8] === option.score}
+                onClick={() => setAnswers((prev) => prev.map((value, i) => i === 8 ? option.score : value))}
+                style={{ display: 'block', width: '100%', textAlign: 'start', padding: 14, marginBlock: 6, border: `1px solid ${answers[8] === option.score ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 8, background: answers[8] === option.score ? 'var(--brand-soft)' : 'var(--bg)', cursor: 'pointer' }}>
+                <span>{option.score}</span>{' '}<L en={option.en} ar={option.ar} />
+              </button>)}
+            </fieldset> : null}
           </div>
         </>
       )}
@@ -426,7 +436,7 @@ export function AssessmentForm({
         <L en="Part two" ar="الجزء الثاني" />
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
-        {domains.map((domain, di) => (
+        {domains.map((domain, di) => !reassess && partA.previousEdition && di === 8 ? null : (
           <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>

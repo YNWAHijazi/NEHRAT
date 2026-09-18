@@ -1,10 +1,16 @@
 import type { NextConfig } from 'next';
+import uploads from './lib/rules/data/uploads.json';
 
 const config: NextConfig = {
   // The deployed image runs the literal output of this build -- nothing regenerates
   // between here and the container, so nothing can drift. Standalone lands at
   // `${distDir}/standalone`, so it composes with the separate harness build below.
   output: 'standalone',
+  // Multipart framing needs headroom above the independently enforced file limit.
+  experimental: {
+    serverActions: { bodySizeLimit: uploads.maxBytes + 1024 * 1024 },
+    middlewareClientMaxBodySize: uploads.maxBytes + 1024 * 1024,
+  },
   // node:sqlite is a Node built-in; keep it external to the server bundle.
   serverExternalPackages: [],
   /**

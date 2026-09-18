@@ -31,6 +31,19 @@ for (const mobile of [false, true]) {
     await expect(page.locator('[data-region="capability-checks"]')).toHaveCount(0);
     await expect(page.locator('[data-region="capability-toggle"] button')).toBeVisible();
     await page.screenshot({ path: `/tmp/moph-v1-vendor-${mobile ? 'mobile' : 'desktop'}.png`, fullPage: true });
+
+    // The venue explanation moved out of the permanent layout in the same
+    // simplification pass. It must still be readable, including on a phone.
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/venues/new');
+    const venueHelp = page.locator('[data-region="exempt-footnote"]');
+    await expect(venueHelp.locator('.info-note-content')).toBeHidden();
+    await venueHelp.getByRole('button').click();
+    await expect(venueHelp.locator('.info-note-content')).toBeVisible();
+    await expect(venueHelp.locator('.info-note-content')).toContainText(mobile
+      ? 'تسجيل الموقع لا يعفي الفعاليات التي تُقام فيه.'
+      : 'Registering a venue does not exempt events held there.');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   });
 }
 

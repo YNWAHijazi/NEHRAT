@@ -11,18 +11,19 @@
     "build": "next build",
     "build:verified": "npm run verify && next build",
     "start": "next start",
-    "verify": "tsc --noEmit && vitest run && npm run preflight && playwright test --project=reference && playwright test --project=app",
+    "verify": "tsc --noEmit && vitest run --maxWorkers=1 && npm run test:e2e",
     "test": "vitest run",
     "test:watch": "vitest",
     "rules:regenerate": "python3 scripts/extract-reference.py",
-    "test:e2e": "npm run preflight && playwright test --project=reference && playwright test --project=app",
+    "test:e2e": "npm run preflight && playwright test --project=reference --workers=1 --retries=0 && playwright test --project=app --workers=1 --retries=0 --shard=1/2 && playwright test --project=app --workers=1 --retries=0 --shard=2/2",
     "e2e:install": "playwright install chromium",
     "dev:e2e": "rm -f var/e2e.db* && next dev",
     "preflight": "node scripts/preflight.mjs",
     "db:reseed": "npx tsx scripts/reseed-dev.ts",
     "db:backup": "node scripts/backup-database.mjs",
     "db:check-supabase": "node --env-file=.env.supabase-staging.local scripts/check-supabase.mjs",
-    "demo:bootstrap": "tsx scripts/bootstrap-demonstration.ts"
+    "demo:bootstrap": "tsx scripts/bootstrap-demonstration.ts",
+    "test:release": "CIRCLE_NODE_TOTAL=2 NODE_OPTIONS=--max-old-space-size=2048 NEXT_DIST_DIR=.next-v1-build npm run build && DATABASE_PATH=var/release-runtime.db node --import tsx scripts/reseed-dev.ts && playwright test --config playwright.release.config.ts"
   },
   "dependencies": {
     "next": "^15.5.0",
@@ -42,6 +43,9 @@
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
     "typescript": "^5.8.0",
-    "vitest": "^3.1.0"
+    "vitest": "^5.0.1"
+  },
+  "overrides": {
+    "postcss": "^8.5.23"
   }
 }

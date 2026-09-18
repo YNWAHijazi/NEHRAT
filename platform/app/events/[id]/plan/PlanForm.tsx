@@ -12,11 +12,13 @@
  * item titles and the eleven items are the Protocol's checklist.
  */
 
+import { UploadInput } from '../../../../components/UploadInput';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { InfoNote } from '../../../../components/InfoNote';
 import { L } from '../../../../components/L';
 import { savePlanAction, uploadPlanFileAction, type PlanPayload } from '../../../actions';
-import { acceptAttribute, acceptHint } from '../../../../lib/rules/uploads';
+import { acceptAttribute, acceptHint, PLAN_DOC_KEY } from '../../../../lib/rules/uploads';
 import { FACILITY_CONTENT, referenceShortfalls, type ReferenceDeviceFacts, GOVERNANCE_LANDING } from '../../../../lib/rules';
 import type { PlanRow, FacilityRow } from '../../../../lib/queries';
 
@@ -71,15 +73,17 @@ export function PlanForm({
   const [refConfirmed, setRefConfirmed] = useState(initial?.refConfirmed ?? false);
   const [refAdmitsChildren, setRefAdmitsChildren] = useState(initial?.refAdmitsChildren ?? false);
   const [refTemporaryAreas, setRefTemporaryAreas] = useState(initial?.refTemporaryAreas ?? false);
-  const [open, setOpen] = useState<number>(-1);
+  const [open, setOpen] = useState<number>(sectionsDef.find((s) => !initial?.sections[String(s.n)]?.text?.trim() && !initial?.sections[String(s.n)]?.covered)?.n ?? -1);
   const [collapsed, setCollapsed] = useState(level === 1);
   const [saved, setSaved] = useState(false);
+  const [baseVersion, setBaseVersion] = useState(initial?.version ?? 0);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const doneCount = useMemo(
     () =>
       sectionsDef.filter((s) => {
         const st = sections[String(s.n)];
-        return mode === 'attach' ? st?.covered === true : Boolean(st?.text?.trim()) || st?.covered === true;
+        return mode === 'attach' ? st?.covered === true : Boolean(st?.text?.trim());
       }).length,
     [sections, sectionsDef, mode],
   );
@@ -95,8 +99,10 @@ export function PlanForm({
 
   const save = () => {
     setSaved(false);
+    setSaveError(null);
     startTransition(async () => {
       const payload: PlanPayload = {
+        baseVersion,
         mode,
         refConfirmed,
         refAdmitsChildren,
@@ -105,11 +111,14 @@ export function PlanForm({
         attachedFile: mode === 'attach' ? attachedFile || null : null,
         majorIncident: mi,
       };
-      const result = await savePlanAction(eventId, payload);
-      if ('ok' in result) {
-        setSaved(true);
-        router.refresh();
-      }
+      try {
+        const result = await savePlanAction(eventId, payload);
+        if ('ok' in result) {
+          setBaseVersion(result.version);
+          setSaved(true);
+          router.refresh();
+        } else setSaveError(result.error);
+      } catch { setSaveError('failed'); }
     });
   };
 
@@ -137,8 +146,7 @@ export function PlanForm({
 
       {mode === 'attach' ? (
         <div data-region="plan-attach" style={{ padding: '18px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20 }}>
-          <input
-            type="file"
+          <UploadInput
             accept={acceptAttribute()}
             disabled={uploading}
             onChange={(e) => {
@@ -148,16 +156,19 @@ export function PlanForm({
               setUploading(true);
               const data = new FormData();
               data.set('file', chosen);
+              data.set('baseVersion', String(baseVersion));
               startTransition(async () => {
-                const result = await uploadPlanFileAction(eventId, data);
-                setUploading(false);
-                if ('ok' in result) {
-                  setAttachedFile(result.fileName);
-                  router.refresh();
-                } else {
-                  setAttachedFile('');
-                  setUploadRefusal({ en: result.en, ar: result.ar });
-                }
+                try {
+                  const result = await uploadPlanFileAction(eventId, data);
+                  if ('ok' in result) {
+                    setAttachedFile(result.fileName);
+                    setBaseVersion(result.version);
+                    router.refresh();
+                  } else {
+                    setUploadRefusal({ en: result.en, ar: result.ar });
+                  }
+                } catch { setUploadRefusal({ en: 'Upload failed. Please try again.', ar: 'تعذّر رفع الملف. حاولوا مجدداً.' }); }
+                finally { setUploading(false); }
               });
             }}
             aria-label="Attach the plan document"
@@ -176,7 +187,7 @@ export function PlanForm({
           ) : null}
           {attachedFile ? (
             <div style={{ marginBlockStart: 8, fontSize: '13.5px', fontVariantNumeric: 'tabular-nums' }}>
-              <L en={`Attached: ${attachedFile}`} ar={`المرفق: ${attachedFile}`} />
+              <a href={`/api/documents/${eventId}/${PLAN_DOC_KEY}`} target="_blank" rel="noopener noreferrer"><L en={`Attached: ${attachedFile}`} ar={`المرفق: ${attachedFile}`} /></a>
             </div>
           ) : null}
         </div>
@@ -329,8 +340,10 @@ export function PlanForm({
                           )}
                         </div>
                       ) : null}
+                      <InfoNote labelEn="What to include" labelAr="ما يجب إدراجه"><L en={s.bodyEn} ar={s.bodyAr} /></InfoNote>
                       {mode === 'write' ? (
                         <textarea
+                          aria-label={`${s.n}. ${s.en}`}
                           rows={4}
                           value={st?.text ?? ''}
                           onChange={(e) =>
@@ -410,6 +423,9 @@ export function PlanForm({
         </div>
       ) : null}
 
+      {saveError ? <p role="alert" style={{ color: 'var(--bad)' }}>{saveError === 'conflict'
+        ? <L en="Someone updated this plan. Copy your unsaved text, then reload the page before saving again." ar="حدّث شخص آخر هذه الخطة. انسخوا نصكم غير المحفوظ، ثم أعيدوا تحميل الصفحة قبل الحفظ مجدداً." />
+        : <L en="The plan could not be saved. Your text is still here; please try again." ar="تعذّر حفظ الخطة. ما زال نصكم هنا؛ حاولوا مجدداً." />}</p> : null}
       {saved ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--brand)' }}>
           <L en="Saved. A new version was recorded; earlier versions remain readable." ar="حُفظت. سُجّلت نسخة جديدة، وتبقى النسخ السابقة قابلة للقراءة." />

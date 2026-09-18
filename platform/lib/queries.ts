@@ -805,6 +805,8 @@ export interface PlanVersionRow {
   attachedFile: string | null;
   majorIncident: Record<string, { covered?: boolean }>;
   savedAt: string;
+  savedBy: string | null;
+  attachedHasFile: boolean;
 }
 
 /** Archived plan versions, newest first. The current version is on `plans` itself. */
@@ -827,12 +829,14 @@ export function planVersionsFor(accountId: number, eventId: string): PlanVersion
   if (!owned) return [];
   const rows = getDb()
     .prepare(
-      `SELECT version, mode, sections, attached_file, major_incident, saved_at
-       FROM plan_versions WHERE event_id = ? ORDER BY version DESC, id DESC`,
+      `SELECT p.version, p.mode, p.sections, p.attached_file, p.major_incident, p.saved_at,
+              a.display_name AS saved_by, (p.attached_bytes IS NOT NULL AND length(p.attached_bytes) > 0) AS attached_has_file
+       FROM plan_versions p LEFT JOIN accounts a ON a.id = p.saved_by
+       WHERE p.event_id = ? ORDER BY p.version DESC, p.id DESC`,
     )
     .all(eventId) as unknown as {
     version: number; mode: 'write' | 'attach'; sections: string; attached_file: string | null;
-    major_incident: string; saved_at: string;
+    major_incident: string; saved_at: string; saved_by: string | null; attached_has_file: number;
   }[];
   return rows.map((r) => ({
     version: r.version,
@@ -841,6 +845,8 @@ export function planVersionsFor(accountId: number, eventId: string): PlanVersion
     attachedFile: r.attached_file,
     majorIncident: JSON.parse(r.major_incident) as PlanVersionRow['majorIncident'],
     savedAt: r.saved_at,
+    savedBy: r.saved_by,
+    attachedHasFile: r.attached_has_file === 1,
   }));
 }
 

@@ -173,7 +173,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await gotoRidingRestarts(page, '/events/EV-0418/plan');
     // Sections are accordion rows: expand section 1, whose textarea then renders.
     const sectionRow = page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' });
-    await sectionRow.click();
+    if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
     const firstSection = page.locator('textarea').first();
     await expect(firstSection).toBeVisible();
     await firstSection.fill('Version one wording for the schedule.');
@@ -182,7 +182,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await expect(page.locator('text=A new version was recorded')).toBeVisible({ timeout: 20_000 });
     // The accordion may close on refresh; re-open before the second edit.
     await page.reload();
-    await page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' }).click();
+    if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
     await page.locator('textarea').first().fill('Version two wording, replacing version one.');
     await page.locator('button:has-text("Save the plan")').first().click();
     // Wait for the SECOND save to land before reloading -- networkidle raced it, and a
