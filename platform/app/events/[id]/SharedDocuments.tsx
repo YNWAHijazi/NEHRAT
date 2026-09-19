@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { UploadInput } from '../../../components/UploadInput';
 import { L } from '../../../components/L';
 import { AddDocumentForm } from './documents/AddDocumentForm';
@@ -29,10 +30,9 @@ export function SharedDocuments({ eventId, token }: { eventId: string; token: st
     <div id="documents" data-region="shared-documents" style={{ marginBlockEnd: 28 }}>
       <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en="Shared documents" ar="المستندات المشتركة" />
+       <InfoNote><L en={ROLES_CONTENT.ems.docsIntro.en} ar={ROLES_CONTENT.ems.docsIntro.ar} /></InfoNote>
       </h2>
-      <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-        <L en={ROLES_CONTENT.ems.docsIntro.en} ar={ROLES_CONTENT.ems.docsIntro.ar} />
-      </p>
+
 
       <AddDocumentForm token={token} />
 
@@ -41,7 +41,7 @@ export function SharedDocuments({ eventId, token }: { eventId: string; token: st
           const s = STATE_STYLE[d.source];
           return (
             <div key={d.id} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${s.edge} ${s.color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: 1, minWidth: 260 }}>
+              <div style={{ flex: '1 1 240px', minWidth: 0 }}>
                 <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                   <L en={d.nameEn} ar={d.nameAr} />
                 </div>
@@ -60,12 +60,12 @@ export function SharedDocuments({ eventId, token }: { eventId: string; token: st
                   />
                 ) : null}
               </div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: 'none', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flex: '0 1 auto', minWidth: 0, maxWidth: '100%', flexWrap: 'wrap' }}>
                 <span style={{ padding: '4px 10px', borderRadius: 999, background: s.chipBg, color: s.color, fontSize: 13 }}>
                   <L en={s.en} ar={s.ar} />
                 </span>
                 {d.source === 'requested' || d.source === 'missing' ? (
-                  <form action={answerDocumentRequestAction.bind(null, token, d.id)} style={{ display: 'inline-flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <form action={answerDocumentRequestAction.bind(null, token, d.id)} style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <UploadInput  name="file" required accept={acceptAttribute()} aria-label="Add the file" style={{ fontSize: 13, maxWidth: 210 }} />
                     <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
                       <L en={s.ctaEn} ar={s.ctaAr} />

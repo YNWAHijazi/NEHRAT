@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
@@ -38,10 +39,9 @@ export default async function ProfilePage({
           ) : null}
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             {isEms ? <L en="Agency profile" ar="ملف الجهة" /> : <L en="Physician profile" ar="الملف الطبي" />}
+           <InfoNote><L en={ROLES_CONTENT.ems.profileReuse.en} ar={ROLES_CONTENT.ems.profileReuse.ar} /></InfoNote>
           </h1>
-          <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '72ch' }}>
-            <L en={ROLES_CONTENT.ems.profileReuse.en} ar={ROLES_CONTENT.ems.profileReuse.ar} />
-          </p>
+
 
           <form action={saveRoleProfileAction}>
             <div data-region="profile-form" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>

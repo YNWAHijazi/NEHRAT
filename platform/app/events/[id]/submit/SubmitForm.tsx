@@ -384,8 +384,8 @@ export function SubmitForm({
             <div style={{ padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch' }}>
               <div style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
                 <L
-                  en={`${outstanding} outstanding`}
-                  ar={`${outstanding} غير مستوفى`}
+                  en={`${outstanding} remaining`}
+                  ar={`${outstanding} متبقٍ`}
                 />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -443,12 +443,12 @@ export function SubmitForm({
             >
               {revisionOpen ? (
                 outstanding > 0 ? (
-                  <L en={`File the revised submission — ${outstanding} outstanding`} ar={`تقديم الملف المعدَّل — ${outstanding} غير مستوفى`} />
+                  <L en={`File the revised submission — ${outstanding} remaining`} ar={`تقديم الملف المعدَّل — ${outstanding} متبقٍ`} />
                 ) : (
                   <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
                 )
               ) : outstanding > 0 ? (
-                <L en={`File the submission — ${outstanding} outstanding`} ar={`تقديم الملف — ${outstanding} غير مستوفى`} />
+                <L en={`File the submission — ${outstanding} remaining`} ar={`تقديم الملف — ${outstanding} متبقٍ`} />
               ) : (
                 <L en="File the submission" ar="تقديم الملف" />
               )}
@@ -458,7 +458,7 @@ export function SubmitForm({
                 item by item, under the same condition. */}
             {fileError ? (
               <span style={{ fontSize: '13.5px', color: 'var(--bad)' }}>
-                <L en="Filing was refused; the outstanding items are listed above." ar="رُفض التقديم؛ والبنود غير المستوفاة مدرجة أعلاه." />
+                <L en="Complete the remaining requirements above to submit." ar="أكملوا المتطلبات المتبقية أعلاه للتقديم." />
               </span>
             ) : null}
           </div>

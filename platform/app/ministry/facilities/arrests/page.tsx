@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -34,13 +35,12 @@ export default async function ArrestLocationsPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Reported arrest locations" ar="مواقع حوادث توقف القلب المبلَّغة" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
-        <L
+       <InfoNote><L
           en="Incidents grouped by place and category; the reports name no patient."
           ar="الحوادث مجمَّعة بحسب المكان والفئة؛ ولا تسمّي التقارير أي مريض."
-        />
-      </p>
+        /></InfoNote>
+</h1>
+
 
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24 }}>
         <div data-region="groups" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

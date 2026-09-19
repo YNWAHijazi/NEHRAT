@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
@@ -37,10 +38,9 @@ export default async function CredentialsPage({
         <div style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Credential verification" ar="التحقق من المؤهلات" />
+           <InfoNote><L en={content.credIntro.en} ar={content.credIntro.ar} /></InfoNote>
           </h1>
-          <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-            <L en={content.credIntro.en} ar={content.credIntro.ar} />
-          </p>
+
 
           {!laneActive ? (
             <div data-region="lane-off" style={{ padding: '32px 36px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 24 }}>

@@ -31,7 +31,7 @@ test.describe('the nomination loop', () => {
     await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     const row = page.locator('[data-region="g2"] > div > div', { hasText: 'Coastal Medical Transport' });
     await expect(row).toContainText('Withdraw the nomination');
-    await expect(row).toContainText('no change report is owed');
+    await expect(row).toContainText('This disables the invitation link.');
     await row.locator('button:has-text("Withdraw the nomination")').click();
     await page.waitForURL('**/requirements?notice=withdrawn');
     await expect(
@@ -61,9 +61,10 @@ test.describe('the nomination loop', () => {
     await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     const confirmed = page.locator('[data-region="g2"] > div > div', { hasText: 'Civil Defence — Beirut' });
     await confirmed.locator('summary', { hasText: 'Remove this provider' }).click();
-    await expect(confirmed).toContainText('Removing a confirmed party is a material change');
-    // EV-0418 is not filed, and the wording says exactly that.
-    await expect(confirmed).toContainText('Nothing is filed yet, so no change report is owed');
+    await expect(confirmed).toContainText('Remove — a material change');
+    await expect(confirmed).toContainText('The party will be notified when removed.');
+    // EV-0418 is not filed: do not incorrectly require a Ministry change report.
+    await expect(confirmed).not.toContainText('a change report to the Ministry is required');
     await confirmed.locator('button:has-text("Remove — a material change")').click();
     await page.waitForURL('**/requirements?notice=removed');
     await expect(

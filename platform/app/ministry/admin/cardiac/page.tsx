@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -89,10 +90,9 @@ export default async function CardiacConfigPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Cardiac-arrest configuration" ar="إعدادات الجاهزية لتوقف القلب" />
+       <InfoNote><L en="The ten Ministry powers, per the source." ar="صلاحيات الوزارة العشر، وفق المصدر." /></InfoNote>
       </h1>
-      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
-        <L en="The ten Ministry powers, per the source." ar="صلاحيات الوزارة العشر، وفق المصدر." />
-      </p>
+
 
       <div data-region="pub-counters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
         {[
@@ -264,10 +264,9 @@ export default async function CardiacConfigPage({
       <div data-region="registry-capabilities" style={{ marginBlockStart: 32, maxWidth: 900 }}>
         <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
           <L en={MINISTRY_CONTENT.registryCapabilities.titleEn} ar={MINISTRY_CONTENT.registryCapabilities.titleAr} />
+         <InfoNote><L en={MINISTRY_CONTENT.registryCapabilities.introEn} ar={MINISTRY_CONTENT.registryCapabilities.introAr} /></InfoNote>
         </h2>
-        <p style={{ margin: '0 0 14px', fontSize: '13px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
-          <L en={MINISTRY_CONTENT.registryCapabilities.introEn} ar={MINISTRY_CONTENT.registryCapabilities.introAr} />
-        </p>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {MINISTRY_CONTENT.registryCapabilities.items.map((item) => {
             const row = config.get(`cardiac:${item.key}`);

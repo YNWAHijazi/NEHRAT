@@ -304,7 +304,7 @@ export default async function DashboardPage({
         ) : null}
         {notice === 'draft-deleted' ? (
           <div style={{ padding: '18px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
-            <L en="The draft was deleted. Nothing had been filed, so nothing is owed by anyone." ar="حُذفت المسودة. لم يكن شيء قد قُدّم، فلا شيء مستحقاً على أحد." />
+            <L en="Draft deleted." ar="حُذفت المسودة." />
           </div>
         ) : null}
 

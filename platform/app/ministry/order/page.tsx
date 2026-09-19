@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { notFound, redirect } from 'next/navigation';
@@ -25,13 +26,12 @@ export default async function OrderLanePage() {
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Order of Physicians lane" ar="مسار نقابة الأطباء" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
-        <L
+       <InfoNote><L
           en="The lane informs the Ministry; it never records an outcome and never reaches the facility side."
           ar="يُعلم المسار الوزارة؛ ولا يسجّل أي نتيجة ولا يصل إلى جانب المرافق."
-        />
-      </p>
+        /></InfoNote>
+</h1>
+
       {!active ? (
         <div data-region="lane-off" style={{ padding: '28px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, maxWidth: '86ch' }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>

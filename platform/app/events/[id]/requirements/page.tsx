@@ -54,14 +54,14 @@ const upLabel: React.CSSProperties = {
  * Director is absent below Level 3, so a real number here would renumber the groups
  * underneath it for Level 3 organizers only.
  */
-function SectionHeading({ n, en, ar }: { n?: number; en: string; ar: string }) {
+function SectionHeading({ n, en, ar, help }: { n?: number; en: string; ar: string; help?: React.ReactNode }) {
   // FIELDS ONLY (partner ruling, 2026-09-04): the group heading is structure;
   // the explanatory note under it was guidance and left for the reference page.
   return (
     <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em', display: 'flex', gap: 14, alignItems: 'baseline' }}>
       <span style={{ flex: 'none', fontSize: 16, fontWeight: 500, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }} aria-hidden={n === undefined}>{n}</span>
       <span>
-        <L en={en} ar={ar} />
+        <L en={en} ar={ar} /> {help ? <InfoNote>{help}</InfoNote> : null}
       </span>
     </h2>
   );
@@ -143,7 +143,7 @@ export default async function RequirementsPage({
     nominated: { en: 'Nominated', ar: 'مُسمّاة', bg: 'var(--surface2)', color: 'var(--muted)', noteEn: 'Has not answered yet', noteAr: 'لم تُجب بعد' },
     confirmed: { en: 'Confirmed', ar: 'مؤكِّدة', bg: 'var(--brand-soft)', color: 'var(--brand)', noteEn: 'Accepted and operational detail supplied', noteAr: 'قبلت وقدّمت التفاصيل التشغيلية' },
     declined: { en: 'Declined', ar: 'معتذرة', bg: 'var(--bad-soft)', color: 'var(--bad)', noteEn: 'A material change you must notify to the Ministry', noteAr: 'تغيير جوهري عليكم إبلاغ الوزارة به' },
-    withdrawn: { en: 'Withdrawn', ar: 'مسحوبة', bg: 'var(--surface)', color: 'var(--muted)', noteEn: 'You withdrew the nomination before an answer — no change report owed', noteAr: 'سحبتم الترشيح قبل الإجابة — لا إبلاغ عن تغيير مستحق' },
+    withdrawn: { en: 'Withdrawn', ar: 'مسحوبة', bg: 'var(--surface)', color: 'var(--muted)', noteEn: 'Invitation withdrawn', noteAr: 'سُحبت الدعوة' },
     removed: { en: 'Removed', ar: 'مُزالة', bg: 'var(--surface)', color: 'var(--muted)', noteEn: 'You removed this confirmed party — a material change', noteAr: 'أزلتم هذا الطرف المؤكَّد — تغيير جوهري' },
   } as const;
   const declChip = {
@@ -159,18 +159,18 @@ export default async function RequirementsPage({
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
+          {comparison ? <span data-region="derivation"><InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى"><L en={comparison.en} ar={comparison.ar} /></InfoNote></span> : null}
         </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Requirements and attachments" ar="المتطلبات والمرفقات" />
-        </h1>
-        <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-          <L
+         <InfoNote><L
             en="Add your documents, invite your medical team, then review your submission."
             ar="أضيفوا مستنداتكم، وادعوا فريقكم الطبي، ثم راجعوا ملف التقديم."
-          />
-        </p>
+          /></InfoNote>
+</h1>
 
-        {comparison ? <p data-region="derivation" style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 20 }}><L en={comparison.en} ar={comparison.ar} /></p> : null}
+
+
         <EmailDeliveryNotice status={typeof q.mail === 'string' ? q.mail : undefined} />
         <nav data-region="preparation-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBlockEnd: 32 }}>
           {[
@@ -224,10 +224,9 @@ export default async function RequirementsPage({
           n={1}
           en={level === 1 ? "Documents" : "Documents and plan"}
           ar={level === 1 ? "المستندات" : "المستندات والخطة"}
+          help={<L en={acceptHint().en} ar={acceptHint().ar} />}
         />
-        <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
-          <L en={acceptHint().en} ar={acceptHint().ar} />
-        </p>
+
         {refusal ? (
           <div
             data-region="upload-refused"
@@ -249,8 +248,8 @@ export default async function RequirementsPage({
             const done = documentState[doc.key] === true;
             const color = done ? 'var(--brand)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
             const chipBg = done ? 'var(--brand-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
-            const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Outstanding';
-            const stateAr = done ? (doc.platform ? 'مكتمل' : 'مُرفق') : doc.optional ? 'اختياري' : 'غير مُرفق';
+            const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Pending';
+            const stateAr = done ? (doc.platform ? 'مكتمل' : 'مُرفق') : doc.optional ? 'اختياري' : 'قيد الانتظار';
             const fileNoteEn = fileNames[doc.key];
             const fileNoteAr = fileNames[doc.key];
             return (
@@ -381,7 +380,7 @@ export default async function RequirementsPage({
                     {p.status === 'declined' && !event.filed ? (
                       // Nothing is filed: no change report is owed on a decline --
                       // the fixed chip note claimed one regardless, wrongly.
-                      <L en="Declined. Nothing is filed yet, so no change report is owed — name another party." ar="اعتُذر. لا شيء مقدَّماً بعد، فلا إبلاغ عن تغيير مستحق — سمّوا طرفاً آخر." />
+                      <L en="Invitation declined. Invite a replacement." ar="رُفضت الدعوة. ادعوا بديلاً." />
                     ) : (
                       <L en={part.noteEn} ar={part.noteAr} />
                     )}
@@ -413,7 +412,7 @@ export default async function RequirementsPage({
                       <L en="Withdraw the nomination" ar="سحب الترشيح" />
                     </button>
                     <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
-                      <L en="The invitation link stops working. Nothing was confirmed, so no change report is owed." ar="يتوقف رابط الدعوة عن العمل. لم يُؤكَّد شيء، فلا إبلاغ عن تغيير مستحق." />
+                      <L en="This disables the invitation link." ar="سيتوقف رابط الدعوة عن العمل." />
                     </span>
                   </form>
                 ) : null}
@@ -430,7 +429,7 @@ export default async function RequirementsPage({
                         {event.filed ? (
                           <L en="Removing a confirmed party is a material change, and your submission is filed: the party will be notified, and a change report to the Ministry is required." ar="إزالة طرف مؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ الطرف، ويلزم إبلاغ الوزارة عن التغيير." />
                         ) : (
-                          <L en="Removing a confirmed party is a material change: the party will be notified. Nothing is filed yet, so no change report is owed." ar="إزالة طرف مؤكَّد تغيير جوهري: سيُبلَّغ الطرف. لا شيء مقدَّم بعد، فلا إبلاغ عن تغيير مستحق." />
+                          <L en="The party will be notified when removed." ar="سيُبلَّغ الطرف عند إزالته." />
                         )}
                       </span>
                       <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
@@ -469,7 +468,7 @@ export default async function RequirementsPage({
                   </div>
                   {governance['command']?.trim() ? (
                     <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
-                      <L en="The Director has written the medical-command arrangements; the text is in the plan." ar="كتب المدير ترتيبات القيادة الطبية؛ والنص في الخطة." />
+                      <L en="Medical-command arrangements added to the plan." ar="أُضيفت ترتيبات القيادة الطبية إلى الخطة." />
                     </div>
                   ) : null}
                 </div>
@@ -484,7 +483,7 @@ export default async function RequirementsPage({
                       <L en="Withdraw the nomination" ar="سحب الترشيح" />
                     </button>
                     <span style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.5 }}>
-                      <L en="The invitation link stops working. Nothing was confirmed, so no change report is owed." ar="يتوقف رابط الدعوة عن العمل. لم يُؤكَّد شيء، فلا إبلاغ عن تغيير مستحق." />
+                      <L en="This disables the invitation link." ar="سيتوقف رابط الدعوة عن العمل." />
                     </span>
                   </form>
                 ) : null}
@@ -556,12 +555,10 @@ export default async function RequirementsPage({
               <L en="Read them" ar="قراءتها" />
             </span>
           </summary>
-          <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
-            <L
+          <div className="secondary-help"><InfoNote><L
               en="You certify to all of them with one line in the compliance and submission form."
               ar="تصدّقون عليها جميعاً بسطر واحد في نموذج الامتثال والتقديم."
-            />
-          </p>
+            /></InfoNote></div>
           {[
             {
               rows: certifyGroups.everyLevel,
@@ -645,18 +642,16 @@ export default async function RequirementsPage({
               <L en="See them" ar="الاطلاع عليها" />
             </span>
           </summary>
-          <p style={{ margin: '4px 0 20px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
-            <L
+          <div className="secondary-help"><InfoNote><L
               en="The conducting authority schedules these checks, and you will be told the date."
               ar="تجدول الجهةُ المنفِّذة هذه التحققات، وستُبلَّغون بالتاريخ."
-            />
-          </p>
+            /></InfoNote></div>
           {inspections.length === 0 ? (
             <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, maxWidth: '74ch' }}>
               <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
                 <L
-                  en="No inspection or visit has been scheduled for this event. The conducting authority sets the date, and it appears here and in your notifications when it does."
-                  ar="لم يُحدَّد أي تفتيش أو زيارة لهذه الفعالية. تحدد الجهة المنفِّذة التاريخ، ويظهر هنا وفي إشعاراتكم عند تحديده."
+                  en="No inspection scheduled."
+                  ar="لم يُحدَّد موعد تفتيش."
                 />
               </p>
             </div>

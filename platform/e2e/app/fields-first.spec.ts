@@ -40,7 +40,7 @@ test.describe('fields come first on a phone', () => {
       const top = await page.evaluate(() => {
         const main = document.querySelector('main');
         if (!main) return Number.MAX_SAFE_INTEGER;
-        const control = main.querySelector('button, input, textarea, select, summary, a[href]');
+        const control = [...main.querySelectorAll<HTMLElement>('button:not(.info-note-trigger), input:not([type=hidden]), textarea, select, summary, a[href]')].find((el) => el.getClientRects().length > 0 && !el.closest('.info-note-content'));
         if (!control) return Number.MAX_SAFE_INTEGER;
         return control.getBoundingClientRect().top + window.scrollY;
       });

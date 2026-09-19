@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
@@ -46,13 +47,12 @@ export default async function NotificationsPage({
       <main data-pad="" data-region="notifications" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Notifications" ar="الإشعارات" />
-        </h1>
-        <p style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '74ch' }}>
-          <L
+         <InfoNote><L
             en="Each row opens the record it concerns."
             ar="كل صف يفتح السجل الذي يخصّه."
-          />
-        </p>
+          /></InfoNote>
+</h1>
+
 
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBlockEnd: 20 }}>
           {filters.map((f) => (
@@ -81,8 +81,8 @@ export default async function NotificationsPage({
           <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, maxWidth: '74ch' }}>
             <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
               <L
-                en="Nothing here. Notifications arrive when the Ministry acts on a submission, a named party answers, or a deadline approaches."
-                ar="لا شيء هنا. تصل الإشعارات عندما تتصرف الوزارة في طلب، أو تجيب جهة مُسمّاة، أو يقترب موعد نهائي."
+                en="No notifications yet."
+                ar="لا إشعارات بعد."
               />
             </p>
           </div>

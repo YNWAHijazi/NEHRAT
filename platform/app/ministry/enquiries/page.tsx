@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
@@ -25,10 +26,9 @@ export default async function EnquiriesPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Enquiries" ar="الاستفسارات" />
+       <InfoNote><L en="Answering an enquiry does not change the outcome." ar="الرد على الاستفسار لا يغيّر النتيجة." /></InfoNote>
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L en="Answering an enquiry does not change the outcome." ar="الرد على الاستفسار لا يغيّر النتيجة." />
-      </p>
+
       <div data-region="enquiries" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((e) => (
           <div key={e.id} style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${e.repliedAt ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12 }}>

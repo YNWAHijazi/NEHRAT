@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -49,15 +50,13 @@ export default async function EditEventPage({
               <L en="Both names and both dates are required." ar="الاسمان والتاريخان مطلوبة جميعاً." />
             </div>
           ) : null}
-          <p style={{ margin: '0 0 24px', fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.7, maxWidth: '70ch' }}>
-            {/* Second sweep: the sentence explaining where classification figures
+          <div className="secondary-help"><InfoNote>{/* Second sweep: the sentence explaining where classification figures
                 change was cut, and the filed-submission band below it was dead code —
                 a filed record redirects away from this screen at the top. */}
             <L
               en="Names, dates, place and municipalities."
               ar="الأسماء والتواريخ والمكان والبلديات."
-            />
-          </p>
+            /></InfoNote></div>
           <form action={editEventDetailsAction.bind(null, id)} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 16 }}>
             <label><span style={label}><L en="Event name (English)" ar="اسم الفعالية (بالإنكليزية)" /></span>
               <input name="nameEn" required defaultValue={event.nameEn} style={input} /></label>

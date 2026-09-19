@@ -158,8 +158,8 @@ export function PostEventForm({
             />
             <p style={{ margin: '10px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
               <L
-                en="The report carries aggregate event data. Do not name a patient or any person — submission is blocked when a personal name is detected."
-                ar="يحمل التقرير بيانات إجمالية للفعالية. لا تذكروا اسم مريض أو أي شخص — يُحجب التقديم عند رصد اسم شخصي."
+                en="Do not include patient names or identifying details."
+                ar="لا تُدرجوا أسماء المرضى أو أي بيانات تكشف هويتهم."
               />
             </p>
           </>
@@ -188,7 +188,7 @@ export function PostEventForm({
               </span>
             ) : (
               <span style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: 13 }}>
-                <L en="Signature owed" ar="التوقيع مستحق" />
+                <L en="Signature pending" ar="بانتظار التوقيع" />
               </span>
             )}
           </div>

@@ -428,7 +428,7 @@ export function PlanForm({
         : <L en="The plan could not be saved. Your text is still here; please try again." ar="تعذّر حفظ الخطة. ما زال نصكم هنا؛ حاولوا مجدداً." />}</p> : null}
       {saved ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--brand)' }}>
-          <L en="Saved. A new version was recorded; earlier versions remain readable." ar="حُفظت. سُجّلت نسخة جديدة، وتبقى النسخ السابقة قابلة للقراءة." />
+          <L en="Saved." ar="حُفظت." />
         </p>
       ) : null}
       <button
@@ -438,7 +438,7 @@ export function PlanForm({
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}
       >
         {outstanding > 0 ? (
-          <L en={`Save the plan — ${outstanding} outstanding`} ar={`حفظ الخطة — ${outstanding} غير مستوفى`} />
+          <L en={`Save the plan — ${outstanding} remaining`} ar={`حفظ الخطة — ${outstanding} متبقٍ`} />
         ) : (
           <L en="Save the plan — complete" ar="حفظ الخطة — مكتملة" />
         )}

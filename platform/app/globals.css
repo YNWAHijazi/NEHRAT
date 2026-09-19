@@ -38,7 +38,7 @@ html[lang="ar"] [data-flip]{transform:scaleX(-1)}
 [data-l="ar"]{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",sans-serif;letter-spacing:0 !important;line-height:1.75}
 h1 [data-l="ar"],h2 [data-l="ar"],h3 [data-l="ar"]{line-height:1.45}
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
-@media (max-width:900px){[data-dock]{display:none !important}}
+
 /* Give the picker its own row on phones so its panel stays inside the content
    in both languages, even when the shorter Arabic heading would fit beside it. */
 @media (max-width:700px){[data-service-picker]{width:100%}[data-svc-menu]{inset-inline-end:auto !important;inset-inline-start:0 !important}}
@@ -68,11 +68,92 @@ html[data-demonstration] [data-wallcard],html[data-demonstration] [data-region="
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}[data-sk]{background:var(--surface2) !important}button:not(:disabled):active,a:active{transform:none !important}}
 
-/* Secondary explanations expand in flow, so they remain usable on small screens. */
+/* Optional help keeps a stable, keyboard-accessible trigger. */
 .info-note { display: inline; font-weight: 400; letter-spacing: normal; text-transform: none; }
-.info-note-trigger { display: inline-flex; align-items: center; justify-content: center; inline-size: 32px; block-size: 32px; padding: 0; margin-inline: 3px; border: 0; background: transparent; color: var(--muted); cursor: pointer; vertical-align: middle; }
+.info-note-trigger { position: relative; display: inline-flex; align-items: center; justify-content: center; inline-size: 32px; block-size: 32px; padding: 0; margin-inline: 3px; border: 0; background: transparent; color: var(--muted); cursor: pointer; vertical-align: middle; }
 .info-note-trigger > [aria-hidden] { display: inline-flex; align-items: center; justify-content: center; inline-size: 18px; block-size: 18px; border: 1px solid currentColor; border-radius: 50%; font: 500 12px Georgia, serif; }
 .info-note-trigger:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
 .info-note-label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.info-note-content:not([hidden]) { display: block; padding: 10px 12px; margin-block: 6px 12px; background: var(--surface2); border-inline-start: 2px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 13px; line-height: 1.65; max-inline-size: 78ch; overflow-wrap: anywhere; }
 .info-note-content[hidden] { display: none; }
+
+/* Compact shared chrome. Account identity lives in its menu; navigation stays explicit. */
+.sr-only { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.government-band { background: var(--surface2); border-block-end: 1px solid var(--line); color: var(--muted); font-size: 11.5px; }
+.government-band > div { max-inline-size: 1160px; margin-inline: auto; padding: 6px 32px; }
+.app-header { position: sticky; inset-block-start: 0; z-index: 60; background: var(--bg); border-block-end: 1px solid var(--line); }
+.app-header-row, .header-breadcrumb { max-inline-size: 1160px; margin-inline: auto; padding-inline: 32px; }
+[data-wide-header] .app-header-row, [data-wide-header] .header-breadcrumb { max-inline-size: 1320px; }
+.app-header-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px; }
+.ministry-mark { display: flex; align-items: center; gap: 10px; color: var(--ink); min-inline-size: 0; }
+.ministry-symbol { display: grid; place-items: center; flex: none; inline-size: 32px; block-size: 32px; border: 1px solid var(--brand); border-radius: 50%; color: var(--brand); font-size: 24px; font-weight: 400; line-height: 1; }
+.ministry-wordmark { display: flex; flex-direction: column; line-height: 1.3; }
+.ministry-wordmark strong { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+.ministry-subtitle { font-size: 11.5px; color: var(--muted); }
+.header-controls { display: flex; align-items: center; gap: 6px; flex: none; }
+.header-breadcrumb { padding-block: 0 8px; font-size: 12.5px; }
+.header-breadcrumb a { display: inline-flex; align-items: center; gap: 5px; min-block-size: 28px; color: var(--muted); }
+.header-breadcrumb a:hover { color: var(--brand); }
+[data-account-menu] { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .government-band { display: none; }
+  .app-header-row[data-pad], .header-breadcrumb[data-pad] { padding-inline: 16px !important; }
+  .app-header-row { gap: 8px; padding-block: 8px; }
+  .ministry-mark { gap: 7px; }
+  .ministry-wordmark strong { font-size: 12px; max-inline-size: 145px; }
+  .ministry-subtitle { display: none; }
+  .ministry-symbol { inline-size: 27px; block-size: 27px; font-size: 21px; }
+  .header-controls { gap: 2px; }
+  .header-controls .language-toggle { border: 0 !important; padding-inline: 6px !important; font-size: 12px !important; }
+  .header-breadcrumb { padding-block-end: 4px; }
+  [data-region="next-action"] { padding: 18px !important; gap: 12px !important; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button, a { transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
+}
+.secondary-help { margin-block: 0 12px; color: var(--muted); font-size: 13px; }
+h1 .info-note-trigger, h2 .info-note-trigger, h3 .info-note-trigger { vertical-align: middle; }
+.record-details { border-block-end: 1px solid var(--line); padding-block: 14px; margin-block-end: 16px; }
+.record-details > summary { cursor: pointer; font-size: 15px; font-weight: 500; color: var(--muted); }
+.record-details[open] > summary { margin-block-end: 16px; color: var(--ink); }
+@media print {
+  [data-demonstration-band] .info-note-trigger { display: none !important; }
+  [data-demonstration-band] .info-note-content { display: inline !important; padding: 0 !important; margin: 0 !important; border: 0 !important; background: transparent !important; }
+}
+/* Help overlays must never participate in flex sizing or move the hovered icon. */
+.info-note-content:not([hidden]) {
+  position: fixed;
+  z-index: 100;
+  display: block;
+  inline-size: min(360px, calc(100vw - 24px));
+  max-inline-size: none;
+  max-block-size: min(400px, calc(100dvh - 32px));
+  overflow: auto;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.65;
+  text-align: start;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+.event-stat-label { display: flex; align-items: center; block-size: 32px; margin-block-end: 4px; gap: 2px; }
+@media print {
+  .info-note-trigger, .info-note-content { display: none !important; }
+  [data-demonstration-band] .info-note-content { display: inline !important; position: static !important; visibility: visible !important; box-shadow: none !important; }
+}
+.display-settings[data-dock] { display: block; position: fixed; inset-block-end: 18px; inset-inline-end: 18px; z-index: 70; }
+.display-preferences { position: absolute; inset-block-end: 56px; inset-inline-end: 0; inline-size: 250px; max-inline-size: calc(100vw - 36px); padding: 18px; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.12); background: var(--bg); font-size: 14px; }
+.display-preference-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-block-start: 10px; }
+.public-signin { display: inline-flex; align-items: center; min-block-size: 40px; padding-inline: 12px; font-size: 13px; color: var(--brand); border: 1px solid var(--line); border-radius: 20px; white-space: nowrap; }
+html { scroll-padding-block-start: 110px; }
+
+/* Ministry review columns stack before their controls become too narrow. */
+[data-split] > * { min-inline-size: 0; }
+@media (max-width: 900px) { [data-split] { grid-template-columns: minmax(0, 1fr) !important; } }

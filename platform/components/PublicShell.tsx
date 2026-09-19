@@ -1,3 +1,4 @@
+import { InfoNote } from './InfoNote';
 import Link from 'next/link';
 import { GovernmentBand } from './Header';
 import { L } from './L';
@@ -35,36 +36,18 @@ export function PublicShell({
   return (
     <>
       <GovernmentBand />
-      <header
-        style={{
-          borderBlockEnd: '1px solid var(--line)',
-          background: 'var(--bg)',
-          paddingBlock: 14,
-        }}
-      >
-        <div
-          data-pad=""
-          style={{ maxWidth: 1160, marginInline: 'auto', paddingInline: 32, display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <Link href="/" style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--ink)' }}>
-            <span aria-hidden="true" style={{ flex: 'none', width: 34, height: 34, borderRadius: '50%', border: '1.5px solid var(--brand)', display: 'grid', placeItems: 'center', color: 'var(--brand)', fontSize: 20 }}>
-              +
-            </span>
-            <span>
-              <span style={{ display: 'block', fontSize: 15, fontWeight: 600, letterSpacing: '-.01em' }}>
-                <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />
-              </span>
-              <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)' }}>
-                <L en="National Health and Medical Readiness" ar="الجاهزية الصحية والطبية الوطنية" />
-              </span>
+      <header className="app-header">
+        <div className="app-header-row" data-pad="">
+          <Link href="/" className="ministry-mark">
+            <span className="ministry-symbol" aria-hidden="true">+</span>
+            <span className="ministry-wordmark">
+              <strong><L en="Ministry of Public Health" ar="وزارة الصحة العامة" /></strong>
+              <span className="ministry-subtitle"><L en="National Health and Medical Readiness" ar="الجاهزية الصحية والطبية الوطنية" /></span>
             </span>
           </Link>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="header-controls">
             <LangToggle />
-            <Link
-              href={signedIn ? '/dashboard' : '/signin'}
-              style={{ height: 36, paddingInline: 16, border: '1px solid var(--line)', borderRadius: 18, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
-            >
+            <Link href={signedIn ? '/dashboard' : '/signin'} className="public-signin">
               {signedIn ? <L en="Your dashboard" ar="لوحتكم" /> : <L en="Sign in" ar="تسجيل الدخول" />}
             </Link>
           </div>
@@ -127,10 +110,12 @@ export function PublicShell({
         style={{ marginBlockStart: 64, borderBlockStart: '1px solid var(--line)', background: 'var(--surface2)' }}
       >
         <div data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '32px 32px 56px' }}>
-          <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)', maxWidth: '84ch' }}>
-            <L en={PUBLIC_LANDING.scopeEn} ar={PUBLIC_LANDING.scopeAr} />{' '}
-            <L en={PUBLIC_LANDING.jurisdictionEn} ar={PUBLIC_LANDING.jurisdictionAr} />
-          </p>
+          <div style={{ fontSize: 13, color: 'var(--muted)' }}>
+            <L en="About this service" ar="حول هذه الخدمة" /> <InfoNote>
+              <L en={PUBLIC_LANDING.scopeEn} ar={PUBLIC_LANDING.scopeAr} />{' '}
+              <L en={PUBLIC_LANDING.jurisdictionEn} ar={PUBLIC_LANDING.jurisdictionAr} />
+            </InfoNote>
+          </div>
           <div style={{ marginBlockStart: 20, display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: '13px' }}>
             <Link href="/applicability" style={{ color: 'var(--brand)' }}>
               <L en="Check whether the rules apply" ar="التحقق من انطباق القواعد" />

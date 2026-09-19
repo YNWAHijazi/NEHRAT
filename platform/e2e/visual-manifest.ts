@@ -196,17 +196,15 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'record-header',
-        mode: 'compare',
-        reference: { strategy: 'headerRow' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="record-header"]',
-        note: 'Identity block and the level/deadline figures. Held at 2%.',
+        note: 'User simplification request, 2026-09-18: a single level readout now holds its explanation behind an information button; overdue days use a positive number and a clear label. Mobile layout and expansion are tested in compact-interface.spec.ts. The earlier reference has no help control.',
       },
       {
         name: 'history',
-        mode: 'compare',
-        reference: { strategy: 'headingSection', text: 'Submission history' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="history"]',
-        note: 'Submission history rows. Held at 2%.',
+        note: 'User simplification request, 2026-09-18: submission history expands on demand. compact-interface.spec.ts checks the disclosure and its rows; the earlier reference keeps them permanently open.',
       },
       {
         name: 'derivation-panel',
@@ -418,10 +416,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'session-callout',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Assess one routine operating session', container: 'border-radius: 14px' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="session-callout"]',
-        note: 'Assess one routine operating session; the Domain 4 and Domain 9 readings. Held at 2%.',
+        note: 'User simplification request, 2026-09-18: session guidance sits behind an information button beside the assessment title. The attendance field still explicitly names a routine operating session; compact-interface.spec.ts covers help access.',
       },
       {
         name: 'validity-panel',
@@ -885,15 +882,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         // sides, a true pixel compare. This panel existed in the reference for a whole
         // slice while an unlocated exception called it a summary.
         name: 'att-intro',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'An attestation is not an outcome', container: 'max-width: 70ch' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="att-intro"]',
-        // EN holds at the default 2%. AR measures 4.3% as a uniform baseline offset on
-        // every glyph -- the outlined-everywhere diff of a sub-pixel line shift, the
-        // same residual class the other held-at-5% Arabic paragraphs carry. A CHANGED
-        // WORD in this paragraph measures far above 5%, so the ratchet still bites.
-        threshold: 0.05,
-        note: 'The not-an-outcome paragraph, verbatim from the reference. A clearance cannot be issued while any attestation is pending; the other two outcomes are available at all times.',
+        note: 'User simplification request, 2026-09-18: explanatory attestation text is optional information. Blocking conditions and all three regulatory outcomes stay visible and unchanged. compact-interface.spec.ts checks collapsed help across the reviewer journey.',
       },
       {
         // The one-line summary over the seeded showcase state -- 3 of 6 pending,

@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
@@ -62,12 +63,10 @@ export default async function LookupPage({
       {/* The anti-enumeration explainer left (partner ruling, second sweep): the form
           asks for the date; it does not have to justify asking. The BEHAVIOUR — no
           answer without the second factor — is non-negotiable 5b and unchanged. */}
-      <p style={{ margin: '0 0 28px', fontSize: '15.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-        <L
+      <div className="secondary-help"><InfoNote><L
           en="Confirm that a Ministry reference exists, and what it says."
           ar="تأكدوا من وجود رقم مرجعي لدى الوزارة وممّا يفيده."
-        />
-      </p>
+        /></InfoNote></div>
 
       <form method="get" data-region="lookup-form" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, alignItems: 'end', maxWidth: 700, marginBlockEnd: 28 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -118,12 +117,10 @@ export default async function LookupPage({
                   <span style={{ flex: 1, minWidth: 180, fontSize: '15px' }}>{r.v}</span>
                 </div>
               ))}
-              <p style={{ margin: '16px 0 0', fontSize: '13px', lineHeight: 1.7, color: 'var(--muted)' }}>
-                <L
+              <div className="secondary-help"><InfoNote><L
                   en="The register discloses nothing further: no contact details, no documents, no assessment answers."
                   ar="لا يفصح السجل عن شيء آخر: لا بيانات اتصال ولا مستندات ولا إجابات تقييم."
-                />
-              </p>
+                /></InfoNote></div>
             </>
           )}
         </div>

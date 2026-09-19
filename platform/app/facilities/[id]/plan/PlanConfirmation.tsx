@@ -1,5 +1,8 @@
 'use client';
 
+import { InfoNote } from '../../../../components/InfoNote';
+
+
 /**
  * The plan's own forms: the responsible persons (one coordinator record, stamped on
  * review -- the ledger's coordinator row reads that stamp) and the plan's own
@@ -92,12 +95,10 @@ export function PlanConfirmation({
           </span>
         ) : null}
       </div>
-      <p style={{ margin: '0 0 20px', fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
-        <L
+      <div className="secondary-help"><InfoNote><L
           en="Recording this confirmation restarts the annual clock on the validity record. The coordinator signs it."
           ar="تسجيل هذا التأكيد يعيد بدء العدّ السنوي في سجل الصلاحية. ويوقّعه المنسّق."
-        />
-      </p>
+        /></InfoNote></div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
         {content.planChecks.map((c) => {
           const on = Boolean(checks[c.key]);

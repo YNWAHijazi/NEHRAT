@@ -8,6 +8,7 @@
  */
 
 import Link from 'next/link';
+import { InfoNote } from '../../../components/InfoNote';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import type { Account } from '../../../lib/auth';
@@ -107,15 +108,13 @@ export function DirectorEventView({
                     return (
                       <div key={g.key} style={{ paddingBlock: '29px', paddingInlineStart: '32px', paddingInlineEnd: '33px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 16 }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 12 }}>
-                          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em', flex: 1, minWidth: 240 }}>
+                          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em', flex: 1, minWidth: 0 }}>
                             <L en={g.en} ar={g.ar} />
+                            <InfoNote><L en={g.askEn} ar={g.askAr} />{' '}<L en={`Included in: ${g.intoEn}`} ar={`يُدرج في: ${g.intoAr}`} /></InfoNote>
                           </h3>
                           <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 13 }}>
                             <L en={s.en} ar={s.ar} />
                           </span>
-                        </div>
-                        <div style={{ fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)', marginBlockEnd: 16, maxWidth: '70ch' }}>
-                          <L en={g.askEn} ar={g.askAr} />
                         </div>
                         <textarea
                           name={g.key}
@@ -123,22 +122,19 @@ export function DirectorEventView({
                           defaultValue={governance[g.key] ?? ''}
                           style={{ width: '100%', padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15, lineHeight: 1.7, resize: 'vertical' }}
                         />
-                        <div style={{ marginBlockStart: 12, fontSize: 13, color: 'var(--muted)' }}>
-                          <L en={`Writes into: ${g.intoEn}`} ar={`يُكتب في: ${g.intoAr}`} />
-                        </div>
                       </div>
                     );
                   })}
                 </div>
                 <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBlockEnd: 32 }}>
-                  <L en="Save — the organizer's plan reads this" ar="حفظ — تقرأ خطة المنظّم هذا" />
+                  <L en="Save" ar="حفظ" />
                 </button>
               </form>
 
               {/* The report is the Director's other signature. The row states where it
                   stands and opens it; the report page carries the figures and the act. */}
               <div data-region="report-row" style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${reportSigned?.director ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ flex: 1, minWidth: 260 }}>
+                <div style={{ flex: '1 1 220px', minWidth: 0 }}>
                   <div style={{ fontSize: 16, fontWeight: 500 }}>
                     <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
                   </div>

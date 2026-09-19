@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
@@ -37,13 +38,12 @@ export default async function ApplicabilityPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Applicability, referrals and designations" ar="الانطباق والإحالات والتحديدات" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L
+       <InfoNote><L
           en="Events that reached the Ministry from outside the platform, each determined in or out of scope with the reasons recorded."
           ar="فعاليات وصلت الوزارة من خارج المنصة، يُحسم كل منها ضمن النطاق أو خارجه مع تسجيل الأسباب."
-        />
-      </p>
+        /></InfoNote>
+</h1>
+
 
       <div data-region="applicability" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
         {rows.map((r) => (

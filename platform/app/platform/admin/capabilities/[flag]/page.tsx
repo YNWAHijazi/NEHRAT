@@ -49,12 +49,12 @@ export default async function CapabilityPage({
     <MinistryShell account={account} back={{ href: '/platform/admin', en: 'Master admin', ar: 'الإدارة العليا' }} consoleEn="Platform owner" consoleAr="مالك المنصة">
       {notice === 'on' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="The capability is on. The act is recorded below — who, when, and the configuration at that moment." ar="القدرة مشغّلة. والإجراء مسجَّل أدناه — مَن ومتى وما كان الإعداد في تلك اللحظة." />
+          <L en="Enabled." ar="تم التفعيل." />
         </div>
       ) : null}
       {notice === 'off' ? (
         <div style={{ padding: '16px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="The capability is off. The act is recorded below." ar="القدرة مطفأة. والإجراء مسجَّل أدناه." />
+          <L en="Disabled." ar="تم التعطيل." />
         </div>
       ) : null}
       {notice === 'config' ? (
@@ -346,13 +346,12 @@ export default async function CapabilityPage({
         <div data-region="sponsorship-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Sponsorships" ar="الرعايات" />
-          </h2>
-          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
-            <L
+           <InfoNote><L
               en="A sponsored vendor holds the top of its category for the period, labelled as sponsored wherever it appears — always. Ending one closes the period; the row stays."
               ar="يحتل المزوّد المموَّل صدارة فئته طوال الفترة، ويوسم بأنه مموَّل حيثما ظهر — دائماً. وإنهاء الرعاية يغلق الفترة؛ ويبقى الصف."
-            />
-          </p>
+            /></InfoNote>
+</h2>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
             {sponsorshipsAll().length === 0 ? (
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>
@@ -443,13 +442,12 @@ export default async function CapabilityPage({
         <div data-region="advert-manager" style={{ padding: '20px 24px', border: '1px solid var(--line)', borderRadius: 12, maxWidth: 860, marginBlockEnd: 24 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Adverts" ar="الإعلانات" />
-          </h2>
-          <p style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
-            <L
+           <InfoNote><L
               en="An advert is an image, a link, a period and a placement — and the placements are the feet of the public pages, structurally: there is nowhere else one can go."
               ar="الإعلان صورة ورابط وفترة وموضع — والمواضع هي أسفل الصفحات العامة، بنيوياً: لا مكان آخر يذهب إليه."
-            />
-          </p>
+            /></InfoNote>
+</h2>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 18 }}>
             {advertsAll().length === 0 ? (
               <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>

@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
@@ -72,10 +73,9 @@ export default async function AdminActivityPage() {
 
       <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en={A.activityTitleEn} ar={A.activityTitleAr} />
+       <InfoNote><L en={A.activityIntroEn} ar={A.activityIntroAr} /></InfoNote>
       </h2>
-      <p style={{ margin: '0 0 16px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
-        <L en={A.activityIntroEn} ar={A.activityIntroAr} />
-      </p>
+
 
       <div data-region="activity" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
         {rows.length === 0 ? (

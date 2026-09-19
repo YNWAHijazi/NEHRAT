@@ -1,5 +1,8 @@
 'use client';
 
+import { InfoNote } from '../../../../components/InfoNote';
+
+
 /**
  * The annual venue assessment: the same nine domains as the event assessment, over one
  * routine operating session. The classification is derived, never chosen; both results
@@ -105,27 +108,12 @@ export function VenueAssessmentForm({
       </div>
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
         <L en="Annual venue assessment" ar="التقييم السنوي للموقع" />
+        <span data-region="session-callout"><InfoNote labelEn="What to assess" labelAr="ما يجب تقييمه"><L en="Assess one routine operating session. Use the session duration and the venue’s operating history." ar="قيّموا فترة تشغيل اعتيادية واحدة، باستخدام مدة الجلسة وسجل تشغيل الموقع." /></InfoNote></span>
       </h1>
       {/* The cross-reference to the event assessment left this screen (partner
           ruling, second sweep): a venue operator has no event assessment to
           compare with, and the callout below says what to assess. */}
 
-      <div data-region="session-callout" style={{ padding: '26px 30px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 44 }}>
-        <div style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
-          <L
-            en="Assess one routine operating session — not a specific event, and not the venue's busiest day."
-            ar="قيّموا فترة تشغيل اعتيادية واحدة — لا فعالية بعينها ولا أكثر أيام الموقع ازدحاماً."
-          />
-        </div>
-        <div style={{ fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
-          <div>
-            <L en="Domain 4, event duration — the length of one routine operating session." ar="المجال 4، مدة الفعالية — طول فترة تشغيل اعتيادية واحدة." />
-          </div>
-          <div>
-            <L en="Domain 9, previous event history — the venue's history across its routine operations, not one event's previous edition." ar="المجال 9، سجل النسخ السابقة — سجل الموقع عبر تشغيله الاعتيادي، لا النسخة السابقة لفعالية واحدة." />
-          </div>
-        </div>
-      </div>
 
       <div style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 380 }}>
@@ -186,17 +174,12 @@ export function VenueAssessmentForm({
           <>
             <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: '-.025em', color: `var(--l${derivation.finalLevel})` }}>
               <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
+              <InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى">
+                {why.reason ? <L en={why.reason.en} ar={why.reason.ar} /> : null}{' '}
+                {why.comparison ? <L en={why.comparison.en} ar={why.comparison.ar} /> : null}
+              </InfoNote>
             </div>
-            {why.reason ? (
-              <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.6, maxWidth: '60ch' }}>
-                <L en={why.reason.en} ar={why.reason.ar} />
-              </p>
-            ) : null}
-            {why.comparison ? (
-              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                <L en={why.comparison.en} ar={why.comparison.ar} />
-              </p>
-            ) : null}
+
           </>
         ) : (
           <div style={{ fontSize: 16, lineHeight: 1.6 }}>

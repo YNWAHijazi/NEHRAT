@@ -40,13 +40,12 @@ export default async function MasterAdminPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Master admin" ar="الإدارة العليا" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '84ch', lineHeight: 1.6 }}>
-        <L
+       <InfoNote><L
           en="Manage users, records, activity and optional services."
           ar="إدارة المستخدمين والسجلات والنشاط والخدمات الاختيارية."
-        />
-      </p>
+        /></InfoNote>
+</h1>
+
 
       {/* The four administration tabs, granted to the owner by the partner ruling —
           the same screens the master administrator sees, not copies of them. */}
@@ -86,7 +85,7 @@ export default async function MasterAdminPage({
           <InfoNote><L en={item.reasonEn} ar={item.reasonAr} />{' '}<L en={item.conditionEn} ar={item.conditionAr} /></InfoNote>
         </div>)}
       </details>
-      
+
       <div data-region="order-lane" style={{ padding: '20px 24px', border: `1px solid ${laneActive ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, maxWidth: 860 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 8 }}>
           <span style={{ fontSize: 15, fontWeight: 600 }}>

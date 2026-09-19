@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 import uploads from './lib/rules/data/uploads.json';
 
 const config: NextConfig = {
+  // Keep the local preview's Arabic display controls clear of Next's corner badge.
+  devIndicators: false,
   // The deployed image runs the literal output of this build -- nothing regenerates
   // between here and the container, so nothing can drift. Standalone lands at
   // `${distDir}/standalone`, so it composes with the separate harness build below.

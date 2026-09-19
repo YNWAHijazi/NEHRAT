@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
@@ -60,9 +61,7 @@ export default async function AdminRecordsPage({
       </h1>
       <AdminTabs current="/ministry/admin/records" />
 
-      <p style={{ margin: '0 0 18px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.65, maxWidth: '84ch' }}>
-        <L en={A.recordsIntroEn} ar={A.recordsIntroAr} />
-      </p>
+      <div className="secondary-help"><InfoNote><L en={A.recordsIntroEn} ar={A.recordsIntroAr} /></InfoNote></div>
 
       <form
         method="get"

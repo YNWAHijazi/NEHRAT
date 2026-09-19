@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -42,13 +43,12 @@ export default async function ChangePage({
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Report a material change" ar="الإبلاغ عن تغيير جوهري" />
-          </h1>
-          <p style={{ margin: '0 0 36px', fontSize: 16, color: 'var(--muted)', lineHeight: 1.6, maxWidth: '74ch' }}>
-            <L
+           <InfoNote><L
               en="Notify the Ministry without undue delay of a change affecting the assessment or the medical plan."
               ar="أبلغوا الوزارة دون تأخير غير مبرر بأي تغيير يؤثر في التقييم أو في الخطة الطبية."
-            />
-          </p>
+            /></InfoNote>
+</h1>
+
 
           {notice === 'reported' ? (
             <div style={{ padding: '18px 22px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: '14.5px', lineHeight: 1.6 }}>

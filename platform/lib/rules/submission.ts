@@ -311,8 +311,8 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       kind: 'documents',
       href: 'requirements',
       tone: 'accent',
-      titleEn: attachable === 1 ? 'Attach the outstanding document' : `Attach the ${attachable} outstanding documents`,
-      titleAr: attachable === 1 ? 'أرفقوا المستند غير المقدَّم' : `أرفقوا المستندات غير المقدَّمة (${attachable})`,
+      titleEn: attachable === 1 ? 'Upload 1 document' : `Upload ${attachable} documents`,
+      titleAr: attachable === 1 ? 'رفع مستند واحد' : `رفع ${attachable} مستندات`,
       bodyEn:
         attachable === 1
           ? 'Upload the missing document to complete your submission package.'
@@ -321,8 +321,8 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
         attachable === 1
           ? 'أرفقوا المستند الناقص لاستكمال حزمة التقديم.'
           : 'أرفقوا المستندات الناقصة لاستكمال حزمة التقديم.',
-      buttonEn: 'Open the documents',
-      buttonAr: 'فتح المستندات',
+      buttonEn: 'Upload documents',
+      buttonAr: 'رفع المستندات',
     };
   }
 
@@ -331,8 +331,8 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       kind: 'plan',
       href: 'plan',
       tone: 'accent',
-      titleEn: 'Write the event health and medical plan',
-      titleAr: 'اكتبوا خطة التأهب الصحي والطبي للفعالية',
+      titleEn: 'Complete the medical plan',
+      titleAr: 'أكملوا الخطة الطبية',
       bodyEn:
         'Write the plan here or upload an existing plan.',
       bodyAr:
@@ -347,8 +347,8 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       kind: 'director',
       href: 'requirements',
       tone: 'accent',
-      titleEn: 'Name the Event Medical Director',
-      titleAr: 'سمّوا المدير الطبي للفعالية',
+      titleEn: 'Invite the Medical Director',
+      titleAr: 'دعوة المدير الطبي للفعالية',
       bodyEn:
         'Nominate a licensed physician and share their invitation link. Their acceptance is required before submission.',
       bodyAr:
@@ -423,8 +423,8 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       bodyEn:
         'Everything the level requires is in place. The application fee is due, and filing completes when its payment is recorded.',
       bodyAr: 'كل ما يقتضيه المستوى مستوفى. ورسم الطلب مستحق، ويكتمل التقديم عند تسجيل سداده.',
-      buttonEn: 'Open the submission package',
-      buttonAr: 'فتح حزمة التقديم',
+      buttonEn: 'Review submission',
+      buttonAr: 'مراجعة الملف',
     };
   }
 
@@ -432,12 +432,12 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
     kind: 'ready',
     href: 'submit',
     tone: 'brand',
-    titleEn: 'File the submission',
-    titleAr: 'قدّموا الملف',
+    titleEn: 'Ready to submit',
+    titleAr: 'جاهز للتقديم',
     bodyEn: 'Everything the level requires is in place.',
     bodyAr: 'كل ما يقتضيه المستوى مستوفى.',
-    buttonEn: 'Open the submission package',
-    buttonAr: 'فتح حزمة التقديم',
+    buttonEn: 'Review submission',
+    buttonAr: 'مراجعة الملف',
   };
 }
 

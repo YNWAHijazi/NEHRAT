@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -66,10 +67,9 @@ export default async function DeterminationCertificatePage({
       <main data-pad="" data-region="certificate" style={{ maxWidth: 820, marginInline: 'auto', padding: '48px 32px 120px' }}>
         <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
           <L en={C.titleEn} ar={C.titleAr} />
+         <InfoNote><L en={C.introEn} ar={C.introAr} /></InfoNote>
         </h1>
-        <p style={{ margin: '0 0 28px', fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '70ch' }}>
-          <L en={C.introEn} ar={C.introAr} />
-        </p>
+
 
         <div style={{ borderBlockStart: '1px solid var(--line)', marginBlockEnd: 24 }}>
           {row(C.refLabelEn, C.refLabelAr, event.mophReference ?? '—', event.mophReference ?? '—')}

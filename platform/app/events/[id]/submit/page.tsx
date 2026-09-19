@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -72,14 +73,13 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
         <div data-region="package-docs" style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Submission package" ar="حزمة التقديم" />
-          </h1>
-          <p style={{ margin: '0 0 36px', fontSize: 16, color: 'var(--muted)', lineHeight: 1.6 }}>
-            {/* Verbatim from the reference, lowercase "the" included -- copy is final. */}
+           <InfoNote>{/* Verbatim from the reference, lowercase "the" included -- copy is final. */}
             <L
               en={`Level ${level} requires the documents below. the compliance and submission form is completed here, not attached.`}
               ar={`يستوجب المستوى ${level} المستندات أدناه. يُستكمل نموذج الامتثال والتقديم هنا ولا يُرفَق.`}
-            />
-          </p>
+            /></InfoNote>
+</h1>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
             {documents.map((d) => {
               const done = documentState[d.key] === true;

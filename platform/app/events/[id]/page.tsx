@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
@@ -358,7 +359,7 @@ export default async function EventRecordPage({
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
       : { k: 'current', en: 'Assessment', ar: 'التقييم', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
     stage === 3
-      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: `${outstanding} outstanding`, metaAr: `${outstanding} غير مستوفى` }
+      ? { k: 'current', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: `${outstanding} remaining`, metaAr: `${outstanding} متبقٍ` }
       : stage > 3
         ? { k: 'done', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' }
         : { k: 'todo', en: 'Requirements and attachments', ar: 'المتطلبات والمرفقات', metaEn: '', metaAr: '' },
@@ -400,13 +401,13 @@ export default async function EventRecordPage({
           <div data-region="archived-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
             {event.archivedAt !== null ? (
               <L
-                en={`Archived by the Ministry on ${event.archivedAt.slice(0, 10)}. This record is read-only; nothing further is owed on it.`}
-                ar={`أُرشف هذا السجل لدى الوزارة في ⁦${event.archivedAt.slice(0, 10)}⁩. وهو للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+                en={`Archived by the Ministry on ${event.archivedAt.slice(0, 10)} · Read-only.`}
+                ar={`أُرشف هذا السجل لدى الوزارة في ⁦${event.archivedAt.slice(0, 10)}⁩ · للقراءة فقط.`}
               />
             ) : (
               <L
-                en={`This event concluded and was moved to Previous services ${archiveWindowDays()} days after it ended. The record is read-only; nothing further is owed on it.`}
-                ar={`انتهت هذه الفعالية ونُقلت إلى الخدمات السابقة بعد ${archiveWindowDays()} يوماً من انتهائها. والسجل للقراءة فقط؛ ولا شيء مستحقاً عليه بعد الآن.`}
+                en={`Archived · Read-only.`}
+                ar={`مؤرشفة · للقراءة فقط.`}
               />
             )}
           </div>
@@ -414,21 +415,21 @@ export default async function EventRecordPage({
         {notice === 'reapplied' ? (
           <div data-region="reapplied-notice" style={{ padding: '20px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 20, fontSize: 15, lineHeight: 1.7 }}>
             <L
-              en={`A new event, copied from ${event.copiedFrom ?? 'the previous record'}. Nothing from the previous event carries over as approved. The level is derived again from your answers. Enter the dates — the filing deadline derives from them.`}
-              ar={`فعالية جديدة، منسوخة من ${event.copiedFrom ?? 'السجل السابق'}. لا شيء من الفعالية السابقة يُعتمد كما هو. ويُستنتج المستوى من جديد من إجاباتكم. أدخلوا التواريخ — فمهلة التقديم تُشتق منها.`}
-            />
+              en={`Copied from ${event.copiedFrom ?? 'the previous event'}. Update the dates and review the requirements.`}
+              ar={`نُسخت من ${event.copiedFrom ?? 'الفعالية السابقة'}. حدّثوا التواريخ وراجعوا المتطلبات.`}
+            /> <InfoNote><L en="Nothing from the previous event carries over as approved. The level is derived again from your answers." ar="لا شيء من الفعالية السابقة يُعتمد كما هو. ويُستنتج المستوى من جديد من إجاباتكم." /></InfoNote>
           </div>
         ) : null}
         {/* REAPPLY: the one action a concluded record offers -- it edits nothing and
             refiles nothing; it starts a NEW record prefilled from this one. */}
         {event.endDate !== null && event.endDate < today ? (
           <div data-region="reapply" style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', padding: '16px 22px', border: '1px dashed var(--line)', borderRadius: 12, marginBlockEnd: 20 }}>
-            <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+            <InfoNote labelEn="About duplicating an event" labelAr="حول نسخ الفعالية">
               <L
                 en="Reuse these details for your next event. Enter new dates and review the requirements before submitting."
                 ar="استخدموا هذه البيانات لفعاليتكم المقبلة. أدخلوا التواريخ الجديدة وراجعوا المتطلبات قبل التقديم."
               />
-            </span>
+            </InfoNote>
             <form action={reapplyEventAction.bind(null, event.id)}>
               <button type="submit" style={{ height: 44, paddingInline: 22, border: '1px solid var(--brand)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', color: 'var(--brand)', cursor: 'pointer' }}>
                 <L en="Duplicate event" ar="نسخ الفعالية" />
@@ -496,13 +497,18 @@ export default async function EventRecordPage({
             </h1>
           </div>
           <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>
-            <div>
-              <div style={upLabel}>
-                <L en="Final level" ar="المستوى النهائي" />
+            <div data-region="derivation" style={{ maxWidth: '100%' }}>
+              <div className="event-stat-label" style={upLabel}>
+                <L en="Level" ar="المستوى" />
+                {why?.reason || why?.comparison ? <InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى">
+                  {why.reason ? <L en={why.reason.en} ar={why.reason.ar} /> : null}{' '}
+                  {why.comparison ? <L en={why.comparison.en} ar={why.comparison.ar} /> : null}
+                </InfoNote> : null}
               </div>
               <div style={{ fontSize: 24, fontWeight: 600, color: level ? `var(--l${level})` : 'var(--muted)' }}>
                 {level ?? '—'}
               </div>
+              {level === null ? <Link href={`/events/${event.id}/reassess`} style={{ fontSize: 13 }}><L en="Complete the assessment" ar="إكمال التقييم" /></Link> : null}
             </div>
             {/* A filed record owes no filing: the File by / Days left tiles rendered
                 on after filing — a satisfied record read "Days left −34" beside a rail
@@ -510,16 +516,17 @@ export default async function EventRecordPage({
             {filing && !event.filed ? (
               <>
                 <div>
-                  <div style={upLabel}>
-                    <L en="File by" ar="التقديم بحلول" />
+                  <div className="event-stat-label" style={upLabel}>
+                    <L en="Submit by" ar="التقديم بحلول" />
+                    {filing.conditional && filing.conditionEn && filing.conditionAr ? <InfoNote labelEn="Filing deadline" labelAr="مهلة التقديم"><L en={filing.conditionEn} ar={filing.conditionAr} /></InfoNote> : null}
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{filing.date}</div>
                 </div>
                 <div>
-                  <div style={upLabel}>
-                    <L en="Days left" ar="الأيام المتبقية" />
+                  <div className="event-stat-label" style={upLabel}>
+                    <L en={daysLeft !== null && daysLeft < 0 ? "Days overdue" : "Days left"} ar={daysLeft !== null && daysLeft < 0 ? "أيام التأخير" : "الأيام المتبقية"} />
                   </div>
-                  <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--accent-ink)', fontVariantNumeric: 'tabular-nums' }}>{daysLeft}</div>
+                  <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--accent-ink)', fontVariantNumeric: 'tabular-nums' }}>{daysLeft !== null ? Math.abs(daysLeft) : '—'}</div>
                 </div>
               </>
             ) : null}
@@ -558,8 +565,7 @@ export default async function EventRecordPage({
 
         {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
         {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
-          <Link
-            href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
+          <section
             data-region="next-action"
             data-next-action={action.kind}
             style={{
@@ -577,18 +583,17 @@ export default async function EventRecordPage({
               textDecoration: 'none',
             }}
           >
-            <span style={{ flex: '1 1 280px', minWidth: 0 }}>
+            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
               <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: action.tone === 'brand' ? 'var(--brand)' : 'var(--accent-ink)', marginBlockEnd: 6 }}>
-                <L en="Your next action" ar="إجراؤكم التالي" />
+                <L en="Next step" ar="الخطوة التالية" />
               </span>
               <span style={{ display: 'block', fontSize: 17, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 6 }}>
-                <L en={action.titleEn} ar={action.titleAr} />
+                <L en={action.titleEn} ar={action.titleAr} /> <InfoNote labelEn="About this step" labelAr="حول هذه الخطوة">
+                  <L en={action.bodyEn} ar={action.bodyAr} />
+                </InfoNote>
               </span>
-              <span style={{ display: 'block', fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '72ch' }}>
-                <L en={action.bodyEn} ar={action.bodyAr} />
-              </span>
-            </span>
-            <span
+            </div>
+            <Link href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
               style={{
                 flex: 'none',
                 height: 44,
@@ -604,78 +609,32 @@ export default async function EventRecordPage({
               }}
             >
               <L en={action.buttonEn} ar={action.buttonAr} />
-            </span>
-          </Link>
+            </Link>
+          </section>
         ) : null}
 
         <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
-        {filing?.conditional && filing.conditionEn && filing.conditionAr ? (
-          <p style={{ margin: '0 0 32px', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '78ch' }}>
-            <L en={filing.conditionEn} ar={filing.conditionAr} />
-          </p>
-        ) : null}
-
-        {/* The level and one line why (partner review). Both results and which governed
-            stay reported, compactly -- the full condition-by-condition detail is the
-            Ministry reviewer's screen, not the organizer's (non-negotiable 1 holds). */}
-        {derivation ? (
-          <div data-region="derivation" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 40 }}>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 12 }}>
-              <L en="Level" ar="المستوى" />
-            </div>
-            {level !== null ? (
-              <>
-                <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-.02em', color: `var(--l${level})` }}>
-                  <L en={`Level ${level}`} ar={`المستوى ${level}`} />
-                </div>
-                {why?.reason ? (
-                  <p style={{ margin: '6px 0 0', fontSize: 15, lineHeight: 1.6, maxWidth: '60ch' }}>
-                    <L en={why.reason.en} ar={why.reason.ar} />
-                  </p>
-                ) : null}
-                {why?.comparison ? (
-                  <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    <L en={why.comparison.en} ar={why.comparison.ar} />
-                  </p>
-                ) : null}
-              </>
-            ) : (
-              <div style={{ fontSize: 15, lineHeight: 1.6 }}>
-                <span style={{ color: 'var(--muted)' }}>
-                  <L en="Not yet derived." ar="لم يُستنتج بعد." />
-                </span>{' '}
-                <span style={{ color: 'var(--accent-ink)' }}>
-                  <L
-                    en={messageFor(enMessages, 'gate.assessmentIncomplete')}
-                    ar={messageFor(arMessages, 'gate.assessmentIncomplete')}
-                  />
-                </span>
-              </div>
-            )}
-          </div>
-        ) : null}
-
         {/* The requirements counters and routes, from the reference record. */}
-        <div data-region="counters" style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
+        <div data-region="counters" style={{ padding: '18px 0', borderBlockEnd: '1px solid var(--line)', marginBlockEnd: 24, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             <div>
-              <div style={{ fontSize: 30, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: agencyPendColor }}>{agencyPending}</div>
               <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                <L en="named agencies yet to answer" ar="جهة مُسمّاة لم تُجب بعد" />
+                <L en="pending responses" ar="ردود معلّقة" />
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{outstanding}</div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--accent-ink)' }}>{outstanding}</div>
               <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4 }}>
-                <L en="items outstanding before filing" ar="بنداً غير مستوفى قبل التقديم" />
+                <L en="remaining requirements" ar="متطلبات متبقية" />
               </div>
             </div>
           </div>
           <div style={actionGrid}>
             <span style={actionCell}>
               <Link href={`/events/${event.id}/requirements`} style={actionPill}>
-                <L en="Open requirements and attachments" ar="فتح المتطلبات والمرفقات" />
+                <L en="Requirements" ar="المتطلبات" />
               </Link>
             </span>
             <GatedAction
@@ -720,10 +679,8 @@ export default async function EventRecordPage({
         ) : null}
 
         {history.length > 0 ? (
-          <div data-region="history">
-            <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-              <L en="Submission history" ar="سجل التقديم" />
-            </h2>
+          <details data-region="history" className="record-details">
+            <summary><L en="Submission history" ar="سجل التقديم" /></summary>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 40 }}>
               {history.map((h) => (
                 <div key={`${h.en}-${h.date}`} style={{ background: 'var(--bg)', padding: '16px 20px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
@@ -734,15 +691,14 @@ export default async function EventRecordPage({
                 </div>
               ))}
             </div>
-          </div>
+          </details>
         ) : null}
 
         {/* Assessment history: versioned, never edited in place, previous versions readable */}
         {versions.length > 0 ? (
           <>
-            <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-              <L en="Assessment versions" ar="إصدارات التقييم" />
-            </h2>
+            <details data-region="assessment-history" className="record-details">
+              <summary><L en="Assessment versions" ar="إصدارات التقييم" /></summary>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 16 }}>
               {versions.map((v) => (
                 <div key={v.version} style={{ background: 'var(--bg)', padding: '16px 20px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between' }}>
@@ -765,6 +721,7 @@ export default async function EventRecordPage({
                 </div>
               ))}
             </div>
+            </details>
             {event.lifecycle !== 'cancelled' && !recordArchived ? (
               <div style={{ marginBlockEnd: 40, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
                 <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>

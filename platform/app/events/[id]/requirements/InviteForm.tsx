@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 /**
  * The invitation, sent from inside the requirement that needs the party (SPEC 5c):
  * organization name, contact email, send. The invited party self-registers against the
@@ -45,12 +46,10 @@ export function InviteForm({ eventId, kind }: { eventId: string; kind: 'ems' | '
       >
         {kind === 'ems' ? <L en="Invite a provider" ar="دعوة مزوّد" /> : <L en="Nominate the Director" ar="ترشيح المدير" />}
       </button>
-      <p style={{ flexBasis: '100%', margin: '6px 0 0', fontSize: '12.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-        <L
+      <div className="secondary-help"><InfoNote><L
           en="Create the invitation, then share its link with the named party."
           ar="أنشئوا الدعوة، ثم شاركوا رابطها مع الجهة المُسمّاة."
-        />
-      </p>
+        /></InfoNote></div>
     </form>
   );
 }

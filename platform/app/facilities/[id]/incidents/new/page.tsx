@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../../components/Header';
 import { L } from '../../../../../components/L';
@@ -36,10 +37,9 @@ export default async function IncidentReportPage({
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Facility cardiac-arrest incident report" ar="تقرير حادثة توقف القلب في المرفق" />
+           <InfoNote><L en="Filed after any suspected cardiac arrest, CPR attempt or AED use." ar="يُقدَّم بعد أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام جهاز." /></InfoNote>
           </h1>
-          <p style={{ margin: '0 0 28px', fontSize: 16, color: 'var(--muted)' }}>
-            <L en="Filed after any suspected cardiac arrest, CPR attempt or AED use." ar="يُقدَّم بعد أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام جهاز." />
-          </p>
+
           {/* POWER 5's PUBLISHED REPORTING PROCEDURES, finally consumed (register
               closure, 2026-09-03): the value the cardiac console publishes under
               "reporting procedures" renders where reporting happens. Absent

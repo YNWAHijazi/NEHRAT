@@ -1,3 +1,4 @@
+import { InfoNote } from '../../components/InfoNote';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
@@ -38,13 +39,12 @@ export default async function OrganizationPage({
         <div style={{ maxWidth: 720 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Organization" ar="المؤسسة" />
-          </h1>
-          <p style={{ margin: '0 0 36px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)' }}>
-            <L
+           <InfoNote><L
               en="You can create events, complete assessments and draft the plan while the Ministry records the organization; only submission waits for it."
               ar="يمكنكم إنشاء الفعاليات وإكمال التقييمات وصياغة الخطة بينما تسجّل الوزارة المؤسسة؛ التقديم وحده ينتظره."
-            />
-          </p>
+            /></InfoNote>
+</h1>
+
 
           {organization ? (
             <div style={{ padding: '27px 31px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 36 }}>
@@ -77,12 +77,10 @@ export default async function OrganizationPage({
                 </div>
               </div>
               {organization.status === 'pending' ? (
-                <p style={{ margin: '18px 0 0', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-                  <L
+                <div className="secondary-help"><InfoNote><L
                     en="You are notified when the Ministry records the organization. Submission opens then."
                     ar="تُبلَّغون عندما تسجّل الوزارة المؤسسة. ويُفتح التقديم حينها."
-                  />
-                </p>
+                  /></InfoNote></div>
               ) : null}
               {organization.status === 'returned' && organization.returnReason ? (
                 <div style={{ margin: '18px 0 0', padding: '14px 18px', background: 'var(--bad-soft)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.65 }}>

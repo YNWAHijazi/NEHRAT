@@ -197,12 +197,10 @@ export default async function SignInPage({
                 ruling, second sweep): it narrated the card it sat on. The organization
                 gate stays — it is the one thing a new arrival cannot guess. */}
             {mode === 'signup' ? (
-            <p style={{ margin: '0 0 26px', fontSize: 15, color: 'var(--muted)', lineHeight: 1.6 }}>
-              <L
+            <div className="secondary-help"><InfoNote><L
                 en="An organization is registered separately and must be recorded by the Ministry before anything can be filed."
                 ar="تُسجَّل المؤسسة بشكل منفصل ويجب أن تسجّلها الوزارة قبل إمكانية تقديم أي ملف."
-              />
-            </p>
+              /></InfoNote></div>
             ) : null}
 
             {params.notice === 'reset-unavailable' ? <p role="alert"><L en="Password recovery email is unavailable. Contact support for help." ar="بريد استعادة كلمة المرور غير متاح. تواصلوا مع الدعم للمساعدة." /> <Link href="/help"><L en="Contact support" ar="التواصل مع الدعم" /></Link></p> : null}
@@ -295,12 +293,10 @@ export default async function SignInPage({
               </div>
             ) : null}
             {mode === 'signup' ? (
-              <p style={{ margin: '16px 0 0', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-                <L
+              <div className="secondary-help"><InfoNote><L
                   en="After creating the account you continue to the organization registration form."
                   ar="بعد إنشاء الحساب تنتقلون إلى نموذج تسجيل المؤسسة."
-                />
-              </p>
+                /></InfoNote></div>
             ) : null}
           </div>
 

@@ -270,13 +270,13 @@ describe('the event record names ONE next action, from the gate\'s own blockers'
     expect(a.kind).toBe('ready');
     expect(a.tone).toBe('brand');
     expect(a.href).toBe('submit');
-    expect(a.titleEn).toBe('File the submission');
+    expect(a.titleEn).toBe('Ready to submit');
     expect(a.bodyEn).toBe('Everything the level requires is in place.');
   });
 
   it('an attachable document asks for an attachment; the plan asks to be written', () => {
     expect(nextAction([b('documentMissing', 'siteMap')]).kind).toBe('documents');
-    expect(nextAction([b('documentMissing', 'siteMap')]).titleEn).toBe('Attach the outstanding document');
+    expect(nextAction([b('documentMissing', 'siteMap')]).titleEn).toBe('Upload 1 document');
     // The plan and the compliance form are completed ON the platform: telling the
     // organizer to "attach" them would send them to a screen with no such control.
     const planAction = nextAction([b('documentMissing', 'plan')]);

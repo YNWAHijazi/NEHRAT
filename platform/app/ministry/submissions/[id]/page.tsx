@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound } from 'next/navigation';
 import { getDb } from '../../../../lib/db';
 import { L } from '../../../../components/L';
@@ -447,9 +448,7 @@ export default async function SubmissionReviewPage({
             {/* One line, not the cut lecture: it says whose answers these are, which
                 is also what tells the reader an unset row is the organizer's blank,
                 not the reviewer's to fill (and the dead-end walker reads it so). */}
-            <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)' }}>
-              <L en="The answers as the organizer gave them." ar="الإجابات كما قدّمها المنظّم." />
-            </p>
+            <div className="secondary-help"><InfoNote><L en="The answers as the organizer gave them." ar="الإجابات كما قدّمها المنظّم." /></InfoNote></div>
             {/* PART F, read back: who certified this version. Absent on versions
                 recorded before the declaration surface existed -- an empty
                 certification is not asserted, it is simply not there. */}
@@ -640,9 +639,7 @@ export default async function SubmissionReviewPage({
               <L en={`${AP.versionLabelEn} ${NEHRAT_TOOL_VERSION}`} ar={`${AP.versionLabelAr} ${NEHRAT_TOOL_VERSION}`} />
             </span>
           </div>
-          <p data-region="att-intro" style={{ margin: '0 0 14px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.55, maxWidth: '70ch' }}>
-            <L en={AP.notAnOutcomeEn} ar={AP.notAnOutcomeAr} />
-          </p>
+          <div data-region="att-intro" className="secondary-help"><InfoNote><L en={AP.notAnOutcomeEn} ar={AP.notAnOutcomeAr} /></InfoNote></div>
           {attRows.length === 0 && review.level !== null ? (
             <div data-region="attestations-empty" style={{ borderRadius: 12, overflow: 'hidden', background: 'var(--surface2)', marginBlockEnd: 28 }}>
               <div style={{ padding: '11px 20px', background: 'var(--surface)', fontSize: 12, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--muted)' }}>
@@ -965,10 +962,9 @@ export default async function SubmissionReviewPage({
           <div data-action-panel="measures" style={{ display: 'contents' }}>
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en={MINISTRY_CONTENT.additionalMeasures.en} ar={MINISTRY_CONTENT.additionalMeasures.ar} />
+           <InfoNote><L en={MINISTRY_CONTENT.additionalMeasures.noteEn} ar={MINISTRY_CONTENT.additionalMeasures.noteAr} /></InfoNote>
           </h2>
-          <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '78ch' }}>
-            <L en={MINISTRY_CONTENT.additionalMeasures.noteEn} ar={MINISTRY_CONTENT.additionalMeasures.noteAr} />
-          </p>
+
           <div data-region="measures" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
             {!mayMeasure ? <OwnerNote panel="measures" /> : null}
             {measures.map((m) => {
@@ -981,7 +977,7 @@ export default async function SubmissionReviewPage({
                   </span>
                   <span style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 'none' }}>
                     <span style={{ padding: '3px 9px', borderRadius: 999, background: m.clearedAt ? 'var(--brand-soft)' : 'var(--accent-soft)', color: m.clearedAt ? 'var(--brand)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
-                      {m.clearedAt ? <L en={`Cleared ${m.clearedAt}`} ar={`أُقفل ⁦${m.clearedAt}⁩`} /> : <L en="Outstanding" ar="قائم" />}
+                      {m.clearedAt ? <L en={`Cleared ${m.clearedAt}`} ar={`أُقفل ⁦${m.clearedAt}⁩`} /> : <L en="Pending" ar="قيد الانتظار" />}
                     </span>
                     {mayMeasure && !m.clearedAt ? (
                       <form action={clearMeasureAction.bind(null, id, m.id)}>

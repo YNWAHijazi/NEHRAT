@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { planEditorOwnerId } from '../../../../lib/plan-access';
 import { PLAN_DOC_KEY } from '../../../../lib/rules/uploads';
 import { notFound, redirect } from 'next/navigation';
@@ -63,7 +64,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
-        {level === 3 ? <p style={{ fontSize: 14, color: 'var(--muted)' }}><L en="The Medical Director leads medical planning. You share this plan; the organizer submits the package." ar="يقود المدير الطبي التخطيط الطبي. تعملون على خطة مشتركة، ويقدّم المنظّم الملف." /></p> : null}
+        {level === 3 ? <div className="secondary-help"><InfoNote><L en="The Medical Director leads medical planning. You share this plan; the organizer submits the package." ar="يقود المدير الطبي التخطيط الطبي. تعملون على خطة مشتركة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
         <PlanForm
           eventId={id}
           level={level}

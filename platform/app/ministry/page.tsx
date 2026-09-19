@@ -45,7 +45,7 @@ export default async function MinistryDashboardPage() {
     { n: changes.length, en: 'Changes and notifications', ar: 'التغييرات والإشعارات', color: 'var(--accent-ink)', href: '/ministry/changes' },
     { n: pendingOrgs.length, en: 'Organizations awaiting recording', ar: 'مؤسسات بانتظار التسجيل', color: 'var(--ink)', href: '/ministry/organizations' },
     { n: openEnquiries.length, en: 'Enquiries awaiting a response', ar: 'استفسارات بانتظار الرد', color: 'var(--accent-ink)', href: '/ministry/enquiries' },
-    { n: openCorrective.length, en: 'Outstanding corrective actions', ar: 'إجراءات تصحيحية قائمة', color: 'var(--accent-ink)', href: '/ministry/facilities' },
+    { n: openCorrective.length, en: 'Pending corrective actions', ar: 'إجراءات تصحيحية قائمة', color: 'var(--accent-ink)', href: '/ministry/facilities' },
     { n: repeatArrests.length, en: 'Places with repeat reported arrests', ar: 'أماكن تكررت فيها حوادث مبلَّغة', color: 'var(--bad)', href: '/ministry/facilities/arrests' },
   ];
 
@@ -183,7 +183,7 @@ export default async function MinistryDashboardPage() {
           </div>
 
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Outstanding corrective actions" ar="الإجراءات التصحيحية القائمة" />
+            <L en="Pending corrective actions" ar="الإجراءات التصحيحية القائمة" />
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
             {openCorrective.slice(0, 4).map((c) => (

@@ -1,3 +1,4 @@
+import { InfoNote } from './InfoNote';
 import { L } from './L';
 
 /**
@@ -38,35 +39,19 @@ export function DemonstrationBand() {
         style={{
           maxWidth: 1160,
           marginInline: 'auto',
-          padding: '9px 32px',
+          padding: '4px 32px',
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: 6,
           flexWrap: 'wrap',
-          fontSize: '13px',
+          fontSize: '12px',
           lineHeight: 1.5,
         }}
       >
-        <svg
-          aria-hidden="true"
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ flex: 'none' }}
-        >
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 8v5" />
-          <path d="M12 16h.01" />
-        </svg>
         <span style={{ fontWeight: 600 }}>
           <L en="Demonstration account" ar="حساب عرض توضيحي" />
         </span>
-        <span>
+        <span><L en="· Not a Ministry record" ar="· ليس سجلاً وزارياً" /> <InfoNote labelEn="About demonstration accounts" labelAr="حول الحسابات التوضيحية">
           {/* Says what it is AND what it is not. "Example records" alone leaves a
               recorded outcome looking like a determination that simply belongs to a
               test event; the second clause is the one that matters on paper. */}
@@ -74,7 +59,7 @@ export function DemonstrationBand() {
             en="Every record shown here is an example. Nothing recorded in this account is a Ministry determination, and none of it appears in the national registry."
             ar="كل سجل معروض هنا مثال. لا يشكّل أي إجراء يُسجَّل في هذا الحساب قراراً من الوزارة، ولا يظهر أي منه في السجل الوطني."
           />
-        </span>
+        </InfoNote></span>
       </div>
     </div>
   );

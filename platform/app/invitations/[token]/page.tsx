@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { notFound } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
@@ -127,9 +128,7 @@ export default async function InvitationPage({
             )}
           </h1>
           {isDirector ? (
-            <p style={{ margin: '0 0 32px', fontSize: '16.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '70ch' }}>
-              <L en={content.director.inviteIntro.en} ar={content.director.inviteIntro.ar} />
-            </p>
+            <div className="secondary-help"><InfoNote><L en={content.director.inviteIntro.en} ar={content.director.inviteIntro.ar} /></InfoNote></div>
           ) : null}
 
           {briefing && live ? (

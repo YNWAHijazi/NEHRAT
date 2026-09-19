@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -98,17 +99,13 @@ export default async function DeclarationPage({
 
           <h2 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="EMS Readiness Declaration" ar="إقرار جاهزية خدمات الطوارئ الطبية" />
+            <InfoNote><L en="Each participating agency completes and signs its own declaration. The organizer needs it before submitting." ar="تستكمل كل جهة مشاركة إقرارها وتوقّعه. ويحتاج إليه المنظّم قبل التقديم." /></InfoNote>
           </h2>
 
           {invitation.status === 'nominated' ? (
             <RespondForm token={invitation.token} kind="ems" eventLevel={invitation.eventLevel} />
           ) : null}
-          <p style={{ margin: '0 0 28px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '72ch' }}>
-            <L
-              en={`Completed and signed by each participating agency separately.${fileBy ? ` The organizer files by ${fileBy} and cannot file without this.` : ''}`}
-              ar={`تستكمله وتوقّعه كل جهة مشاركة على حدة.${fileBy ? ` يقدّم المنظّم بحلول ⁦${fileBy}⁩ ولا يمكنه التقديم من دونه.` : ''}`}
-            />
-          </p>
+          {fileBy ? <p style={{ margin: '0 0 28px', fontSize: 14, color: 'var(--muted)' }}><L en={`Submit by ${fileBy}`} ar={`التقديم بحلول ⁦${fileBy}⁩`} /></p> : null}
 
           {!live ? (
             <div style={{ padding: '20px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, fontSize: 15, lineHeight: 1.65, maxWidth: '76ch' }}>

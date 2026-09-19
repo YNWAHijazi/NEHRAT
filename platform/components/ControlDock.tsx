@@ -1,23 +1,9 @@
 'use client';
 
-/**
- * The control dock: text size, dark mode, palette, language. Government accessibility
- * features, not decoration (SPEC 8). Hidden below 900px by the [data-dock] media rule
- * in globals.css. Choices persist in cookies so the server renders the right html
- * attributes and nothing flashes.
- *
- * FOUR ROUND BUTTONS, NOT SIX STACKED LABELS. Text size CYCLES on one button rather
- * than offering three — the three sizes are one setting, and rendering them as three
- * controls made the dock read as a menu of six unrelated things sitting over the page.
- * The glyphs are the prototype's: two A's for size, a half-filled disc for theme, a
- * two-colour disc for palette, and the other language's own name.
- *
- * Each carries a title and an aria-label, because a glyph is not a name. Cycling means
- * the button's meaning changes with its state, so the label says what pressing it does
- * NEXT rather than what the current size is.
- */
+/** Display preferences stay behind one control; language is also in the header. */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { L } from './L';
 
 const SIZES = [100, 112, 125] as const;
 type Size = (typeof SIZES)[number];
@@ -47,6 +33,15 @@ const dockBtn: React.CSSProperties = {
 };
 
 export function ControlDock() {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const outside = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [open]);
   // Read once on mount from what the server already stamped, so the first press
   // continues the cycle rather than restarting it.
   const [size, setSize] = useState<Size>(() => {
@@ -77,20 +72,17 @@ export function ControlDock() {
   const nextSize = SIZES[(SIZES.indexOf(size) + 1) % SIZES.length]!;
 
   return (
-    <div
-      data-dock=""
-      data-noprint=""
-      style={{
-        position: 'fixed',
-        insetBlockStart: '50%',
-        insetInlineEnd: 22,
-        transform: 'translateY(-50%)',
-        zIndex: 70,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-      }}
-    >
+    <div ref={root} data-dock="" data-noprint="" className="display-settings"
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false); }}
+      onKeyDown={(event) => { if (event.key === 'Escape') { setOpen(false); trigger.current?.focus(); } }}>
+      <button ref={trigger} type="button" style={dockBtn} aria-expanded={open} aria-controls="display-preferences"
+        onClick={() => setOpen(!open)}>
+        <span className="sr-only"><L en="Display settings" ar="إعدادات العرض" /></span>
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--bg)"/><circle cx="15" cy="17" r="3" fill="var(--bg)"/></svg>
+      </button>
+      <div id="display-preferences" hidden={!open} className="display-preferences">
+      <strong><L en="Display settings" ar="إعدادات العرض" /></strong>
+      <div className="display-preference-row"><L en="Text size" ar="حجم النص" />
       <button
         type="button"
         style={{ ...dockBtn, fontSize: 13, alignItems: 'baseline', gridAutoFlow: 'column' }}
@@ -99,9 +91,9 @@ export function ControlDock() {
         onClick={cycleText}
       >
         A<span style={{ fontSize: 18 }}>A</span>
-      </button>
+      </button></div>
 
-      <button type="button" style={dockBtn} title="Dark mode" aria-label="Dark mode" onClick={() => toggle('theme')}>
+      <div className="display-preference-row"><L en="Dark mode" ar="الوضع الداكن" /><button type="button" style={dockBtn} title="Dark mode" aria-label="Dark mode" onClick={() => toggle('theme')}>
         <span
           aria-hidden="true"
           style={{
@@ -113,9 +105,9 @@ export function ControlDock() {
             background: 'linear-gradient(90deg, currentColor 50%, transparent 50%)',
           }}
         />
-      </button>
+      </button></div>
 
-      <button type="button" style={dockBtn} title="Palette" aria-label="Palette" onClick={() => toggle('palette')}>
+      <div className="display-preference-row"><L en="Colors" ar="الألوان" /><button type="button" style={dockBtn} title="Palette" aria-label="Palette" onClick={() => toggle('palette')}>
         <span
           aria-hidden="true"
           style={{
@@ -127,9 +119,9 @@ export function ControlDock() {
             boxShadow: 'inset 0 0 0 1.5px var(--brand)',
           }}
         />
-      </button>
+      </button></div>
 
-      <button
+      <div className="display-preference-row"><L en="Language" ar="اللغة" /><button
         type="button"
         style={{ ...dockBtn, fontSize: 13, fontWeight: 500 }}
         title="Language"
@@ -138,7 +130,8 @@ export function ControlDock() {
       >
         <span data-l="en">ع</span>
         <span data-l="ar">EN</span>
-      </button>
+      </button></div>
+      </div>
     </div>
   );
 }

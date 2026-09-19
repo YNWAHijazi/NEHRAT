@@ -1,5 +1,8 @@
 'use client';
 
+import { InfoNote } from '../../../components/InfoNote';
+
+
 /**
  * Steps 1-3 from the reference: profile, category determination, coordinator.
  *
@@ -194,14 +197,8 @@ export function RegisterFacilityForm({
                   </span>
                 </div>
                 <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.5, marginBlockEnd: 20, maxWidth: '64ch' }}>
-                  <L en={picked.ruleEn} ar={picked.ruleAr} />
+                  <L en={picked.ruleEn} ar={picked.ruleAr} /> <InfoNote labelEn="Why this applies" labelAr="سبب الانطباق"><L en={picked.basisEn} ar={picked.basisAr} /></InfoNote>
                 </div>
-                <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-                  <L en="On what basis" ar="على أي أساس" />
-                </div>
-                <p style={{ margin: 0, fontSize: 16, lineHeight: 1.75, maxWidth: '70ch' }}>
-                  <L en={picked.basisEn} ar={picked.basisAr} />
-                </p>
               </div>
 
               {ended ? (
@@ -253,21 +250,15 @@ export function RegisterFacilityForm({
           ))}
           <input type="hidden" name="category" value={catKey ?? ''} />
           <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en="Coordinator and responsible persons" ar="المنسّق والأشخاص المسؤولون" />
+            <L en="Coordinator and responsible persons" ar="المنسّق والأشخاص المسؤولون" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
           </h2>
           {/* The name-or-position explainer left this step (partner ruling, second
               sweep): the field labels already say "Name or position". */}
-          <div style={{ padding: '21px 25px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
-            <L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} />
-          </div>
           <div data-region="persons" style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBlockEnd: 24 }}>
             {content.persons.map((p, i) => (
               <div key={p.key} style={{ paddingBlock: '27px', paddingInlineStart: '28px', paddingInlineEnd: '29px', background: 'var(--surface2)', borderInlineStart: `3px solid ${i === 0 ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 16 }}>
                 <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 4 }}>
-                  <L en={p.en} ar={p.ar} />
-                </div>
-                <div style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', marginBlockEnd: 18 }}>
-                  <L en={p.noteEn} ar={p.noteAr} />
+                  <L en={p.en} ar={p.ar} /> <InfoNote><L en={p.noteEn} ar={p.noteAr} /></InfoNote>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
                   {content.personFields.map((f) => (

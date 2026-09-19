@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
@@ -28,10 +29,9 @@ export default async function OrganizationsPage({
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Organizations" ar="المؤسسات" />
+       <InfoNote><L en="Recording an organization opens filing for its organizer." ar="تسجيل المؤسسة يفتح التقديم لمنظّمها." /></InfoNote>
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '80ch', lineHeight: 1.6 }}>
-        <L en="Recording an organization opens filing for its organizer." ar="تسجيل المؤسسة يفتح التقديم لمنظّمها." />
-      </p>
+
       <div data-region="orgs" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((o) => (
           <div key={o.id} style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px ${o.status === 'recorded' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>

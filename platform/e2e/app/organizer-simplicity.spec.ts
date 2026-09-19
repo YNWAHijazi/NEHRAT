@@ -23,7 +23,7 @@ for (const lang of LANGUAGES) {
     await progress.locator('summary').press('Enter');
     await expect(progress).not.toHaveAttribute('open');
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
-    await action.click();
+    await action.getByRole('link').click();
     await expect(page).toHaveURL(/\/events\/EV-0418\/(requirements|plan|submit)|\/organization/);
   });
 }
@@ -44,7 +44,7 @@ for (const lang of LANGUAGES) {
     const form = page.locator('form:has(input[name="kind"][value="ems"])');
     await form.locator('input[name="name"]').fill(name);
     await form.locator('input[name="email"]').fill('copy-check@example.test');
-    await form.getByRole('button').click();
+    await form.locator('button[type=submit]').click();
     const row = page.locator('[data-region="g2"] > div > div', { hasText: name });
     const invitation = row.locator('[data-invitation-link]');
     await expect(invitation).toBeVisible();
@@ -60,6 +60,7 @@ for (const lang of LANGUAGES) {
     await expect(invitation.locator('code')).toBeVisible();
     await expect(invitation.locator('code')).toHaveText(copied);
     expect(await page.evaluate(() => Array.from(document.querySelectorAll('main *')).filter((el) => {
+      if (el.closest('.info-note-label, .sr-only')) return false;
       const box = el.getBoundingClientRect();
       return box.width > 0 && (box.x < 0 || box.right > window.innerWidth + 1);
     }).map((el) => ({ tag: el.tagName, text: el.textContent?.slice(0, 70), style: el.getAttribute('style') })))).toEqual([]);

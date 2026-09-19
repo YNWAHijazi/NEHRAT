@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
@@ -80,13 +81,12 @@ export default async function FacilityPlanPage({
         </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Cardiac emergency response plan" ar={content.planTitle.ar} />
-        </h1>
-        <p style={{ margin: '0 0 36px', fontSize: 16, color: 'var(--muted)', maxWidth: '80ch' }}>
-          <L
+         <InfoNote><L
             en="Update it whenever responsible persons, AED locations or emergency arrangements change."
             ar="حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة."
-          />
-        </p>
+          /></InfoNote>
+</h1>
+
 
         <div data-region="procedure" data-wallcard="" style={{ padding: 36, border: '2px solid var(--brand)', borderRadius: 16, background: 'var(--surface)', marginBlockEnd: 44 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 26 }}>
@@ -177,10 +177,9 @@ export default async function FacilityPlanPage({
           <div data-region="plan-persons" id="persons" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16 }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600 }}>
               <L en="Responsible persons" ar="الأشخاص المسؤولون" />
+             <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
             </h3>
-            <p style={{ margin: '0 0 16px', fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-              <L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} />
-            </p>
+
             <PersonsForm facilityId={facility.id} persons={persons} />
           </div>
         </div>

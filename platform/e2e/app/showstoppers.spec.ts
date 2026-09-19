@@ -179,7 +179,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await firstSection.fill('Version one wording for the schedule.');
     await page.locator('button:has-text("Save the plan")').first().click();
     // The versions section appears only AFTER a second save; wait on the save itself.
-    await expect(page.locator('text=A new version was recorded')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('Saved.', { exact: true })).toBeVisible({ timeout: 20_000 });
     // The accordion may close on refresh; re-open before the second edit.
     await page.reload();
     if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
@@ -187,7 +187,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     await page.locator('button:has-text("Save the plan")').first().click();
     // Wait for the SECOND save to land before reloading -- networkidle raced it, and a
     // reload mid-save read the page back before version 1 had been archived.
-    await expect(page.locator('text=A new version was recorded')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText('Saved.', { exact: true })).toBeVisible({ timeout: 20_000 });
     await page.reload();
     const history = page.locator('details', { hasText: 'Version 1' }).first();
     await expect(history).toBeVisible();

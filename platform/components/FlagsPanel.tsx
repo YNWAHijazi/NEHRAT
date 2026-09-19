@@ -38,12 +38,9 @@ export function FlagsPanel() {
                 const detail = flagDetail(flag);
                 return (
                   <div key={flag} style={{ padding: '15px 21px', background: 'var(--surface2)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ flex: 1, minWidth: 260 }}>
+                    <div style={{ flex: '1 1 200px', minWidth: 0 }}>
                       <div style={{ fontSize: '14.5px', fontWeight: 500 }}>
-                        <L en={detail.titleEn} ar={detail.titleAr} />
-                      </div>
-                      <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, lineHeight: 1.55 }}>
-                        <L en={desc.en} ar={desc.ar} />
+                        <L en={detail.titleEn} ar={detail.titleAr} /> <InfoNote><L en={desc.en} ar={desc.ar} /></InfoNote>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

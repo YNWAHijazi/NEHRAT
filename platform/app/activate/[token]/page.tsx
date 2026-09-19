@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../components/InfoNote';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { getDb } from '../../../lib/db';
@@ -72,10 +73,9 @@ export default async function ActivatePage({
             <>
               <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
                 <L en={A.activateTitleEn} ar={A.activateTitleAr} />
+               <InfoNote><L en={A.activateBodyEn} ar={A.activateBodyAr} /></InfoNote>
               </h1>
-              <p style={{ margin: '0 0 8px', fontSize: '16.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '62ch' }}>
-                <L en={A.activateBodyEn} ar={A.activateBodyAr} />
-              </p>
+
               <p style={{ margin: '0 0 28px', fontSize: '14.5px', color: 'var(--muted)' }}>
                 {row.display_name}
                 {row.email ? ` · ${row.email}` : ''}

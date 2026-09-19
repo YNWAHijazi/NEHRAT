@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -64,13 +65,12 @@ export default async function RegistryPage({
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }} consoleEn="Administration" consoleAr="الإدارة">
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="National registry" ar="السجل الوطني" />
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--muted)', maxWidth: '82ch', lineHeight: 1.6 }}>
-        <L
+       <InfoNote><L
           en="Record identifier at creation; Ministry reference number at submission."
           ar="معرّف السجل عند الإنشاء؛ والرقم المرجعي للوزارة عند التقديم."
-        />
-      </p>
+        /></InfoNote>
+</h1>
+
       {notice === 'coverage-ended' ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
           <L en="Recorded: this facility is no longer covered. The reason is on the activity trail, and coverage returns by designation." ar="سُجِّل: لم يعد هذا المرفق مشمولاً. والسبب في سجل النشاط، وتعود الشمولية بالتحديد." />

@@ -1,3 +1,4 @@
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -77,8 +78,8 @@ export default async function NominationAccountPage({
           >
             {declined ? (
               <L
-                en="Your response has been recorded and the organizer has been notified. You do not need an account, and nothing further is owed by you on this event."
-                ar="سُجِّل ردّكم وأُبلغ المنظّم. ولا يلزمكم حساب، ولا شيء مستحق عليكم بعد الآن في هذه الفعالية."
+                en="Invitation declined. The organizer has been notified."
+                ar="رُفضت الدعوة وأُبلغ المنظّم."
               />
             ) : (
               <L en="An account is required to complete acceptance." ar="يلزم حساب لاستكمال قبول الدعوة." />
@@ -95,10 +96,9 @@ export default async function NominationAccountPage({
             <>
               <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
                 <L en="Complete your acceptance" ar="استكمال قبول الدعوة" />
+               <InfoNote><L en="Create an account or sign in to accept this invitation and access your tasks." ar="أنشئوا حساباً أو سجّلوا الدخول لقبول هذه الدعوة والوصول إلى مهامكم." /></InfoNote>
               </h1>
-              <p style={{ margin: '0 0 8px', fontSize: '16.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '68ch' }}>
-                <L en="Create an account or sign in to accept this invitation and access your tasks." ar="أنشئوا حساباً أو سجّلوا الدخول لقبول هذه الدعوة والوصول إلى مهامكم." />
-              </p>
+
               {error === 'account' ? (
                 <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
                   <L
@@ -167,10 +167,9 @@ export default async function NominationAccountPage({
               <div data-region="sign-in-instead" style={{ padding: 33, border: '1px solid var(--line)', borderRadius: 16 }}>
                 <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
                   <L en={N.stage3HaveAccountEn} ar={N.stage3HaveAccountAr} />
+                 <InfoNote><L en={N.stage3SignInEn} ar={N.stage3SignInAr} /></InfoNote>
                 </h2>
-                <p style={{ margin: '0 0 20px', fontSize: '14.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-                  <L en={N.stage3SignInEn} ar={N.stage3SignInAr} />
-                </p>
+
                 <form action={signInAgainstInvitationAction.bind(null, token)}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, marginBlockEnd: 22 }}>
                     <Label en="Email" ar="البريد الإلكتروني">

@@ -33,10 +33,12 @@ for (const lang of LANGUAGES) {
       expect(bandBox!.width).toBeGreaterThanOrEqual((viewport?.width ?? 1280) - 2);
     });
 
-    test('the dock is four round controls, not a stack of labels', async ({ page }) => {
+    test('display preferences are available behind one control', async ({ page }) => {
       await gotoRidingRestarts(page, '/');
       const dock = page.locator('[data-dock]');
-      await expect(dock.locator('button')).toHaveCount(4);
+      await expect(dock.getByRole('button')).toHaveCount(1);
+      await dock.getByRole('button').click();
+      await expect(dock.locator('#display-preferences').getByRole('button')).toHaveCount(4);
       // Text size CYCLES on one button: three sizes are one setting.
       const sizeBtn = dock.locator('button[title="Text size"]');
       await expect(sizeBtn).toHaveCount(1);

@@ -1,5 +1,8 @@
 'use client';
 
+import { InfoNote } from '../../../components/InfoNote';
+
+
 /**
  * Applicability and assessment — one form, rebuilt for simplicity (partner review,
  * 2026-09-01).
@@ -271,10 +274,8 @@ export function AssessmentForm({
   return (
     <div style={{ maxWidth: 900 }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-        <L en="Applicability and assessment" ar="الانطباق والتقييم" />
-      </h1>
-      <p style={{ margin: '0 0 48px', fontSize: 16, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '70ch' }}>
-        {reassess ? (
+        <L en={reassess ? "Update assessment" : "Create event"} ar={reassess ? "تحديث التقييم" : "إنشاء فعالية"} />
+       <InfoNote>{reassess ? (
           <L
             en="Saving stores a new version. Earlier versions stay on the record."
             ar="الحفظ يخزّن نسخة جديدة، وتبقى النسخ السابقة على السجل."
@@ -284,8 +285,9 @@ export function AssessmentForm({
             en="Answer these once. The answers set your event's level, and the level sets what you need to do."
             ar="أجيبوا عن هذه الأسئلة مرة واحدة. الأجوبة تحدد مستوى فعاليتكم، والمستوى يحدد ما عليكم فعله."
           />
-        )}
-      </p>
+        )}</InfoNote>
+</h1>
+
 
       {reassess ? null : (
         <>
@@ -389,12 +391,10 @@ export function AssessmentForm({
               <input type="number" min={0} value={partA.expectedStaff} onChange={(e) => setA('expectedStaff', e.target.value)} style={inputStyle} />
             </Field>
           </div>
-          <p style={{ margin: '0 0 32px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '70ch' }}>
-            <L
+          <div className="secondary-help"><InfoNote><L
               en="Together these count everyone who may be there at the same time."
               ar="تحسب هذه الأعداد معاً كل من قد يكون حاضراً في الوقت نفسه."
-            />
-          </p>
+            /></InfoNote></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 48 }}>
             {(
               [
@@ -421,7 +421,7 @@ export function AssessmentForm({
 
             {partA.previousEdition ? <fieldset data-region="previous-history" style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 16 }}>
               <legend><L en="Previous event history" ar="التاريخ السابق للفعالية" /></legend>
-              <p style={{ fontSize: 13, color: 'var(--muted)' }}><L en="Select the most serious history from any previous edition. If it is already in your Archive, you can duplicate that event instead." ar="اختاروا أخطر ما حدث في أي نسخة سابقة. إذا كانت الفعالية في أرشيفكم، يمكنكم نسخها لبدء نسخة جديدة." /></p>
+              <div className="secondary-help"><InfoNote><L en="Select the most serious history from any previous edition. If it is already in your Archive, you can duplicate that event instead." ar="اختاروا أخطر ما حدث في أي نسخة سابقة. إذا كانت الفعالية في أرشيفكم، يمكنكم نسخها لبدء نسخة جديدة." /></InfoNote></div>
               {domains[8]?.options.map((option) => <button key={option.score} type="button" aria-pressed={answers[8] === option.score}
                 onClick={() => setAnswers((prev) => prev.map((value, i) => i === 8 ? option.score : value))}
                 style={{ display: 'block', width: '100%', textAlign: 'start', padding: 14, marginBlock: 6, border: `1px solid ${answers[8] === option.score ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 8, background: answers[8] === option.score ? 'var(--brand-soft)' : 'var(--bg)', cursor: 'pointer' }}>
@@ -433,7 +433,7 @@ export function AssessmentForm({
       )}
 
       <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-        <L en="Part two" ar="الجزء الثاني" />
+        <L en="Risk assessment" ar="تقييم المخاطر" />
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => !reassess && partA.previousEdition && di === 8 ? null : (
@@ -442,13 +442,9 @@ export function AssessmentForm({
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
                 <L en={domain.en} ar={domain.ar} />
+                {domain.noteEn ? <InfoNote labelEn={`About ${domain.en}`} labelAr={`حول ${domain.ar}`}><L en={domain.noteEn} ar={domain.noteAr} /></InfoNote> : null}
               </h3>
             </div>
-            {domain.noteEn ? (
-              <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-                <L en={domain.noteEn} ar={domain.noteAr} />
-              </p>
-            ) : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 10 }}>
               {domain.options.map((option) => {
                 const on = answers[di] === option.score;
@@ -486,17 +482,12 @@ export function AssessmentForm({
           <>
             <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: '-.025em', color: `var(--l${derivation.finalLevel})` }}>
               <L en={`Level ${derivation.finalLevel}`} ar={`المستوى ${derivation.finalLevel}`} />
+              <InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى">
+                {why.reason ? <L en={why.reason.en} ar={why.reason.ar} /> : null}{' '}
+                {why.comparison ? <L en={why.comparison.en} ar={why.comparison.ar} /> : null}
+              </InfoNote>
             </div>
-            {why.reason ? (
-              <p style={{ margin: '8px 0 0', fontSize: 16, lineHeight: 1.6, maxWidth: '60ch' }}>
-                <L en={why.reason.en} ar={why.reason.ar} />
-              </p>
-            ) : null}
-            {why.comparison ? (
-              <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                <L en={why.comparison.en} ar={why.comparison.ar} />
-              </p>
-            ) : null}
+
           </>
         ) : (
           <div style={{ fontSize: 16, lineHeight: 1.6 }}>

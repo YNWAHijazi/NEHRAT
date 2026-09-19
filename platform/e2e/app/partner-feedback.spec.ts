@@ -63,13 +63,14 @@ test('Director and organizer share a guided plan without losing concurrent edits
   if (await section.getAttribute('aria-expanded') !== 'true') await section.click();
   await expect(page.getByRole('button', { name: 'What to include', exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'What to include', exact: true }).first().click();
-  await expect(page.locator('.info-note-content').first()).toBeVisible();
+  const helpId = await page.getByRole('button', { name: 'What to include', exact: true }).first().getAttribute('aria-controls');
+  await expect(page.locator(`[id="${helpId}"]`)).toBeVisible();
   await page.getByRole('textbox', { name: /^1\./ }).fill('Director medical planning contribution.');
   const organizer = await browser.newPage({ baseURL: baseURL! });
   await signInAs(organizer, 'test_organizer');
   await gotoRidingRestarts(organizer, '/events/EV-0362/plan');
   await page.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(page.getByText('Saved. A new version', { exact: false })).toBeVisible();
+  await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
   await organizer.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(organizer.locator('main').getByRole('alert')).toContainText('Someone updated this plan');
   await organizer.reload();
@@ -87,7 +88,7 @@ test('Director and organizer share a guided plan without losing concurrent edits
   await organizer.locator('[data-region="plan-attach"] input').setInputFiles({ name: 'restored-medical-plan.pdf', mimeType: 'application/pdf', buffer: originalBytes });
   await expect(organizer.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
   await organizer.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(organizer.getByText('Saved. A new version', { exact: false })).toBeVisible();
+  await expect(organizer.getByText('Saved.', { exact: true })).toBeVisible();
   await organizer.close();
   expect((await page.request.get('/events/EV-0418/plan')).status()).toBe(404);
   await signInAs(page, 'test_ems');

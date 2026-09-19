@@ -17,7 +17,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
@@ -33,6 +33,27 @@ import { VISUAL_MANIFEST, type VisualMapping, type VisualRegion } from '../visua
 const OUTPUT = join(HERE, '..', 'output');
 const DEFAULT_THRESHOLD = 0.02; // 2% of pixels differing fails the comparison
 const LANGS: Lang[] = ['en', 'ar'];
+
+// A changed heading above a region can put an otherwise identical table on a
+// fractional pixel. Align only the capture origin on BOTH sides; retain all
+// dimensions, content, styling and the original comparison thresholds.
+async function screenshotRegion(region: Locator): Promise<Buffer> {
+  const original = await region.evaluate((node) => {
+    const element = node as HTMLElement;
+    const rect = element.getBoundingClientRect();
+    const style = element.getAttribute('style');
+    const transform = getComputedStyle(element).transform;
+    element.style.transform = `translate(${Math.round(rect.x) - rect.x}px, ${Math.round(rect.y) - rect.y}px) ${transform === 'none' ? '' : transform}`;
+    return style;
+  });
+  try { return await region.screenshot(); }
+  finally {
+    await region.evaluate((node, style) => {
+      if (style === null) node.removeAttribute('style');
+      else node.setAttribute('style', style);
+    }, original);
+  }
+}
 
 function ensureOutput(): void {
   if (!existsSync(OUTPUT)) mkdirSync(OUTPUT, { recursive: true });
@@ -317,7 +338,7 @@ for (const mapping of VISUAL_MANIFEST) {
         });
         const builtRegion = page.locator(region.builtSelector ?? 'body').first();
         await expect(builtRegion).toBeVisible();
-        const builtRegionShot = await builtRegion.screenshot();
+        const builtRegionShot = await screenshotRegion(builtRegion);
         writeFileSync(join(OUTPUT, `${tag}.built.png`), builtRegionShot);
 
         await openReference(page, mapping.referenceFile);
@@ -330,7 +351,7 @@ for (const mapping of VISUAL_MANIFEST) {
         expect(rect, `${tag}: could not locate the region in the reference DOM`).not.toBeNull();
         const marked = page.locator('[data-e2e-region]');
         const referenceRegionShot = (await marked.count())
-          ? await marked.first().screenshot()
+          ? await screenshotRegion(marked.first())
           : await page.screenshot({ fullPage: true, clip: rect as Rect });
         writeFileSync(join(OUTPUT, `${tag}.reference.png`), referenceRegionShot);
 
