@@ -39,8 +39,8 @@
     "declineWarning": {
       "titleEn": "Declining removes your agency as a named provider for this event.",
       "titleAr": "الاعتذار يزيل جهتكم كمزوّد مُسمّى لهذه الفعالية.",
-      "bodyEn": "The organizer is told, with your reason as written, and may need to name another provider. If their submission is already filed, this is a material change they must report to the Ministry.",
-      "bodyAr": "يُبلَّغ المنظّم بسببكم كما كُتب، وقد يحتاج إلى تسمية مزوّد آخر. وإذا كان ملفه مقدَّماً، فهذا تغيير جوهري عليه إبلاغ الوزارة به."
+      "bodyEn": "Your reason will be sent to the organizer. They may need another EMS agency. If they already submitted the application, they must report this change to the Ministry.",
+      "bodyAr": "سيُرسل سببكم إلى المنظّم. وقد يحتاج إلى جهة إسعاف أخرى. إذا سبق تقديم الطلب، فعليه إبلاغ الوزارة بهذا التغيير."
     },
     "profileFields": [
       {
@@ -199,14 +199,14 @@
       "ar": "أصبح إقراركم أحد مرفقات المستوى 3 في حزمة تقديم المنظّم. لا يُعرض لكم سوى إقرار جهتكم."
     },
     "docsIntro": {
-      "en": "One list, visible to your organization and to the organizer. Either side can add a document. Nothing here is sent to the Ministry unless the organizer attaches it to the submission.",
-      "ar": "قائمة واحدة تظهر لمؤسستكم وللمنظّم. ويمكن لأي من الطرفين إضافة مستند. ولا يُرسل شيء منها إلى الوزارة إلا إذا أرفقه المنظّم بالملف."
+      "en": "You and the organizer can add and view these files. The organizer must attach them to the application to share them with the Ministry.",
+      "ar": "يمكنكم أنتم والمنظّم إضافة هذه الملفات وعرضها. وعلى المنظّم إرفاقها بالطلب لإرسالها إلى الوزارة."
     }
   },
   "director": {
     "inviteIntro": {
-      "en": "An event organizer has nominated you as the Event Medical Director for a Level 3 event. The role exists only at Level 3, and only an organizer can nominate you.",
-      "ar": "رشّحكم منظّم فعالية مديراً طبياً لفعالية من المستوى 3. ولا يوجد هذا الدور إلا في المستوى 3، ولا يمكن ترشيحكم إلا من منظّم."
+      "en": "You have been invited as Medical Director for this Level 3 event.",
+      "ar": "دُعيتم لتولّي دور المدير الطبي لهذه الفعالية من المستوى 3."
     },
     "accepting": {
       "en": "Accepting makes you personally responsible, as a licensed physician, for the requirements below. Four are shared with the organizer and the participating providers. One is yours alone.",
@@ -297,8 +297,8 @@
       }
     ],
     "reportIntro": {
-      "en": "The organizer prepares the report and enters the figures. You review it and sign. At Level 3 the report carries two signatures and is not complete with the organizer's alone.",
-      "ar": "يُعدّ المنظّم التقرير ويُدخل الأرقام. وأنتم تراجعونه وتوقّعونه. وفي المستوى 3 يحمل التقرير توقيعين ولا يكتمل بتوقيع المنظّم وحده."
+      "en": "The organizer fills in and signs the report. Review it and add your signature. Both signatures are required for Level 3.",
+      "ar": "يملأ المنظّم التقرير ويوقّعه. راجعوه وأضيفوا توقيعكم. كلا التوقيعين مطلوبان للمستوى 3."
     },
     "reportReadOnly": {
       "en": "Figures and narrative are the organizer's to enter. You cannot change them here. If something is wrong, return the report rather than signing it.",
@@ -309,13 +309,13 @@
       "ar": "تتحقق نقابة الأطباء في لبنان من ترخيصكم لكل فعالية من المستوى 3. وهذا السجل سجلّها. يمكنكم رؤيته؛ ولا يمكنكم تغييره."
     },
     "credNonDeterminative": {
-      "en": "Verification informs the Ministry's review. It does not decide it. A Ministry reviewer may record any of the three outcomes on a submission whether or not verification is complete.",
-      "ar": "يُعلم التحقق مراجعة الوزارة ولا يقررها. ويجوز لمراجع الوزارة تسجيل أي من النتائج الثلاث على تقديم سواء اكتمل التحقق أم لا."
+      "en": "The Ministry makes the final decision, even if the licence check is still pending.",
+      "ar": "تتخذ الوزارة القرار النهائي، حتى إذا لم يكتمل التحقّق من الترخيص."
     },
     "credLaneOff": {
       "$comment": "SPEC: the Order lane is configurable, non-determinative and OFF BY DEFAULT. The off state is the first-class answer.",
-      "en": "The Order of Physicians verification lane is not active. Until the Ministry activates it, no verification is performed and no record appears here. This does not affect the Ministry's review of any submission.",
-      "ar": "مسار التحقق لدى نقابة الأطباء غير مفعّل. وإلى أن تفعّله الوزارة، لا يُجرى أي تحقق ولا يظهر أي سجل هنا. ولا يؤثر ذلك في مراجعة الوزارة لأي تقديم."
+      "en": "Licence checks by the Order of Physicians are not enabled yet. The Ministry can still review applications.",
+      "ar": "لم تُفعّل مراجعة التراخيص لدى نقابة الأطباء بعد. ويمكن للوزارة متابعة مراجعة الطلبات."
     }
   },
   "lanes": {
@@ -433,8 +433,8 @@
     "infoRequestDescAr": "اسألوا المنظّم قبل الإجابة. يبقى الترشيح قائماً ولا يُسجَّل شيء عليكم.",
     "planTitleEn": "The plan sections that concern your role",
     "planTitleAr": "بنود الخطة المتعلقة بدوركم",
-    "planIntroEn": "Four sections of the organizer’s event health and medical plan, read-only. Deciding whether you can meet the major-incident arrangements needs the arrangements, not a note that they exist. The rest of the plan is the organizer’s and is not shown.",
-    "planIntroAr": "أربعة بنود من خطة التأهب الصحي والطبي للفعالية لدى المنظّم، للاطلاع فقط. فالبتّ في إمكان الوفاء بترتيبات الحوادث الجسيمة يستلزم الاطلاع على الترتيبات نفسها لا على إشارة إلى وجودها. أما بقية الخطة فهي للمنظّم ولا تُعرض.",
+    "planIntroEn": "Review the medical-plan sections shared with your invitation.",
+    "planIntroAr": "راجعوا أقسام الخطة الطبية المشتركة مع دعوتكم.",
     "planVersionEn": "Version {v}, last saved {d}",
     "planVersionAr": "النسخة ⁦{v}⁩، آخر حفظ ⁦{d}⁩",
     "planNoneEn": "The organizer has not written a plan yet. When they do, the four sections that concern your role appear here.",

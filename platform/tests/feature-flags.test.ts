@@ -204,9 +204,8 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
     );
     const missing = missingForEnable('aiPlatformIntelligenceAssistant', fullConfig, { flagOn: () => true, checks: {} });
     expect(missing).toEqual([expect.objectContaining({ kind: 'decision' })]);
-    // Both readings named, neither resolved: the page surfaces the contradiction.
-    expect(missing[0]!.en).toMatch(/full tenant visibility/);
-    expect(missing[0]!.en).toMatch(/counts only/);
+    // The access decision still blocks activation; the message now uses plain language.
+    expect(missing[0]!.en).toMatch(/Data-access permissions must be agreed/);
   });
 
   it('every assistive capability requires a model, a data reach, a confirmation setting and a spend ceiling', () => {
@@ -257,11 +256,11 @@ describe('the enable rule: a capability with no configuration cannot be enabled'
     }
   });
 
-  it('the assistants are deliberately not built, and the statement says so in both languages', async () => {
+  it('the assistants are unavailable and the statement says enabling settings does not activate them', async () => {
     const { assistiveNotBuilt } = await import('../lib/rules/flags');
-    expect(assistiveNotBuilt().en).toContain('deliberately not built');
-    expect(assistiveNotBuilt().en).toContain('activates nothing until the assistant is built');
-    expect(assistiveNotBuilt().ar).toContain('غير مبني عمداً');
+    expect(assistiveNotBuilt().en).toContain('not available yet');
+    expect(assistiveNotBuilt().en).toContain('does not activate an assistant');
+    expect(assistiveNotBuilt().ar).toContain('غير متاحين بعد');
   });
 
   it('every capability page carries bilingual title, description and detail', () => {

@@ -52,7 +52,7 @@ async function makeNomination(page: Page, name: string): Promise<string> {
 
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
-  EMS_TOKEN = await makeNomination(page, 'Stage Walk Medical');
+  EMS_TOKEN = await makeNomination(page, `Stage Walk Medical ${Date.now()}`);
   // Signed out again: stages one and two must work on the token ALONE, and a
   // lingering organizer session would hide it if they did not.
   await page.context().clearCookies();
@@ -165,7 +165,7 @@ test.describe('stage two — the answer, on the token, with no account', () => {
     await gotoRidingRestarts(page, `/invitations/${EMS_TOKEN}`);
     await page.locator('[data-region="respond"] button', { hasText: 'Decline' }).first().click();
     // The material-change weight is stated BEFORE the confirming control appears.
-    await expect(page.locator('body')).toContainText(/material change/i);
+    await expect(page.locator('body')).toContainText('If they already submitted the application, they must report this change to the Ministry.');
     await expect(page.locator('button:has-text("I understand")')).toBeVisible();
   });
 });
@@ -293,12 +293,15 @@ test.describe('the one page, after accepting', () => {
     expect(refused.status()).toBe(404);
   });
 
-  test('accepting is not a widening: the same documents, before and after', async ({ page }) => {
+  test('confirmed Level 3 medical partners can read the plan, but not organizer-only documents', async ({ page }) => {
     await signInAs(page, 'test_ems');
     // EV-0362 is the event this account is confirmed on.
     expect((await page.request.get('/api/documents/EV-0362/siteMap')).status()).toBe(200);
     expect((await page.request.get('/api/documents/EV-0362/deploymentMap')).status()).toBe(200);
-    for (const withheld of ['insuranceCertificate', 'complianceForm', 'plan-document']) {
+    // The Level 3 plan is now prepared by the confirmed Medical Director or EMS.
+    // That explicit permission does not expose the organizer's other documents.
+    expect((await page.request.get('/api/documents/EV-0362/plan-document')).status()).toBe(200);
+    for (const withheld of ['insuranceCertificate', 'complianceForm']) {
       expect(
         (await page.request.get(`/api/documents/EV-0362/${withheld}`)).status(),
         `${withheld} must stay closed to a named party`,

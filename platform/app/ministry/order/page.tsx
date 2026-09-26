@@ -39,16 +39,16 @@ export default async function OrderLanePage() {
           </div>
           <p style={{ margin: 0, fontSize: 15, lineHeight: 1.75 }}>
             <L
-              en="The lane is off — its default. No verification is performed, no Order reviewer holds access, and no record appears here. It is turned on under Master admin."
-              ar="المسار مطفأ — وهذا وضعه الافتراضي. لا يُجرى أي تحقق، ولا يملك أي مراجع من النقابة وصولاً، ولا يظهر أي سجل هنا. ويُشغَّل ضمن الإدارة العليا."
+              en="Order of Physicians review is off. The platform owner can enable it in settings."
+              ar="مراجعة نقابة الأطباء غير مفعّلة. يمكن لمالك المنصة تفعيلها من الإعدادات."
             />
           </p>
         </div>
       ) : (
         <div data-region="lane-on" style={{ padding: '24px 28px', border: '1px solid var(--brand)', borderRadius: 16, maxWidth: '86ch', fontSize: 15, lineHeight: 1.7 }}>
           <L
-            en="The lane is active. Assigned Level 3 items reach the Order reviewer, scoped to the assessment, the level, medical staffing, clinical governance and credentials — never the organizer's commercial details, and never the facility lane."
-            ar="المسار مفعّل. تصل البنود المسندة من المستوى 3 إلى مراجع النقابة، محصورة بالتقييم والمستوى والملاك الطبي والحوكمة السريرية والمؤهلات — لا التفاصيل التجارية للمنظّم أبداً، ولا مسار المرافق أبداً."
+            en="Review your assigned Level 3 medical items here. You can see the assessment, event level, medical staff, clinical roles and licences. Business details and facility records are not shared."
+            ar="راجعوا هنا البنود الطبية المسندة إليكم للمستوى 3. يمكنكم عرض التقييم ومستوى الفعالية والطاقم الطبي والأدوار السريرية والتراخيص. لا تُشارك البيانات التجارية أو سجلات المنشآت."
           />
         </div>
       )}

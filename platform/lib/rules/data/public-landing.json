@@ -7,8 +7,8 @@
   "toolsAr": "الأدوات العامة",
   "scopeEn": "Registration is for sporting and recreational events and venues, and for the facilities the cardiac-readiness rules cover.",
   "scopeAr": "التسجيل مخصص للفعاليات والمواقع الرياضية والترفيهية، وللمرافق المشمولة بقواعد الجاهزية القلبية.",
-  "jurisdictionEn": "This platform records health and medical preparedness. It does not authorize events. Authorization remains with the legally competent authority, and nothing here replaces any other permit or approval required under Lebanese law.",
-  "jurisdictionAr": "تسجّل هذه المنصة التأهب الصحي والطبي. وهي لا ترخّص الفعاليات. ويبقى الترخيص من صلاحية السلطة المختصة قانوناً، ولا يحل أي شيء هنا محل أي إذن أو موافقة أخرى مطلوبة بموجب القانون اللبناني.",
+  "jurisdictionEn": "This platform covers health and medical readiness. It does not give permission to hold an event. You still need any permits required by the relevant authorities under Lebanese law.",
+  "jurisdictionAr": "تختصّ هذه المنصة بالتأهب الصحي والطبي. ولا تمنح إذناً لإقامة الفعالية. تبقى التصاريح المطلوبة من الجهات المختصة بموجب القانون اللبناني ضرورية.",
   "services": [
     {
       "k": "certify",
@@ -49,8 +49,8 @@
       "shortAr": "حضور 1,000 أو أكثر"
     },
     {
-      "en": "A sports competition or group physical activity outside normal facility use that needs dedicated medical, EMS, traffic, security or emergency support, uses a temporary course, or is listed in the minimum event levels.",
-      "ar": "منافسة رياضية أو نشاط بدني جماعي خارج الاستخدام المعتاد للمنشأة، يحتاج إلى دعم طبي أو إسعافي أو مروري أو أمني أو طارئ، أو يستخدم مساراً مؤقتاً، أو يرد في جدول الحد الأدنى لمستويات الفعاليات.",
+      "en": "A sports competition or group physical activity outside normal facility use that meets any of these conditions: needs dedicated medical, EMS, traffic, security or emergency support; uses a temporary course; or appears in the minimum event levels.",
+      "ar": "مسابقة رياضية أو نشاط بدني جماعي خارج الاستخدام المعتاد للمنشأة، يستوفي أياً من الآتي: يحتاج إلى دعم طبي أو إسعافي أو مروري أو أمني أو طارئ مخصّص؛ أو يستخدم مساراً مؤقتاً؛ أو يندرج ضمن جدول المستويات الدنيا للفعاليات.",
       "shortEn": "Organized competition or mass-participation activity",
       "shortAr": "منافسة منظّمة أو نشاط بمشاركة جماهيرية"
     },

@@ -37,7 +37,7 @@ export default async function CredentialsPage({
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-            <L en="Credential verification" ar="التحقق من المؤهلات" />
+            <L en="Medical licence check" ar="التحقّق من الترخيص الطبي" />
            <InfoNote><L en={content.credIntro.en} ar={content.credIntro.ar} /></InfoNote>
           </h1>
 

@@ -208,7 +208,7 @@ export default async function CardiacConfigPage({
                                     ar={`غير محددة — الرقم المؤقت ${key === 'checkCycleDays' ? provisionalCycles.checkCycleDays : provisionalCycles.lapseWindowDays} يوماً مستخدم`}
                                   />
                                 ) : (
-                                  <L en="Not set — nothing is in force under this value" ar="غير محددة — لا يسري شيء بموجب هذه القيمة" />
+                                  <L en="Not set — Ministry decision needed" ar="غير محدّد — يلزم قرار الوزارة" />
                                 )}
                               </span>
                             )}

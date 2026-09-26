@@ -208,8 +208,8 @@
       "kind": "value",
       "valueLabelEn": "Phased schedule — schools, universities and educational campuses",
       "valueLabelAr": "الجدول المرحلي — المدارس والجامعات والحرم التعليمية",
-      "unsetNoteEn": "No obligation is in force against this category until a phase is set and published. Operators who recorded an interest are notified when it is.",
-      "unsetNoteAr": "لا يسري أي موجب على هذه الفئة قبل وضع مرحلة ونشرها. ويُبلَّغ المشغّلون الذين سجّلوا اهتماماً عند نشرها."
+      "unsetNoteEn": "Set and publish the rollout dates. Operators who registered their interest will be notified.",
+      "unsetNoteAr": "حدّدوا مواعيد التطبيق وانشروها. سيُبلَّغ المشغّلون الذين سجّلوا اهتمامهم."
     },
     {
       "n": 2,
@@ -219,8 +219,8 @@
       "kind": "value",
       "valueLabelEn": "Capacity threshold — malls and other public venues (persons)",
       "valueLabelAr": "عتبة السعة — المراكز التجارية والأماكن العامة الأخرى (أشخاص)",
-      "unsetNoteEn": "Airports, passenger ports and central transport terminals are in force by category and depend on no threshold. Everything else in the category waits on this figure.",
-      "unsetNoteAr": "المطارات وموانئ الركاب ومحطات النقل المركزية سارية بحكم الفئة ولا تتوقف على عتبة. وكل ما عداها في الفئة ينتظر هذا الرقم."
+      "unsetNoteEn": "Airports, passenger ports and central transport terminals are already covered. Set the size threshold for other facilities in this category.",
+      "unsetNoteAr": "تشمل المتطلبات المطارات وموانئ الركاب ومحطات النقل المركزية. حدّدوا الحدّ الأدنى للحجم لباقي منشآت هذه الفئة."
     },
     {
       "n": 3,
@@ -228,8 +228,8 @@
       "en": "Designate remote or difficult-access facilities",
       "ar": "تحديد المنشآت النائية أو صعبة الوصول",
       "kind": "act",
-      "actNoteEn": "Nothing is in force against a facility until it is designated and its operator notified. Recorded designations are listed here as they are made.",
-      "actNoteAr": "لا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها. وتُدرَج التحديدات المسجَّلة هنا فور صدورها.",
+      "actNoteEn": "Add the facility and notify its operator to apply these requirements. Facilities already added appear below.",
+      "actNoteAr": "أضيفوا المنشأة وأبلغوا مشغّلها لتطبيق هذه المتطلبات. تظهر المنشآت المضافة أدناه.",
       "limbEn": "Limb one of power 3 — the source names one power with two limbs, exercised separately, so it is shown as two rows numbered 3.",
       "limbAr": "الشق الأول من الصلاحية 3 — يسمّي المصدر صلاحية واحدة بشقّين يُمارَسان منفصلين، فتُعرض في صفّين يحملان الرقم 3."
     },
@@ -239,8 +239,8 @@
       "en": "Designate other individual facilities",
       "ar": "تحديد منشآت فردية أخرى",
       "kind": "act",
-      "actNoteEn": "Nothing is in force against a facility until it is designated and its operator notified.",
-      "actNoteAr": "لا يسري شيء على منشأة قبل تحديدها وإبلاغ مشغّلها.",
+      "actNoteEn": "Add the facility and notify its operator to apply these requirements.",
+      "actNoteAr": "أضيفوا المنشأة وأبلغوا مشغّلها لتطبيق هذه المتطلبات.",
       "limbEn": "Limb two of power 3, for a facility no category reaches.",
       "limbAr": "الشق الثاني من الصلاحية 3، لمنشأة لا تصلها أي فئة."
     },
@@ -288,8 +288,8 @@
         "checkCycleDays",
         "lapseWindowDays"
       ],
-      "outsideTheTenEn": "Not one of the ten. The source names no device-check cadence; these two are platform values for the validity record, kept here for the Ministry to set or remove.",
-      "outsideTheTenAr": "ليست من الصلاحيات العشر. فلا يسمّي المصدر أي وتيرة لفحص الأجهزة؛ وهاتان قيمتان من وضع المنصة لسجل الصلاحية، تبقيان هنا لتحددهما الوزارة أو تحذفهما."
+      "outsideTheTenEn": "The Ministry sets how often device checks are due. These are platform settings, not deadlines set by the source document.",
+      "outsideTheTenAr": "تحدّد الوزارة مواعيد فحص الأجهزة. هذه إعدادات للمنصة وليست مهلاً يحدّدها المستند المرجعي."
     },
     {
       "n": 6,
@@ -370,12 +370,12 @@
     "notifyAr": "النشر يُبلّغ المشغّلين الذين تصلهم القيمة، بتاريخ السريان المسمّى."
   },
   "inForceWithoutValue": {
-    "en": "Two categories are in force without any configured value — sports and aquatic facilities, and airports, ports and central transport terminals — so they do not appear among the configurable rows.",
-    "ar": "فئتان ساريتان دون أي قيمة مُعدّة — المنشآت الرياضية والمائية، والمطارات والموانئ ومحطات النقل المركزية — ولذلك لا تظهران بين الصفوف القابلة للإعداد."
+    "en": "Sports and aquatic facilities, airports, ports and central transport terminals are already covered. They do not need a size threshold here.",
+    "ar": "تشمل المتطلبات المنشآت الرياضية والمائية والمطارات والموانئ ومحطات النقل المركزية. ولا تحتاج إلى تحديد حدّ أدنى للحجم هنا."
   },
   "activityScope": {
-    "en": "Counts only. No organizer, account, event or patient is named here, and nothing filters to one organization's behaviour. The wider owner visibility described in the product specification is an undecided question recorded for the Ministry; this stays narrow until it rules.",
-    "ar": "أعداد فقط. لا يُسمّى هنا منظِّم ولا حساب ولا فعالية ولا مريض، ولا شيء يُرشَّح إلى سلوك مؤسسة واحدة. أما رؤية المالك الأوسع الموصوفة في مواصفات المنتج فمسألة غير محسومة مسجَّلة للوزارة؛ ويبقى هذا ضيقاً إلى أن تبتّ فيها."
+    "en": "This page shows totals only. It does not show names or individual records.",
+    "ar": "تعرض هذه الصفحة الأعداد الإجمالية فقط، دون أسماء أو سجلات فردية."
   },
   "orderSuspension": {
     "en": "The Order of Physicians lane is off, and the Order reviewer account is suspended with it.",
@@ -440,16 +440,16 @@
   "panelOwners": {
     "$comment": "Who holds an action a viewing role does not. An ABSENT control is correct where the role never holds it (non-negotiable 10), but silence is not: a panel that names an absent thing must name the party who acts, or the viewer cannot tell a withheld control from a missing feature. Rendered from the permission the role lacks, never from a hard-coded role name.",
     "determinations": {
-      "en": "Determinations are recorded by a Ministry reviewer. You cannot record one on this account.",
-      "ar": "تُسجَّل النتائج من مراجع في الوزارة. ولا يمكنكم تسجيل نتيجة على هذا الحساب."
+      "en": "A Ministry reviewer must record the decision. Your account does not have this permission.",
+      "ar": "يجب أن يسجّل مراجع الوزارة القرار. لا يملك حسابكم هذه الصلاحية."
     },
     "inspections": {
       "en": "Inspections are scheduled and their findings recorded by a Ministry reviewer. You cannot schedule one on this account.",
       "ar": "يُجدول التفتيش وتُسجَّل نتائجه من مراجع في الوزارة. ولا يمكنكم جدولة تفتيش من هذا الحساب."
     },
     "attestations": {
-      "en": "Attestations are recorded by a Ministry reviewer. You cannot attest or record a deficiency on this account.",
-      "ar": "تُسجَّل التصديقات من مراجع في الوزارة. ولا يمكنكم التصديق أو تسجيل قصور على هذا الحساب."
+      "en": "A Ministry reviewer must mark these items as reviewed. Your account cannot change them.",
+      "ar": "يجب أن يؤكّد مراجع الوزارة مراجعة هذه البنود. لا يمكن لحسابكم تعديلها."
     },
     "measures": {
       "en": "Additional measures are required by a Ministry reviewer. You cannot add one on this account.",
@@ -501,10 +501,10 @@
   },
   "counterpartyDocuments": {
     "$comment": "The other document lane on the review screen: what a named party supplied, or was asked for and has not.",
-    "titleEn": "Counterparty documents",
-    "titleAr": "مستندات الأطراف المُسمّاة",
-    "noneEn": "No counterparty documents on this submission.",
-    "noneAr": "لا مستندات أطراف مُسمّاة على هذا التقديم.",
+    "titleEn": "Medical team documents",
+    "titleAr": "مستندات الفريق الطبي",
+    "noneEn": "No medical team documents have been added.",
+    "noneAr": "لم تُضف مستندات للفريق الطبي.",
     "states": {
       "organizer": {
         "en": "From the organizer",
@@ -542,12 +542,12 @@
     "blockingAr": "يحجب هذا التفتيش النتيجة المستوفاة حتى تُسجَّل نتائجه الميدانية",
     "submitEn": "Schedule the inspection",
     "submitAr": "جدولة التفتيش",
-    "noCandidatesEn": "No account on this platform holds the power to conduct an inspection, so none can be scheduled. The Ministry issues a reviewer account before an inspection can be arranged.",
-    "noCandidatesAr": "لا يملك أي حساب على هذه المنصة صلاحية إجراء معاينة، فلا يمكن تحديد موعد لأي منها. تُصدر الوزارة حساب مراجع قبل ترتيب المعاينة.",
+    "noCandidatesEn": "Add a Ministry reviewer account before scheduling an inspection.",
+    "noCandidatesAr": "أضيفوا حساب مراجع للوزارة قبل تحديد موعد التفتيش.",
     "notifyTitleEn": "An inspection has been scheduled",
     "notifyTitleAr": "جُدول تفتيش",
-    "notifyBodyEn": "The Ministry has scheduled an inspection on this submission. An inspection is not a determination and does not decide one.",
-    "notifyBodyAr": "جدولت الوزارة تفتيشاً على هذا التقديم. والتفتيش ليس نتيجة ولا يقرر واحدة.",
+    "notifyBodyEn": "The Ministry has scheduled an inspection. A review decision will be recorded separately.",
+    "notifyBodyAr": "حدّدت الوزارة موعداً للتفتيش. وسيُسجَّل قرار المراجعة بشكل منفصل.",
     "notifyNoDateEn": "No date is set yet; you are told when one is.",
     "notifyNoDateAr": "لم يُحدَّد تاريخ بعد؛ وتُبلَّغون عند تحديده.",
     "noneYetEn": "No inspection is scheduled on this submission. Schedule one below if it needs one.",
@@ -557,57 +557,57 @@
   },
   "determination": {
     "$comment": "A determination is a regulatory act. Once recorded it is shown, not offered again; changing it is a separate deliberate act that names a reason and never overwrites the original.",
-    "standingTitleEn": "The determination on this submission",
-    "standingTitleAr": "النتيجة المسجَّلة على هذا التقديم",
+    "standingTitleEn": "Ministry decision",
+    "standingTitleAr": "قرار الوزارة",
     "recordedByEn": "Recorded by {who} on {when}",
     "recordedByAr": "سجّلها {who} في ⁦{when}⁩",
     "noteLabelEn": "Note to the organizer, as written",
     "noteLabelAr": "الملاحظة إلى المنظّم كما كُتبت",
-    "reviseTitleEn": "Record a revised determination",
-    "reviseTitleAr": "تسجيل نتيجة معدَّلة",
+    "reviseTitleEn": "Update the decision",
+    "reviseTitleAr": "تحديث القرار",
     "reviseBodyEn": "The original stays on the record, marked as replaced. The reason you give here is sent to the organizer as written.",
     "reviseBodyAr": "تبقى النتيجة الأصلية مسجَّلة موسومة بأنها استُبدلت. ويُرسل السبب الذي تكتبونه هنا إلى المنظّم كما هو.",
-    "reasonLabelEn": "Why the determination is being revised (required, sent to the organizer)",
-    "reasonLabelAr": "سبب تعديل النتيجة (مطلوب، ويُرسل إلى المنظّم)",
-    "reviseSubmitEn": "Record the revised determination",
-    "reviseSubmitAr": "تسجيل النتيجة المعدَّلة",
+    "reasonLabelEn": "Reason for this change (required; shared with the organizer)",
+    "reasonLabelAr": "سبب التغيير (مطلوب؛ يُرسل إلى المنظّم)",
+    "reviseSubmitEn": "Save the updated decision",
+    "reviseSubmitAr": "حفظ القرار المحدّث",
     "supersededChipEn": "Replaced",
     "supersededChipAr": "استُبدلت",
     "standsChipEn": "Stands",
     "standsChipAr": "قائمة",
-    "replacedNoteEn": "Replaced by a later determination.",
-    "replacedNoteAr": "استُبدلت بنتيجة لاحقة.",
+    "replacedNoteEn": "Replaced by a newer decision.",
+    "replacedNoteAr": "استُبدل بقرار أحدث.",
     "revisionReasonLabelEn": "Reason for the revision, as written",
     "revisionReasonLabelAr": "سبب التعديل كما كُتب"
   },
   "certificate": {
     "$comment": "The document the organizer hands to the authorising authority. It states the determination in its exact wording and says plainly what it is not.",
-    "titleEn": "Ministry determination",
-    "titleAr": "نتيجة الوزارة",
-    "introEn": "This is the record of the Ministry's determination on your submission. It concerns health and medical preparedness only.",
-    "introAr": "هذا سجل نتيجة الوزارة على تقديمكم. وهو يتعلق بالتأهب الصحي والطبي فقط.",
+    "titleEn": "Ministry decision",
+    "titleAr": "قرار الوزارة",
+    "introEn": "This records the Ministry’s decision on health and medical readiness for your event.",
+    "introAr": "يسجّل هذا المستند قرار الوزارة بشأن التأهب الصحي والطبي لفعاليتكم.",
     "refLabelEn": "Ministry reference number",
     "refLabelAr": "الرقم المرجعي لدى الوزارة",
     "eventLabelEn": "Event",
     "eventLabelAr": "الفعالية",
     "levelLabelEn": "Event level",
     "levelLabelAr": "مستوى الفعالية",
-    "outcomeLabelEn": "Determination",
-    "outcomeLabelAr": "النتيجة",
+    "outcomeLabelEn": "Decision",
+    "outcomeLabelAr": "القرار",
     "byLabelEn": "Recorded by",
     "byLabelAr": "سجّلها",
     "dateLabelEn": "Date recorded",
     "dateLabelAr": "تاريخ التسجيل",
-    "limitsEn": "The Ministry reviews health and medical preparedness only. Authorization of the event remains with the legally competent authority, and this determination does not replace any other permit or authorization required under Lebanese law.",
-    "limitsAr": "تراجع الوزارة التأهب الصحي والطبي فقط. ويبقى ترخيص الفعالية من صلاحية السلطة المختصة قانوناً، ولا تحل هذه النتيجة محل أي ترخيص أو إذن آخر مطلوب بموجب القانون اللبناني.",
-    "verifyEn": "This determination can be checked against the Ministry reference number above.",
-    "verifyAr": "يمكن التحقق من هذه النتيجة بالرقم المرجعي المذكور أعلاه.",
-    "openEn": "Open the determination record",
-    "openAr": "فتح سجل النتيجة",
+    "limitsEn": "This decision covers health and medical readiness only. It is not permission to hold the event. You still need any permits required by the relevant authorities under Lebanese law.",
+    "limitsAr": "يشمل هذا القرار التأهب الصحي والطبي فقط. وهو ليس إذناً لإقامة الفعالية. تبقى التصاريح المطلوبة من الجهات المختصة بموجب القانون اللبناني ضرورية.",
+    "verifyEn": "Use the Ministry reference number above to verify this decision.",
+    "verifyAr": "استخدموا الرقم المرجعي للوزارة أعلاه للتحقّق من هذا القرار.",
+    "openEn": "View Ministry decision",
+    "openAr": "عرض قرار الوزارة",
     "printEn": "Print or save as PDF",
     "printAr": "طباعة أو حفظ بصيغة PDF",
-    "revisedNoteEn": "This determination replaced an earlier one on the same submission. The earlier determination remains on the record.",
-    "revisedNoteAr": "استبدلت هذه النتيجة نتيجة سابقة على التقديم نفسه. وتبقى النتيجة السابقة مسجَّلة."
+    "revisedNoteEn": "This replaces an earlier decision. You can still view the earlier decision in the record.",
+    "revisedNoteAr": "يحلّ هذا القرار محلّ قرار سابق. ويمكنكم عرض القرار السابق في السجل."
   },
   "adminConsole": {
     "$comment": "The master administrator's overseeing console. It was a reviewer with fewer powers; it is now the profile that can see the whole platform and do anything any Ministry role can do, except act on its own account.",
@@ -633,8 +633,8 @@
     "statusFiledAr": "مقدَّم",
     "statusUnfiledEn": "Not filed",
     "statusUnfiledAr": "غير مقدَّم",
-    "statusUndeterminedEn": "Filed, no determination",
-    "statusUndeterminedAr": "مقدَّم دون نتيجة",
+    "statusUndeterminedEn": "Submitted — awaiting a decision",
+    "statusUndeterminedAr": "قُدّم — بانتظار القرار",
     "countEn": "{n} record(s)",
     "countAr": "⁦{n}⁩ سجل",
     "noneEn": "No record matches these filters.",
@@ -649,8 +649,8 @@
     "activityNoneAr": "لا نشاط في هذا النطاق بعد.",
     "kinds": {
       "determination": {
-        "en": "Determination recorded",
-        "ar": "سُجّلت نتيجة"
+        "en": "Ministry decision recorded",
+        "ar": "سُجّل قرار الوزارة"
       },
       "filed": {
         "en": "Submission filed",
@@ -717,10 +717,10 @@
     "neverSeenAr": "لم يسجّل الدخول قط",
     "createdEn": "Created",
     "createdAr": "أُنشئ",
-    "deferredTitleEn": "Capability deliberately not built",
-    "deferredTitleAr": "إمكانات لم تُبنَ عمداً",
-    "deferredBodyEn": "Each of these was considered and decided against for the reason given, with the condition that would change it.",
-    "deferredBodyAr": "نُظر في كل من هذه وتقرر عدم بنائه للسبب المذكور، مع الشرط الذي يغيّر ذلك.",
+    "deferredTitleEn": "Unavailable features",
+    "deferredTitleAr": "ميزات غير متاحة",
+    "deferredBodyEn": "These features are not available. Review the reason and what is needed for each one.",
+    "deferredBodyAr": "هذه الميزات غير متاحة. راجعوا السبب وما يلزم لكل ميزة.",
     "deferredReasonEn": "Why not",
     "deferredReasonAr": "لماذا لا",
     "deferredConditionEn": "What would change it",
@@ -729,8 +729,8 @@
   "registryCapabilities": {
     "titleEn": "Registry capabilities",
     "titleAr": "قدرات السجل",
-    "introEn": "Two capabilities of the device registry, exercised under these powers. They moved here from the platform's capability list because they are regulatory, not commercial: the Ministry holds them, the platform owner does not. Each is off until turned on here, and nothing renders while it is.",
-    "introAr": "قدرتان لسجل الأجهزة تُمارسان بموجب هذه الصلاحيات. نُقلتا إلى هنا من قائمة قدرات المنصة لأنهما تنظيميتان لا تجاريتان: الوزارة تملكهما، لا مالك المنصة. وكل منهما مطفأة حتى تُشغَّل هنا، ولا يظهر شيء ما دامت كذلك.",
+    "introEn": "The Ministry controls these registry options. Enable an option to make it available.",
+    "introAr": "تتحكّم الوزارة بهذه الخيارات في السجل. فعّلوا الخيار ليصبح متاحاً.",
     "items": [
       {
         "key": "aedGeolocationRegistry",

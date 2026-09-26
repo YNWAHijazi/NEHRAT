@@ -94,8 +94,8 @@
     "applicationFees": {
       "titleEn": "Application fees",
       "titleAr": "رسوم الطلبات",
-      "whatEn": "Charges a fee to file. A fee is set per service — certify an event, register a venue, register a facility — each independently, any of them zero. When on, the fee appears on the service detail page before an organizer starts, again on the submission package as an amount due, and filing waits until it is paid.",
-      "whatAr": "يفرض رسماً عند التقديم. يُحدَّد رسم لكل خدمة — اعتماد فعالية، تسجيل موقع، تسجيل منشأة — كلٌّ على حدة، وأيٌّ منها قد يكون صفراً. عند التشغيل يظهر الرسم على صفحة الخدمة قبل أن يبدأ المنظّم، ثم على حزمة التقديم كمبلغ مستحق، ولا يتم التقديم قبل سداده.",
+      "whatEn": "Set a fee for each service. You can leave any fee at zero. Users see the fee before they start and before they submit. Payment must be recorded before submission.",
+      "whatAr": "حدّدوا رسماً لكل خدمة. يمكن إبقاء أي رسم عند الصفر. يرى المستخدم الرسم قبل البدء وقبل التقديم. ويجب تسجيل الدفع قبل تقديم الطلب.",
       "requiredConfig": [
         {
           "key": "currency",
@@ -160,8 +160,8 @@
     "platformTransactionFees": {
       "titleEn": "Platform transaction fees",
       "titleAr": "رسوم معاملات المنصة",
-      "whatEn": "Adds the platform's own fee on payments made through the platform, on top of any application fee — a percentage or a flat amount. It is shown separately wherever a fee is shown, so what is the Ministry's and what is the platform's stays legible.",
-      "whatAr": "يضيف رسم المنصة على المدفوعات التي تمر عبرها، فوق أي رسم طلب — نسبة مئوية أو مبلغاً ثابتاً. ويُعرض منفصلاً حيثما يُعرض أي رسم، فيبقى واضحاً ما هو للوزارة وما هو للمنصة.",
+      "whatEn": "Add a platform fee as a fixed amount or a percentage. It is shown separately from the Ministry’s service fee.",
+      "whatAr": "أضيفوا رسم المنصة كمبلغ ثابت أو نسبة مئوية. يظهر منفصلاً عن رسم خدمة الوزارة.",
       "requiredConfig": [
         {
           "key": "mode",
@@ -184,8 +184,8 @@
     "vendorDirectory": {
       "titleEn": "Vendor directory",
       "titleAr": "دليل المزوّدين",
-      "whatEn": "A directory of commercial vendors — defibrillator supply, pads and batteries, ambulance services, resuscitation training, event medical cover — added by the administrator, never self-registered. When on, the directory is a public page and is linked from the facility and requirements screens where an operator might need one. Every listing states that listing is commercial and is not Ministry endorsement.",
-      "whatAr": "دليل لمزوّدين تجاريين — توريد أجهزة إزالة الرجفان، اللصاقات والبطاريات، خدمات الإسعاف، التدريب على الإنعاش، التغطية الطبية للفعاليات — يضيفهم المسؤول ولا يسجّلون أنفسهم. عند التشغيل يظهر الدليل صفحةً عامة ويُربط من شاشات المنشآت والمتطلبات حيث قد يحتاجه المشغّل. وتذكر كل قائمة أن الإدراج تجاري وليس تزكية من الوزارة.",
+      "whatEn": "List suppliers of AEDs, supplies, ambulances, training and event medical services. Administrators add suppliers. A listing does not mean the Ministry endorses the supplier.",
+      "whatAr": "أدرجوا مورّدي أجهزة مزيل الرجفان والمستلزمات والإسعاف والتدريب والخدمات الطبية للفعاليات. يضيف المسؤولون المورّدين. الإدراج لا يعني اعتماد الوزارة للمورّد.",
       "requiredConfig": [],
       "requiredChecks": [
         {
@@ -229,8 +229,8 @@
     "sponsoredListings": {
       "titleEn": "Sponsored listings",
       "titleAr": "القوائم المموَّلة",
-      "whatEn": "Lets a directory vendor hold a sponsored position for a period. A sponsored row is labelled as sponsored wherever it appears, always. Needs the vendor directory on — there is nothing to sponsor without it.",
-      "whatAr": "يتيح لمزوّد في الدليل موقعاً مموَّلاً لفترة محددة. ويُوسم الصف المموَّل بذلك حيثما ظهر، دائماً. يتطلب تشغيل دليل المزوّدين — فلا شيء يُموَّل من دونه.",
+      "whatEn": "Show paid listings at the top of a vendor category for a set period. They are always labelled Sponsored. The vendor directory must be enabled first.",
+      "whatAr": "اعرضوا الإعلانات المدفوعة أعلى فئة المورّدين لفترة محدّدة، مع إظهار علامة «برعاية» دائماً. يجب تفعيل دليل المورّدين أولاً.",
       "requiredConfig": [],
       "dependsOn": "vendorDirectory",
       "requiredChecks": [
@@ -244,8 +244,8 @@
     "advertising": {
       "titleEn": "Advertising",
       "titleAr": "الإعلانات",
-      "whatEn": "Paid placements at the foot of public pages only — never on a screen where someone is filing, reviewing or reporting an incident; the placement list is structural, not a guideline. An advert is an image, a link, a period and a placement.",
-      "whatAr": "مواضع مدفوعة في أسفل الصفحات العامة فقط — وليس أبداً على شاشة يقدّم فيها أحد أو يراجع أو يبلّغ عن حادثة؛ فقائمة المواضع بنيوية لا إرشادية. الإعلان صورة ورابط وفترة وموضع.",
+      "whatEn": "Show paid ads at the bottom of public pages. Ads do not appear on application, review or incident-report pages.",
+      "whatAr": "اعرضوا الإعلانات المدفوعة أسفل الصفحات العامة. لا تظهر الإعلانات في صفحات تقديم الطلبات أو المراجعة أو الإبلاغ عن الحوادث.",
       "requiredConfig": [],
       "requiredChecks": [
         {
@@ -492,13 +492,13 @@
         }
       ],
       "blocked": {
-        "reasonEn": "Its reach is an unmade decision. The product specification gives this assistant full tenant visibility; the platform-activity ruling holds the owner to counts only. Those contradict, and neither this page nor this build resolves it. The capability stays disabled until the decision is made.",
-        "reasonAr": "مداه قرار لم يُتَّخذ. تمنح مواصفات المنتج هذا المساعد رؤية كاملة للمستأجر؛ بينما يُلزم قرارُ نشاط المنصة المالكَ بالأعداد فقط. وهما متناقضان، ولا تحسمه هذه الصفحة ولا هذا البناء. تبقى القدرة معطَّلة حتى يُتَّخذ القرار."
+        "reasonEn": "Unavailable. Data-access permissions must be agreed before this assistant can be built.",
+        "reasonAr": "غير متاح. يجب تحديد صلاحيات الوصول إلى البيانات قبل إنشاء هذا المساعد."
       }
     }
   },
   "assistiveNotBuilt": {
-    "en": "The assistant itself is deliberately not built. What each assistant may see needs its own conversation, sequenced after the Ministry console — so this page governs the assistant before it exists: the model, the data it can reach, whether a person confirms before anything is written, and the monthly spend ceiling are what it will be held to. Turning the capability on activates nothing until the assistant is built, and the assistant will not be built beyond what is set here.",
-    "ar": "المساعد نفسه غير مبني عمداً. فما يجوز لكل مساعد أن يراه يحتاج إلى نقاشه الخاص، بعد لوحة الوزارة — لذا تحكم هذه الصفحة المساعدَ قبل وجوده: النموذج، والبيانات التي يصل إليها، وتأكيد شخصٍ قبل كتابة أي شيء، وسقف الإنفاق الشهري هي ما سيُلزَم به. وتشغيل القدرة لا يُفعِّل شيئاً حتى يُبنى المساعد، ولن يُبنى المساعد بما يتجاوز ما حُدِّد هنا."
+    "en": "AI assistants are not available yet. These settings describe future access, review and spending limits. Switching them on does not activate an assistant.",
+    "ar": "مساعدو الذكاء الاصطناعي غير متاحين بعد. تحدّد هذه الإعدادات حدود الوصول والمراجعة والإنفاق مستقبلاً. تشغيلها لا يفعّل مساعداً."
   }
 }

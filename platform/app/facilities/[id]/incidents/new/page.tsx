@@ -51,7 +51,7 @@ export default async function IncidentReportPage({
             return (
               <div data-region="reporting-procedures" style={{ padding: '15px 19px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 24, maxWidth: '84ch' }}>
                 <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-                  <L en="Reporting procedures in force" ar="إجراءات الإبلاغ السارية" />
+                  <L en="Reporting steps" ar="خطوات الإبلاغ" />
                 </div>
                 <div style={{ fontSize: '13.5px', lineHeight: 1.65 }}>{procedures.value}</div>
                 <div style={{ fontSize: '12px', color: 'var(--muted)', marginBlockStart: 6, fontVariantNumeric: 'tabular-nums' }}>

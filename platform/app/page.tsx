@@ -113,7 +113,7 @@ export default async function OverviewPage() {
       <div data-region="public-tools" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12, marginBlockEnd: 44 }}>
         <Link href="/applicability" style={{ padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)' }}>
           <div style={{ fontSize: 16, fontWeight: 500 }}>
-            <L en="Determination of applicability" ar="البت في الانطباق" />
+            <L en="Check whether you need this service" ar="تحقّقوا من حاجتكم إلى هذه الخدمة" />
           </div>
           <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 5, lineHeight: 1.55 }}>
             <L

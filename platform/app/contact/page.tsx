@@ -61,8 +61,8 @@ export default async function ContactPage() {
             carries no channel of its own. */}
         <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.7 }}>
           <L
-            en="Use the Ministry of Public Health's own published contact channels. This platform does not carry messages to the Ministry and does not publish contact details of its own."
-            ar="استخدموا قنوات التواصل التي تنشرها وزارة الصحة العامة نفسها. فهذه المنصة لا تنقل الرسائل إلى الوزارة ولا تنشر بيانات اتصال خاصة بها."
+            en="Contact the Ministry of Public Health through its official channels. This page does not send messages."
+            ar="تواصلوا مع وزارة الصحة العامة عبر قنواتها الرسمية. هذه الصفحة لا ترسل رسائل."
           />
         </p>
         <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)' }}>

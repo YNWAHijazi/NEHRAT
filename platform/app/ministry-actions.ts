@@ -156,7 +156,7 @@ export async function requireMeasureAction(eventId: string, formData: FormData):
     eventId,
     `Additional measures required — ${ev.name_en}`,
     `طُلبت تدابير إضافية — ${ev.name_ar}`,
-    'The Ministry requires additional measures on this submission. This is separate from a revision request and is not a determination.',
+    'The Ministry has added requirements to your application. Review the new items on the requirements page. This is not a final decision.',
     'تطلب الوزارة تدابير إضافية على هذا التقديم. وهذا مستقل عن طلب التعديل وليس نتيجة.',
     `/events/${eventId}/requirements`,
   );
@@ -1103,10 +1103,10 @@ export async function reviseOutcomeAction(eventId: string, formData: FormData): 
   const ev = db.prepare(`SELECT name_en, name_ar, moph_reference FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; moph_reference: string | null };
   notifyEventOwner(
     eventId,
-    `A revised determination — ${ev.moph_reference ?? ev.name_en}`,
+    `Updated Ministry decision — ${ev.moph_reference ?? ev.name_en}`,
     `نتيجة معدَّلة — ${ev.moph_reference ?? ev.name_ar}`,
-    `The Ministry has recorded a revised determination on your submission: ${def?.en ?? outcome}. The reason, as written: “${verbatimQuote(reason)}”. The determination it replaces remains on the record. Your reference number does not change.`,
-    `سجّلت الوزارة نتيجة معدَّلة على تقديمكم: ${def?.ar ?? outcome}. والسبب كما كُتب: «${verbatimQuote(reason)}». وتبقى النتيجة التي استُبدلت مسجَّلة. ولا يتغير رقمكم المرجعي.`,
+    `The Ministry updated its decision: ${def?.en ?? outcome}. Reason: “${verbatimQuote(reason)}”. You can still view the earlier decision. Your reference number stays the same.`,
+    `حدّثت الوزارة قرارها: ${def?.ar ?? outcome}. السبب: «${verbatimQuote(reason)}». يمكنكم عرض القرار السابق. يبقى رقمكم المرجعي كما هو.`,
     `/events/${eventId}`,
   );
   revalidatePath(`/ministry/submissions/${eventId}`);

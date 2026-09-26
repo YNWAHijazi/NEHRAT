@@ -27,8 +27,8 @@ test.describe('the demonstration band', () => {
       await gotoRidingRestarts(page, route);
       const band = page.locator(BAND);
       await expect(band, `${route} must carry the band`).toBeVisible();
-      await expect(band).toContainText('Every record shown here is an example. Nothing recorded in this account is a Ministry determination');
-      await expect(band).toContainText('كل سجل معروض هنا مثال');
+      await expect(band).toContainText('This is a practice account. Its records are examples, not official Ministry records.');
+      await expect(band).toContainText('هذا حساب للتجربة. سجلاته أمثلة وليست سجلات رسمية للوزارة.');
     }
   });
 

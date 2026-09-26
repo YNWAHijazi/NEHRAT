@@ -128,8 +128,8 @@ test.describe('cancellation and postponement', () => {
     await page.locator('form:has(button:has-text("Postpone the event")) textarea[name="reason"]').fill('Venue works overrun.');
     await page.locator('button:has-text("Postpone the event")').click();
     await page.waitForURL(`**/events/${eventId}?notice=postponed`);
-    await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('no new date recorded yet');
-    await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('does not carry to a new date');
+    await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('Add the new date when it is set');
+    await expect(page.locator('[data-region="lifecycle-band"]')).toContainText('Any earlier decision covers only the old date');
 
     // Then cancel, with a reason. The record closes; filing is blocked by name.
     await gotoRidingRestarts(page, `/events/${eventId}/lifecycle`);

@@ -12,6 +12,7 @@
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
+import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
 
 
@@ -47,7 +48,7 @@ test.describe('the outcome gate', () => {
     // A complete row's title and byline, verbatim -- the string half of the att-row
     // region, whose pixel compare is held for geometry only.
     await expect(att).toContainText('Major-incident and mass-casualty plan reviewed');
-    await expect(att).toContainText('Reviewed by L. Nassar · 2026-08-11');
+    await expect(att).toContainText(`Reviewed by L. Nassar · ${seededDate('2026-08-11')}`);
     // A deficiency renders as the reason an item is pending -- not a third state.
     await expect(att).toContainText('Pending because');
     await expect(att).toContainText('the deployment map has not been attached');
@@ -194,8 +195,8 @@ test.describe('the pinned vocabulary', () => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');
     const powersRegion = page.locator('[data-region="powers"]');
-    await expect(powersRegion).toContainText('Not set — nothing is in force under this value');
-    await expect(powersRegion).toContainText('غير محددة — لا يسري شيء بموجب هذه القيمة');
+    await expect(powersRegion).toContainText('Not set — Ministry decision needed');
+    await expect(powersRegion).toContainText('غير محدّد — يلزم قرار الوزارة');
     await expect(powersRegion).toContainText('Not set — the provisional figure');
     await expect(powersRegion).toContainText('غير محددة — الرقم المؤقت');
   });
@@ -234,7 +235,7 @@ test.describe('the organizer reads the same determination', () => {
     const card = page.locator('[data-region="determination-card"]');
     await expect(card).toContainText('Additional information or revision required');
     await expect(card.locator('a[href="/events/EV-0362/determination"]')).toContainText(
-      'Open the determination record',
+      'View Ministry decision',
     );
 
     // The RECORDED note, verbatim, where it now lives. It used to be a hard-coded
@@ -252,7 +253,7 @@ test.describe('cardiac configuration', () => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/cardiac');
     const body = page.locator('body');
-    await expect(body).toContainText('Not set — nothing is in force under this value');
+    await expect(body).toContainText('Not set — Ministry decision needed');
     await expect(body).toContainText('provisional figure');
     // The status-wording caveat lives HERE, on the label-owner's screen, since it
     // left the operator's facility record (partner ruling, second sweep).
@@ -308,7 +309,7 @@ test.describe('cardiac configuration', () => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/FC-0014/incidents/new');
     const band = page.locator('[data-region="reporting-procedures"]');
-    await expect(band).toContainText('Reporting procedures in force');
+    await expect(band).toContainText('Reporting steps');
     await expect(band).toContainText('within 24 hours');
     await expect(band).toContainText('Effective 2026-09-01');
   });
@@ -355,7 +356,7 @@ test.describe('platform activity stays counts only', () => {
     await signInAs(page, 'test_owner');
     await gotoRidingRestarts(page, '/platform/activity');
     const body = page.locator('body');
-    await expect(body).toContainText('Counts only');
+    await expect(body).toContainText('This page shows totals only');
     // The demonstration records' names must not leak into the counts surface.
     for (const name of ['Beirut Road Runners', 'Baalbeck', 'Beirut Sports Complex', 'Forum de Beyrouth']) {
       await expect(body).not.toContainText(name);

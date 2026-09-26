@@ -197,7 +197,7 @@ export default async function SubmissionReviewPage({
                 expedited review waives nothing. */}
             {review.expedited ? (
               <span data-region="expedited-chip" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--accent-soft)', color: 'var(--accent-ink)', fontSize: 13 }}>
-                <L en="Filed past the filing deadline — accepted as expedited. Expedited review waives nothing." ar="قُدّم بعد مهلة التقديم — وقُبل على أساس معجَّل. والمراجعة المعجَّلة لا تُسقط شيئاً." />
+                <L en="Submitted after the deadline for urgent review. All requirements still apply." ar="قُدّم بعد المهلة للمراجعة العاجلة. تبقى جميع المتطلبات واجبة." />
               </span>
             ) : null}
             {review.level !== null ? (
@@ -366,7 +366,7 @@ export default async function SubmissionReviewPage({
           {versions.length > 0 ? (
             <div data-region="review-versions" style={{ marginBlockEnd: 28 }}>
               <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-                <L en="Filing history" ar="سجل التقديمات" />
+                <L en="Submission history" ar="سجل التقديم" />
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
                 {versions.map((v) => (
@@ -1172,7 +1172,7 @@ export default async function SubmissionReviewPage({
           </div>
 
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Determination history" ar="سجل النتائج" />
+            <L en="Decision history" ar="سجل القرارات" />
           </h2>
           <div data-region="determinations" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {/* BOTH, and which is which. A revision does not remove what it
@@ -1215,7 +1215,7 @@ export default async function SubmissionReviewPage({
             })}
             {determinations.length === 0 ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en="No determination has been recorded." ar="لم تُسجَّل أي نتيجة." />
+                <L en="No decision has been recorded yet." ar="لم يُسجَّل قرار بعد." />
               </div>
             ) : null}
           </div>

@@ -2,8 +2,8 @@
   "$comment": "Account administration copy. The administrator never sets or sees a password: creating an account issues an activation link and the recipient sets their own credential.",
   "titleEn": "Accounts",
   "titleAr": "الحسابات",
-  "introEn": "Every account on the platform, with how it came to exist.",
-  "introAr": "كل حساب على المنصة، وكيف نشأ.",
+  "introEn": "Create accounts and manage access.",
+  "introAr": "أنشئوا الحسابات وحدّدوا صلاحيات الوصول.",
   "origins": {
     "demonstration": {
       "en": "Demonstration account",
@@ -18,8 +18,8 @@
       "ar": "دعاه مسؤول"
     },
     "nominated": {
-      "en": "Registered against a nomination",
-      "ar": "سُجّل مقابل ترشيح"
+      "en": "Joined through an event invitation",
+      "ar": "انضمّ عبر دعوة إلى فعالية"
     },
     "selfRegistered": {
       "en": "Registered directly",
@@ -32,16 +32,16 @@
   },
   "originNotes": {
     "demonstration": {
-      "en": "A demonstration row, excluded from the national registry and every aggregate.",
-      "ar": "سجل توضيحي، مستثنى من السجل الوطني ومن كل تجميع."
+      "en": "Practice account. Not included in official records or totals.",
+      "ar": "حساب للتجربة. لا يظهر في السجلات أو الأعداد الرسمية."
     },
     "invitedPending": {
       "en": "The activation link has not been used; the account cannot sign in until the holder sets a password.",
       "ar": "لم يُستخدَم رابط التفعيل؛ ولا يمكن للحساب تسجيل الدخول قبل أن يضع صاحبه كلمة مرور."
     },
     "outOfBand": {
-      "en": "Nothing in the platform creates a Ministry role; this account was issued by a tool outside the platform.",
-      "ar": "لا ينشئ شيء داخل المنصة دوراً وزارياً؛ صدر هذا الحساب عبر أداة خارج المنصة."
+      "en": "This account was created during platform setup.",
+      "ar": "أُنشئ هذا الحساب أثناء إعداد المنصة."
     }
   },
   "holdings": {
@@ -58,8 +58,8 @@
       "ar": "⁦{n}⁩ ترشيح مقبول أو مُجاب"
     },
     "determinations": {
-      "en": "{n} determination(s) recorded under this name",
-      "ar": "⁦{n}⁩ نتيجة مسجَّلة باسم هذا الحساب"
+      "en": "{n} Ministry decision(s) recorded",
+      "ar": "{n} قرار مسجّل للوزارة"
     },
     "inspections": {
       "en": "{n} inspection(s) recorded under this name",
@@ -74,8 +74,8 @@
       "ar": "⁦{n}⁩ سجل مرفق"
     }
   },
-  "holdsNothingEn": "This account holds no records.",
-  "holdsNothingAr": "لا يحمل هذا الحساب أي سجلات.",
+  "holdsNothingEn": "No records linked to this account.",
+  "holdsNothingAr": "لا توجد سجلات مرتبطة بهذا الحساب.",
   "bars": {
     "ownRow": {
       "en": "This is your own account. An administrator cannot change their own role or suspend themselves.",
@@ -88,34 +88,34 @@
   },
   "suspendTitleEn": "Suspend this account",
   "suspendTitleAr": "تعليق هذا الحساب",
-  "suspendBodyEn": "Suspension is immediate — the account stops on its next request. Its records are untouched.",
-  "suspendBodyAr": "التعليق فوري — يتوقف الحساب عند طلبه التالي. أما سجلاته فلا تُمَس.",
+  "suspendBodyEn": "This person will lose access. Their records will be kept.",
+  "suspendBodyAr": "سيفقد هذا الشخص صلاحية الدخول. ستبقى سجلاته محفوظة.",
   "restoreTitleEn": "Restore this account",
   "restoreTitleAr": "إعادة تفعيل هذا الحساب",
-  "restoreBodyEn": "The account signs in again from its next attempt. Nothing else changes.",
-  "restoreBodyAr": "يعود الحساب إلى تسجيل الدخول من محاولته التالية. ولا يتغير شيء آخر.",
+  "restoreBodyEn": "This person can sign in again.",
+  "restoreBodyAr": "يمكن لهذا الشخص تسجيل الدخول مجدداً.",
   "roleChangeTitleEn": "Change the role",
   "roleChangeTitleAr": "تغيير الدور",
-  "roleChangeBodyEn": "Changing the role moves or deletes nothing the account holds; it changes which screens the account reaches.",
-  "roleChangeBodyAr": "لا ينقل تغيير الدور شيئاً مما يحمله الحساب ولا يحذفه؛ بل يغيّر الشاشات التي يصل إليها.",
+  "roleChangeBodyEn": "The new role changes what this person can do. Their records stay in place.",
+  "roleChangeBodyAr": "يغيّر الدور الجديد ما يمكن لهذا الشخص فعله. وتبقى سجلاته محفوظة.",
   "inviteTitleEn": "Create an account",
   "inviteTitleAr": "إنشاء حساب",
-  "inviteBodyEn": "The platform issues an activation link. The person sets their own password against it. No administrator sets or sees a password.",
-  "inviteBodyAr": "تُصدر المنصة رابط تفعيل. ويضع الشخص كلمة مروره بنفسه من خلاله. ولا يضع أي مسؤول كلمة مرور ولا يطّلع عليها.",
-  "inviteLinkLabelEn": "The activation link — hand it to the person it names",
-  "inviteLinkLabelAr": "رابط التفعيل — سلّموه إلى الشخص الذي يسمّيه",
-  "inviteLinkNoteEn": "It sets a password once and then stops working. The token is unguessable; share it only with the person it names.",
-  "inviteLinkNoteAr": "يضع كلمة مرور مرة واحدة ثم يتوقف عن العمل. والرمز غير قابل للتخمين؛ فلا تشاركوه إلا مع الشخص الذي يسمّيه.",
+  "inviteBodyEn": "The user sets their own password through an activation link.",
+  "inviteBodyAr": "يختار المستخدم كلمة مروره من خلال رابط التفعيل.",
+  "inviteLinkLabelEn": "Activation link — share only with this user",
+  "inviteLinkLabelAr": "رابط التفعيل — شاركوه مع هذا المستخدم فقط",
+  "inviteLinkNoteEn": "This link works once. Share it only with the named user.",
+  "inviteLinkNoteAr": "يُستخدم هذا الرابط مرة واحدة. شاركوه مع المستخدم المحدّد فقط.",
   "reissueEn": "Issue a new link",
   "reissueAr": "إصدار رابط جديد",
   "reissueNoteEn": "Issuing a new link stops the previous one working.",
   "reissueNoteAr": "إصدار رابط جديد يوقف عمل الرابط السابق.",
   "activateTitleEn": "Set your password",
   "activateTitleAr": "ضعوا كلمة مروركم",
-  "activateBodyEn": "This link was issued for your account. Set a password and you are signed in.",
-  "activateBodyAr": "صدر هذا الرابط لحسابكم. ضعوا كلمة مرور وتُسجَّل دخولكم.",
-  "activateDeadEn": "This link is no longer usable. It may have been used already, replaced by a newer link, or it may have expired. Ask the Ministry for a new one.",
-  "activateDeadAr": "لم يعد هذا الرابط صالحاً للاستخدام. ربما استُخدم سابقاً أو استُبدل برابط أحدث أو انتهت صلاحيته. اطلبوا من الوزارة رابطاً جديداً.",
+  "activateBodyEn": "Choose a password to continue.",
+  "activateBodyAr": "اختاروا كلمة مرور للمتابعة.",
+  "activateDeadEn": "This link has expired or was already used. Ask the administrator for a new activation link. To reset your password, return to sign in.",
+  "activateDeadAr": "انتهت صلاحية الرابط أو سبق استخدامه. اطلبوا رابط تفعيل جديداً من المسؤول. لإعادة تعيين كلمة المرور، عودوا إلى صفحة تسجيل الدخول.",
   "pendingChipEn": "Pending",
   "pendingChipAr": "معلَّق",
   "suspendedChipEn": "Suspended",

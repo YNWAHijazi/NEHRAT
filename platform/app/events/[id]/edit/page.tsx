@@ -87,8 +87,8 @@ export default async function EditEventPage({
               <form action={deleteDraftEventAction.bind(null, id)} style={{ marginBlockStart: 12, padding: '16px 20px', background: 'var(--bad-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                 <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--bad)', lineHeight: 1.6 }}>
                   <L
-                    en="Nothing is filed, so this record can be deleted entirely — the assessment, attachments and nominations go with it, and any nominated party is told. This cannot be undone."
-                    ar="لا شيء مقدَّماً، فيمكن حذف هذا السجل كلياً — يذهب معه التقييم والمرفقات والترشيحات، ويُبلَّغ أي طرف مُرشَّح. ولا يمكن التراجع عن ذلك."
+                    en="This draft has not been submitted. Deleting it removes the assessment, files and invitations. Invited people will be notified. You cannot undo this."
+                    ar="لم يُقدَّم هذا الطلب بعد. سيحذف ذلك التقييم والملفات والدعوات، وسيُبلَّغ المدعوون. لا يمكن التراجع عن الحذف."
                   />
                 </span>
                 <button type="submit" style={{ flex: 'none', height: 38, paddingInline: 16, border: '1px solid var(--bad)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', color: 'var(--bad)', cursor: 'pointer' }}>

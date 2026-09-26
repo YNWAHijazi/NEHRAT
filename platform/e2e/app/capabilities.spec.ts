@@ -82,8 +82,7 @@ test.describe('the capability shape', () => {
     // Platform intelligence: the contradiction is surfaced as an open decision,
     // and no configuration unblocks it.
     await gotoRidingRestarts(page, '/platform/admin/capabilities/aiPlatformIntelligenceAssistant');
-    await expect(page.locator('[data-region="open-decision"]')).toContainText('full tenant visibility');
-    await expect(page.locator('[data-region="open-decision"]')).toContainText('counts only');
+    await expect(page.locator('[data-region="open-decision"]')).toContainText('Data-access permissions must be agreed');
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(1);
   });
 
@@ -356,7 +355,7 @@ test.describe('the capability shape', () => {
     // the toggle waits on the full governance -- model, data reach,
     // confirmation, ceiling, and what happens at the ceiling.
     await gotoRidingRestarts(page, '/platform/admin/capabilities/aiUserReadinessAssistant');
-    await expect(page.locator('[data-region="not-built"]')).toContainText('deliberately not built');
+    await expect(page.locator('[data-region="not-built"]')).toContainText('not available yet');
     const toggle = page.locator('[data-region="capability-toggle"]');
     await expect(toggle.locator('button[disabled]')).toHaveCount(1);
     await expect(toggle).toContainText('Configuration missing: Model.');
@@ -392,7 +391,7 @@ test.describe('the capability shape', () => {
     await piConfig.locator('button:has-text("Store the configuration")').click();
     await page.waitForURL(/notice=config/);
     await expect(page.locator('[data-region="capability-toggle"] button[disabled]')).toHaveCount(1);
-    await expect(page.locator('[data-region="open-decision"]')).toContainText('unmade decision');
+    await expect(page.locator('[data-region="open-decision"]')).toContainText('Data-access permissions must be agreed');
   });
 
   test('registration fees: the venue classification waits, the facility carries a state, and off means neither', async ({ page }) => {
@@ -424,7 +423,7 @@ test.describe('the capability shape', () => {
     // with the sentence that no readiness obligation waits on it.
     await gotoRidingRestarts(page, '/facilities/FC-0014');
     await expect(page.locator('[data-region="amount-due"]')).toContainText('Amount due: 25 USD');
-    await expect(page.locator('[data-region="amount-due"]')).toContainText('No readiness obligation waits on this');
+    await expect(page.locator('[data-region="amount-due"]')).toContainText('Keep devices, the response plan and reports up to date while payment is pending.');
 
     // Off, fees zeroed: both surfaces shed the region entirely.
     await signInAs(page, 'test_owner');
@@ -463,7 +462,7 @@ test.describe('the capability shape', () => {
     const region = page.locator('[data-region="registry-capabilities"]');
     await expect(region).toContainText('Geolocation registry');
     await expect(region).toContainText('Automated upkeep notifications');
-    await expect(region).toContainText('regulatory, not commercial');
+    await expect(region).toContainText('The Ministry controls these registry options.');
 
     // A Ministry switch that works: on, recorded with who and when, then off.
     const row = region.locator('> div > div').filter({ hasText: 'Automated upkeep notifications' });

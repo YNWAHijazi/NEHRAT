@@ -56,8 +56,8 @@ export function DemonstrationBand() {
               recorded outcome looking like a determination that simply belongs to a
               test event; the second clause is the one that matters on paper. */}
           <L
-            en="Every record shown here is an example. Nothing recorded in this account is a Ministry determination, and none of it appears in the national registry."
-            ar="كل سجل معروض هنا مثال. لا يشكّل أي إجراء يُسجَّل في هذا الحساب قراراً من الوزارة، ولا يظهر أي منه في السجل الوطني."
+            en="This is a practice account. Its records are examples, not official Ministry records. They do not appear in the national registry."
+            ar="هذا حساب للتجربة. سجلاته أمثلة وليست سجلات رسمية للوزارة. ولا تظهر في السجل الوطني."
           />
         </InfoNote></span>
       </div>

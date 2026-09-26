@@ -192,8 +192,8 @@ export default async function FacilityReadinessPage({
               </div>
               <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
                 <L
-                  en="No readiness obligation waits on this: devices, the plan and reporting continue as required. No payment channel is configured on the platform yet; the record is updated when payment is received."
-                  ar="لا موجب تأهب ينتظر هذا: تستمر الأجهزة والخطة والإبلاغ كما هو مطلوب. لا قناة سداد مهيّأة على المنصة بعد؛ ويُحدَّث السجل عند استلام السداد."
+                  en="Keep devices, the response plan and reports up to date while payment is pending. Online payment is not available yet."
+                  ar="حافظوا على تحديث الأجهزة وخطة الاستجابة والتقارير أثناء انتظار الدفع. الدفع الإلكتروني غير متاح بعد."
                 />
               </p>
             </div>

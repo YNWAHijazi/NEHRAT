@@ -118,7 +118,8 @@ test.describe('5 — the record stops asking for what is already done', () => {
     await expect(cert).toBeVisible();
     await expect(cert).toContainText('MOPH-EV-2026-0362');
     // It states what it is NOT: a determination is not authorization of the event.
-    await expect(cert).toContainText(/Authorization of the event remains with the legally competent authority/);
+    await expect(cert).toContainText('It is not permission to hold the event.');
+    await expect(cert).toContainText('permits required by the relevant authorities under Lebanese law');
     await expect(page.locator('[data-region="certificate-controls"]')).toBeVisible();
   });
 

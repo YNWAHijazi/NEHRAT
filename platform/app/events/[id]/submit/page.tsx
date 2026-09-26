@@ -148,8 +148,8 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
             {gate.awaitingPayment ? (
               <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.65, maxWidth: '80ch' }}>
                 <L
-                  en="Awaiting payment. Everything the level requires is in place; filing completes when the payment is recorded."
-                  ar="بانتظار السداد. كل ما يقتضيه المستوى مستوفى؛ ويكتمل التقديم عند تسجيل السداد."
+                  en="Your application is ready. Payment must be recorded before it can be submitted."
+                  ar="طلبكم جاهز. يجب تسجيل الدفع قبل تقديمه."
                 />
               </p>
             ) : null}

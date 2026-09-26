@@ -17,7 +17,7 @@ test('the second report signature submits it and the Ministry accepts it', async
   await signInAs(page, 'test_organizer');
   await gotoRidingRestarts(page, '/events/EV-0244/post-event');
   await page.getByRole('button', { name: 'Sign and submit', exact: true }).click();
-  await expect(page.locator('main')).toContainText('Your signature is recorded');
+  await expect(page.locator('main')).toContainText('Your signature is saved');
   await signInAs(page, 'test_director');
   await gotoRidingRestarts(page, '/events/EV-0244/report');
   await page.getByRole('button', { name: 'Review complete — sign the report', exact: true }).click();

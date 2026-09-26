@@ -29,18 +29,18 @@
   "postpone": {
     "titleEn": "Postpone the event",
     "titleAr": "تأجيل الفعالية",
-    "bodyEn": "Postponing notifies the Ministry. A new date is not required to postpone; you can record it later. Any determination recorded on this submission applies to the filed date and does not carry to a new date — a revised submission is required for the new date.",
-    "bodyAr": "التأجيل يُبلغ الوزارة. التاريخ الجديد ليس شرطاً للتأجيل ويمكن تسجيله لاحقاً. وأي نتيجة مسجَّلة على هذا التقديم تخص التاريخ المقدَّم ولا تنسحب على تاريخ جديد — يلزم تقديم منقَّح للتاريخ الجديد.",
+    "bodyEn": "The Ministry will be notified. Add the new date now or later. You must submit an updated application for the new date. Any earlier Ministry decision covers only the old date.",
+    "bodyAr": "سيُبلَّغ فريق الوزارة. أضيفوا الموعد الجديد الآن أو لاحقاً. يجب تقديم طلب محدّث للموعد الجديد. وأي قرار سابق للوزارة يخصّ الموعد القديم فقط.",
     "dateLabelEn": "New date, if known (optional)",
     "dateLabelAr": "التاريخ الجديد إن عُرف (اختياري)",
     "reasonLabelEn": "Reason, sent to the Ministry as written",
     "reasonLabelAr": "السبب، يُرسل إلى الوزارة كما هو",
     "buttonEn": "Postpone the event",
     "buttonAr": "تأجيل الفعالية",
-    "bandNoDateEn": "This event was postponed on {date}, with no new date recorded yet. The Ministry has been notified. Record the new date here when it is set; any recorded determination does not carry to a new date.",
-    "bandNoDateAr": "أُجّلت هذه الفعالية في {date} دون تسجيل تاريخ جديد بعد. وأُبلغت الوزارة. سجّلوا التاريخ الجديد هنا عند تحديده؛ وأي نتيجة مسجَّلة لا تنسحب على تاريخ جديد.",
-    "bandDateEn": "This event was postponed on {date} to {newDate}. The Ministry has been notified. Any recorded determination applies to the original filing and does not carry to the new date — file a revised submission for it.",
-    "bandDateAr": "أُجّلت هذه الفعالية في {date} إلى {newDate}. وأُبلغت الوزارة. أي نتيجة مسجَّلة تخص التقديم الأصلي ولا تنسحب على التاريخ الجديد — قدّموا تقديماً منقَّحاً له."
+    "bandNoDateEn": "Postponed on {date}. The Ministry has been notified. Add the new date when it is set, then submit an updated application. Any earlier decision covers only the old date.",
+    "bandNoDateAr": "أُجّلت الفعالية في {date} وأُبلغت الوزارة. أضيفوا الموعد الجديد عند تحديده، ثم قدّموا طلباً محدّثاً. وأي قرار سابق يخصّ الموعد القديم فقط.",
+    "bandDateEn": "Postponed on {date} to {newDate}. The Ministry has been notified. Submit an updated application for the new date. Any earlier decision covers only the old date.",
+    "bandDateAr": "أُجّلت الفعالية في {date} إلى {newDate} وأُبلغت الوزارة. قدّموا طلباً محدّثاً للموعد الجديد. وأي قرار سابق يخصّ الموعد القديم فقط."
   },
   "control": {
     "linkEn": "Cancel or postpone this event",
@@ -48,8 +48,8 @@
   },
   "blockerCancelledEn": "Event cancelled — nothing further can be filed on this record",
   "blockerCancelledAr": "فعالية ملغاة — لا يمكن تقديم أي شيء إضافي على هذا السجل",
-  "determinationNoteEn": "Recorded before the postponement: this determination does not carry to a new date.",
-  "determinationNoteAr": "سُجّلت قبل التأجيل: لا تنسحب هذه النتيجة على تاريخ جديد.",
+  "determinationNoteEn": "This Ministry decision covers the old date. Submit an updated application for the new date.",
+  "determinationNoteAr": "يخصّ قرار الوزارة هذا الموعد القديم. قدّموا طلباً محدّثاً للموعد الجديد.",
   "ministryLane": {
     "titleEn": "Cancellations and postponements",
     "titleAr": "الإلغاءات والتأجيلات",

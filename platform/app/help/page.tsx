@@ -30,12 +30,12 @@ export default async function HelpPage() {
   return (
     <PublicShell signedIn={account !== null}>
       <h1 data-sec-h1="" data-region="help" style={{ margin: '10px 0 10px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
-        <L en="Reference" ar="المرجع" />
+        <L en="Help" ar="المساعدة" />
       </h1>
       <p style={{ ...p, color: 'var(--muted)', marginBlockEnd: 4 }}>
         <L
-          en="Everything explanatory lives on this page, so the forms carry only their fields."
-          ar="كل ما هو شرحي يقيم في هذه الصفحة، لتحمل النماذج حقولها فقط."
+          en="Find help with plans, documents and submission here."
+          ar="تجدون هنا إرشادات حول الخطط والمستندات وتقديم الطلبات."
         />
       </p>
 
@@ -44,19 +44,19 @@ export default async function HelpPage() {
       </h2>
       <p style={p}>
         <L
-          en="Write the plan on the platform, or attach the document you already hold and confirm which sections it covers. At Level 1 the requirement is brief written arrangements — usually one page; the requirements call this documented medical arrangements, not a plan, and a Level 1 arrangement should not become a lengthy manual."
-          ar="اكتبوا الخطة على المنصة، أو أرفقوا المستند الذي تملكونه وأكّدوا أي البنود يغطيه. في المستوى 1 المطلوب ترتيبات مكتوبة موجزة — عادةً صفحة واحدة؛ وتسمّيها المتطلبات ترتيبات طبية موثقة لا خطة، ولا ينبغي أن يصير ترتيب المستوى 1 دليلاً مطوّلاً."
+          en="Write the plan here, or upload a plan and confirm the sections it covers. For Levels 1 and 2, the organizer completes it. For Level 3, the confirmed Medical Director or EMS agency completes it. For Level 1, keep the written medical arrangements brief—usually one page."
+          ar="اكتبوا الخطة هنا أو ارفعوها وأكّدوا الأقسام التي تغطيها. في المستويين 1 و2، يُعدّها المنظّم. في المستوى 3، يُعدّها المدير الطبي أو جهة الإسعاف المؤكّدة. في المستوى 1، تكفي ترتيبات طبية مكتوبة موجزة، عادةً صفحة واحدة."
         />
       </p>
       <p style={p}>
         <L
-          en="The Guidance for Preparing Event Health & Medical Plans is non-binding and creates no additional legal requirements. The Protocol and the minimum requirements define what is mandatory."
-          ar="إرشادات إعداد خطط التأهب الصحي والطبي للفعاليات غير ملزمة ولا تنشئ أي متطلبات قانونية إضافية. والبروتوكول والحد الأدنى للمتطلبات هما ما يحدد الإلزامي."
+          en="This guide helps you prepare the plan. It adds no new requirements. Follow the Protocol and the minimum requirements for your event level."
+          ar="يساعدكم هذا الدليل على إعداد الخطة، ولا يضيف متطلبات جديدة. اتبعوا البروتوكول والحدّ الأدنى للمتطلبات بحسب مستوى فعاليتكم."
         />
       </p>
 
       <h3 style={h3}>
-        <L en="What each of the sixteen sections asks for" ar="ما يطلبه كل بند من البنود الستة عشر" />
+        <L en="What to include in each section" ar="ما يجب إدراجه في كل قسم" />
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden' }}>
         {PLAN_SECTIONS.map((s) => (
@@ -76,8 +76,8 @@ export default async function HelpPage() {
       </h3>
       <p style={p}>
         <L
-          en="At Level 2 and 3 the plan must identify eleven items, set by the Protocol; the plan form lists them as checkboxes to confirm against your plan."
-          ar="في المستويين 2 و3 يجب أن تحدد الخطة أحد عشر بنداً يقررها البروتوكول؛ ويعرضها نموذج الخطة كمربعات تأكيد مقابل خطتكم."
+          en="Level 3 requires the major-incident checklist. The confirmed Medical Director or EMS agency completes it. For Level 2, it is recommended, not required. Level 1 does not require it."
+          ar="تُلزم القائمة الخاصة بالحوادث الجسيمة للمستوى 3، ويستكملها المدير الطبي أو جهة الإسعاف المؤكّدة. وهي موصى بها وليست إلزامية للمستوى 2، وغير مطلوبة للمستوى 1."
         />
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden' }}>
@@ -89,7 +89,7 @@ export default async function HelpPage() {
       </div>
 
       <h3 style={h3}>
-        <L en="A planning workflow you may follow" ar="مسار تخطيط يمكنكم اتباعه" />
+        <L en="Steps to prepare your plan" ar="خطوات إعداد الخطة" />
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden' }}>
         {GUIDANCE_WORKFLOW.steps.map((w) => (
@@ -100,7 +100,7 @@ export default async function HelpPage() {
       </div>
 
       <h3 style={h3}>
-        <L en="A fourteen-section structure you may follow" ar="هيكل من أربعة عشر قسماً يمكنكم اتباعه" />
+        <L en="Optional plan outline" ar="نموذج اختياري للخطة" />
       </h3>
       <p style={p}>
         <L en={GUIDANCE_TEMPLATE.nonBindingEn} ar={GUIDANCE_TEMPLATE.nonBindingAr} />
@@ -114,7 +114,7 @@ export default async function HelpPage() {
       </div>
 
       <h3 style={h3}>
-        <L en="Planning depth by event level" ar="عمق التخطيط بحسب مستوى الفعالية" />
+        <L en="What to include at each level" ar="ما يجب إدراجه في كل مستوى" />
       </h3>
       <div style={{ overflowX: 'auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden', minWidth: 640 }}>
@@ -139,8 +139,8 @@ export default async function HelpPage() {
       </h2>
       <p style={p}>
         <L
-          en="Completed and signed by each participating agency separately. What the agency accepts by signing:"
-          ar="تستكمله وتوقّعه كل جهة مشاركة على حدة. وما تقبله الجهة بتوقيعها:"
+          en="For Level 3, each EMS agency completes and signs its own declaration. By signing, the agency agrees to the following:"
+          ar="في المستوى 3، تستكمل كل جهة إسعاف إقرارها وتوقّعه بشكل منفصل. بالتوقيع، توافق الجهة على ما يلي:"
         />
       </p>
       <p style={{ ...p, fontWeight: 500 }}>
@@ -156,8 +156,8 @@ export default async function HelpPage() {
       {DECLARATION_ITEM_DIVERGENCES.length > 0 ? (
         <p style={{ ...p, color: 'var(--muted)', fontSize: '12.5px', marginBlockStart: 12 }}>
           <L
-            en="Where the two issues of the instrument differ on these items, the English governs and the difference is recorded for the Ministry."
-            ar="حيث يختلف إصدارا الأداة في هذه البنود، يُعتمد النص الإنكليزي ويُسجَّل الفرق للوزارة."
+            en="If the English and Arabic source documents differ, the English text applies. The Ministry can review the difference."
+            ar="إذا اختلف النصان الإنكليزي والعربي في المستندات الأصلية، يُعتمد النص الإنكليزي. ويمكن للوزارة مراجعة الاختلاف."
           />
         </p>
       ) : null}
@@ -177,8 +177,8 @@ export default async function HelpPage() {
       </h2>
       <p style={p}>
         <L
-          en="Every field on the compliance and submission form is required unless marked optional. The form saves as you type; filing becomes available when every outstanding item on the package clears, and each outstanding item links to the screen that clears it."
-          ar="كل حقل في نموذج الامتثال والتقديم مطلوب إلا ما وُسم اختيارياً. يُحفظ النموذج أثناء الكتابة؛ ويتاح التقديم عند استيفاء كل بند عالق في الحزمة، وكل بند عالق يقود إلى الشاشة التي تستوفيه."
+          en="Fill in all fields unless marked optional. Your answers save as you type. Complete the pending items to submit. Each pending item links to the page you need."
+          ar="املؤوا كل الحقول ما لم تكن اختيارية. تُحفظ الإجابات أثناء الكتابة. أكملوا البنود المعلّقة لتقديم الطلب. يرتبط كل بند معلّق بالصفحة المطلوبة."
         />
       </p>
 
@@ -187,8 +187,8 @@ export default async function HelpPage() {
       </h2>
       <p style={p}>
         <L
-          en="Where the venue is itself a registered covered facility, its defibrillators, trained responders and cardiac arrangements can be referenced in the plan rather than entered again. The confirmation is yours for each event — it is not inherited from the facility's registration — and where the event requires more than the facility provides, the shortfall surfaces by name and the higher requirement governs."
-          ar="حيث يكون الموقع نفسه منشأة مشمولة مسجّلة، يمكن الإحالة في الخطة إلى أجهزتها ومستجيبيها المدرَّبين وترتيباتها القلبية بدلاً من إدخالها مجدداً. والتأكيد عليكم لكل فعالية — ولا يُورَث من تسجيل المنشأة — وحيث تتطلب الفعالية أكثر مما توفره المنشأة، يظهر النقص باسمه ويسري المتطلب الأعلى."
+          en="You can link a registered facility’s AEDs, trained responders and response plan. Check that they will be available for this event. Add any extra cover your event needs. Facility registration alone does not confirm event readiness."
+          ar="يمكنكم ربط أجهزة مزيل الرجفان والمسعفين المدرّبين وخطة الاستجابة لمنشأة مسجّلة. تحقّقوا من توافرها لهذه الفعالية وأضيفوا أي تغطية إضافية مطلوبة. تسجيل المنشأة وحده لا يؤكّد جاهزية الفعالية."
         />
       </p>
     </PublicShell>

@@ -218,16 +218,16 @@ export function PostEventForm({
       {message === 'personal-name' ? (
         <div style={{ padding: '16px 20px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.6 }}>
           <L
-            en="A personal name appears to be present in the corrective-actions text. Remove it — the report carries aggregate data and never identifies a patient or a person."
-            ar="يبدو أن اسماً شخصياً ورد في نص الإجراءات التصحيحية. احذفوه — يحمل التقرير بيانات إجمالية ولا يحدد هوية مريض أو شخص أبداً."
+            en="This text may contain a person’s name. Remove names and use totals only."
+            ar="قد يحتوي النص على اسم شخص. احذفوا الأسماء واستخدموا الأعداد الإجمالية فقط."
           />
         </div>
       ) : null}
       {message === 'awaiting-director' ? (
         <div style={{ padding: '16px 20px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px', lineHeight: 1.6 }}>
           <L
-            en="Your signature is recorded. At Level 3 the report carries two signatures and is not complete with one — it is submitted when the Event Medical Director signs."
-            ar="سُجّل توقيعكم. في المستوى 3 يحمل التقرير توقيعين ولا يكتمل بواحد — يُقدَّم عندما يوقّع المدير الطبي للفعالية."
+            en="Your signature is saved. The Level 3 report will be submitted after the Medical Director also signs."
+            ar="حُفظ توقيعكم. سيُقدّم تقرير المستوى 3 بعد توقيع المدير الطبي أيضاً."
           />
         </div>
       ) : null}

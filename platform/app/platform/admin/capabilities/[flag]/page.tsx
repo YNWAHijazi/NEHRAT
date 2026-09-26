@@ -347,8 +347,8 @@ export default async function CapabilityPage({
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Sponsorships" ar="الرعايات" />
            <InfoNote><L
-              en="A sponsored vendor holds the top of its category for the period, labelled as sponsored wherever it appears — always. Ending one closes the period; the row stays."
-              ar="يحتل المزوّد المموَّل صدارة فئته طوال الفترة، ويوسم بأنه مموَّل حيثما ظهر — دائماً. وإنهاء الرعاية يغلق الفترة؛ ويبقى الصف."
+              en="Sponsored vendors appear at the top of their category for the dates you set. They always show a Sponsored label. Ending a listing keeps its history."
+              ar="يظهر المورّدون المدفوعون أعلى فئتهم خلال الفترة المحدّدة، مع علامة «برعاية» دائماً. يبقى السجل محفوظاً بعد إنهاء الإعلان."
             /></InfoNote>
 </h2>
 
@@ -443,8 +443,8 @@ export default async function CapabilityPage({
           <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Adverts" ar="الإعلانات" />
            <InfoNote><L
-              en="An advert is an image, a link, a period and a placement — and the placements are the feet of the public pages, structurally: there is nowhere else one can go."
-              ar="الإعلان صورة ورابط وفترة وموضع — والمواضع هي أسفل الصفحات العامة، بنيوياً: لا مكان آخر يذهب إليه."
+              en="Add an image, link, dates and a public page. Ads appear only at the bottom of public pages."
+              ar="أضيفوا صورة ورابطاً وتواريخ وصفحة عامة. تظهر الإعلانات أسفل الصفحات العامة فقط."
             /></InfoNote>
 </h2>
 

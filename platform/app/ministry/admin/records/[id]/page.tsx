@@ -321,12 +321,12 @@ export default async function AdminRecordFilePage({ params }: { params: Promise<
 
       {/* THE FULL DETERMINATION HISTORY. */}
       <h2 style={h2}>
-        <L en="Determination history" ar="سجل النتائج" />
+        <L en="Decision history" ar="سجل القرارات" />
       </h2>
       <div data-region="file-determinations" style={listBox}>
         {determinations.length === 0 ? (
           <div style={{ ...rowBox, color: 'var(--muted)', fontSize: '13.5px' }}>
-            <L en="No determination has been recorded." ar="لم تُسجَّل أي نتيجة." />
+            <L en="No decision has been recorded yet." ar="لم يُسجَّل قرار بعد." />
           </div>
         ) : null}
         {determinations.map((d) => (

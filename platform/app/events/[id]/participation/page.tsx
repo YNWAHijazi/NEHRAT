@@ -133,13 +133,13 @@ export default async function ParticipationPage({
                   <form action={withdrawParticipationAction.bind(null, invitation.token)} style={{ marginBlockStart: 10, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                     <span style={{ flex: 1, minWidth: 260, fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
                       <L
-                        en="If you withdraw, the organizer is told, with your reason as written, and may need to name another provider. For a filed submission this is a material change they must report."
-                        ar="إذا انسحبتم، يُبلَّغ المنظّم بسببكم كما كُتب، وقد يحتاج إلى تسمية مزوّد آخر. وللملف المقدَّم هذا تغيير جوهري عليه الإبلاغ عنه."
+                        en="Your reason will be sent to the organizer. They may need another EMS agency. If the application was submitted, they must report this change to the Ministry."
+                        ar="سيُرسل سببكم إلى المنظّم. وقد يحتاج إلى جهة إسعاف أخرى. إذا قُدّم الطلب، فعليه إبلاغ الوزارة بالتغيير."
                       />
                     </span>
                     <input name="reason" required aria-label="Reason" style={{ flexBasis: '100%', height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
                     <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
-                      <L en="Withdraw — a material change" ar="الانسحاب — تغيير جوهري" />
+                      <L en="Withdraw from this event" ar="الانسحاب من الفعالية" />
                     </button>
                   </form>
                 </details>

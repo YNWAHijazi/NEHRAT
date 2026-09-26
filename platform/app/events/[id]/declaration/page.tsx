@@ -150,8 +150,8 @@ export default async function DeclarationPage({
             <div data-region="declaration-reopen" style={{ padding: '16px 20px', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 20, display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
               <span style={{ flex: 1, minWidth: 260, fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.65 }}>
                 <L
-                  en={`The organizer reported a material change on ${changeAfterSigning.reportedAt.slice(0, 10)}, after you signed. Your declaration attests to the event as it was; re-open it to review the ten items against the changed event, then sign again.`}
-                  ar={`أبلغ المنظّم عن تغيير جوهري في ⁦${changeAfterSigning.reportedAt.slice(0, 10)}⁩ بعد توقيعكم. إقراركم يشهد على الفعالية كما كانت؛ أعيدوا فتحه لمراجعة البنود العشرة على الفعالية المتغيّرة ثم وقّعوا من جديد.`}
+                  en={`The event changed on ${changeAfterSigning.reportedAt.slice(0, 10)}, after you signed. Review all ten items again, then sign the updated declaration.`}
+                  ar={`تغيّرت تفاصيل الفعالية في ⁦${changeAfterSigning.reportedAt.slice(0, 10)}⁩ بعد توقيعكم. راجعوا البنود العشرة مجدداً، ثم وقّعوا الإقرار المحدّث.`}
                 />
               </span>
               <form action={reopenDeclarationAction.bind(null, invitation.token)}>
@@ -188,13 +188,13 @@ export default async function DeclarationPage({
               <form action={withdrawParticipationAction.bind(null, invitation.token)} style={{ marginBlockStart: 10, padding: '14px 18px', background: 'var(--accent-soft)', borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                 <span style={{ flex: 1, minWidth: 260, fontSize: '13px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
                   <L
-                    en="If you withdraw, your declaration no longer counts and the organizer is told, with your reason as written. They may need to name another provider; for a filed submission this is a material change they must report."
-                    ar="إذا انسحبتم، لم يعد إقراركم معتبَراً ويُبلَّغ المنظّم بسببكم كما كُتب. وقد يحتاج إلى تسمية مزوّد آخر؛ وللملف المقدَّم هذا تغيير جوهري عليه الإبلاغ عنه."
+                    en="Withdrawing cancels your declaration. Your reason will be sent to the organizer. They may need another EMS agency and must report the change if the application was submitted."
+                    ar="يلغي الانسحاب إقراركم. سيُرسل السبب إلى المنظّم. وقد يحتاج إلى جهة إسعاف أخرى، وعليه إبلاغ الوزارة بالتغيير إذا قُدّم الطلب."
                   />
                 </span>
                 <input name="reason" required aria-label="Reason" style={{ flexBasis: '100%', height: 34, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
                 <button type="submit" style={{ flex: 'none', height: 34, paddingInline: 14, border: '1px solid var(--accent)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', color: 'var(--accent-ink)', cursor: 'pointer' }}>
-                  <L en="Withdraw — a material change" ar="الانسحاب — تغيير جوهري" />
+                  <L en="Withdraw from this event" ar="الانسحاب من الفعالية" />
                 </button>
               </form>
             </details>

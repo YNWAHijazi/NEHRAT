@@ -1,4 +1,5 @@
 import { InfoNote } from '../../../../components/InfoNote';
+import { PasswordHint } from '../../../../components/PasswordHint';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -102,8 +103,8 @@ export default async function NominationAccountPage({
               {error === 'account' ? (
                 <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
                   <L
-                    en="The account details are incomplete or the password does not meet the policy."
-                    ar="بيانات الحساب ناقصة أو كلمة المرور لا تستوفي السياسة."
+                    en="Check your name, email, phone number and the password requirements below."
+                    ar="تحقّقوا من الاسم والبريد ورقم الهاتف ومتطلبات كلمة المرور أدناه."
                   />
                 </div>
               ) : null}
@@ -153,6 +154,7 @@ export default async function NominationAccountPage({
                   </Label>
                   <Label en="Password" ar="كلمة المرور">
                     <input name="password" type="password" required style={field} />
+                    <PasswordHint />
                   </Label>
                 </div>
                 <button

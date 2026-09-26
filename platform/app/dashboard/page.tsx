@@ -293,8 +293,8 @@ export default async function DashboardPage({
         {notice === 'interest' ? (
           <div data-region="interest-notice" style={{ padding: '18px 24px', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
             <L
-              en="Interest recorded. No obligation is in force for that category until the Ministry publishes its value; you are notified when it does, and registration opens then."
-              ar="سُجّل الاهتمام. لا يسري أي موجب على تلك الفئة قبل نشر الوزارة قيمتها؛ وتُبلَّغون عند نشرها، ويُفتح التسجيل حينها."
+              en="Your interest was saved. Facility registration is now available from Start a service."
+              ar="حُفظ اهتمامكم. يمكنكم الآن تسجيل المنشأة من «بدء خدمة»."
             />
           </div>
         ) : null}

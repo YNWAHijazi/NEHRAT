@@ -1,4 +1,5 @@
 import { InfoNote } from '../../../components/InfoNote';
+import { PasswordHint } from '../../../components/PasswordHint';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
 import { getDb } from '../../../lib/db';
@@ -83,7 +84,7 @@ export default async function ActivatePage({
 
               {error === 'policy' ? (
                 <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-                  <L en="That password does not meet the policy." ar="كلمة المرور هذه لا تستوفي السياسة." />
+                  <L en="Check the password requirements below and try again." ar="راجعوا متطلبات كلمة المرور أدناه وحاولوا مجدداً." />
                 </div>
               ) : null}
               {error === 'mismatch' ? (
@@ -99,6 +100,7 @@ export default async function ActivatePage({
                       <L en="New password" ar="كلمة المرور الجديدة" />
                     </span>
                     <input name="password" type="password" required style={field} />
+                    <PasswordHint />
                   </label>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>

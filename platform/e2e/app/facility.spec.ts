@@ -12,6 +12,7 @@
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { fillFacilityProfile } from '../helpers/facility-map';
+import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
 
 
@@ -90,12 +91,12 @@ test.describe('the validity ledger derives', () => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/FC-0014');
     const ledger = page.locator('[data-region="ledger"]');
-    // Stops-counting dates, derived from the seeded record at REVIEW_CLOCK 2026-08-13.
-    await expect(ledger).toContainText('2026-10-02'); // earliest pad expiry
-    await expect(ledger).toContainText('2027-03-18'); // earliest battery expiry
-    await expect(ledger).toContainText('2026-10-26'); // oldest check + cycle (data)
-    await expect(ledger).toContainText('2026-11-04'); // drill + 12 months
-    await expect(ledger).toContainText('2026-09-12'); // confirmation + 12 months
+    // Seed dates move with the review date; production builds use the real Beirut date.
+    await expect(ledger).toContainText(seededDate('2026-10-02')); // earliest pad expiry
+    await expect(ledger).toContainText(seededDate('2027-03-18')); // earliest battery expiry
+    await expect(ledger).toContainText(seededDate('2026-10-26')); // oldest check + cycle (data)
+    await expect(ledger).toContainText(seededDate('2026-11-04')); // drill + 12 months
+    await expect(ledger).toContainText(seededDate('2026-09-12')); // confirmation + 12 months
     await expect(page.locator('[data-region="standing"]')).toContainText(
       'Obligations are being met. 2 items lapse within 60 days.',
     );

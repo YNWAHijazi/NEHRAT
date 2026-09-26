@@ -51,6 +51,18 @@ The September 26 release snapshot is held at `/data/release-backup-20260926` and
 
 For an application regression, redeploy the preceding successful Railway commit. This release adds columns without removing old columns. Restore a database snapshot only deliberately, with writes paused: restoring an old snapshot would discard records created after it. Keep the current database copy before any restore.
 
+Test a snapshot without changing live records:
+
+```sh
+node scripts/check-recovery.mjs --backup-dir /path/to/verified-backup --restore-path /path/to/new-recovery-copy.sqlite
+```
+
+The destination must not exist. The check verifies the snapshot hash, tables, stored files and a committed write/reopen cycle. It writes a report beside the restored copy. This tests database recovery, not replacement of the live service.
+
+Railway supports daily, weekly and monthly volume backups in the service's Backups tab: [Railway backup documentation](https://docs.railway.com/volumes/backups). As of the September 27 check, none are enabled; the current API login returned “Not Authorized” when enabling them. Manual snapshots on the same volume are not a replacement for automatic backups or an independent copy. See [launch check](acceptance/launch-check-2026-09-27.md).
+
+For all application browser checks against the production build, use `playwright.launch.config.ts`, with `--project=app --shard=1/2` and then `--shard=2/2`. Build as for `test:release` and re-seed only `var/release-runtime.db` before each shard. This database is disposable; never use the live database for tests.
+
 ## Email
 
 Follow [Resend setup](acceptance/resend-setup.md). Store `RESEND_API_KEY`, `MAIL_FROM` and `APP_BASE_URL` as Railway variables. Real inbox delivery must be checked; demonstration accounts never send external email. Review delivery/bounce details in Resend.

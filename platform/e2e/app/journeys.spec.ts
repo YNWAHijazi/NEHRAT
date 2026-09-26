@@ -24,6 +24,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
+import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
 import { LANGUAGES, useLanguage } from '../helpers/language';
 
@@ -168,7 +169,7 @@ for (const lang of LANGUAGES) {
       await expect(page.locator('[data-region="public-tools"] a')).toHaveCount(2);
       // What the platform does NOT do, on the page itself.
       await expect(page.locator('[data-region="jurisdiction"]')).toContainText(
-        lang === 'ar' ? 'لا ترخّص الفعاليات' : 'It does not authorize events',
+        lang === 'ar' ? 'لا تمنح إذناً لإقامة الفعالية' : 'It does not give permission to hold an event',
       );
 
       // BRANCH ONE — an event. Any one criterion is enough.
@@ -205,7 +206,7 @@ for (const lang of LANGUAGES) {
       await gotoRidingRestarts(page, '/lookup');
       await expect(page.locator('[data-region="lookup-form"]')).toBeVisible();
       await page.locator('input[name="reference"]').fill('MOPH-EV-2026-0244');
-      await page.locator('input[name="eventStartDate"]').fill('2026-08-09');
+      await page.locator('input[name="eventStartDate"]').fill(seededDate('2026-08-09'));
       await page.locator('button[type="submit"]').first().click();
       await page.waitForLoadState('networkidle');
       const result = page.locator('[data-region="lookup-result"]');

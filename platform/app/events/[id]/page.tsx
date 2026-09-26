@@ -729,7 +729,7 @@ export default async function EventRecordPage({
                 </Link>
                 {event.filed ? (
                   <span style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '58ch' }}>
-                    <L en="Your submission is filed: a changed assessment is a material change — report it alongside." ar="ملفكم مقدَّم: التقييم المتغيّر تغيير جوهري — أبلغوا عنه أيضاً." />
+                    <L en="You already submitted this application. Report any assessment changes to the Ministry too." ar="سبق تقديم هذا الطلب. أبلغوا الوزارة أيضاً بأي تغيير في التقييم." />
                   </span>
                 ) : null}
               </div>

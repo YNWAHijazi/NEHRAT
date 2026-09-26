@@ -146,7 +146,7 @@ export default async function AdminRecordReportPage({ params }: { params: Promis
         )}
 
         <h2 style={h2}>
-          <L en="Counterparty documents" ar="مستندات الأطراف المُسمّاة" />
+          <L en="Medical team documents" ar="مستندات الفريق الطبي" />
         </h2>
         {counterparty.length === 0 ? (
           <div style={line}>
@@ -190,11 +190,11 @@ export default async function AdminRecordReportPage({ params }: { params: Promis
         )}
 
         <h2 style={h2}>
-          <L en="Determination history" ar="سجل النتائج" />
+          <L en="Decision history" ar="سجل القرارات" />
         </h2>
         {determinations.length === 0 ? (
           <div style={line}>
-            <L en="No determination has been recorded." ar="لم تُسجَّل أي نتيجة." />
+            <L en="No decision has been recorded yet." ar="لم يُسجَّل قرار بعد." />
           </div>
         ) : (
           determinations.map((d) => (

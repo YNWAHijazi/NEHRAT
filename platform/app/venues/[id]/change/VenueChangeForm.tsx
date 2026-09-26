@@ -98,8 +98,8 @@ export function VenueChangeForm({
           </div>
           <div style={{ fontSize: 15, lineHeight: 1.65, marginBlockEnd: 18 }}>
             <L
-              en="Do not implement the change before the new assessment is recorded, and do not wait for the annual renewal. The current classification stands until then; reporting the change does not replace the reassessment."
-              ar="لا تطبّقوا التغيير قبل تسجيل التقييم الجديد، ولا تنتظروا التجديد السنوي. ويبقى التصنيف الحالي سارياً حتى ذلك الحين؛ والإبلاغ عن التغيير لا يحل محل إعادة التقييم."
+              en="Complete a new assessment before making this change. Do not wait for renewal. Reporting the change alone does not update the venue’s classification."
+              ar="أكملوا تقييماً جديداً قبل إجراء التغيير، دون انتظار التجديد. الإبلاغ وحده لا يحدّث تصنيف موقع الاستضافة."
             />
           </div>
           <div style={{ fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.6, maxWidth: '64ch' }}>

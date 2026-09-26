@@ -272,8 +272,8 @@ export function VenueAssessmentForm({
           </div>
           <p style={{ margin: '8px 0 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.65 }}>
             <L
-              en="The classification is recorded when the payment is. No payment channel is configured on the platform yet; the Ministry announces how the fee is paid, and the record is updated when payment is received."
-              ar="يُسجَّل التصنيف عند تسجيل السداد. لا قناة سداد مهيّأة على المنصة بعد؛ تعلن الوزارة كيفية سداد الرسم، ويُحدَّث السجل عند استلام السداد."
+              en="The classification will be saved after payment is recorded. Online payment is not available yet. Follow the Ministry’s payment instructions."
+              ar="سيُحفظ التصنيف بعد تسجيل الدفع. الدفع الإلكتروني غير متاح بعد. اتبعوا تعليمات الوزارة للدفع."
             />
           </p>
         </div>

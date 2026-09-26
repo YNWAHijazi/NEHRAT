@@ -375,8 +375,8 @@ export function SubmitForm({
           {expedited ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
               <L
-                en="The standard filing timeline has passed. The submission can still be filed and will be marked as an expedited submission for Ministry review. Expedited review does not waive the applicable minimum requirements."
-                ar="انقضت المهلة الاعتيادية للتقديم. لا يزال بالإمكان تقديم الملف وسيوسم بأنه تقديم مستعجل لمراجعة الوزارة. ولا تُسقط المراجعة المستعجلة الحد الأدنى للمتطلبات المنطبقة."
+                en="The deadline has passed. You can still submit for urgent review. All requirements still apply."
+                ar="انتهت مهلة التقديم. يمكنكم تقديم الطلب للمراجعة العاجلة. تبقى جميع المتطلبات واجبة."
               />
             </div>
           ) : null}

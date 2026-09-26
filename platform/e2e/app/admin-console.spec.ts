@@ -71,9 +71,10 @@ test.describe('the console', () => {
     await expect(doc).toBeVisible();
     await expect(doc).toContainText('Assessment answers');
     await expect(doc).toContainText('Compliance declarations');
-    await expect(doc).toContainText('Determination history');
+    await expect(doc).toContainText('Decision history');
     // It states its own limits, because it can leave the platform.
-    await expect(doc).toContainText(/Authorization of the event remains with the legally competent authority/);
+    await expect(doc).toContainText('It is not permission to hold the event.');
+    await expect(doc).toContainText('permits required by the relevant authorities under Lebanese law.');
   });
 
   test('Users is segmented by type and searchable', async ({ page }) => {
@@ -90,7 +91,7 @@ test.describe('the console', () => {
   test('Activity reads the audit trail, and names powers nobody can use', async ({ page }) => {
     await signInAs(page, 'test_moph_admin');
     await gotoRidingRestarts(page, '/ministry/admin/activity');
-    await expect(page.locator('[data-region="activity"]')).toContainText('Determination recorded');
+    await expect(page.locator('[data-region="activity"]')).toContainText('Ministry decision recorded');
     // The reachability check from item 3, on the screen for facts about the platform.
     await expect(page.locator('[data-region="unreachable-powers"]')).toBeVisible();
   });

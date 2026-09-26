@@ -29,7 +29,7 @@ export default async function DeterminationsPage() {
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
-        <L en="Determinations and designations" ar="البت والتحديد" />
+        <L en="Decisions and covered facilities" ar="القرارات والمنشآت المشمولة" />
       </h1>
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24 }}>
         <div>
@@ -52,7 +52,7 @@ export default async function DeterminationsPage() {
             })}
             {determinations.length === 0 ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en="No determinations recorded." ar="لا نتائج مسجَّلة." />
+                <L en="No decisions recorded yet." ar="لم تُسجَّل قرارات بعد." />
               </div>
             ) : null}
           </div>

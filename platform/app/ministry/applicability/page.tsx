@@ -28,12 +28,12 @@ export default async function ApplicabilityPage({
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
       {notice ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          {notice === 'logged' ? <L en="Referral logged. It awaits a determination." ar="سُجّلت الإحالة. وتنتظر قراراً." /> : <L en="Determined, with the reasons recorded." ar="حُسمت، مع تسجيل الأسباب." />}
+          {notice === 'logged' ? <L en="Referral saved. Awaiting review." ar="حُفظت الإحالة. بانتظار المراجعة." /> : <L en="Determined, with the reasons recorded." ar="حُسمت، مع تسجيل الأسباب." />}
         </div>
       ) : null}
       {error ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          {error === 'name' ? <L en="The event or gathering must be named." ar="يجب تسمية الفعالية أو التجمع." /> : <L en="A determination requires its reasons, recorded as written." ar="القرار يتطلب أسبابه، مسجَّلة كما كُتبت." />}
+          {error === 'name' ? <L en="The event or gathering must be named." ar="يجب تسمية الفعالية أو التجمع." /> : <L en="Enter the reason for your decision." ar="أدخلوا سبب قراركم." />}
         </div>
       ) : null}
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
@@ -55,7 +55,7 @@ export default async function ApplicabilityPage({
               </span>
               <span style={{ flex: 'none', padding: '3px 9px', borderRadius: 999, fontSize: '12.5px', background: r.determination === 'undetermined' ? 'var(--accent-soft)' : r.determination === 'in_scope' ? 'var(--brand-soft)' : 'var(--surface)', color: r.determination === 'undetermined' ? 'var(--accent-ink)' : r.determination === 'in_scope' ? 'var(--brand)' : 'var(--muted)' }}>
                 {r.determination === 'undetermined' ? (
-                  <L en="Awaiting determination — the reviewer's" ar="بانتظار القرار — للمراجع" />
+                  <L en="Awaiting a reviewer’s decision" ar="بانتظار قرار المراجع" />
                 ) : r.determination === 'in_scope' ? (
                   <L en={r.designated ? 'In scope — designated' : 'In scope'} ar={r.designated ? 'ضمن النطاق — محدَّدة' : 'ضمن النطاق'} />
                 ) : (
@@ -86,7 +86,7 @@ export default async function ApplicabilityPage({
                   <L en="Designate" ar="تحديد" />
                 </label>
                 <button type="submit" style={{ height: 32, paddingInline: 13, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 16, fontSize: '12.5px', cursor: 'pointer' }}>
-                  <L en="Record the determination" ar="تسجيل القرار" />
+                  <L en="Save decision" ar="حفظ القرار" />
                 </button>
               </form>
             ) : null}

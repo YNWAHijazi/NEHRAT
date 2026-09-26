@@ -142,7 +142,7 @@ describe('the configuration values', () => {
     expect(MINISTRY_CONTENT.cardiacPowers.filter((p) => p.n === 3)).toHaveLength(2);
   });
 
-  it('carries the readiness cycles under power 5, labelled as not one of the ten', () => {
+  it('carries the readiness cycles under power 5 and distinguishes platform settings from source deadlines', () => {
     // The cycles used to hang off power 10, which read as though the source named a
     // device-check cadence. It does not: PAD 11 lists ten powers and no cadence is
     // among them, and the policy states no cycle or lapse window anywhere. They sit
@@ -156,7 +156,7 @@ describe('the configuration values', () => {
     const outside = (five as { outsideTheTen?: string[] }).outsideTheTen ?? [];
     expect(outside).toEqual(['checkCycleDays', 'lapseWindowDays']);
     const note = (five as { outsideTheTenEn?: string }).outsideTheTenEn ?? '';
-    expect(note).toMatch(/not one of the ten/i);
+    expect(note).toMatch(/platform settings, not deadlines set by the source document/i);
 
     // Power 10 is restored to what the source says it is: an act, not a value.
     const ten = MINISTRY_CONTENT.cardiacPowers.find((p) => p.key === 'readinessRequests');

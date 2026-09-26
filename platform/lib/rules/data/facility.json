@@ -78,8 +78,8 @@
     }
   ],
   "categoryUnset": {
-    "en": "Until the Ministry sets and publishes the value, nothing under this category is in force and no registration is owed. You have done everything available to you.",
-    "ar": "إلى أن تحدد الوزارة القيمة وتنشرها، لا يسري شيء بموجب هذه الفئة ولا يُستحق أي تسجيل. وقد فعلتم كل ما هو متاح لكم.",
+    "en": "Registration is available. The Ministry still needs to confirm the AED requirement for this category.",
+    "ar": "التسجيل متاح. ولا يزال على الوزارة تحديد متطلبات جهاز مزيل الرجفان لهذه الفئة.",
     "interestEn": "Record an interest and notify us when it activates",
     "interestAr": "تسجيل اهتمام وإبلاغنا عند التفعيل"
   },

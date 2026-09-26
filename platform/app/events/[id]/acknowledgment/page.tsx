@@ -59,8 +59,8 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Acknowledgment of receipt" ar="إشعار الاستلام" />
          <InfoNote><L
-            en="A submission is considered received only when the organizer receives an electronic acknowledgment and reference number. This is the document you give to the authority authorizing your event."
-            ar="يُعتبر التقديم مستلماً فقط عندما يتلقى المنظّم إشعاراً إلكترونياً ورقماً مرجعياً. وهذا هو المستند الذي تقدّمونه إلى السلطة المانحة لترخيص فعاليتكم."
+            en="Your application is received once you have this receipt and reference number. Share this document with the authority issuing your event permit."
+            ar="يُعدّ طلبكم مستلماً عند حصولكم على هذا الإيصال والرقم المرجعي. شاركوا المستند مع الجهة التي تمنح تصريح الفعالية."
           /></InfoNote>
 </h1>
 

@@ -100,8 +100,8 @@ export default async function MasterAdminPage({
         </div>
         <InfoNote>
           <L
-            en="Authorised external reviewer access, scoped to assigned Level 3 items, non-determinative, never the facility lane. Turning it off suspends the Order reviewer account under Users and roles rather than leaving it listed as active."
-            ar="وصول مراجع خارجي مُخوَّل، محصور بالبنود المسندة في المستوى 3، غير حاسم، ولا يصل مسار المرافق أبداً. وإطفاؤه يوقف حساب مراجع النقابة في المستخدمين والأدوار بدل تركه مدرجاً كنشط."
+            en="Order of Physicians reviewers can check assigned Level 3 items. They cannot record Ministry decisions or access facility records. Turning this off blocks their review access."
+            ar="يمكن لمراجعي نقابة الأطباء فحص بنود المستوى 3 المسندة إليهم. لا يمكنهم تسجيل قرارات الوزارة أو الوصول إلى سجلات المنشآت. إيقاف الخيار يمنع وصولهم للمراجعة."
           />
         </InfoNote>
       </div>

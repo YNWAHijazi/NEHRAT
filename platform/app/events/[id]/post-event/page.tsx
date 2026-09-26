@@ -164,8 +164,8 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
               </div>
               <div style={{ fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', marginBlockEnd: 16 }}>
                 <L
-                  en="Cardiac arrest, death, major incident, or interruption or termination for medical reasons. Filing this report does not satisfy the notification."
-                  ar="توقف قلب أو وفاة أو حادثة جسيمة أو توقف الفعالية أو إنهاؤها لأسباب طبية. تقديم هذا التقرير لا يستوفي الإبلاغ."
+                  en="Also report any cardiac arrest, death, major incident, or event stopped for medical reasons. Use Notify a serious incident; this report does not replace that step."
+                  ar="أبلغوا أيضاً عن أي توقّف قلب أو وفاة أو حادث جسيم أو توقّف للفعالية لأسباب طبية. استخدموا «الإبلاغ عن حادث خطير»؛ فهذا التقرير لا يغني عن تلك الخطوة."
                 />
               </div>
               {notifiedAt ? (

@@ -78,7 +78,7 @@ export default async function RegistryPage({
       ) : null}
       {error === 'reason' ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="A reason is required — ending coverage is a determination, and it is recorded." ar="السبب مطلوب — إنهاء الشمولية قرار، ويُسجَّل." />
+          <L en="Enter a reason for removing this facility from coverage. The reason will be saved." ar="أدخلوا سبب إزالة المنشأة من نطاق المتطلبات. سيُحفظ السبب." />
         </div>
       ) : null}
       {notice === 'archived' ? (
@@ -88,7 +88,7 @@ export default async function RegistryPage({
       ) : null}
       {error === 'not-concluded' ? (
         <div style={{ padding: '14px 20px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: 14 }}>
-          <L en="That venue's classification is still in force; a live obligation is not archived." ar="لا يزال تصنيف هذا الموقع سارياً؛ ولا يُؤرشف موجب قائم." />
+          <L en="This venue has a current certificate and cannot be archived yet." ar="لدى موقع الاستضافة شهادة سارية، ولا يمكن أرشفته بعد." />
         </div>
       ) : null}
       {section('Events', 'الفعاليات', events)}

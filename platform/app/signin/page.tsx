@@ -1,4 +1,5 @@
 import { InfoNote } from '../../components/InfoNote';
+import { PasswordHint } from '../../components/PasswordHint';
 import Link from 'next/link';
 import { rememberedSignInFields } from '../../lib/auth';
 import { demonstrationAccountsExist } from '../../lib/queries';
@@ -144,8 +145,8 @@ const ERROR_STRINGS: Record<string, { en: string; ar: string }> = {
     ar: 'يوجد حساب مسجَّل بهذا البريد الإلكتروني. سجّلوا الدخول أو أعيدوا تعيين كلمة المرور.',
   },
   'password-policy': {
-    en: 'The password does not meet the required length of 8 characters.',
-    ar: 'كلمة المرور لا تستوفي الطول المطلوب البالغ 8 أحرف.',
+    en: 'Check the password requirements below and try again.',
+    ar: 'راجعوا متطلبات كلمة المرور أدناه وحاولوا مجدداً.',
   },
 };
 
@@ -243,8 +244,8 @@ export default async function SignInPage({
               {mode === 'reset' ? (
                 <div style={{ padding: '19px 21px', background: 'var(--surface2)', borderRadius: 10, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
                   <L
-                    en="Enter the email address on the account. A reset link is sent to it, expires after one hour, and can be used once."
-                    ar="أدخلوا البريد الإلكتروني المسجَّل على الحساب. ويُرسل إليه رابط إعادة التعيين، تنتهي صلاحيته بعد ساعة ويُستخدم مرة واحدة."
+                    en="Enter your account email. The reset link works once and expires after one hour."
+                    ar="أدخلوا البريد الإلكتروني لحسابكم. يُستخدم رابط إعادة التعيين مرة واحدة وتنتهي صلاحيته بعد ساعة."
                   />
                 </div>
               ) : null}
@@ -262,6 +263,7 @@ export default async function SignInPage({
                     <L en="Password" ar="كلمة المرور" />
                   </span>
                   <input name="password" type="password" required autoFocus={Boolean(error) && Boolean(typed.email)} style={inputStyle} />
+                  {mode === 'signup' ? <PasswordHint /> : null}
                 </label>
               ) : null}
 
@@ -298,8 +300,8 @@ export default async function SignInPage({
             ) : null}
             {mode === 'signup' ? (
               <div className="secondary-help"><InfoNote><L
-                  en="After creating the account you continue to the organization registration form."
-                  ar="بعد إنشاء الحساب تنتقلون إلى نموذج تسجيل المؤسسة."
+                  en="Create your account, then complete your organization details or continue to your chosen service."
+                  ar="أنشئوا حسابكم، ثم أكملوا بيانات المؤسسة أو تابعوا إلى الخدمة المختارة."
                 /></InfoNote></div>
             ) : null}
           </div>
@@ -316,8 +318,8 @@ export default async function SignInPage({
             </h2>
             <InfoNote>
               <L
-                en="Each opens a role's dashboard with example records, so the platform can be walked without creating anything."
-                ar="يفتح كل حساب لوحة دوره بسجلات نموذجية، بحيث يمكن استعراض المنصة دون إنشاء أي شيء."
+                en="Try each role using example records."
+                ar="جرّبوا كل دور باستخدام سجلات تجريبية."
               />
             </InfoNote>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

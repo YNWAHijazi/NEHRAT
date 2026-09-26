@@ -1477,8 +1477,8 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
     ).run(
       inv.account_id,
       `Nomination withdrawn — ${ev.name_en}`, `سُحب الترشيح — ${ev.name_ar}`,
-      'The organizer has withdrawn the nomination before it was answered. No action is owed.',
-      'سحب المنظّم الترشيح قبل الإجابة عليه. لا إجراء مستحق.',
+      'The organizer cancelled this invitation. You do not need to do anything.',
+      'ألغى المنظّم الدعوة. لا تحتاجون إلى اتخاذ أي إجراء.',
       ev.is_demo,
     );
   }
@@ -1510,8 +1510,8 @@ export async function removeProviderAction(eventId: string, formData: FormData):
     ).run(
       inv.account_id,
       `Removed as ${roleEn} — ${ev.name_en}`, `إزالة بصفة ${roleAr} — ${ev.name_ar}`,
-      `The organizer has removed your organization from this event. Your participation record is closed; nothing further is owed on it.`,
-      'أزال المنظّم مؤسستكم من هذه الفعالية. أُغلق سجل مشاركتكم، ولا شيء مستحق عليه بعد الآن.',
+      `The organizer removed your organization from this event. Your participation has ended. No action is needed.`,
+      'أزال المنظّم مؤسستكم من الفعالية. انتهت مشاركتكم، ولا يلزم أي إجراء.',
       ev.is_demo,
     );
   }
@@ -1520,9 +1520,9 @@ export async function removeProviderAction(eventId: string, formData: FormData):
   if (ev.filed === 1) {
     notifyOrganizerOf(
       eventId,
-      `Change report owed — ${ev.name_en}`, `إبلاغ عن تغيير مستحق — ${ev.name_ar}`,
-      `You removed the confirmed ${roleEn}. This is a material change to your filed submission: report it to the Ministry and, where the level requires one, name another party.`,
-      `أزلتم ${roleAr} المؤكَّد. هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به، وسمّوا طرفاً آخر حيث يقتضي المستوى ذلك.`,
+      `Report this change — ${ev.name_en}`, `أبلغوا عن هذا التغيير — ${ev.name_ar}`,
+      `You removed the confirmed ${roleEn}. Report this change to the Ministry. Invite a replacement if your event level requires one.`,
+      `أزلتم ${roleAr} المؤكَّد. أبلغوا الوزارة بالتغيير وادعوا بديلاً إذا كان مستوى الفعالية يتطلّب ذلك.`,
       `/events/${eventId}/change`,
     );
     redirect(`/events/${eventId}/change?notice=provider-removed`);
@@ -1598,11 +1598,11 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `A named party has declined — ${eventName.name_en}`,
       `اعتذر طرف مُسمّى — ${eventName.name_ar}`,
       evFiled
-        ? `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
-        : `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
+        ? `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. Report this change to the Ministry and invite a replacement.`
+        : `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has declined. The reason, as written: “${verbatimQuote(reason)}”. Invite a replacement from Requirements. This application has not been submitted, so you do not need a change report.`,
       evFiled
-        ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
-        : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
+        ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
+        : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
       evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
     );
     redirect(`/invitations/${token}?notice=declined`);
@@ -2043,8 +2043,8 @@ export async function deleteDraftEventAction(eventId: string): Promise<void> {
     ).run(
       h.account_id,
       `Draft event deleted — ${ev.name_en}`, `حُذفت مسودة الفعالية — ${ev.name_ar}`,
-      'The organizer deleted this draft before anything was filed. Nothing is owed by anyone.',
-      'حذف المنظّم هذه المسودة قبل تقديم أي شيء. لا شيء مستحق على أحد.',
+      'The organizer deleted this draft. No action is needed.',
+      'حذف المنظّم المسودة. لا يلزم أي إجراء.',
       ev.is_demo,
     );
   }
@@ -2083,11 +2083,11 @@ export async function withdrawParticipationAction(token: string, formData: FormD
     `A confirmed party has withdrawn — ${ev.name_en}`,
     `انسحب طرف مؤكَّد — ${ev.name_ar}`,
     evFiled
-      ? `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. This is a material change to your filed submission: report it to the Ministry and name another party.`
-      : `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. Name another party from the requirements screen; nothing is filed yet, so no change report is owed.`,
+      ? `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. Report this change to the Ministry and invite a replacement.`
+      : `The confirmed ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has withdrawn. The reason, as written: “${verbatimQuote(reason)}”. Invite a replacement from Requirements. This application has not been submitted, so you do not need a change report.`,
     evFiled
-      ? `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». هذا تغيير جوهري في ملفكم المقدَّم: أبلغوا الوزارة به وسمّوا طرفاً آخر.`
-      : `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». سمّوا طرفاً آخر من شاشة المتطلبات؛ فلا شيء مقدَّم بعد، ولا يُستحق إبلاغ عن تغيير.`,
+      ? `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
+      : `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
     evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
   );
   redirect('/dashboard?notice=withdrawn');
@@ -2121,8 +2121,8 @@ export async function reopenDeclarationAction(token: string): Promise<void> {
     inv.event_id,
     `A readiness declaration was re-opened — ${ev.name_en}`,
     `أُعيد فتح إقرار جاهزية — ${ev.name_ar}`,
-    'Following your reported material change, a named provider has re-opened their signed readiness declaration to review it against the changed event. The Level 3 package waits on their new signature.',
-    'بعد إبلاغكم عن تغيير جوهري، أعاد مزوّد مُسمّى فتح إقرار جاهزيته الموقَّع لمراجعته على الفعالية المتغيّرة. وينتظر ملف المستوى 3 توقيعه الجديد.',
+    'An EMS agency is reviewing its signed declaration after your event changed. The Level 3 application needs its new signature.',
+    'تراجع جهة إسعاف إقرارها الموقّع بعد تغيير تفاصيل فعاليتكم. يحتاج طلب المستوى 3 إلى توقيعها الجديد.',
     `/events/${inv.event_id}/requirements`,
   );
   redirect(`/events/${inv.event_id}/declaration?notice=reopened`);

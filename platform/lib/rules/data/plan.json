@@ -125,8 +125,8 @@
       "n": 16,
       "en": "Post-event reporting",
       "ar": "التقارير اللاحقة للفعالية",
-      "bodyEn": "Who completes the post-event report, on what trigger, and within what time. Seven calendar days where it is owed.",
-      "bodyAr": "من يستكمل التقرير اللاحق وبأي محفّز وخلال أي مدة. سبعة أيام تقويمية حيث يكون مستحقاً.",
+      "bodyEn": "Who writes the post-event report and when it is due. When a report is required, submit it within seven calendar days.",
+      "bodyAr": "من يُعدّ تقرير ما بعد الفعالية وما موعده. عند وجوب التقرير، قدّموه خلال سبعة أيام تقويمية.",
       "summaryEn": "Who files the post-event report, on what trigger, within what time."
     }
   ],

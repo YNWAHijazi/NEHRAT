@@ -335,7 +335,7 @@ export default async function RequirementsPage({
                           </form>
                         ) : (
                           <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                            <L en="Filed submissions correct by replacement, never removal." ar="الملفات المقدَّمة تُصحَّح بالاستبدال لا بالإزالة." />
+                            <L en="To change a submitted document, upload a replacement." ar="لتغيير مستند سبق تقديمه، ارفعوا مستنداً بديلاً." />
                           </span>
                         )}
                       </div>
@@ -431,7 +431,7 @@ export default async function RequirementsPage({
                       <input type="hidden" name="token" value={p.token} />
                       <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
                         {event.filed ? (
-                          <L en="Removing a confirmed party is a material change, and your submission is filed: the party will be notified, and a change report to the Ministry is required." ar="إزالة طرف مؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ الطرف، ويلزم إبلاغ الوزارة عن التغيير." />
+                          <L en="This person will be notified. Since you already submitted the application, report this change to the Ministry too." ar="سيُبلَّغ هذا الطرف. بما أنكم قدّمتم الطلب، أبلغوا الوزارة بهذا التغيير أيضاً." />
                         ) : (
                           <L en="The party will be notified when removed." ar="سيُبلَّغ الطرف عند إزالته." />
                         )}
@@ -502,7 +502,7 @@ export default async function RequirementsPage({
                       <input type="hidden" name="token" value={director.token} />
                       <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
                         {event.filed ? (
-                          <L en="Removing the confirmed Director is a material change, and your submission is filed: they will be notified, a change report is required, and the Level 3 package cannot be re-filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري وملفكم مقدَّم: سيُبلَّغ، ويلزم إبلاغ عن التغيير، ولا يمكن إعادة تقديم ملف المستوى 3 دون مدير." />
+                          <L en="The Medical Director will be notified. Report this change to the Ministry and confirm a new Director before submitting the Level 3 application again." ar="سيُبلَّغ المدير الطبي. أبلغوا الوزارة بالتغيير وأكّدوا مديراً طبياً جديداً قبل إعادة تقديم طلب المستوى 3." />
                         ) : (
                           <L en="Removing the confirmed Director is a material change: they will be notified. The Level 3 package cannot be filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري: سيُبلَّغ. ولا يمكن تقديم ملف المستوى 3 دون مدير." />
                         )}
@@ -547,7 +547,7 @@ export default async function RequirementsPage({
         <details data-region="g3" style={{ marginBlockEnd: 20 }}>
           <summary style={{ cursor: 'pointer', listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', paddingBlock: 10 }}>
             <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-              <L en="Requirements you certify to" ar="المتطلبات التي تصدّقون عليها" />
+              <L en="Final checklist" ar="القائمة النهائية" />
             </span>
             <span style={{ fontSize: 14, color: 'var(--muted)' }}>
               <L
@@ -560,8 +560,8 @@ export default async function RequirementsPage({
             </span>
           </summary>
           <div className="secondary-help"><InfoNote><L
-              en="You certify to all of them with one line in the compliance and submission form."
-              ar="تصدّقون عليها جميعاً بسطر واحد في نموذج الامتثال والتقديم."
+              en="Confirm these items when you submit your application."
+              ar="أكّدوا هذه البنود عند تقديم طلبكم."
             /></InfoNote></div>
           {[
             {
