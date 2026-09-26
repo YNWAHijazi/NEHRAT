@@ -255,14 +255,14 @@ export default async function RequirementsPage({
             const fileNoteEn = fileNames[doc.key];
             const fileNoteAr = fileNames[doc.key];
             return (
-              <details id={`requirement-${doc.key}`} name="event-documents" key={doc.key} open={doc.key === firstOpenDocument} data-document={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 12 }}>
-                <summary style={{ cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ flex: '1 1 240px', minWidth: 0, display: 'flex', gap: 12, alignItems: 'start' }}>
-                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}>
+              <details className="requirement-card" id={`requirement-${doc.key}`} name="event-documents" key={doc.key} open={doc.key === firstOpenDocument} data-document={doc.key} style={{ borderInlineStartColor: color }}>
+                <summary className="requirement-summary">
+                <div className="requirement-title">
+                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none', marginBlockStart: 3 }}>
                     <path d="M6.5 4h8l3.5 3.5V20h-11.5z" />
                     <path d="M9.5 11.5h6M9.5 15.5h4" />
                   </svg>
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 16, lineHeight: 1.45 }}>
                       <L en={doc.en} ar={doc.ar} />
                     </div>
@@ -273,17 +273,17 @@ export default async function RequirementsPage({
                     ) : null}
                   </div>
                 </div>
-                  <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
+                  <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13, flexShrink: 0 }}>
                     <L en={stateEn} ar={stateAr} />
                   </span>
                 </summary>
-                <div style={{ display: 'flex', gap: 12, marginBlockStart: 16, alignItems: 'center', maxWidth: '100%', minWidth: 0, flexWrap: 'wrap' }}>
+                <div className="requirement-body">
                   {medicalPlan ? <p><L en="Completed by the Medical Director or EMS agency." ar="يستكملها المدير الطبي أو جهة الإسعاف."/></p>:null}
                   {medicalMap ? <p><L en="Uploaded by the Event Medical Director." ar="يرفعها المدير الطبي للفعالية." /></p> : null}
                   {doc.platform ? (
                     <a
                       href={doc.key === 'plan' ? `/events/${id}/plan` : `/events/${id}/submit`}
-                      style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
+                      className="requirement-action"
                     >
                       {doc.key === 'plan' ? <L en={medicalPlan?'View plan':'Open the plan'} ar={medicalPlan?'عرض الخطة':'فتح الخطة'} /> : <L en="Open the form" ar="فتح النموذج" />}
                     </a>
@@ -291,7 +291,7 @@ export default async function RequirementsPage({
                   {doc.attach && !medicalMap && !done ? (
                     <form
                       action={attachDocumentAction.bind(null, id)}
-                      style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
+                      className="requirement-upload"
                     >
                       <input type="hidden" name="docKey" value={doc.key} />
                       <UploadInput
@@ -300,9 +300,9 @@ export default async function RequirementsPage({
                         required
                         accept={acceptAttribute()}
                         aria-label="Attach the document"
-                        style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }}
+                        className="requirement-file"
                       />
-                      <button type="submit" style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, cursor: 'pointer' }}>
+                      <button type="submit" className="requirement-action">
                         <L en="Attach" ar="إرفاق" />
                       </button>
                     </form>
@@ -318,18 +318,18 @@ export default async function RequirementsPage({
                           <L en="Replace or remove" ar="استبدال أو إزالة" />
                         </span>
                       </summary>
-                      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBlockStart: 8 }}>
-                        <form action={attachDocumentAction.bind(null, id)} style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div className="requirement-replace">
+                        <form action={attachDocumentAction.bind(null, id)} className="requirement-upload">
                           <input type="hidden" name="docKey" value={doc.key} />
-                          <UploadInput  name="file" required accept={acceptAttribute()} aria-label="Replace the document" style={{ fontSize: 13, maxWidth: 'min(230px, 100%)' }} />
-                          <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                          <UploadInput name="file" required accept={acceptAttribute()} aria-label="Replace the document" className="requirement-file" />
+                          <button type="submit" className="requirement-action">
                             <L en="Replace" ar="استبدال" />
                           </button>
                         </form>
                         {!event.filed ? (
                           <form action={removeAttachmentAction.bind(null, id)}>
                             <input type="hidden" name="docKey" value={doc.key} />
-                            <button type="submit" style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', cursor: 'pointer' }}>
+                            <button type="submit" className="requirement-action">
                               <L en="Remove" ar="إزالة" />
                             </button>
                           </form>
