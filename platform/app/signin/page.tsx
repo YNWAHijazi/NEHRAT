@@ -194,16 +194,6 @@ export default async function SignInPage({
                 <L en="Sign in to the service" ar="تسجيل الدخول إلى الخدمة" />
               )}
             </h1>
-            {/* "An individual account gives access to the platform" left (partner
-                ruling, second sweep): it narrated the card it sat on. The organization
-                gate stays — it is the one thing a new arrival cannot guess. */}
-            {mode === 'signup' ? (
-            <div className="secondary-help"><InfoNote><L
-                en="An organization is registered separately and must be recorded by the Ministry before anything can be filed."
-                ar="تُسجَّل المؤسسة بشكل منفصل ويجب أن تسجّلها الوزارة قبل إمكانية تقديم أي ملف."
-              /></InfoNote></div>
-            ) : null}
-
             {params.notice === 'reset-unavailable' ? <p role="alert"><L en="Password recovery email is unavailable. Contact support for help." ar="بريد استعادة كلمة المرور غير متاح. تواصلوا مع الدعم للمساعدة." /> <Link href="/help"><L en="Contact support" ar="التواصل مع الدعم" /></Link></p> : null}
             {params.notice === 'reset-sent' ? (
               <div style={{ padding: '14px 18px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 10, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.6 }}>
