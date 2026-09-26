@@ -17,6 +17,7 @@ export default async function ApplicabilityPage({ searchParams }: {
     : subject === 'venue' && (q.eligible !== undefined || q.hosts !== undefined)
       ? venueApplicability(q.eligible === 'yes' || q.hosts === '1', q.eligible === 'yes' || q.cap === '1')
       : subject === 'facility' && q.cat !== undefined ? facilityApplicability(Number(q.cat)) : null;
+  const venueSelection = subject === 'venue' && answer ? (answer.route ? 'yes' : 'no') : null;
   const box: React.CSSProperties = { padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 12 };
   const button: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 22, marginBlockStart: 16, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, cursor: 'pointer' };
   return <PublicShell signedIn={account !== null}>
@@ -43,7 +44,9 @@ export default async function ApplicabilityPage({ searchParams }: {
     {subject === 'venue' ? <form method="get" data-region="venue-branch">
       <input type="hidden" name="subject" value="venue" />
       <p style={{ fontSize: 18, lineHeight: 1.65, maxWidth: '65ch' }}><L en={`A hosting venue regularly holds organized events and is licensed for at least ${RECURRING_VENUE_MIN_CAPACITY.toLocaleString('en-US')} people. Does this describe your venue?`} ar={`الموقع المستضيف ينظّم فعاليات بانتظام وتبلغ سعته المرخّصة ${RECURRING_VENUE_MIN_CAPACITY.toLocaleString('en-US')} شخص على الأقل. هل ينطبق ذلك على موقعكم؟`} /></p>
-      <div style={{ display: 'flex', gap: 12 }}><button name="eligible" value="yes" style={button}><L en="Yes" ar="نعم" /></button><button name="eligible" value="no" style={{ ...button, background: 'var(--surface2)', color: 'var(--ink)' }}><L en="No" ar="لا" /></button></div>
+      <div style={{ display: 'flex', gap: 12 }}>
+        {(['yes', 'no'] as const).map(value => <button key={value} type="submit" name="eligible" value={value} aria-pressed={venueSelection === value} style={{ ...button, background: venueSelection === value ? 'var(--brand)' : 'var(--surface2)', color: venueSelection === value ? 'var(--bg)' : 'var(--ink)', border: '1px solid var(--line)' }}><L en={value === 'yes' ? 'Yes' : 'No'} ar={value === 'yes' ? 'نعم' : 'لا'} /></button>)}
+      </div>
     </form> : null}
     {subject === 'facility' ? <section data-region="facility-branch">
       <h2 style={{ fontSize: 22 }}><L en="Select the type of facility" ar="اختاروا نوع المنشأة" /></h2>

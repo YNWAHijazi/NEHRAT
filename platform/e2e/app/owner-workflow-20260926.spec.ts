@@ -30,7 +30,15 @@ test("public check is concise and preserves the chosen service through signup", 
     }),
   ).toBeVisible();
   await page.goto("/applicability?subject=venue");
+  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: "No", exact: true }).click();
+  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByRole("heading", { name: "Hosting venue registration not required", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Yes", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "false");
   await expect(
     page.getByRole("link", { name: "Next", exact: true }),
   ).toHaveAttribute("href", "/services/register-a-venue");
