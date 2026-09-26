@@ -6,6 +6,8 @@
  * read-only from the facility record; the representative signs each save.
  */
 
+import { LocationPicker } from '../../../../components/maps/LocationPicker';
+import type { MapPoint } from '../../../../lib/rules/geolocation';
 import { useState } from 'react';
 import { L } from '../../../../components/L';
 import { saveFacilityDeviceAction } from '../../../actions';
@@ -51,11 +53,15 @@ export function DeviceRegistry({
   devices,
   coordinatorName,
   today,
+  facilityLocation,
+  deviceLocations,
 }: {
   facilityId: string;
   devices: FacilityDevice[];
   coordinatorName: string;
   today: string;
+  facilityLocation: MapPoint | null;
+  deviceLocations: Record<string, MapPoint | null>;
 }) {
   const content = FACILITY_CONTENT;
   const [selected, setSelected] = useState<string | null>(devices[0]?.label ?? null);
@@ -159,7 +165,7 @@ export function DeviceRegistry({
         ) : null}
       </div>
 
-      <form action={saveFacilityDeviceAction.bind(null, facilityId)}>
+      <form key={`${selected}-${purpose}`} action={saveFacilityDeviceAction.bind(null, facilityId)}>
         <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
@@ -220,9 +226,12 @@ export function DeviceRegistry({
                   <span style={{ fontSize: 14 }}><L en={content.deviceFields[4]!.en} ar={content.deviceFields[4]!.ar} /></span>
                   <PediatricPick />
                 </div>
+                <div style={{display:'flex',gap:20,flexWrap:'wrap'}}><L en="AED operational" ar="الجهاز صالح للتشغيل"/><YesNo name="operational" initial={true}/></div>
+                <details><summary><L en="Maintenance dates (optional)" ar="تواريخ الصيانة (اختيارية)"/></summary><div style={{display:'grid',gap:16,marginBlock:12}}>
                 {dateField('padExpiry', content.deviceDates[1]!.en, content.deviceDates[1]!.ar, null)}
                 {dateField('batteryExpiry', content.deviceDates[2]!.en, content.deviceDates[2]!.ar, null)}
                 {dateField('latestCheck', content.deviceDates[0]!.en, content.deviceDates[0]!.ar, null)}
+                </div></details>
               </>
             ) : null}
             {purpose === 'annual' ? (
@@ -253,6 +262,8 @@ export function DeviceRegistry({
                 {dateField('batteryExpiry', content.deviceDates[2]!.en, content.deviceDates[2]!.ar, null)}
               </>
             ) : null}
+            {purpose === 'accessibility' ? <><L en="Accessible during operating hours" ar="متاح خلال ساعات العمل"/><YesNo name="accessibleHours" initial={device?.accessibleHours ?? true}/><L en="Publicly accessible" ar="متاح للعموم"/><YesNo name="publiclyAccessible" initial={device?.publiclyAccessible ?? false}/></> : null}
+            {purpose === 'ministryUpdate' ? <>{textField('identification','Device identifier','معرّف الجهاز',device?.identification??'')}{textField('location','Exact location','الموقع الدقيق',device?.locationEn??'')}{textField('reason','What changed','ما الذي تغيّر','')}<L en="AED operational" ar="الجهاز صالح للتشغيل"/><YesNo name="operational" initial={device?.operational??true}/><L en="Accessible during operating hours" ar="متاح خلال ساعات العمل"/><YesNo name="accessibleHours" initial={device?.accessibleHours??true}/><L en="Publicly accessible" ar="متاح للعموم"/><YesNo name="publiclyAccessible" initial={device?.publiclyAccessible??false}/></> : null}
             {purpose === 'statusChange' ? (
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'center' }}>
@@ -268,6 +279,7 @@ export function DeviceRegistry({
             ) : null}
           </div>
 
+          {['initial','relocation','replacement','ministryUpdate'].includes(purpose) ? <DeviceMap initial={deviceLocations[device?.label ?? ''] ?? null} facilityLocation={facilityLocation}/> : null}
           <div style={{ paddingBlockStart: 18, borderBlockStart: '1px solid var(--line)', marginBlockEnd: 18 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
               <L en="Coordinator" ar="المنسّق" />
@@ -325,4 +337,12 @@ function PediatricPick() {
       <input type="hidden" name="pediatric" value={v} />
     </span>
   );
+}
+
+function DeviceMap({initial,facilityLocation}:{initial:MapPoint|null;facilityLocation:MapPoint|null}) {
+ const [separate,setSeparate]=useState(Boolean(initial));
+ return <div style={{marginBlock:20}}><h3><L en="AED map location" ar="موقع الجهاز على الخريطة"/></h3>
+ <label style={{display:'flex',gap:10,minHeight:44,alignItems:'center'}}><input type="checkbox" checked={separate} onChange={e=>setSeparate(e.target.checked)}/><L en="This AED needs a separate map pin." ar="يحتاج هذا الجهاز إلى علامة منفصلة على الخريطة."/></label>
+ <input type="hidden" name="separatePin" value={separate?'yes':'no'}/>
+ {separate?<LocationPicker prefix="aedMap" initial={initial} center={facilityLocation}/>:<p><L en="Uses the facility map pin." ar="يستخدم علامة موقع المنشأة."/></p>}</div>;
 }

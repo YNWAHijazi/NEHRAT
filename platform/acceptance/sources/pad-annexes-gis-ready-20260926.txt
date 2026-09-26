@@ -1,0 +1,273 @@
+MINISTRY OF PUBLIC HEALTH
+Annexes A-E
+National Policy on Cardiac-Arrest Readiness, Cardiopulmonary Resuscitation and Public Access Defibrillation
+Annex A
+High-Risk Places and Minimum Cardiac-Arrest Readiness Requirements
+Part 1 — Covered facilities and places
+The requirements of the National Policy on Cardiac-Arrest Readiness, Cardiopulmonary Resuscitation and Public Access Defibrillation apply to:
+1.  Gyms, fitness centers, sports clubs, stadiums, athletic facilities, swimming pools and aquatic facilities.
+2.  Schools, universities and educational campuses, with AED requirements implemented according to the phased schedule approved by the Ministry of Public Health.
+3.  Airports, passenger ports, central transport terminals, shopping malls and public venues above a capacity threshold established by the Ministry of Public Health.
+4.  Remote or difficult-access facilities where access by an AED-equipped EMS unit may be delayed.
+5.  Any fixed public, educational, occupational, sporting or commercial facility where a cardiac arrest has been reported by an EMS or designated first-response agency and confirmed by the Ministry of Public Health.
+6.  Any other facility designated by the Ministry of Public Health based on its activity, occupancy, population served, accessibility or emergency-response conditions.
+Part 2 — AED requirements by facility category
+[TABLE]
+Facility category | AED requirement
+Gyms, fitness centers, sports clubs, stadiums, athletic and aquatic facilities | Required
+Schools, universities and educational campuses | Required according to the approved phased implementation schedule
+Airports, passenger ports, central transport terminals, shopping malls and public venues above the Ministry threshold | Required
+Remote or difficult-access facilities | Required where designated by the Ministry
+Facilities where a cardiac arrest has previously been reported and confirmed | Subject to Ministry review and readiness measures required by the Ministry
+Other facilities designated by the Ministry | As specified by the Ministry
+[/TABLE]
+Part 3 — Minimum facility requirements
+Each covered facility shall:
+1.  Designate one responsible facility contact for cardiac-emergency readiness.
+2.  Maintain a Cardiac Emergency Response Plan using Annex B.
+3.  Ensure that personnel trained in CPR and AED use are available during operating hours.
+4.  Provide an AED where required under this Annex.
+5.  Ensure that each required AED is:
+operational;
+accessible during operating hours;
+clearly visible or identified by appropriate signage;
+maintained in accordance with the manufacturer’s instructions; and
+registered with the Ministry using Annex C or the approved electronic system, with geospatial linkage to the registered facility and, where appropriate, a separate AED map position.
+6.  Maintain clear procedures for:
+contacting EMS;
+starting CPR;
+retrieving and applying the AED;
+ensuring EMS personnel can be promptly directed to the patient; and
+transferring care.
+7.  Conduct at least one practical cardiac-emergency drill annually.
+8.  Submit Annex D following any suspected cardiac arrest, CPR attempt or AED application.
+9.  Correct identified readiness deficiencies and restore any AED used during an emergency to operational service without unnecessary delay.
+An AED shall not be considered accessible where retrieval is routinely delayed by locked access, unavailable personnel or other avoidable barriers.
+Part 4 — Implementation
+The Ministry of Public Health may establish:
+phased implementation schedules;
+public-venue capacity thresholds;
+additional requirements for specific facility categories;
+electronic registration, geolocation, GIS mapping and reporting procedures; and
+corrective-action timelines.
+Annex B
+Cardiac Emergency Response Plan
+This plan shall be maintained by every covered facility and updated when AED locations or emergency arrangements change.
+1. Facility information
+[TABLE]
+Item | Information
+Facility name | 
+Facility category | 
+Address and municipality | 
+Geographic location / map pin (electronic system) | 
+Operating hours | 
+Facility telephone | 
+Facility email | 
+Responsible facility contact — name or position | 
+Responsible facility contact — telephone | 
+Responsible facility contact — email | 
+Main EMS entrance or access point | 
+EMS contact number used by the facility | 
+[/TABLE]
+2. AED information
+[TABLE]
+Item | Information
+AED available | ☐ Yes   ☐ No
+Number of AEDs | 
+Exact AED location or locations | 
+Accessible during operating hours | ☐ Yes   ☐ No
+Pediatric capability, where applicable | ☐ Yes   ☐ No   ☐ Not applicable
+[/TABLE]
+3. Immediate response procedure
+In a suspected cardiac arrest:
+1.  Confirm that the person is unresponsive and not breathing normally.
+2.  Contact EMS immediately.
+3.  Start CPR.
+4.  Retrieve and apply the AED.
+5.  Follow the AED instructions and continue CPR.
+6.  Ensure EMS personnel are met or directed promptly to the patient.
+7.  Continue care until responsibility is transferred to EMS or another appropriate medical service.
+8.  Complete the required incident report.
+4. Facility readiness confirmation
+[TABLE]
+Requirement | Confirmed
+CPR- and AED-trained personnel are available during operating hours | ☐
+Required AEDs are accessible and operational | ☐
+AED signage is visible | ☐
+EMS access is clear and staff know how to direct responders to the patient | ☐
+Staff know the immediate response procedure | ☐
+A practical drill has been conducted during the previous 12 months | ☐
+[/TABLE]
+Date of latest drill: ______________________________________
+5. Confirmation
+The facility confirms that this plan is current and that the above readiness arrangements are in place.
+Facility representative: ______________________________________
+Date: _____________________________________________________
+Annex C
+AED Registration Form
+Complete one form or electronic registration record for each AED. For electronic registration, facility information may be populated from the registered facility profile.
+1. Facility information
+[TABLE]
+Item | Information
+Facility name | 
+Facility category | 
+Address and municipality | 
+Geographic location / map pin (electronic system) | 
+[/TABLE]
+2. AED information
+[TABLE]
+Item | Information
+Barcode, QR code, serial number or other unique device identifier | 
+Exact location within the facility or site | 
+Separate AED map position, where applicable (electronic system) | 
+Accessible during operating hours | ☐ Yes   ☐ No
+Publicly accessible | ☐ Yes   ☐ No
+AED operational | ☐ Yes   ☐ No
+Pediatric capability, where applicable | ☐ Yes   ☐ No   ☐ Not applicable
+[/TABLE]
+GIS registration note: In the electronic system, every AED shall be geospatially linked to its registered facility. A separate AED map position may be recorded for large campuses, multi-building facilities, outdoor sites, or other locations where the facility-level map point does not adequately identify the AED position. Geographic coordinates should be generated from a validated map pin rather than manually entered by the user.
+3. Registration or update purpose
+☐ Initial registration
+☐ Update following relocation
+☐ Update following replacement
+☐ Update following a change in operational status
+☐ Update following a change in accessibility status
+☐ Other Ministry-requested update
+4. Confirmation
+The facility confirms that the information provided is accurate and current, that the AED is maintained in accordance with the manufacturer’s instructions, and that the registration will be updated if the device location, accessibility or operational status changes.
+Facility representative: ______________________________________
+Date: _____________________________________________________
+Annex D
+Facility Cardiac-Arrest Incident Report
+To be submitted by the facility following any suspected cardiac arrest, CPR attempt or AED application.
+Do not include the patient’s name or unnecessary identifying information.
+1. Facility and incident information
+[TABLE]
+Item | Information
+Facility name | 
+Facility category | 
+Address and municipality | 
+Date of incident | 
+Approximate time | 
+Location within the facility | 
+[/TABLE]
+2. Immediate response
+[TABLE]
+Item | Response
+EMS contacted | ☐ Yes   ☐ No   ☐ Unknown
+CPR started before professional responders arrived | ☐ Yes   ☐ No   ☐ Unknown
+Onsite AED available | ☐ Yes   ☐ No
+Onsite AED applied | ☐ Yes   ☐ No   ☐ Unknown
+Shock delivered, if known | ☐ Yes   ☐ No   ☐ Unknown
+Responders were promptly directed to the patient | ☐ Yes   ☐ No   ☐ Not applicable
+[/TABLE]
+3. EMS attendance and patient transfer
+[TABLE]
+Item | Information
+EMS agency attended | ☐ Yes   ☐ No   ☐ Unknown
+Name of EMS agency, if known | 
+Patient transported by | ☐ EMS ambulance   ☐ Private vehicle   ☐ Other   ☐ Not transported   ☐ Unknown
+Receiving emergency department or hospital, if known | 
+[/TABLE]
+4. Post-incident readiness
+[TABLE]
+Item | Response
+AED returned to operational status, where applicable | ☐ Yes   ☐ No   ☐ Not applicable
+A readiness or response problem was identified | ☐ Yes   ☐ No
+[/TABLE]
+If a problem was identified, briefly describe the issue and any corrective action required:
+____________________________________________________________________________
+____________________________________________________________________________
+5. Submission
+Electronic submissions shall be linked to the authorized facility account and automatically record the submission date. For paper submission:
+Facility representative: ______________________________________
+Date: _____________________________________________________
+Annex E
+Minimum Requirements for BLS Agencies and Designated Medical First-Response Units
+These requirements apply to BLS ambulances and other designated medical first-response units responding to suspected cardiac arrest.
+Part 1 — Minimum Operational Requirements
+1. Equipment
+Each responding unit shall carry:
+1.  A functioning AED or other defibrillator authorized for use by the responding personnel.
+2.  Adult electrode pads.
+3.  Pediatric pads or pediatric operating capability where children may reasonably be treated.
+4.  A bag-valve-mask or other approved basic ventilation equipment.
+5.  Basic protective equipment required for resuscitation.
+2. Personnel competence
+Responding personnel shall be competent in:
+1.  Recognizing suspected cardiac arrest.
+2.  Performing high-quality CPR.
+3.  Applying and operating the AED or authorized defibrillator.
+4.  Providing basic ventilation.
+5.  Working within an organized resuscitation team.
+6.  Transferring care to another EMS unit or receiving emergency department.
+7.  Documenting and reporting the response.
+3. Operational readiness
+The agency or unit shall:
+1.  Ensure that the AED or authorized defibrillator and essential resuscitation equipment are operational and available whenever the unit is in service.
+2.  Maintain devices and required supplies in accordance with manufacturer instructions and agency procedures.
+3.  Address any unavailable or out-of-service critical equipment without unnecessary delay.
+4.  Restore the unit to operational readiness after each response.
+4. Cardiac-arrest response
+The agency or unit shall maintain a written cardiac-arrest response procedure that includes:
+1.  Confirming suspected cardiac arrest.
+2.  Initiating CPR.
+3.  Applying the AED or defibrillator as soon as possible.
+4.  Continuing resuscitation according to the responder’s authorized scope of practice.
+5.  Coordinating transport or transfer of care.
+6.  Completing the required report.
+Where the responding unit does not transport patients, it shall coordinate handover to the transporting EMS agency or another appropriate medical service.
+5. Reporting requirement
+Every attended suspected cardiac arrest shall be documented and reported through the mechanism approved by the Ministry of Public Health.
+The report shall:
+1.  Include the minimum dataset listed in Part 2.
+2.  Identify the facility or location where the cardiac arrest occurred.
+3.  Be submitted within the timeframe established by the Ministry.
+4.  Not include the patient’s name in the national minimum dataset unless required through a separately authorized reporting process.
+An agency may use its existing paper or electronic patient-care report where it captures the required national minimum dataset.
+Part 2 — Minimum Cardiac-Arrest Reporting Dataset
+One report shall be completed for each patient.
+A. Incident information
+[TABLE]
+Item | Information
+Agency case or report number | 
+Date of incident | 
+Approximate time of incident | 
+Exact location or facility name | 
+Address and municipality | 
+Facility category, if applicable | 
+Patient age group | ☐ Adult   ☐ Child   ☐ Unknown
+[/TABLE]
+B. Response information
+[TABLE]
+Item | Response
+Cardiac arrest witnessed | ☐ Yes   ☐ No   ☐ Unknown
+CPR started before the responding unit arrived | ☐ Yes   ☐ No   ☐ Unknown
+Time the request was received, if available | 
+Time the responding unit arrived, if available | 
+[/TABLE]
+C. AED and defibrillation
+[TABLE]
+Item | Response
+Onsite AED available | ☐ Yes   ☐ No   ☐ Unknown
+Onsite AED applied before responder arrival | ☐ Yes   ☐ No   ☐ Unknown
+Shock delivered before responder arrival | ☐ Yes   ☐ No   ☐ Unknown
+Responding unit’s AED or defibrillator applied | ☐ Yes   ☐ No
+Shock delivered by responding personnel | ☐ Yes   ☐ No
+[/TABLE]
+D. Immediate outcome and transfer
+[TABLE]
+Item | Response
+Return of spontaneous circulation before handover | ☐ Yes   ☐ No   ☐ Unknown
+Patient transported | ☐ Yes   ☐ No   ☐ Not applicable
+Receiving emergency department or hospital | 
+Care transferred to another EMS agency | ☐ Yes   ☐ No   ☐ Not applicable
+Name of receiving EMS agency, if applicable | 
+[/TABLE]
+E. Responding agency
+[TABLE]
+Item | Information
+EMS or first-response agency | 
+Unit identifier | 
+Date submitted | 
+[/TABLE]

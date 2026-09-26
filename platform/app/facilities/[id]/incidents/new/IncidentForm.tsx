@@ -102,15 +102,15 @@ export function IncidentForm({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [narrative, setNarrative] = useState('');
   const [corrective, setCorrective] = useState('');
-  const [serverError, setServerError] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const flagged = useMemo(() => detectPersonalName(narrative) || detectPersonalName(corrective), [narrative, corrective]);
   const pick = (k: string) => (v: string) => setAnswers((prev) => ({ ...prev, [k]: v }));
 
   const submit = (formData: FormData) => {
-    setServerError(false);
+    setServerError(null);
     startTransition(async () => {
       const result = await submitFacilityIncidentAction(facilityId, formData);
-      if (result && 'error' in result) setServerError(true);
+      if (result && 'error' in result) setServerError(result.error);
       else router.push(`/facilities/${facilityId}?notice=incident`);
     });
   };
@@ -143,7 +143,7 @@ export function IncidentForm({
                 <input
                   name={f.key}
                   type={f.key === 'date' ? 'date' : f.key === 'time' ? 'time' : 'text'}
-                  required={f.key !== 'location'}
+                  required
                   style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }}
                 />
               </label>
@@ -211,32 +211,6 @@ export function IncidentForm({
           </div>
         </div>
 
-        <div data-region="narrative" style={{ ...sectionCard, border: `1px solid ${flagged ? 'var(--bad)' : 'var(--line)'}` }}>
-          <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600 }}>
-            <L en={content.narrative.titleEn} ar={content.narrative.titleAr} />
-          </h3>
-          <p style={{ margin: '0 0 14px', fontSize: 14, color: 'var(--muted)' }}>
-            <L en={content.narrative.hintEn} ar={content.narrative.hintAr} />
-          </p>
-          <textarea
-            name="narrative"
-            value={narrative}
-            onChange={(e) => setNarrative(e.target.value)}
-            rows={4}
-            style={{ width: '100%', padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15, lineHeight: 1.6, resize: 'vertical' }}
-          />
-          {flagged ? (
-            <div style={{ marginBlockStart: 14, padding: '14px 18px', borderInlineStart: '3px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: '0 8px 8px 0', fontSize: '14.5px', lineHeight: 1.6 }}>
-              <div style={{ fontWeight: 600, marginBlockEnd: 4 }}>
-                <L en={content.narrative.flagTitleEn} ar={content.narrative.flagTitleAr} />
-              </div>
-              <div style={{ color: 'var(--muted)' }}>
-                <L en={content.narrative.flagBodyEn} ar={content.narrative.flagBodyAr} />
-              </div>
-            </div>
-          ) : null}
-        </div>
-
         <div data-region="post-incident" style={sectionCard}>
           <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
             <L en="Post-incident readiness" ar="الجاهزية بعد الحادثة" />
@@ -260,37 +234,13 @@ export function IncidentForm({
           </label>
         </div>
 
-        <div data-region="submitted-by" style={sectionCard}>
-          <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
-            <L en={content.submittedBy.labelEn} ar={content.submittedBy.labelAr} />
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16 }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                <L en="Name or position" ar="الاسم أو المسمى الوظيفي" />
-              </span>
-              <input name="submittedByName" defaultValue={coordinatorName} required style={inputStyle} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                <L en="Telephone" ar="رقم الهاتف" />
-              </span>
-              <input name="submittedByPhone" defaultValue={coordinatorPhone} style={inputStyle} />
-            </label>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                <L en="Email" ar="البريد الإلكتروني" />
-              </span>
-              <input name="submittedByEmail" defaultValue={coordinatorEmail} style={inputStyle} />
-            </label>
-          </div>
-        </div>
-
+        {flagged?<p role="alert" style={{color:'var(--bad)'}}><L en="Remove personal names from the report." ar="أزيلوا الأسماء الشخصية من التقرير."/></p>:null}
+        <p data-region="submitted-by"><L en="Your account and the submission date are recorded automatically." ar="يُسجَّل حسابكم وتاريخ التقديم تلقائياً."/></p>
         {serverError ? (
           <p style={{ margin: 0, fontSize: 14, color: 'var(--bad)' }}>
             <L
-              en="Something that looks like a personal name is still in the report. Remove it and submit again."
-              ar="لا يزال في التقرير ما يبدو اسماً شخصياً. أزيلوه وقدّموا مجدداً."
+              en={serverError === 'name-detected' ? "Remove personal names from the report." : "Complete the incident details and all response questions. Use a valid incident date."}
+              ar={serverError === 'name-detected' ? "أزيلوا الأسماء الشخصية من التقرير." : "أكملوا تفاصيل الحادثة وجميع الأسئلة واستخدموا تاريخاً صحيحاً."}
             />
           </p>
         ) : null}

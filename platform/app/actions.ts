@@ -8,6 +8,9 @@
  * or invents a gate.
  */
 
+import { TRANSPORT_FACILITY_TYPES, facilityIncidentError } from '../lib/rules/facility-intake';
+import { readMapPoint } from '../lib/rules/geolocation';
+import { facilityPoint, facilitySnapshot, bumpFacilityRevision, facilityAedStatus } from '../lib/facility-gis';
 import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification';
 import { eventGateContext } from '../lib/event-gate-context';
 import { seriousIncidentGate, postEventReportGate } from '../lib/rules/gates';
@@ -1196,9 +1199,14 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   const category = categoryWithPublished(categoryKey, publishedFacilityValues());
   if (!category || categoryEndsJourney(category)) redirect('/facilities/new');
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  const point = readMapPoint(formData);
+  if (!point || !['name','address','municipality','hours','phone','email','accessPoint','emsNumber','coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k))) redirect('/facilities/new?error=details');
   const capacityNum = Number(s('capacity'));
+  if ((s('capacity') && (!Number.isSafeInteger(capacityNum) || capacityNum < 0)) || (categoryKey==='transport' && !TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType')))) redirect('/facilities/new?error=details');
   const facilityId = nextRecordId('FC');
   const db = getDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
   db.prepare(
     `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
        municipality_en, municipality_ar, operating_hours, phone, email, access_point,
@@ -1218,6 +1226,10 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
     person.run(facilityId, role, s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`));
   }
+  db.prepare('UPDATE facilities SET latitude=?,longitude=?,facility_type=?,map_confirmed_at=now_stamp() WHERE id=?').run(point.lat,point.lng,s('facilityType'),facilityId);
+  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
+  db.exec('COMMIT');
+  } catch(error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath('/dashboard');
   redirect(`/facilities/${facilityId}/devices`);
 }
@@ -1247,7 +1259,15 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
   const yes = (k: string): number => (formData.get(k) === 'yes' ? 1 : 0);
   let label = s('label');
-
+  const device = db.prepare('SELECT * FROM facility_devices WHERE facility_id=? AND label=?').get(facilityId,label);
+  const allowed = ['initial','annual','relocation','replacement','statusChange','accessibility','ministryUpdate'];
+  const point = readMapPoint(formData, 'aedMap');
+  if (!allowed.includes(purpose) || !s('representative') || (purpose !== 'initial' && !device)
+    || (['initial','relocation'].includes(purpose) && !facilityPoint(facilityId)) || (s('separatePin') === 'yes' && !point)
+    || (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification'))
+    || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) redirect(`/facilities/${facilityId}/devices?error=details`);
+  db.exec('BEGIN IMMEDIATE');
+  try {
   if (purpose === 'initial') {
     const last = db
       .prepare(`SELECT label FROM facility_devices WHERE facility_id = ? ORDER BY label DESC LIMIT 1`)
@@ -1265,6 +1285,9 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
       s('padExpiry') || null, s('batteryExpiry') || null, s('latestCheck') || null,
     );
   } else if (purpose === 'annual') {
+    const operational = ['operational','pads','battery'].every(k=>s(`check_${k}`)==='yes');
+    db.prepare('UPDATE facility_devices SET operational=? WHERE facility_id=? AND label=?').run(Number(operational),facilityId,label);
+    if(!operational) bumpFacilityRevision(facilityId);
     db.prepare(
       `UPDATE facility_devices SET latest_check = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
@@ -1279,6 +1302,10 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
       `UPDATE facility_devices SET identification = ?, pad_expiry = ?, battery_expiry = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
     ).run(s('identification'), s('padExpiry') || null, s('batteryExpiry') || null, facilityId, label);
+  } else if (purpose === 'ministryUpdate') {
+    db.prepare('UPDATE facility_devices SET identification=?,location_en=?,location_ar=?,operational=?,accessible_hours=?,publicly_accessible=?,updated_at=now_stamp() WHERE facility_id=? AND label=?').run(s('identification'),s('location'),s('location'),yes('operational'),yes('accessibleHours'),yes('publiclyAccessible'),facilityId,label);
+  } else if (purpose === 'accessibility') {
+    db.prepare('UPDATE facility_devices SET accessible_hours=?, publicly_accessible=?, updated_at=now_stamp() WHERE facility_id=? AND label=?').run(yes('accessibleHours'),yes('publiclyAccessible'),facilityId,label);
   } else if (purpose === 'statusChange') {
     db.prepare(
       `UPDATE facility_devices SET operational = ?, accessible_hours = ?, updated_at = now_stamp()
@@ -1286,10 +1313,18 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
     ).run(yes('operational'), yes('accessibleHours'), facilityId, label);
   }
 
+  if (purpose === 'initial') db.prepare('UPDATE facility_devices SET operational=? WHERE facility_id=? AND label=?').run(yes('operational'),facilityId,label);
+  if (['initial','relocation','replacement','ministryUpdate'].includes(purpose)) {
+    db.prepare('UPDATE facility_devices SET latitude=?,longitude=?,map_confirmed_at=now_stamp() WHERE facility_id=? AND label=?').run(s('separatePin')==='yes'?point?.lat ?? null:null,s('separatePin')==='yes'?point?.lng ?? null:null,facilityId,label);
+  }
+  if (purpose !== 'annual') bumpFacilityRevision(facilityId);
   db.prepare(
     `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative, reason)
      VALUES (?, ?, ?, ?, NULLIF(?, ''))`,
   ).run(facilityId, label, purpose, s('representative'), s('reason'));
+  db.prepare('UPDATE facility_device_updates SET snapshot=? WHERE id=last_insert_rowid()').run(facilitySnapshot(facilityId));
+  db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath(`/facilities/${facilityId}/devices`);
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}/devices?notice=saved`);
@@ -1303,6 +1338,18 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
   const checkKeys = ['trained', 'signage', 'access', 'routes', 'staffKnow', 'drill'];
   const checks = Object.fromEntries(checkKeys.map((k) => [k, formData.get(`check_${k}`) === 'on']));
+  const drill=String(formData.get('drillDate')??'').trim();
+  const today=beirutToday();
+
+  const devices=getDb().prepare('SELECT operational,accessible_hours FROM facility_devices WHERE facility_id=?').all(facilityId) as unknown as {operational:number;accessible_hours:number}[];
+  const priorYear=new Date(`${today}T12:00:00Z`);priorYear.setUTCFullYear(priorYear.getUTCFullYear()-1);
+  if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!String(formData.get('coordinator')??'').trim()
+    ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
+    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}/plan?error=readiness`);
+
+  const db=getDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
   getDb()
     .prepare(
       `INSERT INTO facility_plan_confirmations (facility_id, checks, drill_date, coordinator, position)
@@ -1323,6 +1370,9 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
        WHERE facility_id = ? AND status = 'open' AND kind = 'confirmation'`,
     )
     .run(account.displayName, facilityId);
+  getDb().prepare('UPDATE facility_plan_confirmations SET details_revision=(SELECT details_revision FROM facilities WHERE id=?), snapshot=? WHERE id=(SELECT MAX(id) FROM facility_plan_confirmations WHERE facility_id=?)').run(facilityId,facilitySnapshot(facilityId),facilityId);
+  db.exec('COMMIT');
+  } catch(error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath(`/facilities/${facilityId}/plan`);
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}?notice=confirmed`);
@@ -1336,12 +1386,17 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
   const db = getDb();
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
+  if(!['coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k)))redirect(`/facilities/${facilityId}/plan?error=contact`);
+  db.exec('BEGIN IMMEDIATE');try {
   for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
     db.prepare(
       `UPDATE facility_persons SET name_or_position = ?, phone = ?, email = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND role = ?`,
     ).run(s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`), facilityId, role);
   }
+  bumpFacilityRevision(facilityId);
+  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
+  db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}?notice=coordinator`);
 }
@@ -1354,7 +1409,7 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
 export async function submitFacilityIncidentAction(
   facilityId: string,
   formData: FormData,
-): Promise<{ error: 'name-detected' } | void> {
+): Promise<{ error: 'name-detected' | 'incomplete' | 'invalid-date' } | void> {
   refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -1365,12 +1420,12 @@ export async function submitFacilityIncidentAction(
     return { error: 'name-detected' };
   }
   const payload: Record<string, string> = {};
-  for (const [k, v] of formData.entries()) {
-    if (k !== 'narrative' && typeof v === 'string') payload[k] = v;
-  }
+  for(const k of ['date','time','location','emsContacted','cprStarted','aedAvailable','aedApplied','shock','guided','emsAttended','agencyName','transportedBy','hospital','returned','problem','corrective']) payload[k]=String(formData.get(k)??'').trim();
+  const incidentError = facilityIncidentError({...payload,narrative},beirutToday());
+  if(incidentError) return {error:incidentError};
   getDb()
-    .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative) VALUES (?, ?, ?)`)
-    .run(facilityId, JSON.stringify(payload), narrative);
+    .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative, submitted_by) VALUES (?, ?, ?, ?)`)
+    .run(facilityId, JSON.stringify(payload), narrative, account.id);
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}?notice=incident`);
 }
@@ -2121,4 +2176,18 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
      WHERE id = ? AND invitation_token = ?`,
   ).run(fileName, file.type, bytes.length, bytes, `Added by you · ${fileName}`, `أضفتموه · ${fileName}`, docId, token);
   redirect(`/events/${(db.prepare(`SELECT event_id FROM invitations WHERE token = ?`).get(token) as { event_id: string }).event_id}/documents`);
+}
+
+/** Facility profile and GIS pin; changing emergency details requires a new plan confirmation. */
+export async function saveFacilityProfileAction(facilityId:string, data:FormData):Promise<void> {
+ const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);
+ const point=readMapPoint(data),s=(k:string)=>String(data.get(k)??'').trim();
+ if(!point||!['name','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
+ const db=getDb();const category=db.prepare('SELECT category_key FROM facilities WHERE id=?').get(facilityId)?.category_key;
+ if((s('capacity')&&(!Number.isSafeInteger(Number(s('capacity')))||Number(s('capacity'))<0))||(category==='transport'&&!TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType'))))redirect(`/facilities/${facilityId}/profile?error=details`);
+ db.exec('BEGIN IMMEDIATE');try {
+ db.prepare(`UPDATE facilities SET name_en=?,name_ar=?,address=?,municipality_en=?,municipality_ar=?,operating_hours=?,phone=?,email=?,access_point=?,ems_number=?,latitude=?,longitude=?,map_confirmed_at=now_stamp(),details_revision=details_revision+1,facility_type=?,licensed_capacity=? WHERE id=?`).run(s('name'),s('nameAr')||s('name'),s('address'),s('municipality'),s('municipalityAr')||s('municipality'),s('hours'),s('phone'),s('email'),s('accessPoint'),s('emsNumber'),point.lat,point.lng,s('facilityType'),s('capacity')!==''&&Number.isFinite(Number(s('capacity')))?Number(s('capacity')):null,facilityId);
+ db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));db.exec('COMMIT');
+ }catch(e){db.exec('ROLLBACK');throw e;}
+ revalidatePath(`/facilities/${facilityId}`);revalidatePath(`/facilities/${facilityId}/plan`);redirect(`/facilities/${facilityId}?notice=profile`);
 }

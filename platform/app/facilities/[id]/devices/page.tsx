@@ -1,3 +1,4 @@
+import { facilityPoint, devicePoint } from '../../../../lib/facility-gis';
 import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
@@ -24,14 +25,14 @@ export default async function DeviceRegistryPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; error?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
   const facility = facilityDetail(account.id, id);
   if (!facility) notFound();
-  const { notice } = await searchParams;
+  const { notice, error } = await searchParams;
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
   const devices = facilityDevices(facility.id);
@@ -56,7 +57,11 @@ export default async function DeviceRegistryPage({
         </h1>
 
 
+        {!facilityPoint(id) ? <p role="status"><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin before registering an AED." ar="أضيفوا موقع المنشأة على الخريطة قبل تسجيل الجهاز."/></a></p>:null}
+        {error ? <p role="alert"><L en="Check the device ID, location, representative and map pin, then save again." ar="تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً."/></p>:null}
         <DeviceRegistry
+          facilityLocation={facilityPoint(id)}
+          deviceLocations={Object.fromEntries(devices.map(d=>{const location=devicePoint(id,d.label);return [d.label,location.separate?location.point:null]}))}
           facilityId={facility.id}
           devices={devices}
           coordinatorName={coordinator?.nameOrPosition ?? ''}

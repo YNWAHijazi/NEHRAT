@@ -12,3 +12,6 @@ export const DASHBOARD_URGENCY = {
   /** At or under this many days, the row reads as warning. */
   warningDays: 45,
 } as const;
+
+/** Map marker sizes in pixels; no regulatory meaning. */
+export const FACILITY_MAP_STYLE = { facilityRadius: 9, aedRadius: 5 } as const;

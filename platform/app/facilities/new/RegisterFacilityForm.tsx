@@ -13,6 +13,9 @@ import { InfoNote } from '../../../components/InfoNote';
  */
 
 import { useState } from 'react';
+import { LocationPicker } from '../../../components/maps/LocationPicker';
+import { TRANSPORT_FACILITY_TYPES } from '../../../lib/rules/facility-intake';
+import type { MapPoint } from '../../../lib/rules/geolocation';
 import { L } from '../../../components/L';
 import { recordFacilityInterestAction, registerFacilityAction } from '../../actions';
 import {
@@ -55,6 +58,8 @@ export function RegisterFacilityForm({
   /** What the Ministry has published (powers one and two); governs the category states. */
   published: { phasedSchedule: { value: string; effective: string | null } | null; capacityThreshold: { value: string; effective: string | null } | null };
 }) {
+  const [point, setPoint] = useState<MapPoint | null>(null);
+  const [profileError, setProfileError] = useState(false);
   const [step, setStep] = useState(1);
   const [catKey, setCatKey] = useState<string | null>(null);
   const [profile, setProfile] = useState<Record<string, string>>({});
@@ -79,6 +84,7 @@ export function RegisterFacilityForm({
       </span>
       {options ? (
         <select
+          name={key}
           value={profile[key] ?? ''}
           onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
           style={{ ...inputStyle, paddingInlineEnd: 34 }}
@@ -93,6 +99,7 @@ export function RegisterFacilityForm({
       ) : (
         <input
           {...(dir ? { dir } : {})}
+          name={key}
           value={profile[key] ?? ''}
           onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
           style={inputStyle}
@@ -109,7 +116,7 @@ export function RegisterFacilityForm({
             key={s.n}
             type="button"
             aria-pressed={step === s.n}
-            onClick={() => (s.n <= 3 ? setStep(s.n) : undefined)}
+            onClick={() => (s.n < step ? setStep(s.n) : undefined)}
             style={{ textAlign: 'start', paddingBlockStart: 12, border: 0, borderBlockStart: `2px solid ${s.n < step ? 'var(--brand)' : s.n === step ? 'var(--accent)' : 'var(--line)'}`, background: 'none', cursor: s.n <= 3 ? 'pointer' : 'default' }}
           >
             <span style={{ display: 'block', fontSize: '11.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockEnd: 4 }}>{s.n}</span>
@@ -133,6 +140,8 @@ export function RegisterFacilityForm({
               return [base, field(`${f.key}Ar`, `${f.en} (Arabic)`, `${f.ar} (بالعربية)`, 'rtl')];
             })}
           </div>
+          <LocationPicker initial={point} onChange={setPoint} />
+          {profileError ? <p role="alert"><L en="Add the facility name, address, contact details, operating hours and a confirmed map pin." ar="أضيفوا اسم المنشأة وعنوانها وبيانات الاتصال وساعات العمل وأكّدوا موقعها على الخريطة." /></p> : null}
           <div data-region="crew-callout" style={{ padding: '30px 32px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
               <L en={content.crewCallout.labelEn} ar={content.crewCallout.labelAr} />
@@ -143,7 +152,7 @@ export function RegisterFacilityForm({
           </div>
           <button
             type="button"
-            onClick={() => setStep(2)}
+            onClick={() => { const valid = point && ['name','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k => profile[k]?.trim()); setProfileError(!valid); if(valid) setStep(2); }}
             style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
           >
             <L en="Continue to the category" ar="المتابعة إلى الفئة" />
@@ -183,6 +192,7 @@ export function RegisterFacilityForm({
             })}
           </div>
 
+          {catKey==='transport'?<label style={{display:'grid',gap:8,marginBlock:20}}><L en="Facility type" ar="نوع المنشأة"/><select value={profile.facilityType??''} onChange={e=>setProfile(p=>({...p,facilityType:e.target.value}))} style={inputStyle}><option value=""></option>{TRANSPORT_FACILITY_TYPES.map(t=><option key={t.key} value={t.key}>{t.en} · {t.ar}</option>)}</select></label>:null}
           {picked ? (
             <div>
               <div data-region="determination" style={{ padding: '32px 36px', background: 'var(--surface)', border: `1px solid ${CHIP[picked.state].border}`, borderRadius: 16, marginBlockEnd: 16 }}>
@@ -228,7 +238,7 @@ export function RegisterFacilityForm({
               {!ended ? (
                 <button
                   type="button"
-                  onClick={() => setStep(3)}
+                  onClick={() => {if(catKey !== 'transport' || profile.facilityType) setStep(3);}} disabled={catKey==='transport'&&!profile.facilityType}
                   style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
                 >
                   <L en="Continue to the coordinator" ar="المتابعة إلى المنسّق" />
@@ -245,8 +255,9 @@ export function RegisterFacilityForm({
             <input key={k} type="hidden" name={k} value={v} />
           ))}
           <input type="hidden" name="category" value={catKey ?? ''} />
+          <input type="hidden" name="mapLat" value={point?.lat ?? ''}/><input type="hidden" name="mapLng" value={point?.lng ?? ''}/><input type="hidden" name="mapConfirmed" value={point?'yes':'no'}/>
           <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en="Coordinator and responsible persons" ar="المنسّق والأشخاص المسؤولون" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
+            <L en="Responsible facility contact" ar="جهة الاتصال المسؤولة في المنشأة" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
           </h2>
           {/* The name-or-position explainer left this step (partner ruling, second
               sweep): the field labels already say "Name or position". */}
@@ -264,7 +275,7 @@ export function RegisterFacilityForm({
                       </span>
                       <input
                         name={`${p.key}${f.key === 'nameOrPosition' ? 'Name' : f.key === 'phone' ? 'Phone' : 'Email'}`}
-                        required={p.key === 'coordinator' && f.key === 'nameOrPosition'}
+                        required={p.key === 'coordinator'}
                         style={inputStyle}
                       />
                     </label>

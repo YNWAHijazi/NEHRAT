@@ -54,7 +54,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         locationsEn: refDevices.map((d) => d.locationEn),
         locationsAr: refDevices.map((d) => d.locationAr),
         anyPediatric: refDevices.some((d) => d.pediatric === 'yes'),
-        planConfirmed: facilityPlanConfirmation(facility.id) !== null,
+        planConfirmed: facilityPlanConfirmation(facility.id)?.current === true,
       }
     : null;
 

@@ -1,10 +1,11 @@
+import { facilityAedDecisions, facilityAedStatus } from '../../../lib/facility-gis';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { correctiveActions, facilitiesForOversight } from '../../../lib/queries';
 import { FACILITY_CONTENT, can } from '../../../lib/rules';
 import { ministryConfig } from '../../../lib/queries';
-import { markCorrectiveDoneAction, recordFacilityCorrectiveAction, requestReadinessConfirmationAction } from '../../ministry-actions';
+import { setFacilityAedRequirementAction, markCorrectiveDoneAction, recordFacilityCorrectiveAction, requestReadinessConfirmationAction } from '../../ministry-actions';
 
 /**
  * Facility oversight -- the cardiac lane, carrying no event outcome. Corrective
@@ -14,10 +15,10 @@ import { markCorrectiveDoneAction, recordFacilityCorrectiveAction, requestReadin
 export default async function FacilityOversightPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; error?:string }>;
 }) {
   const account = await requireMinistryPage('viewFacilityLane');
-  const { notice } = await searchParams;
+  const { notice,error } = await searchParams;
   const facilities = facilitiesForOversight(account.isDemo);
   const corrective = correctiveActions(account.isDemo);
   const mayCorrect = can(account.role, 'recordCorrective');
@@ -35,10 +36,12 @@ export default async function FacilityOversightPage({
           <L en="The corrective action has been raised and the operator notified." ar="أُثير الإجراء التصحيحي وأُبلغ المشغّل." />
         </div>
       ) : null}
+      {error?<p role="alert"><L en="A reason is required. Required AEDs for sports facilities, transport hubs, malls and public venues above the threshold cannot be waived here." ar="السبب مطلوب. لا يمكن إعفاء المنشآت الرياضية ومحطات النقل ومراكز التسوق والأماكن العامة فوق عتبة السعة من متطلبات الأجهزة هنا."/></p>:null}
       <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="Facility oversight" ar="الرقابة على المرافق" />
       </h1>
 
+      <nav style={{display:"flex",flexWrap:"wrap",gap:20,marginBlockEnd:24}}><a href="/ministry/facilities/map"><L en="Facility and AED map" ar="خريطة المنشآت والأجهزة"/></a><a href="/ministry/facilities/reports"><L en="Incident reports" ar="تقارير الحوادث"/></a></nav>
       <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
         {facilities.map((f) => (
           <div key={f.id} style={{ paddingBlock: '16px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -51,8 +54,10 @@ export default async function FacilityOversightPage({
               </span>
             </span>
             <span style={{ padding: '3px 9px', borderRadius: 999, background: f.standingKind === 'met' ? 'var(--brand-soft)' : f.standingKind === 'lapsing' ? 'var(--accent-soft)' : 'var(--bad-soft)', color: f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent-ink)' : 'var(--bad)', fontSize: '12.5px' }}>
-              {f.standingKind === 'met' ? <L en="Obligations being met" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Items lapsing — the operator's to renew" ar="بنود تقترب من الانتهاء — تجديدها على المشغّل" /> : <L en="Obligations not being met — the operator's to correct" ar="الموجبات غير مستوفاة — تصحيحها على المشغّل" />}
+              {facilityAedStatus(f.id)==='review'?<L en="AED requirement: review needed" ar="متطلبات الجهاز: المراجعة مطلوبة"/>:f.standingKind === 'met' ? <L en="Up to date" ar="الموجبات مستوفاة" /> : f.standingKind === 'lapsing' ? <L en="Updates due soon" ar="بنود تقترب من الانتهاء — تجديدها على المشغّل" /> : <L en="Updates needed" ar="الموجبات غير مستوفاة — تصحيحها على المشغّل" />}
             </span>
+            {mayCorrect?<details style={{flexBasis:'100%'}}><summary><L en="AED requirement" ar="متطلبات الجهاز"/></summary><form action={setFacilityAedRequirementAction.bind(null,f.id)} style={{display:'flex',flexWrap:'wrap',gap:10,marginBlock:12}}><select name="requirement" defaultValue={facilityAedStatus(f.id)} aria-label="AED requirement" style={{minHeight:44}}><option value="required">Required · مطلوب</option><option value="notRequired">Not currently required · غير مطلوب حالياً</option><option value="review">Review needed · يحتاج إلى مراجعة</option></select><input name="reason" aria-label="Reason for AED decision" placeholder="Reason / السبب" required style={{minHeight:44}}/><button type="submit"><L en="Record decision" ar="تسجيل القرار"/></button></form></details>:null}
+            {facilityAedDecisions(f.id).length?<details style={{flexBasis:'100%'}}><summary><L en="Decision history" ar="سجل القرارات"/></summary>{facilityAedDecisions(f.id).map((d,i)=><p key={i}>{d.created_at} · {d.actor}<br/><L en={d.requirement==='required'?'AED required':d.requirement==='notRequired'?'AED not currently required':'Review needed'} ar={d.requirement==='required'?'الجهاز مطلوب':d.requirement==='notRequired'?'الجهاز غير مطلوب حالياً':'المراجعة مطلوبة'}/> — {d.reason}</p>)}</details>:null}
           </div>
         ))}
       </div>

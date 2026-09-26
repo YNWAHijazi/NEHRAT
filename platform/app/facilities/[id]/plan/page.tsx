@@ -1,3 +1,4 @@
+import { facilityPoint } from '../../../../lib/facility-gis';
 import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -23,9 +24,12 @@ import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
  */
 export default async function FacilityPlanPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{error?:string}>;
 }) {
+  const query=await searchParams;
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
@@ -66,6 +70,8 @@ export default async function FacilityPlanPage({
     { en: 'Facility name', ar: 'اسم المرفق', vEn: facility.nameEn, vAr: facility.nameAr },
     { en: 'Facility category', ar: 'فئة المرفق', vEn: category?.en ?? '', vAr: category?.ar ?? '' },
     { en: 'Address and municipality', ar: 'العنوان والبلدية', vEn: `${facility.address}, ${facility.municipalityEn}`, vAr: `${facility.address}، ${facility.municipalityAr}` },
+    { en: 'Facility telephone', ar: 'هاتف المنشأة', vEn: facility.phone, vAr: facility.phone },
+    { en: 'Facility email', ar: 'البريد الإلكتروني للمنشأة', vEn: facility.email, vAr: facility.email },
     { en: 'Operating hours', ar: 'ساعات العمل', vEn: facility.operatingHours, vAr: facility.operatingHours },
     { en: 'Main EMS entrance', ar: 'المدخل الرئيسي أو نقطة وصول خدمات الطوارئ الطبية', vEn: facility.accessPoint, vAr: facility.accessPoint },
     { en: 'EMS contact number used', ar: 'رقم خدمات الطوارئ الطبية المعتمد', vEn: facility.emsNumber, vAr: facility.emsNumber },
@@ -184,6 +190,8 @@ export default async function FacilityPlanPage({
           </div>
         </div>
 
+        {!facilityPoint(id)?<p><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin" ar="إضافة موقع المنشأة على الخريطة"/></a></p>:<p><a href={`https://www.openstreetmap.org/?mlat=${facilityPoint(id)!.lat}&mlon=${facilityPoint(id)!.lng}#map=18/${facilityPoint(id)!.lat}/${facilityPoint(id)!.lng}`} target="_blank" rel="noreferrer"><L en="View facility map" ar="عرض خريطة المنشأة"/></a></p>}
+        {query.error==='contact'?<p role="alert"><L en="Enter the responsible contact’s name, phone and email." ar="أدخلوا اسم جهة الاتصال المسؤولة ورقم الهاتف والبريد الإلكتروني."/></p>:query.error?<p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the facility map and AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من الخريطة وحالة الأجهزة."/></p>:null}
         <PlanConfirmation
           facilityId={facility.id}
           coordinatorName={coordinator?.nameOrPosition ?? ''}

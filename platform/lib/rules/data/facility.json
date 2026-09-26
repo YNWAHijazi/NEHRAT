@@ -10,10 +10,10 @@
       "alsoRecurringVenue": true,
       "shortEn": "Sports and aquatic facility",
       "shortAr": "منشأة رياضية ومائية",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "An AED is required.",
+      "ruleAr": "يلزم توفير جهاز إزالة رجفان.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     },
     {
       "key": "education",
@@ -22,10 +22,10 @@
       "en": "Schools, universities and campuses",
       "ar": "المدارس والجامعات والمجمعات التعليمية",
       "state": "inForceNow",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "AEDs follow the Ministry’s school and university rollout schedule.",
+      "ruleAr": "تخضع الأجهزة لجدول التنفيذ الوزاري للمدارس والجامعات.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     },
     {
       "key": "transport",
@@ -34,10 +34,10 @@
       "en": "Transport hubs, shopping malls and public venues",
       "ar": "محطات النقل ومراكز التسوق والأماكن العامة",
       "state": "inForceNow",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "Transport hubs and malls need AEDs. Public venues follow the Ministry’s capacity threshold.",
+      "ruleAr": "تلزم الأجهزة في محطات النقل ومراكز التسوق. وتخضع الأماكن العامة لعتبة السعة الوزارية.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     },
     {
       "key": "remote",
@@ -46,10 +46,10 @@
       "en": "Remote or hard-to-reach facilities",
       "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
       "state": "inForceNow",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "An AED is required when the Ministry designates the facility.",
+      "ruleAr": "يلزم الجهاز عندما تحدّد الوزارة المنشأة.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     },
     {
       "key": "priorArrest",
@@ -59,10 +59,10 @@
       "ar": "منشآت شهدت توقف قلب مؤكداً",
       "arNote": "The Arabic issue's part 1 is broader: it names who reports (EMS or an approved first-response agency) and who confirms (the Ministry). Recorded for the Ministry; the requirements-table wording is used.",
       "state": "inForceNow",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "The Ministry reviews the facility and sets its readiness requirements.",
+      "ruleAr": "تراجع الوزارة المنشأة وتحدّد متطلبات جاهزيتها.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     },
     {
       "key": "designated",
@@ -71,10 +71,10 @@
       "en": "Other facilities named by the Ministry",
       "ar": "منشآت أخرى تحددها الوزارة",
       "state": "inForceNow",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
-      "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "ruleEn": "Follow the readiness requirements set by the Ministry for this facility.",
+      "ruleAr": "اتّبعوا متطلبات الجاهزية التي تحدّدها الوزارة لهذه المنشأة.",
+      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
+      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
     }
   ],
   "categoryUnset": {
@@ -165,8 +165,8 @@
   "persons": [
     {
       "key": "coordinator",
-      "en": "Facility cardiac-readiness coordinator",
-      "ar": "منسق الجاهزية للاستجابة لحالات توقف القلب في المرفق",
+      "en": "Responsible facility contact",
+      "ar": "جهة الاتصال المسؤولة في المنشأة",
       "noteEn": "One named person for this facility.",
       "noteAr": "شخص واحد مُسمّى لهذه المنشأة."
     },
@@ -306,16 +306,30 @@
     },
     {
       "key": "statusChange",
-      "en": "Update after operational or accessibility status change",
-      "ar": "تحديث نتيجة تغيير في الحالة التشغيلية أو في إمكانية الوصول إلى الجهاز",
+      "en": "Update operational status",
+      "ar": "تحديث الحالة التشغيلية",
       "ctaEn": "Save change",
       "ctaAr": "حفظ التغيير"
+    },
+    {
+      "key": "accessibility",
+      "en": "Update accessibility",
+      "ar": "تحديث إمكانية الوصول",
+      "ctaEn": "Save accessibility",
+      "ctaAr": "حفظ إمكانية الوصول"
+    },
+    {
+      "key": "ministryUpdate",
+      "en": "Other Ministry-requested update",
+      "ar": "تحديث آخر بطلب من الوزارة",
+      "ctaEn": "Save update",
+      "ctaAr": "حفظ التحديث"
     }
   ],
   "deviceConfirmation": {
     "$comment": "Annex C section 6, Arabic verbatim. Signed by the FACILITY REPRESENTATIVE -- a different signatory from the plan's coordinator (ROADMAP 2d).",
-    "en": "I confirm that the information in this form is accurate and that the AED is operational.",
-    "ar": "أقر بأن المعلومات الواردة في هذا النموذج صحيحة، وأن جهاز إزالة الرجفان الخارجي الآلي صالح للتشغيل.",
+    "en": "I confirm this information is current, the AED is maintained, and changes to its location, access or operating status will be recorded.",
+    "ar": "أؤكّد أن البيانات محدّثة وأن الجهاز يخضع للصيانة وأن أي تغيير في موقعه أو إمكانية الوصول إليه أو حالته التشغيلية سيُسجّل.",
     "signatoryEn": "Facility representative",
     "signatoryAr": "ممثل المرفق"
   },
@@ -386,13 +400,13 @@
     },
     {
       "key": "access",
-      "en": "AED access not unnecessarily delayed",
-      "ar": "لا توجد عوائق تؤدي إلى تأخير غير مبرر في الوصول إلى الجهاز"
+      "en": "Required AEDs are accessible and operational",
+      "ar": "الأجهزة المطلوبة متاحة وصالحة للتشغيل"
     },
     {
       "key": "routes",
-      "en": "EMS entrance and access routes clear",
-      "ar": "مداخل المرفق ومسارات وصول خدمات الطوارئ الطبية واضحة وخالية من العوائق"
+      "en": "EMS access is clear and staff can direct responders to the patient",
+      "ar": "وصول الإسعاف واضح ويعرف الموظفون كيف يوجّهون المستجيبين إلى المريض"
     },
     {
       "key": "staffKnow",
@@ -469,7 +483,7 @@
       },
       {
         "key": "guided",
-        "en": "Someone met and guided responders to the patient",
+        "en": "Responders were promptly directed to the patient",
         "ar": "تم استقبال أفراد خدمات الطوارئ الطبية وإرشادهم إلى المريض",
         "answers": "yesNoNa"
       }
@@ -529,34 +543,22 @@
     ],
     "postIncident": [
       {
-        "key": "aedChecked",
-        "en": "AED checked after the incident, where applicable",
-        "ar": "تم فحص جهاز إزالة الرجفان الخارجي الآلي بعد الحادثة، عند الاقتضاء",
-        "answers": "check"
-      },
-      {
-        "key": "padsReplaced",
-        "en": "Used pads or supplies replaced",
-        "ar": "تم استبدال الأقطاب الكهربائية أو المستلزمات المستخدمة",
-        "answers": "checkNa"
-      },
-      {
         "key": "returned",
-        "en": "AED returned to operational service",
-        "ar": "أُعيد جهاز إزالة الرجفان الخارجي الآلي إلى حالته التشغيلية",
-        "answers": "checkNa"
+        "en": "AED returned to operational status",
+        "ar": "أُعيد الجهاز إلى حالته التشغيلية",
+        "answers": "yesNoNa"
       },
       {
-        "key": "reviewed",
-        "en": "Response reviewed by the facility",
-        "ar": "تمت مراجعة الاستجابة من قبل المرفق",
-        "answers": "check"
+        "key": "problem",
+        "en": "A readiness or response problem was identified",
+        "ar": "تم تحديد مشكلة في الجاهزية أو الاستجابة",
+        "answers": "yesNo"
       }
     ],
     "correctiveField": {
       "$comment": "Free text per Annex D, not a checkbox (the prototype's fifth check row is superseded by the source).",
-      "en": "Problems identified or corrective actions required",
-      "ar": "المشكلات التي تم تحديدها أو الإجراءات التصحيحية المطلوبة"
+      "en": "Describe the problem and any action needed",
+      "ar": "صِفوا المشكلة والإجراء المطلوب"
     },
     "narrative": {
       "titleEn": "What happened",
@@ -756,5 +758,6 @@
       }
     }
   },
-  "$commentOwner20260926": "Owner instruction: all listed facility categories are active. Registration is available for every category; old activation waiting screens are removed."
+  "$commentOwner20260926": "Owner instruction: all listed facility categories are active. Registration is available for every category; old activation waiting screens are removed.",
+  "$commentPadGis20260926": "Updated Annexes A–D from PAD Annexes GIS Ready.docx supplied by the owner. Category-specific AED conditions are preserved; all categories can register. Existing extra contacts and maintenance dates are retained as optional records."
 }

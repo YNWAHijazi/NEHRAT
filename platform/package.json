@@ -26,6 +26,7 @@
     "test:release": "CIRCLE_NODE_TOTAL=2 NODE_OPTIONS=--max-old-space-size=2048 NEXT_DIST_DIR=.next-v1-build npm run build && DATABASE_PATH=var/release-runtime.db node --import tsx scripts/reseed-dev.ts && playwright test --config playwright.release.config.ts"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "next": "^15.5.0",
     "nodemailer": "^10.0.3",
     "pg": "^8.23.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^22.15.0",
     "@types/nodemailer": "^8.0.1",
     "@types/pngjs": "^6.0.5",

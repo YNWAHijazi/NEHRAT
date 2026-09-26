@@ -10,7 +10,8 @@ import { publishedFacilityValues, unreadCountFor } from '../../../lib/queries';
  * and for the categories awaiting a Ministry value it ends the journey -- no Continue
  * button exists there (ROADMAP 2d; rule 10's absent behaviour).
  */
-export default async function RegisterFacilityPage() {
+export default async function RegisterFacilityPage({searchParams}:{searchParams:Promise<{error?:string}>}) {
+  const {error}=await searchParams;
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const organization = organizationFor(account.id);
@@ -30,6 +31,7 @@ export default async function RegisterFacilityPage() {
         {/* The six-steps overview sentence left this screen (partner ruling, second
             sweep): the step rail below already shows the steps, and the category
             step explains itself when reached. */}
+        {error?<p role="alert"><L en="Complete the required contact details and confirm the facility map pin." ar="أكملوا بيانات الاتصال المطلوبة وأكّدوا موقع المنشأة على الخريطة."/></p>:null}
         <RegisterFacilityForm published={publishedFacilityValues()} />
       </main>
     </>

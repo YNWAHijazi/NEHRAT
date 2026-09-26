@@ -50,9 +50,9 @@ export function PersonsForm({ facilityId, persons }: { facilityId: string; perso
               <L en={p.en} ar={p.ar} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 10 }}>
-              <input name={`${p.key}Name`} defaultValue={row?.nameOrPosition ?? ''} aria-label={p.en} style={inputStyle} />
-              <input name={`${p.key}Phone`} defaultValue={row?.phone ?? ''} style={inputStyle} />
-              <input name={`${p.key}Email`} defaultValue={row?.email ?? ''} style={inputStyle} />
+              <input name={`${p.key}Name`} required={p.key==='coordinator'} defaultValue={row?.nameOrPosition ?? ''} aria-label={p.en} style={inputStyle} />
+              <input name={`${p.key}Phone`} type="tel" dir="ltr" required={p.key==='coordinator'} aria-label="Phone / الهاتف" defaultValue={row?.phone ?? ''} style={inputStyle} />
+              <input name={`${p.key}Email`} type="email" dir="ltr" required={p.key==='coordinator'} aria-label="Email / البريد الإلكتروني" defaultValue={row?.email ?? ''} style={inputStyle} />
             </div>
           </div>
         );
@@ -77,7 +77,7 @@ export function PlanConfirmation({
   existing: FacilityPlanConfirmation | null;
 }) {
   const content = FACILITY_CONTENT;
-  const [checks, setChecks] = useState<Record<string, boolean>>(existing?.checks ?? {});
+  const [checks, setChecks] = useState<Record<string, boolean>>(existing?.current ? existing.checks : {});
 
   return (
     <form
@@ -95,8 +95,9 @@ export function PlanConfirmation({
           </span>
         ) : null}
       </div>
+      {existing && !existing.current ? <p role="status"><L en="The facility or AED details changed. Review and confirm the updated plan." ar="تغيّرت بيانات المنشأة أو الأجهزة. راجعوا الخطة المحدّثة وأكّدوها."/></p>:null}
       <div className="secondary-help"><InfoNote><L
-          en="Recording this confirmation restarts the annual clock on the validity record. The coordinator signs it."
+          en="Recording this confirmation restarts the annual clock on the validity record. The facility representative confirms it."
           ar="تسجيل هذا التأكيد يعيد بدء العدّ السنوي في سجل الصلاحية. ويوقّعه المنسّق."
         /></InfoNote></div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 20 }}>
@@ -124,11 +125,11 @@ export function PlanConfirmation({
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
             <L en={content.drillDateField.en} ar={content.drillDateField.ar} />
           </span>
-          <input name="drillDate" type="date" defaultValue={existing?.drillDate ?? ''} style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }} />
+          <input name="drillDate" required type="date" defaultValue={existing?.drillDate ?? ''} style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-            <L en="Facility cardiac-readiness coordinator" ar="منسق الجاهزية للاستجابة لحالات توقف القلب في المرفق" />
+            <L en="Facility representative" ar="ممثل المنشأة" />
           </span>
           <input name="coordinator" defaultValue={coordinatorName} required style={inputStyle} />
         </label>

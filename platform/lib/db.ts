@@ -869,6 +869,23 @@ function migrate(d: DatabaseSync): void {
     }
   };
 
+  for (const table of ['facilities', 'facility_devices']) {
+    addColumn(table, 'latitude', 'latitude REAL');
+    addColumn(table, 'longitude', 'longitude REAL');
+    addColumn(table, 'map_confirmed_at', 'map_confirmed_at TEXT');
+  }
+  addColumn('facilities', 'details_revision', 'details_revision INTEGER NOT NULL DEFAULT 0');
+  addColumn('facilities', 'facility_type', "facility_type TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_plan_confirmations', 'details_revision', 'details_revision INTEGER NOT NULL DEFAULT 0');
+  addColumn('facility_plan_confirmations', 'snapshot', "snapshot TEXT NOT NULL DEFAULT '{}'");
+  addColumn('facility_device_updates', 'snapshot', "snapshot TEXT NOT NULL DEFAULT '{}'");
+  addColumn('facility_incidents', 'submitted_by', 'submitted_by INTEGER REFERENCES accounts(id)');
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_aed_decisions (id INTEGER PRIMARY KEY AUTOINCREMENT,facility_id TEXT NOT NULL REFERENCES facilities(id),requirement TEXT NOT NULL CHECK(requirement IN ('required','notRequired','review')),reason TEXT NOT NULL,actor_id INTEGER NOT NULL REFERENCES accounts(id),created_at TEXT NOT NULL DEFAULT (datetime('now')));`);
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_profile_updates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, facility_id TEXT NOT NULL REFERENCES facilities(id),
+    actor_id INTEGER NOT NULL REFERENCES accounts(id), snapshot TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
   addColumn('accounts', 'phone', "phone TEXT NOT NULL DEFAULT ''");
   addColumn('accounts', 'email_verified_at', 'email_verified_at TEXT');
   d.exec(`CREATE TABLE IF NOT EXISTS email_challenges (

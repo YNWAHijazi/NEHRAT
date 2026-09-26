@@ -1,3 +1,4 @@
+import { facilityAedStatus } from './facility-gis';
 /**
  * Read-side queries for the organizer surfaces. Ownership is enforced here: every query
  * is scoped to the session's account, so a foreign record and a missing record are the
@@ -402,7 +403,7 @@ function ledgerInputsFor(facilityId: string, today: string): LedgerInputs {
   const plan = db
     .prepare(
       `SELECT drill_date, created_at FROM facility_plan_confirmations
-       WHERE facility_id = ? ORDER BY created_at DESC LIMIT 1`,
+       WHERE facility_id = ? AND details_revision=(SELECT details_revision FROM facilities WHERE id=facility_plan_confirmations.facility_id) ORDER BY id DESC LIMIT 1`,
     )
     .get(facilityId) as { drill_date: string | null; created_at: string } | undefined;
   const coord = db
@@ -453,7 +454,8 @@ export function publishedCycles(): ReturnType<typeof effectiveCycles> {
 }
 
 export function facilityLedgerFor(facilityId: string, today: string): FacilityLedgerRow[] {
-  return facilityLedger(ledgerInputsFor(facilityId, today));
+  const inputs=ledgerInputsFor(facilityId,today);
+  return facilityLedger(inputs).filter(row=>!['padExpiry','batteryExpiry','latestCheck'].includes(row.key)||row.lastAffirmed!==null && row.until!==null);
 }
 
 export function facilitiesFor(accountId: number): FacilityRow[] {
@@ -473,7 +475,7 @@ export function facilitiesFor(accountId: number): FacilityRow[] {
     const standing = facilityStanding(ledger);
     // The dashboard row carries the reference's short state; the readiness screen
     // carries the full standing line.
-    const line =
+    const line = facilityAedStatus(r.id)==='review' ? {en:'Ministry review needed',ar:'مراجعة الوزارة مطلوبة'} :
       standing.kind === 'lapsed' ? FACILITY_CONTENT.standingShort.notMet : FACILITY_CONTENT.standingShort.met;
     const untils = ledger.map((row) => row.until).filter((u): u is string => u !== null);
     return {
@@ -503,6 +505,7 @@ export interface FacilityDetail {
   id: string;
   nameEn: string; nameAr: string;
   categoryKey: string;
+  facilityType: string; licensedCapacity: number | null;
   address: string;
   municipalityEn: string; municipalityAr: string;
   operatingHours: string; phone: string; email: string;
@@ -516,21 +519,21 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
   const r = getDb()
     .prepare(
       `SELECT id, name_en, name_ar, category_key, address, municipality_en, municipality_ar,
-              operating_hours, phone, email, access_point, ems_number, created_at, archived_at, archived_reason
+              operating_hours, phone, email, access_point, ems_number, created_at, archived_at, archived_reason, facility_type, licensed_capacity
        FROM facilities WHERE id = ? AND account_id = ?`,
     )
     .get(facilityId, accountId) as
     | {
         id: string; name_en: string; name_ar: string; category_key: string; address: string;
         municipality_en: string; municipality_ar: string; operating_hours: string;
-        phone: string; email: string; access_point: string; ems_number: string; created_at: string;
+        facility_type: string; licensed_capacity: number | null; phone: string; email: string; access_point: string; ems_number: string; created_at: string;
         archived_at: string | null; archived_reason: string | null;
       }
     | undefined;
   if (!r) return null;
   return {
     id: r.id, nameEn: r.name_en, nameAr: r.name_ar, categoryKey: r.category_key,
-    address: r.address, municipalityEn: r.municipality_en, municipalityAr: r.municipality_ar,
+    facilityType:r.facility_type, licensedCapacity:r.licensed_capacity, address: r.address, municipalityEn: r.municipality_en, municipalityAr: r.municipality_ar,
     operatingHours: r.operating_hours, phone: r.phone, email: r.email,
     accessPoint: r.access_point, emsNumber: r.ems_number, createdAt: r.created_at,
     archivedAt: r.archived_at ?? null,
@@ -590,19 +593,20 @@ export interface FacilityPlanConfirmation {
   drillDate: string | null;
   coordinator: string; position: string;
   createdAt: string;
+  current: boolean;
 }
 
 export function facilityPlanConfirmation(facilityId: string): FacilityPlanConfirmation | null {
   const r = getDb()
     .prepare(
-      `SELECT checks, drill_date, coordinator, position, created_at
-       FROM facility_plan_confirmations WHERE facility_id = ? ORDER BY created_at DESC LIMIT 1`,
+      `SELECT checks, drill_date, coordinator, position, created_at, details_revision=(SELECT details_revision FROM facilities WHERE id=facility_plan_confirmations.facility_id) AS current
+       FROM facility_plan_confirmations WHERE facility_id = ? ORDER BY id DESC LIMIT 1`,
     )
-    .get(facilityId) as { checks: string; drill_date: string | null; coordinator: string; position: string; created_at: string } | undefined;
+    .get(facilityId) as { checks: string; drill_date: string | null; coordinator: string; position: string; created_at: string; current: number } | undefined;
   if (!r) return null;
   return {
     checks: JSON.parse(r.checks) as Record<string, boolean>,
-    drillDate: r.drill_date, coordinator: r.coordinator, position: r.position, createdAt: r.created_at,
+    drillDate: r.drill_date, coordinator: r.coordinator, position: r.position, createdAt: r.created_at, current: r.current === 1,
   };
 }
 

@@ -1,3 +1,4 @@
+import { facilityPoint, facilityAedStatus } from '../../../lib/facility-gis';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
@@ -76,6 +77,7 @@ export default async function FacilityReadinessPage({
   const asOfDate = offset === 0 ? today : addDaysIso(today, offset);
   const ledger = facilityLedgerFor(facility.id, asOfDate);
   const standing = facilityStanding(ledger);
+  const aedStatus=facilityAedStatus(id);
   const devices = facilityDevices(facility.id);
   const requests = facilityRequests(facility.id);
   const category = facilityCategory(facility.categoryKey);
@@ -89,6 +91,7 @@ export default async function FacilityReadinessPage({
   const fill = (tpl: string, n: number): string =>
     tpl.replace('{n}', String(n)).replace('{days}', String(days));
   const standingLine =
+    aedStatus==='review' ? {en:'Ministry review needed for the AED requirement.',ar:'مراجعة الوزارة مطلوبة لتحديد متطلبات الجهاز.',border:'var(--accent)',bg:'var(--accent-soft)'} :
     standing.kind === 'lapsed'
       ? { en: fill(standing.lapsedCount === 1 ? content.standing.lapsed.enOne : content.standing.lapsed.enMany, standing.lapsedCount), ar: fill(content.standing.lapsed.ar, standing.lapsedCount), border: 'var(--bad)', bg: 'var(--bad-soft)' }
       : standing.kind === 'lapsing'
@@ -102,6 +105,7 @@ export default async function FacilityReadinessPage({
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        <div style={{display:'flex',gap:12,marginBlockEnd:20,flexWrap:'wrap'}}><Link href={`/facilities/${id}/profile`}><L en="Edit facility details and map" ar="تعديل تفاصيل المنشأة والخريطة"/></Link><Link href={`/facilities/${id}/incidents`}><L en="View incident reports" ar="عرض تقارير الحوادث"/></Link>{!facilityPoint(id)?<span><L en="Map pin needed" ar="موقع الخريطة مطلوب"/></span>:null}</div>
         {notice === 'incident' ? (
           <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
             <L en="The incident report has been submitted to the Ministry." ar="قُدِّم تقرير الحادثة إلى الوزارة." />

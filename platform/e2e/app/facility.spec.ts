@@ -11,14 +11,14 @@
  */
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { fillFacilityProfile } from '../helpers/facility-map';
 import { signInAs } from '../helpers/signin';
 
 
 test.describe('the category determination', () => {
   test('a school leaves having done everything available to it', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/facilities/new');
-    await page.getByRole('button', { name: /Continue to the category/ }).click();
+    await fillFacilityProfile(page);
     await page.getByRole('button', { name: /Schools, universities/ }).click();
 
     await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
@@ -28,11 +28,10 @@ test.describe('the category determination', () => {
 
   test('a sports facility proceeds, and the recurring-venue cross-sell is gone', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/facilities/new');
-    await page.getByRole('button', { name: /Continue to the category/ }).click();
+    await fillFacilityProfile(page);
     await page.getByRole('button', { name: /Sports and aquatic facilities/ }).click();
 
-    await expect(page.locator('[data-region="determination"]')).toContainText('Register the facility and its AEDs');
+    await expect(page.locator('[data-region="determination"]')).toContainText('An AED is required.');
     // REMOVED BY RULING (partner, 2026-09-05): registering a facility does not
     // advertise the venue instrument. The determination and the way on are the
     // screen; the anchor proves the page rendered before asserting the absence.
@@ -42,12 +41,11 @@ test.describe('the category determination', () => {
 
   test('a review category proceeds -- the review states what is required', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/facilities/new');
-    await page.getByRole('button', { name: /Continue to the category/ }).click();
+    await fillFacilityProfile(page);
     await page.getByRole('button', { name: /Facilities with a confirmed previous cardiac arrest/ }).click();
 
     await expect(page.locator('[data-region="determination"]')).toContainText(
-      'Register the facility and its AEDs',
+      'The Ministry reviews the facility and sets its readiness requirements.',
     );
     await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
   });
@@ -58,16 +56,16 @@ test.describe('the incident narrative name check', () => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/FC-0014/incidents/new');
 
-    const narrative = page.locator('textarea[name="narrative"]');
+    const narrative = page.locator('textarea[name="corrective"]');
     await narrative.fill('Mr Haddad collapsed near the pool');
-    await expect(page.locator('[data-region="narrative"]')).toContainText(
-      'This looks like a personal name',
+    await expect(page.locator('main')).toContainText(
+      'Remove personal names',
     );
     await expect(page.getByRole('button', { name: /Submit report/ })).toBeDisabled();
 
     await narrative.fill('The patient collapsed; staff started CPR and applied the AED.');
-    await expect(page.locator('[data-region="narrative"]')).not.toContainText(
-      'This looks like a personal name',
+    await expect(page.locator('main')).not.toContainText(
+      'Remove personal names',
     );
     await expect(page.getByRole('button', { name: /Submit report/ })).toBeEnabled();
   });
@@ -76,7 +74,7 @@ test.describe('the incident narrative name check', () => {
 test.describe("an organizer never sees another organizer's facilities", () => {
   test('a foreign facility id refuses like a missing one, on every facility route', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    for (const suffix of ['', '/devices', '/plan', '/incidents/new']) {
+    for (const suffix of ['', '/devices', '/plan', '/profile', '/incidents', '/incidents/new']) {
       const foreign = await gotoRidingRestarts(page, `/facilities/FC-0001${suffix}`);
       const foreignStatus = foreign?.status() ?? 0;
       const missing = await gotoRidingRestarts(page, `/facilities/FC-9999${suffix}`);

@@ -1181,3 +1181,18 @@ export async function acceptPostEventReportAction(eventId: string): Promise<void
   revalidatePath(`/events/${eventId}/post-event`);
   redirect('/ministry/reports');
 }
+
+/** Applies the category-specific schedule/designation/review in the updated PAD Annex A. */
+export async function setFacilityAedRequirementAction(facilityId:string,data:FormData):Promise<void> {
+ const a=await requireMinistry('recordCorrective');const db=getDb();
+ const f=db.prepare('SELECT is_demo,category_key,facility_type,licensed_capacity FROM facilities WHERE id=?').get(facilityId) as {is_demo:number;category_key:string;facility_type:string;licensed_capacity:number|null}|undefined;
+ if(!f||f.is_demo!==Number(a.isDemo))redirect('/ministry/facilities');
+ const requirement=String(data.get('requirement')??''),reason=String(data.get('reason')??'').trim();
+ const config=ministryConfig().get('capacityThreshold');
+ const threshold=config&&(!config.effective||config.effective<=beirutToday())?Number(config.value):NaN;
+ const overThreshold=f.category_key==='transport'&&f.facility_type==='publicVenue'&&f.licensed_capacity!==null&&Number.isFinite(threshold)&&f.licensed_capacity>threshold;
+ const fixed=overThreshold||f.category_key==='sports'||(f.category_key==='transport'&&['airport','port','terminal','mall'].includes(f.facility_type));
+ if(!['required','notRequired','review'].includes(requirement)||!reason||(fixed&&requirement!=='required'))redirect('/ministry/facilities?error=aed');
+ db.exec('BEGIN IMMEDIATE');try {db.prepare('INSERT INTO facility_aed_decisions (facility_id,requirement,reason,actor_id) VALUES (?,?,?,?)').run(facilityId,requirement,reason,a.id);db.prepare('UPDATE facilities SET details_revision=details_revision+1 WHERE id=?').run(facilityId);db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}
+ revalidatePath(`/facilities/${facilityId}`);revalidatePath('/ministry/facilities');redirect('/ministry/facilities?notice=aed');
+}

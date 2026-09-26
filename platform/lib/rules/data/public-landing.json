@@ -84,8 +84,8 @@
       "en": "Sports and aquatic facilities",
       "ar": "المنشآت الرياضية والمائية",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "An AED is required.",
+      "ruleAr": "يلزم توفير جهاز إزالة رجفان.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -93,8 +93,8 @@
       "en": "Schools, universities and campuses",
       "ar": "المدارس والجامعات والمجمعات التعليمية",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "AEDs follow the Ministry’s school and university rollout schedule.",
+      "ruleAr": "تخضع الأجهزة لجدول التنفيذ الوزاري للمدارس والجامعات.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -102,8 +102,8 @@
       "en": "Transport hubs, shopping malls and public venues",
       "ar": "محطات النقل ومراكز التسوق والأماكن العامة",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "Transport hubs and malls need AEDs. Public venues follow the Ministry’s capacity threshold.",
+      "ruleAr": "تلزم الأجهزة في محطات النقل ومراكز التسوق. وتخضع الأماكن العامة لعتبة السعة الوزارية.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -111,8 +111,8 @@
       "en": "Remote or hard-to-reach facilities",
       "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "An AED is required when the Ministry designates the facility.",
+      "ruleAr": "يلزم الجهاز عندما تحدّد الوزارة المنشأة.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -120,8 +120,8 @@
       "en": "Facilities with a confirmed previous cardiac arrest",
       "ar": "منشآت شهدت توقف قلب مؤكداً",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "The Ministry reviews the facility and sets its readiness requirements.",
+      "ruleAr": "تراجع الوزارة المنشأة وتحدّد متطلبات جاهزيتها.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -129,8 +129,8 @@
       "en": "Other facilities named by the Ministry",
       "ar": "منشآت أخرى تحددها الوزارة",
       "state": "inforce",
-      "ruleEn": "Register the facility and its AEDs.",
-      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "ruleEn": "Follow the readiness requirements set by the Ministry for this facility.",
+      "ruleAr": "اتّبعوا متطلبات الجاهزية التي تحدّدها الوزارة لهذه المنشأة.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     }
@@ -352,8 +352,8 @@
   },
   "facilityObligations": [
     {
-      "en": "Name a readiness coordinator.",
-      "ar": "حدّدوا منسّقاً للجاهزية."
+      "en": "Name a responsible facility contact.",
+      "ar": "حدّدوا جهة اتصال مسؤولة في المنشأة."
     },
     {
       "en": "Keep the emergency plan up to date.",
