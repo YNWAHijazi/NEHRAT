@@ -4,6 +4,8 @@
  * tokens.css says adopt verbatim -- this is that adoption. Do not re-derive values.
  */
 *{box-sizing:border-box}
+:root{--success:#237443;--success-soft:rgba(35,116,67,.12)}
+html[data-theme="dark"]{--success:#8CD9A7;--success-soft:rgba(140,217,167,.14)}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-feature-settings:"tnum" 1;text-wrap:pretty}
 button,input,select,textarea{font:inherit;color:inherit}

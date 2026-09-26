@@ -22,6 +22,9 @@ for (const lang of ['en', 'ar']) {
     await input.setInputFiles({ name: 'full-size-route-map.pdf', mimeType: 'application/pdf', buffer: bytes });
     await input.locator('xpath=ancestor::form').locator('button[type="submit"]').click();
     await expect(map).toContainText('full-size-route-map.pdf');
+    await expect(map.locator(':scope > summary').getByText(lang === 'ar' ? 'مكتمل' : 'Complete', { exact: true })).toBeVisible();
+    await expect(map).toHaveCSS('border-inline-start-color', 'rgb(35, 116, 67)');
+    await expect(page.getByRole('link', { name: /^(Continue to|المتابعة إلى)/ })).toHaveCount(0);
     const download = await page.request.get('/api/documents/EV-0418/siteMap');
     expect(download.status()).toBe(200);
     expect((await download.body()).equals(bytes)).toBe(true);

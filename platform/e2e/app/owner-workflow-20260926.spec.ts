@@ -66,7 +66,7 @@ test("public check is concise and preserves the chosen service through signup", 
   });
 });
 
-test("requirements continue opens the next document and medical tasks follow the role", async ({
+test("requirements have no continue links and medical tasks follow the role", async ({
   page,
 }) => {
   await signInAs(page, "test_organizer");
@@ -76,16 +76,7 @@ test("requirements continue opens the next document and medical tasks follow the
   const first = page.locator("[data-document=plan]");
   if ((await first.getAttribute("open")) === null)
     await first.locator("summary").click();
-  await first
-    .getByRole("link", {
-      name: "Continue to Event site or route map",
-      exact: true,
-    })
-    .click();
-  await expect(page.locator("#requirement-siteMap")).toHaveAttribute(
-    "open",
-    "",
-  );
+  await expect(page.getByRole("link", { name: /^Continue to/ })).toHaveCount(0);
   await page.goto("/events/EV-0418/plan");
   await expect(page.locator("[data-region=major-incident]")).toHaveCount(0);
   await expect(

@@ -1,4 +1,3 @@
-import { ContinueRequirement } from '../../../../components/ContinueRequirement';
 import { UploadInput } from '../../../../components/UploadInput';
 import { InfoNote } from '../../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
@@ -245,15 +244,14 @@ export default async function RequirementsPage({
           </div>
         ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 52 }}>
-          {documents.map((doc, index) => {
+          {documents.map((doc) => {
             const done = documentState[doc.key] === true;
             const medicalMap = doc.key === 'deploymentMap' && level === 3;
             const medicalPlan = doc.key === 'plan' && level === 3;
-            const nextDoc = documents.slice(index + 1).find(d=>!(level===3&&['plan','deploymentMap'].includes(d.key)));
-            const color = done ? 'var(--brand)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
-            const chipBg = done ? 'var(--brand-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
-            const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Pending';
-            const stateAr = done ? (doc.platform ? 'مكتمل' : 'مُرفق') : doc.optional ? 'اختياري' : 'قيد الانتظار';
+            const color = done ? 'var(--success)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
+            const chipBg = done ? 'var(--success-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
+            const stateEn = done ? 'Complete' : doc.optional ? 'Optional' : 'Pending';
+            const stateAr = done ? 'مكتمل' : doc.optional ? 'اختياري' : 'قيد الانتظار';
             const fileNoteEn = fileNames[doc.key];
             const fileNoteAr = fileNames[doc.key];
             return (
@@ -344,7 +342,6 @@ export default async function RequirementsPage({
                     </details>
                   ) : null}
                 </div>
-                <ContinueRequirement target={nextDoc ? `requirement-${nextDoc.key}` : 'medical-team'} en={nextDoc?.en ?? 'Event EMS Agencies'} ar={nextDoc?.ar ?? 'جهات الإسعاف في الفعالية'} />
               </details>
             );
           })}
@@ -532,7 +529,6 @@ export default async function RequirementsPage({
           </>
         ) : null}
 
-        <ContinueRequirement target="review" en="review and submit" ar="المراجعة والتقديم" />
         <section id="review" data-region="review-submission" style={{ scrollMarginBlockStart: 24, padding: 24, background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32 }}>
           <SectionHeading n={3} en="Review and submit" ar="المراجعة والتقديم" />
           <InfoNote>
