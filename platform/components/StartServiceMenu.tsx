@@ -6,7 +6,7 @@ import { L } from './L';
 
 const SERVICES = [
   { href: '/events/new', en: 'Start an event', ar: 'بدء فعالية' },
-  { href: '/venues/new', en: 'Register a recurring venue', ar: 'تسجيل موقع فعاليات متكرر' },
+  { href: '/venues/new', en: 'Register a hosting venue', ar: 'تسجيل موقع لاستضافة الفعاليات' },
   { href: '/facilities/new', en: 'Register a facility', ar: 'تسجيل منشأة' },
 ];
 

@@ -3,84 +3,78 @@
   "categories": [
     {
       "key": "sports",
-      "en": "Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities",
-      "ar": "النوادي الرياضية، ومراكز اللياقة البدنية، والأندية الرياضية، والملاعب، والمنشآت الرياضية، والمنشآت المائية",
+      "en": "Sports and aquatic facilities",
+      "ar": "المنشآت الرياضية والمائية",
       "arNote": "Part 1 of the Arabic issue adds أحواض السباحة (swimming pools) to this category; part 2's table omits it. The table wording is used; the divergence is recorded for the Ministry.",
       "state": "inForceNow",
       "alsoRecurringVenue": true,
       "shortEn": "Sports and aquatic facility",
       "shortAr": "منشأة رياضية ومائية",
-      "ruleEn": "A defibrillator is required, with the continuing obligations that go with it.",
-      "ruleAr": "يُطلب جهاز إزالة رجفان، مع الموجبات المستمرة المرتبطة به.",
-      "basisEn": "The category carries the requirement on its own. Nothing further has to be decided for it to apply.",
-      "basisAr": "تحمل الفئة المتطلب بنفسها. ولا يلزم البت في شيء آخر ليسري."
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
       "key": "education",
       "shortEn": "Educational campus",
       "shortAr": "حرم تعليمي",
-      "en": "Schools, universities and educational campuses",
-      "ar": "المدارس، والجامعات، والمجمعات التعليمية",
-      "state": "awaitingMinistryValue",
-      "ruleEn": "A defibrillator is required on the Ministry’s phased schedule.",
-      "ruleAr": "يُطلب جهاز إزالة رجفان وفق خطة التنفيذ المرحلية المعتمدة من الوزارة.",
-      "basisEn": "The schedule has not been set. Until the Ministry sets it and activates a phase covering your kind of institution, no requirement is in force against this category.",
-      "basisAr": "لم تُوضع خطة التنفيذ المرحلية بعد. وإلى أن تضعها الوزارة وتفعّل مرحلة تشمل نوع مؤسستكم، لا يسري أي متطلب على هذه الفئة.",
-      "missingEn": "The phased implementation schedule",
-      "missingAr": "خطة التنفيذ المرحلية"
+      "en": "Schools, universities and campuses",
+      "ar": "المدارس والجامعات والمجمعات التعليمية",
+      "state": "inForceNow",
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
       "key": "transport",
       "shortEn": "Transport hub or large public venue",
       "shortAr": "محطة نقل أو مكان عام كبير",
-      "en": "Airports, passenger ports, central transport terminals, shopping malls and public venues above a Ministry capacity threshold",
-      "ar": "المطارات، ومرافئ الركاب، ومحطات النقل المركزية، ومراكز التسوق، والأماكن العامة التي تتجاوز الحد الذي تحدده الوزارة",
-      "state": "partlyInForce",
-      "ruleEn": "Airports, passenger ports and central transport terminals are required. Shopping malls and other public venues are required only above the Ministry capacity threshold.",
-      "ruleAr": "المطارات ومرافئ الركاب ومحطات النقل المركزية مطلوبة. أما مراكز التسوق والأماكن العامة الأخرى فمطلوبة فوق حد السعة الذي تحدده الوزارة فقط.",
-      "basisEn": "If your facility is an airport, passenger port or central transport terminal, the requirement is in force now. If it is a shopping mall or another public venue, whether it applies turns on a figure the Ministry has not published.",
-      "basisAr": "إذا كانت منشأتكم مطاراً أو مرفأ ركاب أو محطة نقل مركزية، فالمتطلب سارٍ الآن. وإذا كانت مركز تسوق أو مكاناً عاماً آخر، فسريانه يتوقف على رقم لم تنشره الوزارة."
+      "en": "Transport hubs, shopping malls and public venues",
+      "ar": "محطات النقل ومراكز التسوق والأماكن العامة",
+      "state": "inForceNow",
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
       "key": "remote",
       "shortEn": "Remote facility",
       "shortAr": "منشأة نائية",
-      "en": "Remote or difficult-access facilities",
-      "ar": "المرافق الواقعة في المناطق النائية أو التي يصعب الوصول إليها",
-      "state": "awaitingMinistryValue",
-      "ruleEn": "A defibrillator is required where the Ministry designates the facility.",
-      "ruleAr": "يُطلب جهاز إزالة رجفان إذا حددت الوزارة المنشأة.",
-      "basisEn": "This category works by individual designation. Nothing is in force against a facility until the Ministry designates it and notifies the operator.",
-      "basisAr": "تعمل هذه الفئة بالتحديد الفردي. ولا يسري شيء على منشأة قبل أن تحددها الوزارة وتبلّغ المشغّل.",
-      "missingEn": "An individual designation",
-      "missingAr": "تحديد فردي"
+      "en": "Remote or hard-to-reach facilities",
+      "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
+      "state": "inForceNow",
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
       "key": "priorArrest",
       "shortEn": "Facility under Ministry review",
       "shortAr": "مرفق قيد مراجعة الوزارة",
-      "en": "Fixed facilities where a cardiac arrest has previously been reported and confirmed",
-      "ar": "المرافق التي سبق الإبلاغ فيها عن حالة توقف قلب وثبتت من قبل الوزارة",
+      "en": "Facilities with a confirmed previous cardiac arrest",
+      "ar": "منشآت شهدت توقف قلب مؤكداً",
       "arNote": "The Arabic issue's part 1 is broader: it names who reports (EMS or an approved first-response agency) and who confirms (the Ministry). Recorded for the Ministry; the requirements-table wording is used.",
-      "state": "determinedByReview",
-      "ruleEn": "The facility becomes subject to Ministry review, and the review states what is required.",
-      "ruleAr": "تخضع المنشأة لمراجعة الوزارة، وتبيّن المراجعة متطلبات الجاهزية التي تقررها.",
-      "basisEn": "A confirmed report is the trigger. The requirement comes from the review, not automatically from the category.",
-      "basisAr": "الإبلاغ المؤكد هو المحفّز. ويأتي المتطلب من المراجعة لا تلقائياً من الفئة."
+      "state": "inForceNow",
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
       "key": "designated",
       "shortEn": "Ministry-designated facility",
       "shortAr": "مرفق حددته الوزارة",
-      "en": "Other facilities the Ministry designates",
-      "ar": "أي مرفق آخر تحدده الوزارة",
-      "state": "awaitingMinistryValue",
-      "ruleEn": "Requirements are whatever the designation specifies.",
-      "ruleAr": "المتطلبات وفقاً لما تحدده الوزارة.",
-      "basisEn": "This category exists so the Ministry can bring in a facility no other category reaches. Nothing is in force without a designation.",
-      "basisAr": "توجد هذه الفئة لتتمكن الوزارة من إدخال منشأة لا تصلها فئة أخرى. ولا يسري شيء دون تحديد.",
-      "missingEn": "An individual designation",
-      "missingAr": "تحديد فردي"
+      "en": "Other facilities named by the Ministry",
+      "ar": "منشآت أخرى تحددها الوزارة",
+      "state": "inForceNow",
+      "ruleEn": "Register the facility and its AEDs.",
+      "ruleAr": "سجّلوا المنشأة وأجهزة إزالة الرجفان فيها.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     }
   ],
   "categoryUnset": {
@@ -761,5 +755,6 @@
         "ar": "دون المطلوب"
       }
     }
-  }
+  },
+  "$commentOwner20260926": "Owner instruction: all listed facility categories are active. Registration is available for every category; old activation waiting screens are removed."
 }

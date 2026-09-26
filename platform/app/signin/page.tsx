@@ -47,11 +47,11 @@ const DEMO_LOGINS: DemoLogin[] = [
     cannotAr: 'تسجيل أي نتيجة، أو الاطلاع على سجلات منظّم آخر.',
   },
   {
-    login: 'test_organizer_pending', en: 'Organizer — organization pending', ar: 'المنظّم — المؤسسة قيد التسجيل',
-    canEn: 'Everything the organizer can, up to but not including filing.',
-    canAr: 'كل ما يستطيعه المنظّم، حتى التقديم دون أن يشمله.',
-    cannotEn: 'File a submission until the organization is recorded.',
-    cannotAr: 'تقديم أي ملف قبل تسجيل المؤسسة.',
+    login: 'test_organizer_pending', en: 'Organizer — new account', ar: 'المنظّم — حساب جديد',
+    canEn: 'Create events, complete requirements and submit.',
+    canAr: 'إنشاء الفعاليات واستكمال المتطلبات والتقديم.',
+    cannotEn: 'See another organizer’s records.',
+    cannotAr: 'الاطلاع على سجلات منظّم آخر.',
   },
   {
     login: 'test_ems', en: 'EMS provider', ar: 'مزوّد خدمات الطوارئ الطبية',
@@ -152,7 +152,7 @@ const ERROR_STRINGS: Record<string, { en: string; ar: string }> = {
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ mode?: string; notice?: string; error?: string }>;
+  searchParams: Promise<{ mode?: string; notice?: string; error?: string; next?: string }>;
 }) {
   const params = await searchParams;
   const mode: Mode =
@@ -177,10 +177,10 @@ export default async function SignInPage({
           <div data-region="credential-card" style={{ padding: 35, background: 'var(--surface2)', borderRadius: 16 }}>
             {/* Mode chips: the reference shows sign-in as active for both signin and reset. */}
             <div style={{ display: 'flex', gap: 6, marginBlockEnd: 22 }}>
-              <Link href="/signin" aria-pressed={mode !== 'signup'} style={modeChipStyle(mode !== 'signup')}>
+              <Link href={`/signin?next=${encodeURIComponent(params.next ?? '')}`} aria-pressed={mode !== 'signup'} style={modeChipStyle(mode !== 'signup')}>
                 <L en="Sign in" ar="تسجيل الدخول" />
               </Link>
-              <Link href="/signin?mode=signup" aria-pressed={mode === 'signup'} style={modeChipStyle(mode === 'signup')}>
+              <Link href={`/signin?mode=signup&next=${encodeURIComponent(params.next ?? '')}`} aria-pressed={mode === 'signup'} style={modeChipStyle(mode === 'signup')}>
                 <L en="Create an account" ar="إنشاء حساب" />
               </Link>
             </div>
@@ -218,7 +218,11 @@ export default async function SignInPage({
               </div>
             ) : null}
 
+            {params.error?.startsWith('otp-') ? <p role="alert"><L en={params.error==='otp-limited'?'Please wait before requesting another code.':'Verification email is unavailable. Please try again later.'} ar={params.error==='otp-limited'?'انتظروا قبل طلب رمز آخر.':'بريد التحقق غير متاح. حاولوا لاحقاً.'}/></p>:null}
+            {params.error==='phone'?<p role="alert"><L en="Use a phone number with a country code, starting with +." ar="أدخلوا رقم الهاتف مع رمز البلد، بدءاً بعلامة +."/></p>:null}
             <form action={action}>
+              <input type="hidden" name="next" value={params.next ?? ''} />
+              {mode === 'signup' ? <label style={{display:'block',marginBlockEnd:16}}><L en="Phone number (with country code)" ar="رقم الهاتف مع رمز البلد"/><input name="phone" type="tel" autoComplete="tel" placeholder="+961..." style={inputStyle}/></label>:null}
               {mode === 'signup' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 16 }}>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -277,7 +281,7 @@ export default async function SignInPage({
 
             {mode === 'signin' ? (
               <div style={{ marginBlockStart: 16, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
-                <Link href="/signin?mode=signup" style={secondaryBtn}>
+                <Link href={`/signin?mode=signup&next=${encodeURIComponent(params.next ?? '')}`} style={secondaryBtn}>
                   <L en="Create an account" ar="إنشاء حساب" />
                 </Link>
                 <Link href="/signin?mode=reset" style={secondaryBtn}>
@@ -287,7 +291,7 @@ export default async function SignInPage({
             ) : null}
             {mode === 'reset' ? (
               <div style={{ marginBlockStart: 16 }}>
-                <Link href="/signin" style={secondaryBtn}>
+                <Link href={`/signin?next=${encodeURIComponent(params.next ?? '')}`} style={secondaryBtn}>
                   <L en="Back to sign in" ar="العودة إلى تسجيل الدخول" />
                 </Link>
               </div>

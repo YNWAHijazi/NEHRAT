@@ -1,5 +1,5 @@
 import { InfoNote } from '../../../../components/InfoNote';
-import { planEditorOwnerId } from '../../../../lib/plan-access';
+import { planAccess } from '../../../../lib/plan-access';
 import { PLAN_DOC_KEY } from '../../../../lib/rules/uploads';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
@@ -17,14 +17,16 @@ import {
   planVersionsFor,
   unreadCountFor,
 } from '../../../../lib/queries';
-import { MAJOR_INCIDENT_ITEMS, PLAN_SECTIONS, type Level } from '../../../../lib/rules';
+import { GOVERNANCE_LANDING, MAJOR_INCIDENT_ITEMS, PLAN_SECTIONS, type Level } from '../../../../lib/rules';
 
 export default async function PlanPage({ params }: { params: Promise<{ id: string }> }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
-  const ownerId = planEditorOwnerId(account, id);
-  if (ownerId === null) notFound();
+  const access = planAccess(account, id);
+  if (!access) notFound();
+  const ownerId = access.ownerId;
+  const isEms = access.editor === 'ems';
   const event = eventFor(ownerId, id);
   if (!event) notFound();
 
@@ -32,13 +34,16 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const unread = unreadCountFor(account.id);
   const versions = assessmentsFor(ownerId, id);
   const level = (versions[0]?.derivation.finalLevel ?? event.level) as Level | null;
-  const priorVersions = planVersionsFor(ownerId, id);
-  const governance = governanceFor(id);
+  const priorVersions = isEms ? [] : planVersionsFor(ownerId, id);
+  const fullGovernance = governanceFor(id);
+  const governance = isEms ? { incidentRole: fullGovernance.incidentRole ?? '' } : fullGovernance;
   if (level === null) redirect(`/events/${id}`);
 
-  const plan = planFor(ownerId, id);
+  const fullPlan = planFor(ownerId, id);
+  const plan = isEms && fullPlan ? { ...fullPlan, mode: 'write' as const, sections: { '12': fullPlan.sections['12'] ?? {} }, attachedFile: null, attachedHasFile: false, refConfirmed: false, refAdmitsChildren: false, refTemporaryAreas: false } : fullPlan;
+  const requiredSections = PLAN_SECTIONS.filter(s => isEms ? s.n === GOVERNANCE_LANDING.incidentSection : level === 3 || s.n !== GOVERNANCE_LANDING.incidentSection);
   // 12: renders only where the venue is itself a registered covered facility.
-  const facility = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
+  const facility = !isEms && event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
   // reference, never a copy. The shortfalls derive in lib/rules from these facts
   // plus the two event facts the organizer answers on the plan.
@@ -62,13 +67,14 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
         </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-          <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
+          <L en={isEms ? "Major-incident arrangements" : "Event health and medical plan"} ar={isEms ? "ترتيبات الحوادث الجسيمة" : "خطة التأهب الصحي والطبي للفعالية"} />
         </h1>
         {level === 3 ? <div className="secondary-help"><InfoNote><L en="The Medical Director leads medical planning. You share this plan; the organizer submits the package." ar="يقود المدير الطبي التخطيط الطبي. تعملون على خطة مشتركة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
         <PlanForm
           eventId={id}
           level={level}
-          sectionsDef={[...PLAN_SECTIONS]}
+          editor={access.editor}
+          sectionsDef={requiredSections}
           miDef={[...MAJOR_INCIDENT_ITEMS]}
           initial={plan}
           facility={facility}
@@ -90,14 +96,14 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
                   <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{plan.updatedAt.slice(0, 10)}</span>
                   <span style={{ color: 'var(--muted)' }}>
                     <L
-                      en={`${Array.from({ length: 16 }, (_, i) => {
-                        const s = plan.sections[String(i + 1)];
+                      en={`${requiredSections.map((section) => {
+                        const s = plan.sections[String(section.n)];
                         return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
-                      }).filter(Boolean).length} of 16 sections addressed`}
-                      ar={`${Array.from({ length: 16 }, (_, i) => {
-                        const s = plan.sections[String(i + 1)];
+                      }).filter(Boolean).length} of ${requiredSections.length} sections complete`}
+                      ar={`${requiredSections.map((section) => {
+                        const s = plan.sections[String(section.n)];
                         return Boolean(s?.text && s.text.trim() !== '') || s?.covered === true;
-                      }).filter(Boolean).length} من 16 قسماً مُعالَج`}
+                      }).filter(Boolean).length} من ${requiredSections.length} أقسام مكتملة`}
                     />
                   </span>
                 </div>
@@ -116,7 +122,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
                       <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{v.savedAt.slice(0, 10)}</span>
                       {v.savedBy ? <span>{v.savedBy}</span> : null}
                       <span style={{ color: 'var(--muted)' }}>
-                        <L en={`${addressed} of 16 sections addressed`} ar={`${addressed} من 16 قسماً مُعالَج`} />
+                        <L en={`${addressed} sections complete`} ar={`${addressed} أقسام مكتملة`} />
                       </span>
                     </summary>
                     <div style={{ marginBlockStart: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>

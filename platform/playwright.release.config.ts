@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 /** Run after test:release has built and seeded its disposable, isolated database. */
 export default defineConfig({
   testDir: 'e2e/app',
-  testMatch: 'partner-feedback.spec.ts',
+  testMatch: ['partner-feedback.spec.ts', 'owner-workflow-20260926.spec.ts'],
   workers: 1,
   retries: 0,
   timeout: 60_000,

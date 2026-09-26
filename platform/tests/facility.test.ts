@@ -41,21 +41,21 @@ describe('the category determination', () => {
     }
   });
 
-  it('ends the journey exactly where a Ministry value is awaited', () => {
+  it('all owner-activated categories proceed to registration', () => {
     const ended = FACILITY_CATEGORIES.filter(categoryEndsJourney).map((c) => c.key);
-    expect(ended).toEqual(['education', 'remote', 'designated']);
+    expect(ended).toEqual([]);
   });
 
-  it('a school leaves with the missing value named', () => {
+  it('education registration no longer waits for activation', () => {
     const education = facilityCategory('education');
     expect(education).not.toBeNull();
-    expect(education?.missingEn).toBe('The phased implementation schedule');
-    expect(education?.missingAr).toBe('خطة التنفيذ المرحلية');
+    expect(education?.missingEn).toBeUndefined();
+    expect(education?.state).toBe('inForceNow');
   });
 
   it('a review category proceeds -- the review states what is required', () => {
     const prior = facilityCategory('priorArrest');
-    expect(prior?.state).toBe('determinedByReview');
+    expect(prior?.state).toBe('inForceNow');
     expect(categoryEndsJourney(prior!)).toBe(false);
   });
 

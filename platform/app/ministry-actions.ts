@@ -823,7 +823,8 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
     ).run(eventId, itemKey, reason, reason, account.displayName);
   }
   revalidatePath(`/ministry/submissions/${eventId}`);
-  redirect(`/ministry/submissions/${eventId}`);
+  const next = attestationRows(level as Level, attestationRecordsFor(eventId)).find(r => r.state === 'pending' && r.recorder === row.recorder);
+  redirect(`/ministry/submissions/${eventId}${next ? `#review-${next.key}` : '#review-outcome'}`);
 }
 
 /**

@@ -213,6 +213,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
           </div>
         </details>
 
+        {latest ? <section style={{marginBlockEnd:24}}><a href={`/venues/${venue.id}/certificate`} style={{display:'inline-flex',padding:'12px 20px',borderRadius:24,background:'var(--brand)',color:'var(--bg)'}}><L en="Download certificate" ar="تنزيل الشهادة"/></a><details style={{marginBlockStart:14}}><summary><L en="Previous certificates" ar="الشهادات السابقة"/></summary>{versions.map(v=><p key={v.version}><a href={`/venues/${venue.id}/certificate?version=${v.version}`}><L en={`Certificate ${v.version}: ${v.effective} — ${v.validUntil}`} ar={`الشهادة ${v.version}: ${v.effective} — ${v.validUntil}`}/></a></p>)}</details></section>:null}
         <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 32 }}>
           <div>
             <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
@@ -286,7 +287,7 @@ export default async function VenueRecordPage({ params }: { params: Promise<{ id
           </div>
         ) : (
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'start', marginBlockEnd: 32 }}>
-            <GatedAction gate={gate} href={`/venues/${venue.id}/assessment`} en="Start the annual reassessment" ar="بدء إعادة التقييم السنوي" />
+            <GatedAction gate={gate} href={`/venues/${venue.id}/assessment`} en="Renew certificate" ar="تجديد الشهادة" />
             <Link
               href={`/venues/${venue.id}/change`}
               style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}

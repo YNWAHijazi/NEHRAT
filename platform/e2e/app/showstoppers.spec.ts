@@ -135,22 +135,13 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
 });
 
 test.describe('showstopper 3 — the 24-hour notification lives on its own route', () => {
-  test('notifiable on a started event, and the Ministry incidents lane reads it', async ({ page }) => {
+  test('notification closes 24 hours after the event ends', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    // EV-0244 is held 2026-08-09 and ended before the review clock (2026-08-13):
-    // started, filed, notifiable. The occurrence is on the event's own day.
+    // September 26 owner rule: a concluded event can no longer accept late notifications.
     await gotoRidingRestarts(page, '/events/EV-0244/incident');
-    await page.locator('label:has-text("Major incident") input[type="radio"]').check();
-    await page.locator('input[name="occurredAt"]').fill('2026-08-09T21:30');
-    await page.locator('button:has-text("Notify the Ministry")').click();
-    await page.waitForURL(/notice=notified/);
-    await expect(page.locator('body')).toContainText('The Ministry has been notified');
-
-    await signInAs(page, 'test_moph');
-    await gotoRidingRestarts(page, '/ministry/incidents');
-    const lane = page.locator('[data-region="serious-incidents"]');
-    await expect(lane).toContainText('Major incident');
-    await expect(lane).toContainText('hour');
+    await expect(page.locator('body')).toContainText('Closed — more than 24 hours have passed since the event ended.');
+    await expect(page.locator('input[name="occurredAt"]')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Notify the Ministry', exact: true })).toHaveCount(0);
   });
 
   test('before the event starts, the control is a reason, not a form', async ({ page }) => {
@@ -159,7 +150,7 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
     await gotoRidingRestarts(page, '/events/EV-0362/incident');
     await expectAbsent(page, {
       absent: 'button:has-text("Notify the Ministry")',
-      anchor: /Available from the event's first day/,
+      anchor: /Available from \d{4}-\d{2}-\d{2}/,
       because: 'before the event starts the control is a reason, not a form',
     });
   });

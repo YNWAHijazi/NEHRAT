@@ -528,18 +528,10 @@
       "ar": "التأهب للحوادث الجسيمة وحوادث الإصابات الجماعية",
       "prototypeAr": "التأهب للحوادث الجسيمة والإصابات الجماعية",
       "parties": [
+        [],
+        [],
         [
-          "O"
-        ],
-        [
-          "O",
           "E",
-          "M"
-        ],
-        [
-          "O",
-          "E",
-          "M",
           "D"
         ]
       ],
@@ -547,14 +539,8 @@
       "ems": false,
       "inspection": false,
       "values": [
-        {
-          "en": "Emergency escalation procedure",
-          "ar": "إجراء لتصعيد الاستجابة الطارئة"
-        },
-        {
-          "en": "Written plan coordinated with participating providers",
-          "ar": "خطة مكتوبة منسقة مع الجهات المشاركة"
-        },
+        null,
+        null,
         {
           "en": "Detailed plan coordinated with EMS and incorporated into event medical command",
           "ar": "خطة تفصيلية منسقة مع خدمات الإسعاف ومدمجة ضمن القيادة الطبية للفعالية"
@@ -680,5 +666,6 @@
         }
       ]
     }
-  ]
+  ],
+  "$commentOwner20260926": "Major-incident preparedness is required only at Level 3, completed by the confirmed Medical Director or EMS agency. Level 2 receives an optional recommendation."
 }

@@ -1,3 +1,4 @@
+import { ContinueRequirement } from '../../../../components/ContinueRequirement';
 import { UploadInput } from '../../../../components/UploadInput';
 import { InfoNote } from '../../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
@@ -244,8 +245,10 @@ export default async function RequirementsPage({
           </div>
         ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 52 }}>
-          {documents.map((doc) => {
+          {documents.map((doc, index) => {
             const done = documentState[doc.key] === true;
+            const medicalMap = doc.key === 'deploymentMap' && level === 3;
+            const nextDoc = documents[index + 1];
             const color = done ? 'var(--brand)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
             const chipBg = done ? 'var(--brand-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
             const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Pending';
@@ -253,7 +256,7 @@ export default async function RequirementsPage({
             const fileNoteEn = fileNames[doc.key];
             const fileNoteAr = fileNames[doc.key];
             return (
-              <details name="event-documents" key={doc.key} open={doc.key === firstOpenDocument} data-document={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 12 }}>
+              <details id={`requirement-${doc.key}`} name="event-documents" key={doc.key} open={doc.key === firstOpenDocument} data-document={doc.key} style={{ paddingBlock: '21px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${color}`, borderRadius: 12 }}>
                 <summary style={{ cursor: 'pointer', display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ flex: '1 1 240px', minWidth: 0, display: 'flex', gap: 12, alignItems: 'start' }}>
                   <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: 'none' }}>
@@ -276,6 +279,7 @@ export default async function RequirementsPage({
                   </span>
                 </summary>
                 <div style={{ display: 'flex', gap: 12, marginBlockStart: 16, alignItems: 'center', maxWidth: '100%', minWidth: 0, flexWrap: 'wrap' }}>
+                  {medicalMap ? <p><L en="Uploaded by the Event Medical Director." ar="يرفعها المدير الطبي للفعالية." /></p> : null}
                   {doc.platform ? (
                     <a
                       href={doc.key === 'plan' ? `/events/${id}/plan` : `/events/${id}/submit`}
@@ -284,7 +288,7 @@ export default async function RequirementsPage({
                       {doc.key === 'plan' ? <L en="Open the plan" ar="فتح الخطة" /> : <L en="Open the form" ar="فتح النموذج" />}
                     </a>
                   ) : null}
-                  {doc.attach && !done ? (
+                  {doc.attach && !medicalMap && !done ? (
                     <form
                       action={attachDocumentAction.bind(null, id)}
                       style={{ display: 'inline-flex', maxWidth: '100%', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}
@@ -307,7 +311,7 @@ export default async function RequirementsPage({
                       screen promises) and, while nothing is filed, REMOVED. After
                       filing, removal would falsify the filed record -- replacing is
                       the honest correction, so only Replace remains. */}
-                  {doc.attach && done ? (
+                  {doc.attach && !medicalMap && done ? (
                     <details>
                       <summary style={{ cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', listStyle: 'none' }}>
                         <span style={{ textDecoration: 'underline' }}>
@@ -338,6 +342,7 @@ export default async function RequirementsPage({
                     </details>
                   ) : null}
                 </div>
+                <ContinueRequirement target={nextDoc ? `requirement-${nextDoc.key}` : 'medical-team'} en={nextDoc?.en ?? 'Event EMS Agencies'} ar={nextDoc?.ar ?? 'جهات الإسعاف في الفعالية'} />
               </details>
             );
           })}
@@ -348,8 +353,8 @@ export default async function RequirementsPage({
         <div data-region="g2" id="medical-team" style={{ scrollMarginBlockStart: 24 }}>
         <SectionHeading
           n={2}
-          en="Named EMS providers"
-          ar="مزوّدو الإسعاف المُسمّون"
+          en="Event EMS Agencies"
+          ar="جهات الإسعاف في الفعالية"
         />
         {level === 3 ? (
           <InfoNote>
@@ -525,6 +530,7 @@ export default async function RequirementsPage({
           </>
         ) : null}
 
+        <ContinueRequirement target="review" en="review and submit" ar="المراجعة والتقديم" />
         <section id="review" data-region="review-submission" style={{ scrollMarginBlockStart: 24, padding: 24, background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32 }}>
           <SectionHeading n={3} en="Review and submit" ar="المراجعة والتقديم" />
           <InfoNote>

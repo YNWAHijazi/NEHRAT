@@ -293,7 +293,7 @@ export default async function SubmissionReviewPage({
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 20, alignItems: 'start' }}>
         <div>
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Named EMS providers" ar="مزوّدو الإسعاف المُسمّون" />
+            <L en="Event EMS Agencies" ar="جهات الإسعاف في الفعالية" />
           </h2>
           <div data-region="providers" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
             {review.providers.map((p) => {
@@ -672,7 +672,7 @@ export default async function SubmissionReviewPage({
                   const auth = ATTESTATIONS_CONTENT.authorities[t.authority];
                   const color = t.state === 'complete' ? 'var(--brand)' : 'var(--accent-ink)';
                   return (
-                    <div key={t.key} data-att-item={t.key} style={{ paddingBlock: '15px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px ${t.authority === 'order' ? 'dashed' : 'solid'} ${color}`, borderRadius: 10 }}>
+                    <div id={`review-${t.key}`} key={t.key} data-att-item={t.key} style={{ paddingBlock: '15px', paddingInlineStart: '16px', paddingInlineEnd: '17px', background: 'var(--surface2)', borderInlineStart: `3px ${t.authority === 'order' ? 'dashed' : 'solid'} ${color}`, borderRadius: 10 }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 6 }}>
                         <span style={{ fontSize: 14, lineHeight: 1.45, flex: 1, minWidth: 220 }}>
                           <L en={t.en} ar={t.ar} />
@@ -1108,7 +1108,7 @@ export default async function SubmissionReviewPage({
           ) : null}
 
           {mayRecord && !standing ? (
-            <div data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
+            <div id="review-outcome" data-region="outcome" style={{ padding: 25, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 16 }}>
               <h2 style={{ margin: '0 0 16px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en="Record an outcome" ar="تسجيل نتيجة" />
               </h2>

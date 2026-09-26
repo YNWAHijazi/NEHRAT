@@ -1,0 +1,6 @@
+{
+  "maxCodesPerHour": 5,
+  "maxCodeAttempts": 5,
+  "codeLifetimeMs": 600000,
+  "resendDelayMs": 60000
+}

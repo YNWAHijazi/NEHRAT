@@ -1,3 +1,4 @@
+import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -68,7 +69,7 @@ const secLabel: React.CSSProperties = {
   marginBlockEnd: 4,
 };
 
-function EventCard({ event, today }: { event: EventRow; today: string }) {
+function EventCard({ event, today, pending }: { event: EventRow; today: string; pending: number }) {
   const days = event.due ? daysBetween(today, event.due) : null;
   const color = days === null ? 'var(--line)' : urgencyColor(days);
   const pct =
@@ -105,7 +106,7 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
           <L en={event.nameEn} ar={event.nameAr} />
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <span>{event.id}</span>
+          <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث ${(event.updatedAt || event.createdAt).slice(0, 10)}`} /></span>{!event.filed ? <span><L en={`${pending} pending requirements`} ar={`${pending} متطلبات متبقية`}/></span> : null}
           {event.mophReference ? <span>· {event.mophReference}</span> : null}
           {/* A second running reads as one at a glance: the previous edition's
               date beside the new record's identity. The records stay separate --
@@ -196,11 +197,14 @@ function EventCard({ event, today }: { event: EventRow; today: string }) {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ notice?: string }>;
+  searchParams?: Promise<{ notice?: string; sort?: string; q?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  const notice = (await searchParams)?.notice;
+  const filters = await searchParams;
+  const notice = filters?.notice;
+  const sort = filters?.sort ?? 'updated';
+  const query = filters?.q?.trim().toLowerCase() ?? '';
   // This surface belongs to the organizer, the EMS provider and the Director. Every
   // other role is REFUSED here, the same way every unpermitted surface refuses: a 404,
   // indistinguishable from non-existence, so a role cannot map what sits above its
@@ -250,7 +254,15 @@ export default async function DashboardPage({
     );
   }
   const organization = organizationFor(account.id);
-  const events = eventsFor(account.id);
+  const allEvents = eventsFor(account.id);
+  const pendingById = new Map(allEvents.map(e => [e.id, e.filed || !e.level ? 0 : submissionGateFor(account.id, e.id).blockers.length]));
+  const events = allEvents.filter(e => `${e.id} ${e.nameEn} ${e.nameAr} ${e.mophReference ?? ''}`.toLowerCase().includes(query)).sort((a,b) => {
+    if(sort==='pending') return (pendingById.get(b.id)??0)-(pendingById.get(a.id)??0);
+    if(sort==='due') return (a.due??'9999').localeCompare(b.due??'9999');
+    if(sort==='status') return a.stateEn.localeCompare(b.stateEn);
+    if(sort==='date') return (a.startDate??'9999').localeCompare(b.startDate??'9999');
+    return (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt);
+  });
   const archived = archivedEventsFor(account.id);
   const archivedVenues = archivedVenuesFor(account.id);
   const archivedFacilities = archivedFacilitiesFor(account.id);
@@ -260,7 +272,7 @@ export default async function DashboardPage({
   const unread = unreadCountFor(account.id);
   const today = beirutToday();
 
-  const empty = events.length === 0 && venues.length === 0 && facilities.length === 0;
+  const empty = allEvents.length === 0 && venues.length === 0 && facilities.length === 0;
 
   return (
     <>
@@ -277,22 +289,6 @@ export default async function DashboardPage({
           </h1>
           <StartServiceMenu />
         </div>
-
-        {organization && organization.status === 'pending' ? (
-          <Link href="/organization" style={{ display: 'block', padding: '24px 28px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockEnd: 16, color: 'var(--ink)', textDecoration: 'none' }}>
-            <div style={{ maxWidth: '70ch' }}>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 5 }}>
-                <L en="Organization registration is with the Ministry" ar="تسجيل المؤسسة لدى الوزارة" />
-              </div>
-              <div style={{ fontSize: '14.5px', lineHeight: 1.6, color: 'var(--muted)' }}>
-                <L
-                  en="Assessments and drafts continue meanwhile; submission opens once the organization is recorded."
-                  ar="تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة."
-                />
-              </div>
-            </div>
-          </Link>
-        ) : null}
 
         {notice === 'interest' ? (
           <div data-region="interest-notice" style={{ padding: '18px 24px', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
@@ -326,7 +322,7 @@ export default async function DashboardPage({
             </div>
             <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
-                <L en="Venues" ar="المواقع" />
+                <L en="Hosting venues" ar="المواقع المستضيفة" />
               </div>
               <InfoNote>
                 <L
@@ -335,7 +331,7 @@ export default async function DashboardPage({
                 />
               </InfoNote>
               <Link href="/venues/new" style={serviceAction}>
-                <L en="Register a venue" ar="تسجيل موقع" />
+                <L en="Register a hosting venue" ar="تسجيل موقع مستضيف" />
               </Link>
             </div>
             <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
@@ -360,9 +356,11 @@ export default async function DashboardPage({
                 <L en="Events" ar="الفعاليات" />
               </h2>
             </div>
+            <form style={{display:'flex',gap:12,flexWrap:'wrap',marginBlock:'12px 20px'}}><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Search events" ar="البحث عن فعاليات"/><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{padding:10,borderRadius:8,border:'1px solid var(--line)',minWidth:0,maxWidth:'100%'}}/></label><label><L en="Sort by " ar="ترتيب حسب "/><select name="sort" defaultValue={sort} style={{padding:10}}>{[['updated','Last updated','آخر تحديث'],['pending','Pending requirements','المتطلبات المتبقية'],['due','Submit by','موعد التقديم'],['status','Status','الحالة'],['date','Event date','تاريخ الفعالية']].map(([value,en,ar])=><option key={value} value={value}>{en} · {ar}</option>)}</select></label><button type="submit"><L en="Apply" ar="تطبيق"/></button></form>
+            {events.length===0 ? <p><L en="No matching events." ar="لا توجد فعاليات مطابقة."/></p>:null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
               {events.map((event) => (
-                <EventCard key={event.id} event={event} today={today} />
+                <EventCard key={event.id} event={event} today={today} pending={pendingById.get(event.id) ?? 0} />
               ))}
             </div>
 
@@ -429,7 +427,7 @@ export default async function DashboardPage({
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-                    <L en="Venues" ar="المواقع" />
+                    <L en="Hosting venues" ar="المواقع المستضيفة" />
                   </h2>
                 </div>
                 <div data-stack="" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1.1fr 1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
@@ -516,7 +514,7 @@ export default async function DashboardPage({
               {archivedVenues.length > 0 ? (
                 <div data-region="previous-venues">
                   <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-                    <L en="Venues" ar="المواقع" />
+                    <L en="Hosting venues" ar="المواقع المستضيفة" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {archivedVenues.map((v) => (

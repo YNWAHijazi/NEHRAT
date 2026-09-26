@@ -47,13 +47,13 @@ test.describe('the outcome gate', () => {
     // A complete row's title and byline, verbatim -- the string half of the att-row
     // region, whose pixel compare is held for geometry only.
     await expect(att).toContainText('Major-incident and mass-casualty plan reviewed');
-    await expect(att).toContainText('Attested by L. Nassar · 2026-08-11');
+    await expect(att).toContainText('Reviewed by L. Nassar · 2026-08-11');
     // A deficiency renders as the reason an item is pending -- not a third state.
     await expect(att).toContainText('Pending because');
     await expect(att).toContainText('the deployment map has not been attached');
     // The Order-assigned pending item carries the lane fallback, and is therefore
     // attestable by the reviewer while the lane is off (open decision 19).
-    await expect(att).toContainText('Assigned to the Order of Physicians, whose lane is off');
+    await expect(att).toContainText('The Ministry reviews this item until the Order of Physicians service is enabled.');
 
     // EV-0362 carries a determination, so the FIRST-recording panel is not offered
     // here -- recording is once. The same three options, gated by the same blockers,
@@ -62,7 +62,7 @@ test.describe('the outcome gate', () => {
     const revise = page.locator('[data-region="revise-determination"]');
     await revise.locator('summary').click();
     await expect(revise).toContainText('Blocking inspection without recorded findings');
-    await expect(revise).toContainText('Attestation pending');
+    await expect(revise).toContainText('Review pending');
     const radios = page.locator('[data-region="outcome-options"] input[type="radio"]');
     await expect(radios.nth(0)).toBeEnabled(); // incomplete
     await expect(radios.nth(1)).toBeEnabled(); // revision
@@ -76,15 +76,15 @@ test.describe('the outcome gate', () => {
     for (const item of ['deploymentMap', 'emsDeclarations', 'clinicalContent']) {
       const form = att.locator(`form:has(input[name="itemKey"][value="${item}"]):has(input[value="attest"])`);
       await form.locator('button').click();
-      await page.waitForURL('**/ministry/submissions/EV-0362');
+      await page.waitForURL((url) => url.pathname === '/ministry/submissions/EV-0362');
     }
-    await expect(att).toContainText('All six attestations complete — a clearance may be recorded.');
+    await expect(att).toContainText('All reviews complete. You can approve the submission.');
 
     // Attestations clear, inspection still open: the gate must STILL be shut.
     const revise2 = page.locator('[data-region="revise-determination"]');
     await revise2.locator('summary').click();
     await expect(revise2).toContainText('Blocking inspection without recorded findings');
-    await expect(revise2).not.toContainText('Attestation pending');
+    await expect(revise2).not.toContainText('Review pending');
     await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeDisabled();
 
     // The reviewer records the findings -- corrective actions and findings are
@@ -93,7 +93,7 @@ test.describe('the outcome gate', () => {
     const blocking = page.locator('[data-region="inspections"] > div').first();
     await blocking.locator('input[name="findings"]').fill('Treatment post and deployment verified as planned.');
     await blocking.locator('button:has-text("Save")').click();
-    await page.waitForURL('**/ministry/submissions/EV-0362');
+    await page.waitForURL((url) => url.pathname === '/ministry/submissions/EV-0362');
 
     // Both classes clear: the gate opens for the reviewer.
     await signInAs(page, 'test_moph');
@@ -110,7 +110,7 @@ test.describe('the outcome gate', () => {
     const reopen = attNow.locator('form:has(input[name="itemKey"][value="deploymentMap"]):has(input[value="deficiency"])');
     await reopen.locator('input[name="reason"]').fill('The attached map omits the second treatment post.');
     await reopen.locator('button').click();
-    await page.waitForURL('**/ministry/submissions/EV-0362');
+    await page.waitForURL((url) => url.pathname === '/ministry/submissions/EV-0362');
     await expect(attNow).toContainText('1 of 6 pending');
     await expect(attNow).toContainText('The attached map omits the second treatment post.');
     await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeDisabled();
@@ -118,7 +118,7 @@ test.describe('the outcome gate', () => {
     // And re-attesting reopens the gate, leaving the record clean for later tests.
     const reattest = attNow.locator('form:has(input[name="itemKey"][value="deploymentMap"]):has(input[value="attest"])');
     await reattest.locator('button').click();
-    await page.waitForURL('**/ministry/submissions/EV-0362');
+    await page.waitForURL((url) => url.pathname === '/ministry/submissions/EV-0362');
     await expect(page.locator('[data-region="outcome-options"] input[type="radio"]').nth(2)).toBeEnabled({ timeout: 15_000 });
   });
 
@@ -127,7 +127,7 @@ test.describe('the outcome gate', () => {
     // EV-0455, the Level 2 filed-and-unreviewed submission.
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0455');
     const empty = page.locator('[data-region="attestations-empty"]');
-    await expect(empty).toContainText('No attestation items apply to this submission.');
+    await expect(empty).toContainText('No additional checklist is required.');
     await expect(empty).toContainText('Level 2');
     await expectAbsent(page, {
       absent: '[data-region="attestations"]',

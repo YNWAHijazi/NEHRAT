@@ -61,8 +61,8 @@ describe('showstopper 2 — the eleven major-incident items gate filing at Level
     majorIncident,
   });
 
-  it('sixteen sections alone are NOT a complete Level 2 plan', () => {
-    expect(planIsComplete(plan({}), 2)).toBe(false);
+  it('Level 2 does not require major-incident items (owner update Sep 26)', () => {
+    expect(planIsComplete(plan({}), 2)).toBe(true);
   });
 
   it('ten of eleven confirmed still blocks', () => {

@@ -39,6 +39,7 @@ interface MiItem {
 export function PlanForm({
   eventId,
   level,
+  editor,
   sectionsDef,
   miDef,
   initial,
@@ -48,6 +49,7 @@ export function PlanForm({
 }: {
   eventId: string;
   level: 1 | 2 | 3;
+  editor: 'organizer' | 'director' | 'ems';
   sectionsDef: PlanSection[];
   miDef: MiItem[];
   initial: PlanRow | null;
@@ -58,6 +60,8 @@ export function PlanForm({
    *  promises, and the organizer cannot overwrite it. */
   governance: Record<string, string>;
 }) {
+  const canEditSection = (n: number) => editor === 'ems' ? n === GOVERNANCE_LANDING.incidentSection : !(level === 3 && n === GOVERNANCE_LANDING.incidentSection && editor === 'organizer');
+  const canEditMedical = editor !== 'organizer';
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<'write' | 'attach'>(initial?.mode ?? 'write');
@@ -94,10 +98,10 @@ export function PlanForm({
   // (lib/rules/submission.ts planIsComplete). It was simply invisible here. Save
   // still works at any time: a plan is written over sessions and each save keeps
   // its version.
-  const miOutstanding = level >= 2 ? miDef.filter((i) => mi[String(i.n)]?.covered !== true).length : 0;
+  const miOutstanding = level === 3 ? miDef.filter((i) => mi[String(i.n)]?.covered !== true).length : 0;
   const outstanding = sectionsDef.length - doneCount + miOutstanding;
 
-  const save = () => {
+  const save = (nextSection?: number) => {
     setSaved(false);
     setSaveError(null);
     startTransition(async () => {
@@ -116,6 +120,7 @@ export function PlanForm({
         if ('ok' in result) {
           setBaseVersion(result.version);
           setSaved(true);
+          if (nextSection !== undefined) setOpen(nextSection);
           router.refresh();
         } else setSaveError(result.error);
       } catch { setSaveError('failed'); }
@@ -125,7 +130,7 @@ export function PlanForm({
   return (
     <div style={{ maxWidth: 860 }}>
       {/* THE TWO ROUTES, ONE LINE: write here or attach. */}
-      <div data-region="plan-route" role="group" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 20 }}>
+      <div data-region="plan-route" role="group" style={{ display: editor === 'ems' ? 'none' : 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 20 }}>
         {(
           [
             ['write', 'Write the plan here', 'كتابة الخطة هنا'],
@@ -135,6 +140,7 @@ export function PlanForm({
           <button
             key={which}
             type="button"
+            disabled={editor === 'ems' || (editor === 'organizer' && level === 3 && Boolean(initial))}
             aria-pressed={mode === which}
             onClick={() => setMode(which)}
             style={{ height: 40, paddingInline: 18, border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--bg)', color: mode === which ? 'var(--brand)' : 'var(--ink)', borderRadius: 20, fontSize: 14, cursor: 'pointer' }}
@@ -142,13 +148,14 @@ export function PlanForm({
             <L en={en} ar={ar} />
           </button>
         ))}
+        {level === 3 && editor === 'organizer' && initial ? <InfoNote><L en="The Medical Director manages the plan format. A replacement file needs a new medical review." ar="يحدّد المدير الطبي صيغة الخطة. يحتاج الملف البديل إلى مراجعة طبية جديدة." /></InfoNote> : null}
       </div>
 
       {mode === 'attach' ? (
         <div data-region="plan-attach" style={{ padding: '18px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20 }}>
           <UploadInput
             accept={acceptAttribute()}
-            disabled={uploading}
+            disabled={uploading || editor === 'ems'}
             onChange={(e) => {
               const chosen = e.target.files?.[0];
               if (!chosen) return;
@@ -163,6 +170,11 @@ export function PlanForm({
                   if ('ok' in result) {
                     setAttachedFile(result.fileName);
                     setBaseVersion(result.version);
+                    if (level === 3 && editor === 'organizer') {
+                      setSections(prev => ({ ...prev, [String(GOVERNANCE_LANDING.incidentSection)]: {} }));
+                      setMi({});
+                    }
+                    setSaved(false);
                     router.refresh();
                   } else {
                     setUploadRefusal({ en: result.en, ar: result.ar });
@@ -275,7 +287,7 @@ export function PlanForm({
         <div data-region="sections" style={{ marginBlockEnd: 28 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 8 }}>
             <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
-              {doneCount > 0 ? <L en={`${doneCount} of 16 addressed`} ar={`عولج ${doneCount} من 16`} /> : null}
+              {doneCount > 0 ? <L en={`${doneCount} of ${sectionsDef.length} complete`} ar={`عولج ${doneCount} من ${sectionsDef.length}`} /> : null}
             </span>
             {/* SELECT ALL (partner ruling, 2026-09-05): confirming an attached
                 plan covers all sixteen is one decision, not sixteen clicks. Only
@@ -288,7 +300,7 @@ export function PlanForm({
                   const all = doneCount === sectionsDef.length;
                   setSections((prev) => {
                     const next = { ...prev };
-                    for (const s of sectionsDef) next[String(s.n)] = { ...next[String(s.n)], covered: !all };
+                    for (const s of sectionsDef.filter(s => canEditSection(s.n))) next[String(s.n)] = { ...next[String(s.n)], covered: !all };
                     return next;
                   });
                 }}
@@ -340,10 +352,12 @@ export function PlanForm({
                           )}
                         </div>
                       ) : null}
+                      {!canEditSection(s.n) ? <p><L en={s.n === GOVERNANCE_LANDING.incidentSection ? 'Completed by the Medical Director or EMS agency.' : 'Completed by the organizer or Medical Director.'} ar={s.n === GOVERNANCE_LANDING.incidentSection ? 'يستكمله المدير الطبي أو جهة الإسعاف.' : 'يستكمله المنظّم أو المدير الطبي.'} /></p> : null}
                       <InfoNote labelEn="What to include" labelAr="ما يجب إدراجه"><L en={s.bodyEn} ar={s.bodyAr} /></InfoNote>
                       {mode === 'write' ? (
                         <textarea
                           aria-label={`${s.n}. ${s.en}`}
+                          readOnly={!canEditSection(s.n)}
                           rows={4}
                           value={st?.text ?? ''}
                           onChange={(e) =>
@@ -354,6 +368,7 @@ export function PlanForm({
                       ) : (
                         <button
                           type="button"
+                          disabled={!canEditSection(s.n)}
                           aria-pressed={st?.covered === true}
                           onClick={() =>
                             setSections((prev) => ({ ...prev, [String(s.n)]: { ...prev[String(s.n)], covered: !(st?.covered === true) } }))
@@ -363,6 +378,7 @@ export function PlanForm({
                           <L en="The attached plan covers this" ar="الخطة المرفقة تغطي هذا" />
                         </button>
                       )}
+                      {canEditSection(s.n) ? <button type="button" disabled={pending} onClick={() => save(sectionsDef[sectionsDef.findIndex(section => section.n === s.n) + 1]?.n ?? -1)} style={{display:'block',marginBlockStart:14,padding:'10px 16px',borderRadius:20,border:'1px solid var(--line)'}}><L en={sectionsDef[sectionsDef.findIndex(section => section.n === s.n) + 1] ? `Save and continue to ${sectionsDef[sectionsDef.findIndex(section => section.n === s.n) + 1]!.en}` : 'Save this section'} ar={sectionsDef[sectionsDef.findIndex(section => section.n === s.n) + 1] ? `حفظ ومتابعة إلى ${sectionsDef[sectionsDef.findIndex(section => section.n === s.n) + 1]!.ar}` : 'حفظ هذا القسم'}/></button>:null}
                     </div>
                   ) : null}
                 </div>
@@ -372,9 +388,10 @@ export function PlanForm({
         </div>
       ) : null}
 
+      {level === 2 ? <label style={{ display: 'flex', gap: 10, marginBlock: 24 }}><input type="checkbox" checked={mi['recommendation']?.covered === true} onChange={e => setMi(prev => ({ ...prev, recommendation: { covered: e.target.checked } }))} /><L en="I have read the recommendation to prepare for a major incident. This is optional for Level 2." ar="اطّلعت على التوصية بالاستعداد للحوادث الجسيمة. هذا اختياري للمستوى 2." /></label> : null}
       {/* THE ELEVEN MAJOR-INCIDENT ITEMS: a plain checkbox list. Level 2 and 3
           only; absent below. */}
-      {level >= 2 ? (
+      {level === 3 ? (
         <div data-region="major-incident" style={{ marginBlockEnd: 28 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 10 }}>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
@@ -383,6 +400,7 @@ export function PlanForm({
             <button
               type="button"
               data-region="mi-all"
+              disabled={!canEditMedical}
               onClick={() => {
                 const all = miDef.every((i) => mi[String(i.n)]?.covered === true);
                 setMi(() => Object.fromEntries(miDef.map((i) => [String(i.n), { covered: !all }])));
@@ -407,6 +425,7 @@ export function PlanForm({
                 <button
                   key={item.n}
                   type="button"
+                  disabled={!canEditMedical}
                   aria-pressed={covered}
                   onClick={() => setMi((prev) => ({ ...prev, [String(item.n)]: { covered: !covered } }))}
                   style={{ textAlign: 'start', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 16px', border: `1px solid ${covered ? 'var(--brand)' : 'var(--line)'}`, background: covered ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
@@ -426,6 +445,7 @@ export function PlanForm({
       {saveError ? <p role="alert" style={{ color: 'var(--bad)' }}>{saveError === 'conflict'
         ? <L en="Someone updated this plan. Copy your unsaved text, then reload the page before saving again." ar="حدّث شخص آخر هذه الخطة. انسخوا نصكم غير المحفوظ، ثم أعيدوا تحميل الصفحة قبل الحفظ مجدداً." />
         : <L en="The plan could not be saved. Your text is still here; please try again." ar="تعذّر حفظ الخطة. ما زال نصكم هنا؛ حاولوا مجدداً." />}</p> : null}
+      {saved ? <a href={editor === 'organizer' ? `/events/${eventId}/requirements#requirement-siteMap` : `/events/${eventId}`} style={{ display: 'block', marginBlock: 16 }}><L en={editor === 'organizer' ? 'Continue to event site or route map' : 'Continue to event'} ar={editor === 'organizer' ? 'المتابعة إلى خريطة الموقع أو المسار' : 'المتابعة إلى الفعالية'} /></a> : null}
       {saved ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--brand)' }}>
           <L en="Saved." ar="حُفظت." />
@@ -434,7 +454,7 @@ export function PlanForm({
       <button
         type="button"
         disabled={pending}
-        onClick={save}
+        onClick={() => save()}
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, cursor: 'pointer' }}
       >
         {outstanding > 0 ? (

@@ -172,23 +172,23 @@ for (const lang of LANGUAGES) {
       );
 
       // BRANCH ONE — an event. Any one criterion is enough.
-      await gotoRidingRestarts(page, '/applicability?subject=event&c=1');
+      await gotoRidingRestarts(page, '/applicability?subject=event&checked=1&c=1');
       const answer = page.locator('[data-region="applicability-answer"]');
-      await expect(answer).toContainText(lang === 'ar' ? 'خاضعة للبروتوكول' : 'Subject to the Protocol');
+      await expect(answer).toContainText(lang === 'ar' ? 'الاعتماد مطلوب' : 'Certification required');
       // "What is not routinely subject" renders ONLY here (ROADMAP 1).
       await expect(page.locator('[data-region="not-routinely-subject"]')).toBeVisible();
 
       // None selected is NOT "not subject": the Ministry makes the final determination.
-      await gotoRidingRestarts(page, '/applicability?subject=event&c=');
+      await gotoRidingRestarts(page, '/applicability?subject=event&checked=1&c=');
       await expect(answer).toContainText(
-        lang === 'ar' ? 'تتخذ الوزارة القرار النهائي' : 'The Ministry makes the final determination',
+        lang === 'ar' ? 'الاعتماد غير مطلوب' : 'Certification not required',
       );
 
       // BRANCH TWO — a venue. Both conditions, or it routes to the event branch.
       await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1&cap=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'موقع فعاليات متكرر' : 'A recurring event venue');
+      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل الموقع المستضيف مطلوب' : 'Hosting venue registration required');
       await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'ليس موقع فعاليات متكرر' : 'Not a recurring event venue');
+      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل الموقع المستضيف غير مطلوب' : 'Hosting venue registration not required');
       await expectAbsent(page, {
         absent: '[data-region="not-routinely-subject"]',
         anchor: answer,
@@ -198,16 +198,8 @@ for (const lang of LANGUAGES) {
       // BRANCH THREE — a facility, which NEVER returns a bare yes or no. The schools
       // category is the live unset state and the one most likely to look broken.
       await gotoRidingRestarts(page, '/applicability?subject=facility&cat=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'بانتظار قيمة من الوزارة' : 'Awaiting a Ministry value');
-      const waiting = page.locator('[data-region="waiting-on-ministry"]');
-      await expect(waiting).toBeVisible();
-      await expect(waiting).toContainText(lang === 'ar' ? 'الجدول المرحلي' : 'The phased schedule');
-      // The unset state is the answer, not a gap in it — said plainly since the
-      // partner's second sweep: nothing in force until the Ministry publishes the
-      // value, and operators notified when it is.
-      await expect(waiting).toContainText(
-        lang === 'ar' ? 'لا شيء سارٍ على هذه الفئة' : 'Nothing is in force against this category',
-      );
+      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل المنشأة مطلوب' : 'Facility registration required');
+      await expect(answer.locator('a')).toHaveAttribute('href', '/services/register-a-facility');
 
       // THE LOOKUP SCREEN, in front of the endpoint. Four fields and no more.
       await gotoRidingRestarts(page, '/lookup');

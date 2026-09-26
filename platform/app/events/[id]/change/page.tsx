@@ -42,7 +42,7 @@ export default async function ChangePage({
             <L en={`${event.nameEn} · ${event.startDate ?? ''}`} ar={`${event.nameAr} · ⁦${event.startDate ?? ''}⁩`} />
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-            <L en="Report a material change" ar="الإبلاغ عن تغيير جوهري" />
+            <L en="Edit and file" ar="تعديل وتقديم" />
            <InfoNote><L
               en="Notify the Ministry without undue delay of a change affecting the assessment or the medical plan."
               ar="أبلغوا الوزارة دون تأخير غير مبرر بأي تغيير يؤثر في التقييم أو في الخطة الطبية."

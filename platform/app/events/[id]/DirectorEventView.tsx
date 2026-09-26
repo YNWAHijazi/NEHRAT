@@ -1,3 +1,7 @@
+import { getDb } from '../../../lib/db';
+import { attachDocumentAction } from '../../actions';
+import { UploadInput } from '../../../components/UploadInput';
+import { acceptAttribute } from '../../../lib/rules/uploads';
 /**
  * THE DIRECTOR'S ONE PAGE (partner ruling, counterparty pass 2026-09-02): the event's
  * facts at the top with View more, then only what the Director actually fills — the
@@ -38,6 +42,7 @@ export function DirectorEventView({
   notice?: string | undefined;
 }) {
   const content = ROLES_CONTENT.director;
+  const hasMap = Boolean(getDb().prepare("SELECT 1 FROM event_attachments WHERE event_id = ? AND doc_key = 'deploymentMap' AND length(bytes) > 0").get(invitation.eventId));
   const confirmed = invitation.status === 'confirmed';
   const live = confirmed || invitation.status === 'nominated';
 
@@ -101,6 +106,7 @@ export function DirectorEventView({
           {confirmed ? (
             <>
               {invitation.eventLevel === 3 ? <Link data-region="director-plan" href={`/events/${invitation.eventId}/plan`} style={{ display: 'inline-flex', padding: '13px 22px', background: 'var(--brand)', color: 'var(--bg)', borderRadius: 24, marginBlockEnd: 20 }}><L en="Prepare the medical plan" ar="إعداد الخطة الطبية" /></Link> : null}
+              {invitation.eventLevel === 3 ? <section style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}><h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>{hasMap ? <a href={`/api/documents/${invitation.eventId}/deploymentMap`} target="_blank" rel="noreferrer"><L en="View uploaded map" ar="عرض الخريطة المرفوعة" /></a> : null}<form action={attachDocumentAction.bind(null, invitation.eventId)}><input type="hidden" name="docKey" value="deploymentMap" /><input type="hidden" name="returnTo" value={`/events/${invitation.eventId}/plan`} /><UploadInput name="file" required accept={acceptAttribute()} /><button type="submit"><L en="Upload map" ar="رفع الخريطة" /></button></form></section> : null}
               <form action={saveGovernanceAction.bind(null, invitation.eventId)}>
                 <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
                   {content.govSections.map((g) => {

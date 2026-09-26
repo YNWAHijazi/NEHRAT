@@ -4,7 +4,7 @@ import { gotoRidingRestarts } from '../helpers/resilient';
 import { LANGUAGES, useLanguage } from '../helpers/language';
 
 for (const lang of LANGUAGES) {
-  test(`organizer sees event identity and can expand progress on a phone (${lang})`, async ({ page, context }) => {
+  test(`organizer sees event identity and always sees progress on a phone (${lang})`, async ({ page, context }) => {
     await useLanguage(context, lang);
     await page.setViewportSize({ width: 375, height: 812 });
     await signInAs(page, 'test_organizer');
@@ -15,13 +15,9 @@ for (const lang of LANGUAGES) {
     await expect(header).toBeVisible();
     await expect(action).toBeVisible();
     expect(await header.evaluate((el) => (el.compareDocumentPosition(document.querySelector('[data-region="next-action"]')!) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0)).toBe(true);
-    await expect(progress.locator('summary')).toBeVisible();
-    await expect(progress).not.toHaveAttribute('open');
-    await progress.locator('summary').click();
     await expect(progress.locator('[data-rail]')).toBeVisible();
     await expect(progress.locator('[data-rail] > div')).toHaveCount(6);
-    await progress.locator('summary').press('Enter');
-    await expect(progress).not.toHaveAttribute('open');
+    await expect(progress.locator('summary')).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     await action.getByRole('link').click();
     await expect(page).toHaveURL(/\/events\/EV-0418\/(requirements|plan|submit)|\/organization/);

@@ -21,30 +21,18 @@ test.describe('the category determination', () => {
     await page.getByRole('button', { name: /Continue to the category/ }).click();
     await page.getByRole('button', { name: /Schools, universities/ }).click();
 
-    // The end-of-journey panel: the missing value is NAMED, nothing is in force,
-    // and the two actions are an interest and the way back.
-    await expect(page.locator('[data-region="journey-ends"]')).toContainText(
-      'The phased implementation schedule',
-    );
-    await expect(page.locator('[data-region="journey-ends"]')).toContainText(
-      'You have done everything available to you',
-    );
-    await expect(
-      page.getByRole('button', { name: /Record an interest and notify us when it activates/ }),
-    ).toBeVisible();
-    await expect(page.getByRole('link', { name: /Back to the dashboard/ })).toBeVisible();
-
-    // No Continue control exists -- not disabled, not greyed: absent.
-    await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
+    await expect(page.locator('[data-region="journey-ends"]')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
   });
 
   test('a sports facility proceeds, and the recurring-venue cross-sell is gone', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
-    await page.getByRole('button', { name: /Gyms, fitness centres/ }).click();
+    await page.getByRole('button', { name: /Sports and aquatic facilities/ }).click();
 
-    await expect(page.locator('[data-region="determination"]')).toContainText('In force now');
+    await expect(page.locator('[data-region="determination"]')).toContainText('Register the facility and its AEDs');
     // REMOVED BY RULING (partner, 2026-09-05): registering a facility does not
     // advertise the venue instrument. The determination and the way on are the
     // screen; the anchor proves the page rendered before asserting the absence.
@@ -56,10 +44,10 @@ test.describe('the category determination', () => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/new');
     await page.getByRole('button', { name: /Continue to the category/ }).click();
-    await page.getByRole('button', { name: /cardiac arrest has previously been reported/ }).click();
+    await page.getByRole('button', { name: /Facilities with a confirmed previous cardiac arrest/ }).click();
 
     await expect(page.locator('[data-region="determination"]')).toContainText(
-      'Determined by Ministry review',
+      'Register the facility and its AEDs',
     );
     await expect(page.getByRole('button', { name: /Continue to the coordinator/ })).toBeVisible();
   });

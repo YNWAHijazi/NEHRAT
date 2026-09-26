@@ -15,7 +15,7 @@
  * not a gate, and must never be expressed through this module.
  */
 
-import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, startOfBeirutDay, type FilingDeadline } from './deadlines';
+import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, startOfBeirutDay, fromBeirut, type FilingDeadline } from './deadlines';
 import { REASSESSMENT_WINDOW } from './load';
 import type { Level } from './types';
 
@@ -38,6 +38,7 @@ export interface EventGateContext {
   /** YYYY-MM-DD, null until captured. */
   eventEndDate: string | null;
   eventStartDate: string | null;
+  eventEndTime?: string | null;
   filed: boolean;
   organizationStatus: 'none' | 'pending' | 'recorded' | 'returned';
   now: Date;
@@ -105,6 +106,12 @@ export function seriousIncidentGate(ctx: EventGateContext): Gate {
   // was already correct.
   const [y, m, d] = ctx.eventStartDate.split('-').map(Number) as [number, number, number];
   const start = startOfBeirutDay({ year: y, month: m, day: d });
+  if (ctx.eventEndDate) {
+    const [year, month, day] = ctx.eventEndDate.split('-').map(Number) as [number, number, number];
+    const time = /^(\d{2}):(\d{2})$/.exec(ctx.eventEndTime ?? '');
+    const end = time ? fromBeirut({ year, month, day, hour: Number(time[1]), minute: Number(time[2]), second: 0 }) : startOfBeirutDay(addDays({ year, month, day }, 1));
+    if (ctx.now.getTime() >= end.getTime() + 24 * 60 * 60 * 1000) return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentClosed' };
+  }
   if (ctx.now.getTime() >= start.getTime()) return ENABLED;
   return {
     behaviour: 'disabled',

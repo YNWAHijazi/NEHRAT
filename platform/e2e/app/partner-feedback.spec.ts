@@ -74,7 +74,7 @@ test('Director and organizer share a guided plan without losing concurrent edits
   await organizer.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(organizer.locator('main').getByRole('alert')).toContainText('Someone updated this plan');
   await organizer.reload();
-  await organizer.getByRole('button', { name: 'Write the plan here', exact: true }).click();
+  await expect(organizer.getByRole('button', { name: 'Write the plan here', exact: true })).toHaveAttribute('aria-pressed', 'true');
   const first = organizer.getByRole('button', { name: /^1 / }).and(organizer.locator('[aria-expanded]'));
   if (await first.getAttribute('aria-expanded') !== 'true') await first.click();
   await expect(organizer.getByRole('textbox', { name: /^1\./ })).toHaveValue('Director medical planning contribution.');
@@ -84,13 +84,14 @@ test('Director and organizer share a guided plan without losing concurrent edits
   expect(historyDownload.status()).toBe(200);
   expect((await historyDownload.body()).equals(originalBytes)).toBe(true);
   // Restore this shared fixture's complete attachment so later filing tests remain independent.
-  await organizer.getByRole('button', { name: 'Attach an existing plan', exact: true }).click();
-  await organizer.locator('[data-region="plan-attach"] input').setInputFiles({ name: 'restored-medical-plan.pdf', mimeType: 'application/pdf', buffer: originalBytes });
-  await expect(organizer.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
-  await organizer.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(organizer.getByText('Saved.', { exact: true })).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Attach an existing plan', exact: true }).click();
+  await page.locator('[data-region="plan-attach"] input').setInputFiles({ name: 'restored-medical-plan.pdf', mimeType: 'application/pdf', buffer: originalBytes });
+  await expect(page.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /^Save the plan/ }).click();
+  await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
   await organizer.close();
   expect((await page.request.get('/events/EV-0418/plan')).status()).toBe(404);
   await signInAs(page, 'test_ems');
-  expect((await page.request.get('/events/EV-0362/plan')).status()).toBe(404);
+  expect((await page.request.get('/events/EV-0362/plan')).status()).toBe(200);
 });

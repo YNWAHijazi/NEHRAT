@@ -154,7 +154,7 @@ export function RegisterFacilityForm({
       {step === 2 ? (
         <div style={{ maxWidth: 920 }}>
           <h2 style={{ margin: '0 0 24px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en="Category, and what it requires" ar="الفئة وما تقتضيه" />
+            <L en="Select the type of facility" ar="اختاروا نوع المرفق" />
           </h2>
           {/* The determination-not-a-form explainer left this step (partner ruling,
               second sweep): picking a category shows the applicable rule itself. */}
@@ -177,9 +177,7 @@ export function RegisterFacilityForm({
                       <L en={c.en} ar={c.ar} />
                     </span>
                   </span>
-                  <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
-                    <L en={chip.en} ar={chip.ar} />
-                  </span>
+
                 </button>
               );
             })}
@@ -192,9 +190,7 @@ export function RegisterFacilityForm({
                   <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
                     <L en="The applicable rule" ar="القاعدة المنطبقة" />
                   </span>
-                  <span style={{ padding: '4px 10px', borderRadius: 999, background: CHIP[picked.state].bg, color: CHIP[picked.state].color, fontSize: '12.5px' }}>
-                    <L en={CHIP[picked.state].en} ar={CHIP[picked.state].ar} />
-                  </span>
+
                 </div>
                 <div style={{ fontSize: 21, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.5, marginBlockEnd: 20, maxWidth: '64ch' }}>
                   <L en={picked.ruleEn} ar={picked.ruleAr} /> <InfoNote labelEn="Why this applies" labelAr="سبب الانطباق"><L en={picked.basisEn} ar={picked.basisAr} /></InfoNote>

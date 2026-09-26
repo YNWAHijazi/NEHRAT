@@ -202,6 +202,7 @@ export default async function DeclarationPage({
 
           {confirmed ? (
             <div style={{ marginBlockStart: 32 }}>
+              <a href={`/events/${id}/plan`} style={{ display: 'block', marginBlock: 16 }}><L en="Complete major-incident preparedness" ar="استكمال الاستعداد للحوادث الجسيمة" /></a>
               <SharedDocuments eventId={id} token={invitation.token} />
             </div>
           ) : null}

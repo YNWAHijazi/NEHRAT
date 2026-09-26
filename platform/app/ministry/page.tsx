@@ -1,18 +1,15 @@
+import { ServiceSearch } from '../../components/ServiceSearch';
 import Link from 'next/link';
 import { L } from '../../components/L';
 import { MinistryShell } from '../../components/MinistryShell';
 import { requireMinistryPage } from '../../lib/ministry-auth';
 import { beirutToday } from '../../lib/clock';
 import {
-  arrestLocations,
   changesForReview,
-  correctiveActions,
   enquiriesForReview,
-  facilitiesForOversight,
-  organizationsForReview,
   reviewQueue,
 } from '../../lib/queries';
-import { FACILITY_CONTENT, MINISTRY_CONTENT, addDaysIso, can } from '../../lib/rules';
+import { MINISTRY_CONTENT, addDaysIso, can } from '../../lib/rules';
 
 /**
  * The operational dashboard. Every count derives from the records -- never a
@@ -24,29 +21,19 @@ export default async function MinistryDashboardPage() {
   const account = await requireMinistryPage('viewMinistry');
   const today = beirutToday();
   const queue = reviewQueue(account.isDemo);
-  const orgs = organizationsForReview(account.isDemo);
   const changes = changesForReview(account.isDemo);
   const enquiries = enquiriesForReview(account.isDemo);
-  const facilities = facilitiesForOversight(account.isDemo);
-  const arrests = arrestLocations(account.isDemo);
-  const corrective = correctiveActions(account.isDemo);
 
   const open = queue.filter((q) => q.outcome !== 'satisfied');
   const upcomingL3 = queue.filter((q) => q.level === 3 && (q.eventDate ?? '') >= today);
   const within30 = upcomingL3.filter((q) => (q.eventDate ?? '') <= addDaysIso(today, 30));
-  const pendingOrgs = orgs.filter((o) => o.status === 'pending');
-  const openCorrective = corrective.filter((c) => c.status === 'open');
-  const repeatArrests = arrests.filter((a) => a.count >= 2);
   const openEnquiries = enquiries.filter((e) => e.repliedAt === null);
 
   const counters: { n: number; en: string; ar: string; color: string; href: string }[] = [
     { n: open.length, en: 'In the review queue', ar: 'في قائمة المراجعة', color: 'var(--ink)', href: '/ministry/queue' },
     { n: within30.length, en: 'Level 3 events within 30 days', ar: 'فعاليات المستوى 3 خلال 30 يوماً', color: 'var(--accent-ink)', href: '/ministry/queue' },
     { n: changes.length, en: 'Changes and notifications', ar: 'التغييرات والإشعارات', color: 'var(--accent-ink)', href: '/ministry/changes' },
-    { n: pendingOrgs.length, en: 'Organizations awaiting recording', ar: 'مؤسسات بانتظار التسجيل', color: 'var(--ink)', href: '/ministry/organizations' },
     { n: openEnquiries.length, en: 'Enquiries awaiting a response', ar: 'استفسارات بانتظار الرد', color: 'var(--accent-ink)', href: '/ministry/enquiries' },
-    { n: openCorrective.length, en: 'Pending corrective actions', ar: 'إجراءات تصحيحية قائمة', color: 'var(--accent-ink)', href: '/ministry/facilities' },
-    { n: repeatArrests.length, en: 'Places with repeat reported arrests', ar: 'أماكن تكررت فيها حوادث مبلَّغة', color: 'var(--bad)', href: '/ministry/facilities/arrests' },
   ];
 
   const levels = [1, 2, 3].map((level) => ({
@@ -56,17 +43,13 @@ export default async function MinistryDashboardPage() {
     done: queue.filter((q) => q.level === level && q.outcome === 'satisfied').length,
   }));
 
-  const shortEn = (key: string): string =>
-    (FACILITY_CONTENT.categories.find((c) => c.key === key) as { shortEn?: string } | undefined)?.shortEn ?? key;
-  const shortAr = (key: string): string =>
-    (FACILITY_CONTENT.categories.find((c) => c.key === key) as { shortAr?: string } | undefined)?.shortAr ?? key;
-
   return (
     <MinistryShell account={account}>
       <h1 data-sec-h1="" style={{ margin: '0 0 20px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
-        <L en="Operational dashboard" ar="اللوحة التشغيلية" />
+        <L en="Events" ar="الفعاليات" />
       </h1>
 
+      <ServiceSearch action="/ministry/queue" />
       {/* THE OVERSEEING CONSOLE, for the profile that holds it. It had no entry
           point from here at all: its four screens were reachable only by typing the
           URL or by following a footer link on an unrelated page. */}
@@ -182,100 +165,7 @@ export default async function MinistryDashboardPage() {
             ) : null}
           </div>
 
-          <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Pending corrective actions" ar="الإجراءات التصحيحية القائمة" />
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-            {openCorrective.slice(0, 4).map((c) => (
-              <Link key={c.id} href="/ministry/facilities" style={{ background: 'var(--bg)', padding: '13px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: 14, color: 'var(--ink)' }}>
-                <span style={{ lineHeight: 1.45 }}>
-                  <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
-                </span>
-                <span style={{ flex: 'none', fontSize: '12.5px', color: 'var(--muted)' }}>
-                  <L en="Open the lane" ar="فتح المسار" />
-                </span>
-              </Link>
-            ))}
-            {openCorrective.length === 0 ? (
-              <div style={{ background: 'var(--bg)', padding: '13px 16px', fontSize: 14, color: 'var(--muted)' }}>
-                <L en="None open." ar="لا شيء مفتوحاً." />
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
 
-      <div data-region="facility-band" style={{ marginBlockStart: 36, paddingBlockStart: 28, borderBlockStart: '1px solid var(--line)' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Cardiac-arrest instrument" ar="إطار الجاهزية لتوقف القلب" />
-          </h2>
-          <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 12 }}>
-            <L en="Separate lane" ar="مسار منفصل" />
-          </span>
-        </div>
-
-        {/* One coherent band: two EQUAL columns, each a self-contained card with its
-            own heading, its rows filling the card, and its link in the card foot --
-            matched heights, no orphaned buttons, no ocean of white beside one card. */}
-        <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'stretch' }}>
-          <div style={{ background: 'var(--surface2)', borderRadius: 16, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, letterSpacing: '-.015em' }}>
-              <L en={`Covered facilities — ${facilities.length}`} ar={`المرافق المشمولة — ${facilities.length}`} />
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-              {facilities.map((f) => (
-                <div key={f.id} style={{ paddingBlock: '13px', paddingInlineStart: '15px', paddingInlineEnd: '16px', background: 'var(--bg)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', fontSize: '13.5px' }}>
-                  <span>
-                    <L en={`${f.nameEn} · ${shortEn(f.categoryKey)} · ${f.municipality}`} ar={`${f.nameAr} · ${shortAr(f.categoryKey)} · ${f.municipality}`} />
-                  </span>
-                  <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    <L en={`${f.devices} devices`} ar={`${f.devices} أجهزة`} />
-                  </span>
-                </div>
-              ))}
-              {facilities.length === 0 ? (
-                <div style={{ padding: '13px 16px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: '13.5px', color: 'var(--muted)' }}>
-                  <L en="No covered facilities registered." ar="لا مرافق مشمولة مسجَّلة." />
-                </div>
-              ) : null}
-            </div>
-            <div style={{ marginBlockStart: 14 }}>
-              <Link href="/ministry/facilities" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
-                <L en="Open facility oversight" ar="فتح الرقابة على المرافق" />
-              </Link>
-            </div>
-          </div>
-          <div style={{ background: 'var(--surface2)', borderRadius: 16, padding: '20px 24px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, letterSpacing: '-.015em' }}>
-              <L en={`Places with repeat reported arrests — ${repeatArrests.length}`} ar={`أماكن تكررت فيها حوادث مبلَّغة — ${repeatArrests.length}`} />
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-              {repeatArrests.map((a) => (
-                <div key={a.placeEn} style={{ paddingBlock: '13px', paddingInlineStart: '15px', paddingInlineEnd: '16px', background: 'var(--bg)', borderInlineStart: `3px solid ${a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13.5px', lineHeight: 1.45 }}>
-                    <L en={a.placeEn} ar={a.placeAr} />
-                  </span>
-                  <span style={{ display: 'flex', gap: 10, alignItems: 'center', flex: 'none' }}>
-                    <span style={{ fontSize: 16, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: a.count >= 3 ? 'var(--bad)' : 'var(--accent-ink)' }}>{a.count}</span>
-                    <span style={{ padding: '3px 8px', borderRadius: 999, background: a.designated ? 'var(--brand-soft)' : 'var(--bg)', color: a.designated ? 'var(--brand)' : 'var(--muted)', fontSize: '11.5px' }}>
-                      {a.designated ? <L en="Already a covered facility" ar="مرفق مشمول أصلاً" /> : <L en="Not currently covered" ar="غير مشمول حالياً" />}
-                    </span>
-                  </span>
-                </div>
-              ))}
-              {repeatArrests.length === 0 ? (
-                <div style={{ padding: '13px 16px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: '13.5px', color: 'var(--muted)' }}>
-                  <L en="No place shows a repeat pattern." ar="لا مكان يُظهر نمطاً متكرراً." />
-                </div>
-              ) : null}
-            </div>
-            <div style={{ marginBlockStart: 14 }}>
-              <Link href="/ministry/facilities/arrests" style={{ height: 36, paddingInline: 15, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, display: 'inline-flex', alignItems: 'center' }}>
-                <L en="Open reported arrest locations" ar="فتح مواقع الحوادث المبلَّغة" />
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
 

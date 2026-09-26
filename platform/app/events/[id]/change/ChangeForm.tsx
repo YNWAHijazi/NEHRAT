@@ -126,7 +126,7 @@ export function ChangeForm({ eventId, aspects }: { eventId: string; aspects: Asp
         type="submit"
         style={{ height: 44, paddingInline: 22, border: '1px solid var(--line)', background: 'none', borderRadius: 22, fontSize: '14.5px', cursor: 'pointer' }}
       >
-        <L en="Notify the Ministry of the change" ar="إبلاغ الوزارة بالتغيير" />
+        <L en="File changes" ar="تقديم التغييرات" />
       </button>
     </form>
   );

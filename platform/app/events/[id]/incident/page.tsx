@@ -1,3 +1,5 @@
+import { eventGateContext } from '../../../../lib/event-gate-context';
+import { seriousIncidentGate } from '../../../../lib/rules/gates';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -32,7 +34,8 @@ export default async function IncidentPage({
   const unread = unreadCountFor(account.id);
   const rows = seriousIncidentNotificationsFor(account.id, id);
   const today = beirutToday();
-  const started = event.startDate !== null && event.startDate <= today;
+  const gate = seriousIncidentGate(eventGateContext(id));
+  const started = gate.behaviour === 'enabled';
   const types = SERIOUS_INCIDENT_NOTIFICATION.types as { key: string; en: string; ar: string }[];
   const typeByKey = Object.fromEntries(types.map((t) => [t.key, t]));
   const hours = SERIOUS_INCIDENT_NOTIFICATION.windowHours as number;
@@ -76,14 +79,14 @@ export default async function IncidentPage({
           {!started ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 28, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
               <L
-                en={`Available from the event's first day${event.startDate ? ` — ${event.startDate}` : ''}. Nothing can have occurred at an event that has not begun.`}
-                ar={`متاح من اليوم الأول للفعالية${event.startDate ? ` — ⁦${event.startDate}⁩` : ''}. فلا يمكن أن تقع حادثة في فعالية لم تبدأ.`}
+                en={gate.reasonKey === 'gate.seriousIncidentClosed' ? 'Closed — more than 24 hours have passed since the event ended.' : `Available from ${event.startDate ?? 'the event start date'}.`}
+                ar={gate.reasonKey === 'gate.seriousIncidentClosed' ? 'أُغلق الإبلاغ — مرّت أكثر من 24 ساعة على انتهاء الفعالية.' : `متاح من ${event.startDate ?? 'تاريخ بدء الفعالية'}.`}
               />
             </div>
           ) : (
             <form action={notifySeriousIncidentAction.bind(null, id)} style={{ padding: '26px 28px', border: '2px solid var(--bad)', borderRadius: 16, marginBlockEnd: 28 }}>
               <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--bad)', marginBlockEnd: 14 }}>
-                <L en={`Separate obligation — ${hours} hours`} ar={`موجب منفصل — ${hours} ساعة`} />
+                <L en="Incident details" ar="تفاصيل الحادثة" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 16 }}>
                 {types.map((t) => (

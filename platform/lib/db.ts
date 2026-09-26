@@ -869,6 +869,33 @@ function migrate(d: DatabaseSync): void {
     }
   };
 
+  addColumn('accounts', 'phone', "phone TEXT NOT NULL DEFAULT ''");
+  addColumn('accounts', 'email_verified_at', 'email_verified_at TEXT');
+  d.exec(`CREATE TABLE IF NOT EXISTS email_challenges (
+    token_hash TEXT PRIMARY KEY, account_id INTEGER NOT NULL REFERENCES accounts(id), code_hash TEXT NOT NULL,
+    next_path TEXT NOT NULL, created_ms INTEGER NOT NULL, expires_ms INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, used INTEGER NOT NULL DEFAULT 0
+  ); CREATE INDEX IF NOT EXISTS email_challenges_account ON email_challenges(account_id, created_ms);`);
+  addColumn('events', 'updated_at', "updated_at TEXT NOT NULL DEFAULT ''");
+  addColumn('venue_assessments', 'certificate_snapshot', "certificate_snapshot TEXT NOT NULL DEFAULT '{}'");
+  d.exec(`
+    UPDATE events SET updated_at = created_at WHERE updated_at = '';
+    UPDATE venue_assessments SET certificate_snapshot = (
+      SELECT json_object('nameEn',name_en,'nameAr',name_ar,'addressEn',address_municipality_en,'addressAr',address_municipality_ar,'capacity',licensed_capacity)
+      FROM venues WHERE id = venue_assessments.venue_id
+    ) WHERE certificate_snapshot = '{}';
+    CREATE TRIGGER IF NOT EXISTS event_activity_update AFTER UPDATE ON events
+    WHEN NEW.updated_at = OLD.updated_at BEGIN
+      UPDATE events SET updated_at = now_stamp() WHERE id = NEW.id;
+    END;
+    CREATE TRIGGER IF NOT EXISTS venue_certificate_snapshot AFTER INSERT ON venue_assessments BEGIN
+      UPDATE venue_assessments SET certificate_snapshot = (SELECT json_object('nameEn',name_en,'nameAr',name_ar,'addressEn',address_municipality_en,'addressAr',address_municipality_ar,'capacity',licensed_capacity) FROM venues WHERE id = NEW.venue_id) WHERE id = NEW.id;
+    END;
+  `);
+  for (const table of ['assessments','plans','event_attachments','invitations','submissions','post_event_reports','serious_incident_notifications','material_changes','determinations']) {
+    for (const action of ['INSERT','UPDATE','DELETE']) {
+      d.exec(`CREATE TRIGGER IF NOT EXISTS activity_${table}_${action} AFTER ${action} ON ${table} BEGIN UPDATE events SET updated_at = now_stamp() WHERE id = ${action === 'DELETE' ? 'OLD' : 'NEW'}.event_id; END;`);
+    }
+  }
   addColumn('submissions', 'version', 'version INTEGER NOT NULL DEFAULT 1');
   addColumn('facilities', 'licensed_capacity', 'licensed_capacity INTEGER');
   // SQLite cannot add a NOT NULL column without a default; the CHECK stays on new

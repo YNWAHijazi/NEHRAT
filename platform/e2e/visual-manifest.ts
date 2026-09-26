@@ -125,13 +125,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceFile: 'Event Health Readiness.dc.html',
     referenceTab: 'Determination of applicability',
     builtRoute: '/applicability',
-    threshold: 0.03,
-    builtMask: [
-      {
-        css: '[data-region="need-help"]{display:none !important}',
-        why: 'The Need help footer link rides every page by the fields-only ruling (2026-09-04); the reference predates it, and unmasked it moved this compare from 2.5% to 8%. Masked by name so the 3% stays meaningful.',
-      },
-    ],
+    regions: [{ name: 'subject-choice', mode: 'expectedDivergent', builtSelector: '[data-region="subject-choice"]', note: 'Owner request September 26: concise service labels, five event criteria, exemptions first and a simple required/not-required result. owner-workflow-20260926.spec.ts walks each branch and its next step.' }],
   },
 
   // --- Slice 1: the shell and the thin event slice ---
@@ -192,7 +186,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         mode: 'expectedDivergent',
         reference: { strategy: 'cardByText', text: 'Where this event stands' },
         builtSelector: '[data-region="rail"]',
-        note: 'Expected divergent by the organizer simplification request (2026-09-11): the current-stage note remains visible while the six-stage timeline expands on demand. Stage states and regulatory content are preserved. Interaction is covered in organizer-simplicity.spec.ts.',
+        note: 'Expected divergent by the organizer simplification request (2026-09-11): the September 26 owner update keeps the full six-stage timeline visible and replaces organization approval with event details. Stage states and regulatory content are preserved. Interaction is covered in organizer-simplicity.spec.ts.',
       },
       {
         name: 'record-header',
@@ -903,25 +897,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: "The summary strip: '3 of 6 pending · 2 held by the Ministry, 1 by the Order of Physicians', derived not stored. Geometry held loosely here; the string itself is e2e-ratcheted.",
       },
       {
-        // One COMPLETE Ministry-held row: no controls on either side, so the row is
-        // comparable. The pending rows are not compared as pixels -- the build adds a
-        // working deficiency input the reference does not carry, and the Order rows
-        // carry the lane-fallback ruling where the reference says read-only -- both
-        // recorded divergences, exercised behaviourally in e2e/app/ministry.spec.ts.
         name: 'att-row-complete',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Major-incident and mass-casualty plan reviewed', container: 'border-inline-start: 3px' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-att-item="majorIncidentPlan"]',
-        // Measured residual 8-10%, three named causes, all deliberate: the reference
-        // shows a static Attest button on this COMPLETE row (its buttons are showcase
-        // furniture; the build's controls act, so Attest renders only while pending);
-        // the deficiency control reads "returns to pending" here because on a complete
-        // row that is what it does; and the right-anchored chip doubles under the
-        // width pad. Held at 13% so gross breakage still fails; the title and the
-        // attested-by line are asserted VERBATIM in e2e/app/ministry.spec.ts, where a
-        // changed character fails the build regardless of this hold.
-        threshold: 0.13,
-        note: 'A complete attestation row: title, state chip, authority and the attested-by line. Geometry held at 13% for the named control divergences; strings e2e-ratcheted.',
+        note: 'Owner request September 26: review wording replaces attestation jargon, including Reviewed by and Reopen for correction. The reference still uses Attested by. ministry.spec.ts checks the exact new labels, required reviews and outcome gate, including reopening a completed review.',
       },
     ],
   },

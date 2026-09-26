@@ -119,9 +119,9 @@ for (const lang of LANGUAGES) {
       // They had drifted into three different shapes, which made two of the three read
       // as less considered than the first. Same table, different end state.
       const ends: [string, string, string][] = [
-        ['/services/certify-an-event', 'From registration to reference number', 'من التسجيل إلى الرقم المرجعي'],
-        ['/services/register-a-venue', 'From registration to classification', 'من التسجيل إلى التصنيف'],
-        ['/services/register-a-facility', 'From registration to a maintained record', 'من التسجيل إلى سجل محفوظ'],
+        ['/services/certify-an-event', 'How it works', 'خطوات الخدمة'],
+        ['/services/register-a-venue', 'How it works', 'خطوات الخدمة'],
+        ['/services/register-a-facility', 'How it works', 'خطوات الخدمة'],
       ];
       for (const [route, en, ar] of ends) {
         await gotoRidingRestarts(page, route);
@@ -129,7 +129,7 @@ for (const lang of LANGUAGES) {
         await expect(flow, `${route} has no flow`).toBeVisible();
         await expect(page.locator('body')).toContainText(lang === 'ar' ? ar : en);
         // A numbered sequence, not a paragraph: header row plus at least six steps.
-        expect(await flow.locator('> div').count()).toBeGreaterThanOrEqual(7);
+        expect(await flow.locator('> div').count()).toBeGreaterThanOrEqual(5);
       }
 
       // The venue reuses the SAME nine domains the event assessment uses, answered for
@@ -141,7 +141,7 @@ for (const lang of LANGUAGES) {
       // The facility names the rule beside each category, not the category alone.
       await gotoRidingRestarts(page, '/services/register-a-facility');
       await expect(page.locator('[data-region="facility-categories"] > div')).toHaveCount(6);
-      await expect(page.locator('[data-region="facility-obligations"] > div')).toHaveCount(9);
+      await expect(page.locator('[data-region="facility-obligations"] > div')).toHaveCount(7);
     });
 
     test('each suggestion chip reaches a different kind of result', async ({ page }) => {

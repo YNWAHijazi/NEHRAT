@@ -43,7 +43,7 @@ import { can } from '../../../../../lib/rules/ministry';
 import { demonstrationFilter } from '../../../../../lib/rules/scope';
 import { PLAN_DOC_KEY, servedType } from '../../../../../lib/rules/uploads';
 import { nomineeMayReadDocument } from '../../../../../lib/rules/nomination-access';
-import { planEditorOwnerId } from '../../../../../lib/plan-access';
+import { planAccess } from '../../../../../lib/plan-access';
 
 const notFound = (): NextResponse => new NextResponse('Not found', { status: 404 });
 
@@ -84,7 +84,7 @@ export async function GET(
   const nomineeMayRead = nomination !== undefined && nomineeMayReadDocument(nomination.kind, docKey);
   // A confirmed Level 3 Director prepares the shared plan and must be able to open it.
   // This does not widen anonymous invitation access or expose other attachments.
-  const planEditorMayRead = docKey === PLAN_DOC_KEY && planEditorOwnerId(account, eventId) !== null;
+  const planEditorMayRead = docKey === PLAN_DOC_KEY && planAccess(account, eventId)?.editor === 'director';
   if (!owns && !ministryMayRead && !nomineeMayRead && !planEditorMayRead) return notFound();
 
   const version = new URL(request.url).searchParams.get('version');

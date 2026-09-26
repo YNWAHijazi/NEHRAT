@@ -33,7 +33,8 @@ describe("the Director's requirements, derived from the matrix", () => {
 
   it('shared rows carry the other parties, computed not written', () => {
     const r16 = requirementsForParty(3, 'D').find((r) => r.n === 16);
-    expect(r16?.partyKeys).toContain('O');
+    expect(r16?.partyKeys).toEqual(['E', 'D']);
+    expect(requirementsForParty(2, 'O').some(r => r.n === 16)).toBe(false);
   });
 
   it('is EMPTY below Level 3 -- the role does not exist there', () => {

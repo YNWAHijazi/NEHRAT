@@ -22,7 +22,8 @@
     "attendanceRequired": "Expected maximum simultaneous attendance is required, as a number.",
     "seriousIncidentBeforeFiling": "Available once the submission is filed",
     "seriousIncidentBeforeStart": "Available from the event’s first day — {date}",
-    "seriousIncidentNeedsEventDate": "Available once the event dates are captured"
+    "seriousIncidentNeedsEventDate": "Available once the event dates are captured",
+    "seriousIncidentClosed": "Closed — more than 24 hours have passed since the event ended."
   },
   "level": {
     "governedByScore": "Governed by the assessment score",

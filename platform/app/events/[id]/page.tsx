@@ -199,15 +199,15 @@ const STAGE_STYLE: Record<StageKind, { color: string; edge: string; ink: string;
 
 function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn: string; noteAr: string }) {
   return (
-    <details data-region="rail" style={{ marginBlockEnd: 28, padding: '16px 22px', background: 'var(--surface2)', borderRadius: 16 }}>
-      <summary style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+    <section data-region="rail" style={{ marginBlockEnd: 28, padding: '16px 22px', background: 'var(--surface2)', borderRadius: 16 }}>
+      <div style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
         <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-          <L en="View event progress" ar="عرض مراحل الفعالية" />
+          <L en="Event progress" ar="مراحل الفعالية" />
         </span>
         <span style={{ fontSize: 13, color: 'var(--muted)' }}>
           <L en={noteEn} ar={noteAr} />
         </span>
-      </summary>
+      </div>
       <div data-rail="" style={{ marginBlockStart: 18, display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 12 }}>
         {stages.map((s, i) => {
           const st = STAGE_STYLE[s.k];
@@ -229,7 +229,7 @@ function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn
           );
         })}
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -292,6 +292,7 @@ export default async function EventRecordPage({
   const gateCtx: EventGateContext = {
     finalLevel: derivation?.finalLevel ?? event.level,
     eventEndDate: event.endDate,
+    eventEndTime: event.closingTime ?? null,
     eventStartDate: event.startDate,
     filed: event.filed,
     lifecycle: event.lifecycle,
@@ -347,14 +348,13 @@ export default async function EventRecordPage({
     finalLevel: level,
     reportRequired: reportRequirement.required,
     eventEndDate: event.endDate,
+
     reportSubmitted,
     now: clockNow(),
   });
   const stage = stageInfo.stage;
   const stages: RailStage[] = [
-    orgRecorded
-      ? { k: 'done', en: 'Organization recorded', ar: 'تسجيل المؤسسة', metaEn: organization?.recordedAt ?? '', metaAr: organization?.recordedAt ? `\u2066${organization.recordedAt}\u2069` : '' }
-      : { k: 'current', en: 'Organization recording', ar: 'تسجيل المؤسسة', metaEn: 'With the Ministry', metaAr: 'لدى الوزارة' },
+    { k: 'done', en: 'Event details', ar: 'بيانات الفعالية', metaEn: '', metaAr: '' },
     assessed
       ? { k: 'done', en: 'Assessment complete', ar: 'إتمام التقييم', metaEn: `${latestDate} · Level ${level ?? ''}`, metaAr: `\u2066${latestDate}\u2069 · المستوى ${level ?? ''}` }
       : { k: 'current', en: 'Assessment', ar: 'التقييم', metaEn: 'Not yet complete', metaAr: 'لم يكتمل بعد' },
@@ -640,8 +640,8 @@ export default async function EventRecordPage({
             <GatedAction
               gate={materialChangeGate(gateCtx)}
               href={`/events/${event.id}/change`}
-              en="Report a material change"
-              ar="الإبلاغ عن تغيير جوهري"
+              en="Edit and file"
+              ar="تعديل وتقديم"
             />
             <GatedAction
               gate={seriousIncidentGate(gateCtx)}

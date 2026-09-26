@@ -19,3 +19,9 @@ The app sends invitations, activation links and password resets through the Rese
 - [Railway outbound email restrictions](https://docs.railway.com/networking/outbound-networking)
 
 On September 18, the owner chose to postpone sender setup because no sending domain is available yet. These three production variables were absent. Manual invitation links remain available; automatic invitations, activation emails and password-reset emails are not operational until the sender is connected and real inbox delivery is verified.
+
+## Email verification
+
+The September 26 update adds email verification after password sign-in, signup and account recovery. Once the verified sender works, set `REQUIRE_EMAIL_OTP=true` in Railway and deploy. Leave it unset until delivery is tested: when enabled, an unavailable sender prevents new sign-ins rather than bypassing verification. Demonstration accounts remain exempt and never send mail.
+
+Codes last 10 minutes, allow five attempts and can be used once. Resends wait 60 seconds and are limited to five per account per hour. These limits live in `lib/auth-policy.json`. Phone numbers are captured for contact; SMS verification is not enabled.

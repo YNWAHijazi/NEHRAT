@@ -8,8 +8,11 @@
  * or invents a gate.
  */
 
+import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification';
+import { eventGateContext } from '../lib/event-gate-context';
+import { seriousIncidentGate, postEventReportGate } from '../lib/rules/gates';
 import { deliverPasswordReset } from '../lib/password-reset';
-import { planEditorOwnerId } from '../lib/plan-access';
+import { planAccess, mayEditEventDocument } from '../lib/plan-access';
 import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
 import { beirutToday, nowStamp } from '../lib/clock';
@@ -84,12 +87,12 @@ export async function signInWithPasswordAction(formData: FormData): Promise<void
     redirect('/signin?error=credentials');
   }
   await forgetSignInFields();
-  await startSession(row.id);
+  await verifiedSignIn(row.id, safeNext(formData.get('next'), landingRouteFor(row.role)));
   // The ROLE's landing route, not a hard-coded /dashboard. This line sent every
   // credentialed account to the organizer surface, so a Ministry administrator
   // signing in with an email and password arrived at Events, Venues, Facilities
   // and Start a service -- controls for a job that role does not do.
-  redirect(landingRouteFor(row.role));
+  redirect(safeNext(formData.get('next'), landingRouteFor(row.role)));
 }
 
 export async function createAccountAction(formData: FormData): Promise<void> {
@@ -97,6 +100,8 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   const organization = String(formData.get('organization') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
+  const phone = String(formData.get('phone') ?? '').trim();
+  if (!validPhone(phone)) redirect('/signin?mode=signup&error=phone');
   const typed = { email, name, organization };
   if (!name) {
     await rememberSignInFields(typed);
@@ -129,10 +134,12 @@ export async function createAccountAction(formData: FormData): Promise<void> {
        VALUES (?, ?, ?, ?, ?, 'organizer', 0)`,
     )
     .run(login, email, hashPassword(password), name, initials);
-  await startSession(result.lastInsertRowid as number);
-  // The reference: after creating the account you continue to the organization
-  // registration form. The organization name captured here pre-fills it.
-  redirect(organization ? `/organization?name=${encodeURIComponent(organization)}` : '/organization');
+
+  // Organization details are optional self-service information, not an approval step.
+  if (organization) getDb().prepare("INSERT INTO organizations (account_id, name_en, name_ar, status, is_demo) VALUES (?, ?, ?, 'recorded', 0)").run(result.lastInsertRowid, organization, organization);
+  getDb().prepare('UPDATE accounts SET phone = ? WHERE id = ?').run(phone,result.lastInsertRowid);
+  await verifiedSignIn(Number(result.lastInsertRowid),safeNext(formData.get('next')));
+  redirect(safeNext(formData.get('next')));
 }
 
 /** Send recovery mail without disclosing whether an address has an account. */
@@ -180,7 +187,7 @@ export async function setPasswordFromLinkAction(token: string, formData: FormDat
     hashPassword(password),
     row.account_id,
   );
-  await startSession(row.account_id);
+  await verifiedSignIn(row.account_id);
   const account = await currentAccount();
   redirect(account ? landingRouteFor(account.role) : '/signin');
 }
@@ -193,23 +200,24 @@ export async function signOutAction(): Promise<void> {
 export async function registerOrganizationAction(formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
+  const phone=String(formData.get('phone')??'').trim();
+  if(!validPhone(phone)) redirect('/organization?error=phone');
   const nameEn = String(formData.get('nameEn') ?? '').trim();
   const nameAr = String(formData.get('nameAr') ?? '').trim();
   if (!nameEn || !nameAr) redirect('/organization?error=both-names');
+  getDb().prepare('UPDATE accounts SET phone = ? WHERE id = ?').run(phone,account.id);
+
   getDb()
     .prepare(
       `INSERT INTO organizations (account_id, name_en, name_ar, status, is_demo)
-       VALUES (?, ?, ?, 'pending', ?)
+       VALUES (?, ?, ?, 'recorded', ?)
        ON CONFLICT (account_id) DO UPDATE SET name_en = excluded.name_en, name_ar = excluded.name_ar,
-         -- Re-submitting a RETURNED filing sets it pending again; a recorded one is
-         -- untouched (the guard below never routes a recorded org here).
-         status = CASE WHEN organizations.status = 'returned' THEN 'pending' ELSE organizations.status END,
-         return_reason = CASE WHEN organizations.status = 'returned' THEN NULL ELSE organizations.return_reason END`,
+         status = 'recorded', return_reason = NULL`,
     )
     .run(account.id, nameEn, nameAr, account.isDemo ? 1 : 0);
   revalidatePath('/organization');
   revalidatePath('/dashboard');
-  redirect('/organization');
+  redirect('/organization?notice=saved');
 }
 
 export interface PartAFields {
@@ -342,7 +350,7 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
   }
 
   revalidatePath('/dashboard');
-  redirect(`/events/${newId}?notice=reapplied`);
+  redirect(`/events/${newId}/prepare`);
 }
 
 /** The venue lane's half of the same rule: an archived venue record is read-only. */
@@ -374,7 +382,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.nameEn.trim() || !payload.nameAr.trim()) {
     return { error: 'name-required' };
   }
-  if (!payload.startDate || !payload.endDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(payload.endDate) || payload.endDate < payload.startDate) {
     return { error: 'dates-required' };
   }
   // A certification with an empty field is not a certification (the rule the
@@ -423,6 +431,55 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
     payload.representative.trim(),
     payload.position.trim(),
   );
+  revalidatePath('/dashboard');
+  return { eventId };
+}
+
+export async function updateDraftEventAction(eventId: string, payload: AssessmentSubmission): Promise<{ eventId: string } | { error: string }> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+
+  const derivation = deriveLevel({ answers: payload.answers, inputs: payload.inputs });
+
+  if (!payload.nameEn.trim() || !payload.nameAr.trim()) {
+    return { error: 'name-required' };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(payload.endDate) || payload.endDate < payload.startDate) {
+    return { error: 'dates-required' };
+  }
+  // A certification with an empty field is not a certification (the rule the
+  // compliance form already enforces). Part F's fields are required to save.
+  if (!payload.representative.trim() || !payload.position.trim()) {
+    return { error: 'certification-required' };
+  }
+
+  const db = getDb();
+  if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
+  const current = db.prepare('SELECT filed FROM events WHERE id = ?').get(eventId) as { filed: number };
+  if (current.filed) return { error: 'filed' };
+  refuseIfArchived(eventId);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const a = payload.partA;
+    db.prepare(`UPDATE events SET name_en = ?, name_ar = ?, start_date = ?, end_date = ?, event_type = ?, venue_route = ?, municipalities = ?, opening_time = ?, closing_time = ?, expected_participants = ?, expected_spectators = ?, expected_staff = ?, previous_edition = ?, recurring_fixed_venue = ? WHERE id = ?`).run(payload.nameEn.trim(), payload.nameAr.trim(), payload.startDate, payload.endDate, a.eventType, a.venueRoute, a.municipalities, a.openingTime, a.closingTime, a.expectedParticipants, a.expectedSpectators, a.expectedStaff, a.previousEdition ? 1 : 0, a.recurringFixedVenue ? 1 : 0, eventId);
+    const version = (db.prepare('SELECT COALESCE(MAX(version), 0) + 1 AS n FROM assessments WHERE event_id = ?').get(eventId) as { n: number }).n;
+    db.prepare(
+      `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, representative, position)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      eventId, version,
+      JSON.stringify(payload.answers),
+      JSON.stringify(payload.inputs),
+      JSON.stringify(derivation),
+      NEHRAT_TOOL_VERSION,
+      payload.representative.trim(),
+      payload.position.trim(),
+    );
+    db.exec('COMMIT');
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
   revalidatePath('/dashboard');
   return { eventId };
 }
@@ -495,9 +552,12 @@ export async function attachDocumentAction(
 ): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   refuseIfArchived(eventId);
   const docKey = String(formData.get('docKey') ?? '');
+  if (!mayEditEventDocument(account, eventId, docKey)) redirect('/dashboard');
+  const { documentsForLevel } = await import('../lib/rules/submission');
+  const { derivedLevelFor } = await import('../lib/queries');
+  if (!documentsForLevel(derivedLevelFor(eventId) ?? 1).some(d => d.key === docKey && d.attach)) redirect('/dashboard');
   const file = formData.get('file');
   // WHERE TO COME BACK TO. The same attachment can be made from the requirements
   // screen or from the compliance form it belongs to, and sending an organizer back
@@ -544,7 +604,8 @@ export async function uploadPlanFileAction(
 ): Promise<{ ok: true; fileName: string; version: number } | { error: string; en: string; ar: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (planEditorOwnerId(account, eventId) === null) return { error: 'not-found', en: '', ar: '' };
+  const access = planAccess(account, eventId);
+  if (!access || access.editor === 'ems') return { error: 'not-found', en: '', ar: '' };
   refuseIfArchived(eventId);
   const version = (getDb().prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
   if (Number(formData.get('baseVersion')) !== version) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
@@ -556,6 +617,7 @@ export async function uploadPlanFileAction(
   if (bytes.length > maxUploadBytes()) {
     return { error: 'tooLarge', en: UPLOADS_CONTENT.copy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: UPLOADS_CONTENT.copy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) };
   }
+  const { derivedLevelFor } = await import('../lib/queries');
   const savedVersion = writePlanVersion(eventId, version, account.id, (db) => {
     db
       .prepare(
@@ -569,6 +631,9 @@ export async function uploadPlanFileAction(
            attached_bytes = excluded.attached_bytes, version = plans.version + 1, updated_at = now_stamp()`,
       )
       .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
+    if (access.editor === 'organizer' && derivedLevelFor(eventId) === 3) {
+      db.prepare("UPDATE plans SET sections = json_remove(sections, '$.12'), major_incident = '{}' WHERE event_id = ?").run(eventId);
+    }
   });
   if (savedVersion === null) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
   revalidatePath(`/events/${eventId}/plan`);
@@ -652,8 +717,22 @@ function writePlanVersion(eventId: string, baseVersion: number, actorId: number,
 export async function savePlanAction(eventId: string, payload: PlanPayload): Promise<{ ok: true; version: number } | { error: string }> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (planEditorOwnerId(account, eventId) === null) return { error: 'not-found' };
+  const access = planAccess(account, eventId);
+  if (!access) return { error: 'not-found' };
   refuseIfArchived(eventId);
+  const { planFor, derivedLevelFor } = await import('../lib/queries');
+  const previous = planFor(access.ownerId, eventId);
+  if (payload.baseVersion !== (previous?.version ?? 0)) return { error: 'conflict' };
+  // Merge on the server: crafted requests cannot overwrite another role’s work.
+  if (access.editor === 'ems') {
+    payload = { ...payload, mode: previous?.mode ?? 'write', attachedFile: previous?.attachedFile ?? null,
+      refConfirmed: previous?.refConfirmed ?? false, refAdmitsChildren: previous?.refAdmitsChildren ?? false, refTemporaryAreas: previous?.refTemporaryAreas ?? false,
+      sections: { ...previous?.sections, '12': { ...payload.sections['12'], covered: Boolean(payload.sections['12']?.text?.trim()) } } };
+  } else if (access.editor === 'organizer' && derivedLevelFor(eventId) === 3) {
+    // Changing the shared file or mode invalidates the medical team's coverage check.
+    if (previous && payload.mode !== previous.mode) return { error: 'medical-review-required' };
+    payload = { ...payload, sections: { ...payload.sections, '12': previous?.sections['12'] ?? {} }, majorIncident: previous?.majorIncident ?? {} };
+  }
   const version = writePlanVersion(eventId, payload.baseVersion, account.id, (db) => {
     db
       .prepare(
@@ -806,6 +885,7 @@ export async function savePostEventReportAction(eventId: string, payload: PostEv
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
   refuseIfArchived(eventId);
+  if (postEventReportGate(eventGateContext(eventId)).behaviour !== 'enabled') return { error: 'not-open' };
   if (getDb().prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { error: 'already-submitted' };
   // Event-side data minimisation (Protocol 14): the narrative field is name-screened,
   // the same rule the facility incident report carries.
@@ -837,6 +917,7 @@ export async function signAndSubmitPostEventAction(eventId: string): Promise<{ o
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
   refuseIfArchived(eventId);
+  if (postEventReportGate(eventGateContext(eventId)).behaviour !== 'enabled') return { error: 'not-open' };
   const db = getDb();
   if (db.prepare('SELECT event_id FROM post_event_reports WHERE event_id = ? AND submitted_at IS NOT NULL').get(eventId)) return { ok: true };
   // The DERIVED level, like every other call site -- demo_level is the fallback for
@@ -873,11 +954,19 @@ export async function notifySeriousIncidentAction(eventId: string, formData: For
   if (!account) redirect('/signin');
   if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   refuseIfArchived(eventId);
+  if (seriousIncidentGate(eventGateContext(eventId)).behaviour !== 'enabled') redirect(`/events/${eventId}/incident?error=closed`);
   const incidentType = String(formData.get('incidentType') ?? '');
   const occurredAt = String(formData.get('occurredAt') ?? '').trim();
   if (!['arrest', 'death', 'major', 'interruption'].includes(incidentType) || occurredAt === '') {
     redirect(`/events/${eventId}/incident?error=incomplete`);
   }
+  const { fromBeirut } = await import('../lib/rules/deadlines');
+  const { clockNow } = await import('../lib/clock');
+  const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d)$/.exec(occurredAt);
+  const context = eventGateContext(eventId);
+  if (!match || occurredAt.slice(0,10) < (context.eventStartDate ?? '') || (context.eventEndDate && occurredAt.slice(0,10) > context.eventEndDate)) redirect(`/events/${eventId}/incident?error=incomplete`);
+  const occurred = fromBeirut({ year:Number(match[1]),month:Number(match[2]),day:Number(match[3]),hour:Number(match[4]),minute:Number(match[5]),second:0 });
+  if (occurred.getTime() > clockNow().getTime()) redirect(`/events/${eventId}/incident?error=incomplete`);
   getDb()
     .prepare(`INSERT INTO serious_incident_notifications (event_id, incident_type, occurred_at) VALUES (?, ?, ?)`)
     .run(eventId, incidentType, occurredAt);
@@ -1504,6 +1593,8 @@ export async function registerAgainstInvitationAction(
   if (inv.status === 'withdrawn' || inv.status === 'removed') redirect(`/invitations/${token}`);
   if (inv.account_id !== null) redirect(counterpartyLanding(inv.kind, inv.event_id));
 
+  const phone = String(formData.get('phone') ?? '').trim();
+  if (!validPhone(phone)) redirect(`/invitations/${token}/account?error=account`);
   const name = String(formData.get('fullName') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
@@ -1532,8 +1623,9 @@ export async function registerAgainstInvitationAction(
       (db.prepare('SELECT is_demo FROM events WHERE id = ?').get(inv.event_id) as { is_demo: number }).is_demo,
     );
   const accountId = created.lastInsertRowid as number;
+  db.prepare('UPDATE accounts SET phone = ? WHERE id = ?').run(phone, accountId);
   db.prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(accountId, token);
-  await startSession(accountId);
+  await verifiedSignIn(accountId, `/invitations/${token}`);
   if (inv.status === 'nominated') {
     const acceptance = new FormData();
     acceptance.set('response', 'accept');
@@ -1575,7 +1667,7 @@ export async function signInAgainstInvitationAction(
 
   getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
   await forgetSignInFields();
-  await startSession(row.id);
+  await verifiedSignIn(row.id, `/invitations/${token}`);
   if (inv.status === 'nominated') {
     const acceptance = new FormData();
     acceptance.set('response', 'accept');
@@ -1751,6 +1843,7 @@ export async function signPostEventReportAction(eventId: string): Promise<void> 
   if (!account) redirect('/signin');
   if (!directorFor(account.id, eventId)) redirect('/dashboard');
   refuseIfArchived(eventId);
+  if (postEventReportGate(eventGateContext(eventId)).behaviour !== 'enabled') redirect(`/events/${eventId}/report?error=not-open`);
   getDb()
     .prepare(`UPDATE post_event_reports SET director_signed_at = now_stamp(),
       submitted_at = CASE WHEN organizer_signed_at IS NOT NULL THEN now_stamp() ELSE NULL END
@@ -1840,9 +1933,9 @@ export async function postponeEventAction(eventId: string, formData: FormData): 
 export async function removeAttachmentAction(eventId: string, formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
   refuseIfArchived(eventId);
   const docKey = String(formData.get('docKey') ?? '');
+  if (!mayEditEventDocument(account, eventId, docKey)) redirect('/dashboard');
   const db = getDb();
   const ev = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number };
   if (ev.filed === 1) redirect(`/events/${eventId}/requirements`);

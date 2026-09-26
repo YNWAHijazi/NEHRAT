@@ -1,3 +1,4 @@
+import { ServiceSearch } from '../../../components/ServiceSearch';
 import Link from 'next/link';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
@@ -10,9 +11,10 @@ import { MINISTRY_CONTENT } from '../../../lib/rules';
  * states render GREY -- visually distinguishable so they are never mistaken for
  * determinations.
  */
-export default async function ReviewQueuePage() {
+export default async function ReviewQueuePage({searchParams}:{searchParams:Promise<{q?:string}>}) {
   const account = await requireMinistryPage('viewQueue');
-  const rows = reviewQueue(account.isDemo);
+  const { q = '' } = await searchParams;
+  const rows = reviewQueue(account.isDemo).filter(r => Object.values(r).join(' ').toLowerCase().includes(q.trim().toLowerCase()));
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
@@ -20,6 +22,8 @@ export default async function ReviewQueuePage() {
         <L en="Review queue" ar="قائمة المراجعة" />
       </h1>
 
+      <ServiceSearch value={q} />
+      {rows.length===0 ? <p><L en="No matching events." ar="لا توجد فعاليات مطابقة."/></p>:null}
       {/* Eight columns, the reference's own proportions and its own headings. The build
           had six: Organizer was folded into the first cell as a sub-line and Days was
           dropped, and three headings were renamed (Submission, Filed, State). None of
@@ -27,7 +31,7 @@ export default async function ReviewQueuePage() {
           "geometry, vocabulary and gating follow the reference" and did not. */}
       <div data-region="queue" data-stack="" data-xscroll="" style={{ display: 'grid', gridTemplateColumns: '1.7fr 1.1fr .6fr .9fr 1.1fr 1.2fr .9fr .7fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
         {[
-          { en: 'Event or venue', ar: 'الفعالية أو الموقع' },
+          { en: 'Event', ar: 'الفعالية' },
           { en: 'Organizer', ar: 'المنظّم' },
           { en: 'Level', ar: 'المستوى' },
           { en: 'Event date', ar: 'تاريخ الفعالية' },

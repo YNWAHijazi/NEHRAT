@@ -34,7 +34,7 @@ import { InfoNote } from '../../../components/InfoNote';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
-import { createEventAction, reassessAction } from '../../actions';
+import { createEventAction, updateDraftEventAction, reassessAction, type AssessmentSubmission } from '../../actions';
 import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
 import { PART_F } from '../../../lib/rules/load';
 import { deriveLevel } from '../../../lib/rules/derive';
@@ -121,8 +121,10 @@ export function AssessmentForm({
   bands,
   maxScore,
   reassess,
+  draft,
   organizerName,
 }: {
+  draft?: AssessmentSubmission & { eventId: string };
   domains: Domain[];
   conditions: MinimumCondition[];
   bands: Band[];
@@ -131,6 +133,7 @@ export function AssessmentForm({
   /** The organization's name for Part F's Organizer line, when one is recorded. */
   organizerName?: { en: string; ar: string } | null;
 }) {
+  const stored = reassess ?? draft;
   void conditions;
   void bands;
   const router = useRouter();
@@ -138,40 +141,42 @@ export function AssessmentForm({
   const [representative, setRepresentative] = useState('');
   const [position, setPosition] = useState('');
   const certificationComplete = representative.trim() !== '' && position.trim() !== '';
-  const [nameEn, setNameEn] = useState('');
-  const [nameAr, setNameAr] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [nameEn, setNameEn] = useState(draft?.nameEn ?? '');
+  const [nameAr, setNameAr] = useState(draft?.nameAr ?? '');
+  const [startDate, setStartDate] = useState(draft?.startDate ?? '');
+  const [endDate, setEndDate] = useState(draft?.endDate ?? '');
   const [partA, setPartA] = useState({
-    venueRoute: '', municipalities: '',
-    openingTime: '', closingTime: '',
-    expectedParticipants: '', expectedSpectators: '', expectedStaff: '',
-    previousEdition: false, recurringFixedVenue: false,
+    venueRoute: draft?.partA.venueRoute ?? '', municipalities: draft?.partA.municipalities ?? '',
+    openingTime: draft?.partA.openingTime ?? '', closingTime: draft?.partA.closingTime ?? '',
+    expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
+    previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
 
-  const [typeKey, setTypeKey] = useState<string>(reassess ? typeFromInputs(reassess.inputs) : '');
+  const initialType = EVENT_TYPES.find((type) => [type.key, type.en, type.ar].includes(draft?.partA.eventType ?? ''))?.key
+    ?? (stored ? typeFromInputs(stored.inputs) : '');
+  const [typeKey, setTypeKey] = useState<string>(initialType);
   const [extraDisciplines, setExtraDisciplines] = useState<string[]>(
-    reassess
-      ? reassess.inputs.eventDisciplines.filter(
-          (d) => !(EVENT_TYPES.find((t) => t.key === typeFromInputs(reassess.inputs))?.disciplines ?? []).includes(d),
+    stored
+      ? stored.inputs.eventDisciplines.filter(
+          (d) => !(EVENT_TYPES.find((t) => t.key === initialType)?.disciplines ?? []).includes(d),
         )
       : [],
   );
   const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(
-    reassess ? reassess.answers : Array(9).fill(null),
+    stored ? [...stored.answers] : Array(9).fill(null),
   );
   // Reassess edits the stored attendance figure directly; creation derives it from the
   // three expected counts below, so the number is never asked twice.
   const [attendanceDirect, setAttendanceDirect] = useState(
-    reassess?.inputs.expectedMaxSimultaneousAttendance != null ? String(reassess.inputs.expectedMaxSimultaneousAttendance) : '',
+    stored?.inputs.expectedMaxSimultaneousAttendance != null ? String(stored.inputs.expectedMaxSimultaneousAttendance) : '',
   );
   const [courseKm, setCourseKm] = useState(
-    reassess?.inputs.courseDistanceKm != null ? String(reassess.inputs.courseDistanceKm) : '',
+    stored?.inputs.courseDistanceKm != null ? String(stored.inputs.courseDistanceKm) : '',
   );
   const [capacity, setCapacity] = useState(
-    reassess?.inputs.venueLicensedCapacity != null ? String(reassess.inputs.venueLicensedCapacity) : '',
+    stored?.inputs.venueLicensedCapacity != null ? String(stored.inputs.venueLicensedCapacity) : '',
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -241,7 +246,7 @@ export function AssessmentForm({
         else router.push(`/events/${reassess.eventId}?notice=reassessed`);
         return;
       }
-      const result = await createEventAction({
+      const payload: AssessmentSubmission = {
         nameEn,
         nameAr,
         startDate,
@@ -265,7 +270,8 @@ export function AssessmentForm({
         inputs,
         representative,
         position,
-      });
+      };
+      const result = draft ? await updateDraftEventAction(draft.eventId, payload) : await createEventAction(payload);
       if ('error' in result) setError(result.error);
       else router.push(`/events/${result.eventId}/requirements`);
     });
@@ -274,7 +280,7 @@ export function AssessmentForm({
   return (
     <div style={{ maxWidth: 900 }}>
       <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-        <L en={reassess ? "Update assessment" : "Create event"} ar={reassess ? "تحديث التقييم" : "إنشاء فعالية"} />
+        <L en={reassess ? "Update assessment" : draft ? "Update event" : "Create event"} ar={reassess ? "تحديث التقييم" : draft ? "تحديث الفعالية" : "إنشاء فعالية"} />
        <InfoNote>{reassess ? (
           <L
             en="Saving stores a new version. Earlier versions stay on the record."

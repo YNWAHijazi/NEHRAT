@@ -29,22 +29,15 @@ test.describe('reapply from a concluded event', () => {
     await expect(reapply).toBeVisible();
     await expect(reapply).toContainText('Enter new dates and review the requirements before submitting.');
     await reapply.locator('button:has-text("Duplicate event")').click();
-    await page.waitForURL(/\/events\/EV-\d+\?notice=reapplied/);
+    await page.waitForURL(/\/events\/EV-\d+\/prepare/);
 
     // A NEW record with its own identifier, naming its source.
     const newId = new URL(page.url()).pathname.split('/')[2]!;
     expect(newId).not.toBe('EV-0244');
-    await expect(page.locator('[data-region="reapplied-notice"]')).toContainText(
-      'Nothing from the previous event carries over as approved. The level is derived again from your answers.',
-    );
-    await expect(page.locator('[data-region="copied-from"]')).toContainText('Copied from EV-0244');
-
-    // The level DERIVES from the copied answers -- EV-0244's answers give Level 3 --
-    // and the dates are the organizer's to enter: no File-by tile without them.
-    await expect(page.locator('body')).toContainText('Level 3');
-    await expect(page.locator('body')).not.toContainText('File by');
-    // Prefilled event information and the copied nomination, unanswered.
-    await expect(page.locator('h1')).toContainText('Tripoli Marathon');
+    const modal = page.locator('dialog[open]');
+    if (await modal.count()) await modal.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(page.getByRole('textbox', { name: 'Event name (English)', exact: true })).toHaveValue('Tripoli Marathon');
+    await expect(page.locator('input[type="date"]').first()).toHaveValue('');
     await gotoRidingRestarts(page, `/events/${newId}/requirements`);
     await expect(page.locator('body')).toContainText('Dr. N. Salameh');
     await expect(page.locator('body')).not.toContainText('Confirmed —');

@@ -22,7 +22,8 @@
     "attendanceRequired": "الحد الأقصى المتوقع للحضور المتزامن مطلوب، رقماً.",
     "seriousIncidentBeforeFiling": "يُتاح بعد تقديم الطلب",
     "seriousIncidentBeforeStart": "يُتاح من اليوم الأول للفعالية — {date}",
-    "seriousIncidentNeedsEventDate": "يُتاح بعد تسجيل تواريخ الفعالية"
+    "seriousIncidentNeedsEventDate": "يُتاح بعد تسجيل تواريخ الفعالية",
+    "seriousIncidentClosed": "أُغلق الإبلاغ — مرّت أكثر من 24 ساعة على انتهاء الفعالية."
   },
   "level": {
     "governedByScore": "يحكمه مجموع نقاط التقييم",

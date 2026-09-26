@@ -75,15 +75,15 @@ export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
   const sectionsDone =
     plan.mode === 'attach'
       ? plan.attachedFile !== null &&
-        Array.from({ length: 16 }, (_, i) => plan.sections[String(i + 1)]?.covered === true).every(Boolean)
-      : Array.from({ length: 16 }, (_, i) => {
+        Array.from({ length: 16 }, (_, i) => i + 1).filter(n => level === 3 || n !== 12).every(n => plan.sections[String(n)]?.covered === true)
+      : Array.from({ length: 16 }, (_, i) => i + 1).filter(n => level === 3 || n !== 12).map(n => {
           // Write mode is complete by WRITTEN text alone: a coverage confirmation
           // belongs to the attach route and does not survive switching modes.
-          const s = plan.sections[String(i + 1)];
+          const s = plan.sections[String(n)];
           return Boolean(s?.text && s.text.trim() !== '');
         }).every(Boolean);
   if (!sectionsDone) return false;
-  if (level >= 2) {
+  if (level === 3) {
     return (planJson.majorIncidentItems as { n: number }[]).every(
       (item) => plan.majorIncident[String(item.n)]?.covered === true,
     );
@@ -166,13 +166,6 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
     });
   }
 
-  if (facts.organizationStatus !== 'recorded') {
-    blockers.push({
-      kind: 'organizationPending',
-      itemEn: 'Your organization is pending Ministry registration',
-      itemAr: 'تسجيل مؤسستكم قيد الاستكمال لدى الوزارة',
-    });
-  }
 
   for (const doc of documentsForLevel(facts.level)) {
     if (doc.optional) continue;

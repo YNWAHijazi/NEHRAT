@@ -188,9 +188,7 @@ export function HeaderMenus({
                 </div>
               ) : null}
               {roleLabel ? <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockStart: 4 }}><L en={roleLabel.en} ar={roleLabel.ar} /></div> : null}
-              {organizer && organizationStatus !== 'recorded' ? <div style={{ fontSize: 12, color: 'var(--accent-ink)', marginBlockStart: 6 }}>
-                {organizationStatus === 'returned' ? <L en="Organization details need updating" ar="يجب تحديث تفاصيل المؤسسة" /> : organizationNameEn ? <L en="Organization pending Ministry approval" ar="المؤسسة بانتظار موافقة الوزارة" /> : <L en="Organization not yet recorded" ar="لم تُسجَّل المؤسسة بعد" />}
-              </div> : null}
+
             </div>
             {counterparty || organizer ? <button
               type="button"

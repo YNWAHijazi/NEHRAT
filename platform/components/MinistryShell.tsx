@@ -1,3 +1,4 @@
+import { MinistryServices } from './MinistryServices';
 /**
  * The Ministry console's chrome: the government band, the console header naming
  * the signed-in role, and the content column. Navigation is the dashboard's
@@ -30,6 +31,7 @@ export function MinistryShell({
       <Header account={account} organization={null} unreadCount={unreadCountFor(account.id)}
         showBack={!!back} {...(back ? { back } : {})} subtitle={{ en: consoleEn, ar: consoleAr }} wide />
       <main data-pad="" style={{ maxWidth: 1320, marginInline: 'auto', padding: '32px 32px 90px' }}>
+        <MinistryServices />
         {children}
       </main>
     </>

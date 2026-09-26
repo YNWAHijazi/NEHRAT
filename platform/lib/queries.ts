@@ -34,6 +34,7 @@ export interface EventRow {
   nameAr: string;
   startDate: string | null;
   endDate: string | null;
+  closingTime?: string | null;
   mophReference: string | null;
   filed: boolean;
   level: Level | null;
@@ -49,6 +50,7 @@ export interface EventRow {
   stageAr: string;
   stages: string[];
   span: number;
+  updatedAt?: string;
   createdAt: string;
   venueFacilityId: string | null;
   /** Cancellation and postponement -- a lifecycle, never a deletion. */
@@ -89,6 +91,7 @@ interface EventDbRow {
   archived_at?: string | null;
   copied_from?: string | null;
   end_date: string | null;
+  closing_time: string | null;
   moph_reference: string | null;
   filed: number;
   demo_state_en: string | null;
@@ -102,6 +105,7 @@ interface EventDbRow {
   demo_stages: string | null;
   demo_span: number | null;
   demo_level: number | null;
+  updated_at: string;
   created_at: string;
   venue_facility_id: string | null;
 }
@@ -212,7 +216,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     now: clockNowFn(),
   });
   const derivedStages = [
-    orgRecorded ? 'done' : 'current',
+    'done',
     assessed ? 'done' : 'current',
     !assessed ? 'todo' : filed ? 'done' : 'current',
     filed ? 'done' : 'todo',
@@ -233,6 +237,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     nameAr: row.name_ar,
     startDate: row.start_date,
     endDate: row.end_date,
+    closingTime: row.closing_time,
     mophReference: row.moph_reference,
     filed: row.filed === 1,
     level,
@@ -257,6 +262,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     stageAr: row.demo_stage_ar ?? stageInfo.ar,
     stages: row.demo_stages ? (JSON.parse(row.demo_stages) as string[]) : derivedStages,
     span: row.demo_span ?? 60,
+    updatedAt: row.updated_at,
     createdAt: row.created_at,
     venueFacilityId: row.venue_facility_id,
     lifecycle: (row.lifecycle ?? 'active') as EventRow['lifecycle'],
@@ -271,9 +277,9 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
   };
 }
 
-const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, moph_reference, filed,
+const EVENT_COLUMNS = `id, name_en, name_ar, start_date, end_date, closing_time, moph_reference, filed,
    demo_state_en, demo_state_ar, demo_due, demo_due_label_en, demo_due_label_ar,
-   demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, venue_facility_id,
+   demo_stage, demo_stage_en, demo_stage_ar, demo_stages, demo_span, demo_level, created_at, updated_at, venue_facility_id,
    lifecycle, lifecycle_at, lifecycle_note, postponed_to, archived_at, copied_from`;
 
 function orgRecordedFor(accountId: number): boolean {

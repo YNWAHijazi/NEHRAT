@@ -120,7 +120,7 @@ test.describe('what the administrator can and cannot do', () => {
     await gotoRidingRestarts(page, '/ministry');
     await expectAbsent(page, {
       absent: '[data-region="master-admin-entry"]',
-      anchor: /Operational dashboard/,
+      anchor: page.getByRole('heading', { name: 'Events', exact: true }),
       because: 'the overseeing console belongs to the administrator',
     });
   });

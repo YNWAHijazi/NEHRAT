@@ -50,6 +50,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   const { service } = await params;
   if (!(SERVICES as readonly string[]).includes(service)) notFound();
   const key = service as Service;
+  const destination = key === 'certify-an-event' ? '/events/new' : key === 'register-a-venue' ? '/venues/new' : '/facilities/new';
   const P = PUBLIC_LANDING;
 
   const def = P.services.find(
@@ -95,6 +96,15 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             <L en={line.en} ar={line.ar} />
           </p>
         ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBlock: '20px 28px' }}>
+        <Link href="/applicability" style={{ height: 44, paddingInline: 20, border: '1px solid var(--line)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" />
+        </Link>
+        <Link href={account ? destination : `/signin?next=${encodeURIComponent(destination)}`} style={{ height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
+          <L en={account ? 'Start' : key === 'certify-an-event' ? 'Sign in to certify' : 'Sign in to register'} ar={account ? 'ابدأ' : key === 'certify-an-event' ? 'سجّل الدخول لطلب الشهادة' : 'سجّل الدخول للتسجيل'} />
+        </Link>
       </div>
 
       {/* WHAT THE SERVICE COVERS. Each screen answers the same question in its own
@@ -234,14 +244,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBlockStart: 36 }}>
-        <Link href="/applicability" style={{ height: 44, paddingInline: 20, border: '1px solid var(--line)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
-          <L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" />
-        </Link>
-        <Link href="/signin" style={{ height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
-          <L en="Sign in to begin" ar="تسجيل الدخول للبدء" />
-        </Link>
-      </div>
+
 
       <AdFooter placement="serviceDetail" />
     </PublicShell>
