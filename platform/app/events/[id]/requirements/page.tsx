@@ -110,7 +110,7 @@ export default async function RequirementsPage({
         documentState[d.key] === true || d.optional === true ? 1 : 0;
       return completeOrOptional(a) - completeOrOptional(b);
     });
-  const firstOpenDocument = documents.find((doc) => !doc.optional && documentState[doc.key] !== true)?.key;
+  const firstOpenDocument = documents.find((doc) => !(level === 3 && ['plan','deploymentMap'].includes(doc.key)) && !doc.optional && documentState[doc.key] !== true)?.key;
   const attachments = attachmentsFor(account.id, id);
   const fileNames = Object.fromEntries(attachments.map((a) => [a.docKey, a.fileName]));
   const invitations = invitationsFor(account.id, id);
@@ -248,7 +248,8 @@ export default async function RequirementsPage({
           {documents.map((doc, index) => {
             const done = documentState[doc.key] === true;
             const medicalMap = doc.key === 'deploymentMap' && level === 3;
-            const nextDoc = documents[index + 1];
+            const medicalPlan = doc.key === 'plan' && level === 3;
+            const nextDoc = documents.slice(index + 1).find(d=>!(level===3&&['plan','deploymentMap'].includes(d.key)));
             const color = done ? 'var(--brand)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
             const chipBg = done ? 'var(--brand-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
             const stateEn = done ? (doc.platform ? 'Complete' : 'Attached') : doc.optional ? 'Optional' : 'Pending';
@@ -279,13 +280,14 @@ export default async function RequirementsPage({
                   </span>
                 </summary>
                 <div style={{ display: 'flex', gap: 12, marginBlockStart: 16, alignItems: 'center', maxWidth: '100%', minWidth: 0, flexWrap: 'wrap' }}>
+                  {medicalPlan ? <p><L en="Completed by the Medical Director or EMS agency." ar="يستكملها المدير الطبي أو جهة الإسعاف."/></p>:null}
                   {medicalMap ? <p><L en="Uploaded by the Event Medical Director." ar="يرفعها المدير الطبي للفعالية." /></p> : null}
                   {doc.platform ? (
                     <a
                       href={doc.key === 'plan' ? `/events/${id}/plan` : `/events/${id}/submit`}
                       style={{ height: 38, paddingInline: 16, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
                     >
-                      {doc.key === 'plan' ? <L en="Open the plan" ar="فتح الخطة" /> : <L en="Open the form" ar="فتح النموذج" />}
+                      {doc.key === 'plan' ? <L en={medicalPlan?'View plan':'Open the plan'} ar={medicalPlan?'عرض الخطة':'فتح الخطة'} /> : <L en="Open the form" ar="فتح النموذج" />}
                     </a>
                   ) : null}
                   {doc.attach && !medicalMap && !done ? (

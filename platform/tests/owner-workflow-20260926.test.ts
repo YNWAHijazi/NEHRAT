@@ -24,7 +24,8 @@ import {
   type PlanPayload,
 } from "../app/actions";
 import { planFor } from "../lib/queries";
-import { planIsComplete } from "../lib/rules/submission";
+import { canPreparePlan } from "../lib/rules/plan-responsibility";
+import { nextAction, planIsComplete } from "../lib/rules/submission";
 import { seriousIncidentGate } from "../lib/rules/gates";
 import {
   eventApplicability,
@@ -87,14 +88,15 @@ test("Level 2 completes without major-incident section or checklist; Level 3 can
   expect(planIsComplete(p, 2)).toBe(true);
   expect(planIsComplete(p, 3)).toBe(false);
 });
-test("organizer cannot overwrite the medical section; EMS can only update that section", async () => {
+test("organizer cannot edit any Level 3 plan section; confirmed EMS can prepare the full plan", async () => {
   as("test_organizer");
   const owner = session.account!.id;
   const before = planFor(owner, "EV-0362")!;
   const org = payload(owner);
   org.sections = { ...org.sections, "12": { text: "Unauthorized override" } };
   org.majorIncident = { "1": { covered: false } };
-  expect(await savePlanAction("EV-0362", org)).toHaveProperty("ok", true);
+  expect(await savePlanAction("EV-0362", org)).toEqual({error:"not-authorized"});
+  expect(planFor(owner,"EV-0362")).toEqual(before);
   expect(planFor(owner, "EV-0362")!.sections["12"]).toEqual(
     before.sections["12"],
   );
@@ -104,12 +106,12 @@ test("organizer cannot overwrite the medical section; EMS can only update that s
   as("test_ems");
   const ems = payload(owner);
   ems.sections = {
-    "1": { text: "Unauthorized general section" },
+    "1": { text: "EMS general planning section" },
     "12": { text: "EMS major-incident arrangements" },
   };
   expect(await savePlanAction("EV-0362", ems)).toHaveProperty("ok", true);
   const after = planFor(owner, "EV-0362")!;
-  expect(after.sections["1"]).toEqual(before.sections["1"]);
+  expect(after.sections["1"]?.text).toBe("EMS general planning section");
   expect(after.sections["12"]?.text).toBe("EMS major-incident arrangements");
   expect(await savePlanAction("EV-0362", ems)).toEqual({ error: "conflict" });
 });
@@ -291,7 +293,7 @@ test("an incident can be recorded inside the window but future occurrences are r
   ).toHaveProperty("incident_type", "major");
 });
 
-test("a replacement Level 3 plan requires a fresh medical review and keeps the previous version", async () => {
+test("organizer cannot upload a Level 3 plan; confirmed EMS can replace it and history is preserved", async () => {
   as("test_organizer");
   const before = planFor(session.account!.id, "EV-0362")!;
   const form = new FormData();
@@ -302,12 +304,15 @@ test("a replacement Level 3 plan requires a fresh medical review and keeps the p
       type: "application/pdf",
     }),
   );
+  const owner = session.account!.id;
+  expect(await uploadPlanFileAction("EV-0362",form)).toHaveProperty("error","not-authorized");
+  expect(planFor(owner,"EV-0362")).toEqual(before);
+  as("test_ems");
   const result = await uploadPlanFileAction("EV-0362", form);
   expect(result).toHaveProperty("ok", true);
-  const after = planFor(session.account!.id, "EV-0362")!;
+  const after = planFor(owner, "EV-0362")!;
   expect(after.version).toBe(before.version + 1);
-  expect(after.sections["12"]).toBeUndefined();
-  expect(after.majorIncident).toEqual({});
+  expect(after.sections).toEqual(before.sections);
   expect(after.attachedFile).toBe("replacement.pdf");
   const old = getDb()
     .prepare(
@@ -315,4 +320,18 @@ test("a replacement Level 3 plan requires a fresh medical review and keeps the p
     )
     .get("EV-0362", before.version) as { sections: string };
   expect(JSON.parse(old.sections)).toEqual(before.sections);
+});
+
+test("removed medical partners cannot edit plans and lower-level organizers keep access",async()=>{
+ as('test_ems');const owner=Number(getDb().prepare("SELECT account_id FROM events WHERE id='EV-0362'").get()!.account_id);const old=payload(owner);
+ getDb().prepare("UPDATE invitations SET status='removed' WHERE event_id='EV-0362' AND account_id=? AND kind='ems'").run(session.account!.id);
+ expect(await savePlanAction('EV-0362',old)).toEqual({error:'not-authorized'});
+ as('test_organizer');const low=planFor(session.account!.id,'EV-0418');expect(await savePlanAction('EV-0418',{baseVersion:low?.version??0,mode:'write',sections:{'1':{text:'Organizer Level 2 plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false})).toHaveProperty('ok',true);
+});
+
+test('plan responsibility and organizer next steps follow the level',()=>{
+ for(const level of [1,2]){expect(canPreparePlan(level,'organizer')).toBe(true);expect(canPreparePlan(level,'ems')).toBe(false);expect(canPreparePlan(level,'director')).toBe(false);}
+ expect(canPreparePlan(3,'organizer')).toBe(false);expect(canPreparePlan(3,'ems')).toBe(true);expect(canPreparePlan(3,'director')).toBe(true);
+ const blocker={kind:'documentMissing' as const,docKey:'plan',itemEn:'Plan',itemAr:'الخطة'};
+ expect(nextAction([blocker],3).kind).toBe('waitingOnOthers');expect(nextAction([blocker],2).kind).toBe('plan');
 });

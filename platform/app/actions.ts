@@ -608,7 +608,7 @@ export async function uploadPlanFileAction(
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const access = planAccess(account, eventId);
-  if (!access || access.editor === 'ems') return { error: 'not-found', en: '', ar: '' };
+  if (!access?.canEdit) return { error: 'not-authorized', en: 'The Medical Director or EMS agency completes this plan.', ar: 'يستكمل المدير الطبي أو جهة الإسعاف هذه الخطة.' };
   refuseIfArchived(eventId);
   const version = (getDb().prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
   if (Number(formData.get('baseVersion')) !== version) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
@@ -634,9 +634,7 @@ export async function uploadPlanFileAction(
            attached_bytes = excluded.attached_bytes, version = plans.version + 1, updated_at = now_stamp()`,
       )
       .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
-    if (access.editor === 'organizer' && derivedLevelFor(eventId) === 3) {
-      db.prepare("UPDATE plans SET sections = json_remove(sections, '$.12'), major_incident = '{}' WHERE event_id = ?").run(eventId);
-    }
+
   });
   if (savedVersion === null) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
   revalidatePath(`/events/${eventId}/plan`);
@@ -721,21 +719,12 @@ export async function savePlanAction(eventId: string, payload: PlanPayload): Pro
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const access = planAccess(account, eventId);
-  if (!access) return { error: 'not-found' };
+  if (!access) return { error: 'not-authorized' };
   refuseIfArchived(eventId);
+  if (!access.canEdit) return { error: 'not-authorized' };
   const { planFor, derivedLevelFor } = await import('../lib/queries');
   const previous = planFor(access.ownerId, eventId);
   if (payload.baseVersion !== (previous?.version ?? 0)) return { error: 'conflict' };
-  // Merge on the server: crafted requests cannot overwrite another role’s work.
-  if (access.editor === 'ems') {
-    payload = { ...payload, mode: previous?.mode ?? 'write', attachedFile: previous?.attachedFile ?? null,
-      refConfirmed: previous?.refConfirmed ?? false, refAdmitsChildren: previous?.refAdmitsChildren ?? false, refTemporaryAreas: previous?.refTemporaryAreas ?? false,
-      sections: { ...previous?.sections, '12': { ...payload.sections['12'], covered: Boolean(payload.sections['12']?.text?.trim()) } } };
-  } else if (access.editor === 'organizer' && derivedLevelFor(eventId) === 3) {
-    // Changing the shared file or mode invalidates the medical team's coverage check.
-    if (previous && payload.mode !== previous.mode) return { error: 'medical-review-required' };
-    payload = { ...payload, sections: { ...payload.sections, '12': previous?.sections['12'] ?? {} }, majorIncident: previous?.majorIncident ?? {} };
-  }
   const version = writePlanVersion(eventId, payload.baseVersion, account.id, (db) => {
     db
       .prepare(

@@ -287,7 +287,7 @@ export interface NextAction {
  * Prioritize work the organizer can complete while external responses are pending.
  * Organization registration still blocks filing, not preparation.
  */
-export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
+export function nextAction(blockers: readonly SubmissionBlocker[], level?: Level | null): NextAction {
   const has = (k: BlockerKind): boolean => blockers.some((b) => b.kind === k);
   const count = (...kinds: BlockerKind[]): number =>
     blockers.filter((b) => kinds.includes(b.kind)).length;
@@ -297,7 +297,7 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
   // screen with no control on it.
   const missingKeys = blockers.filter((b) => b.kind === 'documentMissing').map((b) => b.docKey);
   const attachable = missingKeys.filter(
-    (k) => (attachmentsCatalog.documents as CatalogDocument[]).find((d) => d.key === k)?.attach === true,
+    (k) => !(level === 3 && k === 'deploymentMap') && (attachmentsCatalog.documents as CatalogDocument[]).find((d) => d.key === k)?.attach === true,
   ).length;
   if (attachable > 0) {
     return {
@@ -319,7 +319,7 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
     };
   }
 
-  if (missingKeys.includes('plan')) {
+  if (level !== 3 && missingKeys.includes('plan')) {
     return {
       kind: 'plan',
       href: 'plan',
@@ -401,6 +401,10 @@ export function nextAction(blockers: readonly SubmissionBlocker[]): NextAction {
       buttonEn: 'Open the named providers',
       buttonAr: 'فتح الجهات المُسمّاة',
     };
+  }
+
+  if (level === 3 && missingKeys.some(k=>k==='plan'||k==='deploymentMap')) {
+    return {kind:'waitingOnOthers',href:'requirements',tone:'accent',titleEn:'Medical documents pending',titleAr:'المستندات الطبية قيد الانتظار',bodyEn:'The Medical Director or EMS agency completes the plan. The Medical Director uploads the deployment map.',bodyAr:'يستكمل المدير الطبي أو جهة الإسعاف الخطة. ويرفع المدير الطبي خريطة الانتشار.',buttonEn:'View requirements',buttonAr:'عرض المتطلبات'};
   }
 
   // The state between complete and filed: only the fee's payment is outstanding,

@@ -321,7 +321,7 @@ export default async function EventRecordPage({
   // figure IS the submit gate's blocker count, not a separate arithmetic.
   const gate = submissionGateFor(account.id, id);
   const outstanding = gate.blockers.length;
-  const action = nextAction(gate.blockers);
+  const action = nextAction(gate.blockers, level);
 
   // The six-stage rail, from the record's own state. Stage 1 follows the organization's
   // real status; stage 6 is level-gated: at Level 3 it is coming (todo), below it is not

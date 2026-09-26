@@ -50,7 +50,7 @@ test('event type hides unrelated activities and a previous edition reveals the n
   await expect(history.getByRole('button').last()).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('Director and organizer share a guided plan without losing concurrent edits', async ({ page, browser, baseURL }) => {
+test('Director and EMS share a guided plan; organizer can only view it', async ({ page, browser, baseURL }) => {
   await signInAs(page, 'test_director');
   await gotoRidingRestarts(page, '/events/EV-0362');
   await page.locator('[data-region="director-plan"]').click();
@@ -66,21 +66,21 @@ test('Director and organizer share a guided plan without losing concurrent edits
   const helpId = await page.getByRole('button', { name: 'What to include', exact: true }).first().getAttribute('aria-controls');
   await expect(page.locator(`[id="${helpId}"]`)).toBeVisible();
   await page.getByRole('textbox', { name: /^1\./ }).fill('Director medical planning contribution.');
-  const organizer = await browser.newPage({ baseURL: baseURL! });
-  await signInAs(organizer, 'test_organizer');
-  await gotoRidingRestarts(organizer, '/events/EV-0362/plan');
+  const emsPage = await browser.newPage({ baseURL: baseURL! });
+  await signInAs(emsPage, 'test_ems');
+  await gotoRidingRestarts(emsPage, '/events/EV-0362/plan');
   await page.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
-  await organizer.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(organizer.locator('main').getByRole('alert')).toContainText('Someone updated this plan');
-  await organizer.reload();
-  await expect(organizer.getByRole('button', { name: 'Write the plan here', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  const first = organizer.getByRole('button', { name: /^1 / }).and(organizer.locator('[aria-expanded]'));
+  await emsPage.getByRole('button', { name: /^Save the plan/ }).click();
+  await expect(emsPage.locator('main').getByRole('alert')).toContainText('Someone updated this plan');
+  await emsPage.reload();
+  await expect(emsPage.getByRole('button', { name: 'Write the plan here', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  const first = emsPage.getByRole('button', { name: /^1 / }).and(emsPage.locator('[aria-expanded]'));
   if (await first.getAttribute('aria-expanded') !== 'true') await first.click();
-  await expect(organizer.getByRole('textbox', { name: /^1\./ })).toHaveValue('Director medical planning contribution.');
-  await organizer.locator('[data-region="versions"] details > summary').first().click();
-  const oldAttachment = organizer.getByRole('link', { name: 'Open this version’s attachment', exact: true }).first();
-  const historyDownload = await organizer.request.get((await oldAttachment.getAttribute('href'))!);
+  await expect(emsPage.getByRole('textbox', { name: /^1\./ })).toHaveValue('Director medical planning contribution.');
+  await emsPage.locator('[data-region="versions"] details > summary').first().click();
+  const oldAttachment = emsPage.getByRole('link', { name: 'Open this version’s attachment', exact: true }).first();
+  const historyDownload = await emsPage.request.get((await oldAttachment.getAttribute('href'))!);
   expect(historyDownload.status()).toBe(200);
   expect((await historyDownload.body()).equals(originalBytes)).toBe(true);
   // Restore this shared fixture's complete attachment so later filing tests remain independent.
@@ -90,7 +90,11 @@ test('Director and organizer share a guided plan without losing concurrent edits
   await expect(page.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
-  await organizer.close();
+  await signInAs(emsPage,'test_organizer');
+  await gotoRidingRestarts(emsPage,'/events/EV-0362/plan');
+  await expect(emsPage.locator('[data-region=plan-readonly]')).toBeVisible();
+  await expect(emsPage.getByRole('button',{name:/Save the plan/})).toHaveCount(0);
+  await emsPage.close();
   expect((await page.request.get('/events/EV-0418/plan')).status()).toBe(404);
   await signInAs(page, 'test_ems');
   expect((await page.request.get('/events/EV-0362/plan')).status()).toBe(200);

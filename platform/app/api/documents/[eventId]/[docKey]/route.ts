@@ -82,9 +82,9 @@ export async function GET(
     )
     .get(eventId, account.id) as { kind: 'ems' | 'director' } | undefined;
   const nomineeMayRead = nomination !== undefined && nomineeMayReadDocument(nomination.kind, docKey);
-  // A confirmed Level 3 Director prepares the shared plan and must be able to open it.
+  // A confirmed Level 3 medical partner prepares the shared plan and must be able to open it.
   // This does not widen anonymous invitation access or expose other attachments.
-  const planEditorMayRead = docKey === PLAN_DOC_KEY && planAccess(account, eventId)?.editor === 'director';
+  const planEditorMayRead = docKey === PLAN_DOC_KEY && planAccess(account, eventId)?.canEdit === true;
   if (!owns && !ministryMayRead && !nomineeMayRead && !planEditorMayRead) return notFound();
 
   const version = new URL(request.url).searchParams.get('version');

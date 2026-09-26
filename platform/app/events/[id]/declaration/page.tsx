@@ -202,7 +202,7 @@ export default async function DeclarationPage({
 
           {confirmed ? (
             <div style={{ marginBlockStart: 32 }}>
-              <a href={`/events/${id}/plan`} style={{ display: 'block', marginBlock: 16 }}><L en="Complete major-incident preparedness" ar="استكمال الاستعداد للحوادث الجسيمة" /></a>
+              {invitation.eventLevel === 3 ? <a href={`/events/${id}/plan`} style={{ display: 'block', marginBlock: 16 }}><L en="Prepare the medical plan" ar="إعداد الخطة الطبية" /></a> : null}
               <SharedDocuments eventId={id} token={invitation.token} />
             </div>
           ) : null}

@@ -26,7 +26,6 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const access = planAccess(account, id);
   if (!access) notFound();
   const ownerId = access.ownerId;
-  const isEms = access.editor === 'ems';
   const event = eventFor(ownerId, id);
   if (!event) notFound();
 
@@ -34,16 +33,15 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const unread = unreadCountFor(account.id);
   const versions = assessmentsFor(ownerId, id);
   const level = (versions[0]?.derivation.finalLevel ?? event.level) as Level | null;
-  const priorVersions = isEms ? [] : planVersionsFor(ownerId, id);
+  const priorVersions = planVersionsFor(ownerId, id);
   const fullGovernance = governanceFor(id);
-  const governance = isEms ? { incidentRole: fullGovernance.incidentRole ?? '' } : fullGovernance;
+  const governance = fullGovernance;
   if (level === null) redirect(`/events/${id}`);
 
   const fullPlan = planFor(ownerId, id);
-  const plan = isEms && fullPlan ? { ...fullPlan, mode: 'write' as const, sections: { '12': fullPlan.sections['12'] ?? {} }, attachedFile: null, attachedHasFile: false, refConfirmed: false, refAdmitsChildren: false, refTemporaryAreas: false } : fullPlan;
-  const requiredSections = PLAN_SECTIONS.filter(s => isEms ? s.n === GOVERNANCE_LANDING.incidentSection : level === 3 || s.n !== GOVERNANCE_LANDING.incidentSection);
-  // 12: renders only where the venue is itself a registered covered facility.
-  const facility = !isEms && event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
+  const plan = fullPlan;
+  const requiredSections = PLAN_SECTIONS.filter(s => level === 3 || s.n !== GOVERNANCE_LANDING.incidentSection);
+  const facility = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
   // reference, never a copy. The shortfalls derive in lib/rules from these facts
   // plus the two event facts the organizer answers on the plan.
@@ -67,10 +65,10 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
         </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-          <L en={isEms ? "Major-incident arrangements" : "Event health and medical plan"} ar={isEms ? "ترتيبات الحوادث الجسيمة" : "خطة التأهب الصحي والطبي للفعالية"} />
+          <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
-        {level === 3 ? <div className="secondary-help"><InfoNote><L en="The Medical Director leads medical planning. You share this plan; the organizer submits the package." ar="يقود المدير الطبي التخطيط الطبي. تعملون على خطة مشتركة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
-        <PlanForm
+        {level === 3 ? <div className="secondary-help"><InfoNote><L en="The Medical Director or EMS agency completes the plan. The organizer submits the package." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
+        {access.canEdit ? <PlanForm
           eventId={id}
           level={level}
           editor={access.editor}
@@ -80,7 +78,15 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           facility={facility}
           referenceFacts={referenceFacts}
           governance={governance}
-        />
+        /> : <section data-region="plan-readonly">
+          <p role="status"><L en="Completed by the Medical Director or EMS agency. You can view the plan here." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة. يمكنكم الاطّلاع عليها هنا."/></p>
+          {!plan?<p><L en="The medical plan has not been started." ar="لم يبدأ إعداد الخطة الطبية بعد."/></p>:<>
+          {plan.attachedHasFile?<a href={`/api/documents/${id}/${PLAN_DOC_KEY}`} target="_blank" rel="noreferrer"><L en="View attached plan" ar="عرض الخطة المرفقة"/></a>:null}
+          {requiredSections.map(s=><details key={s.n} style={{padding:16,borderBlockEnd:'1px solid var(--line)'}}><summary>{s.n}. <L en={s.en} ar={s.ar}/></summary><p style={{whiteSpace:'pre-wrap'}}>{plan.sections[String(s.n)]?.text || <L en={plan.sections[String(s.n)]?.covered?'Covered in the attached plan':'Pending'} ar={plan.sections[String(s.n)]?.covered?'مشمول في الخطة المرفقة':'قيد الانتظار'}/>}</p></details>)}
+          <details style={{padding:16}}><summary><L en="Major-incident preparedness" ar="الاستعداد للحوادث الجسيمة"/></summary>{MAJOR_INCIDENT_ITEMS.map(i=><p key={i.n}><L en={i.en} ar={i.ar}/> — <L en={plan.majorIncident[String(i.n)]?.covered?'Complete':'Pending'} ar={plan.majorIncident[String(i.n)]?.covered?'مكتمل':'قيد الانتظار'}/></p>)}</details>
+          </>}
+          <a href={`/events/${id}/requirements`}><L en="Back to requirements" ar="العودة إلى المتطلبات"/></a>
+        </section>}
 
         {priorVersions.length > 0 ? (
           <section data-region="versions" style={{ marginBlockStart: 32 }}>

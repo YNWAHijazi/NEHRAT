@@ -94,33 +94,19 @@ test("requirements continue opens the next document and medical tasks follow the
       { exact: true },
     ),
   ).toBeVisible();
-  await page.goto("/events/EV-0362/plan");
-  await page
-    .getByRole("button", { name: /^12 / })
-    .and(page.locator("[aria-expanded]"))
-    .click();
-  const section = page.getByRole("textbox", { name: /^12\./ });
-  if (await section.count())
-    await expect(section).toHaveAttribute("readonly", "");
-  await expect(
-    page.locator("[data-region=major-incident] button").first(),
-  ).toBeDisabled();
+  await page.goto("/events/EV-0362/requirements");
+  const medicalPlan=page.locator('[data-document=plan]');await medicalPlan.locator('summary').click();
+  await expect(medicalPlan).toContainText('Completed by the Medical Director or EMS agency.');
+  await medicalPlan.getByRole('link',{name:'View plan',exact:true}).click();
+  await expect(page.locator('[data-region=plan-readonly]')).toBeVisible();
+  await expect(page.locator('main textarea, main input[type=file]')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:/Save the plan/})).toHaveCount(0);
   await signInAs(page, "test_ems");
   await page.goto("/events/EV-0362/plan");
-  await expect(
-    page.locator("[data-region=major-incident] button").first(),
-  ).toBeEnabled();
-  await expect(
-    page.getByRole("heading", {
-      name: "Major-incident arrangements",
-      exact: true,
-    }),
-  ).toBeVisible();
-  await expect(page.getByRole("textbox", { name: /^1\./ })).toHaveCount(0);
-  await expect(page.locator("[data-region=versions]")).toHaveCount(0);
-  expect(
-    (await page.request.get("/api/documents/EV-0362/plan-document")).status(),
-  ).toBe(404);
+  await expect(page.getByRole('heading',{name:'Event health and medical plan',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Write the plan here',exact:true})).toBeEnabled();
+  await expect(page.locator('[data-region=major-incident] button').first()).toBeEnabled();
+  expect((await page.request.get('/api/documents/EV-0362/plan-document')).status()).toBe(200);
   await signInAs(page, "test_director");
   await page.goto("/events/EV-0362");
   await expect(

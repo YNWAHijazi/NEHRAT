@@ -60,7 +60,7 @@ export function PlanForm({
    *  promises, and the organizer cannot overwrite it. */
   governance: Record<string, string>;
 }) {
-  const canEditSection = (n: number) => editor === 'ems' ? n === GOVERNANCE_LANDING.incidentSection : !(level === 3 && n === GOVERNANCE_LANDING.incidentSection && editor === 'organizer');
+  const canEditSection = (_n: number) => level !== 3 || editor !== 'organizer';
   const canEditMedical = editor !== 'organizer';
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -130,7 +130,7 @@ export function PlanForm({
   return (
     <div style={{ maxWidth: 860 }}>
       {/* THE TWO ROUTES, ONE LINE: write here or attach. */}
-      <div data-region="plan-route" role="group" style={{ display: editor === 'ems' ? 'none' : 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 20 }}>
+      <div data-region="plan-route" role="group" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 20 }}>
         {(
           [
             ['write', 'Write the plan here', 'كتابة الخطة هنا'],
@@ -140,7 +140,7 @@ export function PlanForm({
           <button
             key={which}
             type="button"
-            disabled={editor === 'ems' || (editor === 'organizer' && level === 3 && Boolean(initial))}
+            disabled={level === 3 && editor === 'organizer'}
             aria-pressed={mode === which}
             onClick={() => setMode(which)}
             style={{ height: 40, paddingInline: 18, border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--bg)', color: mode === which ? 'var(--brand)' : 'var(--ink)', borderRadius: 20, fontSize: 14, cursor: 'pointer' }}
@@ -155,7 +155,7 @@ export function PlanForm({
         <div data-region="plan-attach" style={{ padding: '18px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20 }}>
           <UploadInput
             accept={acceptAttribute()}
-            disabled={uploading || editor === 'ems'}
+            disabled={uploading || (level === 3 && editor === 'organizer')}
             onChange={(e) => {
               const chosen = e.target.files?.[0];
               if (!chosen) return;
