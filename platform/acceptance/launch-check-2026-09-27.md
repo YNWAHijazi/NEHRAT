@@ -42,4 +42,13 @@ Record completion, time taken, requests for help, misunderstood wording and any 
 
 ## Validation
 
-Results and deployed commit are recorded after the final checks finish.
+- TypeScript and production build passed.
+- 469 unit checks passed across 46 files.
+- All 187 distinct application browser checks passed across the two isolated shards and the targeted rerun. The second shard passed 82/82; the first passed 104/105 before an obsolete assertion was corrected. The final invitation/help rerun passed 17/17, including that remaining check.
+- Older assertions were updated for the approved plain wording, moving demo dates and the already-implemented Level 3 medical-partner plan access. The test still requires organizer-only insurance and compliance documents to return 404 to EMS. No application permission was widened to satisfy a test.
+- The browser checks cover account activation and roles, event creation/submission/review, uploads, shared medical plans, certificates, venue renewal, facility forms/maps, post-event reports, and English/Arabic phone navigation. The 320-pixel English and Arabic event captures were visually inspected.
+- The final help-page clarification was rebuilt and included in the last targeted run. This pass did not rerun the separate historic prototype pixel-comparison suite; no new pixel-baseline claim is made.
+- Rule-data comparison found only text changes: no numeric values, booleans, keys or array sizes changed.
+- Database recovery verification is described above. Real email delivery, automatic backups and unfamiliar-user testing remain unverified or pending as stated.
+
+Application changes: commit `3d7bbb9`. This release is suitable for a supervised pilot. Public-launch sign-off remains pending email/OTP setup, automatic-backup access and the usability pilot. Deployment status must be checked against the release commit.
