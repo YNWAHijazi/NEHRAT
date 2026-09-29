@@ -44,8 +44,8 @@ export default async function HelpPage() {
       </h2>
       <p style={p}>
         <L
-          en="Write the plan here, or upload a plan and confirm the sections it covers. For Levels 1 and 2, the organizer completes it. For Level 3, the confirmed Medical Director or EMS agency completes it. For Level 1, keep the written medical arrangements brief—usually one page."
-          ar="اكتبوا الخطة هنا أو ارفعوها وأكّدوا الأقسام التي تغطيها. في المستويين 1 و2، يُعدّها المنظّم. في المستوى 3، يُعدّها المدير الطبي أو جهة الإسعاف المؤكّدة. في المستوى 1، تكفي ترتيبات طبية مكتوبة موجزة، عادةً صفحة واحدة."
+          en="Level 1 does not require a medical plan. At Level 2, a plan is recommended and becomes required if the Ministry requests it. Level 3 requires a plan. The confirmed Medical Director or EMS agency fills the shared plan. The organizer can view it."
+          ar="لا تُطلب خطة طبية في المستوى 1. في المستوى 2، يُوصى بالخطة وتصبح مطلوبة إذا طلبتها الوزارة. الخطة مطلوبة في المستوى 3. يستكمل المدير الطبي أو جهة الإسعاف المؤكّدة الخطة المشتركة، ويمكن للمنظّم الاطّلاع عليها."
         />
       </p>
       <p style={p}>

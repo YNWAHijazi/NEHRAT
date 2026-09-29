@@ -86,12 +86,12 @@ test.describe('stage one — what you are being asked to take on', () => {
     // The requirements THIS level puts on THIS party, derived from the matrix.
     const reqs = page.locator('[data-region="briefing-requirements"]');
     await expect(reqs).toBeVisible();
-    // At Level 2 the provider carries six matrix rows. The declaration is a LEVEL 3
+    // The provider sees the revised Level 2 matrix rows. The declaration is a LEVEL 3
     // row and must not appear here -- the briefing states the level's real demands,
     // not the heaviest level's.
-    await expect(reqs).toContainText('Basic Life Support medical response team');
+    await expect(reqs).toContainText('BLS response team(s)');
     await expectAbsent(page, {
-      absent: 'text=EMS Readiness Declaration',
+      absent: reqs.getByText('EMS Readiness Declaration', { exact: true }),
       anchor: reqs,
       because: 'the readiness declaration is a Level 3 requirement and this event is Level 2',
     });

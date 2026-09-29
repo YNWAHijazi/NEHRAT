@@ -90,8 +90,8 @@ describe('showstopper 2 — the eleven major-incident items gate filing at Level
     ).toBe(true);
   });
 
-  it('Level 1 does not carry the eleven', () => {
-    expect(planIsComplete(plan({}), 1)).toBe(true);
+  it('Level 1 has no medical-plan requirement', () => {
+    expect(planIsComplete(plan({}), 1)).toBe(false);
   });
 });
 
@@ -274,14 +274,14 @@ describe('the event record names ONE next action, from the gate\'s own blockers'
     expect(a.bodyEn).toBe('Everything the level requires is in place.');
   });
 
-  it('an attachable document asks for an attachment; the plan asks to be written', () => {
+  it('an attachable document asks for an attachment; the plan sends the organizer to their medical team', () => {
     expect(nextAction([b('documentMissing', 'siteMap')]).kind).toBe('documents');
     expect(nextAction([b('documentMissing', 'siteMap')]).titleEn).toBe('Upload 1 document');
     // The plan and the compliance form are completed ON the platform: telling the
     // organizer to "attach" them would send them to a screen with no such control.
     const planAction = nextAction([b('documentMissing', 'plan')]);
     expect(planAction.kind).toBe('plan');
-    expect(planAction.href).toBe('plan');
+    expect(planAction.href).toBe('requirements');
   });
 
   it('waiting on somebody else offers a clear follow-up', () => {

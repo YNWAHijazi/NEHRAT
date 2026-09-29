@@ -56,17 +56,9 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     const eventId = eventUrl.pathname.split('/')[2]!;
     await expect(page.locator('body')).toContainText('Level 1');
 
-    // Level 1 package: the assessment (system) and the documented arrangements.
+    // Revised Annex B: Level 1 has no medical-plan upload.
     await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-    const attach = page.locator('form:has(input[name="docKey"])').first();
-    // The control is a real file picker: a document is chosen, never a typed name.
-    await attach.locator('input[type="file"]').setInputFiles({
-      name: 'arrangements.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('review-build placeholder'),
-    });
-    await attach.locator('button:has-text("Attach")').click();
-    await page.waitForLoadState('networkidle');
+    await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
 
     // The compliance form renders SIX declarations at Level 1 -- and completes on six.
     await gotoRidingRestarts(page, `/events/${eventId}/submit`);
@@ -160,11 +152,12 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
   test('a second save archives version 1, readable under Earlier versions', async ({ page }) => {
     // Two save-and-reload cycles: generous under full-suite dev-compile load.
     test.setTimeout(90_000);
-    await signInAs(page, 'test_organizer');
+    await signInAs(page, 'test_ems');
     await gotoRidingRestarts(page, '/events/EV-0418/plan');
     // Sections are accordion rows: expand section 1, whose textarea then renders.
     const sectionRow = page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' });
     if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
+    const initialVersion = (await (await page.request.get('/api/events/EV-0418/plan-state')).json()).version as number;
     const firstSection = page.locator('textarea').first();
     await expect(firstSection).toBeVisible();
     await firstSection.fill('Version one wording for the schedule.');
@@ -180,7 +173,7 @@ test.describe('showstopper 6 — plan versions survive saving', () => {
     // reload mid-save read the page back before version 1 had been archived.
     await expect(page.getByText('Saved.', { exact: true })).toBeVisible({ timeout: 20_000 });
     await page.reload();
-    const history = page.locator('details', { hasText: 'Version 1' }).first();
+    const history = page.locator('[data-region=versions] details').filter({ has: page.locator('summary', { hasText: `Version ${initialVersion + 1}` }) }).first();
     await expect(history).toBeVisible();
     await history.locator('summary').click();
     await expect(history).toContainText('Version one wording for the schedule.');

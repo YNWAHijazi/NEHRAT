@@ -16,6 +16,7 @@ import lifecycleJson from './data/lifecycle.json';
 import planJson from './data/plan.json';
 import type { Level } from './types';
 import type { RequirementRow } from './requirements';
+import { planRequirement, planSectionsForLevel } from './plan-responsibility';
 
 export interface CatalogDocument {
   key: string;
@@ -28,15 +29,16 @@ export interface CatalogDocument {
   attach?: boolean;
   thirdParty?: boolean;
   optional?: boolean;
+  retired?: boolean;
   noteEn?: string;
   noteAr?: string;
 }
 
 /** The documents the level requires, in catalog order. */
-export function documentsForLevel(level: Level): CatalogDocument[] {
+export function documentsForLevel(level: Level, planRequested = false): CatalogDocument[] {
   return (attachmentsCatalog.documents as CatalogDocument[]).filter(
-    (d) => d.minLevel <= level && (!d.maxLevel || level <= d.maxLevel),
-  );
+    (d) => !d.retired && d.minLevel <= level && (!d.maxLevel || level <= d.maxLevel),
+  ).map(d => d.key === 'plan' ? { ...d, optional: planRequirement(level, planRequested) !== 'required' } : d);
 }
 
 /**
@@ -61,22 +63,23 @@ export function declarationsAreComplete(
 export interface PlanShape {
   mode: 'write' | 'attach';
   attachedFile: string | null;
+  attachedHasFile?: boolean;
   sections: Record<string, { text?: string; covered?: boolean }>;
   majorIncident: Record<string, { covered?: boolean }>;
 }
 
 /**
- * The plan is complete when all sixteen sections are addressed AND, at Level 2 and 3,
+ * The plan is complete when all applicable sections are addressed AND, at Level 3,
  * every one of the eleven major-incident items is confirmed (Protocol 12). The eleven
  * are not decoration on section 12 -- an unconfirmed item blocks filing.
  */
 export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
-  if (!plan) return false;
+  if (!plan || planSectionsForLevel(level).length === 0) return false;
   const sectionsDone =
     plan.mode === 'attach'
-      ? plan.attachedFile !== null &&
-        Array.from({ length: 16 }, (_, i) => i + 1).filter(n => level === 3 || n !== 12).every(n => plan.sections[String(n)]?.covered === true)
-      : Array.from({ length: 16 }, (_, i) => i + 1).filter(n => level === 3 || n !== 12).map(n => {
+      ? plan.attachedFile !== null && plan.attachedHasFile !== false &&
+        planSectionsForLevel(level).every(({ n }) => plan.sections[String(n)]?.covered === true)
+      : planSectionsForLevel(level).map(({ n }) => {
           // Write mode is complete by WRITTEN text alone: a coverage confirmation
           // belongs to the attach route and does not survive switching modes.
           const s = plan.sections[String(n)];
@@ -93,6 +96,7 @@ export function planIsComplete(plan: PlanShape | null, level: Level): boolean {
 
 export interface SubmissionFacts {
   level: Level;
+  planRequested?: boolean;
   /** 'cancelled' closes the record: nothing further files. Defaults to active. */
   lifecycle?: 'active' | 'cancelled' | 'postponed';
   organizationStatus: 'none' | 'pending' | 'recorded' | 'returned';
@@ -167,7 +171,7 @@ export function submissionGate(facts: SubmissionFacts): SubmissionGate {
   }
 
 
-  for (const doc of documentsForLevel(facts.level)) {
+  for (const doc of documentsForLevel(facts.level, facts.planRequested)) {
     if (doc.optional) continue;
     if (facts.documentState[doc.key]) continue;
     // A NEWLY REQUIRED DOCUMENT APPLIES FROM ITS EFFECTIVE DATE FORWARD (Ministry
@@ -319,19 +323,19 @@ export function nextAction(blockers: readonly SubmissionBlocker[], level?: Level
     };
   }
 
-  if (level !== 3 && missingKeys.includes('plan')) {
+  if (missingKeys.includes('plan') && level !== 3) {
     return {
       kind: 'plan',
-      href: 'plan',
+      href: 'requirements',
       tone: 'accent',
-      titleEn: 'Complete the medical plan',
-      titleAr: 'أكملوا الخطة الطبية',
+      titleEn: 'Medical plan pending',
+      titleAr: 'الخطة الطبية قيد الانتظار',
       bodyEn:
-        'Write the plan here or upload an existing plan.',
+        'Ask your Medical Director or EMS agency to complete the shared plan.',
       bodyAr:
-        'اكتبوا الخطة هنا أو أرفقوا خطة موجودة لديكم.',
-      buttonEn: 'Open the plan',
-      buttonAr: 'فتح الخطة',
+        'اطلبوا من المدير الطبي أو جهة الإسعاف استكمال الخطة المشتركة.',
+      buttonEn: 'View medical team',
+      buttonAr: 'عرض الفريق الطبي',
     };
   }
 

@@ -334,13 +334,10 @@ describe('English governs, everywhere — the standing ruling (2026-09-03)', () 
       requirements: { n?: number; number?: number; en: string; ar: string; setAsideAr?: string; setAsideEn?: string }[];
     };
     const row = (n: number) => matrix.requirements.find((r) => (r.n ?? r.number) === n)!;
-    expect(row(7).ar).toBe('ترتيبات سيارات الإسعاف');
-    expect(row(7).setAsideAr).toContain('والنقل');
-    // Row 13: the built ENGLISH had carried the Arabic issue's extra limb too.
-    // The English issue reads "notified" alone, and now so does the build.
-    expect(row(13).en).toBe('Participating EMS provider notified');
-    expect(row(13).setAsideEn).toContain('coordinated');
-    expect(row(13).ar).not.toContain('التنسيق');
-    expect(row(15).ar).not.toContain('محددة');
+    // The revised bilingual Annex B supersedes those older translation differences.
+    expect(row(7).ar).toBe('ترتيبات الإسعاف / خدمات الطوارئ الطبية');
+    expect(row(7).setAsideAr).toBeUndefined();
+    expect(row(13)).toBeUndefined();
+    expect(row(15).ar).toContain('القيادة الطبية');
   });
 });

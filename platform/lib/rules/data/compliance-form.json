@@ -55,9 +55,9 @@
       "ar": "تم استيفاء المتطلبات الدنيا المنطبقة على مستوى الفعالية."
     },
     {
-      "en": "The required documented medical arrangements or event health and medical plan has been prepared",
+      "en": "The medical arrangements for this level are in place, and a medical plan is complete if required",
       "minLevel": 1,
-      "ar": "تم إعداد الترتيبات الطبية الموثقة أو خطة التأهب الصحي والطبي للفعالية المطلوبة بحسب مستوى الفعالية."
+      "ar": "الترتيبات الطبية لهذا المستوى جاهزة، والخطة الطبية مكتملة إذا كانت مطلوبة"
     },
     {
       "en": "For Level 2 and Level 3 events, participating emergency medical service or medical providers and their operational contacts have been identified",

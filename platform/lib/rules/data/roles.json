@@ -9,8 +9,8 @@
         "$commentLevelAware": "Accept reads differently by level, at reviewer instruction. The readiness declaration exists only at Level 3 (emsDeclarationGate); at Levels 1 and 2 the obligation is operational detail for the organizer's plan and nothing more. The absence is NAMED rather than left silent -- a provider should know the lighter obligation is deliberate, not an omission. descEn/descAr are the Level 3 wording; descNoDeclarationEn/Ar are Levels 1 and 2. Decline and Request modification reference no declaration at any level and are level-neutral by inspection.",
         "descEn": "Your organization becomes a named provider for this event and the readiness declaration opens.",
         "descAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية ويُفتح إقرار الجاهزية.",
-        "descNoDeclarationEn": "Your organization becomes a named provider for this event. No declaration is required at this level; you supply operational detail for the organizer's plan.",
-        "descNoDeclarationAr": "تصبح مؤسستكم مزوّداً مُسمّى لهذه الفعالية. ولا يُطلب أي إقرار في هذا المستوى؛ بل تقدّمون التفاصيل التشغيلية لخطة المنظّم."
+        "descNoDeclarationEn": "Your agency joins the event team and shares its operational details. No EMS readiness declaration is required at this level.",
+        "descNoDeclarationAr": "تنضم جهتكم إلى فريق الفعالية وتشارك تفاصيلها التشغيلية. لا يُطلب إقرار جاهزية الإسعاف في هذا المستوى."
       },
       {
         "key": "decline",
@@ -99,59 +99,89 @@
       "ar": "يضع إطار الجاهزية لتوقف القلب موجبات أيضاً على جهات دعم الحياة الأساسي ووحدات الاستجابة الأولية. وتُستوفى تلك الموجبات عبر ترتيبات الجهات نفسها وتقاريرها، لا عبر هذه المنصة."
     },
     "level2Intro": {
-      "en": "This information goes to the organizer for the event health and medical plan. No declaration is required at Level 2.",
-      "ar": "تذهب هذه المعلومات إلى المنظّم لإدراجها في خطة التأهب الصحي والطبي للفعالية. لا يُطلب أي إقرار في المستوى 2."
+      "en": "Share your operational details with the organizer. The medical plan is recommended at Level 2 unless the Ministry requests it.",
+      "ar": "شاركوا تفاصيلكم التشغيلية مع المنظّم. الخطة الطبية موصى بها في المستوى 2، وتصبح مطلوبة إذا طلبتها الوزارة."
     },
     "level2Fields": [
       {
         "key": "contactName",
         "en": "Operational contact for this event — name",
-        "ar": "جهة الاتصال التشغيلية لهذه الفعالية — الاسم"
+        "ar": "جهة الاتصال التشغيلية لهذه الفعالية — الاسم",
+        "multiline": false,
+        "helpEn": "Who should the organizer call during the event?",
+        "helpAr": "بمن يتصل المنظّم أثناء الفعالية؟"
       },
       {
         "key": "position",
         "en": "Position",
-        "ar": "الصفة"
+        "ar": "الصفة",
+        "multiline": false,
+        "helpEn": "",
+        "helpAr": ""
       },
       {
         "key": "phone",
         "en": "Telephone",
-        "ar": "الهاتف"
+        "ar": "الهاتف",
+        "multiline": false,
+        "helpEn": "",
+        "helpAr": ""
       },
       {
         "key": "teams",
         "en": "Assigned personnel and BLS response teams",
-        "ar": "الموظفون المكلّفون وفرق الاستجابة لدعم الحياة الأساسي"
+        "ar": "الموظفون المكلّفون وفرق الاستجابة لدعم الحياة الأساسي",
+        "multiline": true,
+        "helpEn": "Give the number of people, their roles and their shifts.",
+        "helpAr": "اذكروا عدد الأشخاص وأدوارهم ومناوباتهم."
       },
       {
         "key": "ambulances",
         "en": "Assigned ambulances",
-        "ar": "سيارات الإسعاف المكلّفة"
+        "ar": "سيارات الإسعاف المكلّفة",
+        "multiline": true,
+        "helpEn": "Give the number of vehicles and when they will be available.",
+        "helpAr": "اذكروا عدد السيارات وأوقات توفّرها."
       },
       {
         "key": "deployment",
         "en": "Deployment arrangements",
-        "ar": "ترتيبات الانتشار"
+        "ar": "ترتيبات الانتشار",
+        "multiline": true,
+        "helpEn": "Where will each team and vehicle be based?",
+        "helpAr": "أين سيتمركز كل فريق وكل سيارة؟"
       },
       {
         "key": "communications",
         "en": "Communications — channels and call signs",
-        "ar": "الاتصالات — القنوات ورموز النداء"
+        "ar": "الاتصالات — القنوات ورموز النداء",
+        "multiline": true,
+        "helpEn": "How will teams reach each other? Include a backup method.",
+        "helpAr": "كيف تتواصل الفرق؟ اذكروا وسيلة بديلة أيضاً."
       },
       {
         "key": "escalation",
         "en": "Escalation arrangements",
-        "ar": "ترتيبات التصعيد"
+        "ar": "ترتيبات التصعيد",
+        "multiline": true,
+        "helpEn": "Who calls for extra help, and how?",
+        "helpAr": "من يطلب مساعدة إضافية وكيف؟"
       },
       {
         "key": "access",
         "en": "Ambulance access and patient-extraction routes",
-        "ar": "وصول الإسعاف ومسارات إخلاء المرضى"
+        "ar": "وصول الإسعاف ومسارات إخلاء المرضى",
+        "multiline": true,
+        "helpEn": "Name the access gates, patient routes and ambulance loading points.",
+        "helpAr": "حدّدوا بوابات الدخول ومسارات المرضى ونقاط نقلهم إلى الإسعاف."
       },
       {
         "key": "hospitals",
         "en": "Receiving emergency departments",
-        "ar": "أقسام الطوارئ المستقبِلة"
+        "ar": "أقسام الطوارئ المستقبِلة",
+        "multiline": true,
+        "helpEn": "Name the receiving hospitals and how you will contact them.",
+        "helpAr": "اذكروا المستشفيات المستقبِلة وطريقة الاتصال بها."
       }
     ],
     "responsibilitySentence": {
@@ -199,8 +229,8 @@
       "ar": "أصبح إقراركم أحد مرفقات المستوى 3 في حزمة تقديم المنظّم. لا يُعرض لكم سوى إقرار جهتكم."
     },
     "docsIntro": {
-      "en": "You and the organizer can add and view these files. The organizer must attach them to the application to share them with the Ministry.",
-      "ar": "يمكنكم أنتم والمنظّم إضافة هذه الملفات وعرضها. وعلى المنظّم إرفاقها بالطلب لإرسالها إلى الوزارة."
+      "en": "Files shared here can be read by the organizer and Ministry reviewers.",
+      "ar": "يمكن للمنظّم ومراجعي الوزارة الاطلاع على الملفات المشتركة هنا."
     }
   },
   "director": {
@@ -264,8 +294,8 @@
       "ar": "في المستوى 3 هذا المحتوى من كتابتكم. وما تُدخلونه هنا يُكتب في خطة التأهب الصحي والطبي للفعالية لدى المنظّم؛ ولا يكتبه أي منكما مرتين."
     },
     "govWhere": {
-      "en": "Sections 10 and 12 of the organizer's plan, and the major-incident and mass-casualty plan. The organizer sees your text there and cannot overwrite it.",
-      "ar": "البندان 10 و12 من خطة المنظّم، وخطة الحوادث الجسيمة وحوادث الإصابات الجماعية. ويرى المنظّم نصكم هناك ولا يمكنه استبداله."
+      "en": "Your arrangements appear in the shared medical plan. The organizer can read them.",
+      "ar": "تظهر ترتيباتكم في الخطة الطبية المشتركة، ويمكن للمنظّم الاطّلاع عليها."
     },
     "govSections": [
       {
@@ -437,12 +467,12 @@
     "planIntroAr": "راجعوا أقسام الخطة الطبية المشتركة مع دعوتكم.",
     "planVersionEn": "Version {v}, last saved {d}",
     "planVersionAr": "النسخة ⁦{v}⁩، آخر حفظ ⁦{d}⁩",
-    "planNoneEn": "The organizer has not written a plan yet. When they do, the four sections that concern your role appear here.",
-    "planNoneAr": "لم يكتب المنظّم خطة بعد. وعندما يفعل، تظهر هنا البنود الأربعة المتعلقة بدوركم.",
+    "planNoneEn": "No medical plan has been saved yet. After accepting, the Medical Director or EMS agency can prepare it.",
+    "planNoneAr": "لم تُحفظ خطة طبية بعد. بعد القبول، يمكن للمدير الطبي أو جهة الإسعاف إعدادها.",
     "planSectionEmptyEn": "Not yet written.",
     "planSectionEmptyAr": "لم يُكتب بعد.",
-    "planAttachedEn": "The organizer attached an existing plan rather than writing one here, and confirmed which sections it covers. The text of those sections is in the attached document.",
-    "planAttachedAr": "أرفق المنظّم خطة قائمة بدل كتابتها هنا، وأكّد البنود التي تغطيها. ونص تلك البنود في المستند المرفق.",
+    "planAttachedEn": "The medical team uploaded a plan. Open the document to read the details.",
+    "planAttachedAr": "رفع الفريق الطبي خطة. افتحوا المستند للاطلاع على التفاصيل.",
     "coveredEn": "Confirmed as covered",
     "coveredAr": "مؤكَّد أنه مغطّى",
     "notCoveredEn": "Not confirmed",

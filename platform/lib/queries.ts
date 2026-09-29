@@ -1,3 +1,4 @@
+import { hasReportableEvent } from './rules/gates';
 import { facilityAedStatus } from './facility-gis';
 /**
  * Read-side queries for the organizer surfaces. Ownership is enforced here: every query
@@ -204,6 +205,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
   const reportRequired = postEventReportRequired({
     finalLevel: level,
     seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    reportableEventRecorded: reportFacts.reportableEventRecorded,
     ministryRequested: reportFacts.ministryRequested,
   }).required;
   const stageInfo = eventStage({
@@ -753,6 +755,14 @@ export interface PlanRow {
   updatedAt: string;
 }
 
+/** Authorship shown to the event owner alongside the shared medical plan. */
+export function planLastEditorFor(accountId: number, eventId: string): { name: string; role: string } | null {
+  const row = getDb().prepare(`SELECT a.display_name AS name, a.role FROM plans p
+    JOIN events e ON e.id=p.event_id JOIN accounts a ON a.id=p.updated_by
+    WHERE p.event_id=? AND e.account_id=?`).get(eventId, accountId) as { name: string; role: string } | undefined;
+  return row ?? null;
+}
+
 export function planFor(accountId: number, eventId: string): PlanRow | null {
   const owned = getDb().prepare(`SELECT id FROM events WHERE id = ? AND account_id = ?`).get(eventId, accountId);
   if (!owned) return null;
@@ -779,7 +789,7 @@ export function planFor(accountId: number, eventId: string): PlanRow | null {
 }
 
 /**
- * The plan AS SUBMITTED, for the Ministry's review screen -- event-scoped, because the
+ * The latest shared plan, for the Ministry's review screen -- event-scoped, because the
  * reviewer is not the owner. The organizer-side planFor stays account-scoped; this
  * exists so the reviewer can READ the document the submission is about, which for a
  * whole slice they could not: the review screen carried providers, inspections and an
@@ -988,7 +998,7 @@ export function documentStateFor(
   eventId: string,
   level: 1 | 2 | 3,
 ): Record<string, boolean> {
-  const attached = new Set(attachmentsFor(accountId, eventId).map((a) => a.docKey));
+  const attached = new Set(attachmentsFor(accountId, eventId).filter(a => a.hasFile).map((a) => a.docKey));
   const invitations = invitationsFor(accountId, eventId);
   const providers = invitations.filter((i) => i.kind === 'ems');
   const plan = planFor(accountId, eventId);
@@ -1053,6 +1063,7 @@ export function seriousIncidentNotificationsFor(accountId: number, eventId: stri
  */
 export function postEventReportFacts(eventId: string): {
   seriousIncidentNotified: boolean;
+  reportableEventRecorded: boolean;
   ministryRequested: boolean;
   requestedBy: string | null;
   requestedAt: string | null;
@@ -1064,6 +1075,10 @@ export function postEventReportFacts(eventId: string): {
     .get(eventId) as { requested_by: string; requested_at: string } | undefined;
   return {
     seriousIncidentNotified: notified,
+    reportableEventRecorded: (() => {
+      const report = db.prepare('SELECT activity, significant FROM post_event_reports WHERE event_id=?').get(eventId) as { activity: string; significant: string } | undefined;
+      return report ? hasReportableEvent(JSON.parse(report.activity), JSON.parse(report.significant)) : false;
+    })(),
     ministryRequested: req !== undefined,
     requestedBy: req?.requested_by ?? null,
     requestedAt: req ? req.requested_at.slice(0, 10) : null,

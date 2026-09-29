@@ -1,3 +1,4 @@
+import { EventWorkspaceNav } from '../../../components/EventWorkspaceNav';
 import { InfoNote } from '../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -339,6 +340,7 @@ export default async function EventRecordPage({
   const reportRequirement = postEventReportRequired({
     finalLevel: level,
     seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    reportableEventRecorded: reportFacts.reportableEventRecorded,
     ministryRequested: reportFacts.ministryRequested,
   });
   const stageInfo = eventStage({
@@ -532,6 +534,8 @@ export default async function EventRecordPage({
             ) : null}
           </div>
         </div>
+
+        <EventWorkspaceNav eventId={id} active="overview" />
 
         {/* THE CERTIFICATE, at the top of the record once a determination stands.
             A determination was recorded, the organizer was notified, and there was

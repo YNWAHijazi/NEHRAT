@@ -73,12 +73,8 @@ export function commandFunctionRow(level: Level): RequirementRow | null {
  * The rows a NAMED PARTY carries at a level, and which of them are theirs alone.
  *
  * A nominated party deciding whether to accept is being asked to take on specific
- * requirements, and until now the nomination screen told them so in prose written by
- * hand. This derives it: at Level 3 the Event Medical Director carries five rows, and
- * requirement 15 -- the event medical command function -- names no other party at any
- * level. The prose said "four are shared, one is yours alone" and happened to be
- * right; this makes it TRUE BY DERIVATION rather than by a sentence somebody kept in
- * step. If the Ministry re-issues the matrix, the screen follows.
+ * requirements. These come from the current matrix, including the optional shared
+ * plan at Level 2. Requirement 15 is the Director’s sole Level 3 duty.
  *
  * `sole` is not "important" -- it is the mechanical fact that no other party is named
  * against the row, which is what makes it undischargeable by anyone else.

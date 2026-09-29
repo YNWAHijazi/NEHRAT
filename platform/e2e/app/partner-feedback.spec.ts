@@ -56,7 +56,7 @@ test('event type hides unrelated activities and a previous edition reveals the n
 test('Director and EMS share a guided plan; organizer can only view it', async ({ page, browser, baseURL }) => {
   await signInAs(page, 'test_director');
   await gotoRidingRestarts(page, '/events/EV-0362');
-  await page.locator('[data-region="director-plan"]').click();
+  await page.locator('[data-region="director-plan"]').getByRole('link').click();
   await expect(page).toHaveURL(/EV-0362\/plan/);
   const originalFile = await page.request.get('/api/documents/EV-0362/plan-document');
   expect(originalFile.status()).toBe(200);
@@ -72,6 +72,8 @@ test('Director and EMS share a guided plan; organizer can only view it', async (
   const emsPage = await browser.newPage({ baseURL: baseURL! });
   await signInAs(emsPage, 'test_ems');
   await gotoRidingRestarts(emsPage, '/events/EV-0362/plan');
+  // Unsaved edits retain their base version when another medical user saves.
+  await emsPage.getByRole('button', { name: 'Write the plan here', exact: true }).click();
   await page.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
   await emsPage.getByRole('button', { name: /^Save the plan/ }).click();

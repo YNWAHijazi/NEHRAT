@@ -1,5 +1,5 @@
 {
-  "$comment": "The submitted documents by level, from the prototype's catalog with Arabic aligned to the compliance form's attachment list. The plan carries its official Arabic name (SPEC 2b). State lives in the database; this is the catalog.",
+  "$comment": "Current document catalogue. Revised Annex B (2026-09-29) removes the Level 1 medical-arrangements attachment and makes the Level 2 plan recommended unless requested by the Ministry. Other supporting documents remain governed by the existing submission form.",
   "documents": [
     {
       "key": "assessment",
@@ -16,7 +16,8 @@
       "ar": "ترتيبات طبية موثّقة",
       "minLevel": 1,
       "maxLevel": 1,
-      "attach": true
+      "attach": true,
+      "retired": true
     },
     {
       "key": "complianceForm",

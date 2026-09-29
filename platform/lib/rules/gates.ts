@@ -16,6 +16,7 @@
  */
 
 import { addDays, formatIsoDate, postEventReportWindow, filingDeadline, startOfBeirutDay, fromBeirut, type FilingDeadline } from './deadlines';
+import postEventJson from './data/post-event-report.json';
 import { REASSESSMENT_WINDOW } from './load';
 import type { Level } from './types';
 
@@ -155,37 +156,38 @@ export function eventStage(input: {
   return { stage: 4, en: 'Submitted', ar: 'التقديم' };
 }
 
-/**
- * WHO OWES A POST-EVENT REPORT -- Protocol 13 p2's three limbs, evaluated at
- * last (register closure, 2026-09-03). Required after every Level 3 event
- * (2a); after a reportable event at Level 1 or 2 -- the recorded 24-hour
- * serious-incident notification IS the reportable event (2b); or on Ministry
- * request (2c). The copy has named all three since Slice 2; only the first was
- * ever evaluated. One rule, consumed by the record's stage rail, the report
- * screen and the console alike -- the gate's TIMING (opens the day after the
- * event ends) stays in postEventReportGate and is a separate question from
- * whether the report is owed at all.
- */
+/** Revised Annex B: reportable events include transfers and extra resource requests,
+ * even when none of the four urgent serious-incident notifications applies. */
+export function hasReportableEvent(activity: Record<string, unknown>, significant: Record<string, unknown>): boolean {
+  return postEventJson.significantEvents.some(item => item.key !== 'none' && significant[item.key] === true)
+    || ['patientsTransported', 'cardiacArrests', 'deaths', 'unplannedResources'].some(key => {
+      const count = Number(activity[key]);
+      return Number.isFinite(count) && count > 0;
+    });
+}
+
+/** Report obligation and the timing gate are separate questions. */
 export function postEventReportRequired(input: {
   finalLevel: Level | null;
   seriousIncidentNotified: boolean;
+  reportableEventRecorded?: boolean;
   ministryRequested: boolean;
 }): { required: boolean; limb: 'level3' | 'reportable' | 'request' | null; en: string; ar: string } {
   if (input.finalLevel === 3) {
     return { required: true, limb: 'level3', en: 'Required after every Level 3 event.', ar: 'مطلوب بعد كل فعالية من المستوى 3.' };
   }
-  if (input.seriousIncidentNotified) {
+  if (input.seriousIncidentNotified || input.reportableEventRecorded) {
     return {
       required: true,
       limb: 'reportable',
-      en: 'Required — a reportable event was notified for this event.',
+      en: 'Required — a reportable event was recorded.',
       ar: 'مطلوب — أُبلغ عن حدث موجب للإبلاغ في هذه الفعالية.',
     };
   }
   if (input.ministryRequested) {
     return { required: true, limb: 'request', en: 'Required — the Ministry has requested it.', ar: 'مطلوب — طلبته الوزارة.' };
   }
-  return { required: false, limb: null, en: 'Not needed for this event.', ar: 'غير مطلوب لهذه الفعالية.' };
+  return { required: false, limb: null, en: 'Required only if a reportable incident occurred or the Ministry requests it.', ar: 'مطلوب فقط إذا وقعت حادثة واجبة الإبلاغ أو طلبته الوزارة.' };
 }
 
 /** Material change: a state gate. Disabled until the submission is filed. */

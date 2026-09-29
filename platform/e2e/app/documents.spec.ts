@@ -67,7 +67,7 @@ test.describe('the Ministry opens the file', () => {
     await expect(panel).toBeVisible();
     // Nine domains, and the structured inputs the minimum conditions derive from.
     await expect(panel).toContainText('Assessment answers');
-    await expect(panel).toContainText('Structured inputs');
+    await expect(panel).toContainText('Event facts');
     // Nine domains, each with the option the organizer chose. Not a summary.
     await expect(panel).toContainText('Highest expected simultaneous attendance');
     await expect(panel).toContainText('18000');

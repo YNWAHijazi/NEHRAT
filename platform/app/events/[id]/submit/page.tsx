@@ -14,6 +14,7 @@ import {
   submissionFor,
   unreadCountFor,
   planFor,
+  addedMeasuresFor,
   venueRouteFor,
 } from '../../../../lib/queries';
 import { submissionGateFor } from '../../../../lib/submission-facts';
@@ -35,7 +36,7 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   const submission = submissionFor(account.id, id);
   const gate = submissionGateFor(account.id, id);
   const documentState = documentStateFor(account.id, id, level);
-  const documents = documentsForLevel(level).filter((d) => !d.optional);
+  const documents = documentsForLevel(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt)).filter((d) => !d.optional);
   const providers = invitationsFor(account.id, id).filter((i) => i.kind === 'ems');
   const signedCount = providers.filter((p) => p.declaration === 'signed').length;
 

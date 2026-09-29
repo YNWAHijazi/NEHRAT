@@ -233,15 +233,15 @@
     ]
   },
   "guidanceDepth": {
-    "$comment": "The planning-depth-by-level table. Wording from the reference prototype (copy is final); the Guidance's fuller table is in source-documents/en/05. The event's own level column is highlighted, as the prototype does.",
+    "$comment": "Planning depth updated to match revised Annex B supplied 2026-09-29. Existing detailed guidance remains available when a plan is prepared.",
     "rows": [
       {
         "en": "Format",
         "ar": "الشكل",
-        "l1En": "Brief written arrangements, usually 1 page",
-        "l1Ar": "ترتيبات مكتوبة موجزة، عادةً صفحة واحدة",
-        "l2En": "Written plan",
-        "l2Ar": "خطة مكتوبة",
+        "l1En": "No medical plan required",
+        "l1Ar": "لا تُطلب خطة طبية",
+        "l2En": "Recommended; required only if the Ministry requests it",
+        "l2Ar": "موصى بها؛ وتصبح مطلوبة إذا طلبتها الوزارة",
         "l3En": "Comprehensive plan with maps and EMS declarations",
         "l3Ar": "خطة شاملة مع خرائط وإقرارات إسعاف"
       },
@@ -278,20 +278,20 @@
       {
         "en": "Ambulance and EMS",
         "ar": "الإسعاف وخدمات الطوارئ",
-        "l1En": "Access to local EMS",
-        "l1Ar": "إتاحة الوصول إلى الإسعاف المحلي",
-        "l2En": "Defined in the plan",
-        "l2Ar": "محددة في الخطة",
-        "l3En": "EMS resources documented and coordinated",
-        "l3Ar": "موارد إسعافية موثقة ومنسّقة"
+        "l1En": "Confirm contact with local EMS",
+        "l1Ar": "تأكيد التواصل مع الإسعاف المحلي",
+        "l2En": "EMS arrangements and coordination required",
+        "l2Ar": "ترتيبات الإسعاف والتنسيق مطلوبة",
+        "l3En": "Defined in the medical plan",
+        "l3Ar": "محدّدة في الخطة الطبية"
       },
       {
-        "en": "Major-incident plan",
-        "ar": "خطة الحوادث الجسيمة",
-        "l1En": "Emergency escalation procedure",
-        "l1Ar": "إجراء تصعيد طارئ",
-        "l2En": "Written plan",
-        "l2Ar": "خطة مكتوبة",
+        "en": "Emergency escalation",
+        "ar": "إجراءات التصعيد في الطوارئ",
+        "l1En": "Basic emergency procedure",
+        "l1Ar": "إجراء أساسي للطوارئ",
+        "l2En": "Documented procedure coordinated with EMS",
+        "l2Ar": "إجراء موثّق ومنسّق مع جهات الإسعاف",
         "l3En": "Detailed coordinated plan",
         "l3Ar": "خطة مفصّلة ومنسّقة"
       },

@@ -12,8 +12,9 @@
  * item titles and the eleven items are the Protocol's checklist.
  */
 
+import { useSharedPlanSync } from '../../../../components/SharedPlanSync';
 import { UploadInput } from '../../../../components/UploadInput';
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { InfoNote } from '../../../../components/InfoNote';
 import { L } from '../../../../components/L';
@@ -60,7 +61,7 @@ export function PlanForm({
    *  promises, and the organizer cannot overwrite it. */
   governance: Record<string, string>;
 }) {
-  const canEditSection = (_n: number) => level !== 3 || editor !== 'organizer';
+  const canEditSection = (_n: number) => editor !== 'organizer';
   const canEditMedical = editor !== 'organizer';
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -83,6 +84,22 @@ export function PlanForm({
   const [baseVersion, setBaseVersion] = useState(initial?.version ?? 0);
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const dirty = useRef(false);
+  const newerPlan = useSharedPlanSync(eventId, baseVersion, dirty, pending || uploading);
+
+  useEffect(() => {
+    if (dirty.current || pending || uploading || (initial?.version ?? 0) <= baseVersion) return;
+    setMode(initial?.mode ?? 'write');
+    setSections(initial?.sections ?? {});
+    setMi(initial?.majorIncident ?? {});
+    setAttachedFile(initial?.attachedFile ?? '');
+    setRefConfirmed(initial?.refConfirmed ?? false);
+    setRefAdmitsChildren(initial?.refAdmitsChildren ?? false);
+    setRefTemporaryAreas(initial?.refTemporaryAreas ?? false);
+    setBaseVersion(initial?.version ?? 0);
+    setSaved(false);
+  }, [initial, baseVersion, pending, uploading]);
+
   const doneCount = useMemo(
     () =>
       sectionsDef.filter((s) => {
@@ -93,8 +110,7 @@ export function PlanForm({
   );
 
   // WHAT IS STILL OUTSTANDING, on the button (partner ruling, 2026-09-05). The
-  // plan counts as complete only when every section is addressed and, at Level 2
-  // and 3, every major-incident item is ticked -- that rule already gates FILING
+  // plan counts as complete only when every section is addressed and, at Level 3, every major-incident item is ticked -- that rule already gates FILING
   // (lib/rules/submission.ts planIsComplete). It was simply invisible here. Save
   // still works at any time: a plan is written over sessions and each save keeps
   // its version.
@@ -120,6 +136,7 @@ export function PlanForm({
         if ('ok' in result) {
           setBaseVersion(result.version);
           setSaved(true);
+          dirty.current = false;
           if (nextSection !== undefined) setOpen(nextSection);
           router.refresh();
         } else setSaveError(result.error);
@@ -128,7 +145,10 @@ export function PlanForm({
   };
 
   return (
-    <div style={{ maxWidth: 860 }}>
+    <fieldset disabled={pending || uploading} onClickCapture={e => {
+      if ((e.target as HTMLElement).closest('button[aria-pressed], button[data-region="sections-all"], button[data-region="mi-all"]')) { dirty.current = true; setSaved(false); }
+    }} onChangeCapture={() => { dirty.current = true; setSaved(false); }} style={{ maxWidth: 860, border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+      {newerPlan && <p role="status"><L en="The medical team saved a newer version. Your unsaved changes are still here. Reload the page to use the latest plan." ar="حفظ الفريق الطبي نسخة أحدث. تغييراتكم غير المحفوظة ما زالت هنا. أعيدوا تحميل الصفحة لاستخدام أحدث خطة." /></p>}
       {/* THE TWO ROUTES, ONE LINE: write here or attach. */}
       <div data-region="plan-route" role="group" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBlockEnd: 20 }}>
         {(
@@ -140,22 +160,22 @@ export function PlanForm({
           <button
             key={which}
             type="button"
-            disabled={level === 3 && editor === 'organizer'}
+            disabled={editor === 'organizer'}
             aria-pressed={mode === which}
-            onClick={() => setMode(which)}
+            onClick={() => { dirty.current = true; setSaved(false); setMode(which); }}
             style={{ height: 40, paddingInline: 18, border: `1px solid ${mode === which ? 'var(--brand)' : 'var(--line)'}`, background: mode === which ? 'var(--brand-soft)' : 'var(--bg)', color: mode === which ? 'var(--brand)' : 'var(--ink)', borderRadius: 20, fontSize: 14, cursor: 'pointer' }}
           >
             <L en={en} ar={ar} />
           </button>
         ))}
-        {level === 3 && editor === 'organizer' && initial ? <InfoNote><L en="The Medical Director manages the plan format. A replacement file needs a new medical review." ar="يحدّد المدير الطبي صيغة الخطة. يحتاج الملف البديل إلى مراجعة طبية جديدة." /></InfoNote> : null}
+        {editor === 'organizer' && initial ? <InfoNote><L en="The Medical Director manages the plan format. A replacement file needs a new medical review." ar="يحدّد المدير الطبي صيغة الخطة. يحتاج الملف البديل إلى مراجعة طبية جديدة." /></InfoNote> : null}
       </div>
 
       {mode === 'attach' ? (
         <div data-region="plan-attach" style={{ padding: '18px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20 }}>
           <UploadInput
             accept={acceptAttribute()}
-            disabled={uploading || (level === 3 && editor === 'organizer')}
+            disabled={uploading || (editor === 'organizer')}
             onChange={(e) => {
               const chosen = e.target.files?.[0];
               if (!chosen) return;
@@ -170,12 +190,13 @@ export function PlanForm({
                   if ('ok' in result) {
                     setAttachedFile(result.fileName);
                     setBaseVersion(result.version);
-                    if (level === 3 && editor === 'organizer') {
+                    if (editor === 'organizer') {
                       setSections(prev => ({ ...prev, [String(GOVERNANCE_LANDING.incidentSection)]: {} }));
                       setMi({});
                     }
                     setSaved(false);
-                    router.refresh();
+                    // Preserve any unsaved section text after uploading.
+                    dirty.current = true;
                   } else {
                     setUploadRefusal({ en: result.en, ar: result.ar });
                   }
@@ -463,6 +484,6 @@ export function PlanForm({
           <L en="Save the plan — complete" ar="حفظ الخطة — مكتملة" />
         )}
       </button>
-    </div>
+    </fieldset>
   );
 }

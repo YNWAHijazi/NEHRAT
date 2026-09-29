@@ -413,7 +413,7 @@
     }
   },
   "reviewPlan": {
-    "$comment": "The plan panel on the submission review, verbatim from the reference. For a slice the review screen carried no plan at all -- the same unlocated exception that hid the attestation gate called this panel a summary of organizer content. The reviewer reads the plan AS SUBMITTED, in place; nothing here is editable. Section states derive from the stored plan: a written section with text, or an attach-mode section the organizer confirmed, is addressed; 'partly addressed' exists in the reference's showcase but is not derivable from stored data and is deliberately not invented.",
+    "$comment": "Latest shared medical plan, read-only. Saved content is not a Ministry approval. The screen identifies the last editor and changes since filing.",
     "titleEn": "Event health and medical plan",
     "titleAr": "خطة التأهب الصحي والطبي للفعالية",
     "versionWrittenEn": "Version {v} · written in the platform · {n} sections",
@@ -428,12 +428,12 @@
     "miLabelAr": "خطة الحوادث الجسيمة — أحد عشر بنداً",
     "states": {
       "done": {
-        "en": "Addressed",
-        "ar": "مُعالَج"
+        "en": "Provided",
+        "ar": "مقدّم"
       },
       "open": {
-        "en": "Not addressed",
-        "ar": "غير مُعالَج"
+        "en": "Not provided",
+        "ar": "غير مقدّم"
       }
     }
   },
@@ -462,8 +462,8 @@
     "titleAr": "إجابات التقييم",
     "noneEn": "No assessment answers are stored against this record.",
     "noneAr": "لا إجابات تقييم مخزَّنة على هذا السجل.",
-    "inputsLabelEn": "Structured inputs",
-    "inputsLabelAr": "المدخلات المهيكلة",
+    "inputsLabelEn": "Event facts",
+    "inputsLabelAr": "تفاصيل الفعالية",
     "unsetEn": "Not set",
     "unsetAr": "غير محدَّد",
     "versionLabelEn": "Scored against",
@@ -474,8 +474,8 @@
         "ar": "أعلى حضور متزامن متوقَّع"
       },
       "eventDisciplines": {
-        "en": "Disciplines",
-        "ar": "الاختصاصات"
+        "en": "Activities",
+        "ar": "الأنشطة"
       },
       "courseDistanceKm": {
         "en": "Course distance (km)",

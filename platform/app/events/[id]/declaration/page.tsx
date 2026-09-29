@@ -1,3 +1,4 @@
+import { MedicalPlanTask } from '../../../../components/MedicalPlanTask';
 import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
@@ -202,7 +203,7 @@ export default async function DeclarationPage({
 
           {confirmed ? (
             <div style={{ marginBlockStart: 32 }}>
-              {invitation.eventLevel === 3 ? <a href={`/events/${id}/plan`} style={{ display: 'block', marginBlock: 16 }}><L en="Prepare the medical plan" ar="إعداد الخطة الطبية" /></a> : null}
+              <MedicalPlanTask eventId={id} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} />
               <SharedDocuments eventId={id} token={invitation.token} />
             </div>
           ) : null}

@@ -79,12 +79,8 @@ test("requirements have no continue links and medical tasks follow the role", as
   await expect(page.getByRole("link", { name: /^Continue to/ })).toHaveCount(0);
   await page.goto("/events/EV-0418/plan");
   await expect(page.locator("[data-region=major-incident]")).toHaveCount(0);
-  await expect(
-    page.getByText(
-      "I have read the recommendation to prepare for a major incident. This is optional for Level 2.",
-      { exact: true },
-    ),
-  ).toBeVisible();
+  await expect(page.locator('[data-region=plan-readonly]')).toBeVisible();
+  await expect(page.getByText('Recommended — not required to submit', { exact: true })).toBeVisible();
   await page.goto("/events/EV-0362/requirements");
   const medicalPlan=page.locator('[data-document=plan]');await medicalPlan.locator('summary').click();
   await expect(medicalPlan).toContainText('Completed by the Medical Director or EMS agency.');

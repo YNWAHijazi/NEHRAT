@@ -88,6 +88,10 @@
     {
       "phrase": "approved first-response agency",
       "why": "PAD: an agency the Ministry has approved to respond. Not a determination on a submission."
+    },
+    {
+      "phrase": "prepared and approved by the Event Medical Director",
+      "why": "Revised Annex B supplied 2026-09-29: medical plan approval by its Medical Director, not a Ministry application outcome."
     }
   ]
 }

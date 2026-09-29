@@ -1,3 +1,7 @@
+import { EXTRA_DISCIPLINES } from '../../../../lib/rules/event-labels';
+import { ReviewFileSummary, ReviewMedicalAnswers } from '../../../../components/ReviewEvidence';
+import { reviewEvidenceFor } from '../../../../lib/review-evidence';
+import { planRequirement, planSectionsForLevel } from '../../../../lib/rules/plan-responsibility';
 import { InfoNote } from '../../../../components/InfoNote';
 import { notFound } from 'next/navigation';
 import { getDb } from '../../../../lib/db';
@@ -27,7 +31,6 @@ import {
   MAJOR_INCIDENT_ITEMS,
   bilingualMap,
   MINISTRY_CONTENT,
-  PLAN_SECTIONS,
   NEHRAT_TOOL_VERSION,
   attestationEmptyBody,
   attestationRows,
@@ -87,9 +90,12 @@ export default async function SubmissionReviewPage({
   const attSummary = attRows.length > 0 ? attestationSummary(attRows) : null;
   const AP = ATTESTATIONS_CONTENT.panel;
   const mayAttest = can(account.role, 'recordAttestation');
-  // The plan AS SUBMITTED, readable in place. For a slice this screen carried no plan
+  // The latest shared plan, readable in place. For a slice this screen carried no plan
   // at all -- the reviewer recorded outcomes about a document they could not see.
   const plan = planForReview(id);
+  const evidence = reviewEvidenceFor(account, id);
+  const requiredPlan = planRequirement(review.level, measures.some(m => m.catalogKey === 'plan' && !m.clearedAt));
+  const planSections = planSectionsForLevel(review.level);
   const RP = MINISTRY_CONTENT.reviewPlan;
   const AA = MINISTRY_CONTENT.assessmentAnswers;
   const SI = MINISTRY_CONTENT.scheduleInspection;
@@ -123,10 +129,11 @@ export default async function SubmissionReviewPage({
   const reportRequirement = postEventReportRequired({
     finalLevel: review.level,
     seriousIncidentNotified: reportFacts.seriousIncidentNotified,
+    reportableEventRecorded: reportFacts.reportableEventRecorded,
     ministryRequested: reportFacts.ministryRequested,
   });
   const mayInspect = can(account.role, 'scheduleInspection');
-  const catalog = review.level ? documentsForLevel(review.level) : [];
+  const catalog = review.level ? documentsForLevel(review.level, measures.some(m => m.catalogKey === 'plan' && !m.clearedAt)) : [];
 
   /**
    * Who holds an action this account does not. The control being ABSENT is correct
@@ -145,18 +152,6 @@ export default async function SubmissionReviewPage({
     );
   };
 
-  const STATUS_CHIP: Record<string, { en: string; ar: string; bg: string; color: string }> = {
-    nominated: { en: 'Nominated — unanswered', ar: 'مُسمّى — دون إجابة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
-    confirmed: { en: 'Confirmed', ar: 'مؤكَّد', bg: 'var(--brand-soft)', color: 'var(--brand)' },
-    declined: { en: 'Declined', ar: 'معتذِر', bg: 'var(--bad-soft)', color: 'var(--bad)' },
-    withdrawn: { en: 'Withdrawn by the organizer', ar: 'سحبه المنظّم', bg: 'var(--surface)', color: 'var(--muted)' },
-    removed: { en: 'Removed by the organizer', ar: 'أزاله المنظّم', bg: 'var(--surface)', color: 'var(--muted)' },
-  };
-  const DECL_CHIP: Record<string, { en: string; ar: string; bg: string; color: string }> = {
-    none: { en: 'No declaration', ar: 'لا إقرار', bg: 'var(--surface2)', color: 'var(--muted)' },
-    draft: { en: 'Draft — not signed', ar: 'مسودة — غير موقّعة', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' },
-    signed: { en: 'Signed', ar: 'موقّع', bg: 'var(--brand-soft)', color: 'var(--brand)' },
-  };
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry/queue', en: 'Review queue', ar: 'قائمة المراجعة' }}>
@@ -221,6 +216,16 @@ export default async function SubmissionReviewPage({
           </form>
         ) : null}
       </div>
+
+      <nav aria-label="Review sections" style={{ display: 'flex', flexWrap: 'wrap', gap: 18, marginBlockEnd: 22 }}>
+        <a href="#review-file"><L en="Application" ar="الطلب" /></a>
+        <a href="#review-medical-team"><L en="Medical team" ar="الفريق الطبي" /></a>
+        <a href="#review-documents"><L en="Documents" ar="المستندات" /></a>
+        <a href="#review-assessment"><L en="Assessment" ar="التقييم" /></a>
+        <a href="#review-medical-plan"><L en="Medical plan" ar="الخطة الطبية" /></a>
+        <a href="#review-decision"><L en="Review and decision" ar="المراجعة والقرار" /></a>
+      </nav>
+      {evidence && <ReviewFileSummary evidence={evidence} />}
 
       {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --
           never a bare level chip. A seeded submission without stored answers says so. */}
@@ -292,41 +297,7 @@ export default async function SubmissionReviewPage({
 
       <div data-split="" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 20, alignItems: 'start' }}>
         <div>
-          <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
-            <L en="Event EMS Agencies" ar="جهات الإسعاف في الفعالية" />
-          </h2>
-          <div data-region="providers" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 28 }}>
-            {review.providers.map((p) => {
-              const chip = DECL_CHIP[p.declaration] ?? DECL_CHIP['none']!;
-              // Every state, DISTINCT: a declined or removed party must not render
-              // like a confirmed one -- the reviewer reads who actually stands.
-              const st = STATUS_CHIP[p.status] ?? STATUS_CHIP['nominated']!;
-              const closed = p.status === 'withdrawn' || p.status === 'removed' || p.status === 'declined';
-              return (
-                <div key={p.nameEn} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px ${closed ? 'dashed var(--line)' : p.declaration === 'signed' ? 'solid var(--brand)' : 'dashed var(--accent-ink)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '14.5px', color: closed ? 'var(--muted)' : 'var(--ink)' }}>
-                    <L en={p.nameEn} ar={p.nameAr} />
-                  </span>
-                  <span style={{ display: 'flex', gap: 8, flex: 'none', alignItems: 'center' }}>
-                    <span style={{ padding: '3px 9px', borderRadius: 999, background: st.bg, color: st.color, fontSize: '12.5px' }}>
-                      <L en={st.en} ar={st.ar} />
-                    </span>
-                    {review.level === 3 && !closed ? (
-                      <span style={{ padding: '3px 9px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: '12.5px' }}>
-                        <L en={chip.en} ar={chip.ar} />
-                        {p.signedAt ? <span style={{ fontVariantNumeric: 'tabular-nums' }}> · {p.signedAt}</span> : null}
-                      </span>
-                    ) : null}
-                  </span>
-                </div>
-              );
-            })}
-            {review.providers.length === 0 ? (
-              <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en="No providers named." ar="لا مزوّدين مُسمّين." />
-              </div>
-            ) : null}
-          </div>
+          <div data-region="providers">{evidence && <ReviewMedicalAnswers evidence={evidence} level={review.level} />}</div>
 
           {/* What was ATTACHED -- THE FILE, not the name. The storage decision is
               taken: the reviewer opens the route map here. Rows seeded before the
@@ -334,7 +305,7 @@ export default async function SubmissionReviewPage({
           <h2 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
             <L en="Attached documents" ar="المستندات المرفقة" />
           </h2>
-          <div data-region="review-attachments" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 28 }}>
+          <div id="review-documents" data-region="review-attachments" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 28 }}>
             {attachments.map((a) => {
               const doc = catalogueEntry(a.docKey);
               return (
@@ -434,7 +405,7 @@ export default async function SubmissionReviewPage({
               organizer actually declared. A reviewer checking whether a level is
               right needs the inputs, not only the conclusion -- the same reason
               the Ministry now opens documents rather than reading their names. */}
-          <div data-region="assessment-answers" style={{ marginBlockEnd: 28 }}>
+          <div id="review-assessment" data-region="assessment-answers" style={{ marginBlockEnd: 28 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 14px' }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en={AA.titleEn} ar={AA.titleAr} />
@@ -512,7 +483,9 @@ export default async function SubmissionReviewPage({
                           <L en={label.en} ar={label.ar} />
                         </span>
                         <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                          {typeof raw === 'boolean' ? (
+                          {key === 'eventDisciplines' && Array.isArray(raw) ? (
+                            raw.length ? raw.map((key, index) => { const label = EXTRA_DISCIPLINES.find(d => d.key === key); return <span key={String(key)}>{index > 0 ? ', ' : ''}{label ? <L en={label.en} ar={label.ar} /> : String(key).replaceAll('_', ' ')}</span>; }) : <L en="None listed" ar="لم تُذكر أنشطة" />
+                          ) : typeof raw === 'boolean' ? (
                             <L en={raw ? AA.yesEn : AA.noEn} ar={raw ? AA.yesAr : AA.noAr} />
                           ) : value === null || value === '' ? (
                             <L en={AA.unsetEn} ar={AA.unsetAr} />
@@ -530,7 +503,7 @@ export default async function SubmissionReviewPage({
 
           {/* The plan the outcome concerns -- the OTHER panel the same Slice 6
               exception hid. Read-only; nothing the Ministry can edit. */}
-          <div data-region="review-plan" style={{ marginBlockEnd: 28 }}>
+          <div id="review-medical-plan" data-region="review-plan" style={{ marginBlockEnd: 28 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', margin: '0 0 14px' }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.02em' }}>
                 <L en={RP.titleEn} ar={RP.titleAr} />
@@ -539,8 +512,8 @@ export default async function SubmissionReviewPage({
                 <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
                   {plan.mode === 'write' ? (
                     <L
-                      en={RP.versionWrittenEn.replace('{v}', String(plan.version)).replace('{n}', String(PLAN_SECTIONS.length))}
-                      ar={RP.versionWrittenAr.replace('{v}', String(plan.version)).replace('{n}', String(PLAN_SECTIONS.length))}
+                      en={RP.versionWrittenEn.replace('{v}', String(plan.version)).replace('{n}', String(planSections.length))}
+                      ar={RP.versionWrittenAr.replace('{v}', String(plan.version)).replace('{n}', String(planSections.length))}
                     />
                   ) : (
                     <L
@@ -551,14 +524,20 @@ export default async function SubmissionReviewPage({
                 </span>
               ) : null}
             </div>
+            <p data-region="review-plan-requirement"><L
+              en={requiredPlan === 'notRequired' ? 'Not required for this level.' : requiredPlan === 'recommended' ? 'Recommended — not required to submit.' : 'Required — completed by the Medical Director or EMS agency.'}
+              ar={requiredPlan === 'notRequired' ? 'غير مطلوبة لهذا المستوى.' : requiredPlan === 'recommended' ? 'موصى بها — ليست شرطاً للتقديم.' : 'مطلوبة — يعدّها المدير الطبي أو جهة الإسعاف.'}
+            /></p>
+            {plan && <p style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Latest saved plan" ar="آخر خطة محفوظة" /> · {plan.updatedAt}{evidence?.planEditor ? <> · {evidence.planEditor.name}</> : null}</p>}
+            {evidence?.planChangedSinceFiling && <p data-region="plan-changed-after-filing" style={{ background: 'var(--accent-soft)', padding: 12, borderRadius: 8 }}><L en="This plan changed after the application was submitted. Review the updated answers." ar="تغيّرت هذه الخطة بعد تقديم الطلب. راجعوا الإجابات المحدّثة." /></p>}
             {!plan ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en={RP.noPlanEn} ar={RP.noPlanAr} />
+                {requiredPlan !== 'notRequired' && <L en={RP.noPlanEn} ar={RP.noPlanAr} />}
               </div>
             ) : (
               <>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 16 }}>
-                  {PLAN_SECTIONS.map((sec) => {
+                  {planSections.map((sec) => {
                     const done = sectionAddressed(sec.n);
                     const st = done ? RP.states.done : RP.states.open;
                     const color = done ? 'var(--brand)' : 'var(--bad)';
@@ -602,7 +581,7 @@ export default async function SubmissionReviewPage({
                     />
                   </div>
                 ) : null}
-                <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
+                {review.level === 3 && <><div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
                   <L en={RP.miLabelEn} ar={RP.miLabelAr} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
@@ -624,7 +603,7 @@ export default async function SubmissionReviewPage({
                       </div>
                     );
                   })}
-                </div>
+                </div></>}
               </>
             )}
           </div>
@@ -1018,7 +997,7 @@ export default async function SubmissionReviewPage({
           </div>
         </div>
 
-        <div data-action-panel="determinations">
+        <div id="review-decision" data-action-panel="determinations">
           {!mayRecord ? <OwnerNote panel="determinations" /> : null}
 
           {/* WHAT STANDS, once anything does. The three radios used to remain live

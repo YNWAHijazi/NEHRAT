@@ -7,7 +7,7 @@ test('organizer prepares one document at a time', async ({ page }) => {
   await gotoRidingRestarts(page, '/events/EV-0418/requirements');
   const plan = page.locator('[data-document="plan"]');
   const map = page.locator('[data-document="siteMap"]');
-  await expect(plan).toHaveAttribute('open');
+  await expect(plan).not.toHaveAttribute('open');
   await map.locator(':scope > summary').click();
   await expect(map).toHaveAttribute('open');
   await expect(plan).not.toHaveAttribute('open');

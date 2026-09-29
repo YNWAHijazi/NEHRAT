@@ -21,8 +21,8 @@ describe("the Director's requirements, derived from the matrix", () => {
   // Pinned through requirementsForParty — the one derivation every counterparty
   // surface reads since the directorRequirements wrapper was deleted with the
   // requirement cards it fed (partner ruling, counterparty pass 2026-09-02).
-  it('names five requirements at Level 3', () => {
-    expect(requirementsForParty(3, 'D').map((r) => r.n)).toEqual([8, 12, 15, 16, 19]);
+  it('names the six revised Director requirements at Level 3', () => {
+    expect(requirementsForParty(3, 'D').map((r) => r.n)).toEqual([8, 12, 15, 16, 2, 19]);
   });
 
   it('requirement 15 is the only sole row -- no other party is named against it', () => {
@@ -33,12 +33,12 @@ describe("the Director's requirements, derived from the matrix", () => {
 
   it('shared rows carry the other parties, computed not written', () => {
     const r16 = requirementsForParty(3, 'D').find((r) => r.n === 16);
-    expect(r16?.partyKeys).toEqual(['E', 'D']);
-    expect(requirementsForParty(2, 'O').some(r => r.n === 16)).toBe(false);
+    expect(r16?.partyKeys).toEqual(['O', 'E', 'M', 'D']);
+    expect(requirementsForParty(2, 'O').some(r => r.n === 16)).toBe(true);
   });
 
-  it('is EMPTY below Level 3 -- the role does not exist there', () => {
-    expect(requirementsForParty(2, 'D')).toEqual([]);
+  it('Level 2 permits optional Director plan preparation; Level 1 has none', () => {
+    expect(requirementsForParty(2, 'D').map(r => r.n)).toEqual([2]);
     expect(requirementsForParty(1, 'D')).toEqual([]);
   });
 });
@@ -94,20 +94,20 @@ describe('the nomination offers all three responses to both kinds', () => {
 });
 
 describe('a nominated party sees their own requirements, derived not described', () => {
-  it('the Level 3 Director carries five rows, and requirement 15 is theirs alone', () => {
+  it('the Level 3 Director carries six rows, and requirement 15 is theirs alone', () => {
     // The prose said "four are shared with the organizer and the providers, one is
     // yours alone" and happened to be right. This makes it true BY DERIVATION: if the
     // Ministry re-issues the matrix, the screen follows instead of the sentence
     // quietly going stale.
     const rows = requirementsForParty(3, 'D');
-    expect(rows.map((r) => r.n)).toEqual([8, 12, 15, 16, 19]);
+    expect(rows.map((r) => r.n)).toEqual([8, 12, 15, 16, 2, 19]);
     expect(rows.filter((r) => r.sole).map((r) => r.n)).toEqual([15]);
   });
 
-  it('no Director row exists below Level 3 -- absent, not empty', () => {
+  it('the optional Level 2 plan is the only lower-level Director row', () => {
     // Non-negotiable 10: what never applies is absent entirely.
     expect(requirementsForParty(1, 'D')).toEqual([]);
-    expect(requirementsForParty(2, 'D')).toEqual([]);
+    expect(requirementsForParty(2, 'D').map(r => r.n)).toEqual([2]);
   });
 
   it('the EMS provider carries the readiness declaration at Level 3 and not below', () => {

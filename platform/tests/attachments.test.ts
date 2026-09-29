@@ -10,7 +10,7 @@
  * defect family as a guard that names its inputs.
  */
 import { describe, expect, it } from 'vitest';
-import { documentsForLevel } from '../lib/rules';
+import { documentsForLevel, catalogueEntry } from '../lib/rules';
 import { DOCUMENT_STATE_KEYS } from '../lib/queries';
 
 describe('every catalogue document has a state', () => {
@@ -34,16 +34,8 @@ describe('every catalogue document has a state', () => {
   });
 
   it('and answers for nothing that is not in the catalogue', () => {
-    // The other direction: a state key with no catalogue document is a rule nobody
-    // reads, and it hides the fact that a document was renamed rather than added.
-    //
-    // The UNION of all three levels, not level 3 alone: `arrangements` is a Level 1
-    // document that the plan supersedes higher up, so it is absent from the level-3
-    // catalogue and present in the map for good reason.
-    const catalogue = new Set(
-      ([1, 2, 3] as const).flatMap((l) => documentsForLevel(l).map((d) => d.key)),
-    );
-    const orphans = DOCUMENT_STATE_KEYS.filter((k) => !catalogue.has(k));
+    // Historical keys remain readable after retirement, but never block new filing.
+    const orphans = DOCUMENT_STATE_KEYS.filter((k) => catalogueEntry(k) === null);
     expect(orphans).toEqual([]);
   });
 });

@@ -15,6 +15,7 @@ import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification'
 import { eventGateContext } from '../lib/event-gate-context';
 import { seriousIncidentGate, postEventReportGate } from '../lib/rules/gates';
 import { deliverPasswordReset } from '../lib/password-reset';
+import { derivedLevelFor } from '../lib/queries';
 import { planAccess, mayEditEventDocument } from '../lib/plan-access';
 import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
@@ -638,6 +639,7 @@ export async function uploadPlanFileAction(
   });
   if (savedVersion === null) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
   revalidatePath(`/events/${eventId}/plan`);
+  revalidatePath(`/events/${eventId}/medical-team`);
   revalidatePath(`/events/${eventId}/requirements`);
   return { ok: true, fileName: file.name.trim(), version: savedVersion };
 }
@@ -754,6 +756,7 @@ export async function savePlanAction(eventId: string, payload: PlanPayload): Pro
   });
   if (version === null) return { error: 'conflict' };
   revalidatePath(`/events/${eventId}/plan`);
+  revalidatePath(`/events/${eventId}/medical-team`);
   revalidatePath(`/events/${eventId}/requirements`);
   return { ok: true, version };
 }
@@ -1865,7 +1868,7 @@ function directorFor(accountId: number, eventId: string): boolean {
 export async function saveGovernanceAction(eventId: string, formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (!directorFor(account.id, eventId)) redirect('/dashboard');
+  if (account.role !== 'director' || derivedLevelFor(eventId) !== 3 || !planAccess(account, eventId)?.canEdit) redirect('/dashboard');
   refuseIfArchived(eventId);
   const sections: Record<string, string> = {};
   for (const key of ['clinical', 'command', 'incidentRole']) {

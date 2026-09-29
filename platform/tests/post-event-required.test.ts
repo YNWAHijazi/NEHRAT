@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { postEventReportRequired } from '../lib/rules/gates';
+import { hasReportableEvent, postEventReportRequired } from '../lib/rules/gates';
 
 describe('who owes a post-event report', () => {
   it('Level 3 always (2a), and the limb says so', () => {
@@ -30,10 +30,10 @@ describe('who owes a post-event report', () => {
     }
   });
 
-  it('none of the three: not required, in those words', () => {
+  it('without recorded incidents, states the condition rather than ruling out reporting', () => {
     const r = postEventReportRequired({ finalLevel: 2, seriousIncidentNotified: false, ministryRequested: false });
     expect(r).toMatchObject({ required: false, limb: null });
-    expect(r.en).toBe('Not needed for this event.');
+    expect(r.en).toContain('if a reportable incident occurred');
   });
 
   it('the limbs name themselves in the instrument’s order: level, then reportable, then request', () => {
@@ -41,3 +41,14 @@ describe('who owes a post-event report', () => {
     expect(postEventReportRequired({ finalLevel: 2, seriousIncidentNotified: true, ministryRequested: true }).limb).toBe('reportable');
   });
 });
+
+
+  it('hospital transport and unplanned resources trigger reporting at Levels 1 and 2', () => {
+    for (const key of ['patientsTransported', 'cardiacArrests', 'deaths', 'unplannedResources']) {
+      expect(hasReportableEvent({[key]: '1'}, {})).toBe(true);
+      expect(hasReportableEvent({[key]: '0'}, {})).toBe(false);
+    }
+    for (const key of ['hospitalTransport', 'cardiacArrest', 'death', 'majorIncident', 'interrupted', 'terminated', 'unplannedRequest']) expect(hasReportableEvent({}, {[key]: true})).toBe(true);
+    expect(hasReportableEvent({patientsTreated:'2'}, {none:true})).toBe(false);
+    for (const level of [1,2] as const) expect(postEventReportRequired({finalLevel:level,seriousIncidentNotified:false,reportableEventRecorded:true,ministryRequested:false})).toMatchObject({required:true,limb:'reportable'});
+  });

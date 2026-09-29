@@ -38,7 +38,7 @@ test.describe('the outcome gate', () => {
     await expect(plan).toContainText('Event health and medical plan');
     await expect(plan).toContainText('Major-incident and mass-casualty plan — eleven items');
     // EV-0362's seeded plan addresses all sixteen and confirms all eleven.
-    await expect(plan.locator('text=Not addressed')).toHaveCount(0);
+    await expect(plan.getByText('Not provided', {exact:true})).toHaveCount(0);
     // Read-only: no form, no input, nothing the Ministry can edit.
     await expect(plan.locator('form, input, textarea, button')).toHaveCount(0);
 

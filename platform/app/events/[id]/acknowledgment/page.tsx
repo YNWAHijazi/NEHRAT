@@ -5,13 +5,15 @@ import { L } from '../../../../components/L';
 import { PrintButton } from '../../../../components/PrintButton';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
+  addedMeasuresFor,
+  documentStateFor,
   assessmentsFor,
   attachmentsFor,
   eventFor,
   submissionFor,
   unreadCountFor,
 } from '../../../../lib/queries';
-import { documentsForLevel, type Level } from '../../../../lib/rules';
+import { catalogueEntry, documentsForLevel, type Level } from '../../../../lib/rules';
 import { PrintBar } from './PrintBar';
 
 const upLabel: React.CSSProperties = {
@@ -41,15 +43,22 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
   const filed = submission?.filedAt != null && event.mophReference != null;
   const attachments = attachmentsFor(account.id, id);
 
+  const state = documentStateFor(account.id, id, level ?? 1);
+  const currentDocs = documentsForLevel((level ?? 1) as Level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
   const receivedDocs = filed
-    ? documentsForLevel((level ?? 1) as Level)
-        .filter((d) => !d.optional)
+    ? currentDocs
+        .filter((d) => !d.optional || state[d.key])
         .map((d) => ({
           en: d.en,
           ar: d.ar,
           when: attachments.find((a) => a.docKey === d.key)?.attachedAt.slice(0, 10) ?? submission?.filedAt?.slice(0, 10) ?? '',
         }))
     : [];
+  // Keep retired document names on receipts when a file was actually submitted.
+  if (filed) for (const attachment of attachments) {
+    const entry = catalogueEntry(attachment.docKey);
+    if (entry && !currentDocs.some(d => d.key === attachment.docKey)) receivedDocs.push({ en: entry.en, ar: entry.ar, when: attachment.attachedAt.slice(0, 10) });
+  }
 
   return (
     <>

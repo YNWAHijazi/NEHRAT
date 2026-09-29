@@ -1,3 +1,4 @@
+import { MedicalPlanTask } from '../../../components/MedicalPlanTask';
 import { getDb } from '../../../lib/db';
 import { attachDocumentAction } from '../../actions';
 import { UploadInput } from '../../../components/UploadInput';
@@ -48,8 +49,7 @@ export function DirectorEventView({
 
   const stateOf = (key: string): { en: string; ar: string; bg: string; color: string } => {
     const v = governance[key]?.trim() ?? '';
-    if (v.length > 120) return { en: 'Written', ar: 'مكتوب', bg: 'var(--brand-soft)', color: 'var(--brand)' };
-    if (v.length > 0) return { en: 'Started', ar: 'بُدئ', bg: 'var(--accent-soft)', color: 'var(--accent-ink)' };
+    if (v.length > 0) return { en: 'Saved', ar: 'محفوظ', bg: 'var(--brand-soft)', color: 'var(--brand)' };
     return { en: 'Not written', ar: 'غير مكتوب', bg: 'var(--bad-soft)', color: 'var(--bad)' };
   };
 
@@ -105,9 +105,9 @@ export function DirectorEventView({
 
           {confirmed ? (
             <>
-              {invitation.eventLevel === 3 ? <Link data-region="director-plan" href={`/events/${invitation.eventId}/plan`} style={{ display: 'inline-flex', padding: '13px 22px', background: 'var(--brand)', color: 'var(--bg)', borderRadius: 24, marginBlockEnd: 20 }}><L en="Prepare the medical plan" ar="إعداد الخطة الطبية" /></Link> : null}
+              <div data-region="director-plan"><MedicalPlanTask eventId={invitation.eventId} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} /></div>
               {invitation.eventLevel === 3 ? <section style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}><h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>{hasMap ? <a href={`/api/documents/${invitation.eventId}/deploymentMap`} target="_blank" rel="noreferrer"><L en="View uploaded map" ar="عرض الخريطة المرفوعة" /></a> : null}<form action={attachDocumentAction.bind(null, invitation.eventId)}><input type="hidden" name="docKey" value="deploymentMap" /><input type="hidden" name="returnTo" value={`/events/${invitation.eventId}/plan`} /><UploadInput name="file" required accept={acceptAttribute()} /><button type="submit"><L en="Upload map" ar="رفع الخريطة" /></button></form></section> : null}
-              <form action={saveGovernanceAction.bind(null, invitation.eventId)}>
+              {invitation.eventLevel === 3 ? <><form action={saveGovernanceAction.bind(null, invitation.eventId)}>
                 <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
                   {content.govSections.map((g) => {
                     const s = stateOf(g.key);
@@ -158,6 +158,7 @@ export function DirectorEventView({
                   <L en="Open the post-event report" ar="فتح التقرير اللاحق" />
                 </Link>
               </div>
+            </> : null}
             </>
           ) : null}
 

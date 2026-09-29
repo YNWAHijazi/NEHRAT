@@ -68,6 +68,7 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
   const requirement = postEventReportRequired({
     finalLevel: (assessmentsFor(account.id, id)[0]?.derivation.finalLevel ?? event.level) as Level | null,
     seriousIncidentNotified: facts.seriousIncidentNotified,
+    reportableEventRecorded: facts.reportableEventRecorded,
     ministryRequested: facts.ministryRequested,
   });
   const report = postEventReportFor(account.id, id);
@@ -187,8 +188,8 @@ export default async function PostEventPage({ params }: { params: Promise<{ id: 
               </div>
               <div style={{ fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)' }}>
                 <L
-                  en={`Due ${window?.due.date ?? ''}. Required after every Level 3 event, after a reportable event at Level 1 or 2, or on Ministry request.`}
-                  ar={`مستحق في ⁦${window?.due.date ?? ''}⁩. مطلوب بعد كل فعالية من المستوى 3، وبعد واقعة واجبة الإبلاغ في المستوى 1 أو 2، أو بطلب الوزارة.`}
+                  en={`Due ${window?.due.date ?? ''}. Required for all Level 3 events. For Levels 1 and 2, submit if anyone was transported to hospital, extra medical resources were needed, a serious incident occurred, or the Ministry asks.`}
+                  ar={`مستحق في ⁦${window?.due.date ?? ''}⁩. مطلوب لكل فعاليات المستوى 3. في المستويين 1 و2، قدّموا التقرير إذا نُقل أحد إلى المستشفى، أو طُلبت موارد طبية إضافية، أو وقع حادث جسيم، أو طلبته الوزارة.`}
                 />
               </div>
               {/* THE ANSWER FOR THIS EVENT, from the one rule -- the three limbs

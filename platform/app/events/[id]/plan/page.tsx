@@ -1,3 +1,6 @@
+import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
+import { SharedPlanSync } from '../../../../components/SharedPlanSync';
+import { planRequirement, planSectionsForLevel } from '../../../../lib/rules/plan-responsibility';
 import { InfoNote } from '../../../../components/InfoNote';
 import { planAccess } from '../../../../lib/plan-access';
 import { PLAN_DOC_KEY } from '../../../../lib/rules/uploads';
@@ -7,6 +10,7 @@ import { L } from '../../../../components/L';
 import { PlanForm } from './PlanForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
+  addedMeasuresFor,
   assessmentsFor,
   eventFor,
   facilityById,
@@ -40,7 +44,8 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
 
   const fullPlan = planFor(ownerId, id);
   const plan = fullPlan;
-  const requiredSections = PLAN_SECTIONS.filter(s => level === 3 || s.n !== GOVERNANCE_LANDING.incidentSection);
+  const requirement = planRequirement(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
+  const requiredSections = planSectionsForLevel(level);
   const facility = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
   // reference, never a copy. The shortfalls derive in lib/rules from these facts
@@ -67,7 +72,9 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
-        {level === 3 ? <div className="secondary-help"><InfoNote><L en="The Medical Director or EMS agency completes the plan. The organizer submits the package." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
+        {access.editor === 'organizer' && <EventWorkspaceNav eventId={id} active="plan" />}
+        <p><L en={requirement === 'required' ? 'Required' : requirement === 'recommended' ? 'Recommended — not required to submit' : 'No medical plan required at Level 1'} ar={requirement === 'required' ? 'مطلوبة' : requirement === 'recommended' ? 'موصى بها — ليست شرطاً لتقديم الملف' : 'لا تُطلب خطة طبية في المستوى 1'} /></p>
+        {level >= 2 ? <div className="secondary-help"><InfoNote><L en="The Medical Director or EMS agency completes the plan. The organizer submits the package." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
         {access.canEdit ? <PlanForm
           eventId={id}
           level={level}
@@ -79,11 +86,12 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           referenceFacts={referenceFacts}
           governance={governance}
         /> : <section data-region="plan-readonly">
+          <SharedPlanSync eventId={id} version={plan?.version ?? 0} />
           <p role="status"><L en="Completed by the Medical Director or EMS agency. You can view the plan here." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة. يمكنكم الاطّلاع عليها هنا."/></p>
           {!plan?<p><L en="The medical plan has not been started." ar="لم يبدأ إعداد الخطة الطبية بعد."/></p>:<>
           {plan.attachedHasFile?<a href={`/api/documents/${id}/${PLAN_DOC_KEY}`} target="_blank" rel="noreferrer"><L en="View attached plan" ar="عرض الخطة المرفقة"/></a>:null}
           {requiredSections.map(s=><details key={s.n} style={{padding:16,borderBlockEnd:'1px solid var(--line)'}}><summary>{s.n}. <L en={s.en} ar={s.ar}/></summary><p style={{whiteSpace:'pre-wrap'}}>{plan.sections[String(s.n)]?.text || <L en={plan.sections[String(s.n)]?.covered?'Covered in the attached plan':'Pending'} ar={plan.sections[String(s.n)]?.covered?'مشمول في الخطة المرفقة':'قيد الانتظار'}/>}</p></details>)}
-          <details style={{padding:16}}><summary><L en="Major-incident preparedness" ar="الاستعداد للحوادث الجسيمة"/></summary>{MAJOR_INCIDENT_ITEMS.map(i=><p key={i.n}><L en={i.en} ar={i.ar}/> — <L en={plan.majorIncident[String(i.n)]?.covered?'Complete':'Pending'} ar={plan.majorIncident[String(i.n)]?.covered?'مكتمل':'قيد الانتظار'}/></p>)}</details>
+          {level === 3 && <details style={{padding:16}}><summary><L en="Major-incident preparedness" ar="الاستعداد للحوادث الجسيمة"/></summary>{MAJOR_INCIDENT_ITEMS.map(i=><p key={i.n}><L en={i.en} ar={i.ar}/> — <L en={plan.majorIncident[String(i.n)]?.covered?'Complete':'Pending'} ar={plan.majorIncident[String(i.n)]?.covered?'مكتمل':'قيد الانتظار'}/></p>)}</details>}
           </>}
           <a href={`/events/${id}/requirements`}><L en="Back to requirements" ar="العودة إلى المتطلبات"/></a>
         </section>}

@@ -7,7 +7,7 @@
 import { organizationFor } from './auth';
 import { clockNow } from './clock';
 import { paymentFor } from './payments';
-import { beirutToday, capabilityConfigFor, documentStateFor, eventFor, invitationsFor, latestOutcomeFor, ministryConfig, submissionFor, assessmentsFor } from './queries';
+import { beirutToday, capabilityConfigFor, documentStateFor, eventFor, invitationsFor, latestOutcomeFor, ministryConfig, submissionFor, assessmentsFor, addedMeasuresFor } from './queries';
 import { applicationFee, declarationsAreComplete, effectiveFlag, eventFilingDeadline, submissionGate, type EventGateContext, type Level, type SubmissionGate } from './rules';
 
 /**
@@ -76,6 +76,7 @@ export function submissionGateFor(
 
   const gate = submissionGate({
     level,
+    planRequested: addedMeasuresFor(eventId).some(m => m.catalogKey === 'plan' && !m.clearedAt),
     lifecycle: event.lifecycle,
     organizationStatus: organization?.status ?? 'none',
     documentState,

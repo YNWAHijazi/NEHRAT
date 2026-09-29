@@ -96,15 +96,10 @@ for (const lang of LANGUAGES) {
       // BOTH RESULTS AND WHICH GOVERNED -- never the final level alone.
       await expect(page.locator('[data-region="derivation"]')).toBeVisible();
 
-      // THE PACKAGE. One attachment at Level 1, six declarations, and the
+      // THE PACKAGE. No plan attachment at Level 1; six declarations and the
       // certification -- which is part of making the submission, not decoration.
       await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-      const attach = page.locator('form:has(input[name="docKey"])').first();
-      await attach.locator('input[type="file"]').setInputFiles({
-        name: 'arrangements.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 journey'),
-      });
-      await attach.locator('button[type="submit"]').click();
-      await page.waitForLoadState('networkidle');
+      await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
 
       await gotoRidingRestarts(page, `/events/${eventId}/submit`);
       for (let i = 0; i < 6; i += 1) {

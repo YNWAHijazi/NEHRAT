@@ -1,3 +1,5 @@
+import { MedicalPlanTask } from '../../../../components/MedicalPlanTask';
+import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -39,7 +41,6 @@ export default async function ParticipationPage({
   const content = ROLES_CONTENT.ems;
   const briefing = nominationBriefing(invitation.token);
   const confirmed = invitation.status === 'confirmed';
-  const live = confirmed || invitation.status === 'nominated';
   const plan = confirmed ? nomineePlanSlice(id) : null;
 
   return (
@@ -51,7 +52,7 @@ export default async function ParticipationPage({
         <div style={{ maxWidth: 900 }}>
           {notice === 'sent' ? (
             <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="Participation confirmed. The operational detail has been sent to the organizer." ar="تأكدت المشاركة. وأُرسلت التفاصيل التشغيلية إلى المنظّم." />
+              <L en="Your arrangements have been shared with the organizer." ar="تمت مشاركة ترتيباتكم مع المنظّم." />
             </div>
           ) : null}
           {notice === 'accepted' || notice === 'registered' || notice === 'linked' ? (
@@ -90,33 +91,34 @@ export default async function ParticipationPage({
             <RespondForm token={invitation.token} kind="ems" eventLevel={invitation.eventLevel} />
           ) : null}
 
-          {live ? (
+          {confirmed && <div data-region="ems-plan"><MedicalPlanTask eventId={id} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} /></div>}
+          {confirmed ? (
             <>
               <div data-region="l2-intro" style={{ padding: '20px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 28, maxWidth: '76ch' }}>
                 <div style={{ fontSize: 15, lineHeight: 1.65 }}>
-                  <L en={content.level2Intro.en} ar={content.level2Intro.ar} />
+                  <L en="Share the arrangements your agency will provide for this event." ar="شاركوا الترتيبات التي ستوفّرها جهتكم لهذه الفعالية." />
                 </div>
               </div>
 
               <form action={saveOpsDetailAction.bind(null, invitation.token)}>
                 <div data-region="ops-detail" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
                   <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
-                    <L en="Operational detail for the organizer" ar="التفاصيل التشغيلية للمنظّم" />
+                    <L en="Your event arrangements" ar="ترتيباتكم للفعالية" />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
                     {content.level2Fields.map((f) => (
                       <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.4 }}>
-                          <L en={f.en} ar={f.ar} />
+                          <L en={f.en} ar={f.ar} />{f.helpEn && <InfoNote><L en={f.helpEn} ar={f.helpAr} /></InfoNote>}
                         </span>
-                        <input name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
+                        {f.multiline ? <textarea name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} rows={3} style={{ minHeight: 96, padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 15, resize: 'vertical' }} /> : <input name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />}
                       </label>
                     ))}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 28 }}>
                   <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
-                    <L en="Confirm participation and send to the organizer" ar="تأكيد المشاركة وإرسالها إلى المنظّم" />
+                    <L en="Share with organizer" ar="مشاركة مع المنظّم" />
                   </button>
                 </div>
               </form>
@@ -145,7 +147,7 @@ export default async function ParticipationPage({
                 </details>
               ) : null}
             </>
-          ) : (
+          ) : invitation.status === 'nominated' ? null : (
             <div style={{ padding: '20px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, fontSize: 15, lineHeight: 1.65, maxWidth: '76ch' }}>
               <L en="Your part in this event is closed. Nothing more is needed from you." ar="أُغلق دوركم في هذه الفعالية. ولا يُطلب منكم شيء بعد الآن." />
             </div>

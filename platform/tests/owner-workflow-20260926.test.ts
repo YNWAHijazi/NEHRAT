@@ -322,15 +322,16 @@ test("organizer cannot upload a Level 3 plan; confirmed EMS can replace it and h
   expect(JSON.parse(old.sections)).toEqual(before.sections);
 });
 
-test("removed medical partners cannot edit plans and lower-level organizers keep access",async()=>{
+test("removed medical partners and lower-level organizers cannot edit plans",async()=>{
  as('test_ems');const owner=Number(getDb().prepare("SELECT account_id FROM events WHERE id='EV-0362'").get()!.account_id);const old=payload(owner);
  getDb().prepare("UPDATE invitations SET status='removed' WHERE event_id='EV-0362' AND account_id=? AND kind='ems'").run(session.account!.id);
  expect(await savePlanAction('EV-0362',old)).toEqual({error:'not-authorized'});
- as('test_organizer');const low=planFor(session.account!.id,'EV-0418');expect(await savePlanAction('EV-0418',{baseVersion:low?.version??0,mode:'write',sections:{'1':{text:'Organizer Level 2 plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false})).toHaveProperty('ok',true);
+ as('test_organizer');const low=planFor(session.account!.id,'EV-0418');expect(await savePlanAction('EV-0418',{baseVersion:low?.version??0,mode:'write',sections:{'1':{text:'Organizer Level 2 plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false})).toEqual({error:'not-authorized'});
 });
 
 test('plan responsibility and organizer next steps follow the level',()=>{
- for(const level of [1,2]){expect(canPreparePlan(level,'organizer')).toBe(true);expect(canPreparePlan(level,'ems')).toBe(false);expect(canPreparePlan(level,'director')).toBe(false);}
+ for(const level of [1,2,3]) expect(canPreparePlan(level,'organizer')).toBe(false);
+ for(const role of ['ems','director'] as const){expect(canPreparePlan(1,role)).toBe(false);expect(canPreparePlan(2,role)).toBe(true);}
  expect(canPreparePlan(3,'organizer')).toBe(false);expect(canPreparePlan(3,'ems')).toBe(true);expect(canPreparePlan(3,'director')).toBe(true);
  const blocker={kind:'documentMissing' as const,docKey:'plan',itemEn:'Plan',itemAr:'الخطة'};
  expect(nextAction([blocker],3).kind).toBe('waitingOnOthers');expect(nextAction([blocker],2).kind).toBe('plan');

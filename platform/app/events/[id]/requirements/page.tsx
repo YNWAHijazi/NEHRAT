@@ -1,3 +1,5 @@
+import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
+import { SharedPlanSync } from '../../../../components/SharedPlanSync';
 import { UploadInput } from '../../../../components/UploadInput';
 import { InfoNote } from '../../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
@@ -9,6 +11,7 @@ import { InviteForm } from './InviteForm';
 import { InvitationLinkBlock } from './InvitationLinkBlock';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import {
+  planFor,
   assessmentsFor,
   attachmentsFor,
   documentStateFor,
@@ -102,14 +105,14 @@ export default async function RequirementsPage({
   const documentState = documentStateFor(account.id, id, level);
   // Only organizer uploads and the plan belong here. Generated records, provider
   // declarations, and final certification live in their respective sections.
-  const documents = documentsForLevel(level)
+  const documents = documentsForLevel(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt))
     .filter((doc) => doc.attach || doc.key === 'plan')
     .sort((a, b) => {
       const completeOrOptional = (d: { key: string; optional?: boolean }) =>
         documentState[d.key] === true || d.optional === true ? 1 : 0;
       return completeOrOptional(a) - completeOrOptional(b);
     });
-  const firstOpenDocument = documents.find((doc) => !(level === 3 && ['plan','deploymentMap'].includes(doc.key)) && !doc.optional && documentState[doc.key] !== true)?.key;
+  const firstOpenDocument = documents.find((doc) => doc.key !== 'plan' && !(level === 3 && doc.key === 'deploymentMap') && !doc.optional && documentState[doc.key] !== true)?.key;
   const attachments = attachmentsFor(account.id, id);
   const fileNames = Object.fromEntries(attachments.map((a) => [a.docKey, a.fileName]));
   const invitations = invitationsFor(account.id, id);
@@ -157,6 +160,8 @@ export default async function RequirementsPage({
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        <EventWorkspaceNav eventId={id} active="requirements" />
+        <SharedPlanSync eventId={id} version={planFor(account.id, id)?.version ?? 0} />
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
           {comparison ? <span data-region="derivation"><InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى"><L en={comparison.en} ar={comparison.ar} /></InfoNote></span> : null}
@@ -168,15 +173,14 @@ export default async function RequirementsPage({
             ar="أضيفوا مستنداتكم، وادعوا فريقكم الطبي، ثم راجعوا ملف التقديم."
           /></InfoNote>
 </h1>
-
-
+        <p data-region="organizer-guidance" style={{ margin: '0 0 22px', color: 'var(--muted)', lineHeight: 1.6 }}><L en="Add your files and invite your medical team. They complete their part here. Review everything, then submit." ar="أضيفوا ملفاتكم وادعوا فريقكم الطبي. يستكمل الفريق دوره هنا. راجعوا الملف كاملاً ثم قدّموه." /></p>
 
         <EmailDeliveryNotice status={typeof q.mail === 'string' ? q.mail : undefined} />
         <nav data-region="preparation-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBlockEnd: 32 }}>
           {[
-            { href: '#documents', en: level === 1 ? '1. Documents' : '1. Documents and plan', ar: level === 1 ? '١. المستندات' : '١. المستندات والخطة' },
-            { href: '#medical-team', en: '2. Medical team', ar: '٢. الفريق الطبي' },
-            { href: '#review', en: '3. Review and submit', ar: '٣. المراجعة والتقديم' },
+            ...(documents.length > 0 ? [{ href: '#documents', en: '1. Documents and plan', ar: '١. المستندات والخطة' }] : []),
+            { href: '#medical-team', en: documents.length > 0 ? '2. Medical team' : '1. Medical team', ar: documents.length > 0 ? '٢. الفريق الطبي' : '١. الفريق الطبي' },
+            { href: '#review', en: documents.length > 0 ? '3. Review and submit' : '2. Review and submit', ar: documents.length > 0 ? '٣. المراجعة والتقديم' : '٢. المراجعة والتقديم' },
           ].map((item) => (
             <a key={item.href} href={item.href} style={{ padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)', fontSize: 14 }}>
               <L en={item.en} ar={item.ar} />
@@ -219,7 +223,7 @@ export default async function RequirementsPage({
         ) : null}
 
         {/* Group 1 — Documents to attach */}
-        <div data-region="g1" id="documents" style={{ scrollMarginBlockStart: 24 }}>
+        {documents.length > 0 && <div data-region="g1" id="documents" style={{ scrollMarginBlockStart: 24 }}>
         <SectionHeading
           n={1}
           en={level === 1 ? "Documents" : "Documents and plan"}
@@ -247,11 +251,11 @@ export default async function RequirementsPage({
           {documents.map((doc) => {
             const done = documentState[doc.key] === true;
             const medicalMap = doc.key === 'deploymentMap' && level === 3;
-            const medicalPlan = doc.key === 'plan' && level === 3;
+            const medicalPlan = doc.key === 'plan';
             const color = done ? 'var(--success)' : doc.optional ? 'var(--muted)' : 'var(--accent-ink)';
             const chipBg = done ? 'var(--success-soft)' : doc.optional ? 'var(--surface2)' : 'var(--accent-soft)';
-            const stateEn = done ? 'Complete' : doc.optional ? 'Optional' : 'Pending';
-            const stateAr = done ? 'مكتمل' : doc.optional ? 'اختياري' : 'قيد الانتظار';
+            const stateEn = done ? 'Complete' : doc.optional ? (medicalPlan ? 'Recommended' : 'Optional') : 'Pending';
+            const stateAr = done ? 'مكتمل' : doc.optional ? (medicalPlan ? 'موصى بها' : 'اختياري') : 'قيد الانتظار';
             const fileNoteEn = fileNames[doc.key];
             const fileNoteAr = fileNames[doc.key];
             return (
@@ -346,12 +350,12 @@ export default async function RequirementsPage({
             );
           })}
         </div>
-        </div>
+        </div>}
 
         {/* Group 2 — Named EMS providers, and the invitation that belongs here (SPEC 5c) */}
         <div data-region="g2" id="medical-team" style={{ scrollMarginBlockStart: 24 }}>
         <SectionHeading
-          n={2}
+          n={documents.length > 0 ? 2 : 1}
           en="Event EMS Agencies"
           ar="جهات الإسعاف في الفعالية"
         />
@@ -452,12 +456,12 @@ export default async function RequirementsPage({
         </div>
         <div style={{ marginBlockEnd: 52 }} />
 
-        {/* The Event Medical Director: Level 3 only. Below Level 3 this block is ABSENT. */}
-        {level === 3 && commandRow ? (
+        {/* A Director is required at Level 3 and optional for a Level 2 medical plan. */}
+        {level >= 2 ? (
           <>
             <SectionHeading
-              en="Event Medical Director"
-              ar="المدير الطبي للفعالية"
+              en={level === 2 ? "Medical Director (optional)" : "Event Medical Director"}
+              ar={level === 2 ? "المدير الطبي (اختياري)" : "المدير الطبي للفعالية"}
             />
             {director ? (
               <div style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${director.status === 'confirmed' ? 'var(--brand)' : director.status === 'declined' ? 'var(--bad)' : 'var(--accent-ink)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center', marginBlockEnd: 20 }}>
@@ -466,9 +470,8 @@ export default async function RequirementsPage({
                     <L en={director.nameEn} ar={director.nameAr} />
                   </div>
                   <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
-                    <L en={commandRow.en} ar={commandRow.ar} />
-                    {' · '}
-                    <L en={commandRow.respEn} ar={commandRow.respAr} />
+                    <L en={commandRow?.en ?? "Optional at Level 2"} ar={commandRow?.ar ?? "اختياري في المستوى 2"} />
+                    {commandRow ? <> · <L en={commandRow.respEn} ar={commandRow.respAr} /></> : null}
                   </div>
                   {governance['command']?.trim() ? (
                     <div style={{ fontSize: '12.5px', color: 'var(--brand)', marginBlockStart: 6 }}>
@@ -501,7 +504,7 @@ export default async function RequirementsPage({
                     <form action={removeProviderAction.bind(null, id)} style={{ marginBlockStart: 10, padding: '12px 16px', background: 'var(--accent-soft)', borderRadius: 8, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
                       <input type="hidden" name="token" value={director.token} />
                       <span style={{ flex: '1 1 240px', minWidth: 0, fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.55 }}>
-                        {event.filed ? (
+                        {level === 2 ? <L en="The Medical Director will be notified. A replacement is optional at Level 2." ar="سيُبلَّغ المدير الطبي. تعيين بديل اختياري في المستوى 2." /> : event.filed ? (
                           <L en="The Medical Director will be notified. Report this change to the Ministry and confirm a new Director before submitting the Level 3 application again." ar="سيُبلَّغ المدير الطبي. أبلغوا الوزارة بالتغيير وأكّدوا مديراً طبياً جديداً قبل إعادة تقديم طلب المستوى 3." />
                         ) : (
                           <L en="Removing the confirmed Director is a material change: they will be notified. The Level 3 package cannot be filed without a Director." ar="إزالة المدير المؤكَّد تغيير جوهري: سيُبلَّغ. ولا يمكن تقديم ملف المستوى 3 دون مدير." />
@@ -560,22 +563,22 @@ export default async function RequirementsPage({
             </span>
           </summary>
           <div className="secondary-help"><InfoNote><L
-              en="Confirm these items when you submit your application."
-              ar="أكّدوا هذه البنود عند تقديم طلبكم."
+              en="Check the requirement and responsible person for each item."
+              ar="راجعوا المتطلب والشخص المسؤول عن كل بند."
             /></InfoNote></div>
           {[
             {
               rows: certifyGroups.everyLevel,
-              en: 'Required at every level',
-              ar: 'مطلوبة في كل المستويات',
+              en: 'Arrangements for every level',
+              ar: 'ترتيبات لكل المستويات',
               countEn: `${certifyGroups.everyLevel.length} apply at every level`,
               countAr: `${certifyGroups.everyLevel.length} تنطبق في كل المستويات`,
               tone: 'var(--muted)',
             },
             {
               rows: certifyGroups.addedOrRaised,
-              en: `Added or raised at Level ${level}`,
-              ar: `أُضيفت أو رُفعت في المستوى ${level}`,
+              en: `Additional arrangements for Level ${level}`,
+              ar: `ترتيبات إضافية للمستوى ${level}`,
               countEn: `${certifyGroups.addedOrRaised.length} begin or increase at Level ${level}`,
               countAr: `${certifyGroups.addedOrRaised.length} تبدأ أو تزيد في المستوى ${level}`,
               tone: 'var(--accent-ink)',

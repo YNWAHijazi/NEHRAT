@@ -184,14 +184,10 @@ test.describe('creation to determination, end to end', () => {
     await page.waitForURL(/\/events\/EV-\d+\/requirements$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
-    // Level 1 package: attach the arrangements, declare six, file.
+    // Revised Annex B: Level 1 files without a medical-plan attachment.
     await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-    const attach = page.locator('form:has(input[name="docKey"])').first();
-    await attach.locator('input[type="file"]').setInputFiles({
-      name: 'arrangements.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
-    });
-    await attach.locator('button:has-text("Attach")').click();
-    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading',{name:/Requirements and attachments/})).toBeVisible();
+    await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
     await gotoRidingRestarts(page, `/events/${eventId}/submit`);
     for (let i = 0; i < 6; i += 1) {
       await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
