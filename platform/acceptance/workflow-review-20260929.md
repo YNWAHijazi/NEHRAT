@@ -1,6 +1,6 @@
 # Role workflow review — 29 September 2026
 
-Status: local changes. Publication and final validation are recorded below when completed.
+Status: published to production on 29 September 2026. Application commit: `1853db45a40e41fb08b70b13178d752f1be977ad`.
 
 ## Confirmed policy
 
@@ -48,7 +48,10 @@ Review shows the latest shared plan, its editor and timestamp, with an explicit 
 - The focused preliminary run passed 27/28; the new failing test expected “Clinical governance” while the actual heading was “Clinical-governance arrangements.” Its assertion was corrected to verify the real saved answer; it passed in the full regression run.
 - New browser journeys cover reviewer medical evidence, Level 2 optional-plan presentation, multiline EMS-to-organizer handoff, Arabic and phone layouts. Screenshots were inspected.
 - Git whitespace validation passed.
-- Production verification is recorded after publication.
+- Six live checks passed after deployment: public sign-in; organizer Level 2 recommendation and read-only plan; EMS shared plan and multiline answers; Director Level 3 plan entry; Ministry event/evidence review; Arabic mobile Level 2 review without overflow.
+- Live checks used demonstration accounts and did not change event content.
+- Railway status: **SUCCESS**. Deployment: `7aaa3d37-62c7-40d3-ae01-62ebeab8c8de`, from GitHub commit `1853db45a40e41fb08b70b13178d752f1be977ad`.
+- GitHub push did not start an automatic deployment. The release was triggered with Railway’s `redeploy --from-source` for the existing production service. The first live request returned 502 during rollout; the instance subsequently started and all six live checks passed.
 
 ## Outside this update
 
