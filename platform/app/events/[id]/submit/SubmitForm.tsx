@@ -8,6 +8,7 @@
  * expedited, and expedited review waives nothing (Protocol 8.4).
  */
 
+import { SubmissionChecklist, type SubmissionCheck } from '../../../../components/SubmissionChecklist';
 import { UploadInput } from '../../../../components/UploadInput';
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,6 +44,8 @@ const inputStyle: React.CSSProperties = {
 
 export function SubmitForm({
   eventId,
+  requiredChecks,
+  optionalChecks,
   level,
   declarations,
   initial,
@@ -54,6 +57,8 @@ export function SubmitForm({
   certificationStatement,
 }: {
   eventId: string;
+  requiredChecks: SubmissionCheck[];
+  optionalChecks: SubmissionCheck[];
   level: 1 | 2 | 3;
   declarations: DeclItem[];
   initial: SubmissionRow | null;
@@ -182,10 +187,14 @@ export function SubmitForm({
 
   return (
     <div style={{ maxWidth: 900 }}>
-      <div data-region="form-card" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
-        <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
-          <L en="Form header" ar="ترويسة النموذج" />
-        </div>
+      <SubmissionChecklist required={[
+        ...requiredChecks,
+        { key: 'declarations', en: 'Your declarations', ar: 'إقراراتك', done: declComplete, href: '#compliance' },
+        { key: 'certification', en: 'Your name and contact details', ar: 'اسمك وبيانات الاتصال', done: certComplete, href: '#organizer-certification' },
+      ]} optional={optionalChecks} />
+      <h2 style={{ fontSize: 20, marginBlock: '28px 12px' }}><L en="Confirm and submit" ar="التأكيد والتقديم" /></h2>
+      <div id="compliance" data-region="form-card" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
+        <details style={{ marginBlockEnd: 20 }}><summary style={{ cursor: 'pointer', marginBlockEnd: 12 }}><L en="Submission details" ar="تفاصيل الطلب" /></summary>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden', marginBlockEnd: 28 }}>
           {headerRows.map((h) => (
             <div key={h.en} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: '14.5px', lineHeight: 1.5 }}>
@@ -199,6 +208,7 @@ export function SubmitForm({
           ))}
         </div>
 
+        </details>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Organizer compliance declaration" ar="إقرار امتثال المنظِّم" />
         </div>
@@ -298,7 +308,7 @@ export function SubmitForm({
         </div>
 
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
-          <L en="Organizer certification" ar="تصديق المنظِّم" />
+          <span id="organizer-certification"><L en="Organizer certification" ar="تصديق المنظِّم" /></span>
         </div>
         {certificationStatement ? (
           <div data-region="certification-statement" style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 18, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
@@ -448,9 +458,9 @@ export function SubmitForm({
                   <L en="File the revised submission" ar="تقديم الملف المعدَّل" />
                 )
               ) : outstanding > 0 ? (
-                <L en={`File the submission — ${outstanding} remaining`} ar={`تقديم الملف — ${outstanding} متبقٍ`} />
+                <L en={`Submit — ${outstanding} remaining`} ar={`تقديم الملف — ${outstanding} متبقٍ`} />
               ) : (
-                <L en="File the submission" ar="تقديم الملف" />
+                <L en="Submit" ar="تقديم الملف" />
               )}
             </button>
             {/* The "Blocked while N items are outstanding" caption was cut in the

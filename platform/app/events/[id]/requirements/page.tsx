@@ -1,4 +1,4 @@
-import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
+import { EventWorkspaceHeader } from '../../../../components/EventWorkspaceHeader';
 import { SharedPlanSync } from '../../../../components/SharedPlanSync';
 import { UploadInput } from '../../../../components/UploadInput';
 import { InfoNote } from '../../../../components/InfoNote';
@@ -50,13 +50,7 @@ const upLabel: React.CSSProperties = {
   color: 'var(--muted)',
 };
 
-/**
- * `n` is the group number. The Event Medical Director block passes NONE: it is part of
- * group 2, the parties you name, and giving it its own heading number printed a second
- * "2" beside group 2 at Level 3. Numbering must also not shift with the level -- the
- * Director is absent below Level 3, so a real number here would renumber the groups
- * underneath it for Level 3 organizers only.
- */
+/** Number each preparation section, including the optional Medical Director. */
 function SectionHeading({ n, en, ar, help }: { n?: number; en: string; ar: string; help?: React.ReactNode }) {
   // FIELDS ONLY (partner ruling, 2026-09-04): the group heading is structure;
   // the explanatory note under it was guidance and left for the reference page.
@@ -158,14 +152,10 @@ export default async function RequirementsPage({
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true}  />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <EventWorkspaceNav eventId={id} active="requirements" />
+        <EventWorkspaceHeader accountId={account.id} event={event} active="requirements" />
         <SharedPlanSync eventId={id} version={planFor(account.id, id)?.version ?? 0} />
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-          <L en={`${event.nameEn} · ${event.id} · Level ${level}`} ar={`${event.nameAr} · ${event.id} · المستوى ${level}`} />
-          {comparison ? <span data-region="derivation"><InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى"><L en={comparison.en} ar={comparison.ar} /></InfoNote></span> : null}
-        </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 14px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Requirements and attachments" ar="المتطلبات والمرفقات" />
          <InfoNote><L
@@ -179,8 +169,9 @@ export default async function RequirementsPage({
         <nav data-region="preparation-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBlockEnd: 32 }}>
           {[
             ...(documents.length > 0 ? [{ href: '#documents', en: '1. Documents and plan', ar: '١. المستندات والخطة' }] : []),
-            { href: '#medical-team', en: documents.length > 0 ? '2. Medical team' : '1. Medical team', ar: documents.length > 0 ? '٢. الفريق الطبي' : '١. الفريق الطبي' },
-            { href: '#review', en: documents.length > 0 ? '3. Review and submit' : '2. Review and submit', ar: documents.length > 0 ? '٣. المراجعة والتقديم' : '٢. المراجعة والتقديم' },
+            { href: '#medical-team', en: documents.length > 0 ? '2. Event EMS Agencies' : '1. Event EMS Agencies', ar: documents.length > 0 ? '٢. جهات إسعاف الفعالية' : '١. جهات إسعاف الفعالية' },
+            ...(level >= 2 ? [{ href: '#medical-director', en: documents.length > 0 ? '3. Medical Director' : '2. Medical Director', ar: documents.length > 0 ? '٣. المدير الطبي' : '٢. المدير الطبي' }] : []),
+            { href: `/events/${id}/submit`, en: 'Submit', ar: 'تقديم الطلب' },
           ].map((item) => (
             <a key={item.href} href={item.href} style={{ padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)', fontSize: 14 }}>
               <L en={item.en} ar={item.ar} />
@@ -459,7 +450,8 @@ export default async function RequirementsPage({
         {/* A Director is required at Level 3 and optional for a Level 2 medical plan. */}
         {level >= 2 ? (
           <>
-            <SectionHeading
+            <div id="medical-director" style={{ scrollMarginBlockStart: 24 }} />
+            <SectionHeading n={documents.length > 0 ? 3 : 2}
               en={level === 2 ? "Medical Director (optional)" : "Event Medical Director"}
               ar={level === 2 ? "المدير الطبي (اختياري)" : "المدير الطبي للفعالية"}
             />
@@ -533,7 +525,7 @@ export default async function RequirementsPage({
         ) : null}
 
         <section id="review" data-region="review-submission" style={{ scrollMarginBlockStart: 24, padding: 24, background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 32 }}>
-          <SectionHeading n={3} en="Review and submit" ar="المراجعة والتقديم" />
+          <SectionHeading en="Review and submit" ar="المراجعة والتقديم" />
           <InfoNote>
             <L en="Your risk assessment is included automatically. Review the package and complete your declarations. You can save your progress while waiting for others."
               ar="يُدرَج تقييم المخاطر تلقائياً. راجعوا الملف وأكملوا إقراراتكم. يمكنكم حفظ تقدّمكم أثناء انتظار الآخرين." />

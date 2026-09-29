@@ -1,4 +1,5 @@
-import { InfoNote } from '../../../../components/InfoNote';
+import type { SubmissionCheck } from '../../../../components/SubmissionChecklist';
+import { EventWorkspaceHeader } from '../../../../components/EventWorkspaceHeader';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -36,9 +37,19 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   const submission = submissionFor(account.id, id);
   const gate = submissionGateFor(account.id, id);
   const documentState = documentStateFor(account.id, id, level);
-  const documents = documentsForLevel(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt)).filter((d) => !d.optional);
+  const documents = documentsForLevel(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
   const providers = invitationsFor(account.id, id).filter((i) => i.kind === 'ems');
-  const signedCount = providers.filter((p) => p.declaration === 'signed').length;
+
+  const checks = (optional: boolean): SubmissionCheck[] => documents.filter(d => Boolean(d.optional) === optional && d.key !== 'complianceForm').map(d => ({
+    key: d.key, en: d.en, ar: d.ar, done: documentState[d.key] === true,
+    href: d.key === 'assessment' ? `/events/${id}/reassess` : d.key === 'plan' ? `/events/${id}/plan` : d.thirdParty ? `/events/${id}/medical-team?tab=ems` : `/events/${id}/requirements#documents`,
+  }));
+  const requiredChecks = checks(false);
+  if (providers.some(p => !['removed', 'withdrawn'].includes(p.status))) requiredChecks.push({ key: 'ems-replies', en: 'EMS invitation replies', ar: 'الردود على دعوات الإسعاف', done: !gate.blockers.some(b => b.kind === 'providerUnanswered'), href: `/events/${id}/requirements#medical-team` });
+  if (level === 3) requiredChecks.push({ key: 'director', en: 'Medical Director confirmed', ar: 'تأكيد المدير الطبي', done: !gate.blockers.some(b => ['directorMissing','directorUnanswered'].includes(b.kind)), href: `/events/${id}/requirements#medical-director` });
+  if (gate.fee) requiredChecks.push({ key: 'fee', en: 'Application fee', ar: 'رسم الطلب', done: gate.fee.paid, href: '#amount-due' });
+  const optionalChecks = checks(true);
+  if (level === 2) optionalChecks.push({ key: 'director', en: 'Medical Director', ar: 'المدير الطبي', done: invitationsFor(account.id,id).some(i => i.kind === 'director' && i.status === 'confirmed'), href: `/events/${id}/requirements#medical-director` });
 
   // The eight header fields the compliance form defines -- from the data, not
   // hand-written: two of eight went missing the last time this was a literal list.
@@ -69,71 +80,17 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true}  />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div data-region="package-docs" style={{ maxWidth: 900 }}>
-          <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-            <L en="Submission package" ar="حزمة التقديم" />
-           <InfoNote>{/* Verbatim from the reference, lowercase "the" included -- copy is final. */}
-            <L
-              en={`Level ${level} requires the documents below. the compliance and submission form is completed here, not attached.`}
-              ar={`يستوجب المستوى ${level} المستندات أدناه. يُستكمل نموذج الامتثال والتقديم هنا ولا يُرفَق.`}
-            /></InfoNote>
-</h1>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 44 }}>
-            {documents.map((d) => {
-              const done = documentState[d.key] === true;
-              const color = done ? 'var(--brand)' : d.thirdParty ? 'var(--bad)' : d.system ? 'var(--muted)' : 'var(--accent-ink)';
-              const chipBg = done ? 'var(--brand-soft)' : d.thirdParty ? 'var(--bad-soft)' : 'var(--accent-soft)';
-              return (
-                <div key={d.key} style={{ paddingBlock: '19px', paddingInlineStart: '22px', paddingInlineEnd: '23px', background: 'var(--surface2)', borderInlineStart: `3px ${d.thirdParty ? 'dashed' : 'solid'} ${color}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 16 }}>
-                    <L en={d.en} ar={d.ar} />
-                  </span>
-                  <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', flex: 'none' }}>
-                    <span style={{ padding: '4px 10px', borderRadius: 999, background: chipBg, color, fontSize: 13 }}>
-                      {done ? (
-                        <L en="Complete" ar="مكتمل" />
-                      ) : d.thirdParty ? (
-                        <L en={`${signedCount} of ${providers.length} signed`} ar={`وُقّع ${signedCount} من ${providers.length}`} />
-                      ) : d.system ? (
-                        <L en="Generated" ar="مُنشأ" />
-                      ) : (
-                        <L en="Awaiting you" ar="بانتظاركم" />
-                      )}
-                    </span>
-                    {/* "Awaiting you" without the control that answers it is a corridor:
-                        each incomplete row links to where it completes. */}
-                    {!done && !d.system && !d.thirdParty ? (
-                      <a
-                        href={d.key === 'plan' ? `/events/${id}/plan` : d.key === 'complianceForm' ? '#compliance' : `/events/${id}/requirements`}
-                        style={{ height: 34, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 17, fontSize: '12.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
-                      >
-                        {d.key === 'plan' ? (
-                          <L en="Open the plan" ar="فتح الخطة" />
-                        ) : d.key === 'complianceForm' ? (
-                          <L en="Complete it below" ar="أكملوه أدناه" />
-                        ) : (
-                          <L en="Attach on the requirements screen" ar="الإرفاق في شاشة المتطلبات" />
-                        )}
-                      </a>
-                    ) : null}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-        </div>
-
+        <EventWorkspaceHeader accountId={account.id} event={event} active="submit" />
+        <h2 data-sec-h1="" style={{ fontSize: 28, marginBlock: '0 24px' }}><L en="Submission package" ar="حزمة التقديم" /></h2>
         {/* THE AMOUNT DUE, on the package (rendered only while a fee is in
             force -- the capability ships off and this region with it). Between
             complete and filed sits awaiting payment: filing completes when the
             payment is recorded through the payment seam, and no payment channel
             renders here because none is integrated. */}
         {gate.fee ? (
-          <div data-region="amount-due" style={{ maxWidth: 900, padding: '19px 23px', border: `1px solid ${gate.fee.paid ? 'var(--line)' : 'var(--accent-ink)'}`, borderRadius: 12, marginBlockEnd: 44 }}>
+          <div id="amount-due" data-region="amount-due" style={{ maxWidth: 900, padding: '19px 23px', border: `1px solid ${gate.fee.paid ? 'var(--line)' : 'var(--accent-ink)'}`, borderRadius: 12, marginBlockEnd: 44 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
               <span style={{ fontSize: 16, fontWeight: 500 }}>
                 <L en="Application fee" ar="رسم الطلب" />
@@ -165,13 +122,9 @@ export default async function SubmitPage({ params }: { params: Promise<{ id: str
           </div>
         ) : null}
 
-        <div style={{ maxWidth: 900 }}>
-          <h2 style={{ margin: '0 0 18px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en="Compliance and submission" ar="الامتثال والتقديم" />
-          </h2>
-        </div>
-
         <SubmitForm
+          requiredChecks={requiredChecks}
+          optionalChecks={optionalChecks}
           eventId={id}
           level={level}
           declarations={[...COMPLIANCE_DECLARATIONS]}

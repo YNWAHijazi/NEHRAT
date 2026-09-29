@@ -200,7 +200,7 @@ test.describe('creation to determination, end to end', () => {
     await page.keyboard.press('Tab'); // blur -> flush the last field's autosave
     // The form AUTOSAVES (fields-only ruling, 2026-09-04); the receipt is the wait.
     await expect(page.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
-    const fileBtn = page.locator('button:has-text("File the submission")');
+    const fileBtn = page.locator('button:has-text("Submit")');
     await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
     await fileBtn.click();
     await page.waitForURL(/acknowledgment/);

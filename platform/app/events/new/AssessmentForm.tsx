@@ -32,7 +32,7 @@ import { InfoNote } from '../../../components/InfoNote';
  * never a level.
  */
 
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { createEventAction, updateDraftEventAction, reassessAction, type AssessmentSubmission } from '../../actions';
@@ -109,10 +109,12 @@ export function AssessmentForm({
   const [nameEn, setNameEn] = useState(draft?.nameEn ?? '');
   const [nameAr, setNameAr] = useState(draft?.nameAr ?? '');
   const [startDate, setStartDate] = useState(draft?.startDate ?? '');
-  const [endDate, setEndDate] = useState(draft?.endDate ?? '');
+  const [endDate, setEndDate] = useState(draft?.endDate || draft?.startDate || '');
+  const endDateEdited = useRef(Boolean(draft?.endDate));
+  const closingTimeEdited = useRef(Boolean(draft?.partA.closingTime));
   const [partA, setPartA] = useState({
     venueRoute: draft?.partA.venueRoute ?? '', municipalities: draft?.partA.municipalities ?? '',
-    openingTime: draft?.partA.openingTime ?? '', closingTime: draft?.partA.closingTime ?? '',
+    openingTime: draft?.partA.openingTime ?? '', closingTime: draft?.partA.closingTime || draft?.partA.openingTime || '',
     expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
     previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
@@ -273,16 +275,16 @@ export function AssessmentForm({
               <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} style={inputStyle} />
             </Field>
             <Field labelEn="Start date" labelAr="تاريخ البداية">
-              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={inputStyle} />
+              <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); if (!endDateEdited.current) setEndDate(e.target.value); }} style={inputStyle} />
             </Field>
             <Field labelEn="End date" labelAr="تاريخ النهاية">
-              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={inputStyle} />
+              <input type="date" value={endDate} onChange={(e) => { endDateEdited.current = Boolean(e.target.value); setEndDate(e.target.value || startDate); }} min={startDate || undefined} style={inputStyle} />
             </Field>
             <Field labelEn="Opening time" labelAr="وقت الافتتاح">
-              <input type="time" value={partA.openingTime} onChange={(e) => setA('openingTime', e.target.value)} style={inputStyle} />
+              <input type="time" value={partA.openingTime} onChange={(e) => { const value = e.target.value; setPartA(prev => ({ ...prev, openingTime: value, ...(!closingTimeEdited.current ? { closingTime: value } : {}) })); }} style={inputStyle} />
             </Field>
             <Field labelEn="Closing time" labelAr="وقت الإغلاق">
-              <input type="time" value={partA.closingTime} onChange={(e) => setA('closingTime', e.target.value)} style={inputStyle} />
+              <input type="time" value={partA.closingTime} onChange={(e) => { closingTimeEdited.current = Boolean(e.target.value); setA('closingTime', e.target.value || partA.openingTime); }} style={inputStyle} />
             </Field>
             <Field labelEn="Venue, route, or location" labelAr="الموقع أو المسار أو مكان الانعقاد">
               <input value={partA.venueRoute} onChange={(e) => setA('venueRoute', e.target.value)} style={inputStyle} />

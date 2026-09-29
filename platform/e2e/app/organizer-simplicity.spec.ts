@@ -33,7 +33,7 @@ for (const lang of LANGUAGES) {
     await gotoRidingRestarts(page, '/events/EV-0418/requirements');
     const nav = page.locator('[data-region="preparation-nav"]');
     await expect(nav).toBeVisible();
-    await expect(nav.locator('a')).toHaveCount(3);
+    await expect(nav.locator('a')).toHaveCount(4);
     await nav.locator('a[href="#medical-team"]').click();
     // Own the pending invitation: other journeys legitimately withdraw the demo one.
     const name = `Copy check ${lang} ${Date.now()}`;
@@ -61,10 +61,7 @@ for (const lang of LANGUAGES) {
       return box.width > 0 && (box.x < 0 || box.right > window.innerWidth + 1);
     }).map((el) => ({ tag: el.tagName, text: el.textContent?.slice(0, 70), style: el.getAttribute('style') })))).toEqual([]);
     await page.screenshot({ path: `/tmp/moph-requirements-${lang}.png`, fullPage: true });
-    await nav.locator('a[href="#review"]').click();
-    const review = page.locator('[data-region="review-submission"]');
-    await expect(review.getByRole('link')).toBeVisible();
-    await review.getByRole('link').click();
+    await nav.locator('a[href="/events/EV-0418/submit"]').click();
     await expect(page).toHaveURL(/\/events\/EV-0418\/submit/);
   });
 }

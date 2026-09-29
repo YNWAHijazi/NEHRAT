@@ -118,7 +118,9 @@ for (const lang of LANGUAGES) {
       // certification filled, it enables without waiting for an autosave to land
       // -- and File saves-then-files, so the click never races a pending save.
       // No reload, no "Saved." wait: the button IS the readiness signal.
-      const fileBtn = page.locator('button:has-text("File the submission"), button:has-text("تقديم الملف")').first();
+      const fileBtn = page.locator('button:has-text("Submit"), button:has-text("تقديم الملف")').first();
+      await expect(page.locator('[data-check="declarations"]')).toContainText('Complete');
+      await expect(page.locator('[data-check="certification"]')).toContainText('Complete');
       await expect(fileBtn).toBeEnabled({ timeout: 40_000 });
       await fileBtn.click();
       await page.waitForURL(/acknowledgment/);

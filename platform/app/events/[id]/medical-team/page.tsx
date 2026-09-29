@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { eventFor, invitationsFor, invitationByToken, sharedDocumentsFor, governanceFor, planFor, planLastEditorFor, derivedLevelFor, unreadCountFor, attachmentsFor, addedMeasuresFor } from '../../../../lib/queries';
 import { GovernmentBand, Header } from '../../../../components/Header';
-import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
+import { EventWorkspaceHeader } from '../../../../components/EventWorkspaceHeader';
 import { DocumentViewer } from '../../../../components/DocumentViewer';
 import { L } from '../../../../components/L';
 import { DECLARATION_ITEMS, ROLES_CONTENT, planIsComplete } from '../../../../lib/rules';
@@ -36,10 +36,9 @@ export default async function MedicalTeamPage({ params, searchParams }: { params
   return <>
     <SharedPlanSync eventId={id} version={plan?.version ?? 0} />
     <GovernmentBand />
-    <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack back={{ href: `/events/${id}`, en: 'Event record', ar: 'سجل الفعالية' }} />
-    <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '32px 32px 100px' }}>
-      <p style={{ color: 'var(--muted)' }}><L en={event.nameEn} ar={event.nameAr} /> · {id}</p>
-      <EventWorkspaceNav eventId={id} active={tab} />
+    <Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack  />
+    <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+      <EventWorkspaceHeader accountId={account.id} event={event} active={tab} />
       <h1><L en={title[0]} ar={title[1]} /></h1>
       {required !== 'notRequired' && <section data-region="shared-plan-summary" style={card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
