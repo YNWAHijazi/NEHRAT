@@ -15,3 +15,6 @@ export const DASHBOARD_URGENCY = {
 
 /** Map marker sizes in pixels; no regulatory meaning. */
 export const FACILITY_MAP_STYLE = { facilityRadius: 9, aedRadius: 5 } as const;
+
+/** Spotlight-to-card spacing in pixels; no workflow or regulatory meaning. */
+export const TOUR_LAYOUT = { gap: 12 } as const;

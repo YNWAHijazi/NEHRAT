@@ -1,0 +1,43 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  color: var(--ink);
+}
+.dialog::backdrop { background: transparent; }
+.shade { position: fixed; inset: 0; background: rgb(18 28 33 / 68%); }
+.spotlight {
+  position: fixed;
+  border: 2px solid var(--brand);
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgb(18 28 33 / 68%);
+  pointer-events: none;
+}
+.panel {
+  position: fixed;
+  box-sizing: border-box;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 20%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  text-align: start;
+}
+.panel h2 { margin: 0 0 10px; font-size: 19px; font-weight: 600; line-height: 1.4; }
+.panel p { margin: 0 0 22px; font-size: 15px; line-height: 1.65; color: var(--muted); }
+.controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.count { margin-inline-end: auto; color: var(--muted); font-size: 12px; }
+.controls button { min-height: 44px; padding: 8px 11px; border: 0; border-radius: 9px; background: transparent; color: var(--ink); cursor: pointer; font-size: 14px; }
+.controls .next { background: var(--brand); color: var(--bg); }
+.controls button:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+@media print { .dialog { display: none; } }

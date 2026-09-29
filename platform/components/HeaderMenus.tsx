@@ -7,8 +7,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
-import { MINISTRY_CONTENT, bilingualMap } from '../lib/rules';
+import { MINISTRY_CONTENT, bilingualMap, landingRouteFor } from '../lib/rules';
 import { L } from './L';
+import type { Account } from '../lib/auth';
 import { signOutAction } from '../app/actions';
 
 export function LangToggle() {
@@ -80,6 +81,7 @@ export function HeaderMenus({
       <div style={{ position: 'relative' }}>
         <button
           type="button"
+          data-tour="notifications"
           onClick={() => router.push('/notifications')}
           style={{
             width: 40,
@@ -127,7 +129,7 @@ export function HeaderMenus({
       }} onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setAcctOpen(false);
       }}>
-        <button ref={triggerRef}
+        <button ref={triggerRef} data-tour="account"
           type="button"
           aria-controls={menuId}
           aria-expanded={acctOpen}
@@ -211,6 +213,10 @@ export function HeaderMenus({
                 </span>
               ) : null}
             </button>
+            <a href={`${landingRouteFor(role as Account['role'])}?tour=1`}
+              style={{ display: 'block', padding: '12px 16px', borderBlockEnd: '1px solid var(--line)', fontSize: 14, color: 'var(--ink)' }}>
+              <L en="Quick tour" ar="جولة سريعة" />
+            </a>
             <button
               type="button"
               onClick={() => void signOutAction()}

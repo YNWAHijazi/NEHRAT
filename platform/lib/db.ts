@@ -886,6 +886,13 @@ function migrate(d: DatabaseSync): void {
     actor_id INTEGER NOT NULL REFERENCES accounts(id), snapshot TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );`);
+  // Existing accounts keep their current experience. Only accounts created after
+  // this migration receive the automatic tour; demo accounts use manual replay.
+  addColumn('accounts', 'tour_pending', 'tour_pending INTEGER NOT NULL DEFAULT 0');
+  d.exec(`CREATE TRIGGER IF NOT EXISTS account_first_tour AFTER INSERT ON accounts
+    WHEN NEW.is_demo = 0 BEGIN
+      UPDATE accounts SET tour_pending = 1 WHERE id = NEW.id;
+    END;`);
   addColumn('accounts', 'phone', "phone TEXT NOT NULL DEFAULT ''");
   addColumn('accounts', 'email_verified_at', 'email_verified_at TEXT');
   d.exec(`CREATE TABLE IF NOT EXISTS email_challenges (

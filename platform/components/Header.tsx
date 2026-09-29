@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { getDb } from '../lib/db';
+import { QuickTour } from './QuickTour';
 import { L } from './L';
 import { landingRouteFor } from '../lib/rules';
 import { HeaderMenus, LangToggle } from './HeaderMenus';
@@ -22,7 +24,9 @@ export function Header({ account, organization, unreadCount, showBack, back,
   wide?: boolean;
 }) {
   const home = account ? landingRouteFor(account.role) : '/';
+  const tourPending = account && !account.isDemo ? (getDb().prepare('SELECT tour_pending FROM accounts WHERE id = ?').get(account.id) as { tour_pending: number } | undefined)?.tour_pending === 1 : false;
   return <header data-noprint="" className="app-header" data-wide-header={wide || undefined}>
+    {account ? <QuickTour accountId={account.id} role={account.role} home={home} pending={tourPending} /> : null}
     <div className="app-header-row" data-pad="">
       <Link href={home} className="ministry-mark">
         <span className="ministry-symbol" aria-hidden="true">+</span>

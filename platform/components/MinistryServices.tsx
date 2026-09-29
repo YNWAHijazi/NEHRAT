@@ -5,7 +5,7 @@ import { L } from "./L";
 export function MinistryServices() {
   const path = usePathname();
   return (
-    <nav
+    <nav data-tour="services"
       aria-label="Services"
       style={{
         display: "flex",
