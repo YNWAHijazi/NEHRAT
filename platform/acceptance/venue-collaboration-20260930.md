@@ -18,7 +18,7 @@ Responsibility formula
 
 Experience and safeguards
 
-- Saved details and assessment open read-only. The organizer can explicitly choose Edit while preparing the package. Submitted/accepted preparation is locked server-side, including replayed old forms.
+- Saved details and assessment open read-only, including older venues with incomplete newly separated contact fields. The organizer can explicitly choose Edit while preparing the package. Submitted/accepted preparation is locked server-side, including replayed old forms.
 - Changing venue details or assessment clears current medical confirmations; stale open forms cannot overwrite newer work. Renewal keeps the same venue ID, certificates and immutable submitted packages, and requires fresh assessment/team confirmation.
 - Responsible name and phone are separate fields. Legacy combined values are split only when a trailing phone number is recognisable; uncertain values need operator confirmation.
 - Detailed five-stage venue progress stays visible. Overview, Details, Assessment, Medical team, Requirements and Submit use the same record header.
@@ -28,8 +28,9 @@ Experience and safeguards
 Validation
 
 - TypeScript and production build passed.
-- 494 tests passed across 50 files. New integration coverage checks role boundaries, automatic contact, stale forms, required per-agency declarations, plan approval/invalidation, submission locks, Ministry acceptance, renewal and record-ID privacy.
-- 16 distinct targeted browser checks passed. Includes full venue invitation → acceptance → clinical completion → Director approval → organizer submission → Ministry review/acceptance → certificate journey, event/venue/facility tab layout in English and Arabic at desktop/mobile sizes, and public verification privacy. The first combined run had a test-selector failure; the corrected full venue journey passed in its focused rerun.
+- 495 tests passed across 50 files. New integration coverage checks role boundaries, automatic contact, stale forms, required per-agency declarations, plan approval/invalidation, submission locks, Ministry acceptance, renewal and record-ID privacy.
+- 17 distinct targeted browser checks passed. Includes full venue invitation → acceptance → clinical completion → Director approval → organizer submission → Ministry review/acceptance → certificate journey, event/venue/facility tab layout in English and Arabic at desktop/mobile sizes, and public verification privacy. The first combined run had a test-selector failure; the corrected full venue journey passed in its focused rerun.
+- The live read-only check found an older-record edge case on VN-0034: incomplete contact fields left details editable. A dedicated integration and browser regression now requires an explicit Edit action even for incomplete saved records.
 - Browser writes used a disposable local database (var/release-runtime.db), not production records. Desktop and phone screenshots were visually reviewed.
 
 Pre-release live backup: /data/venue-collaboration-backup-20260930/database.sqlite; 55 tables; integrity ok; SHA-256 b9cbf1f2cb067ce2917b2ab25808df2813446a4f9933436fc4f5073540ba2ab8. Schema additions preserve existing records and historical certificates.

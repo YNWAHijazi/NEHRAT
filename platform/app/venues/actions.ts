@@ -17,7 +17,7 @@ async function owned(id:string) {
 function notify(accountId:number,isDemo:boolean,route:string,en:string,ar:string) { getDb().prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?, ?,?,now_stamp(),?)").run(accountId,en,ar,en,ar,route,+isDemo); }
 function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
 export async function saveVenueDetailsAction(id:string,form:FormData) {
- const {a,w}=await owned(id);if(!w.editable||(w.detailsDone&&!w.detailsEditing))redirect(`/venues/${id}`);const v=readVenueDetails(form);if(!v)redirect(`/venues/${id}/details?error=details`);
+ const {a,w}=await owned(id);if(!w.editable||!w.detailsEditing)redirect(`/venues/${id}`);const v=readVenueDetails(form);if(!v)redirect(`/venues/${id}/details?error=details`);
  ensureVenuePackage(a.id,id);
  getDb().prepare(`UPDATE venues SET name_en=?,name_ar=?,category=?,address_municipality_en=?,address_municipality_ar=?,responsible_contact=?,licensed_capacity=?,regularly_hosts=?,is_nightclub=?,district=?,latitude=?,longitude=?,responsible_name=?,responsible_phone=? WHERE id=?`).run(v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,v.district,v.point.lat,v.point.lng,v.contactName,v.contactPhone,id);
  getDb().prepare('UPDATE venue_packages SET details_editing=0 WHERE venue_id=?').run(id);

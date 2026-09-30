@@ -12,3 +12,12 @@ for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue
   await page.screenshot({path:info.outputPath(`${service}-${lang}-${width}.png`),fullPage:true});
  }
 });
+
+test('legacy venue details open read-only even when a new contact field is missing',async({page})=>{
+ const db=new DatabaseSync('var/release-runtime.db');const v=db.prepare("SELECT responsible_phone FROM venues WHERE id='VN-0032'").get() as {responsible_phone:string};
+ db.prepare("UPDATE venues SET responsible_phone='' WHERE id='VN-0032'").run();
+ try{await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/details');
+ await expect(page.locator('input[name=contactName]')).toBeDisabled();await expect(page.locator('input[name=contactPhone]')).toBeDisabled();await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
+ await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhone]')).toBeEnabled();
+ }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("UPDATE venue_packages SET details_editing=0 WHERE venue_id='VN-0032'").run();db.close();}
+});

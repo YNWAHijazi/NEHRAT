@@ -38,6 +38,13 @@ test('saved facts are locked, contact is automatic, clinical answers cannot be f
  const inv=venueInvitations(id);expect(inv).toHaveLength(2);expect(inv[0]?.token).toMatch(/^[a-f0-9]{48}$/);expect(inv.every(i=>i.delivery==='demo')).toBe(true);
  as('test_director');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('error=account');expect(venueAccess(session.account!,id)).toBeNull();
 });
+test('incomplete legacy details still need an explicit Edit action',async()=>{
+ as('test_organizer');const db=getDb();db.prepare("UPDATE venues SET responsible_phone='' WHERE id=?").run(id);
+ try{expect(state().detailsDone).toBe(false);expect(state().detailsEditing).toBe(false);
+ await expect(saveVenueDetailsAction(id,new FormData())).rejects.toThrow(/^redirect:\/venues\/VN-9001$/);
+ await expect(reopenVenueSectionAction(id,'details')).rejects.toThrow(`redirect:/venues/${id}/details`);expect(state().detailsEditing).toBe(true);
+ }finally{db.prepare("UPDATE venues SET responsible_phone='+9613111111' WHERE id=?").run(id);db.prepare('UPDATE venue_packages SET details_editing=0 WHERE venue_id=?').run(id);}
+});
 test('accepted medical partners share completed answers; a stale form cannot overwrite them; Director approval is required',async()=>{
  const inv=venueInvitations(id);as('test_ems');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('/venue-team/');
  let stale:FormData|undefined;
