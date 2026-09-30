@@ -76,6 +76,17 @@ test('each EMS agency must confirm its own declaration, then submission freezes 
  as('test_ems');const before=state().answers['7'];await expect(saveVenueRequirementAction(id,'7',form({agency:'tampered'}))).rejects.toThrow('/venue-team/');expect(state().answers['7']).toEqual(before);
  as('test_moph');await expect(reviewVenuePackageAction(id,form({decision:'satisfied',revision:'1'}))).rejects.toThrow('/ministry/venues/');expect(state().status).toBe('accepted');expect(JSON.parse((db.prepare('SELECT snapshot FROM venue_package_history WHERE venue_id=?').get(id) as {snapshot:string}).snapshot)).toEqual(snapshot);
 });
+test('each EMS agency opens its own readiness declaration and never another agency\'s',async()=>{
+ const {GET}=await import('../app/api/venue-documents/[id]/[key]/route');
+ const ems=venueInvitations(id).filter(i=>i.kind==='ems'&&i.status==='confirmed');
+ const first=ems.find(i=>i.email==='ems@venue.example.test')!.token,second=ems.find(i=>i.email==='second@venue.example.test')!.token;
+ const get=async(key:string,rev?:string)=>(await GET(new Request(`http://test/api/venue-documents/${id}/${key}${rev?`?revision=${rev}`:''}`),{params:Promise.resolve({id,key})})).status;
+ as('test_ems');expect(await get(`20-${first}`)).toBe(200);expect(await get(`20-${second}`)).toBe(404);expect(await get(`20-${second}`,'1')).toBe(404);
+ as('venue_second_ems');expect(await get(`20-${second}`)).toBe(200);expect(await get(`20-${first}`)).toBe(404);
+ as('test_director');expect(await get(`20-${first}`)).toBe(404);
+ as('test_organizer');expect(await get(`20-${first}`)).toBe(200);expect(await get(`20-${second}`)).toBe(200);
+ as('test_moph');expect(await get(`20-${first}`,'1')).toBe(200);expect(await get(`20-${first}`)).toBe(404);
+});
 test('events enforce the same version-specific Medical Director approval and invalidate it after edits',async()=>{
  const db=getDb();as('test_ems');db.prepare("UPDATE events SET filed=0,archived_at=NULL WHERE id='EV-0362'").run();
  const payload={baseVersion:planFor(owner,'EV-0362')?.version??0,mode:'write' as const,sections:Object.fromEntries(PLAN_SECTIONS.map(s=>[String(s.n),{text:'Medical arrangements confirmed'}])),majorIncident:Object.fromEntries(MAJOR_INCIDENT_ITEMS.map(s=>[String(s.n),{covered:true}])),attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false};

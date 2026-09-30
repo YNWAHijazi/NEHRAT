@@ -2,6 +2,7 @@ import {reopenVenueSectionAction} from '../../actions';
 import { VenueWorkspace } from '../../../../components/VenueWorkspace';
 import { venuePackageFor } from '../../../../lib/venue/workspace';
 import { L } from '../../../../components/L';
+import { pageTitle, secondaryButton } from '../../../../components/workspace-styles';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { VenueAssessmentForm } from './VenueAssessmentForm';
@@ -61,7 +62,32 @@ export default async function VenueAssessmentPage({
 
   return (
     <VenueWorkspace account={account} w={w} active="assessment">
-    {!w.editable || (w.assessmentDone&&!w.assessmentEditing) ? <section>{w.editable?<form action={reopenVenueSectionAction.bind(null,id,'assessment')}><button><L en="Edit assessment" ar="تعديل التقييم"/></button></form>:null}<h2><L en="Assessment" ar="التقييم"/></h2><p><L en={`Recorded level: ${w.level ?? '—'}`} ar={`المستوى المسجّل: ${w.level ?? '—'}`}/></p>{last?.answers.map((answer,i)=><p key={i}><L en={DOMAINS[i]?.en??''} ar={DOMAINS[i]?.ar??''}/> · <L en={DOMAINS[i]?.options.find(o=>o.score===answer)?.en??'—'} ar={DOMAINS[i]?.options.find(o=>o.score===answer)?.ar??'—'}/></p>)}</section> :
+    {!w.editable || (w.assessmentDone && !w.assessmentEditing) ? (
+      <section data-region="assessment-summary">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', justifyContent: 'space-between', marginBlockEnd: 24 }}>
+          <h2 data-sec-h1="" style={{ ...pageTitle, marginBlock: 0 }}><L en="Assessment" ar="التقييم" /></h2>
+          {w.editable ? (
+            <form action={reopenVenueSectionAction.bind(null, id, 'assessment')}>
+              <button type="submit" style={secondaryButton}><L en="Edit assessment" ar="تعديل التقييم" /></button>
+            </form>
+          ) : null}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 32 }}>
+          {last?.answers.map((answer, i) => (
+            <div key={i} style={{ background: 'var(--bg)', padding: '14px 20px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: '14.5px', flex: '1 1 260px' }}>
+                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 10 }}>{i + 1}</span>
+                <L en={DOMAINS[i]?.en ?? ''} ar={DOMAINS[i]?.ar ?? ''} />
+              </span>
+              <span style={{ fontSize: 14, color: 'var(--muted)', flex: '1 1 220px' }}>
+                <L en={DOMAINS[i]?.options.find((o) => o.score === answer)?.en ?? '—'} ar={DOMAINS[i]?.options.find((o) => o.score === answer)?.ar ?? '—'} />
+              </span>
+              <span style={{ fontSize: 14, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{answer ?? '—'}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    ) :
         <VenueAssessmentForm
           venueId={venue.id}
           venueNameEn={venue.nameEn}

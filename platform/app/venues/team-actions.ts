@@ -15,6 +15,8 @@ export async function inviteVenuePartnerAction(id:string,form:FormData) {
  if(!w.editable||!w.level)redirect(`/venues/${id}/team`);
  const kind=String(form.get('kind')),name=String(form.get('name')??'').trim(),email=String(form.get('email')??'').trim().toLowerCase();
  if(!['ems','director'].includes(kind)||!name||!/^\S+@\S+\.\S+$/.test(email))redirect(`/venues/${id}/team?error=details`);
+ // A Director applies from Level 2 (optional) and is required at Level 3; at Level 1 there is no Director to invite.
+ if(kind==='director'&&w.level<2)redirect(`/venues/${id}/team`);
  if(venueInvitations(id).some(i=>['nominated','confirmed'].includes(i.status)&&(i.kind===kind&&(i.email===email||kind==='director'))))redirect(`/venues/${id}/team?error=duplicate`);
  const token=randomBytes(24).toString('hex');const db=getDb();
  db.prepare('INSERT INTO venue_invitations(token,venue_id,kind,name,email,expires_at) VALUES(?,?,?,?,?,?)').run(token,id,kind,name,email,new Date(Date.now()+30*86400000).toISOString());

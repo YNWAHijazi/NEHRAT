@@ -1104,6 +1104,12 @@ function migrate(d: DatabaseSync): void {
   addColumn('venue_packages', 'work_revision', 'work_revision INTEGER NOT NULL DEFAULT 0');
   addColumn('venue_packages', 'details_editing', 'details_editing INTEGER NOT NULL DEFAULT 0');
   addColumn('venue_packages', 'assessment_editing', 'assessment_editing INTEGER NOT NULL DEFAULT 0');
+  // A reviewer's "incomplete" was once stored on the package as 'revision' while the history kept the
+  // real decision. Carry the recorded outcome onto the package so the operator is told what was recorded.
+  // Idempotent: it touches only packages whose current revision was decided 'incomplete'.
+  d.exec(`UPDATE venue_packages SET status = 'incomplete'
+    WHERE status = 'revision' AND EXISTS (SELECT 1 FROM venue_package_history h
+      WHERE h.venue_id = venue_packages.venue_id AND h.revision = venue_packages.revision AND h.decision = 'incomplete')`);
   d.exec(`CREATE TABLE IF NOT EXISTS venue_invitations (
     token TEXT PRIMARY KEY, venue_id TEXT NOT NULL REFERENCES venues(id),
     kind TEXT NOT NULL CHECK(kind IN ('ems','director')), name TEXT NOT NULL, email TEXT NOT NULL,

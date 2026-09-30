@@ -1,3 +1,4 @@
+import { VENUE_STATUS, type VenuePackageStatus } from '../../../lib/rules/venue-workflow';
 import { ServiceSearch } from "../../../components/ServiceSearch";
 import Link from "next/link";
 import { MinistryShell } from "../../../components/MinistryShell";
@@ -80,7 +81,7 @@ export default async function Venues({
                 }
               />
             </p>
-            {v.status?<p><L en={v.status==='submitted'?'Under Ministry review':v.status==='accepted'?'Requirements satisfied':v.status==='revision'?'Changes requested':'In preparation'} ar={v.status==='submitted'?'قيد مراجعة الوزارة':v.status==='accepted'?'المتطلبات مستوفاة':v.status==='revision'?'تعديلات مطلوبة':'قيد التحضير'}/></p>:null}
+            {v.status&&v.status in VENUE_STATUS?<p><L en={VENUE_STATUS[v.status as VenuePackageStatus].en} ar={VENUE_STATUS[v.status as VenuePackageStatus].ar}/></p>:null}
             {v.submitted_at?<p><Link href={`/ministry/venues/${v.id}`}><L en="Review submission" ar="مراجعة الطلب"/></Link></p>:null}
             {v.valid_until ? (
               <>

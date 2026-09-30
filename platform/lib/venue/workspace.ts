@@ -6,6 +6,10 @@ import { venuePackageEditable, venueRequirements, type VenueAnswers, type VenueP
 import type { Level } from '../rules';
 import { readMapPoint, type MapPoint } from '../rules/geolocation';
 import { VENUE_TYPES, VENUE_DISTRICTS } from '../rules/venue-intake';
+import { applicationFee, effectiveFlag } from '../rules';
+import { capabilityConfigFor, ministryConfig } from '../queries';
+import { paymentFor } from '../payments';
+import { venueRowAwaitsInvitation, type VenuePackageFacts } from '../rules/venue-workflow';
 
 export function venuePackageFor(accountId:number,id:string) {
  const venue=venueById(accountId,id); if(!venue)return null;
@@ -57,6 +61,12 @@ export function venuePackageFor(accountId:number,id:string) {
  editable:venuePackageEditable(status,Boolean(venue.archivedAt)),
  assessmentDone:assessmentVersion!==null,
  detailsDone:Boolean(point&&geo.district&&venue.nameEn&&venue.category&&venue.responsibleName&&venue.responsiblePhone&&venue.licensedCapacity),
+ // The same conditions, named, so the details screen can say which ones are missing.
+ detailsMissing:([
+  [venue.nameEn,'Venue name','اسم الموقع'],[venue.category,'Venue type','نوع الموقع'],[geo.district,'District','القضاء'],
+  [venue.responsibleName,'Responsible person','الشخص المسؤول'],[venue.responsiblePhone,'Phone number','رقم الهاتف'],
+  [venue.licensedCapacity,'Approved or licensed capacity','السعة المعتمدة أو المرخّصة'],[point,'Map pin','علامة الخريطة'],
+ ] as const).filter(([value])=>!value).map(([,en,ar])=>({en,ar})),
  };
 }
 export function ensureVenuePackage(accountId:number,id:string) {
@@ -68,4 +78,32 @@ export function readVenueDetails(form:FormData) {
  const s=(k:string)=>String(form.get(k)??'').trim();const point=readMapPoint(form);const capacity=Number(s('capacity'));
  if(!s('name')||!s('nameAr')||!s('address')||!s('contactName')||!s('contactPhone')||!/^\+?[0-9 ()-]{7,24}$/.test(s('contactPhone'))||!point||!Number.isSafeInteger(capacity)||capacity<=0||!VENUE_TYPES.some(t=>t.key===s('category'))||!VENUE_DISTRICTS.some(d=>d.en===s('district'))||!['yes','no'].includes(s('regularlyHosts'))||!['yes','no'].includes(s('isNightclub'))||(s('category')==='other'&&!s('categoryOther')))return null;
  return {nameEn:s('name'),nameAr:s('nameAr'),address:s('address'),addressAr:s('addressAr')||s('address'),contact:`${s('contactName')} ${s('contactPhone')}`,contactName:s('contactName'),contactPhone:s('contactPhone'),category:s('category')==='other'?s('categoryOther'):s('category'),district:s('district'),capacity,point,regular:s('regularlyHosts')==='yes',nightclub:s('category')==='nightclub'||s('isNightclub')==='yes'};
+}
+
+export type VenueWorkspace = NonNullable<ReturnType<typeof venuePackageFor>>;
+
+/** The plain facts lib/rules reads to derive the venue's checks, next step and rail. */
+export function venuePackageFacts(w: VenueWorkspace): VenuePackageFacts {
+  const config = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
+  const fee = applicationFee('registerVenue', null, effectiveFlag('applicationFees', config), capabilityConfigFor('applicationFees'));
+  const nominated = {
+    director: w.invitations.some((i) => i.kind === 'director' && i.status === 'nominated'),
+    ems: w.invitations.some((i) => i.kind === 'ems' && i.status === 'nominated'),
+  };
+  return {
+    editable: w.editable,
+    status: w.status,
+    detailsDone: w.detailsDone && !w.detailsEditing,
+    assessmentDone: w.assessmentDone && !w.assessmentEditing,
+    level: w.level,
+    assessmentVersion: w.assessmentVersion,
+    pendingInvitations: w.invitations.filter((i) => i.status === 'nominated').map((i) => ({ name: i.name, token: i.token })),
+    requirements: w.requirements.map((r) => ({
+      n: r.n, en: r.en, ar: r.ar, optional: r.optional, done: r.done, clinical: r.clinical,
+      awaitingInvitation: !r.done && venueRowAwaitsInvitation(r.n, w.level, nominated),
+    })),
+    fee: fee ? { amount: fee.amount, currency: fee.currency, paid: Boolean(paymentFor(w.venue.id, 'registerVenue')) } : null,
+    submittedAt: w.submittedAt,
+    validUntil: w.venue.validUntil ?? null,
+  };
 }

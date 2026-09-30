@@ -4,11 +4,11 @@ import { notFound, redirect } from 'next/navigation';
 import { venueAccess, venueMayWrite, invalidateVenueMedicalWork } from '../../lib/venue/collaboration';
 import { currentAccount } from '../../lib/auth';
 import { getDb } from '../../lib/db';
-import { ensureVenuePackage, readVenueDetails, venuePackageFor } from '../../lib/venue/workspace';
+import { ensureVenuePackage, readVenueDetails, venuePackageFor, venuePackageFacts } from '../../lib/venue/workspace';
+import { venueSubmissionChecks, venueStatusForDecision, VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { refuseUpload } from '../../lib/rules/uploads';
-import { can, REASSESSMENT_WINDOW, venueReassessmentGate, applicationFee, effectiveFlag } from '../../lib/rules';
-import { capabilityConfigFor, ministryConfig, venueChangeSinceAssessment } from '../../lib/queries';
-import { paymentFor } from '../../lib/payments';
+import { can, REASSESSMENT_WINDOW, venueReassessmentGate } from '../../lib/rules';
+import { venueChangeSinceAssessment } from '../../lib/queries';
 import { beirutToday } from '../../lib/clock';
 
 async function owned(id:string) {
@@ -71,8 +71,9 @@ export async function approveVenuePlanAction(id:string,form:FormData) {
 }
 export async function submitVenuePackageAction(id:string,form:FormData) {
  const {a}=await owned(id); const db=getDb();db.exec('BEGIN IMMEDIATE');let blocked=false;
- try{const w=ensureVenuePackage(a.id,id)!;const config=new Map([...ministryConfig()].map(([k,v])=>[k,v.value]));const fee=applicationFee('registerVenue',null,effectiveFlag('applicationFees',config),capabilityConfigFor('applicationFees'));
- if(!w.editable||!w.assessmentDone||!w.detailsDone||w.detailsEditing||w.assessmentEditing||w.invitations.some(i=>i.status==='nominated')||w.requirements.some(r=>!r.optional&&!r.done)||form.get('confirm')!=='yes'||(fee&&!paymentFor(id,'registerVenue')))blocked=true;
+ try{const w=ensureVenuePackage(a.id,id)!;
+ // The same checks the submit screen shows (lib/rules venueSubmissionChecks), plus the declaration on the form.
+ if(!venueSubmissionChecks(venuePackageFacts(w)).canSubmit||form.get('confirm')!=='yes')blocked=true;
  else {const revision=w.revision+1;const snapshot=JSON.stringify({venue:w.venue,point:w.point,district:w.district,level:w.level,assessmentVersion:w.assessmentVersion,requirements:w.requirements,answers:w.answers,approval:w.approval});
  const result=db.prepare('INSERT INTO venue_package_history(venue_id,revision,snapshot) VALUES(?,?,?)').run(id,revision,snapshot);
  db.prepare(`INSERT INTO venue_package_files(package_id,doc_key,file_name,content_type,bytes) SELECT ?,doc_key,file_name,content_type,bytes FROM venue_attachments WHERE venue_id=? AND length(bytes)>0`).run(result.lastInsertRowid,id);
@@ -88,13 +89,15 @@ export async function reviewVenuePackageAction(id:string,form:FormData) {
  if(!['satisfied','revision','incomplete'].includes(decision)||(decision!=='satisfied'&&!note))redirect(`/ministry/venues/${id}?error=note`);
  db.exec('BEGIN IMMEDIATE');let stale=false;
  try{const w=venuePackageFor(v.account_id,id)!;if(w.status!=='submitted'||w.revision!==revision)stale=true;else{
- db.prepare(`UPDATE venue_packages SET status=?,review_note=?,reviewer_id=?,accepted_at=CASE WHEN ?='satisfied' THEN now_stamp() ELSE NULL END WHERE venue_id=?`).run(decision==='satisfied'?'accepted':'revision',note,a.id,decision,id);
+ db.prepare(`UPDATE venue_packages SET status=?,review_note=?,reviewer_id=?,accepted_at=CASE WHEN ?='satisfied' THEN now_stamp() ELSE NULL END WHERE venue_id=?`).run(venueStatusForDecision(decision as 'satisfied'|'revision'|'incomplete'),note,a.id,decision,id);
  db.prepare('UPDATE venue_package_history SET decision=?,review_note=?,reviewer_id=?,reviewed_at=now_stamp() WHERE venue_id=? AND revision=?').run(decision,note,a.id,id,revision);
  if(decision==='satisfied') { const date=beirutToday(), d=new Date(`${date}T00:00:00Z`);const day=d.getUTCDate();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+REASSESSMENT_WINDOW.venueClassificationMonths);const last=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,0)).getUTCDate();d.setUTCDate(Math.min(day,last));const until=d.toISOString().slice(0,10);
  db.prepare('UPDATE venue_assessments SET certificate_issued=1,effective=?,valid_until=?,certificate_snapshot=? WHERE venue_id=? AND version=?').run(date,until,JSON.stringify({nameEn:w.venue.nameEn,nameAr:w.venue.nameAr,addressEn:w.venue.addressMunicipalityEn,addressAr:w.venue.addressMunicipalityAr,capacity:w.venue.licensedCapacity}),id,w.assessmentVersion);
  db.prepare('UPDATE venues SET level=?,issued=?,valid_until=? WHERE id=?').run(w.level,date,until,id);
  }
- notify(v.account_id,a.isDemo,`/venues/${id}`,decision==='satisfied'?'Venue certificate available':'Venue changes requested',decision==='satisfied'?'شهادة الموقع متاحة':'تعديلات مطلوبة على الموقع');
+ // The operator is told the outcome the Ministry recorded, in the compliance form's words.
+ const outcome=VENUE_STATUS[venueStatusForDecision(decision as 'satisfied'|'revision'|'incomplete')];
+ notify(v.account_id,a.isDemo,`/venues/${id}`,`${w.venue.nameEn}: ${outcome.en}`,`${w.venue.nameAr}: ${outcome.ar}`);
  }db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}refresh(id);redirect(`/ministry/venues/${id}${stale?'?error=stale':''}`);
 }
 export async function renewVenuePackageAction(id:string) {
