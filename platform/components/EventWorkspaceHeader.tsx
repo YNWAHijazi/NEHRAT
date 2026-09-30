@@ -59,7 +59,7 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
               </div>
             </div>
             <h1 data-sec-h1="" style={{ margin: 0, fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-              <bdi lang="en">{event.nameEn}</bdi>{event.nameAr && event.nameAr !== event.nameEn ? <> <bdi lang="ar" style={{ display: 'block', fontWeight: 400, fontSize: '0.7em', marginBlockStart: 4 }}>({event.nameAr})</bdi></> : null}
+              <bdi lang="en">{event.nameEn}</bdi>{event.nameAr && event.nameAr !== event.nameEn ? <> <span style={{display:'block'}}><bdi lang="ar" style={{fontWeight: 400, fontSize: '0.7em', marginBlockStart: 4 }}>({event.nameAr})</bdi></span></> : null}
             </h1>
           </div>
           <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>

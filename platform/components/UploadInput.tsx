@@ -9,7 +9,7 @@ export function UploadInput({ onChange, ...props }: Omit<InputHTMLAttributes<HTM
   const id = useId();
   const [error, setError] = useState<{ en: string; ar: string } | null>(null);
   return <span style={{ display: 'block', minWidth: 0, maxWidth: '100%' }}>
-    <input {...props} type="file" accept={acceptAttribute()} aria-describedby={error ? id : props['aria-describedby']}
+    <input {...props} className={['requirement-file',props.className].filter(Boolean).join(' ')} type="file" accept={acceptAttribute()} aria-describedby={error ? id : props['aria-describedby']}
       aria-invalid={error ? true : undefined} onChange={(event) => {
         const file = event.currentTarget.files?.[0];
         const refusal = file ? refuseUpload(file) : null;

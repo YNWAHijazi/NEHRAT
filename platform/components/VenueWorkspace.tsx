@@ -19,7 +19,7 @@ export function VenueWorkspace({account,w,active,children}:{account:Account;w:Ve
  {en:'Record ID',ar:'معرّف السجل',value:v.id}, {en:'Ministry reference',ar:'الرقم المرجعي للوزارة',value:v.mophReference},
  {en:'Level',ar:'المستوى',value:w.level}, {en:'Certificate valid until',ar:'الشهادة صالحة حتى',value:v.validUntil},
  ].map(x=><div key={x.en}><div style={{fontSize:12,color:'var(--muted)',marginBlockEnd:4}}><L en={x.en} ar={x.ar}/></div><strong>{x.value??'—'}</strong></div>)}</div>
- <h1 style={{fontSize:34,margin:'0 0 12px',overflowWrap:'anywhere'}}><bdi lang="en">{v.nameEn}</bdi>{v.nameAr!==v.nameEn?<bdi lang="ar" style={{display:'block',fontSize:24,fontWeight:400,marginBlockStart:4}}>({v.nameAr})</bdi>:null}</h1>
+ <h1 style={{fontSize:34,margin:'0 0 12px',overflowWrap:'anywhere'}}><bdi lang="en">{v.nameEn}</bdi>{v.nameAr!==v.nameEn?<span style={{display:'block'}}><bdi lang="ar" style={{fontSize:24,fontWeight:400,marginBlockStart:4}}>({v.nameAr})</bdi></span>:null}</h1>
  <span style={{background:w.status==='accepted'?'var(--brand-soft)':'var(--accent-soft)',color:w.status==='accepted'?'var(--brand)':'var(--accent-ink)',padding:'5px 12px',borderRadius:20,fontSize:14}}><L en={state.en} ar={state.ar}/></span>
  </div>
  <nav aria-label="Venue sections" data-region="venue-workspace-nav" style={{display:'flex',flexWrap:'wrap',gap:6,paddingBlockEnd:12,borderBlockEnd:'1px solid var(--line)',marginBlockEnd:28}}>{tabs.map(t=><Link key={t.key} href={`/venues/${v.id}${t.path}`} aria-current={active===t.key?'page':undefined} style={{padding:'10px 16px',borderRadius:8,background:active===t.key?'var(--brand-soft)':'transparent',color:active===t.key?'var(--brand)':'var(--muted)',fontWeight:active===t.key?600:400}}><L en={t.en} ar={t.ar}/></Link>)}</nav>

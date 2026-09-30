@@ -27,3 +27,8 @@ Pre-release live backup:
 - 52 tables; integrity passed.
 - SHA-256: 922010078e7716e02352aa6bcde598a4faff92b20cefaf4a06e0714393d2a958
 - Schema changes are additive. New assessment versions explicitly start without an issued certificate; all existing versions retain their issued-certificate flag.
+
+Live verification of the workflow release:
+- Railway deployment 02954957-2836-4469-8c58-4bdedbc5999e succeeded for commit 5b32a54.
+- Venue overview, requirements, details, submit and facility submit returned 200 for the demonstration organizer, without editing records. Requirements opened on click; English/Arabic phone layouts had no horizontal overflow or browser exceptions.
+- Final visual cleanup aligns both names at the same edge in all three workspaces and applies the existing styled upload control everywhere UploadInput is used. Production build and nine desktop/mobile bilingual layout checks passed after that cleanup.
