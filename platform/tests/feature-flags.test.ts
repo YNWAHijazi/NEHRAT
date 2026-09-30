@@ -129,6 +129,9 @@ describe('commercial and AI capability', () => {
       // readiness obligation waits on money, and the band says so. Both render
       // nothing while the capability is off.
       .filter((f) => !f.endsWith('app/venues/[id]/assessment/page.tsx'))
+      // Venue fees now gate submission, not the preparatory assessment.
+      .filter((f) => !f.endsWith('app/venues/[id]/submit/page.tsx'))
+      .filter((f) => !f.endsWith('app/venues/actions.ts'))
       .filter((f) => !f.endsWith('app/facilities/[id]/page.tsx'))
       // ...and the venue gate ENFORCED server-side in the action, not only
       // rendered: the action recomputes rather than trusting the screen, the

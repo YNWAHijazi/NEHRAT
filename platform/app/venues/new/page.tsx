@@ -15,7 +15,8 @@ import { VENUE_REGISTRATION_FIELDS } from '../../../lib/rules';
  * still captured, because the assessment derives from them; they simply stop
  * being a door.
  */
-export default async function RegisterVenuePage() {
+export default async function RegisterVenuePage({searchParams}:{searchParams:Promise<{error?:string}>}) {
+  const {error}=await searchParams;
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const organization = organizationFor(account.id);
@@ -34,6 +35,7 @@ export default async function RegisterVenuePage() {
               second sweep): the one optional field says so on its own label. */}
 
 
+          {error?<p role="alert"><L en="Complete the venue details and confirm the map pin." ar="أكملوا تفاصيل الموقع وأكّدوا العلامة على الخريطة."/></p>:null}
           <RegisterVenueForm fields={[...VENUE_REGISTRATION_FIELDS]} />
 
           <div data-region="exempt-footnote"><InfoNote>

@@ -1,3 +1,4 @@
+import { VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
@@ -446,6 +447,8 @@ export default async function DashboardPage({
                   {venues.map((v) => {
                     const dleft = v.validUntil ? daysBetween(today, v.validUntil) : null;
                     const state =
+                      v.packageStatus && v.packageStatus!=='accepted' ? {...VENUE_STATUS[v.packageStatus],color:'var(--accent-ink)',chipBg:'var(--accent-soft)'} :
+                      !v.issued ? {...VENUE_STATUS.draft,color:'var(--accent-ink)',chipBg:'var(--accent-soft)'} :
                       dleft !== null && dleft < 0
                         ? { en: 'Reassessment required', ar: 'يلزم إعادة التقييم', color: 'var(--bad)', chipBg: 'var(--bad-soft)' }
                         : dleft !== null && dleft <= REASSESSMENT_WINDOW.opensDaysBeforeExpiry
@@ -460,7 +463,7 @@ export default async function DashboardPage({
                           <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockStart: 3 }}>{v.id}</span>
                         </Link>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', color: 'var(--muted)' }}>
-                          <L en={`Level ${v.level}`} ar={`المستوى ${v.level}`} />
+                          <L en={v.level?`Level ${v.level}`:'Not assessed'} ar={v.level?`المستوى ${v.level}`:'لم يُقيّم بعد'} />
                         </div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: 15, fontVariantNumeric: 'tabular-nums', color: state.color }}>{v.validUntil}</div>
                         <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '13.5px' }}>

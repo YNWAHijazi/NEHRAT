@@ -934,6 +934,26 @@ function migrate(d: DatabaseSync): void {
   addColumn('events', 'archived_by', 'archived_by TEXT');
   addColumn('venues', 'archived_at', 'archived_at TEXT');
   addColumn('venues', 'archived_by', 'archived_by TEXT');
+  addColumn('venues', 'district', "district TEXT NOT NULL DEFAULT ''");
+  addColumn('venues', 'latitude', 'latitude REAL');
+  addColumn('venues', 'longitude', 'longitude REAL');
+  // Existing certificates remain accessible. New assessments are drafts until reviewed.
+  addColumn('venue_assessments', 'certificate_issued', 'certificate_issued INTEGER NOT NULL DEFAULT 1');
+  d.exec(`CREATE TABLE IF NOT EXISTS venue_packages (
+    venue_id TEXT PRIMARY KEY REFERENCES venues(id), status TEXT NOT NULL DEFAULT 'draft',
+    answers TEXT NOT NULL DEFAULT '{}', assessment_version INTEGER, revision INTEGER NOT NULL DEFAULT 0,
+    submitted_at TEXT, accepted_at TEXT, review_note TEXT NOT NULL DEFAULT '', reviewer_id INTEGER REFERENCES accounts(id)
+  ); CREATE TABLE IF NOT EXISTS venue_package_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, venue_id TEXT NOT NULL REFERENCES venues(id), revision INTEGER NOT NULL,
+    snapshot TEXT NOT NULL, decision TEXT, review_note TEXT NOT NULL DEFAULT '', reviewer_id INTEGER REFERENCES accounts(id),
+    submitted_at TEXT NOT NULL DEFAULT (datetime('now')), reviewed_at TEXT,
+    UNIQUE(venue_id,revision)
+  ); CREATE TABLE IF NOT EXISTS venue_package_files (
+    package_id INTEGER NOT NULL REFERENCES venue_package_history(id), doc_key TEXT NOT NULL,
+    file_name TEXT NOT NULL, content_type TEXT NOT NULL, bytes BLOB NOT NULL,
+    PRIMARY KEY(package_id,doc_key)
+  );`);
+
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
   // Partner ruling (2026-09-03): ending a facility's coverage is a DETERMINATION,
@@ -1020,6 +1040,26 @@ function migrate(d: DatabaseSync): void {
   // organizer's archived section; the columns mirror events' archive pair.
   addColumn('venues', 'archived_at', 'archived_at TEXT');
   addColumn('venues', 'archived_by', 'archived_by TEXT');
+  addColumn('venues', 'district', "district TEXT NOT NULL DEFAULT ''");
+  addColumn('venues', 'latitude', 'latitude REAL');
+  addColumn('venues', 'longitude', 'longitude REAL');
+  // Existing certificates remain accessible. New assessments are drafts until reviewed.
+  addColumn('venue_assessments', 'certificate_issued', 'certificate_issued INTEGER NOT NULL DEFAULT 1');
+  d.exec(`CREATE TABLE IF NOT EXISTS venue_packages (
+    venue_id TEXT PRIMARY KEY REFERENCES venues(id), status TEXT NOT NULL DEFAULT 'draft',
+    answers TEXT NOT NULL DEFAULT '{}', assessment_version INTEGER, revision INTEGER NOT NULL DEFAULT 0,
+    submitted_at TEXT, accepted_at TEXT, review_note TEXT NOT NULL DEFAULT '', reviewer_id INTEGER REFERENCES accounts(id)
+  ); CREATE TABLE IF NOT EXISTS venue_package_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, venue_id TEXT NOT NULL REFERENCES venues(id), revision INTEGER NOT NULL,
+    snapshot TEXT NOT NULL, decision TEXT, review_note TEXT NOT NULL DEFAULT '', reviewer_id INTEGER REFERENCES accounts(id),
+    submitted_at TEXT NOT NULL DEFAULT (datetime('now')), reviewed_at TEXT,
+    UNIQUE(venue_id,revision)
+  ); CREATE TABLE IF NOT EXISTS venue_package_files (
+    package_id INTEGER NOT NULL REFERENCES venue_package_history(id), doc_key TEXT NOT NULL,
+    file_name TEXT NOT NULL, content_type TEXT NOT NULL, bytes BLOB NOT NULL,
+    PRIMARY KEY(package_id,doc_key)
+  );`);
+
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
   // Partner ruling (2026-09-03): ending a facility's coverage is a DETERMINATION,

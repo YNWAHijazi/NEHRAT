@@ -71,10 +71,12 @@ export function PlanConfirmation({
   facilityId,
   coordinatorName,
   existing,
+  ready=true,
 }: {
   facilityId: string;
   coordinatorName: string;
   existing: FacilityPlanConfirmation | null;
+  ready?:boolean;
 }) {
   const content = FACILITY_CONTENT;
   const [checks, setChecks] = useState<Record<string, boolean>>(existing?.current ? existing.checks : {});
@@ -83,6 +85,7 @@ export function PlanConfirmation({
     <form
       action={saveFacilityPlanAction.bind(null, facilityId)}
       data-region="plan-confirmation"
+      id="confirmation"
       style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}
     >
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 8 }}>
@@ -142,6 +145,7 @@ export function PlanConfirmation({
       </div>
       <button
         type="submit"
+        disabled={!ready}
         style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
       >
         <L en="Record the readiness confirmation" ar="تسجيل تأكيد الجاهزية" />

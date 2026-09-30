@@ -1,4 +1,5 @@
 'use server';
+import { facilityPersons } from '../lib/queries';
 
 /**
  * Server actions for Slice 1: sign-in, sign-out, account creation, organization
@@ -987,29 +988,15 @@ function ownedVenue(accountId: number, venueId: string): boolean {
 export async function registerVenueAction(formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  const nameEn = String(formData.get('name') ?? '').trim();
-  const nameAr = String(formData.get('nameAr') ?? '').trim() || nameEn;
-  const category = String(formData.get('category') ?? '').trim();
-  const addressEn = String(formData.get('address') ?? '').trim();
-  const addressAr = String(formData.get('addressAr') ?? '').trim() || addressEn;
-  const contact = String(formData.get('contact') ?? '').trim();
-  const capacity = Number(String(formData.get('capacity') ?? '').replace(/[^0-9]/g, '')) || null;
-  const regularlyHosts = formData.get('regularlyHosts') === 'yes';
-  const isNightclub = formData.get('isNightclub') === 'yes';
-  // NO APPLICABILITY GATE (partner ruling, 2026-09-05): registering mints the
-  // record. The capacity and regularly-hosts answers are stored because the
-  // annual assessment derives from them, not to refuse the registration.
-  if (!nameEn) redirect('/venues/new');
-  const venueId = nextRecordId('VN');
-  getDb()
-    .prepare(
-      `INSERT INTO venues (id, account_id, name_en, name_ar, category, address_municipality_en,
-         address_municipality_ar, responsible_contact, licensed_capacity, regularly_hosts, is_nightclub, is_demo)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(venueId, account.id, nameEn, nameAr, category, addressEn, addressAr, contact, capacity, regularlyHosts ? 1 : 0, isNightclub ? 1 : 0, account.isDemo ? 1 : 0);
-  revalidatePath('/dashboard');
-  redirect(`/venues/${venueId}/assessment`);
+  const {readVenueDetails}=await import('../lib/venue/workspace');
+  const v=readVenueDetails(formData);if(!v)redirect('/venues/new?error=details');
+  const venueId=nextRecordId('VN');
+  const db=getDb();db.exec('BEGIN IMMEDIATE');
+  try {
+  db.prepare(`INSERT INTO venues(id,account_id,name_en,name_ar,category,address_municipality_en,address_municipality_ar,responsible_contact,licensed_capacity,regularly_hosts,is_nightclub,is_demo,district,latitude,longitude) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(venueId,account.id,v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,+account.isDemo,v.district,v.point.lat,v.point.lng);
+  db.prepare('INSERT INTO venue_packages(venue_id) VALUES(?)').run(venueId);
+  db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
+  revalidatePath('/dashboard');redirect(`/venues/${venueId}/assessment`);
 }
 
 export interface VenueAssessmentPayload {
@@ -1036,16 +1023,20 @@ export async function attachVenueDocumentAction(venueId: string, formData: FormD
   if (!account) redirect('/signin');
   if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
   refuseIfVenueArchived(venueId);
+  const {venuePackageFor}=await import('../lib/venue/workspace');
+  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
   const docKey = String(formData.get('docKey') ?? '');
   const file = formData.get('file');
   const back = `/venues/${venueId}`;
-  if (!docKey || !(file instanceof File)) redirect(back);
+  if (!venuePackageFor(account.id,venueId)?.requirements.some(r=>String(r.n)===docKey) || !(file instanceof File)) redirect(back);
 
   const refusal = refuseUpload({ type: file.type, size: file.size });
   if (refusal) redirect(`${back}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
   const bytes = Buffer.from(await file.arrayBuffer());
   if (bytes.length > maxUploadBytes()) redirect(`${back}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
 
+  // Recheck after reading the file: a submitted package must not change.
+  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
   getDb()
     .prepare(
       `INSERT INTO venue_attachments (venue_id, doc_key, file_name, content_type, byte_size, bytes)
@@ -1065,6 +1056,8 @@ export async function removeVenueAttachmentAction(venueId: string, formData: For
   if (!account) redirect('/signin');
   if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
   refuseIfVenueArchived(venueId);
+  const {venuePackageFor}=await import('../lib/venue/workspace');
+  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
   const docKey = String(formData.get('docKey') ?? '');
   if (docKey) {
     getDb().prepare(`DELETE FROM venue_attachments WHERE venue_id = ? AND doc_key = ?`).run(venueId, docKey);
@@ -1077,77 +1070,23 @@ export async function saveVenueAssessmentAction(
   venueId: string,
   payload: VenueAssessmentPayload,
 ): Promise<{ level: number } | { error: string }> {
-  refuseIfVenueArchived(venueId);
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedVenue(account.id, venueId)) return { error: 'not-found' };
-  const db = getDb();
-  const venue = db
-    .prepare(`SELECT licensed_capacity, regularly_hosts, is_nightclub, moph_reference FROM venues WHERE id = ?`)
-    .get(venueId) as { licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number; moph_reference: string | null };
-
-  const inputs: MinimumConditionInputs = {
-    expectedMaxSimultaneousAttendance: payload.attendance,
-    eventDisciplines: [],
-    courseDistanceKm: null,
-    venueLicensedCapacity: venue.licensed_capacity,
-    venueIsNightclubOrDanceVenue: venue.is_nightclub === 1,
-  };
-  const derivation = deriveLevel({ answers: payload.answers, inputs });
-  if (!derivation.complete || derivation.finalLevel === null) return { error: 'incomplete' };
-  // Part F certifies the venue assessment too: the declaration's fields are
-  // required to record (the same one-rule the compliance form enforces).
-  if (!payload.representative.trim() || !payload.position.trim()) return { error: 'incomplete' };
-
-  // THE REGISTRATION FEE GATES THE CLASSIFICATION (register closure, 2026-09-03):
-  // the venue's filing moment is here, where the Ministry reference mints and the
-  // classification issues. With a venue fee in force and unpaid, both wait --
-  // named on the screen before this is reachable, and refused here regardless.
-  {
-    const { applicationFee, effectiveFlag } = await import('../lib/rules');
-    const { capabilityConfigFor, ministryConfig } = await import('../lib/queries');
-    const { paymentFor } = await import('../lib/payments');
-    const config = new Map([...ministryConfig()].map(([k, v]) => [k, v.value]));
-    const fee = applicationFee('registerVenue', null, effectiveFlag('applicationFees', config), capabilityConfigFor('applicationFees'));
-    if (fee !== null && paymentFor(venueId, 'registerVenue') === null) return { error: 'fee-unpaid' };
-  }
-
-  const { beirutToday } = await import('../lib/clock');
-  const effective = beirutToday();
-  const { REASSESSMENT_WINDOW } = await import('../lib/rules');
-  const months = REASSESSMENT_WINDOW.venueClassificationMonths;
-  const until = new Date(`${effective}T00:00:00Z`);
-  until.setUTCMonth(until.getUTCMonth() + months);
-  const validUntil = until.toISOString().slice(0, 10);
-
-  const latest = db
-    .prepare(`SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = ?`)
-    .get(venueId) as { v: number | null };
-  db.prepare(
-    `INSERT INTO venue_assessments (venue_id, version, answers, inputs, derivation,
-       nehrat_tool_version, effective, valid_until, representative, position)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    venueId, (latest.v ?? 0) + 1,
-    JSON.stringify(payload.answers), JSON.stringify(inputs), JSON.stringify(derivation),
-    NEHRAT_TOOL_VERSION, effective, validUntil, payload.representative, payload.position,
-  );
-
-  let reference = venue.moph_reference;
-  if (!reference) {
-    // The Beirut clock, like the event reference and every other date computation.
-    const year = effective.slice(0, 4);
-    const last = db
-      .prepare(`SELECT moph_reference AS r FROM venues WHERE moph_reference LIKE ? ORDER BY moph_reference DESC LIMIT 1`)
-      .get(`MOPH-VN-${year}-%`) as { r: string } | undefined;
-    const n = last ? Number.parseInt(last.r.slice(-4), 10) + 1 : 1;
-    reference = `MOPH-VN-${year}-${String(n).padStart(4, '0')}`;
-  }
-  db.prepare(
-    `UPDATE venues SET level = ?, issued = ?, valid_until = ?, moph_reference = ? WHERE id = ?`,
-  ).run(derivation.finalLevel, effective, validUntil, reference, venueId);
-  revalidatePath(`/venues/${venueId}`);
-  return { level: derivation.finalLevel };
+  const account=await currentAccount();if(!account)redirect('/signin');
+  const {ensureVenuePackage}=await import('../lib/venue/workspace');
+  const w=ensureVenuePackage(account.id,venueId);if(!w||!w.editable)return {error:'locked'};
+  const inputs:MinimumConditionInputs={expectedMaxSimultaneousAttendance:payload.attendance,eventDisciplines:[],courseDistanceKm:null,venueLicensedCapacity:w.venue.licensedCapacity,venueIsNightclubOrDanceVenue:w.venue.isNightclub};
+  const derivation=deriveLevel({answers:payload.answers,inputs});
+  if(!derivation.complete||derivation.finalLevel===null||!payload.representative.trim()||!payload.position.trim())return {error:'incomplete'};
+  const db=getDb();db.exec('BEGIN IMMEDIATE');
+  try {
+    const latest=db.prepare('SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id=?').get(venueId) as {v:number|null};
+    const version=(latest.v??0)+1;
+    db.prepare(`INSERT INTO venue_assessments(venue_id,version,answers,inputs,derivation,nehrat_tool_version,effective,valid_until,representative,position,certificate_issued) VALUES(?,?,?,?,?,?,'','',?,?,0)`).run(venueId,version,JSON.stringify(payload.answers),JSON.stringify(inputs),JSON.stringify(derivation),NEHRAT_TOOL_VERSION,payload.representative.trim(),payload.position.trim());
+    db.prepare('UPDATE venue_packages SET assessment_version=? WHERE venue_id=?').run(version,venueId);
+    // A draft level is visible immediately; issuance and validity wait for Ministry review.
+    if(!w.venue.issued)db.prepare('UPDATE venues SET level=? WHERE id=?').run(derivation.finalLevel,venueId);
+    db.exec('COMMIT');
+  }catch(e){db.exec('ROLLBACK');throw e;}
+  revalidatePath(`/venues/${venueId}`,'layout');return {level:derivation.finalLevel};
 }
 
 export async function reportVenueChangeAction(venueId: string, formData: FormData): Promise<void> {
@@ -1337,7 +1276,8 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   const priorYear=new Date(`${today}T12:00:00Z`);priorYear.setUTCFullYear(priorYear.getUTCFullYear()-1);
   if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!String(formData.get('coordinator')??'').trim()
     ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
-    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}/plan?error=readiness`);
+    ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
+    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}/submit?error=readiness`);
 
   const db=getDb();
   db.exec('BEGIN IMMEDIATE');

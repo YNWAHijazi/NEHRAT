@@ -366,15 +366,16 @@ export function assessmentsFor(accountId: number, eventId: string): AssessmentVe
 }
 
 export interface VenueRow {
+  packageStatus?: import('./rules/venue-workflow').VenuePackageStatus | null;
   id: string; nameEn: string; nameAr: string;
   level: number | null; issued: string | null; validUntil: string | null;
 }
 
 export function venuesFor(accountId: number): VenueRow[] {
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, level, issued, valid_until FROM venues WHERE account_id = ? AND archived_at IS NULL`)
-    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; level: number | null; issued: string | null; valid_until: string | null }[];
-  return rows.map((r) => ({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar, level: r.level, issued: r.issued, validUntil: r.valid_until }));
+    .prepare(`SELECT v.id,v.name_en,v.name_ar,v.level,v.issued,v.valid_until,p.status AS package_status FROM venues v LEFT JOIN venue_packages p ON p.venue_id=v.id WHERE v.account_id = ? AND v.archived_at IS NULL`)
+    .all(accountId) as unknown as { package_status: import('./rules/venue-workflow').VenuePackageStatus|null; id: string; name_en: string; name_ar: string; level: number | null; issued: string | null; valid_until: string | null }[];
+  return rows.map((r) => ({ packageStatus:r.package_status,id: r.id, nameEn: r.name_en, nameAr: r.name_ar, level: r.level, issued: r.issued, validUntil: r.valid_until }));
 }
 
 /** Archived venues, for the Previous services section: read-only rows. */
@@ -2092,13 +2093,13 @@ export function arrestLocations(viewerIsDemo: boolean): ArrestGroup[] {
 }
 
 /** A venue's attached requirement documents, keyed by catalogue doc key. */
-export function venueAttachmentsFor(accountId: number, venueId: string): { docKey: string; fileName: string; attachedAt: string }[] {
+export function venueAttachmentsFor(accountId: number, venueId: string): { docKey: string; fileName: string; attachedAt: string; hasFile: boolean }[] {
   const owned = getDb().prepare(`SELECT id FROM venues WHERE id = ? AND account_id = ?`).get(venueId, accountId);
   if (!owned) return [];
   const rows = getDb()
-    .prepare(`SELECT doc_key, file_name, attached_at FROM venue_attachments WHERE venue_id = ? ORDER BY attached_at DESC`)
-    .all(venueId) as unknown as { doc_key: string; file_name: string; attached_at: string }[];
-  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at.slice(0, 10) }));
+    .prepare(`SELECT doc_key, file_name, attached_at, length(bytes) AS byte_count FROM venue_attachments WHERE venue_id = ? ORDER BY attached_at DESC`)
+    .all(venueId) as unknown as { doc_key: string; file_name: string; attached_at: string; byte_count:number }[];
+  return rows.map((r) => ({ docKey: r.doc_key, fileName: r.file_name, attachedAt: r.attached_at.slice(0, 10), hasFile:r.byte_count>0 }));
 }
 
 export interface ConfigValueRow {

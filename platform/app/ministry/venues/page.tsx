@@ -14,9 +14,10 @@ export default async function Venues({
   const { q = "" } = await searchParams;
   const rows = getDb()
     .prepare(
-      "SELECT id,name_en,name_ar,level,valid_until,moph_reference FROM venues WHERE is_demo = ? ORDER BY valid_until ASC",
+      "SELECT v.id,v.name_en,v.name_ar,v.level,v.valid_until,v.moph_reference,p.status,p.submitted_at FROM venues v LEFT JOIN venue_packages p ON p.venue_id=v.id WHERE v.is_demo = ? ORDER BY CASE WHEN p.status='submitted' THEN 0 ELSE 1 END,p.submitted_at DESC,v.valid_until ASC",
     )
     .all(Number(account.isDemo)) as unknown as {
+    status:string|null;submitted_at:string|null;
     id: string;
     name_en: string;
     name_ar: string;
@@ -79,7 +80,9 @@ export default async function Venues({
                 }
               />
             </p>
-            {v.level ? (
+            {v.status?<p><L en={v.status==='submitted'?'Under Ministry review':v.status==='accepted'?'Requirements satisfied':v.status==='revision'?'Changes requested':'In preparation'} ar={v.status==='submitted'?'قيد مراجعة الوزارة':v.status==='accepted'?'المتطلبات مستوفاة':v.status==='revision'?'تعديلات مطلوبة':'قيد التحضير'}/></p>:null}
+            {v.submitted_at?<p><Link href={`/ministry/venues/${v.id}`}><L en="Review submission" ar="مراجعة الطلب"/></Link></p>:null}
+            {v.valid_until ? (
               <>
                 <Link href={`/venues/${v.id}/certificate`}>
                   <L en="View certificate" ar="عرض الشهادة" />
@@ -91,7 +94,7 @@ export default async function Venues({
                   {(
                     getDb()
                       .prepare(
-                        "SELECT version,effective,valid_until FROM venue_assessments WHERE venue_id = ? ORDER BY version DESC",
+                        "SELECT version,effective,valid_until FROM venue_assessments WHERE venue_id = ? AND certificate_issued=1 ORDER BY version DESC",
                       )
                       .all(v.id) as unknown as {
                       version: number;

@@ -1,3 +1,4 @@
+import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
 import { facilityPoint, devicePoint } from '../../../../lib/facility-gis';
 import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
@@ -42,19 +43,17 @@ export default async function DeviceRegistryPage({
     <>
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}><FacilityWorkspaceHeader facility={facility} active="devices"/>
         {notice === 'saved' ? (
           <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
             <L en="The device record has been saved." ar="حُفظ سجل الجهاز." />
           </div>
         ) : null}
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-          <L en={`${facility.nameEn} · ${facility.id}`} ar={`${facility.nameAr} · ${facility.id}`} />
-        </div>
-        <h1 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+
+        <h2 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="AED registry" ar="سجل أجهزة إزالة الرجفان" />
          <InfoNote><L en="Select a device to confirm or update it." ar="اختر جهازاً لتأكيده أو تحديثه." /></InfoNote>
-        </h1>
+        </h2>
 
 
         {!facilityPoint(id) ? <p role="status"><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin before registering an AED." ar="أضيفوا موقع المنشأة على الخريطة قبل تسجيل الجهاز."/></a></p>:null}

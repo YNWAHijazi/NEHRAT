@@ -1,3 +1,4 @@
+import { FacilityWorkspaceHeader, FacilityProgress } from '../../../components/FacilityWorkspaceHeader';
 import { facilityPoint, facilityAedStatus } from '../../../lib/facility-gis';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -46,7 +47,7 @@ const ACTION_ROUTE: Record<string, (id: string) => string> = {
   batteryExpiry: (id) => `/facilities/${id}/devices`,
   latestCheck: (id) => `/facilities/${id}/devices`,
   drill: (id) => `/facilities/${id}/plan`,
-  annualConfirmation: (id) => `/facilities/${id}/plan`,
+  annualConfirmation: (id) => `/facilities/${id}/submit`,
   coordinator: (id) => `/facilities/${id}/plan#persons`,
 };
 
@@ -105,7 +106,8 @@ export default async function FacilityReadinessPage({
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div style={{display:'flex',gap:12,marginBlockEnd:20,flexWrap:'wrap'}}><Link href={`/facilities/${id}/profile`}><L en="Edit facility details and map" ar="تعديل تفاصيل المنشأة والخريطة"/></Link><Link href={`/facilities/${id}/incidents`}><L en="View incident reports" ar="عرض تقارير الحوادث"/></Link>{!facilityPoint(id)?<span><L en="Map pin needed" ar="موقع الخريطة مطلوب"/></span>:null}</div>
+        <FacilityWorkspaceHeader facility={facility} active="overview"/>
+        <FacilityProgress id={id}/>
         {notice === 'incident' ? (
           <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
             <L en="The incident report has been submitted to the Ministry." ar="قُدِّم تقرير الحادثة إلى الوزارة." />
@@ -122,21 +124,7 @@ export default async function FacilityReadinessPage({
           </div>
         ) : null}
 
-        <div data-region="record-header" style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 36 }}>
-          <div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 8 }}>
-              <L
-                en={`${short?.shortEn ?? category?.en ?? ''} · ${facility.municipalityEn}`}
-                ar={`${short?.shortAr ?? category?.ar ?? ''} · ${facility.municipalityAr}`}
-              />
-            </div>
-            <h1 data-sec-h1="" style={{ margin: 0, fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-              <L en={facility.nameEn} ar={facility.nameAr} />
-            </h1>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockStart: 8, fontVariantNumeric: 'tabular-nums' }}>
-              <L en={`Record ID ${facility.id}`} ar={`معرّف السجل ${facility.id}`} />
-            </div>
-          </div>
+        <div style={{marginBlockEnd:24}}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'start' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
               <L en="Viewing as of" ar="العرض بتاريخ" />
@@ -215,7 +203,7 @@ export default async function FacilityReadinessPage({
             concern -- it renders on the cardiac configuration screen instead. */}
 
         {catRequirements ? (
-          <div data-region="category-requirements" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
+          <div data-region="category-requirements" style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--line)', borderRadius: 12, marginBlockEnd: 40, maxWidth: '86ch' }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
               <L en="Additional requirements for this category — published by the Ministry" ar="متطلبات إضافية لهذه الفئة — منشورة من الوزارة" />
             </div>

@@ -1,3 +1,6 @@
+import { VenueWorkspace } from '../../../../components/VenueWorkspace';
+import { venuePackageFor } from '../../../../lib/venue/workspace';
+import { L } from '../../../../components/L';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { VenueAssessmentForm } from './VenueAssessmentForm';
@@ -33,7 +36,7 @@ export default async function VenueAssessmentPage({
     today,
     changeReportedSinceAssessment: venueChangeSinceAssessment(account.id, venue.id),
   });
-  if (gate.behaviour !== 'enabled') redirect(`/venues/${venue.id}`);
+  const w=venuePackageFor(account.id,id)!;
 
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
@@ -56,10 +59,8 @@ export default async function VenueAssessmentPage({
     : null;
 
   return (
-    <>
-      <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/venues/${id}`, en: 'Venue record', ar: 'سجل الموقع' }} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+    <VenueWorkspace account={account} w={w} active="assessment">
+    {!w.editable ? <section><h2><L en="Assessment" ar="التقييم"/></h2><p><L en={`Recorded level: ${w.level ?? '—'}`} ar={`المستوى المسجّل: ${w.level ?? '—'}`}/></p>{last?.answers.map((answer,i)=><p key={i}><L en={DOMAINS[i]?.en??''} ar={DOMAINS[i]?.ar??''}/> · {answer??'—'}</p>)}</section> :
         <VenueAssessmentForm
           venueId={venue.id}
           venueNameEn={venue.nameEn}
@@ -75,13 +76,13 @@ export default async function VenueAssessmentPage({
           }}
           initialAnswers={last ? [...last.answers] : null}
           initialAttendance={last ? last.inputs.expectedMaxSimultaneousAttendance : null}
-          feeDue={feeDue}
+          feeDue={null}
           effectivePreview={effectivePreview}
           validPreview={validPreview}
           triggers={[...VENUE_REASSESSMENT_TRIGGERS]}
         />
-      </main>
-    </>
+      }
+    </VenueWorkspace>
   );
 }
 

@@ -96,7 +96,7 @@ export function VenueAssessmentForm({
         representative,
         position,
       });
-      if ('level' in result) router.push(`/venues/${venueId}`);
+      if ('level' in result) router.push(`/venues/${venueId}/requirements`);
       else setError(true);
     });
   };
@@ -106,10 +106,10 @@ export function VenueAssessmentForm({
       <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
         <L en={`${venueNameEn} · routine operations`} ar={`${venueNameAr} · التشغيل الاعتيادي`} />
       </div>
-      <h1 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+      <h2 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
         <L en="Annual venue assessment" ar="التقييم السنوي للموقع" />
         <span data-region="session-callout"><InfoNote labelEn="What to assess" labelAr="ما يجب تقييمه"><L en="Assess one routine operating session. Use the session duration and the venue’s operating history." ar="قيّموا فترة تشغيل اعتيادية واحدة، باستخدام مدة الجلسة وسجل تشغيل الموقع." /></InfoNote></span>
-      </h1>
+      </h2>
       {/* The cross-reference to the event assessment left this screen (partner
           ruling, second sweep): a venue operator has no event assessment to
           compare with, and the callout below says what to assess. */}
@@ -130,7 +130,7 @@ export function VenueAssessmentForm({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
-          <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div data-domain={domain.number} key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -196,36 +196,6 @@ export function VenueAssessmentForm({
         )}
       </div>
 
-      <div data-region="validity" style={{ padding: 32, border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, marginBlockEnd: 26 }}>
-          <div>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-              <L en="Effective from" ar="ساري اعتباراً من" />
-            </div>
-            <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.03em', fontVariantNumeric: 'tabular-nums' }}>{effectivePreview}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
-              <L en="Valid through" ar="صالح حتى" />
-            </div>
-            <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.03em', fontVariantNumeric: 'tabular-nums' }}>{validPreview}</div>
-          </div>
-        </div>
-        <div style={{ fontSize: '14.5px', color: 'var(--muted)', marginBlockEnd: 12 }}>
-          <L en="A new assessment is required before that date if any of these change" ar="يلزم تقييم جديد قبل ذلك التاريخ إذا تغيّر أي مما يلي" />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {triggers.map((t) => (
-            <div key={t.en} style={{ display: 'flex', gap: 12, fontSize: 16, lineHeight: 1.5 }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--brand)', marginBlockStart: 9, flex: 'none' }} />
-              <span>
-                <L en={t.en} ar={t.ar} />
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div data-region="declaration" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Operator declaration" ar="إقرار الجهة المشغّلة" />
@@ -255,7 +225,7 @@ export function VenueAssessmentForm({
 
       {error ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--bad)' }}>
-          <L en="Answer every domain and the attendance figure before recording the classification." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور قبل تسجيل التصنيف." />
+          <L en="Answer every question and complete your name and position." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور قبل حفظ التقييم." />
         </p>
       ) : null}
       {/* THE REGISTRATION FEE, named before the control it holds. Absent while
@@ -284,7 +254,7 @@ export function VenueAssessmentForm({
         onClick={submit}
         style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: derivation.complete && !feeDue ? 'var(--brand)' : 'var(--surface2)', color: derivation.complete && !feeDue ? 'var(--bg)' : 'var(--muted)', fontSize: '14.5px', fontWeight: 500, cursor: derivation.complete && !feeDue ? 'pointer' : 'not-allowed' }}
       >
-        <L en="Record the classification" ar="تسجيل التصنيف" />
+        <L en="Save and view requirements" ar="الحفظ وعرض المتطلبات" />
       </button>
       {feeDue ? (
         <p style={{ margin: '10px 0 0', fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>

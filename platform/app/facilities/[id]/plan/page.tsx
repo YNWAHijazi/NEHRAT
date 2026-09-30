@@ -1,3 +1,4 @@
+import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
 import { facilityPoint } from '../../../../lib/facility-gis';
 import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
@@ -81,17 +82,15 @@ export default async function FacilityPlanPage({
     <>
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-          <L en={`${facility.nameEn} · ${facility.id}`} ar={`${facility.nameAr} · ${facility.id}`} />
-        </div>
-        <h1 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}><FacilityWorkspaceHeader facility={facility} active="plan"/>
+
+        <h2 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Cardiac emergency response plan" ar={content.planTitle.ar} />
          <InfoNote><L
             en="Update it whenever responsible persons, AED locations or emergency arrangements change."
             ar="حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة."
           /></InfoNote>
-</h1>
+</h2>
 
 
         <div data-region="procedure" data-wallcard="" style={{ padding: 36, border: '2px solid var(--brand)', borderRadius: 16, background: 'var(--surface)', marginBlockEnd: 44 }}>
@@ -192,11 +191,7 @@ export default async function FacilityPlanPage({
 
         {!facilityPoint(id)?<p><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin" ar="إضافة موقع المنشأة على الخريطة"/></a></p>:<p><a href={`https://www.openstreetmap.org/?mlat=${facilityPoint(id)!.lat}&mlon=${facilityPoint(id)!.lng}#map=18/${facilityPoint(id)!.lat}/${facilityPoint(id)!.lng}`} target="_blank" rel="noreferrer"><L en="View facility map" ar="عرض خريطة المنشأة"/></a></p>}
         {query.error==='contact'?<p role="alert"><L en="Enter the responsible contact’s name, phone and email." ar="أدخلوا اسم جهة الاتصال المسؤولة ورقم الهاتف والبريد الإلكتروني."/></p>:query.error?<p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the facility map and AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من الخريطة وحالة الأجهزة."/></p>:null}
-        <PlanConfirmation
-          facilityId={facility.id}
-          coordinatorName={coordinator?.nameOrPosition ?? ''}
-          existing={confirmation}
-        />
+        <p><Link href={`/facilities/${id}/submit`} style={{display:'inline-flex',padding:'12px 24px',borderRadius:24,background:'var(--brand)',color:'var(--bg)'}}><L en="Review and submit" ar="المراجعة والتقديم"/></Link></p>
 
         {/* Step 5 of the registration continues to step 6 -- the registered
 

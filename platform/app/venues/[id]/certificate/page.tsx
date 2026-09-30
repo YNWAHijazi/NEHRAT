@@ -31,7 +31,7 @@ export default async function Certificate({
   if (version && !/^[1-9]\d*$/.test(version)) notFound();
   const row = getDb()
     .prepare(
-      `SELECT version,derivation,effective,valid_until,certificate_snapshot FROM venue_assessments WHERE venue_id = ? ${version ? "AND version = ?" : ""} ORDER BY version DESC LIMIT 1`,
+      `SELECT version,derivation,effective,valid_until,certificate_snapshot FROM venue_assessments WHERE venue_id = ? AND certificate_issued=1 ${version ? "AND version = ?" : ""} ORDER BY version DESC LIMIT 1`,
     )
     .get(...(version ? [id, Number(version)] : [id])) as
     | {
