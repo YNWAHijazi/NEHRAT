@@ -21,3 +21,24 @@ test('legacy venue details open read-only even when a new contact field is missi
  await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhone]')).toBeEnabled();
  }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("UPDATE venue_packages SET details_editing=0 WHERE venue_id='VN-0032'").run();db.close();}
 });
+
+test('Level 1 EMS contact is set up once in Medical team and reused in Requirements',async({page})=>{
+ await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/requirements');
+ const row=page.locator('[data-requirement="7"]');
+ await row.locator('summary').first().click();
+ await expect(row.locator('[data-completion=pending]')).toBeVisible();
+ await expect(row.locator('form,input,textarea')).toHaveCount(0);
+ await row.getByRole('link',{name:'Confirm EMS contact',exact:true}).click();
+ const contact=page.locator('form').filter({has:page.locator('input[name=agency]')});
+ await contact.locator('input[name=agency]').fill('Confirmed local EMS');
+ await contact.locator('input[name=phone]').fill('+9613111111');
+ await contact.locator('input[name=confirm]').check();
+ await contact.getByRole('button',{name:'Save contact',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('Contact saved');
+ await page.goto('/venues/VN-0032/requirements');
+ await expect(page.locator('[data-region=linked-medical-team]')).toContainText('Confirmed local EMS');
+ await expect(row.locator('[data-completion=complete]')).toBeVisible();
+ await row.locator('summary').first().click();
+ await expect(row.locator('form,input,textarea')).toHaveCount(0);
+ await expect(row.locator('dd')).toHaveCount(0);
+});

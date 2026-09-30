@@ -11,7 +11,7 @@ import {getDb} from '../lib/db';
 import {venuePackageFor} from '../lib/venue/workspace';
 import {venueAccess,venueInvitations} from '../lib/venue/collaboration';
 import {saveVenueRequirementAction,approveVenuePlanAction,submitVenuePackageAction,reopenVenueSectionAction,saveVenueDetailsAction,reviewVenuePackageAction} from '../app/venues/actions';
-import {inviteVenuePartnerAction,respondVenueInvitationAction,withdrawVenuePartnerAction} from '../app/venues/team-actions';
+import {inviteVenuePartnerAction,respondVenueInvitationAction,withdrawVenuePartnerAction,saveVenueLocalEmsContactAction} from '../app/venues/team-actions';
 import {saveVenueAssessmentAction,savePlanAction} from '../app/actions';
 import {venueRequirementEditors} from '../lib/rules/venue-workflow';
 import {approveEventPlanAction} from '../app/events/plan-approval-actions';
@@ -99,4 +99,26 @@ test('record ID lookup supports historical aliases and still requires the event 
  expect(resolvePublicLookup({referenceNumber:r.id,eventStartDate:r.start_date},findSubmissionByReference).exists).toBe(false);
  db.prepare('UPDATE events SET is_demo=0 WHERE id=?').run(r.id);
  try{expect(resolvePublicLookup({referenceNumber:r.id},findSubmissionByReference).exists).toBe(false);expect(resolvePublicLookup({referenceNumber:r.id,eventStartDate:'1900-01-01'},findSubmissionByReference).exists).toBe(false);expect(resolvePublicLookup({referenceNumber:r.id,eventStartDate:r.start_date},findSubmissionByReference).exists).toBe(true);expect(resolvePublicLookup({referenceNumber:r.moph_reference,eventStartDate:r.start_date},findSubmissionByReference).exists).toBe(true);}finally{db.prepare('UPDATE events SET is_demo=1 WHERE id=?').run(r.id);}
+});
+
+test('Level 1 uses one confirmed local contact or an accepted invitation and locks it after filing',async()=>{
+ as('test_organizer');const venue='VN-0032',w=()=>venuePackageFor(owner,venue)!;
+ expect(w().level).toBe(1);expect(w().requirements.find(r=>r.n===7)?.done).toBe(false);
+ await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Local EMS',phone:'+9613111111'}))).rejects.toThrow('error=local');
+ await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Local EMS',phone:'+9613111111',confirm:'yes'}))).rejects.toThrow('saved=contact');
+ expect(w().requirements.find(r=>r.n===7)?.done).toBe(true);
+ await expect(saveVenueRequirementAction(venue,'7',form({agency:'Duplicate',phone:'00000000'}))).rejects.toThrow('/requirements');
+ expect(w().answers['7']?.agency).toBe('Local EMS');
+ await expect(inviteVenuePartnerAction(venue,form({kind:'ems',name:'Invited EMS',email:'ems@venue.example.test'}))).rejects.toThrow('invited=yes');
+ expect(w().requirements.find(r=>r.n===7)?.done).toBe(false);
+ await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Bypass',phone:'+9613111111',confirm:'yes'}))).rejects.toThrow(`redirect:/venues/${venue}/team`);
+ const inv=venueInvitations(venue).find(i=>i.kind==='ems')!;as('test_ems');
+ await expect(respondVenueInvitationAction(inv.token,form({response:'accept',phone:'+9613222222'}))).rejects.toThrow('/venue-team/');
+ expect(w().answers['7']?.agency).toBe('Invited EMS');expect(w().answers['7']?.phone).toBe('+9613222222');expect(w().requirements.find(r=>r.n===7)?.done).toBe(true);
+ as('test_organizer');await expect(withdrawVenuePartnerAction(venue,inv.token)).rejects.toThrow(`/venues/${venue}/team`);
+ expect(w().requirements.find(r=>r.n===7)?.done).toBe(false);
+ await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Local EMS',phone:'+9613111111',confirm:'yes'}))).rejects.toThrow('saved=contact');
+ const before=w().answers['7'];getDb().prepare("UPDATE venue_packages SET status='submitted' WHERE venue_id=?").run(venue);
+ await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Changed after filing',phone:'+9613333333',confirm:'yes'}))).rejects.toThrow(`redirect:/venues/${venue}/team`);
+ expect(w().answers['7']).toEqual(before);
 });

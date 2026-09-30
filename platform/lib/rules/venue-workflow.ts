@@ -28,7 +28,7 @@ const FIELDS: Record<number, VenueField[]> = {
 export type VenueEditor = 'organizer' | 'ems' | 'director';
 /** Revised Annex B plus the owner's assignment of clinical entry to medical partners. */
 export function venueRequirementEditors(n:number,level:Level):VenueEditor[] {
- if(n===1||n===3)return []; // Derived contact / accepted licensed appointment.
+ if(n===1||n===3||(n===7&&level===1))return []; // Derived contact / accepted licensed appointment.
  if(n===10||n===17)return ['organizer'];
  if(n===15)return ['director'];
  if(n===20)return ['ems']; // Each participating EMS agency signs its own declaration.
@@ -39,13 +39,18 @@ export function venueRequirementEditors(n:number,level:Level):VenueEditor[] {
 export interface VenueRequirement extends RequirementRow { fields: VenueField[]; optional: boolean; fileRequired: boolean; done: boolean }
 /** Routine-session readiness only. Actual post-event reports stay attached to their events. */
 export function venueRequirements(level:Level, answers:VenueAnswers, files:ReadonlySet<string>):VenueRequirement[] {
- return requirementsForLevel(level).filter(r=>r.n!==19).map(r=>({ ...r, fields:r.n===2&&level===2?FIELDS[2]!.filter(f=>f.key!=='approvedBy'):FIELDS[r.n]??[], optional:(r.n===2&&level===2)||(r.n===6&&level===2)||(r.n===8&&level===1),
- fileRequired:[2,17,20].includes(r.n), done: (r.n===2&&level===2?FIELDS[2]!.filter(f=>f.key!=='approvedBy'):FIELDS[r.n]??[]).every(f=>Boolean(answers[String(r.n)]?.[f.key]?.trim())) && (![2,17,20].includes(r.n)||files.has(String(r.n))) }));
+ return requirementsForLevel(level).filter(r=>r.n!==19).map(r=>({ ...r, fields:venueFieldsForLevel(r.n,level), optional:(r.n===2&&level===2)||(r.n===6&&level===2)||(r.n===8&&level===1),
+ fileRequired:[2,17,20].includes(r.n), done: venueFieldsForLevel(r.n,level).every(f=>Boolean(answers[String(r.n)]?.[f.key]?.trim())) && (![2,17,20].includes(r.n)||files.has(String(r.n))) }));
 }
 export function venuePackageEditable(status:VenuePackageStatus, archived:boolean) { return !archived && (status==='draft'||status==='revision'); }
 export const VENUE_STATUS:Record<VenuePackageStatus,{en:string;ar:string}>={draft:{en:'In preparation',ar:'قيد التحضير'},submitted:{en:'Under Ministry review',ar:'قيد مراجعة الوزارة'},revision:{en:'Changes requested',ar:'تعديلات مطلوبة'},accepted:{en:'Requirements satisfied',ar:'المتطلبات مستوفاة'}};
 
-/** Local EMS contact is sufficient at Level 1; an invited agency supplies its own identity. */
-export function venueFieldsForTeam(fields:VenueField[],requirement:number,level:Level,hasEmsInvitation:boolean):VenueField[] {
- return requirement===7&&level===1&&!hasEmsInvitation?fields.map(({source,...field})=>field):fields;
+/** Contact and acceptance are managed once, in Medical team. */
+export function venueFieldsForLevel(requirement:number,level:Level):VenueField[] {
+ const fields=FIELDS[requirement]??[];
+ return requirement===7&&level===1?fields.filter(f=>f.key!=='arrangements'):fields;
 }
+export function venueRequirementIsClinical(requirement:number,level:Level) {
+ return !venueRequirementEditors(requirement,level).includes('organizer') && ![1,3].includes(requirement) && !(requirement===7&&level===1);
+}
+export function venueLocalEmsContactApplies(level:Level|null,hasEmsInvitation:boolean) { return level===1&&!hasEmsInvitation; }

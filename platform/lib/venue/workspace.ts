@@ -1,5 +1,5 @@
 import { venueInvitations } from './collaboration';
-import { venueRequirementEditors, venueFieldsForTeam } from '../rules/venue-workflow';
+import { venueRequirementIsClinical, venueLocalEmsContactApplies } from '../rules/venue-workflow';
 import { getDb } from '../db';
 import { venueById, venueAssessmentsFor, venueAttachmentsFor } from '../queries';
 import { venuePackageEditable, venueRequirements, type VenueAnswers, type VenuePackageStatus } from '../rules/venue-workflow';
@@ -27,7 +27,7 @@ export function venuePackageFor(accountId:number,id:string) {
  const agencies=confirmed.filter(i=>i.kind==='ems');
  // Invitation identity is the only source of agency/contact details when a team is linked.
  const linkedEms=invitations.some(i=>i.kind==='ems'&&['nominated','confirmed'].includes(i.status));
- if(level!==1||linkedEms){
+ if(!venueLocalEmsContactApplies(level as Level|null,linkedEms)){
  const agency=agencies.map(i=>i.name).join('\n'),phone=agencies.map(i=>i.phone).join('\n');
  answers['7']={...answers['7'],agency,phone};
  }
@@ -43,16 +43,15 @@ export function venuePackageFor(accountId:number,id:string) {
  const point:MapPoint|null=geo.latitude!==null&&geo.longitude!==null?{lat:geo.latitude,lng:geo.longitude}:null;
  const requirements=level?venueRequirements(level as Level,answers,new Set(files.filter(f=>f.hasFile).map(f=>f.docKey))).map(r=>{
  const receipts=contributions.filter(c=>c.requirement_key===String(r.n));
- const clinical=!venueRequirementEditors(r.n,level as Level).includes('organizer')&&r.n!==1&&r.n!==3;
+ const clinical=venueRequirementIsClinical(r.n,level as Level);
  let done=r.n===3?Boolean(director):r.done;
  if(clinical)done=done&&receipts.length>0;
+ if(String(r.n)==='7'&&level===1)done=r.done&&(confirmed.some(i=>i.kind==='ems')||answers['7']?.localConfirmed==='yes');
  if(r.n===2&&level===3)done=done&&Boolean(approval);
  if(r.n===20){const agencies=confirmed.filter(i=>i.kind==='ems');done=agencies.length>0&&agencies.every(i=>receipts.some(c=>c.invitation_token===i.token));}
  // Submitted packages are immutable; older accepted packages retain their recorded completion.
  if(frozen){const h=getDb().prepare('SELECT snapshot FROM venue_package_history WHERE venue_id=? AND revision=?').get(id,row!.revision) as {snapshot:string}|undefined;const old=h?JSON.parse(h.snapshot).requirements?.find((x:{n:number})=>x.n===r.n):null;if(old)done=old.done;}
- // At Level 1 a local EMS contact can be recorded without an on-site invitation.
- const fields=venueFieldsForTeam(r.fields,r.n,level as Level,invitations.some(i=>i.kind==='ems'&&['nominated','confirmed'].includes(i.status)));
- return {...r,fields,done,receipts,clinical,awaitingApproval:r.n===2&&level===3&&r.done&&receipts.length>0&&!approval};
+ return {...r,done,receipts,clinical,awaitingApproval:r.n===2&&level===3&&r.done&&receipts.length>0&&!approval};
  }):[];
  return {venue,status,answers,workRevision:row?.work_revision??0,invitations,contributions,approval,detailsEditing:Boolean(row?.details_editing),assessmentEditing:Boolean(row?.assessment_editing),assessmentVersion,level:level as Level|null,requirements,files,point,district:geo.district,revision:row?.revision??0,note:row?.review_note??'',submittedAt:row?.submitted_at??null,
  editable:venuePackageEditable(status,Boolean(venue.archivedAt)),

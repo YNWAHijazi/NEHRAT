@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {venueRequirements,venuePackageEditable} from '../lib/rules/venue-workflow';
+import {venueRequirements,venuePackageEditable,venueRequirementEditors,venueLocalEmsContactApplies} from '../lib/rules/venue-workflow';
 import type {Level} from '../lib/rules';
 describe('venue submission requirements',()=>{
  for(const level of [1,2,3] as Level[])it(`starts pending at level ${level}; every item needs a recorded answer`,()=>{
@@ -25,5 +25,16 @@ describe('venue submission requirements',()=>{
  it('locks filed, accepted and archived packages',()=>{
   expect(venuePackageEditable('draft',false)).toBe(true);expect(venuePackageEditable('revision',false)).toBe(true);
   expect(venuePackageEditable('submitted',false)).toBe(false);expect(venuePackageEditable('accepted',false)).toBe(false);expect(venuePackageEditable('draft',true)).toBe(false);
+ });
+ it('requires only a confirmed local EMS contact at Level 1, managed from Medical team',()=>{
+  const contact=venueRequirements(1,{'7':{agency:'Local EMS',phone:'+9613111111'}},new Set()).find(r=>r.n===7)!;
+  expect(contact.done).toBe(true);
+  expect(contact.fields.map(f=>f.key)).toEqual(['agency','phone']);
+  expect(contact.fields.every(f=>f.source==='ems')).toBe(true);
+  expect(venueRequirementEditors(7,1)).toEqual([]);
+  expect(venueLocalEmsContactApplies(1,false)).toBe(true);
+  expect(venueLocalEmsContactApplies(1,true)).toBe(false);
+  expect(venueLocalEmsContactApplies(2,false)).toBe(false);
+  expect(venueLocalEmsContactApplies(3,false)).toBe(false);
  });
 });
