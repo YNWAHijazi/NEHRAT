@@ -67,12 +67,12 @@ export default async function ContactPage() {
         </p>
         <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
           <L
-            en="If you already hold a Ministry reference number, the record itself answers most questions."
+            en="If you already hold a Record ID, the record itself answers most questions."
             ar="إذا كنتم تحملون رقماً مرجعياً من الوزارة، فالسجل نفسه يجيب عن معظم الأسئلة."
           />
         </p>
         <Link href="/lookup" style={{ display: 'inline-flex', alignItems: 'center', height: 40, paddingInline: 18, marginBlockStart: 14, border: '1px solid var(--line)', borderRadius: 20, fontSize: '13.5px', color: 'var(--ink)' }}>
-          <L en="Verify a reference number" ar="التحقق من رقم مرجعي" />
+          <L en="Verify a record" ar="التحقق من سجل" />
         </Link>
       </div>
     </PublicShell>

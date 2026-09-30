@@ -1,4 +1,5 @@
 'use server';
+import { invalidateVenueMedicalWork, venueMayWrite } from '../lib/venue/collaboration';
 import { facilityPersons } from '../lib/queries';
 
 /**
@@ -702,7 +703,9 @@ function writePlanVersion(eventId: string, baseVersion: number, actorId: number,
   db.exec('BEGIN IMMEDIATE');
   try {
     const version = (db.prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
-    if (baseVersion !== version) {
+    const actor=db.prepare('SELECT role,is_demo FROM accounts WHERE id=?').get(actorId) as {role:'ems'|'director';is_demo:number}|undefined;
+    const roleAccess=actor?planAccess({id:actorId,role:actor.role,isDemo:actor.is_demo===1,login:'',displayName:'',initials:''},eventId):null;
+    if (baseVersion !== version || !roleAccess?.canEdit) {
       db.exec('ROLLBACK');
       return null;
     }
@@ -796,7 +799,7 @@ export async function saveComplianceAction(eventId: string, payload: ComplianceP
 
 /**
  * Files the submission. The gate is recomputed HERE, server-side -- the screen's gate is
- * presentation. Assigns the Ministry reference; a submission counts as received only
+ * presentation. Keeps the record ID; a submission counts as received only
  * when the acknowledgment carries it (Protocol 9).
  */
 export async function fileSubmissionAction(eventId: string): Promise<{ reference: string } | { error: string }> {
@@ -825,7 +828,7 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
       `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
        WHERE event_id = ?`,
     ).run(gate.expedited ? 1 : 0, eventId);
-    const ref = (db.prepare(`SELECT moph_reference AS r FROM events WHERE id = ?`).get(eventId) as { r: string }).r;
+    const ref = eventId;
     revalidatePath(`/events/${eventId}`);
     revalidatePath(`/ministry/submissions/${eventId}`);
     return { reference: ref };
@@ -835,14 +838,8 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   const gate = submissionGateFor(account.id, eventId);
   if (!gate.canFile) return { error: 'blocked' };
 
-  // The reference year follows the Beirut clock like every other date computation.
-  const { beirutToday: beirutTodayFn } = await import('../lib/clock');
-  const year = beirutTodayFn().slice(0, 4);
-  const last = db
-    .prepare(`SELECT moph_reference AS r FROM events WHERE moph_reference LIKE ? ORDER BY moph_reference DESC LIMIT 1`)
-    .get(`MOPH-EV-${year}-%`) as { r: string } | undefined;
-  const n = last ? Number.parseInt(last.r.slice(-4), 10) + 1 : 1;
-  const reference = `MOPH-EV-${year}-${String(n).padStart(4, '0')}`;
+  // One public identifier from creation through submission and renewal.
+  const reference = eventId;
 
   db.prepare(
     `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
@@ -993,7 +990,7 @@ export async function registerVenueAction(formData: FormData): Promise<void> {
   const venueId=nextRecordId('VN');
   const db=getDb();db.exec('BEGIN IMMEDIATE');
   try {
-  db.prepare(`INSERT INTO venues(id,account_id,name_en,name_ar,category,address_municipality_en,address_municipality_ar,responsible_contact,licensed_capacity,regularly_hosts,is_nightclub,is_demo,district,latitude,longitude) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(venueId,account.id,v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,+account.isDemo,v.district,v.point.lat,v.point.lng);
+  db.prepare(`INSERT INTO venues(id,account_id,name_en,name_ar,category,address_municipality_en,address_municipality_ar,responsible_contact,licensed_capacity,regularly_hosts,is_nightclub,is_demo,district,latitude,longitude,responsible_name,responsible_phone) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(venueId,account.id,v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,+account.isDemo,v.district,v.point.lat,v.point.lng,v.contactName,v.contactPhone);
   db.prepare('INSERT INTO venue_packages(venue_id) VALUES(?)').run(venueId);
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath('/dashboard');redirect(`/venues/${venueId}/assessment`);
@@ -1010,7 +1007,7 @@ export interface VenueAssessmentPayload {
  * Records the annual assessment: the classification derives from the same engine as
  * events, over one routine operating session, and carries an effective date and an
  * expiry date twelve months on (the Arabic issue's wording). The record identifier
- * exists from registration; the Ministry reference is issued at first classification.
+ * exists from registration and stays the same on every certificate.
  */
 /**
  * A venue's requirement documents (partner ruling, 2026-09-05). Venues carried
@@ -1026,6 +1023,7 @@ export async function attachVenueDocumentAction(venueId: string, formData: FormD
   const {venuePackageFor}=await import('../lib/venue/workspace');
   if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
   const docKey = String(formData.get('docKey') ?? '');
+  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
   const file = formData.get('file');
   const back = `/venues/${venueId}`;
   if (!venuePackageFor(account.id,venueId)?.requirements.some(r=>String(r.n)===docKey) || !(file instanceof File)) redirect(back);
@@ -1059,6 +1057,7 @@ export async function removeVenueAttachmentAction(venueId: string, formData: For
   const {venuePackageFor}=await import('../lib/venue/workspace');
   if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
   const docKey = String(formData.get('docKey') ?? '');
+  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
   if (docKey) {
     getDb().prepare(`DELETE FROM venue_attachments WHERE venue_id = ? AND doc_key = ?`).run(venueId, docKey);
   }
@@ -1072,7 +1071,7 @@ export async function saveVenueAssessmentAction(
 ): Promise<{ level: number } | { error: string }> {
   const account=await currentAccount();if(!account)redirect('/signin');
   const {ensureVenuePackage}=await import('../lib/venue/workspace');
-  const w=ensureVenuePackage(account.id,venueId);if(!w||!w.editable)return {error:'locked'};
+  const w=ensureVenuePackage(account.id,venueId);if(!w||!w.editable||(w.assessmentDone&&!w.assessmentEditing))return {error:'locked'};
   const inputs:MinimumConditionInputs={expectedMaxSimultaneousAttendance:payload.attendance,eventDisciplines:[],courseDistanceKm:null,venueLicensedCapacity:w.venue.licensedCapacity,venueIsNightclubOrDanceVenue:w.venue.isNightclub};
   const derivation=deriveLevel({answers:payload.answers,inputs});
   if(!derivation.complete||derivation.finalLevel===null||!payload.representative.trim()||!payload.position.trim())return {error:'incomplete'};
@@ -1081,7 +1080,8 @@ export async function saveVenueAssessmentAction(
     const latest=db.prepare('SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id=?').get(venueId) as {v:number|null};
     const version=(latest.v??0)+1;
     db.prepare(`INSERT INTO venue_assessments(venue_id,version,answers,inputs,derivation,nehrat_tool_version,effective,valid_until,representative,position,certificate_issued) VALUES(?,?,?,?,?,?,'','',?,?,0)`).run(venueId,version,JSON.stringify(payload.answers),JSON.stringify(inputs),JSON.stringify(derivation),NEHRAT_TOOL_VERSION,payload.representative.trim(),payload.position.trim());
-    db.prepare('UPDATE venue_packages SET assessment_version=? WHERE venue_id=?').run(version,venueId);
+    db.prepare('UPDATE venue_packages SET assessment_version=?,assessment_editing=0 WHERE venue_id=?').run(version,venueId);
+    invalidateVenueMedicalWork(venueId);
     // A draft level is visible immediately; issuance and validity wait for Ministry review.
     if(!w.venue.issued)db.prepare('UPDATE venues SET level=? WHERE id=?').run(derivation.finalLevel,venueId);
     db.exec('COMMIT');
@@ -1808,8 +1808,8 @@ function directorFor(accountId: number, eventId: string): boolean {
 export async function saveGovernanceAction(eventId: string, formData: FormData): Promise<void> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  if (account.role !== 'director' || derivedLevelFor(eventId) !== 3 || !planAccess(account, eventId)?.canEdit) redirect('/dashboard');
   refuseIfArchived(eventId);
+  if (account.role !== 'director' || derivedLevelFor(eventId) !== 3 || !planAccess(account, eventId)?.canEdit) redirect('/dashboard');
   const sections: Record<string, string> = {};
   for (const key of ['clinical', 'command', 'incidentRole']) {
     sections[key] = String(formData.get(key) ?? '');

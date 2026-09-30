@@ -47,7 +47,6 @@ export default async function RegistryPage({
               <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>{r.id}</span> · <L en={r.name_en} ar={r.name_ar} />
             </span>
             <span style={{ display: 'inline-flex', gap: 12, alignItems: 'center' }}>
-              <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>{r.moph_reference ?? '—'}</span>
               {r.control ?? null}
             </span>
           </div>
@@ -66,8 +65,8 @@ export default async function RegistryPage({
       <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
         <L en="National registry" ar="السجل الوطني" />
        <InfoNote><L
-          en="Record identifier at creation; Ministry reference number at submission."
-          ar="معرّف السجل عند الإنشاء؛ والرقم المرجعي للوزارة عند التقديم."
+          en="One record ID from creation onwards."
+          ar="معرّف واحد للسجل منذ إنشائه."
         /></InfoNote>
 </h1>
 

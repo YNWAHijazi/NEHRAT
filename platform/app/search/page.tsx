@@ -10,7 +10,7 @@ import { PUBLIC_LANDING, looksLikeReference, searchGuidance, searchServices } fr
  * A person arriving at a regulator's site usually has a question rather than a
  * destination, and the three kinds of answer are genuinely different: a SERVICE they
  * can start, a REQUIREMENT OR PIECE OF GUIDANCE that settles the question, or — if what
- * they typed is a Ministry reference number — the register itself.
+ * they typed is a Record ID — the register itself.
  *
  * THE REFERENCE BRANCH DIVERGES FROM THE PROTOTYPE, deliberately and on two counts.
  * The prototype answers a pasted reference immediately and shows five facts including
@@ -126,7 +126,7 @@ export default async function SearchPage({
       {isReference ? (
         <div data-region="search-reference" style={{ padding: '24px 26px', border: '2px solid var(--brand)', borderRadius: 14, maxWidth: '76ch' }}>
           <div style={{ fontSize: 19, fontWeight: 600, marginBlockEnd: 8 }}>
-            <L en="That is a Ministry reference number" ar="هذا رقم مرجعي لدى الوزارة" />
+            <L en="That is a Record ID" ar="هذا رقم مرجعي لدى الوزارة" />
           </div>
           <p style={{ margin: '0 0 16px', fontSize: '14.5px', lineHeight: 1.7 }}>
             <L

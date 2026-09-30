@@ -22,9 +22,20 @@ const FIELDS: Record<number, VenueField[]> = {
   16:[f('steps','What happens in a major emergency?','ما الخطوات عند حدوث طارئ كبير؟'),f('authority','Who calls for extra help or stops activities?','من يطلب دعماً إضافياً أو يوقف الأنشطة؟')],
   17:[f('insurer','Insurer and policy number','شركة التأمين ورقم البوليصة'),f('coverage','Who is covered and for which dates?','من تشملهم التغطية وما مدتها؟')],
   18:[f('procedure','How will providers record care and hand over to EMS? Do not enter patient details.','كيف توثّق الجهات الرعاية وتسلّم المرضى للإسعاف؟ لا تدخلوا بيانات المرضى.')],
-  2:[f('preparedBy','Prepared by (Medical Director or EMS agency)','أعدّها (المدير الطبي أو جهة الإسعاف)'),f('approvedBy','Approved by the Medical Director (name and licence)','اعتمدها المدير الطبي (الاسم والترخيص)')],
+  2:[f('preparedBy','Prepared by (Medical Director or EMS agency)','أعدّها (المدير الطبي أو جهة الإسعاف)'),],
   20:[f('agencies','EMS agencies covered by the signed declarations','جهات الإسعاف التي تشملها الإقرارات الموقّعة')],
 };
+export type VenueEditor = 'organizer' | 'ems' | 'director';
+/** Revised Annex B plus the owner's assignment of clinical entry to medical partners. */
+export function venueRequirementEditors(n:number,level:Level):VenueEditor[] {
+ if(n===1||n===3)return []; // Derived contact / accepted licensed appointment.
+ if(n===10||n===17)return ['organizer'];
+ if(n===15)return ['director'];
+ if(n===20)return ['ems']; // Each participating EMS agency signs its own declaration.
+ if(n===2)return ['ems','director'];
+ if(level===1 && [4,7,9,11,14,16].includes(n))return ['organizer','ems','director'];
+ return ['ems','director'];
+}
 export interface VenueRequirement extends RequirementRow { fields: VenueField[]; optional: boolean; fileRequired: boolean; done: boolean }
 /** Routine-session readiness only. Actual post-event reports stay attached to their events. */
 export function venueRequirements(level:Level, answers:VenueAnswers, files:ReadonlySet<string>):VenueRequirement[] {

@@ -17,7 +17,7 @@ const digest = (value: string) =>
 export const emailOtpEnabled = () => process.env.REQUIRE_EMAIL_OTP === "true";
 export function safeNext(value: unknown, fallback = "/dashboard"): string {
   return typeof value === "string" &&
-    /^(\/events\/new|\/venues\/new|\/facilities\/new|\/invitations\/[a-f0-9]{48})$/.test(
+    /^(\/events\/new|\/venues\/new|\/facilities\/new|\/(?:venue-invitations|invitations)\/[a-f0-9]{48})$/.test(
       value,
     )
     ? value

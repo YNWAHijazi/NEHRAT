@@ -365,8 +365,8 @@ export function SubmitForm({
       {locked ? (
         <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 28, fontSize: 15, lineHeight: 1.65 }}>
           <L
-            en={`Filed. The Ministry reference number is ${initial?.mophReference ?? ''}.`}
-            ar={`قُدِّم. الرقم المرجعي للوزارة هو ⁦${initial?.mophReference ?? ''}⁩.`}
+            en={`Filed. The Record ID is ${initial?.mophReference ?? ''}.`}
+            ar={`قُدِّم. معرّف السجل هو ⁦${initial?.mophReference ?? ''}⁩.`}
           />{' '}
           <a href={`/events/${eventId}/acknowledgment`} style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
             <L en="Open the acknowledgment of receipt" ar="فتح إشعار الاستلام" />

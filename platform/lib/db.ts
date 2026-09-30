@@ -954,6 +954,39 @@ function migrate(d: DatabaseSync): void {
     PRIMARY KEY(package_id,doc_key)
   );`);
 
+  d.exec(`CREATE TABLE IF NOT EXISTS event_plan_approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, event_id TEXT NOT NULL REFERENCES events(id),
+    plan_version INTEGER NOT NULL, assessment_version INTEGER NOT NULL,
+    invitation_token TEXT NOT NULL REFERENCES invitations(token), approved_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
+  // Venue collaboration: provenance belongs to an authenticated, assigned medical partner.
+  addColumn('venues', 'responsible_name', "responsible_name TEXT NOT NULL DEFAULT ''");
+  addColumn('venues', 'responsible_phone', "responsible_phone TEXT NOT NULL DEFAULT ''");
+  for (const v of d.prepare("SELECT id,responsible_contact FROM venues WHERE responsible_name='' AND responsible_phone=''").all() as unknown as {id:string;responsible_contact:string}[]) {
+    const parts=v.responsible_contact.match(/^(.*?)\s+(\+?[0-9][0-9 ()-]{6,22})$/);
+    if(parts)d.prepare('UPDATE venues SET responsible_name=?,responsible_phone=? WHERE id=?').run(parts[1]!.trim(),parts[2]!.trim(),v.id);
+  }
+  addColumn('venue_packages', 'work_revision', 'work_revision INTEGER NOT NULL DEFAULT 0');
+  addColumn('venue_packages', 'details_editing', 'details_editing INTEGER NOT NULL DEFAULT 0');
+  addColumn('venue_packages', 'assessment_editing', 'assessment_editing INTEGER NOT NULL DEFAULT 0');
+  d.exec(`CREATE TABLE IF NOT EXISTS venue_invitations (
+    token TEXT PRIMARY KEY, venue_id TEXT NOT NULL REFERENCES venues(id),
+    kind TEXT NOT NULL CHECK(kind IN ('ems','director')), name TEXT NOT NULL, email TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'nominated', account_id INTEGER REFERENCES accounts(id),
+    invited_at TEXT NOT NULL DEFAULT (datetime('now')), expires_at TEXT NOT NULL,
+    responded_at TEXT, note TEXT NOT NULL DEFAULT '', licence TEXT NOT NULL DEFAULT '',
+    delivery TEXT NOT NULL DEFAULT 'notConfigured'
+  ); CREATE INDEX IF NOT EXISTS venue_invitation_account ON venue_invitations(account_id,venue_id);
+  CREATE TABLE IF NOT EXISTS venue_contributions (
+    venue_id TEXT NOT NULL REFERENCES venues(id), requirement_key TEXT NOT NULL,
+    invitation_token TEXT NOT NULL REFERENCES venue_invitations(token), answers TEXT NOT NULL,
+    assessment_version INTEGER NOT NULL, completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY(venue_id,requirement_key,invitation_token)
+  ); CREATE TABLE IF NOT EXISTS venue_plan_approvals (
+    venue_id TEXT PRIMARY KEY REFERENCES venues(id), invitation_token TEXT NOT NULL REFERENCES venue_invitations(token),
+    assessment_version INTEGER NOT NULL, approved_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
+
   addColumn('facilities', 'archived_at', 'archived_at TEXT');
   addColumn('facilities', 'archived_by', 'archived_by TEXT');
   // Partner ruling (2026-09-03): ending a facility's coverage is a DETERMINATION,
@@ -1058,6 +1091,35 @@ function migrate(d: DatabaseSync): void {
     package_id INTEGER NOT NULL REFERENCES venue_package_history(id), doc_key TEXT NOT NULL,
     file_name TEXT NOT NULL, content_type TEXT NOT NULL, bytes BLOB NOT NULL,
     PRIMARY KEY(package_id,doc_key)
+  );`);
+
+  d.exec(`CREATE TABLE IF NOT EXISTS event_plan_approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, event_id TEXT NOT NULL REFERENCES events(id),
+    plan_version INTEGER NOT NULL, assessment_version INTEGER NOT NULL,
+    invitation_token TEXT NOT NULL REFERENCES invitations(token), approved_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
+  // Venue collaboration: provenance belongs to an authenticated, assigned medical partner.
+  addColumn('venues', 'responsible_name', "responsible_name TEXT NOT NULL DEFAULT ''");
+  addColumn('venues', 'responsible_phone', "responsible_phone TEXT NOT NULL DEFAULT ''");
+  addColumn('venue_packages', 'work_revision', 'work_revision INTEGER NOT NULL DEFAULT 0');
+  addColumn('venue_packages', 'details_editing', 'details_editing INTEGER NOT NULL DEFAULT 0');
+  addColumn('venue_packages', 'assessment_editing', 'assessment_editing INTEGER NOT NULL DEFAULT 0');
+  d.exec(`CREATE TABLE IF NOT EXISTS venue_invitations (
+    token TEXT PRIMARY KEY, venue_id TEXT NOT NULL REFERENCES venues(id),
+    kind TEXT NOT NULL CHECK(kind IN ('ems','director')), name TEXT NOT NULL, email TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'nominated', account_id INTEGER REFERENCES accounts(id),
+    invited_at TEXT NOT NULL DEFAULT (datetime('now')), expires_at TEXT NOT NULL,
+    responded_at TEXT, note TEXT NOT NULL DEFAULT '', licence TEXT NOT NULL DEFAULT '',
+    delivery TEXT NOT NULL DEFAULT 'notConfigured'
+  ); CREATE INDEX IF NOT EXISTS venue_invitation_account ON venue_invitations(account_id,venue_id);
+  CREATE TABLE IF NOT EXISTS venue_contributions (
+    venue_id TEXT NOT NULL REFERENCES venues(id), requirement_key TEXT NOT NULL,
+    invitation_token TEXT NOT NULL REFERENCES venue_invitations(token), answers TEXT NOT NULL,
+    assessment_version INTEGER NOT NULL, completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY(venue_id,requirement_key,invitation_token)
+  ); CREATE TABLE IF NOT EXISTS venue_plan_approvals (
+    venue_id TEXT PRIMARY KEY REFERENCES venues(id), invitation_token TEXT NOT NULL REFERENCES venue_invitations(token),
+    assessment_version INTEGER NOT NULL, approved_at TEXT NOT NULL DEFAULT (datetime('now'))
   );`);
 
   addColumn('facilities', 'archived_at', 'archived_at TEXT');

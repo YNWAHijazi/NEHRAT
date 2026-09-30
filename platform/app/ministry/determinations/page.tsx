@@ -45,7 +45,7 @@ export default async function DeterminationsPage() {
                     <L en={`${d.name_en} — ${def?.en ?? d.outcome}`} ar={`${d.name_ar} — ${def?.ar ?? d.outcome}`} />
                   </div>
                   <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 4, fontVariantNumeric: 'tabular-nums' }}>
-                    {d.moph_reference ? `${d.moph_reference} · ` : ''}{d.recorded_at.slice(0, 10)} · {d.recorded_by}
+                    {d.event_id} · {d.recorded_at.slice(0, 10)} · {d.recorded_by}
                   </div>
                 </Link>
               );

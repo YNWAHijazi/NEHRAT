@@ -162,7 +162,7 @@ describe('every data file, not a hand-written list of five', () => {
       // differently on the Arabic side would break the thing it identifies. Matched by
       // the reference shape rather than allowlisted by path, so it covers the next one
       // too and nothing else.
-      .filter((p) => !/^MOPH-[A-Z]{2}-\d{4}-\d{4}$/.test((p.en as string).trim()))
+      .filter((p) => !/^(?:MOPH-[A-Z]{2}-\d{4}-\d{4}|(?:EV|VN|FC)-\d{4,})$/.test((p.en as string).trim()))
       .filter((p) => p.en === p.ar || !arabic.test(p.ar as string))
       .map((p) => `${p.file}:${p.path}.${p.key}`)
       .filter((id) => !excluded(id));

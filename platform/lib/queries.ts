@@ -1,3 +1,4 @@
+import {eventPlanApproval} from './plan-approval';
 import { hasReportableEvent } from './rules/gates';
 import { facilityAedStatus } from './facility-gis';
 /**
@@ -241,7 +242,7 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     startDate: row.start_date,
     endDate: row.end_date,
     closingTime: row.closing_time,
-    mophReference: row.moph_reference,
+    mophReference: row.filed ? row.id : null,
     filed: row.filed === 1,
     level,
     outcome,
@@ -900,7 +901,7 @@ export function submissionFor(accountId: number, eventId: string): SubmissionRow
     position: r.position,
     expedited: r.expedited === 1,
     filedAt: r.filed_at,
-    mophReference: r.moph_reference,
+    mophReference: r.filed_at ? eventId : null,
     version: r.version,
   };
 }
@@ -1006,7 +1007,7 @@ export function documentStateFor(
   const submission = submissionFor(accountId, eventId);
 
   // Both completeness rules live in lib/rules -- this file never re-derives them.
-  const planComplete = planIsComplete(plan, level);
+  const planComplete = planIsComplete(plan, level) && (level!==3||Boolean(eventPlanApproval(eventId)));
   const declarationsComplete = declarationsAreComplete(submission?.declarations ?? null, level);
   // THE FORM IS NOT COMPLETE WITHOUT ITS CERTIFICATION. The requirements screen used
   // to call this row done as soon as the boxes were ticked, while the authorized
@@ -1113,7 +1114,7 @@ export function seriousIncidentsForMinistry(viewerIsDemo: boolean): MinistrySeri
   }[];
   return rows.map((r) => ({
     incidentType: r.incident_type, occurredAt: r.occurred_at, notifiedAt: r.notified_at,
-    eventId: r.event_id, eventEn: r.name_en, eventAr: r.name_ar, mophReference: r.moph_reference,
+    eventId: r.event_id, eventEn: r.name_en, eventAr: r.name_ar, mophReference: r.event_id,
   }));
 }
 
@@ -1124,6 +1125,8 @@ export interface VenueDetail extends VenueRow {
   addressMunicipalityEn: string;
   addressMunicipalityAr: string;
   responsibleContact: string;
+  responsibleName: string;
+  responsiblePhone: string;
   licensedCapacity: number | null;
   regularlyHosts: boolean;
   isNightclub: boolean;
@@ -1135,7 +1138,7 @@ export interface VenueDetail extends VenueRow {
 export function venueById(accountId: number, venueId: string): VenueDetail | null {
   const r = getDb()
     .prepare(
-      `SELECT id, name_en, name_ar, category, address_municipality_en, address_municipality_ar, responsible_contact,
+      `SELECT id, name_en, name_ar, category, address_municipality_en, address_municipality_ar, responsible_contact, responsible_name, responsible_phone,
               licensed_capacity, regularly_hosts, is_nightclub, level, issued, valid_until,
               moph_reference, created_at, archived_at
        FROM venues WHERE id = ? AND account_id = ?`,
@@ -1143,7 +1146,7 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
     .get(venueId, accountId) as
     | {
         id: string; name_en: string; name_ar: string; category: string;
-        address_municipality_en: string; address_municipality_ar: string; responsible_contact: string;
+        address_municipality_en: string; address_municipality_ar: string; responsible_contact: string; responsible_name: string; responsible_phone: string;
         licensed_capacity: number | null; regularly_hosts: number; is_nightclub: number;
         level: number | null; issued: string | null; valid_until: string | null;
         moph_reference: string | null; created_at: string; archived_at: string | null;
@@ -1156,11 +1159,12 @@ export function venueById(accountId: number, venueId: string): VenueDetail | nul
     addressMunicipalityEn: r.address_municipality_en,
     addressMunicipalityAr: r.address_municipality_ar,
     responsibleContact: r.responsible_contact,
+    responsibleName: r.responsible_name, responsiblePhone: r.responsible_phone,
     licensedCapacity: r.licensed_capacity,
     regularlyHosts: r.regularly_hosts === 1,
     isNightclub: r.is_nightclub === 1,
     level: r.level, issued: r.issued, validUntil: r.valid_until,
-    mophReference: r.moph_reference, createdAt: r.created_at,
+    mophReference: r.id, createdAt: r.created_at,
     archivedAt: r.archived_at ?? null,
   };
 }
@@ -1678,7 +1682,7 @@ export function reviewQueue(viewerIsDemo: boolean): QueueRow[] {
     level: derivedLevelFor(r.id) ?? ((r.demo_level as Level | null) ?? null),
     eventDate: r.start_date,
     filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
-    mophReference: r.moph_reference,
+    mophReference: r.id,
     state: r.r_state ?? 'queued',
     reviewer: r.r_reviewer ?? '',
     outcome: r.d_outcome ?? null,
@@ -2012,7 +2016,7 @@ export function enquiriesForReview(viewerIsDemo: boolean): EnquiryRow[] {
     }[];
   return rows.map((r) => ({
     id: r.id, eventId: r.event_id, eventEn: r.name_en, eventAr: r.name_ar,
-    mophReference: r.moph_reference, askedBy: r.asked_by, question: r.question,
+    mophReference: r.event_id, askedBy: r.asked_by, question: r.question,
     askedAt: r.asked_at.slice(0, 10), reply: r.reply, repliedBy: r.replied_by,
     repliedAt: r.replied_at ? r.replied_at.slice(0, 10) : null,
   }));
@@ -2404,9 +2408,9 @@ export function findSubmissionByReference(reference: string): SubmissionRecord |
   const row = getDb()
     .prepare(
       `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
-       FROM events e WHERE e.moph_reference = ?`,
+       FROM events e WHERE e.filed = 1 AND (e.id = ? OR e.moph_reference = ?)`,
     )
-    .get(reference) as
+    .get(reference, reference) as
     | {
         id: string;
         moph_reference: string;
@@ -2425,7 +2429,7 @@ export function findSubmissionByReference(reference: string): SubmissionRecord |
     ? MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome)?.en
     : undefined;
   return {
-    referenceNumber: row.moph_reference,
+    referenceNumber: row.id,
     eventName: row.name_en,
     // No derivable level is NOT Level 1 (non-negotiable 0): the register reports the
     // absence rather than inventing the lowest band.
@@ -2544,7 +2548,7 @@ export function adminRecords(viewerIsDemo: boolean, filter: AdminRecordFilter = 
     startDate: r.start_date,
     filed: r.filed === 1,
     filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
-    mophReference: r.moph_reference,
+    mophReference: r.id,
     outcome: r.outcome,
     outcomeAt: r.outcome_at ? r.outcome_at.slice(0, 10) : null,
     lifecycle: r.lifecycle,
@@ -2579,18 +2583,18 @@ export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRo
     .prepare(
       `SELECT * FROM (
          SELECT dt.recorded_at AS at, 'determination' AS kind, dt.recorded_by AS actor,
-                COALESCE(e.moph_reference, e.id) AS subject, dt.outcome AS detail,
+                e.id AS subject, dt.outcome AS detail,
                 '/ministry/submissions/' || e.id AS href
            FROM determinations dt JOIN events e ON e.id = dt.event_id WHERE e.is_demo = ?
          UNION ALL
          SELECT s.filed_at, 'filed', s.representative,
-                COALESCE(e.moph_reference, e.id), 'submission filed',
+                e.id, 'submission filed',
                 '/ministry/submissions/' || e.id
            FROM submissions s JOIN events e ON e.id = s.event_id
            WHERE e.is_demo = ? AND s.filed_at IS NOT NULL
          UNION ALL
          SELECT i.date, 'inspection', i.inspector,
-                COALESCE(e.moph_reference, e.id), i.title_en,
+                e.id, i.title_en,
                 '/ministry/submissions/' || e.id
            FROM inspections i JOIN events e ON e.id = i.event_id
            WHERE e.is_demo = ? AND i.date IS NOT NULL
@@ -2952,7 +2956,7 @@ export function submissionForReview(viewerIsDemo: boolean, eventId: string): Sub
     level: derivedLevelFor(r.id) ?? ((r.demo_level as Level | null) ?? null),
     eventDate: r.start_date,
     filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null,
-    mophReference: r.moph_reference,
+    mophReference: r.id,
     version: r.s_version,
     expedited: r.expedited === 1,
     state: r.r_state ?? 'queued',

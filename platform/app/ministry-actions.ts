@@ -125,11 +125,11 @@ export async function recordOutcomeAction(eventId: string, formData: FormData): 
   const ev = getDb().prepare(`SELECT name_en, name_ar, moph_reference FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; moph_reference: string | null };
   notifyEventOwner(
     eventId,
-    `${def?.en ?? outcome} — ${ev.moph_reference ?? ev.name_en}`,
-    `${def?.ar ?? outcome} — ${ev.moph_reference ?? ev.name_ar}`,
+    `${def?.en ?? outcome} — ${eventId}`,
+    `${def?.ar ?? outcome} — ${eventId}`,
     note
-      ? `${def?.en ?? ''}. ${note} Your reference number does not change.`
-      : `${def?.en ?? ''}. Your reference number does not change.`,
+      ? `${def?.en ?? ''}. ${note} Your record ID does not change.`
+      : `${def?.en ?? ''}. Your record ID does not change.`,
     note
       ? `${def?.ar ?? ''}. ${note} ولا يتغير رقمكم المرجعي.`
       : `${def?.ar ?? ''}. ولا يتغير رقمكم المرجعي.`,
@@ -1103,9 +1103,9 @@ export async function reviseOutcomeAction(eventId: string, formData: FormData): 
   const ev = db.prepare(`SELECT name_en, name_ar, moph_reference FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; moph_reference: string | null };
   notifyEventOwner(
     eventId,
-    `Updated Ministry decision — ${ev.moph_reference ?? ev.name_en}`,
-    `نتيجة معدَّلة — ${ev.moph_reference ?? ev.name_ar}`,
-    `The Ministry updated its decision: ${def?.en ?? outcome}. Reason: “${verbatimQuote(reason)}”. You can still view the earlier decision. Your reference number stays the same.`,
+    `Updated Ministry decision — ${eventId}`,
+    `نتيجة معدَّلة — ${eventId}`,
+    `The Ministry updated its decision: ${def?.en ?? outcome}. Reason: “${verbatimQuote(reason)}”. You can still view the earlier decision. Your record ID stays the same.`,
     `حدّثت الوزارة قرارها: ${def?.ar ?? outcome}. السبب: «${verbatimQuote(reason)}». يمكنكم عرض القرار السابق. يبقى رقمكم المرجعي كما هو.`,
     `/events/${eventId}`,
   );

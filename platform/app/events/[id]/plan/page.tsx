@@ -1,3 +1,4 @@
+import {EventPlanApproval} from '../../../../components/EventPlanApproval';
 import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
 import { SharedPlanSync } from '../../../../components/SharedPlanSync';
 import { planRequirement, planSectionsForLevel } from '../../../../lib/rules/plan-responsibility';
@@ -75,6 +76,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
         {access.editor === 'organizer' && <EventWorkspaceNav eventId={id} active="plan" />}
         <p><L en={requirement === 'required' ? 'Required' : requirement === 'recommended' ? 'Recommended — not required to submit' : 'No medical plan required at Level 1'} ar={requirement === 'required' ? 'مطلوبة' : requirement === 'recommended' ? 'موصى بها — ليست شرطاً لتقديم الملف' : 'لا تُطلب خطة طبية في المستوى 1'} /></p>
         {level >= 2 ? <div className="secondary-help"><InfoNote><L en="The Medical Director or EMS agency completes the plan. The organizer submits the package." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
+        {level===3?<EventPlanApproval id={id} ownerId={ownerId} canApprove={access.editor==='director'&&access.canEdit}/>:null}
         {access.canEdit ? <PlanForm
           eventId={id}
           level={level}

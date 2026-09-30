@@ -94,7 +94,7 @@ export function facilityApplicability(categoryIndex: number): FacilityAnswer | n
  * holding a reference can paste it into the one field on the page and be taken to the
  * right tool, instead of having to know which of two tools they wanted.
  */
-export const REFERENCE_SHAPE = /^MOPH-EV-\d{4}-\d{4}$/;
+export const REFERENCE_SHAPE = /^(?:EV-\d{4,}|MOPH-EV-\d{4}-\d{4,})$/;
 
 export function looksLikeReference(query: string): boolean {
   return REFERENCE_SHAPE.test(query.trim().toUpperCase());

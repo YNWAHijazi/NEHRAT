@@ -1,3 +1,4 @@
+import {reopenVenueSectionAction} from '../app/venues/actions';
 import { beforeAll, afterAll, expect, test, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -237,6 +238,7 @@ test("renewal keeps the venue ID and reference while earlier certificate details
     "Updated venue name",
     venue.id,
   );
+  await expect(reopenVenueSectionAction(venue.id,'assessment')).rejects.toThrow('/assessment');
   expect(
     await saveVenueAssessmentAction(venue.id, {
       answers: [1, 1, 1, 1, 1, 1, 1, 1, 1],

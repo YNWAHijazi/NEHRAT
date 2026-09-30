@@ -41,18 +41,6 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
               </div>
               <div>
                 <div style={{ ...upLabel, fontSize: 11, marginBlockEnd: 3 }}>
-                  <L en="Ministry reference number" ar="الرقم المرجعي للوزارة" />
-                </div>
-                {event.mophReference ? (
-                  <div style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{event.mophReference}</div>
-                ) : (
-                  <div style={{ fontSize: '14.5px', color: 'var(--muted)' }}>
-                    <L en="Issued on submission" ar="يصدر عند التقديم" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <div style={{ ...upLabel, fontSize: 11, marginBlockEnd: 3 }}>
                   <L en="Event date" ar="تاريخ الفعالية" />
                 </div>
                 <div style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{event.startDate ?? '—'}</div>

@@ -1,5 +1,5 @@
 {
-  "$comment": "Cancellation and postponement (Protocol 8.5 / 9(vii); required by three instruments and previously absent from the build). A lifecycle on the event, never a deletion: the record and any Ministry reference survive. A cancelled event files nothing further. A postponed event's recorded determination DOES NOT CARRY to the new date -- the screen says so wherever the determination or the postponement shows.",
+  "$comment": "Cancellation and postponement (Protocol 8.5 / 9(vii); required by three instruments and previously absent from the build). A lifecycle on the event, never a deletion: the record and any Record ID survive. A cancelled event files nothing further. A postponed event's recorded determination DOES NOT CARRY to the new date -- the screen says so wherever the determination or the postponement shows.",
   "states": {
     "active": {
       "en": "Active",

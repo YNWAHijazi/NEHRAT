@@ -74,7 +74,7 @@ export default async function Certificate({
         />
       </h2>
       <p>
-        {id} · {venue.mophReference}
+        {id}
       </p>
       <p>
         <L

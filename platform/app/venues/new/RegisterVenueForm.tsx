@@ -22,7 +22,7 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  {category==='other'?text('categoryOther','Specify venue type','حدّد نوع الموقع',known?'':initial?.category):null}
  <label style={{display:'grid',gap:6}}><L en="District" ar="القضاء"/><select name="district" defaultValue={district} required style={input}><option value=""></option>{VENUE_DISTRICTS.map(d=><option key={d.en} value={d.en}>{d.en} · {d.ar}</option>)}</select></label>
  {text('address','Town and street address','البلدة وعنوان الشارع',initial?.addressMunicipalityEn)}{text('addressAr','Address (Arabic, optional)','العنوان (بالعربية، اختياري)',initial?.addressMunicipalityAr,false)}
- {text('contact','Responsible person and phone number','الشخص المسؤول ورقم الهاتف',initial?.responsibleContact)}
+ {text('contactName','Responsible person','الشخص المسؤول',initial?.responsibleName || initial?.responsibleContact)}{text('contactPhone','Phone number','رقم الهاتف',initial?.responsiblePhone)}
  <label style={{display:'grid',gap:6}}><L en={VENUE_CAPACITY_FIELD.en} ar={VENUE_CAPACITY_FIELD.ar}/><input style={input} name="capacity" type="number" min="1" step="1" required defaultValue={initial?.licensedCapacity??''}/></label>
  </div>
  <div style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center',marginBlock:24}}><L en={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts.en} ar={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts.ar}/><YesNoPair value={regular} onPick={setRegular}/><input type="hidden" name="regularlyHosts" value={regular===null?'':regular?'yes':'no'}/></div>

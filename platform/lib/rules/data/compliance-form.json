@@ -34,8 +34,8 @@
     },
     {
       "key": "mophReference",
-      "en": "Ministry reference number",
-      "ar": "الرقم المرجعي لوزارة الصحة العامة"
+      "en": "Record ID",
+      "ar": "معرّف السجل"
     },
     {
       "key": "planVersion",

@@ -64,7 +64,7 @@ export default async function Venues({
               <L en={v.name_en} ar={v.name_ar} />
             </h2>
             <p>
-              {v.id} · {v.moph_reference}
+              {v.id}
             </p>
             <p>
               <L

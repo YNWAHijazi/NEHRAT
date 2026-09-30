@@ -124,11 +124,11 @@ export default async function OverviewPage() {
         </Link>
         <Link href="/lookup" style={{ padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)' }}>
           <div style={{ fontSize: 16, fontWeight: 500 }}>
-            <L en="Verify a reference number" ar="التحقق من رقم مرجعي" />
+            <L en="Verify a record" ar="التحقق من سجل" />
           </div>
           <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 5, lineHeight: 1.55 }}>
             <L
-              en="Confirm that a Ministry reference exists and what it says."
+              en="Check a submitted record and its status."
               ar="تأكدوا من وجود رقم مرجعي لدى الوزارة وممّا يفيده."
             />
           </div>

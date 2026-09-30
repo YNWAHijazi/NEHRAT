@@ -1,3 +1,4 @@
+import {eventPlanApproval} from '../../../../lib/plan-approval';
 import Link from 'next/link';
 import { SharedPlanSync } from '../../../../components/SharedPlanSync';
 import { notFound, redirect } from 'next/navigation';
@@ -28,7 +29,7 @@ export default async function MedicalTeamPage({ params, searchParams }: { params
   const level = derivedLevelFor(id);
   const plan = planFor(account.id, id);
   const lastEditor = planLastEditorFor(account.id, id);
-  const complete = level ? planIsComplete(plan, level) : false;
+  const complete = level ? planIsComplete(plan, level)&&(level!==3||Boolean(eventPlanApproval(id))) : false;
   const required = planRequirement(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
   const governance = governanceFor(id);
   const deployment = attachmentsFor(account.id, id).find(a => a.docKey === 'deploymentMap');

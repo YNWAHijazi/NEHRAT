@@ -1,3 +1,4 @@
+import {eventPlanApproval} from '../../../../lib/plan-approval';
 import { EXTRA_DISCIPLINES } from '../../../../lib/rules/event-labels';
 import { ReviewFileSummary, ReviewMedicalAnswers } from '../../../../components/ReviewEvidence';
 import { reviewEvidenceFor } from '../../../../lib/review-evidence';
@@ -528,6 +529,7 @@ export default async function SubmissionReviewPage({
               en={requiredPlan === 'notRequired' ? 'Not required for this level.' : requiredPlan === 'recommended' ? 'Recommended — not required to submit.' : 'Required — completed by the Medical Director or EMS agency.'}
               ar={requiredPlan === 'notRequired' ? 'غير مطلوبة لهذا المستوى.' : requiredPlan === 'recommended' ? 'موصى بها — ليست شرطاً للتقديم.' : 'مطلوبة — يعدّها المدير الطبي أو جهة الإسعاف.'}
             /></p>
+            {review.level===3&&eventPlanApproval(id)?<p><L en="Medical Director approval" ar="اعتماد المدير الطبي"/>: {eventPlanApproval(id)!.display_name} · {eventPlanApproval(id)!.approved_at}</p>:null}
             {plan && <p style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Latest saved plan" ar="آخر خطة محفوظة" /> · {plan.updatedAt}{evidence?.planEditor ? <> · {evidence.planEditor.name}</> : null}</p>}
             {evidence?.planChangedSinceFiling && <p data-region="plan-changed-after-filing" style={{ background: 'var(--accent-soft)', padding: 12, borderRadius: 8 }}><L en="This plan changed after the application was submitted. Review the updated answers." ar="تغيّرت هذه الخطة بعد تقديم الطلب. راجعوا الإجابات المحدّثة." /></p>}
             {!plan ? (

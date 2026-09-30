@@ -204,7 +204,7 @@
   ],
   "searchTitleEn": "Search",
   "searchTitleAr": "بحث",
-  "searchPlaceholderEn": "A service, a requirement, or a Ministry reference number",
+  "searchPlaceholderEn": "A service, a requirement, or a Record ID",
   "searchPlaceholderAr": "خدمة أو متطلب أو رقم مرجعي لدى الوزارة",
   "frequentEn": "Frequent",
   "frequentAr": "الأكثر طلباً",
@@ -220,9 +220,9 @@
       "q": "defibrillator"
     },
     {
-      "en": "MOPH-EV-2026-0418",
-      "ar": "MOPH-EV-2026-0418",
-      "q": "MOPH-EV-2026-0418"
+      "en": "EV-0418",
+      "ar": "EV-0418",
+      "q": "EV-0418"
     },
     {
       "en": "Road closure",

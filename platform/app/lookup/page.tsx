@@ -11,7 +11,7 @@ import { findSubmissionByReference } from '../../lib/queries';
  * already worked.
  *
  * The projection has existed since Slice 1 and returns exactly four fields. What did
- * not exist was a page: a member of the public holding a Ministry reference number had
+ * not exist was a page: a member of the public holding a Record ID had
  * no way to check it without calling an API by hand.
  *
  * IT ASKS FOR TWO THINGS, and that is the point rather than friction. References are
@@ -58,22 +58,22 @@ export default async function LookupPage({
         <L en="Overview" ar="نظرة عامة" />
       </Link>
       <h1 data-sec-h1="" style={{ margin: '10px 0 10px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
-        <L en="Verify a reference number" ar="التحقق من رقم مرجعي" />
+        <L en="Verify a record" ar="التحقق من سجل" />
       </h1>
       {/* The anti-enumeration explainer left (partner ruling, second sweep): the form
           asks for the date; it does not have to justify asking. The BEHAVIOUR — no
           answer without the second factor — is non-negotiable 5b and unchanged. */}
       <div className="secondary-help"><InfoNote><L
-          en="Confirm that a Ministry reference exists, and what it says."
+          en="Check a submitted record and its status."
           ar="تأكدوا من وجود رقم مرجعي لدى الوزارة وممّا يفيده."
         /></InfoNote></div>
 
       <form method="get" data-region="lookup-form" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, alignItems: 'end', maxWidth: 700, marginBlockEnd: 28 }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-            <L en="Ministry reference number" ar="الرقم المرجعي لدى الوزارة" />
+            <L en="Record ID" ar="معرّف السجل" />
           </span>
-          <input name="reference" defaultValue={reference ?? ''} placeholder="MOPH-EV-2026-0000" required style={field} />
+          <input name="reference" defaultValue={reference ?? ''} placeholder="EV-0000" required style={field} />
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>

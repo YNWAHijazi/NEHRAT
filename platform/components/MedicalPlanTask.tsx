@@ -1,3 +1,4 @@
+import {eventPlanApproval} from '../lib/plan-approval';
 import Link from 'next/link';
 import { L } from './L';
 import { addedMeasuresFor, planFor } from '../lib/queries';
@@ -10,10 +11,11 @@ export function MedicalPlanTask({ eventId, ownerId, level }: { eventId: string; 
   if (requirement === 'notRequired') return null;
   const plan = planFor(ownerId, eventId);
   const complete = level !== null && planIsComplete(plan, level);
+  const hasApproval=level!==3||Boolean(eventPlanApproval(eventId));
   return <section data-region="medical-plan-task" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--line)', borderRadius: 12, padding: 20, marginBlockEnd: 24 }}>
     <div><h3 style={{ margin: '0 0 8px', fontSize: 18 }}><L en="Shared medical plan" ar="الخطة الطبية المشتركة" /></h3>
       <L en={requirement === 'required' ? 'Required' : 'Recommended — not required to submit'} ar={requirement === 'required' ? 'مطلوبة' : 'موصى بها — ليست شرطاً للتقديم'} />
-      <span style={{ display: 'block', marginBlockStart: 6, color: complete ? 'var(--brand)' : 'var(--muted)' }}><L en={complete ? 'All sections provided' : plan ? 'In progress' : 'Not started'} ar={complete ? 'جميع الأقسام مقدّمة' : plan ? 'قيد الإعداد' : 'لم تبدأ بعد'} /></span>
+      <span style={{ display: 'block', marginBlockStart: 6, color: complete ? 'var(--brand)' : 'var(--muted)' }}><L en={complete ? hasApproval?'Complete':'Awaiting Medical Director approval' : plan ? 'In progress' : 'Not started'} ar={complete ? hasApproval?'مكتملة':'بانتظار اعتماد المدير الطبي' : plan ? 'قيد الإعداد' : 'لم تبدأ بعد'} /></span>
     </div>
     <Link href={`/events/${eventId}/plan`} className="requirement-action"><L en="Open shared medical plan" ar="فتح الخطة الطبية المشتركة" /></Link>
   </section>;

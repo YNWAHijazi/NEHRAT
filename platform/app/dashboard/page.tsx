@@ -1,3 +1,4 @@
+import {venueAssignments} from '../../lib/venue/collaboration';
 import { VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
@@ -108,7 +109,6 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث ${(event.updatedAt || event.createdAt).slice(0, 10)}`} /></span>{!event.filed ? <span><L en={`${pending} pending requirements`} ar={`${pending} متطلبات متبقية`}/></span> : null}
-          {event.mophReference ? <span>· {event.mophReference}</span> : null}
           {/* A second running reads as one at a glance: the previous edition's
               date beside the new record's identity. The records stay separate --
               one per authorisation, each with its own reference. */}
@@ -245,6 +245,7 @@ export default async function DashboardPage({
               <L en="You have withdrawn from the event. The organizer has been told." ar="انسحبتم من الفعالية. وأُبلغ المنظّم." />
             </div>
           ) : null}
+          {venueAssignments(account).length?<section style={{marginBlockEnd:32}}><h2><L en="Hosting venues" ar="مواقع الاستضافة"/></h2>{venueAssignments(account).map(i=><p key={i.token}><Link href={i.status==='confirmed'?`/venue-team/${i.venue_id}`:`/venue-invitations/${i.token}`}>{i.venue_id} · <L en={i.name_en} ar={i.name_ar}/></Link> · <L en={i.status==='confirmed'?'View requirements':'Respond to invitation'} ar={i.status==='confirmed'?'عرض المتطلبات':'الرد على الدعوة'}/></p>)}</section>:null}
           <RoleDashboard
             rows={rows}
             countEn={`${rows.length} events · ${owed} need a response from you`}

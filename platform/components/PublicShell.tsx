@@ -121,7 +121,7 @@ export function PublicShell({
               <L en="Check whether the rules apply" ar="التحقق من انطباق القواعد" />
             </Link>
             <Link href="/lookup" style={{ color: 'var(--brand)' }}>
-              <L en="Verify a reference number" ar="التحقق من رقم مرجعي" />
+              <L en="Verify a record" ar="التحقق من سجل" />
             </Link>
           </div>
           <p style={{ margin: '20px 0 0', fontSize: 12, color: 'var(--muted)' }}>

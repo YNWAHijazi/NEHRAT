@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { L } from '../../../../components/L';
 
-export function InvitationLinkBlock({ token }: { token: string }) {
-  const path = `/invitations/${token}`;
+export function InvitationLinkBlock({ token, path = `/invitations/${token}` }: { token: string; path?: string }) {
   const [url, setUrl] = useState(path);
   const [state, setState] = useState<'idle' | 'copied' | 'manual'>('idle');
   useEffect(() => { setUrl(new URL(path, window.location.origin).href); }, [path]);

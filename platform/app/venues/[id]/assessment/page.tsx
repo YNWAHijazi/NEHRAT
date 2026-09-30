@@ -1,3 +1,4 @@
+import {reopenVenueSectionAction} from '../../actions';
 import { VenueWorkspace } from '../../../../components/VenueWorkspace';
 import { venuePackageFor } from '../../../../lib/venue/workspace';
 import { L } from '../../../../components/L';
@@ -60,7 +61,7 @@ export default async function VenueAssessmentPage({
 
   return (
     <VenueWorkspace account={account} w={w} active="assessment">
-    {!w.editable ? <section><h2><L en="Assessment" ar="التقييم"/></h2><p><L en={`Recorded level: ${w.level ?? '—'}`} ar={`المستوى المسجّل: ${w.level ?? '—'}`}/></p>{last?.answers.map((answer,i)=><p key={i}><L en={DOMAINS[i]?.en??''} ar={DOMAINS[i]?.ar??''}/> · {answer??'—'}</p>)}</section> :
+    {!w.editable || (w.assessmentDone&&!w.assessmentEditing) ? <section>{w.editable?<form action={reopenVenueSectionAction.bind(null,id,'assessment')}><button><L en="Edit assessment" ar="تعديل التقييم"/></button></form>:null}<h2><L en="Assessment" ar="التقييم"/></h2><p><L en={`Recorded level: ${w.level ?? '—'}`} ar={`المستوى المسجّل: ${w.level ?? '—'}`}/></p>{last?.answers.map((answer,i)=><p key={i}><L en={DOMAINS[i]?.en??''} ar={DOMAINS[i]?.ar??''}/> · <L en={DOMAINS[i]?.options.find(o=>o.score===answer)?.en??'—'} ar={DOMAINS[i]?.options.find(o=>o.score===answer)?.ar??'—'}/></p>)}</section> :
         <VenueAssessmentForm
           venueId={venue.id}
           venueNameEn={venue.nameEn}

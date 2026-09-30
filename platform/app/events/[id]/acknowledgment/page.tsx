@@ -102,7 +102,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
 
             <div style={{ paddingBlock: 30, borderBlockEnd: '1px solid var(--line)' }}>
               <div style={{ ...upLabel, marginBlockEnd: 8 }}>
-                <L en="Ministry reference number" ar="الرقم المرجعي للوزارة" />
+                <L en="Record ID" ar="معرّف السجل" />
               </div>
               <div style={{ fontSize: 38, fontWeight: 600, letterSpacing: '-.03em', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>
                 {event.mophReference}
