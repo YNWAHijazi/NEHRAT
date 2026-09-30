@@ -27,6 +27,7 @@ export async function withdrawVenuePartnerAction(id:string,token:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w?.editable)notFound();
  const inv=venueInvitation(token);if(!inv||inv.venue_id!==id)notFound();
  getDb().prepare("UPDATE venue_invitations SET status='withdrawn',responded_at=now_stamp() WHERE token=?").run(token);
+ getDb().prepare('UPDATE venue_packages SET work_revision=work_revision+1 WHERE venue_id=?').run(id);
  getDb().prepare('DELETE FROM venue_plan_approvals WHERE venue_id=?').run(id);
  revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(`/venues/${id}/team`);
 }
@@ -39,7 +40,7 @@ export async function respondVenueInvitationAction(token:string,form:FormData) {
  const response=form.get('response'),note=String(form.get('note')??'').trim(),licence=String(form.get('licence')??'').trim(),phone=String(form.get('phone')??'').trim();
  if(!['accept','decline'].includes(String(response))||(response==='decline'&&!note)||(response==='accept'&&(!phone||!validPhone(phone)||(inv.kind==='director'&&!licence))))redirect(`/venue-invitations/${token}?error=details`);
  db.prepare('UPDATE venue_invitations SET status=?,account_id=?,note=?,licence=?,responded_at=now_stamp() WHERE token=?').run(response==='accept'?'confirmed':'declined',a.id,note,licence,token);
- if(response==='accept')db.prepare('UPDATE accounts SET phone=? WHERE id=?').run(phone,a.id);
+ if(response==='accept'){db.prepare('UPDATE accounts SET phone=? WHERE id=?').run(phone,a.id);db.prepare('UPDATE venue_packages SET work_revision=work_revision+1 WHERE venue_id=?').run(inv.venue_id);db.prepare('DELETE FROM venue_plan_approvals WHERE venue_id=?').run(inv.venue_id);}
  db.prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(venue.account_id,response==='accept'?'Venue invitation accepted':'Venue invitation declined',response==='accept'?'قُبلت دعوة الموقع':'رُفضت دعوة الموقع',inv.name,inv.name,`/venues/${inv.venue_id}/team`,venue.is_demo);
  revalidatePath(`/venues/${inv.venue_id}`,'layout');revalidatePath('/dashboard');redirect(response==='accept'?`/venue-team/${inv.venue_id}`:`/venue-invitations/${token}`);
 }

@@ -3,27 +3,27 @@ import type { Level } from './types';
 export type VenuePackageStatus = 'draft' | 'submitted' | 'revision' | 'accepted';
 export type VenueAnswer = Record<string, string>;
 export type VenueAnswers = Record<string, VenueAnswer>;
-export type VenueField = { key: string; en: string; ar: string };
-const f = (key:string,en:string,ar:string):VenueField => ({key,en,ar});
+export type VenueField = { key: string; en: string; ar: string; source?: 'organizer' | 'director' | 'ems' | 'author' };
+const f = (key:string,en:string,ar:string,source?:VenueField['source']):VenueField => ({key,en,ar,...(source?{source}:{})});
 const FIELDS: Record<number, VenueField[]> = {
-  1:[f('name','Contact name','اسم جهة الاتصال'),f('phone','Phone number','رقم الهاتف')],
-  3:[f('name','Medical Director name','اسم المدير الطبي'),f('license','Medical licence number','رقم ترخيص الطبيب'),f('phone','Phone number','رقم الهاتف')],
-  4:[f('team','Who provides first aid?','من يقدّم الإسعافات الأولية؟'),f('coverage','Where and when is the team available?','أين ومتى يتوفر الفريق؟')],
-  5:[f('agency','Medical or EMS agency','الجهة الطبية أو الإسعافية'),f('teams','Team numbers and staffing','عدد الفرق وأفرادها'),f('contact','Team lead and phone number','مسؤول الفريق ورقم الهاتف')],
+  1:[f('name','Contact name','اسم جهة الاتصال','organizer'),f('phone','Phone number','رقم الهاتف','organizer')],
+  3:[f('name','Medical Director name','اسم المدير الطبي','director'),f('license','Medical licence number','رقم ترخيص الطبيب','director'),f('phone','Phone number','رقم الهاتف','director')],
+  4:[f('team','First-aid staffing','أفراد فريق الإسعافات الأولية'),f('coverage','Where and when is the team available?','أين ومتى يتوفر الفريق؟')],
+  5:[f('agency','EMS agency','جهة الإسعاف','ems'),f('teams','Team numbers and staffing','عدد الفرق وأفرادها'),f('contact','EMS contact','جهة الاتصال بالإسعاف','ems')],
   6:[f('location','Treatment post location','موقع نقطة العلاج'),f('staff','Staff and opening hours','العاملون وساعات العمل')],
-  7:[f('agency','EMS agency','جهة الإسعاف'),f('phone','EMS contact number','رقم الاتصال بالإسعاف'),f('arrangements','Ambulance coverage and transport arrangements','التغطية الإسعافية وترتيبات النقل')],
+  7:[f('agency','EMS agency','جهة الإسعاف','ems'),f('phone','EMS contact number','رقم الاتصال بالإسعاف','ems'),f('arrangements','Ambulance coverage and transport arrangements','التغطية الإسعافية وترتيبات النقل')],
   8:[f('location','AED locations','مواقع أجهزة إزالة الرجفان'),f('responders','Trained responders and how to reach them','المستجيبون المدرّبون وكيفية الاتصال بهم')],
   9:[f('supplies','Available supplies and storage locations','المستلزمات المتاحة وأماكن حفظها'),f('responsible','Who checks the supplies?','من يتفقّد المستلزمات؟')],
   10:[f('entrance','Emergency vehicle entrance','مدخل مركبات الطوارئ'),f('access','How is access kept clear?','كيف يُحافظ على خلوّ طريق الدخول؟')],
   11:[f('route','Patient access and removal route','مسار الوصول إلى المريض ونقله'),f('support','Who helps move patients safely?','من يساعد في نقل المرضى بأمان؟')],
   12:[f('hospital','Receiving hospital or emergency department','المستشفى أو قسم الطوارئ المستقبل'),f('contact','Contact details and coordination','بيانات الاتصال والتنسيق')],
   14:[f('channel','Main communication method','وسيلة الاتصال الرئيسية'),f('backup','Backup if it fails','البديل عند تعطلها')],
-  15:[f('lead','Medical command lead','مسؤول القيادة الطبية'),f('contact','Contact and reporting arrangements','الاتصال وترتيبات الإبلاغ')],
+  15:[f('lead','Medical command lead','مسؤول القيادة الطبية','director'),f('contact','How will the team report medical issues to you?','كيف يبلّغكم الفريق بالمشكلات الطبية؟')],
   16:[f('steps','What happens in a major emergency?','ما الخطوات عند حدوث طارئ كبير؟'),f('authority','Who calls for extra help or stops activities?','من يطلب دعماً إضافياً أو يوقف الأنشطة؟')],
   17:[f('insurer','Insurer and policy number','شركة التأمين ورقم البوليصة'),f('coverage','Who is covered and for which dates?','من تشملهم التغطية وما مدتها؟')],
   18:[f('procedure','How will providers record care and hand over to EMS? Do not enter patient details.','كيف توثّق الجهات الرعاية وتسلّم المرضى للإسعاف؟ لا تدخلوا بيانات المرضى.')],
-  2:[f('preparedBy','Prepared by (Medical Director or EMS agency)','أعدّها (المدير الطبي أو جهة الإسعاف)'),],
-  20:[f('agencies','EMS agencies covered by the signed declarations','جهات الإسعاف التي تشملها الإقرارات الموقّعة')],
+  2:[f('preparedBy','Prepared by','أعدّها','author'),],
+  20:[f('agencies','EMS agency','جهة الإسعاف','author')],
 };
 export type VenueEditor = 'organizer' | 'ems' | 'director';
 /** Revised Annex B plus the owner's assignment of clinical entry to medical partners. */
@@ -44,3 +44,8 @@ export function venueRequirements(level:Level, answers:VenueAnswers, files:Reado
 }
 export function venuePackageEditable(status:VenuePackageStatus, archived:boolean) { return !archived && (status==='draft'||status==='revision'); }
 export const VENUE_STATUS:Record<VenuePackageStatus,{en:string;ar:string}>={draft:{en:'In preparation',ar:'قيد التحضير'},submitted:{en:'Under Ministry review',ar:'قيد مراجعة الوزارة'},revision:{en:'Changes requested',ar:'تعديلات مطلوبة'},accepted:{en:'Requirements satisfied',ar:'المتطلبات مستوفاة'}};
+
+/** Local EMS contact is sufficient at Level 1; an invited agency supplies its own identity. */
+export function venueFieldsForTeam(fields:VenueField[],requirement:number,level:Level,hasEmsInvitation:boolean):VenueField[] {
+ return requirement===7&&level===1&&!hasEmsInvitation?fields.map(({source,...field})=>field):fields;
+}

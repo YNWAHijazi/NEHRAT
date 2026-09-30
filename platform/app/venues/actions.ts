@@ -37,7 +37,9 @@ export async function saveVenueRequirementAction(id:string,key:string,form:FormD
  const w=venuePackageFor(access.ownerId,id)!;const back=access.role==='organizer'?`/venues/${id}/requirements`:`/venue-team/${id}`;
  if(!w.editable||!w.level||!venueMayWrite(a,id,Number(key),w.level))redirect(back);
  const req=w.requirements.find(r=>String(r.n)===key);if(!req)notFound();
- const values=Object.fromEntries(req.fields.map(f=>[f.key,String(form.get(f.key)??'').trim().slice(0,5000)]));
+ const entered=Object.fromEntries(req.fields.filter(f=>!f.source).map(f=>[f.key,String(form.get(f.key)??'').trim().slice(0,5000)]));
+ const author=key==='20'?access.invitation?.name:a.displayName;
+ const values={...Object.fromEntries(req.fields.filter(f=>f.source).map(f=>[f.key,f.source==='author'?author??'':w.answers[key]?.[f.key]??''])),...entered};
  const file=form.get('file');let upload:{name:string;type:string;bytes:Buffer}|null=null;
  if(file instanceof File&&file.size){if(refuseUpload(file))redirect(`${back}?error=upload#r-${key}`);upload={name:file.name.trim(),type:file.type,bytes:Buffer.from(await file.arrayBuffer())};}
  const fileKey=key==='20'&&access.invitation?`${key}-${access.invitation.token}`:key;

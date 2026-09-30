@@ -36,3 +36,11 @@ Validation
 Pre-release live backup: /data/venue-collaboration-backup-20260930/database.sqlite; 55 tables; integrity ok; SHA-256 b9cbf1f2cb067ce2917b2ab25808df2813446a4f9933436fc4f5073540ba2ab8. Schema additions preserve existing records and historical certificates.
 
 Still outside this release: real invitation-email delivery and OTP activation (the sender domain remains postponed by the owner), Supabase production migration, automatic off-site backups. The platform provides shareable invitation links and in-app notifications for existing accounts while email setup is pending.
+
+Linked-team correction — 1 October 2026
+
+The initial venue collaboration still asked for agency/contact identity inside individual requirements. Those fields now derive from accepted invitations and account contact details. BLS staffing asks for staffing only; EMS arrangements ask for coverage/transport only. The plan author and each agency's declaration identity come from the authenticated contributor. Director identity comes from the accepted appointment. Client-supplied replacement identity values are ignored. At Level 1, Annex B still permits recording a local EMS contact where no agency is invited; once an agency is linked, its identity is automatic.
+
+Organizer requirements separate the organizer's work from medical-team work. Pending clinical cards no longer present empty answer sheets. Actual completed answers and contributor receipts appear for review. Linked team details appear once above the requirements; optional supporting uploads are collapsed. Ministry submissions retain the populated contact/agency answers in their immutable snapshot. Later account-phone edits do not change the filed answers. Acceptance/withdrawal changes invalidate stale editing forms and current Director approval.
+
+Validation: TypeScript, production build and all 496 unit/integration tests passed. Six browser checks passed, including the multi-role submission journey, explicit checks for absence of duplicate EMS/BLS inputs, organizer pending/completed displays, and desktop/mobile English/Arabic layouts. Production backup: /data/venue-linked-team-backup-20261001/database.sqlite, 59 tables, integrity ok, SHA-256 e8f3da62c393b3180d18a7ca86bb9efd09fb1ed41189f7466e5b04658863a3db. No schema change or rewrite of historical submissions is needed for this correction.

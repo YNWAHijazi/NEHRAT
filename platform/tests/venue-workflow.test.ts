@@ -15,6 +15,13 @@ describe('venue submission requirements',()=>{
   expect(venueRequirements(2,{'1':{name:'Manager'}},new Set(['1'])).find(r=>r.n===1)?.done).toBe(false);
   expect(venueRequirements(2,{'1':{name:'Manager',phone:'+9611234567'}},new Set()).find(r=>r.n===1)?.done).toBe(true);
  });
+ it('uses linked identities instead of asking medical partners to enter them again',()=>{
+  const rows=venueRequirements(3,{},new Set());
+  expect(rows.find(r=>r.n===7)!.fields.filter(f=>!f.source).map(f=>f.key)).toEqual(['arrangements']);
+  expect(rows.find(r=>r.n===5)!.fields.filter(f=>!f.source).map(f=>f.key)).toEqual(['teams']);
+  expect(rows.find(r=>r.n===2)!.fields.filter(f=>!f.source)).toEqual([]);
+  expect(rows.find(r=>r.n===20)!.fields.filter(f=>!f.source)).toEqual([]);
+ });
  it('locks filed, accepted and archived packages',()=>{
   expect(venuePackageEditable('draft',false)).toBe(true);expect(venuePackageEditable('revision',false)).toBe(true);
   expect(venuePackageEditable('submitted',false)).toBe(false);expect(venuePackageEditable('accepted',false)).toBe(false);expect(venuePackageEditable('draft',true)).toBe(false);

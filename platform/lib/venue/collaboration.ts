@@ -7,8 +7,9 @@ export interface VenueInvitation {
  status:'nominated'|'confirmed'|'declined'|'withdrawn';account_id:number|null;
  invited_at:string;expires_at:string;responded_at:string|null;note:string;licence:string;delivery:string;
 }
-export function venueInvitations(id:string):VenueInvitation[] {
- return getDb().prepare('SELECT * FROM venue_invitations WHERE venue_id=? ORDER BY invited_at,token').all(id) as unknown as VenueInvitation[];
+export type VenueTeamMember = VenueInvitation & {phone:string;active:number};
+export function venueInvitations(id:string):VenueTeamMember[] {
+ return getDb().prepare("SELECT i.*,COALESCE(a.phone,'') AS phone,CASE WHEN a.suspended=0 THEN 1 ELSE 0 END AS active FROM venue_invitations i LEFT JOIN accounts a ON a.id=i.account_id WHERE i.venue_id=? ORDER BY i.invited_at,i.token").all(id) as unknown as VenueTeamMember[];
 }
 export function venueInvitation(token:string):VenueInvitation|null {
  if(!/^[a-f0-9]{48}$/.test(token))return null;

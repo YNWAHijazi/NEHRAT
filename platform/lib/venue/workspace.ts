@@ -1,5 +1,5 @@
 import { venueInvitations } from './collaboration';
-import { venueRequirementEditors } from '../rules/venue-workflow';
+import { venueRequirementEditors, venueFieldsForTeam } from '../rules/venue-workflow';
 import { getDb } from '../db';
 import { venueById, venueAssessmentsFor, venueAttachmentsFor } from '../queries';
 import { venuePackageEditable, venueRequirements, type VenueAnswers, type VenuePackageStatus } from '../rules/venue-workflow';
@@ -16,14 +16,26 @@ export function venuePackageFor(accountId:number,id:string) {
  const level=assessmentVersion?versions.find(v=>v.version===assessmentVersion)?.derivation.finalLevel??null:null;
  const answers:VenueAnswers=row?JSON.parse(row.answers):{};
  const invitations=venueInvitations(id);
- const confirmed=invitations.filter(i=>i.status==='confirmed');
+ const confirmed=invitations.filter(i=>i.status==='confirmed'&&i.active);
  const director=confirmed.find(i=>i.kind==='director'&&i.licence);
  const contributions=getDb().prepare(`SELECT c.*,a.display_name FROM venue_contributions c JOIN venue_invitations i ON i.token=c.invitation_token JOIN accounts a ON a.id=i.account_id WHERE c.venue_id=? AND c.assessment_version=? AND i.status='confirmed' AND a.suspended=0`).all(id,assessmentVersion??0) as unknown as {requirement_key:string;invitation_token:string;answers:string;completed_at:string;display_name:string}[];
  const approval=getDb().prepare(`SELECT p.approved_at,a.display_name FROM venue_plan_approvals p JOIN venue_invitations i ON i.token=p.invitation_token JOIN accounts a ON a.id=i.account_id WHERE p.venue_id=? AND p.assessment_version=? AND i.kind='director' AND i.status='confirmed' AND a.suspended=0`).get(id,assessmentVersion??0) as {approved_at:string;display_name:string}|undefined;
  const frozen=row?.status==='submitted'||row?.status==='accepted';
  if(!frozen){
  answers['1']={name:venue.responsibleName,phone:venue.responsiblePhone};
- answers['3']=director?{name:director.name,phone:String((getDb().prepare('SELECT phone FROM accounts WHERE id=?').get(director.account_id) as {phone:string})?.phone??''),license:director.licence}:{};
+ answers['3']=director?{name:director.name,phone:director.phone,license:director.licence}:{};
+ const agencies=confirmed.filter(i=>i.kind==='ems');
+ // Invitation identity is the only source of agency/contact details when a team is linked.
+ const linkedEms=invitations.some(i=>i.kind==='ems'&&['nominated','confirmed'].includes(i.status));
+ if(level!==1||linkedEms){
+ const agency=agencies.map(i=>i.name).join('\n'),phone=agencies.map(i=>i.phone).join('\n');
+ answers['7']={...answers['7'],agency,phone};
+ }
+ answers['5']={...answers['5'],agency:agencies.map(i=>i.name).join('\n'),contact:agencies.map(i=>`${i.name} · ${i.phone}`).join('\n')};
+ answers['15']={...answers['15'],lead:director?.name??''};
+ const author=contributions.find(c=>c.requirement_key==='2');
+ answers['2']={...answers['2'],preparedBy:author?.display_name??''};
+ answers['20']={...answers['20'],agencies:agencies.map(i=>i.name).join('\n')};
  }
 
  const files=venueAttachmentsFor(accountId,id);
@@ -38,7 +50,9 @@ export function venuePackageFor(accountId:number,id:string) {
  if(r.n===20){const agencies=confirmed.filter(i=>i.kind==='ems');done=agencies.length>0&&agencies.every(i=>receipts.some(c=>c.invitation_token===i.token));}
  // Submitted packages are immutable; older accepted packages retain their recorded completion.
  if(frozen){const h=getDb().prepare('SELECT snapshot FROM venue_package_history WHERE venue_id=? AND revision=?').get(id,row!.revision) as {snapshot:string}|undefined;const old=h?JSON.parse(h.snapshot).requirements?.find((x:{n:number})=>x.n===r.n):null;if(old)done=old.done;}
- return {...r,done,receipts,clinical,awaitingApproval:r.n===2&&level===3&&r.done&&receipts.length>0&&!approval};
+ // At Level 1 a local EMS contact can be recorded without an on-site invitation.
+ const fields=venueFieldsForTeam(r.fields,r.n,level as Level,invitations.some(i=>i.kind==='ems'&&['nominated','confirmed'].includes(i.status)));
+ return {...r,fields,done,receipts,clinical,awaitingApproval:r.n===2&&level===3&&r.done&&receipts.length>0&&!approval};
  }):[];
  return {venue,status,answers,workRevision:row?.work_revision??0,invitations,contributions,approval,detailsEditing:Boolean(row?.details_editing),assessmentEditing:Boolean(row?.assessment_editing),assessmentVersion,level:level as Level|null,requirements,files,point,district:geo.district,revision:row?.revision??0,note:row?.review_note??'',submittedAt:row?.submitted_at??null,
  editable:venuePackageEditable(status,Boolean(venue.archivedAt)),
