@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
+import { StageRail } from '../../../components/StageRail';
+import { NextStepCard } from '../../../components/NextStepCard';
+import { GatedAction, actionGrid, actionCell, actionPill } from '../../../components/RecordActions';
+import type { RailStage } from '../../../lib/rules/rail';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
 import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFacts, postEventReportFor, standingDeterminationFor } from '../../../lib/queries';
@@ -28,201 +32,9 @@ import {
   LIFECYCLE_CONTENT, materialChangeGate, seriousIncidentGate,
   postEventReportGate,
   type EventGateContext,
-  type Gate,
   MINISTRY_CONTENT,
   postEventReportRequired,
 } from '../../../lib/rules';
-import enMessages from '../../../lib/i18n/messages/en.json';
-import arMessages from '../../../lib/i18n/messages/ar.json';
-
-function messageFor(catalog: Record<string, unknown>, key: string, params?: Record<string, string | number>): string {
-  const parts = key.split('.');
-  let node: unknown = catalog;
-  for (const part of parts) {
-    node = (node as Record<string, unknown>)[part];
-  }
-  let text = String(node ?? key);
-  for (const [k, v] of Object.entries(params ?? {})) {
-    text = text.replaceAll(`{${k}}`, String(v));
-  }
-  return text;
-}
-
-/**
- * The four routes off the event record.
- *
- * They were a wrapping flex row, which put three pills on one line at three
- * different widths and the fourth alone on the next, with two reason captions
- * hanging under two of them and nothing lining up with anything. A grid gives
- * one column per action: the pills come out the same width, they sit on a
- * shared baseline, and every caption starts on the same line.
- *
- * ONE pill style, used by the plain link and by BOTH branches of GatedAction.
- * It was three inline copies and they had already drifted -- the disabled
- * button carried neither the colour nor the centring the two links had.
- */
-const actionGrid: React.CSSProperties = {
-  display: 'grid',
-  /**
-   * 376px is measured, not chosen: the longest label, "Open requirements and
-   * attachments", sets 331px of text and the pill adds 44px of padding. Below
-   * that the label wraps to two lines and the row stops looking aligned, which
-   * is what a narrower column produced on the first attempt.
-   */
-  /**
-   * min(376px, 100%), not 376px: a bare minimum track is a FLOOR the grid will
-   * not go below, so on a 335px phone the row overflowed its own panel by 41px
-   * and the page scrolled sideways. Wrapping it in min() lets the track collapse
-   * to the container when the container is the smaller of the two.
-   */
-  gridTemplateColumns: 'repeat(auto-fit, minmax(min(376px, 100%), 1fr))',
-  gap: '14px 12px',
-  alignItems: 'start',
-  /**
-   * Its own full-width row under the counters. Sharing the row left 731px, which
-   * fits one 376px column and wastes the rest; the full width fits two.
-   */
-  flexBasis: '100%',
-  // Basis alone left the row at its content width inside a wider panel; grow
-  // makes it actually take the row it was given.
-  flexGrow: 1,
-};
-
-const actionCell: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 3,
-  alignItems: 'stretch',
-};
-
-const actionPill: React.CSSProperties = {
-  // A FLOOR, not a fixed height: the Arabic issue of a label is not the English
-  // one's length, and a fixed height clips the second line rather than growing.
-  // Tightened (partner ruling, 2026-09-05): these three rows are waiting states,
-  // not the page's subject, and they were taking a phone screen between them.
-  minHeight: 34,
-  paddingBlock: 6,
-  paddingInline: 16,
-  border: '1px solid var(--line)',
-  background: 'var(--bg)',
-  borderRadius: 17,
-  fontSize: '13.5px',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'var(--ink)',
-  width: '100%',
-};
-
-/**
- * Disabled is NOT the same pill in a grid cell. Non-negotiable 10 turns on a
- * reader telling "will become available" from "live" at a glance, and the old
- * disabled button got that distinction from the browser's default disabled
- * grey -- which the shared style would have overwritten with --ink, leaving a
- * dead control that looks live. Muted is stated here rather than inherited.
- */
-const actionPillDisabled: React.CSSProperties = { ...actionPill, color: 'var(--muted)' };
-
-const actionReason: React.CSSProperties = {
-  fontSize: '11.5px',
-  lineHeight: 1.4,
-  color: 'var(--muted)',
-};
-
-/**
- * A gated action row. Two behaviours, distinguishable at a glance:
- * enabled renders as a live control; disabled renders greyed WITH its reason beside it.
- * The third behaviour, absent, never reaches this component -- absent means no row.
- */
-function GatedAction({
-  gate,
-  href,
-  en,
-  ar,
-}: {
-  gate: Gate;
-  href: string;
-  en: string;
-  ar: string;
-}) {
-  if (gate.behaviour === 'absent') return null;
-  if (gate.behaviour === 'enabled') {
-    return (
-      <span style={actionCell}>
-        <Link href={href} style={actionPill}>
-          <L en={en} ar={ar} />
-        </Link>
-      </span>
-    );
-  }
-  const reasonEn = gate.reasonKey ? messageFor(enMessages, gate.reasonKey, gate.params) : '';
-  const reasonAr = gate.reasonKey ? messageFor(arMessages, gate.reasonKey, gate.params) : '';
-  return (
-    <span style={actionCell}>
-      <button type="button" disabled style={actionPillDisabled}>
-        <L en={en} ar={ar} />
-      </button>
-      <span style={actionReason}>
-        <L en={reasonEn} ar={reasonAr} />
-      </span>
-    </span>
-  );
-}
-
-
-type StageKind = 'done' | 'current' | 'returned' | 'todo' | 'na';
-
-interface RailStage {
-  k: StageKind;
-  en: string;
-  ar: string;
-  metaEn: string;
-  metaAr: string;
-}
-
-const STAGE_STYLE: Record<StageKind, { color: string; edge: string; ink: string; weight: number; lblEn: string; lblAr: string; chipBg: string; chipColor: string }> = {
-  done: { color: 'var(--brand)', edge: 'solid', ink: 'var(--ink)', weight: 500, lblEn: 'Complete', lblAr: 'مُنجزة', chipBg: 'var(--brand-soft)', chipColor: 'var(--brand)' },
-  current: { color: 'var(--accent)', edge: 'solid', ink: 'var(--ink)', weight: 600, lblEn: 'Current', lblAr: 'الحالية', chipBg: 'var(--accent-soft)', chipColor: 'var(--accent-ink)' },
-  returned: { color: 'var(--accent)', edge: 'solid', ink: 'var(--ink)', weight: 600, lblEn: 'Returned here', lblAr: 'أُعيدت إلى هنا', chipBg: 'var(--accent-soft)', chipColor: 'var(--accent-ink)' },
-  todo: { color: 'var(--line)', edge: 'solid', ink: 'var(--muted)', weight: 400, lblEn: 'Not yet', lblAr: 'لم تبدأ', chipBg: 'var(--surface2)', chipColor: 'var(--muted)' },
-  na: { color: 'var(--line)', edge: 'dashed', ink: 'var(--muted)', weight: 400, lblEn: 'Not applicable', lblAr: 'غير منطبقة', chipBg: 'var(--surface2)', chipColor: 'var(--muted)' },
-};
-
-function StageRailCard({ stages, noteEn, noteAr }: { stages: RailStage[]; noteEn: string; noteAr: string }) {
-  return (
-    <section data-region="rail" style={{ marginBlockEnd: 28, padding: '16px 22px', background: 'var(--surface2)', borderRadius: 16 }}>
-      <div style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <span style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-          <L en="Event progress" ar="مراحل الفعالية" />
-        </span>
-        <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-          <L en={noteEn} ar={noteAr} />
-        </span>
-      </div>
-      <div data-rail="" style={{ marginBlockStart: 18, display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 12 }}>
-        {stages.map((s, i) => {
-          const st = STAGE_STYLE[s.k];
-          return (
-            <div key={i} style={{ paddingBlockStart: 12, borderBlockStart: `3px ${st.edge} ${st.color}` }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBlockEnd: 6 }}>
-                <span style={{ fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
-                <span style={{ padding: '2px 7px', borderRadius: 999, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
-                  <L en={st.lblEn} ar={st.lblAr} />
-                </span>
-              </div>
-              <div style={{ fontSize: '14.5px', fontWeight: st.weight, lineHeight: 1.4, color: st.ink }}>
-                <L en={s.en} ar={s.ar} />
-              </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5, marginBlockStart: 5 }}>
-                <L en={s.metaEn} ar={s.metaAr} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
 
 export default async function EventRecordPage({
   params,
@@ -479,55 +291,10 @@ export default async function EventRecordPage({
 
         {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
         {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
-          <section
-            data-region="next-action"
-            data-next-action={action.kind}
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 20,
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '22px 26px',
-              border: `1px solid ${action.tone === 'brand' ? 'var(--brand)' : 'var(--accent)'}`,
-              background: action.tone === 'brand' ? 'var(--brand-soft)' : 'var(--accent-soft)',
-              borderRadius: 16,
-              marginBlockEnd: 20,
-              color: 'var(--ink)',
-              textDecoration: 'none',
-            }}
-          >
-            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: action.tone === 'brand' ? 'var(--brand)' : 'var(--accent-ink)', marginBlockEnd: 6 }}>
-                <L en="Next step" ar="الخطوة التالية" />
-              </span>
-              <span style={{ display: 'block', fontSize: 17, fontWeight: 600, lineHeight: 1.45, marginBlockEnd: 6 }}>
-                <L en={action.titleEn} ar={action.titleAr} /> <InfoNote labelEn="About this step" labelAr="حول هذه الخطوة">
-                  <L en={action.bodyEn} ar={action.bodyAr} />
-                </InfoNote>
-              </span>
-            </div>
-            <Link href={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`}
-              style={{
-                flex: 'none',
-                height: 44,
-                paddingInline: 22,
-                borderRadius: 22,
-                background: action.tone === 'brand' ? 'var(--brand)' : 'var(--bg)',
-                color: action.tone === 'brand' ? 'var(--bg)' : 'var(--ink)',
-                border: action.tone === 'brand' ? '0' : '1px solid var(--line)',
-                fontSize: '14.5px',
-                fontWeight: 500,
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              <L en={action.buttonEn} ar={action.buttonAr} />
-            </Link>
-          </section>
+          <NextStepCard step={action} to={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`} />
         ) : null}
 
-        <StageRailCard stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
+        <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
         {/* The requirements counters and routes, from the reference record. */}
         <div data-region="counters" style={{ padding: '18px 0', borderBlockEnd: '1px solid var(--line)', marginBlockEnd: 24, display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between', alignItems: 'center' }}>
