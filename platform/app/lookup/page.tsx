@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
 import { currentAccount } from '../../lib/auth';
-import { resolvePublicLookup } from '../../lib/rules';
+import { resolvePublicLookup, publicStatusArabic } from '../../lib/rules';
 import { findSubmissionByReference } from '../../lib/queries';
 
 /**
@@ -108,7 +108,7 @@ export default async function LookupPage({
               {[
                 { en: 'Event', ar: 'الفعالية', v: result.eventName },
                 { en: 'Level', ar: 'المستوى', v: result.level === null ? '—' : String(result.level) },
-                { en: 'Current status', ar: 'الحالة الراهنة', v: result.status },
+                { en: 'Current status', ar: 'الحالة الراهنة', v: result.status ? <L en={result.status} ar={publicStatusArabic(result.status)} /> : '—' },
               ].map((r) => (
                 <div key={r.en} style={{ display: 'flex', flexWrap: 'wrap', gap: 14, paddingBlock: 10, borderBlockEnd: '1px solid var(--line)' }}>
                   <span style={{ flex: '0 0 160px', fontSize: '12.5px', color: 'var(--muted)' }}>

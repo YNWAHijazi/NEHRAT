@@ -27,7 +27,6 @@ import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
 import { can, permissionMatrix, rolesHolding } from './rules/ministry';
 import { COMPLIANCE_DECLARATIONS } from './rules/content';
-import { MINISTRY_CONTENT } from './rules/ministry';
 import type { SubmissionRecord } from './rules/public-lookup';
 import { certificationComplete } from './rules/certification';
 
@@ -2407,7 +2406,7 @@ export function notificationsForEvent(eventId: string): { id: number; titleEn: s
 export function findSubmissionByReference(reference: string): SubmissionRecord | null {
   const row = getDb()
     .prepare(
-      `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en
+      `SELECT e.id, e.moph_reference, e.name_en, e.start_date, e.is_demo, e.demo_level, e.demo_state_en, e.lifecycle
        FROM events e WHERE e.filed = 1 AND (e.id = ? OR e.moph_reference = ?)`,
     )
     .get(reference, reference) as
@@ -2419,22 +2418,28 @@ export function findSubmissionByReference(reference: string): SubmissionRecord |
         is_demo: number;
         demo_level: number | null;
         demo_state_en: string | null;
+        lifecycle: string | null;
       }
     | undefined;
   if (!row) return null;
   // The same precedence as the organizer's own screens: a recorded outcome wins,
   // so the public register never disagrees with the dashboard on the same event.
+  // A filed record with no recorded outcome is "Filed — under review", exactly as the organizer
+  // sees it; it is never one of the three outcomes, which only a Ministry reviewer records.
   const outcome = latestOutcomeFor(row.id);
-  const outcomeLabel = outcome
-    ? MINISTRY_CONTENT.outcomes.find((o) => o.key === outcome)?.en
-    : undefined;
+  const lifecycle = row.lifecycle ?? 'active';
+  const state = lifecycle !== 'active'
+    ? LIFECYCLE_CONTENT.states[lifecycle as 'cancelled' | 'postponed'].en
+    : outcome
+      ? organizerEventState({ outcome, filed: true, assessed: true }).en
+      : (row.demo_state_en ?? organizerEventState({ outcome: null, filed: true, assessed: true }).en);
   return {
     referenceNumber: row.id,
     eventName: row.name_en,
     // No derivable level is NOT Level 1 (non-negotiable 0): the register reports the
     // absence rather than inventing the lowest band.
     level: derivedLevelFor(row.id),
-    status: outcomeLabel ?? row.demo_state_en ?? 'Submission received but incomplete',
+    status: state,
     isDemo: row.is_demo === 1,
     eventStartDate: row.start_date ?? '',
   };

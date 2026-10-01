@@ -68,8 +68,8 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Acknowledgment of receipt" ar="إشعار الاستلام" />
          <InfoNote><L
-            en="Your application is received once you have this receipt and reference number. Share this document with the authority issuing your event permit."
-            ar="يُعدّ طلبكم مستلماً عند حصولكم على هذا الإيصال والرقم المرجعي. شاركوا المستند مع الجهة التي تمنح تصريح الفعالية."
+            en="Your application is received once you have this receipt and its record ID. Share this document with the authority issuing your event permit."
+            ar="يُعدّ طلبكم مستلماً عند حصولكم على هذا الإيصال ومعرّف السجل الوارد فيه. شاركوا المستند مع الجهة التي تمنح تصريح الفعالية."
           /></InfoNote>
 </h1>
 

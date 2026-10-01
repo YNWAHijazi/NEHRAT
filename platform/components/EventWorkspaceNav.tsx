@@ -3,11 +3,11 @@ import { L } from './L';
 
 export type EventWorkspaceSection = 'overview' | 'requirements' | 'director' | 'ems' | 'plan' | 'submit';
 
-export function EventWorkspaceNav({ eventId, active }: { eventId: string; active: EventWorkspaceSection }) {
+export function EventWorkspaceNav({ eventId, active, showDirector = true }: { eventId: string; active: EventWorkspaceSection; showDirector?: boolean }) {
   const items = [
     { key: 'overview', path: '', en: 'Overview', ar: 'نظرة عامة' },
     { key: 'requirements', path: '/requirements', en: 'Requirements', ar: 'المتطلبات' },
-    { key: 'director', path: '/medical-team?tab=director', en: 'Medical Director', ar: 'المدير الطبي' },
+    ...(showDirector ? [{ key: 'director', path: '/medical-team?tab=director', en: 'Medical Director', ar: 'المدير الطبي' }] : []),
     { key: 'ems', path: '/medical-team?tab=ems', en: 'EMS agencies', ar: 'جهات الإسعاف' },
     { key: 'submit', path: '/submit', en: 'Submit', ar: 'تقديم الطلب' },
   ];

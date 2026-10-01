@@ -29,6 +29,9 @@
 
 import type { Level } from './types';
 import { applyDemonstrationFilter, demonstrationFilter } from './scope';
+import { organizerEventState } from './ministry';
+import ministryJson from './data/ministry.json';
+import lifecycleJson from './data/lifecycle.json';
 
 /** The complete list. Adding a field here is a policy change, not a refactor. */
 export const PUBLIC_LOOKUP_FIELDS = ['exists', 'eventName', 'level', 'status'] as const;
@@ -120,4 +123,18 @@ export function resolvePublicLookup(
   if (record.eventStartDate !== query.eventStartDate) return NOT_FOUND;
 
   return projectPublicLookup(record);
+}
+
+/**
+ * The Arabic of a public status. The register carries one status string (the projection is
+ * four fields), so the page asks for its Arabic here: the three outcomes, the filed state and
+ * the lifecycle states, each from the same source the organizer's screens use.
+ */
+export function publicStatusArabic(status: string): string {
+  const known: { en: string; ar: string }[] = [
+    ...ministryJson.outcomes,
+    organizerEventState({ outcome: null, filed: true, assessed: true }),
+    ...Object.values(lifecycleJson.states as Record<string, { en: string; ar: string }>),
+  ];
+  return known.find((k) => k.en === status)?.ar ?? status;
 }

@@ -30,6 +30,7 @@ import {
   certifyRowGroups,
   commandFunctionRow, requirementsForLevel,
   type Level,
+  medicalDirectorApplies,
 } from '../../../../lib/rules';
 import { attachDocumentAction, removeAttachmentAction, removeProviderAction, withdrawNominationAction } from '../../../actions';
 import { UPLOADS_CONTENT, acceptAttribute, acceptHint } from '../../../../lib/rules/uploads';
@@ -157,7 +158,7 @@ export default async function RequirementsPage({
           {[
             ...(documents.length > 0 ? [{ href: '#documents', en: '1. Documents and plan', ar: '١. المستندات والخطة' }] : []),
             { href: '#medical-team', en: documents.length > 0 ? '2. Event EMS Agencies' : '1. Event EMS Agencies', ar: documents.length > 0 ? '٢. جهات إسعاف الفعالية' : '١. جهات إسعاف الفعالية' },
-            ...(level >= 2 ? [{ href: '#medical-director', en: documents.length > 0 ? '3. Medical Director' : '2. Medical Director', ar: documents.length > 0 ? '٣. المدير الطبي' : '٢. المدير الطبي' }] : []),
+            ...(medicalDirectorApplies(level) ? [{ href: '#medical-director', en: documents.length > 0 ? '3. Medical Director' : '2. Medical Director', ar: documents.length > 0 ? '٣. المدير الطبي' : '٢. المدير الطبي' }] : []),
             { href: `/events/${id}/submit`, en: 'Submit', ar: 'تقديم الطلب' },
           ].map((item) => (
             <a key={item.href} href={item.href} style={{ padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, color: 'var(--ink)', fontSize: 14 }}>
@@ -435,7 +436,7 @@ export default async function RequirementsPage({
         <div style={{ marginBlockEnd: 52 }} />
 
         {/* A Director is required at Level 3 and optional for a Level 2 medical plan. */}
-        {level >= 2 ? (
+        {medicalDirectorApplies(level) ? (
           <>
             <div id="medical-director" style={{ scrollMarginBlockStart: 24 }} />
             <SectionHeading n={documents.length > 0 ? 3 : 2}

@@ -8,12 +8,12 @@ import { GovernmentBand, Header } from '../../../../components/Header';
 import { EventWorkspaceHeader } from '../../../../components/EventWorkspaceHeader';
 import { DocumentViewer } from '../../../../components/DocumentViewer';
 import { L } from '../../../../components/L';
-import { DECLARATION_ITEMS, ROLES_CONTENT, planIsComplete } from '../../../../lib/rules';
+import { DECLARATION_ITEMS, ROLES_CONTENT, planIsComplete, medicalDirectorApplies } from '../../../../lib/rules';
 import { planRequirement } from '../../../../lib/rules/plan-responsibility';
 
 const states = {
   nominated: ['Invitation pending', 'الدعوة قيد الانتظار'], confirmed: ['Confirmed', 'مؤكّد'],
-  declined: ['Declined', 'مرفوض'], withdrawn: ['Withdrawn', 'مسحوب'], removed: ['Removed', 'تمت الإزالة'],
+  declined: ['Declined', 'لم تُقبل الدعوة'], withdrawn: ['Withdrawn', 'مسحوب'], removed: ['Removed', 'تمت الإزالة'],
 } as const;
 const card: React.CSSProperties = { border: '1px solid var(--line)', borderRadius: 12, padding: 22, marginBlockEnd: 18 };
 
@@ -27,6 +27,8 @@ export default async function MedicalTeamPage({ params, searchParams }: { params
   // Invitation tokens come only from this owner's event, never from a request parameter.
   const parties = invitationsFor(account.id, id).filter(i => i.kind === tab).map(i => invitationByToken(i.token)).filter(i => i !== null);
   const level = derivedLevelFor(id);
+  // No Director at Level 1: the tab is absent, and a direct link lands on the EMS agencies instead.
+  if (tab === 'director' && !medicalDirectorApplies(level)) redirect(`/events/${id}/medical-team?tab=ems`);
   const plan = planFor(account.id, id);
   const lastEditor = planLastEditorFor(account.id, id);
   const complete = level ? planIsComplete(plan, level)&&(level!==3||Boolean(eventPlanApproval(id))) : false;

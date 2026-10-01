@@ -6,7 +6,7 @@ import { RecordHeader } from './RecordHeader';
 import { organizationFor } from '../lib/auth';
 import { assessmentsFor, beirutToday, daysBetween, archiveWindowDays, type EventRow } from '../lib/queries';
 import { clockNow } from '../lib/clock';
-import { eventFilingDeadline, isArchivedRecord, levelWhy, type EventGateContext } from '../lib/rules';
+import { eventFilingDeadline, isArchivedRecord, levelWhy, medicalDirectorApplies, type EventGateContext } from '../lib/rules';
 
 /** One identity and navigation layout for every organizer event tab. */
 export function EventWorkspaceHeader({ accountId, event, active }: { accountId: number; event: EventRow; active: EventWorkspaceSection }) {
@@ -69,7 +69,7 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
           ]}
         />
 
-        <EventWorkspaceNav eventId={event.id} active={active} />
+        <EventWorkspaceNav eventId={event.id} active={active} showDirector={medicalDirectorApplies(level)} />
 
   </div>;
 }
