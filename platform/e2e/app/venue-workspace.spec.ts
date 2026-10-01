@@ -3,6 +3,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {signInAs} from '../helpers/signin';
 import {mockMapTiles,chooseMapPoint} from '../helpers/facility-map';
 import {useLanguage} from '../helpers/language';
+import {expectAbsent} from '../helpers/absence';
 
 for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
@@ -17,7 +18,7 @@ test('legacy venue details open read-only even when a new contact field is missi
  const db=new DatabaseSync('var/release-runtime.db');const v=db.prepare("SELECT responsible_phone FROM venues WHERE id='VN-0032'").get() as {responsible_phone:string};
  db.prepare("UPDATE venues SET responsible_phone='' WHERE id='VN-0032'").run();
  try{await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/details');
- await expect(page.locator('input[name=contactName]')).toBeDisabled();await expect(page.locator('input[name=contactPhone]')).toBeDisabled();await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
+ await expect(page.locator('[data-region=venue-details-read-only]')).toContainText('Missing');await expectAbsent(page,{anchor:'[data-region=venue-details-read-only]',absent:'input[name=contactName], input[name=contactPhone]',because:'saved details read as text until the organizer chooses Edit details'});await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
  await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhone]')).toBeEnabled();
  }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("UPDATE venue_packages SET details_editing=0 WHERE venue_id='VN-0032'").run();db.close();}
 });

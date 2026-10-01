@@ -17,7 +17,12 @@ export function venuePackageFor(accountId:number,id:string) {
  const geo=getDb().prepare('SELECT district,latitude,longitude FROM venues WHERE id=?').get(id) as {district:string;latitude:number|null;longitude:number|null};
  const versions=venueAssessmentsFor(accountId,id);
  const assessmentVersion=row?row.assessment_version:(versions[0]?.version??null);
- const level=assessmentVersion?versions.find(v=>v.version===assessmentVersion)?.derivation.finalLevel??null:null;
+ // A venue certified before packages existed has no package row: it is certified, not "in preparation".
+ const status:VenuePackageStatus=row?.status??(venue.issued?'accepted':'draft');
+ // A certified venue's level is the level written on its certificate (venues.level, set when the
+ // Ministry accepted the package). Re-deriving old answers must not silently change an issued certificate.
+ const derivedLevel=assessmentVersion?versions.find(v=>v.version===assessmentVersion)?.derivation.finalLevel??null:null;
+ const level=status==='accepted'&&venue.level?venue.level:derivedLevel;
  const answers:VenueAnswers=row?JSON.parse(row.answers):{};
  const invitations=venueInvitations(id);
  const confirmed=invitations.filter(i=>i.status==='confirmed'&&i.active);
@@ -43,7 +48,6 @@ export function venuePackageFor(accountId:number,id:string) {
  }
 
  const files=venueAttachmentsFor(accountId,id);
- const status=row?.status??'draft';
  const point:MapPoint|null=geo.latitude!==null&&geo.longitude!==null?{lat:geo.latitude,lng:geo.longitude}:null;
  const requirements=level?venueRequirements(level as Level,answers,new Set(files.filter(f=>f.hasFile).map(f=>f.docKey))).map(r=>{
  const receipts=contributions.filter(c=>c.requirement_key===String(r.n));
@@ -98,6 +102,7 @@ export function venuePackageFacts(w: VenueWorkspace): VenuePackageFacts {
     level: w.level,
     assessmentVersion: w.assessmentVersion,
     pendingInvitations: w.invitations.filter((i) => i.status === 'nominated').map((i) => ({ name: i.name, token: i.token })),
+    medicalTeamLinked: w.invitations.some((i) => ['nominated', 'confirmed'].includes(i.status)),
     requirements: w.requirements.map((r) => ({
       n: r.n, en: r.en, ar: r.ar, optional: r.optional, done: r.done, clinical: r.clinical,
       awaitingInvitation: !r.done && venueRowAwaitsInvitation(r.n, w.level, nominated),

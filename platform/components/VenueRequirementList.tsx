@@ -36,8 +36,10 @@ export function VenueRequirementList({ w, role = 'organizer', token, saved }: { 
     { key: 'medical', en: 'Medical team requirements', ar: 'متطلبات الفريق الطبي', rows: w.requirements.filter(r => !r.optional && r.clinical) },
     { key: 'optional', en: 'Recommended (optional)', ar: 'موصى به (اختياري)', rows: w.requirements.filter(r => r.optional) },
   ] : [
-    { key: 'required', en: 'Required', ar: 'مطلوب', rows: w.requirements.filter(r => !r.optional) },
-    { key: 'optional', en: 'Recommended (optional)', ar: 'موصى به (اختياري)', rows: w.requirements.filter(r => r.optional) },
+    // A medical partner works only on the rows it can complete; the rest of the package follows, to read.
+    { key: 'required', en: 'Your requirements', ar: 'متطلباتكم', rows: w.requirements.filter(r => !r.optional && w.level !== null && venueRequirementEditors(r.n, w.level).includes(role)) },
+    { key: 'optional', en: 'Recommended (optional)', ar: 'موصى به (اختياري)', rows: w.requirements.filter(r => r.optional && w.level !== null && venueRequirementEditors(r.n, w.level).includes(role)) },
+    { key: 'others', en: 'Other requirements in this package', ar: 'متطلبات أخرى في هذا الملف', rows: w.requirements.filter(r => w.level === null || !venueRequirementEditors(r.n, w.level).includes(role)) },
   ];
   const shown = groups.filter(group => group.rows.length);
   return <>{shown.map((group, index) => <section key={group.key} id={`group-${group.key}`} data-requirement-group={group.key} style={{ scrollMarginBlockStart: 24, marginBlockEnd: 40 }}>

@@ -18,3 +18,9 @@ export const VENUE_DISTRICTS = [
  {en:'Saida',ar:'صيدا'}, {en:'Tripoli',ar:'طرابلس'}, {en:'Tyre',ar:'صور'}, {en:'West Bekaa',ar:'البقاع الغربي'},
  {en:'Zahle',ar:'زحلة'}, {en:'Zgharta',ar:'زغرتا'},
 ] as const;
+
+/** The venue type's label in both languages; a free-text "other" type is shown as entered. */
+export function venueTypeLabel(category: string | null | undefined): { en: string; ar: string } {
+  const known = VENUE_TYPES.find((t) => t.key === category);
+  return known ? { en: known.en, ar: known.ar } : { en: category || '—', ar: category || '—' };
+}

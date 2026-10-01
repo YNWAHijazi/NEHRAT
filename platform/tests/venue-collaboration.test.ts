@@ -114,6 +114,9 @@ test('record ID lookup supports historical aliases and still requires the event 
 
 test('Level 1 uses one confirmed local contact or an accepted invitation and locks it after filing',async()=>{
  as('test_organizer');const venue='VN-0032',w=()=>venuePackageFor(owner,venue)!;
+ // The seeded venue holds a certificate (read-only). This test needs it as a Level 1 package in preparation,
+ // so it says so explicitly rather than relying on a missing package row reading as a draft.
+ getDb().prepare("INSERT OR REPLACE INTO venue_packages(venue_id,status,assessment_version) VALUES(?,'draft',(SELECT MAX(version) FROM venue_assessments WHERE venue_id=?))").run(venue,venue);
  expect(w().level).toBe(1);expect(w().requirements.find(r=>r.n===7)?.done).toBe(false);
  await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Local EMS',phone:'+9613111111'}))).rejects.toThrow('error=local');
  await expect(saveVenueLocalEmsContactAction(venue,form({agency:'Local EMS',phone:'+9613111111',confirm:'yes'}))).rejects.toThrow('saved=contact');

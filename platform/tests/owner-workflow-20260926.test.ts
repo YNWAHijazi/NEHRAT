@@ -1,4 +1,4 @@
-import {reopenVenueSectionAction} from '../app/venues/actions';
+import {renewVenuePackageAction} from '../app/venues/actions';
 import { beforeAll, afterAll, expect, test, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -238,7 +238,10 @@ test("renewal keeps the venue ID and reference while earlier certificate details
     "Updated venue name",
     venue.id,
   );
-  await expect(reopenVenueSectionAction(venue.id,'assessment')).rejects.toThrow('/assessment');
+  // A certified venue is read-only (2026-10-01): a reported change opens renewal, and renewal starts the
+  // new assessment cycle -- the earlier certificate is never edited in place.
+  db.prepare("INSERT INTO venue_changes (venue_id, aspects, description, effective_date) VALUES (?, ?, ?, ?)").run(venue.id, JSON.stringify(['name']), 'Venue renamed', '2026-09-26');
+  await expect(renewVenuePackageAction(venue.id)).rejects.toThrow('/details');
   expect(
     await saveVenueAssessmentAction(venue.id, {
       answers: [1, 1, 1, 1, 1, 1, 1, 1, 1],

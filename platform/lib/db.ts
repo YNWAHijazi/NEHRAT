@@ -90,8 +90,7 @@ export function getDb(): DatabaseSync {
  * Explicit values -- the seeder's historical dates, an app-passed stamp -- fall
  * outside the window and are never touched.
  */
-function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
-  const defaulted: [string, string][] = [
+export const ONE_CLOCK_COLUMNS: readonly [string, string][] = [
     ['accounts', 'created_at'], ['password_resets', 'created_at'], ['sessions', 'created_at'],
     ['events', 'created_at'], ['assessments', 'created_at'], ['event_attachments', 'attached_at'],
     ['invitations', 'invited_at'], ['shared_documents', 'added_at'],
@@ -106,8 +105,18 @@ function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
     ['determinations', 'recorded_at'], ['added_measures', 'recorded_at'],
     ['ministry_config', 'published_at'], ['facility_designations', 'designated_at'],
     ['enquiries', 'asked_at'],
-  ];
-  for (const [table, col] of defaulted) {
+    // Added after the list was written, and every one of them was stamping UTC: the capability,
+    // payment and report-request tables, the venue workflow, plan approvals and the PAD updates.
+    ['applicability_records', 'created_at'], ['vendors', 'added_at'], ['sponsorships', 'added_at'],
+    ['adverts', 'added_at'], ['payments', 'paid_at'], ['post_event_report_requests', 'requested_at'],
+    ['post_event_report_reviews', 'reviewed_at'], ['email_deliveries', 'attempted_at'], ['capability_acts', 'at'],
+    ['facility_aed_decisions', 'created_at'], ['facility_profile_updates', 'created_at'],
+    ['venue_package_history', 'submitted_at'], ['event_plan_approvals', 'approved_at'],
+    ['venue_invitations', 'invited_at'], ['venue_contributions', 'completed_at'], ['venue_plan_approvals', 'approved_at'],
+];
+
+function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
+  for (const [table, col] of ONE_CLOCK_COLUMNS) {
     d.exec(`
       CREATE TEMP TRIGGER IF NOT EXISTS one_clock_${table}_${col}
       AFTER INSERT ON ${table}

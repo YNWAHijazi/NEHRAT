@@ -14,7 +14,13 @@ import { beirutToday } from '../../lib/clock';
 async function owned(id:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();return {a,w};
 }
-function notify(accountId:number,isDemo:boolean,route:string,en:string,ar:string) { getDb().prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?, ?,?,now_stamp(),?)").run(accountId,en,ar,en,ar,route,+isDemo); }
+/** A notification about one venue: the subject says what happened, the body names the venue -- never the same line twice. */
+function notify(accountId:number,isDemo:boolean,route:string,en:string,ar:string) {
+ const venueId=/\/venues\/(VN-\d+)/.exec(route)?.[1];
+ const venue=venueId?getDb().prepare('SELECT name_en,name_ar FROM venues WHERE id=?').get(venueId) as {name_en:string;name_ar:string}|undefined:undefined;
+ const bodyEn=venue?`${venue.name_en} · ${venueId}`:en, bodyAr=venue?`${venue.name_ar} · ${venueId}`:ar;
+ getDb().prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(accountId,en,ar,bodyEn,bodyAr,route,+isDemo);
+}
 function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
 export async function saveVenueDetailsAction(id:string,form:FormData) {
  const {a,w}=await owned(id);if(!w.editable||!w.detailsEditing)redirect(`/venues/${id}`);const v=readVenueDetails(form);if(!v)redirect(`/venues/${id}/details?error=details`);
@@ -98,12 +104,14 @@ export async function reviewVenuePackageAction(id:string,form:FormData) {
  // The operator is told the outcome the Ministry recorded, in the compliance form's words.
  const outcome=VENUE_STATUS[venueStatusForDecision(decision as 'satisfied'|'revision'|'incomplete')];
  notify(v.account_id,a.isDemo,`/venues/${id}`,`${w.venue.nameEn}: ${outcome.en}`,`${w.venue.nameAr}: ${outcome.ar}`);
- }db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}refresh(id);redirect(`/ministry/venues/${id}${stale?'?error=stale':''}`);
+ }db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}refresh(id);redirect(`/ministry/venues/${id}${stale?'?error=stale':'?recorded=1'}`);
 }
 export async function renewVenuePackageAction(id:string) {
  const {a,w}=await owned(id);const gate=venueReassessmentGate({validUntil:w.venue.validUntil,today:beirutToday(),changeReportedSinceAssessment:venueChangeSinceAssessment(a.id,id)});
  if(w.venue.archivedAt||w.status!=='accepted'||gate.behaviour!=='enabled')redirect(`/venues/${id}`);
  const db=getDb();db.exec('BEGIN IMMEDIATE');try{
+ // A venue certified before packages existed has no package row yet; renewal starts its first one.
+ db.prepare("INSERT OR IGNORE INTO venue_packages(venue_id,status) VALUES(?,'accepted')").run(id);
  db.prepare("UPDATE venue_packages SET status='draft',assessment_version=NULL,answers='{}',review_note='',accepted_at=NULL,details_editing=1,assessment_editing=0 WHERE venue_id=?").run(id);
  // Old files stay in the immutable submission snapshot; the new cycle needs fresh confirmation.
  db.prepare('DELETE FROM venue_attachments WHERE venue_id=?').run(id);

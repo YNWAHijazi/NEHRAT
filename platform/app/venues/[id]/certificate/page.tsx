@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { currentAccount } from "../../../../lib/auth";
 import { getDb } from "../../../../lib/db";
-import { venueById } from "../../../../lib/queries";
+import { venueById, venueAssessmentsFor } from "../../../../lib/queries";
 import { can } from "../../../../lib/rules/ministry";
 import { PrintButton } from "../../../../components/PrintButton";
 import { L } from "../../../../components/L";
@@ -45,6 +45,11 @@ export default async function Certificate({
   if (!row) notFound();
   const snapshot = JSON.parse(row.certificate_snapshot);
   const derivation = JSON.parse(row.derivation);
+  // Seeded certificates store a placeholder rather than a derivation: the certificate then states the
+  // level the venue was certified at (the latest certificate) or the version's re-derived level.
+  const latestIssued = (getDb().prepare('SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = ? AND certificate_issued = 1').get(id) as { v: number | null }).v;
+  const certifiedLevel = (getDb().prepare('SELECT level FROM venues WHERE id = ?').get(id) as { level: number | null } | undefined)?.level ?? null;
+  const level: number | null = derivation.finalLevel ?? (row.version === latestIssued ? certifiedLevel : null) ?? venueAssessmentsFor(owner.account_id, id).find((v) => v.version === row.version)?.derivation.finalLevel ?? null;
   return (
     <main
       data-region="certificate"
@@ -78,8 +83,8 @@ export default async function Certificate({
       </p>
       <p>
         <L
-          en={`Certificate ${row.version} · Level ${derivation.finalLevel}`}
-          ar={`الشهادة ${row.version} · المستوى ${derivation.finalLevel}`}
+          en={`Certificate ${row.version} · Level ${level ?? '—'}`}
+          ar={`الشهادة ${row.version} · المستوى ${level ?? '—'}`}
         />
       </p>
       <p>

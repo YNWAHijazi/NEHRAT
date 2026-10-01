@@ -88,6 +88,8 @@ export interface VenuePackageFacts {
   level: Level | null;
   assessmentVersion: number | null;
   pendingInvitations: readonly { name: string; token: string }[];
+  /** Whether any EMS agency or Director has been invited (nominated or confirmed). */
+  medicalTeamLinked?: boolean;
   /** awaitingInvitation: the row completes from an invitation reply (the Director's acceptance, a
    *  Level 1 EMS agency's), so there is nothing on it for the organizer to do but wait. */
   requirements: readonly { n: number; en: string; ar: string; optional: boolean; done: boolean; clinical: boolean; awaitingInvitation?: boolean }[];
@@ -112,7 +114,8 @@ export function venueSubmissionChecks(f: VenuePackageFacts): { required: VenueCh
   const optional: VenueCheck[] = f.requirements.filter((r) => r.optional).map((r) => ({ key: String(r.n), en: r.en, ar: r.ar, done: r.done, target: 'requirements' as const, n: r.n }));
   const remaining = required.filter((c) => !c.done).length;
   // The requirements stage's own count: the rows and the replies they wait on, not details or the fee.
-  const requirementsRemaining = required.filter((c) => (c.target === 'requirements' || c.target === 'team') && !c.done).length;
+  // A package the Ministry holds or has accepted owes nothing more in this cycle.
+  const requirementsRemaining = f.editable ? required.filter((c) => (c.target === 'requirements' || c.target === 'team') && !c.done).length : 0;
   return { required, optional, remaining, requirementsRemaining, canSubmit: f.editable && remaining === 0 };
 }
 
@@ -135,11 +138,20 @@ export function venueNextAction(f: VenuePackageFacts): NextStep | null {
   const { remaining } = venueSubmissionChecks(f);
   const yours = f.requirements.filter((r) => !r.optional && !r.done && !r.clinical && !r.awaitingInvitation).length;
   const medical = f.requirements.filter((r) => !r.optional && !r.done && r.clinical).length;
+  // The medical items cannot start until someone is invited to do them, so that comes first.
+  if (medical > 0 && !f.medicalTeamLinked) {
+    return { kind: 'team', href: 'team', tone: 'accent',
+      titleEn: 'Invite your medical team', titleAr: 'ادعوا فريقكم الطبي',
+      bodyEn: `They complete ${medical} of the ${medical + yours} remaining requirements.`,
+      bodyAr: `يستكمل الفريق ${medical} من أصل ${medical + yours} من المتطلبات المتبقية.`,
+      buttonEn: 'Open medical team', buttonAr: 'فتح الفريق الطبي' };
+  }
   if (yours > 0) {
     return { kind: 'requirements', href: 'requirements', tone: 'accent',
-      titleEn: returned ? 'Update the requirements and resubmit' : yours === 1 ? 'Complete 1 requirement' : `Complete ${yours} requirements`,
-      titleAr: returned ? 'حدّثوا المتطلبات وأعيدوا التقديم' : `أكملوا ${arabicCount(yours, { one: 'متطلباً واحداً', two: 'متطلبَين', few: 'متطلبات', many: 'متطلباً' })}`,
-      bodyEn: 'Your medical team completes the medical items.', bodyAr: 'يستكمل فريقكم الطبي البنود الطبية.',
+      titleEn: returned ? 'Update the requirements and resubmit' : yours === 1 ? 'Complete your 1 requirement' : `Complete your ${yours} requirements`,
+      titleAr: returned ? 'حدّثوا المتطلبات وأعيدوا التقديم' : `أكملوا ${arabicCount(yours, { one: 'متطلبكم الوحيد', two: 'متطلبَيكم', few: 'من متطلباتكم', many: 'من متطلباتكم' })}`,
+      bodyEn: medical > 0 ? `Your medical team completes the other ${medical}.` : 'Then review and submit.',
+      bodyAr: medical > 0 ? `يستكمل فريقكم الطبي المتطلبات الأخرى (${medical}).` : 'ثم راجعوا الملف وقدّموه.',
       buttonEn: 'Open requirements', buttonAr: 'فتح المتطلبات' };
   }
   if (f.pendingInvitations.length > 0) {
@@ -168,17 +180,21 @@ export function venueNextAction(f: VenuePackageFacts): NextStep | null {
 
 /** The five-stage venue rail, drawn by the same component as the event rail. */
 export function venueRailStages(f: VenuePackageFacts): { stage: number; stages: RailStage[] } {
-  const requirementsLeft = venueSubmissionChecks(f).requirementsRemaining;
+  const requirementsLeft = f.editable ? venueSubmissionChecks(f).requirementsRemaining : 0;
   const returned = f.status === 'revision' || f.status === 'incomplete';
   const withMinistry = f.status === 'submitted' || f.status === 'accepted';
   const requirementsDone = f.assessmentDone && requirementsLeft === 0 && f.requirements.length > 0;
-  const done = [f.detailsDone, f.assessmentDone, requirementsDone || withMinistry, withMinistry, f.status === 'accepted'];
+  // Once the Ministry has the package, everything before it is complete by definition -- a certified
+  // venue never reads "Stage 1" because a field added after its certificate is empty.
+  const done = withMinistry
+    ? [true, true, true, true, f.status === 'accepted']
+    : [f.detailsDone, f.assessmentDone, requirementsDone, false, false];
   const first = done.findIndex((d) => !d);
   const stage = first < 0 ? done.length : first + 1;
   const k = (i: number): RailStage['k'] => (done[i] ? 'done' : i === first ? (returned && i === 2 ? 'returned' : 'current') : 'todo');
   const status = VENUE_STATUS[f.status];
   const stages: RailStage[] = [
-    { k: k(0), en: 'Venue details', ar: 'تفاصيل الموقع', metaEn: f.detailsDone ? '' : 'Contact and map pin', metaAr: f.detailsDone ? '' : 'بيانات الاتصال وعلامة الخريطة' },
+    { k: k(0), en: 'Venue details', ar: 'تفاصيل الموقع', metaEn: done[0] ? '' : 'Contact and map pin', metaAr: done[0] ? '' : 'بيانات الاتصال وعلامة الخريطة' },
     { k: k(1), en: 'Assessment', ar: 'التقييم',
       metaEn: f.assessmentDone && f.level ? `Level ${f.level} · Version ${f.assessmentVersion}` : 'Not yet complete',
       metaAr: f.assessmentDone && f.level ? `المستوى ${f.level} · النسخة ${f.assessmentVersion}` : 'لم يكتمل بعد' },
@@ -215,4 +231,16 @@ export function arabicCount(n: number, forms: { one: string; two: string; few: s
  */
 export function venueRowAwaitsInvitation(n: number, level: Level | null, nominated: { director: boolean; ems: boolean }): boolean {
   return (n === 3 && nominated.director) || (n === 7 && level === 1 && nominated.ems);
+}
+
+/**
+ * How a venue reads on the Ministry's register: its package state first (with the Ministry,
+ * returned), then its certificate. A submitted venue is never "assessment pending".
+ */
+export function venueRegisterState(input: { status: VenuePackageStatus | null; validUntil: string | null; today: string }): { en: string; ar: string; tone: 'pending' | 'done' | 'bad' | 'muted' } {
+  if (input.status === 'submitted') return { ...VENUE_STATUS.submitted, tone: 'pending' };
+  if (input.status === 'revision' || input.status === 'incomplete') return { ...VENUE_STATUS[input.status], tone: 'pending' };
+  if (input.validUntil && input.validUntil < input.today) return { en: `Certificate expired ${input.validUntil}`, ar: `انتهت الشهادة في ⁦${input.validUntil}⁩`, tone: 'bad' };
+  if (input.validUntil) return { en: `Certificate valid until ${input.validUntil}`, ar: `الشهادة صالحة حتى ⁦${input.validUntil}⁩`, tone: 'done' };
+  return input.status === 'draft' ? { ...VENUE_STATUS.draft, tone: 'muted' } : { en: 'No certificate yet', ar: 'لا شهادة بعد', tone: 'muted' };
 }

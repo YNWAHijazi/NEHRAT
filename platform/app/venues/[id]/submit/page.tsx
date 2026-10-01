@@ -5,6 +5,7 @@ import { ownedVenuePage } from '../../../../lib/venue/page';
 import { venuePackageFacts } from '../../../../lib/venue/workspace';
 import { venueSubmissionChecks, type VenueCheck } from '../../../../lib/rules/venue-workflow';
 import { submitVenuePackageAction } from '../../actions';
+import { VenueSubmitControls } from '../../../../components/VenueSubmitControls';
 import { alertBand, noticeBand } from '../../../../components/workspace-styles';
 
 /** The submission package in the event's shape: the checklist, what is still outstanding, the declaration, one button. */
@@ -13,7 +14,7 @@ export default async function VenueSubmit({ params, searchParams }: { params: Pr
   const { account, w } = await ownedVenuePage(id);
   const q = await searchParams;
   const facts = venuePackageFacts(w);
-  const { required, optional, remaining, canSubmit } = venueSubmissionChecks(facts);
+  const { required, optional, remaining } = venueSubmissionChecks(facts);
   const href = (c: VenueCheck) =>
     c.target === 'details' ? `/venues/${id}/details`
       : c.target === 'assessment' ? `/venues/${id}/assessment`
@@ -51,32 +52,7 @@ export default async function VenueSubmit({ params, searchParams }: { params: Pr
       {w.editable ? (
         <form action={submitVenuePackageAction.bind(null, id)} data-region="confirm-and-submit">
           <h2 style={{ fontSize: 20, marginBlock: '8px 12px' }}><L en="Confirm and submit" ar="التأكيد والتقديم" /></h2>
-          <label style={{ display: 'flex', gap: 12, alignItems: 'start', padding: '16px 20px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.6 }}>
-            <input type="checkbox" name="confirm" value="yes" required style={{ marginBlockStart: 4 }} />
-            <L en="I confirm these details and documents are accurate and cover the venue’s routine operations." ar="أؤكّد أن هذه البيانات والمستندات صحيحة وتشمل التشغيل الاعتيادي للموقع." />
-          </label>
-
-          {/* Every outstanding item is a row of the checklist above, marked Pending and linked;
-              the count rides on the button rather than repeating the list. */}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            style={{
-              height: 48,
-              paddingInline: 26,
-              border: 0,
-              borderRadius: 24,
-              background: canSubmit ? 'var(--brand)' : 'var(--surface2)',
-              color: canSubmit ? 'var(--bg)' : 'var(--muted)',
-              fontSize: 15,
-              fontWeight: 500,
-              cursor: canSubmit ? 'pointer' : 'not-allowed',
-            }}
-          >
-            {canSubmit
-              ? <L en="Submit to the Ministry" ar="التقديم إلى الوزارة" />
-              : <L en={`Submit to the Ministry — ${remaining} remaining`} ar={`التقديم إلى الوزارة — ${remaining} متبقٍ`} />}
-          </button>
+          <VenueSubmitControls remaining={w.editable ? remaining : 1} />
         </form>
       ) : null}
     </VenueWorkspace>

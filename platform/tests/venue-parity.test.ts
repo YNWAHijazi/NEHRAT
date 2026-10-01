@@ -60,8 +60,16 @@ describe('venue next step', () => {
     });
     expect(venueNextAction(facts)).toMatchObject({ kind: 'waitingOnOthers', href: 'team' });
   });
+  it('asks for the medical team first when medical items wait and nobody is invited', () => {
+    const facts = ready({ requirements: [
+      { n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false },
+      { n: 5, en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true },
+    ] });
+    expect(venueNextAction(facts)).toMatchObject({ kind: 'team', href: 'team' });
+    expect(venueNextAction({ ...facts, medicalTeamLinked: true })).toMatchObject({ kind: 'requirements', titleEn: 'Complete your 1 requirement' });
+  });
   it('waits on the medical team for clinical rows, and says ready only when everything is in place', () => {
-    expect(venueNextAction(ready({ requirements: [{ n: 5, en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true }] }))?.kind).toBe('waitingOnOthers');
+    expect(venueNextAction(ready({ medicalTeamLinked: true, requirements: [{ n: 5, en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true }] }))?.kind).toBe('waitingOnOthers');
     expect(venueNextAction(ready())).toMatchObject({ kind: 'submit', tone: 'brand' });
     expect(venueNextAction(ready({ fee: { amount: '50', currency: 'USD', paid: false } }))?.kind).toBe('awaitingPayment');
   });

@@ -116,7 +116,7 @@ export default async function VenueOverview({ params }: { params: Promise<{ id: 
       </div>
 
       <details data-region="history" className="record-details">
-        <summary><L en="Previous certificates" ar="الشهادات السابقة" /></summary>
+        <summary><L en="Certificate history" ar="سجل الشهادات" /></summary>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 40 }}>
           {certificates.length ? certificates.map((c) => (
             <Link key={c.version} href={`/venues/${id}/certificate?version=${c.version}`} style={{ background: 'var(--bg)', padding: '16px 20px', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', color: 'var(--ink)' }}>
