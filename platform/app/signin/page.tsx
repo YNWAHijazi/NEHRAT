@@ -213,7 +213,7 @@ export default async function SignInPage({
             {params.error==='phone'?<p role="alert"><L en="Use a phone number with a country code, starting with +." ar="أدخلوا رقم الهاتف مع رمز البلد، بدءاً بعلامة +."/></p>:null}
             <form action={action}>
               <input type="hidden" name="next" value={params.next ?? ''} />
-              {mode === 'signup' ? <label style={{display:'block',marginBlockEnd:16}}><L en="Phone number (with country code)" ar="رقم الهاتف مع رمز البلد"/><input name="phone" type="tel" autoComplete="tel" placeholder="+961..." style={inputStyle}/></label>:null}
+              {mode === 'signup' ? <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 16 }}><span style={fieldLabel}><L en="Phone number (with country code)" ar="رقم الهاتف مع رمز البلد"/></span><input name="phone" type="tel" autoComplete="tel" placeholder="+961..." style={inputStyle}/></label>:null}
               {mode === 'signup' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 16 }}>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

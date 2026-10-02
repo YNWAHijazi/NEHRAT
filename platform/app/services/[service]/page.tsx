@@ -1,3 +1,4 @@
+import { arabicCount } from '../../../lib/rules/venue-workflow';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { L } from '../../../components/L';
@@ -142,8 +143,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 <span style={{ color: 'var(--muted)' }}>
                   {' — '}
                   <L
-                    en={`${documentsForLevel(l).filter((d) => !d.optional).length} documents, ${requirementsForLevel(l).length} requirements`}
-                    ar={`⁦${documentsForLevel(l).filter((d) => !d.optional).length}⁩ مستندات، ⁦${requirementsForLevel(l).length}⁩ متطلباً`}
+                    en={`${documentsForLevel(l).filter((d) => !d.optional).length} ${documentsForLevel(l).filter((d) => !d.optional).length === 1 ? 'document' : 'documents'}, ${requirementsForLevel(l).length} ${requirementsForLevel(l).length === 1 ? 'requirement' : 'requirements'}`}
+                    ar={`${arabicCount(documentsForLevel(l).filter((d) => !d.optional).length, { one: 'مستند واحد', two: 'مستندان', few: 'مستندات', many: 'مستنداً' })}، ${arabicCount(requirementsForLevel(l).length, { one: 'متطلب واحد', two: 'متطلبان', few: 'متطلبات', many: 'متطلباً' })}`}
                   />
                 </span>
               </div>

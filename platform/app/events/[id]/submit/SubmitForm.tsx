@@ -140,12 +140,19 @@ export function SubmitForm({
   // router.refresh() would otherwise race the navigation to the acknowledgment
   // and strand the user on this page.
   const filing = useRef(false);
+  // What the server last held. Leaving a field you did not change saves nothing and says
+  // nothing -- "Saved." appeared on arrival before anything had been entered.
+  const lastSaved = useRef(JSON.stringify(latest.current));
   const persist = () => {
     if (locked || filing.current) return;
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    const snapshot = latest.current;
+    const key = JSON.stringify(snapshot);
+    if (key === lastSaved.current) return;
     startAutosave(async () => {
-      const result = await saveComplianceAction(eventId, latest.current);
+      const result = await saveComplianceAction(eventId, snapshot);
       if ('ok' in result && !filing.current) {
+        lastSaved.current = key;
         setSaved(true);
         router.refresh();
       }

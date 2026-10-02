@@ -12,8 +12,9 @@ import {
   eventFor,
   submissionFor,
   unreadCountFor,
+  latestOutcomeFor,
 } from '../../../../lib/queries';
-import { catalogueEntry, documentsForLevel, type Level } from '../../../../lib/rules';
+import { catalogueEntry, documentsForLevel, organizerEventState, type Level } from '../../../../lib/rules';
 import { PrintBar } from './PrintBar';
 
 const upLabel: React.CSSProperties = {
@@ -42,6 +43,10 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
   const submission = submissionFor(account.id, id);
   const filed = submission?.filedAt != null && event.mophReference != null;
   const attachments = attachmentsFor(account.id, id);
+  // The same status the dashboard and the public register show for this record -- and it moves
+  // when the Ministry records an outcome, instead of reading "in queue" forever.
+  const outcome = latestOutcomeFor(id);
+  const ministryState = organizerEventState({ outcome, filed: true, assessed: true });
 
   const state = documentStateFor(account.id, id, level ?? 1);
   const currentDocs = documentsForLevel((level ?? 1) as Level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
@@ -155,15 +160,26 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
               <div style={{ ...upLabel, marginBlockEnd: 12 }}>
                 <L en="Current Ministry status" ar="الحالة الحالية لدى الوزارة" />
               </div>
-              {/* Grey and quiet: an internal workflow state, not a determination. */}
-              <div style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 16, fontWeight: 500, lineHeight: 1.45 }}>
-                <L en="In queue for review" ar="في قائمة انتظار المراجعة" />
+              {/* Grey and quiet while it is an internal workflow state, not a determination. */}
+              <div style={{ display: 'inline-block', padding: '8px 16px', borderRadius: 999, background: outcome ? 'var(--brand-soft)' : 'var(--surface2)', color: outcome ? 'var(--ink)' : 'var(--muted)', fontSize: 16, fontWeight: 500, lineHeight: 1.45 }}>
+                <L en={ministryState.en} ar={ministryState.ar} />
               </div>
+              {outcome ? null : (
+                <p style={{ margin: '14px 0 0', fontSize: 15, lineHeight: 1.65, maxWidth: '70ch' }}>
+                  <L
+                    en="The Ministry reviews the submission and records one of three outcomes. You are notified on this platform when it does."
+                    ar="تراجع الوزارة الطلب وتسجّل إحدى ثلاث نتائج. يصلكم إشعار على هذه المنصة عند تسجيلها."
+                  />
+                </p>
+              )}
             </div>
 
-            <div data-noprint="" style={{ marginBlock: 6, display: 'flex', gap: 12 }}>
-              <PrintButton en="Print or save the acknowledgment" ar="طباعة الإشعار أو حفظه" />
-            </div>
+            {/* Once filed, the reference's print bar below serves; one set of print controls, not two. */}
+            {filed ? null : (
+              <div data-noprint="" style={{ marginBlock: 6, display: 'flex', gap: 12 }}>
+                <PrintButton en="Print or save the acknowledgment" ar="طباعة الإشعار أو حفظه" />
+              </div>
+            )}
             <div data-region="limits" style={{ paddingBlockStart: 30, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, fontWeight: 500 }}>
                 <L

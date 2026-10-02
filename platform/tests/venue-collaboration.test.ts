@@ -52,7 +52,7 @@ test('accepted medical partners share completed answers; a stale form cannot ove
  for(const r of state().requirements.filter(r=>!r.optional&&venueRequirementEditors(r.n,3).includes('ems'))){const f=await save(String(r.n));if(r.n===5)stale=f;}
  // The organizer gets ONE progress notice for the medical team's work, updated in place -- not one per row.
  const progress=getDb().prepare("SELECT kind,subject_en FROM notifications WHERE account_id=? AND record_route=? AND (subject_en LIKE 'Medical requirements:%' OR subject_en='Your medical team has completed its requirements')").all(owner,`/venues/${id}/requirements`) as {kind:string;subject_en:string}[];
- expect(progress).toHaveLength(1);expect(progress[0].subject_en).toMatch(/^Medical requirements: \d+ of \d+ complete$/);expect(progress[0].kind).toBe('for_information');
+ expect(progress).toHaveLength(1);expect(progress[0]!.subject_en).toMatch(/^Medical requirements: \d+ of \d+ complete$/);expect(progress[0]!.kind).toBe('for_information');
  const before=state();await expect(saveVenueRequirementAction(id,'7',form({arrangements:'Confirmed coverage',agency:'FORGED AGENCY',phone:'00000000',assessmentVersion:String(before.assessmentVersion),workRevision:String(before.workRevision),confirm:'yes'}))).rejects.toThrow('saved=7');
  expect(state().answers['7']).toEqual({arrangements:'Confirmed coverage',agency:'Venue ems',phone:'+9613111111'});
  expect(JSON.parse(state().contributions.find(c=>c.requirement_key==='7')!.answers).agency).toBe('Venue ems');

@@ -188,9 +188,13 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
         {event.due ? (
           <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockStart: 2 }}>{event.due}</div>
         ) : null}
-        <div style={{ marginBlockStart: 8, height: 2, background: 'var(--line)', position: 'relative' }}>
-          <span style={{ position: 'absolute', insetInlineStart: 0, top: 0, height: 2, width: `${pct}%`, background: color }} />
-        </div>
+        {event.filedOn ? (
+          <div style={{ fontSize: 15, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{event.filedOn}</div>
+        ) : (
+          <div style={{ marginBlockStart: 8, height: 2, background: 'var(--line)', position: 'relative' }}>
+            <span style={{ position: 'absolute', insetInlineStart: 0, top: 0, height: 2, width: `${pct}%`, background: color }} />
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -360,7 +364,7 @@ export default async function DashboardPage({
               </h2>
             </div>
             {/* Search and sort only once there is something to search; an empty account gets a start, not a failed search. */}
-            {allEvents.length > 0 ? <form style={{display:'flex',gap:12,flexWrap:'wrap',marginBlock:'12px 20px'}}><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Search events" ar="البحث عن فعاليات"/><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{padding:10,borderRadius:8,border:'1px solid var(--line)',minWidth:0,maxWidth:'100%'}}/></label><label><L en="Sort by " ar="ترتيب حسب "/><select name="sort" defaultValue={sort} style={{padding:10}}>{[['updated','Last updated','آخر تحديث'],['pending','Pending requirements','المتطلبات المتبقية'],['due','Submit by','موعد التقديم'],['status','Status','الحالة'],['date','Event date','تاريخ الفعالية']].map(([value,en,ar])=><option key={value} value={value}><OptionText en={String(en)} ar={String(ar)} /></option>)}</select></label><button type="submit" style={{height:40,paddingInline:18,border:'1px solid var(--line)',borderRadius:20,background:'var(--bg)',color:'var(--ink)',cursor:'pointer'}}><L en="Apply" ar="تطبيق"/></button></form> : null}
+            {allEvents.length > 0 ? <form style={{display:'flex',gap:12,flexWrap:'wrap',marginBlock:'12px 20px'}}><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Search events" ar="البحث عن فعاليات"/><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14,minWidth:0,maxWidth:'100%'}}/></label><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Sort by" ar="ترتيب حسب"/><select name="sort" defaultValue={sort} style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14}}>{[['updated','Last updated','آخر تحديث'],['pending','Pending requirements','المتطلبات المتبقية'],['due','Submit by','موعد التقديم'],['status','Status','الحالة'],['date','Event date','تاريخ الفعالية']].map(([value,en,ar])=><option key={value} value={value}><OptionText en={String(en)} ar={String(ar)} /></option>)}</select></label><button type="submit" style={{height:40,paddingInline:18,border:'1px solid var(--line)',borderRadius:20,background:'var(--bg)',color:'var(--ink)',cursor:'pointer'}}><L en="Apply" ar="تطبيق"/></button></form> : null}
             {allEvents.length===0 ? <p style={{padding:'16px 22px',background:'var(--surface2)',borderRadius:12}}><L en="No events yet." ar="لا فعاليات بعد."/> <Link href="/events/new"><L en="Create an event" ar="إنشاء فعالية"/></Link></p> : events.length===0 ? <p><L en="No matching events." ar="لا توجد فعاليات مطابقة."/></p> : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
               {events.map((event) => (

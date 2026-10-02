@@ -30,7 +30,7 @@ import {
   isArchivedRecord,
   eventMedicalDirectorGate, eventStage, nextAction, POST_EVENT_STAGE, RAIL_STAGE_COUNT,
   LIFECYCLE_CONTENT, materialChangeGate, seriousIncidentGate,
-  postEventReportGate,
+  postEventReportGate, organizerEventState,
   type EventGateContext,
   MINISTRY_CONTENT,
   postEventReportRequired,
@@ -292,6 +292,20 @@ export default async function EventRecordPage({
         {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
         {!event.filed && event.lifecycle === 'active' && !recordArchived ? (
           <NextStepCard step={action} to={action.href === 'organization' ? '/organization' : `/events/${event.id}/${action.href}`} />
+        ) : null}
+        {/* Filed and not yet decided: say what happens next, and keep the receipt one click away. */}
+        {event.filed && !standingDetermination && event.lifecycle === 'active' && !recordArchived ? (
+          <NextStepCard
+            step={{
+              kind: 'underReview', href: 'acknowledgment', tone: 'brand',
+              titleEn: organizerEventState({ outcome: null, filed: true, assessed: true }).en,
+              titleAr: organizerEventState({ outcome: null, filed: true, assessed: true }).ar,
+              bodyEn: 'The Ministry reviews the submission and records one of three outcomes. You are notified on this platform when it does.',
+              bodyAr: 'تراجع الوزارة الطلب وتسجّل إحدى ثلاث نتائج. يصلكم إشعار على هذه المنصة عند تسجيلها.',
+              buttonEn: 'View acknowledgment of receipt', buttonAr: 'عرض إشعار الاستلام',
+            }}
+            to={`/events/${event.id}/acknowledgment`}
+          />
         ) : null}
 
         <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />

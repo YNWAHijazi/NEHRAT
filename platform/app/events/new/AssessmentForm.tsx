@@ -536,7 +536,7 @@ export function AssessmentForm({
       ) : null}
       {derivation.complete && !certificationComplete ? (
         <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: 'var(--accent-ink)', lineHeight: 1.6 }}>
-          <L en="Part F — complete the declaration to save: authorized representative and position." ar="الجزء و — أكملوا الإقرار للحفظ: الممثل المفوض والصفة." />
+          <L en="Complete the organizer declaration to save: authorized representative and position." ar="أكملوا إقرار المنظم للحفظ: الممثل المفوض والصفة." />
         </p>
       ) : null}
       <button

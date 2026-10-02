@@ -47,6 +47,8 @@ export interface EventRow {
   due: string | null;
   dueLabelEn: string;
   dueLabelAr: string;
+  /** The day it was filed; the card shows it instead of a deadline that has been met. */
+  filedOn: string | null;
   stage: number | null;
   stageEn: string;
   stageAr: string;
@@ -257,9 +259,13 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
         : outcome
           ? derivedState.ar
           : (row.demo_state_ar ?? derivedState.ar),
-    due: row.demo_due ?? derivedDue,
-    dueLabelEn: row.demo_due_label_en ?? 'File by',
-    dueLabelAr: row.demo_due_label_ar ?? 'التقديم بحلول',
+    // A filed record has met its filing deadline: no countdown to it (seeded rows set their own).
+    due: row.demo_due ?? (row.filed ? null : derivedDue),
+    dueLabelEn: row.demo_due_label_en ?? (row.filed ? 'Filed' : 'File by'),
+    dueLabelAr: row.demo_due_label_ar ?? (row.filed ? 'قُدِّم في' : 'التقديم بحلول'),
+    filedOn: row.filed && !row.demo_due
+      ? ((getDb().prepare('SELECT filed_at FROM submissions WHERE event_id = ?').get(row.id) as { filed_at: string | null } | undefined)?.filed_at?.slice(0, 10) ?? null)
+      : null,
     stage: row.demo_stage ?? stageInfo.stage,
     stageEn: row.demo_stage_en ?? stageInfo.en,
     stageAr: row.demo_stage_ar ?? stageInfo.ar,
