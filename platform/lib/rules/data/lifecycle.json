@@ -17,8 +17,8 @@
   "cancel": {
     "titleEn": "Cancel the event",
     "titleAr": "إلغاء الفعالية",
-    "bodyEn": "Cancelling notifies the Ministry and closes every remaining obligation on this record. The record and any reference number remain readable; nothing further can be filed on it.",
-    "bodyAr": "الإلغاء يُبلغ الوزارة ويُغلق كل الموجبات المتبقية على هذا السجل. يبقى السجل وأي رقم مرجعي قابلَين للقراءة؛ ولا يمكن تقديم أي شيء إضافي عليه.",
+    "bodyEn": "Cancelling notifies the Ministry and closes every remaining obligation on this record. The record remains readable; nothing further can be filed on it.",
+    "bodyAr": "الإلغاء يُبلغ الوزارة ويُغلق كل الموجبات المتبقية على هذا السجل. يبقى السجل قابلاً للقراءة؛ ولا يمكن تقديم أي شيء إضافي عليه.",
     "reasonLabelEn": "Reason, sent to the Ministry as written",
     "reasonLabelAr": "السبب، يُرسل إلى الوزارة كما هو",
     "buttonEn": "Cancel the event — this closes the record",

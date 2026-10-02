@@ -202,11 +202,22 @@ export default async function SubmissionReviewPage({
                 <L en={`Level ${review.level}`} ar={`المستوى ${review.level}`} />
               </span>
             ) : null}
-            {/* Internal workflow state: grey, quiet, not a determination. */}
-            <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
-              <L en={internal.en} ar={internal.ar} />
-              {review.reviewer ? ` · ${review.reviewer}` : null}
-            </span>
+            {/* Once an outcome stands, the header states it -- the queue and the organizer already do.
+                Until then: the internal workflow state, grey and quiet, not a determination. */}
+            {standing ? (
+              <span data-region="review-state" data-outcome={standing.outcome} style={{ padding: '3px 9px', borderRadius: 13, background: standing.outcome === 'satisfied' ? 'var(--brand-soft)' : 'var(--accent-soft)', color: 'var(--ink)', fontSize: 13 }}>
+                <L
+                  en={MINISTRY_CONTENT.outcomes.find((o) => o.key === standing.outcome)?.en ?? standing.outcome}
+                  ar={MINISTRY_CONTENT.outcomes.find((o) => o.key === standing.outcome)?.ar ?? standing.outcome}
+                />
+                {` · ${standing.recordedBy}`}
+              </span>
+            ) : (
+              <span data-region="review-state" style={{ padding: '3px 9px', borderRadius: 13, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 13 }}>
+                <L en={internal.en} ar={internal.ar} />
+                {review.reviewer ? ` · ${review.reviewer}` : null}
+              </span>
+            )}
           </div>
         </div>
         {can(account.role, 'assignReview') && review.state !== 'progress' ? (

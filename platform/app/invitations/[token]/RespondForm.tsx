@@ -33,6 +33,8 @@ export function RespondForm({
     en: accept?.descNoDeclarationEn ?? accept?.descEn ?? '',
     ar: accept?.descNoDeclarationAr ?? accept?.descAr ?? '',
   };
+  // A Director is appointed, not named as a provider, and has no readiness declaration.
+  const directorCopy = ROLES_CONTENT.director.responseDescriptions;
   const [picked, setPicked] = useState<string | null>(null);
   const [declineOpen, setDeclineOpen] = useState(false);
   // ALL THREE RESPONSES, FOR BOTH KINDS. The Director used to be offered two: the
@@ -65,7 +67,9 @@ export function RespondForm({
                     <L en={r.en} ar={r.ar} />
                   </span>
                   <span style={{ display: 'block', fontSize: 14, lineHeight: 1.6, color: 'var(--muted)', marginBlockStart: 4 }}>
-                    {r.key === 'accept' && !declarationOpens ? (
+                    {kind === 'director' && (r.key === 'accept' || r.key === 'decline') ? (
+                      <L en={r.key === 'accept' ? directorCopy.acceptEn : directorCopy.declineEn} ar={r.key === 'accept' ? directorCopy.acceptAr : directorCopy.declineAr} />
+                    ) : r.key === 'accept' && !declarationOpens ? (
                       <L en={acceptCopy.en} ar={acceptCopy.ar} />
                     ) : (
                       <L en={r.descEn} ar={r.descAr} />

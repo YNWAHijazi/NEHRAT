@@ -79,7 +79,7 @@ test.describe('the outcome gate', () => {
       await form.locator('button').click();
       await page.waitForURL((url) => url.pathname === '/ministry/submissions/EV-0362');
     }
-    await expect(att).toContainText('All reviews complete. You can approve the submission.');
+    await expect(att).toContainText('All reviews complete. You can record the outcome.');
 
     // Attestations clear, inspection still open: the gate must STILL be shut.
     const revise2 = page.locator('[data-region="revise-determination"]');

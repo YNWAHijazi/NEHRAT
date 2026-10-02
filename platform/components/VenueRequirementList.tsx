@@ -75,7 +75,7 @@ export function VenueRequirementList({ w, role = 'organizer', token, saved }: { 
           const mayOpen = r.n === 20 && data.fileKey && (role === 'organizer' || c.invitation_token === token);
           return <p key={`${c.requirement_key}-${index}`} style={{ fontSize: 13, color: 'var(--muted)' }}><L en="Completed by" ar="أكمله" /> <bdi>{c.display_name}</bdi> · {c.completed_at.slice(0, 10)} {mayOpen ? <a href={`/api/venue-documents/${id}/${data.fileKey}`} target="_blank" rel="noreferrer"><L en="View declaration" ar="عرض الإقرار" /></a> : null}</p>;
         })}
-        {r.n === 2 && w.approval ? <p><L en="Medical Director approval" ar="اعتمدها" /> {w.approval.display_name} · {w.approval.approved_at.slice(0, 10)}</p> : null}
+        {r.n === 2 && w.approval ? <p><L en="Signed off by the Medical Director" ar="اعتمدها المدير الطبي" /> {w.approval.display_name} · {w.approval.approved_at.slice(0, 10)}</p> : null}
         {canEdit ? (doneForMe ? <details style={{ marginBlockStart: 20 }}><summary style={{ cursor: 'pointer', color: 'var(--brand)', marginBlockEnd: 16 }}><L en="Update these answers" ar="تعديل هذه الإجابات" /></summary>{fields}</details> : fields) : null}
         {!r.done && role === 'organizer' && r.clinical ? <p><L en={r.awaitingApproval ? 'Waiting for the Medical Director’s approval.' : 'Your medical team completes this item.'} ar={r.awaitingApproval ? 'بانتظار اعتماد المدير الطبي.' : 'يستكمل الفريق الطبي هذا البند.'} /> <Link href={`/venues/${id}/team`}><L en="View team" ar="عرض الفريق" /></Link></p> : null}
         {r.n === 1 && !r.done && role === 'organizer' ? <Link href={`/venues/${id}/details`}><L en="Complete contact details" ar="إكمال بيانات الاتصال" /></Link> : null}

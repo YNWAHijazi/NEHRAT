@@ -235,8 +235,16 @@
   },
   "director": {
     "inviteIntro": {
-      "en": "You have been invited as Medical Director for this Level 3 event.",
-      "ar": "دُعيتم لتولّي دور المدير الطبي لهذه الفعالية من المستوى 3."
+      "$comment": "No level named: since the revised Annex B (2026-09-29) a Director may be invited at Level 2 as well as Level 3, and the level is on the briefing strip above.",
+      "en": "You have been invited as Medical Director for this event.",
+      "ar": "دُعيتم لتولّي دور المدير الطبي لهذه الفعالية."
+    },
+    "responseDescriptions": {
+      "$comment": "The Director's own wording for Accept and Decline. The EMS wording (a named provider, its readiness declaration) does not describe a physician's appointment. Request further information is level- and role-neutral and is shared.",
+      "acceptEn": "You become the Medical Director for this event, and your responsibilities open: the medical arrangements and the event health and medical plan.",
+      "acceptAr": "تصبحون المدير الطبي لهذه الفعالية وتُفتح مسؤولياتكم: الترتيبات الطبية وخطة التأهب الصحي والطبي للفعالية.",
+      "declineEn": "A reason is required and returns to the organizer, who must name another Medical Director.",
+      "declineAr": "يُطلب سبب يعود إلى المنظّم، وعليه تسمية مدير طبي آخر."
     },
     "accepting": {
       "en": "Accepting makes you personally responsible, as a licensed physician, for the requirements below. Four are shared with the organizer and the participating providers. One is yours alone.",

@@ -120,7 +120,6 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: '28px 32px', paddingBlock: 30, borderBlockEnd: '1px solid var(--line)' }}>
               {[
                 { en: 'Event', ar: 'الفعالية', vEn: event.nameEn, vAr: event.nameAr },
-                { en: 'Record identifier', ar: 'معرّف السجل', vEn: event.id, vAr: event.id },
                 { en: 'Event date', ar: 'تاريخ الفعالية', vEn: event.startDate ?? '—', vAr: event.startDate ?? '—' },
                 { en: 'Final level', ar: 'المستوى النهائي', vEn: `Level ${level}`, vAr: `المستوى ${level}` },
                 { en: 'Organizer', ar: 'المنظم', vEn: organization?.nameEn ?? '—', vAr: organization?.nameAr ?? '—' },

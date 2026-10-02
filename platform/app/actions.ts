@@ -1372,14 +1372,15 @@ function invitationRow(token: string): { event_id: string; kind: 'ems' | 'direct
     .get(token) ?? null) as { event_id: string; kind: 'ems' | 'director'; account_id: number | null; status: string; declaration: string } | null;
 }
 
-function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string): void {
+/** kind: 'for_information' when nothing is asked of the organizer (an acceptance); 'needs_action' when it is. */
+function notifyOrganizerOf(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string, kind: 'needs_action' | 'for_information' = 'needs_action'): void {
   const db = getDb();
   const ev = db.prepare(`SELECT account_id, is_demo FROM events WHERE id = ?`).get(eventId) as { account_id: number; is_demo: number } | undefined;
   if (!ev) return;
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
-  ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
+     VALUES (?, ?, ?, ?, ?, ?, ?, now_stamp(), ?)`,
+  ).run(ev.account_id, kind, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
 }
 
 /**
@@ -1523,6 +1524,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has accepted the nomination.`,
       `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
       `/events/${inv.event_id}/requirements`,
+      'for_information',
     );
     // The linked nominee lands on their own event tasks.
     if (account) redirect(`${counterpartyLanding(inv.kind, inv.event_id)}?notice=accepted`);

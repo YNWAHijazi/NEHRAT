@@ -38,7 +38,7 @@ export function PrintBar() {
         <L en="Download as PDF" ar="تنزيل بصيغة PDF" />
       </button>
       <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
-        <L en="Reissued from the record at any time. The reference number does not change." ar="يمكن إعادة إصداره من السجل في أي وقت. ولا يتغير الرقم المرجعي." />
+        <L en="Reissued from the record at any time. The record ID does not change." ar="يمكن إعادة إصداره من السجل في أي وقت. ولا يتغير معرّف السجل." />
       </span>
     </div>
   );

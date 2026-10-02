@@ -384,8 +384,8 @@ export function SubmitForm({
           {revisionOpen ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 22, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
               <L
-                en={`The Ministry's determination asks for more. The form is open for revision; re-filing archives version ${initial?.version ?? 1} and your reference number does not change.`}
-                ar={`نتيجة الوزارة تطلب المزيد. النموذج مفتوح للتعديل؛ وإعادة التقديم تؤرشف النسخة ${initial?.version ?? 1} ولا يتغير رقمكم المرجعي.`}
+                en={`The Ministry's determination asks for more. The form is open for revision; re-filing archives version ${initial?.version ?? 1} and your record ID does not change.`}
+                ar={`نتيجة الوزارة تطلب المزيد. النموذج مفتوح للتعديل؛ وإعادة التقديم تؤرشف النسخة ${initial?.version ?? 1} ولا يتغير معرّف السجل.`}
               />
             </div>
           ) : null}

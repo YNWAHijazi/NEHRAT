@@ -40,14 +40,15 @@ async function requireMinistry(action: MinistryAction): Promise<{ id: number; ro
   return { id: account.id, role: account.role, displayName: account.displayName, isDemo: account.isDemo };
 }
 
-function notifyEventOwner(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string): void {
+/** kind: 'for_information' when the organizer has nothing to do about it (requirements satisfied, a report accepted). */
+function notifyEventOwner(eventId: string, subjectEn: string, subjectAr: string, bodyEn: string, bodyAr: string, route: string, kind: 'needs_action' | 'for_information' = 'needs_action'): void {
   const db = getDb();
   const ev = db.prepare(`SELECT account_id, is_demo FROM events WHERE id = ?`).get(eventId) as { account_id: number; is_demo: number } | undefined;
   if (!ev) return;
   db.prepare(
     `INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
-     VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`,
-  ).run(ev.account_id, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
+     VALUES (?, ?, ?, ?, ?, ?, ?, now_stamp(), ?)`,
+  ).run(ev.account_id, kind, subjectEn, subjectAr, bodyEn, bodyAr, route, ev.is_demo);
 }
 
 /**
@@ -131,9 +132,11 @@ export async function recordOutcomeAction(eventId: string, formData: FormData): 
       ? `${def?.en ?? ''}. ${note} Your record ID does not change.`
       : `${def?.en ?? ''}. Your record ID does not change.`,
     note
-      ? `${def?.ar ?? ''}. ${note} ولا يتغير رقمكم المرجعي.`
-      : `${def?.ar ?? ''}. ولا يتغير رقمكم المرجعي.`,
-    outcome === 'satisfied' ? `/events/${eventId}/acknowledgment` : `/events/${eventId}`,
+      ? `${def?.ar ?? ''}. ${note} ولا يتغير معرّف السجل.`
+      : `${def?.ar ?? ''}. ولا يتغير معرّف السجل.`,
+    // Satisfied opens the certificate and asks nothing more; the other two ask for work.
+    outcome === 'satisfied' ? `/events/${eventId}/determination` : `/events/${eventId}`,
+    outcome === 'satisfied' ? 'for_information' : 'needs_action',
   );
   revalidatePath(`/ministry/submissions/${eventId}`);
   // The organizer's surfaces show the same determination -- refresh them too.
@@ -1176,7 +1179,7 @@ export async function acceptPostEventReportAction(eventId: string): Promise<void
   const saved = db.prepare(`INSERT OR IGNORE INTO post_event_report_reviews
     (event_id, report_submitted_at, reviewed_by) VALUES (?, ?, ?)`).run(eventId, report.submitted_at, actor.id);
   if (saved.changes > 0) notifyEventOwner(eventId, 'Post-event report accepted', 'قُبل تقرير ما بعد الفعالية',
-    'The Ministry has reviewed and accepted your post-event report.', 'راجعت الوزارة تقرير ما بعد الفعالية وقبلته.', `/events/${eventId}/post-event`);
+    'The Ministry has reviewed and accepted your post-event report.', 'راجعت الوزارة تقرير ما بعد الفعالية وقبلته.', `/events/${eventId}/post-event`, 'for_information');
   revalidatePath('/ministry/reports');
   revalidatePath(`/events/${eventId}/post-event`);
   redirect('/ministry/reports');

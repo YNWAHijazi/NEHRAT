@@ -10,7 +10,9 @@ const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repea
 const states = { nominated: ['Invitation pending', 'الدعوة قيد الانتظار'], confirmed: ['Confirmed', 'مؤكّد'], declined: ['Declined', 'مرفوض'], removed: ['Removed', 'تمت الإزالة'], withdrawn: ['Withdrawn', 'مسحوب'] } as const;
 
 function Value({ value }: { value: string | number | null | undefined }) {
-  return value !== null && value !== undefined && String(value).trim() !== '' ? <>{value}</> : <L en="Not provided" ar="غير مقدّم" />;
+  if (value === null || value === undefined || String(value).trim() === '') return <L en="Not provided" ar="غير مقدّم" />;
+  // Counts read with separators (25,000), as they do on the invitation and the organizer's screens.
+  return <>{typeof value === 'number' ? value.toLocaleString('en-US') : value}</>;
 }
 
 export function ReviewFileSummary({ evidence }: { evidence: Evidence }) {
