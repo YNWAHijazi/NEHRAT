@@ -16,6 +16,7 @@ next-env.d.ts
 .next-preview/
 
 .next-v1-build/
+.next-walk/
 
 # Local Railway SSH credentials
 /railway ssh

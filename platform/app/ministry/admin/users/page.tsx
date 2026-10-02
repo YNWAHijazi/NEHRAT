@@ -1,3 +1,4 @@
+import { OptionText } from '../../../../components/OptionText';
 import { InfoNote } from '../../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../../components/EmailDeliveryNotice';
 import { AdminTabs } from '../../../../components/AdminTabs';
@@ -100,7 +101,7 @@ export default async function UsersPage({
             <span style={{ fontSize: 11.5, color: 'var(--muted)' }}><L en="Role" ar="الدور" /></span>
             <select name="role" required style={{ height: 34, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
               {assignable.map((r) => (
-                <option key={r} value={r}>{roleLabels[r]?.en ?? r}</option>
+                <option key={r} value={r}><OptionText en={roleLabels[r]?.en ?? r} ar={roleLabels[r]?.ar ?? r} /></option>
               ))}
             </select>
           </label>
@@ -120,9 +121,9 @@ export default async function UsersPage({
             <L en={ACCOUNTS_CONSOLE.segmentsTitleEn} ar={ACCOUNTS_CONSOLE.segmentsTitleAr} />
           </span>
           <select name="seg" defaultValue={seg ?? ''} style={{ height: 36, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 13 }}>
-            <option value="">{`${ACCOUNTS_CONSOLE.anyEn} (${all.length})`}</option>
+            <option value=""><OptionText en={`${ACCOUNTS_CONSOLE.anyEn} (${all.length})`} ar={`${ACCOUNTS_CONSOLE.anyAr} (${all.length})`} /></option>
             {Object.entries(segments).map(([key, label]) => (
-              <option key={key} value={key}>{`${label.en} (${segmentCounts.get(key) ?? 0})`}</option>
+              <option key={key} value={key}><OptionText en={`${label.en} (${segmentCounts.get(key) ?? 0})`} ar={`${label.ar} (${segmentCounts.get(key) ?? 0})`} /></option>
             ))}
           </select>
         </label>
@@ -271,7 +272,7 @@ export default async function UsersPage({
                       <form action={changeUserRoleAction.bind(null, u.login)} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
                         <select name="role" defaultValue={u.role} aria-label="Role" style={{ height: 30, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 6, fontSize: 12 }}>
                           {assignable.map((r) => (
-                            <option key={r} value={r}>{roleLabels[r]?.en ?? r}</option>
+                            <option key={r} value={r}><OptionText en={roleLabels[r]?.en ?? r} ar={roleLabels[r]?.ar ?? r} /></option>
                           ))}
                         </select>
                         <button type="submit" style={{ height: 30, paddingInline: 11, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 15, fontSize: 12, cursor: 'pointer' }}>

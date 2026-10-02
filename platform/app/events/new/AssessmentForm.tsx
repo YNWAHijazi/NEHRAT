@@ -1,5 +1,6 @@
 'use client';
 
+import { OptionText } from '../../../components/OptionText';
 import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
 
@@ -302,7 +303,7 @@ export function AssessmentForm({
             <option value="" disabled />
             {EVENT_TYPES.map((t) => (
               <option key={t.key} value={t.key}>
-                {t.en} · {t.ar}
+                <OptionText en={t.en} ar={t.ar} />
               </option>
             ))}
           </select>

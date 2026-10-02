@@ -1,3 +1,4 @@
+import { OptionText } from '../../../components/OptionText';
 import { InfoNote } from '../../../components/InfoNote';
 import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
@@ -77,8 +78,8 @@ export default async function ApplicabilityPage({
             {mayDetermine && r.determination === 'undetermined' ? (
               <form action={determineApplicabilityAction.bind(null, r.id)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBlockStart: 10 }}>
                 <select name="determination" required aria-label="Determination" style={{ height: 32, paddingInline: 8, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }}>
-                  <option value="in_scope">In scope</option>
-                  <option value="out_of_scope">Not in scope</option>
+                  <option value="in_scope"><OptionText en="In scope" ar="ضمن النطاق" /></option>
+                  <option value="out_of_scope"><OptionText en="Not in scope" ar="خارج النطاق" /></option>
                 </select>
                 <input name="reasons" required aria-label="Reasons" style={{ flex: 1, minWidth: 220, height: 32, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: '12.5px' }} />
                 <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: '12.5px' }}>

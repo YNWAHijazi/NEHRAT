@@ -1,3 +1,4 @@
+import { OptionText } from '../../../../components/OptionText';
 import {eventPlanApproval} from '../../../../lib/plan-approval';
 import { EXTRA_DISCIPLINES } from '../../../../lib/rules/event-labels';
 import { ReviewFileSummary, ReviewMedicalAnswers } from '../../../../components/ReviewEvidence';
@@ -981,7 +982,7 @@ export default async function SubmissionReviewPage({
                 <select name="catalogKey" required style={{ height: 38, paddingInline: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 19, fontSize: 13 }}>
                   <option value="">—</option>
                   {catalog.map((d) => (
-                    <option key={d.key} value={d.key}>{d.en}</option>
+                    <option key={d.key} value={d.key}><OptionText en={d.en} ar={d.ar} /></option>
                   ))}
                 </select>
               </label>

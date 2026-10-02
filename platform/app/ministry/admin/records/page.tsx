@@ -1,3 +1,4 @@
+import { OptionText } from '../../../../components/OptionText';
 import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { AdminTabs } from '../../../../components/AdminTabs';
@@ -73,9 +74,9 @@ export default async function AdminRecordsPage({
             <L en={A.filterLevelEn} ar={A.filterLevelAr} />
           </span>
           <select name="level" defaultValue={level ?? ''} style={field}>
-            <option value="">{A.anyEn}</option>
+            <option value=""><OptionText en={A.anyEn} ar={A.anyAr} /></option>
             {[1, 2, 3].map((l) => (
-              <option key={l} value={l}>{`Level ${l}`}</option>
+              <option key={l} value={l}><OptionText en={`Level ${l}`} ar={`المستوى ${l}`} /></option>
             ))}
           </select>
         </label>
@@ -84,12 +85,12 @@ export default async function AdminRecordsPage({
             <L en={A.filterStatusEn} ar={A.filterStatusAr} />
           </span>
           <select name="status" defaultValue={status ?? ''} style={field}>
-            <option value="">{A.anyEn}</option>
-            <option value="filed">{A.statusFiledEn}</option>
-            <option value="unfiled">{A.statusUnfiledEn}</option>
-            <option value="undetermined">{A.statusUndeterminedEn}</option>
+            <option value=""><OptionText en={A.anyEn} ar={A.anyAr} /></option>
+            <option value="filed"><OptionText en={A.statusFiledEn} ar={A.statusFiledAr} /></option>
+            <option value="unfiled"><OptionText en={A.statusUnfiledEn} ar={A.statusUnfiledAr} /></option>
+            <option value="undetermined"><OptionText en={A.statusUndeterminedEn} ar={A.statusUndeterminedAr} /></option>
             {outcomes.map((o) => (
-              <option key={o.key} value={o.key}>{o.en}</option>
+              <option key={o.key} value={o.key}><OptionText en={o.en} ar={o.ar} /></option>
             ))}
           </select>
         </label>

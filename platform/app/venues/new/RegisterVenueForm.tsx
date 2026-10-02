@@ -1,4 +1,5 @@
 'use client';
+import { OptionText } from '../../../components/OptionText';
 import { VENUE_CAPACITY_FIELD, VENUE_ELIGIBILITY_QUESTIONS } from '../../../lib/rules';
 import { useState } from 'react';
 import { L } from '../../../components/L';
@@ -18,9 +19,9 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  <fieldset disabled={locked} style={{border:0,padding:0,margin:0,minWidth:0}}>
  <div data-region="registration-form" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,240px),1fr))',gap:20}}>
  {text('name','Venue name (English)','اسم الموقع (بالإنكليزية)',initial?.nameEn)}{text('nameAr','Venue name (Arabic)','اسم الموقع (بالعربية)',initial?.nameAr)}
- <label style={{display:'grid',gap:6}}><L en="Venue type" ar="نوع الموقع"/><select name="category" value={category} onChange={e=>{setCategory(e.target.value);if(e.target.value==='nightclub')setNightclub(true);}} required style={input}><option value=""></option>{VENUE_TYPES.map(t=><option key={t.key} value={t.key}>{t.en} · {t.ar}</option>)}</select></label>
+ <label style={{display:'grid',gap:6}}><L en="Venue type" ar="نوع الموقع"/><select name="category" value={category} onChange={e=>{setCategory(e.target.value);if(e.target.value==='nightclub')setNightclub(true);}} required style={input}><option value=""></option>{VENUE_TYPES.map(t=><option key={t.key} value={t.key}><OptionText en={t.en} ar={t.ar} /></option>)}</select></label>
  {category==='other'?text('categoryOther','Specify venue type','حدّد نوع الموقع',known?'':initial?.category):null}
- <label style={{display:'grid',gap:6}}><L en="District" ar="القضاء"/><select name="district" defaultValue={district} required style={input}><option value=""></option>{VENUE_DISTRICTS.map(d=><option key={d.en} value={d.en}>{d.en} · {d.ar}</option>)}</select></label>
+ <label style={{display:'grid',gap:6}}><L en="District" ar="القضاء"/><select name="district" defaultValue={district} required style={input}><option value=""></option>{VENUE_DISTRICTS.map(d=><option key={d.en} value={d.en}><OptionText en={d.en} ar={d.ar} /></option>)}</select></label>
  {text('address','Town and street address','البلدة وعنوان الشارع',initial?.addressMunicipalityEn)}{text('addressAr','Address (Arabic, optional)','العنوان (بالعربية، اختياري)',initial?.addressMunicipalityAr,false)}
  {text('contactName','Responsible person','الشخص المسؤول',initial?.responsibleName || initial?.responsibleContact)}{text('contactPhone','Phone number','رقم الهاتف',initial?.responsiblePhone)}
  <label style={{display:'grid',gap:6}}><L en={VENUE_CAPACITY_FIELD.en} ar={VENUE_CAPACITY_FIELD.ar}/><input style={input} name="capacity" type="number" min="1" step="1" required defaultValue={initial?.licensedCapacity??''}/></label>

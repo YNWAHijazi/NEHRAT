@@ -1,5 +1,6 @@
 'use client';
 
+import { OptionText } from '../../../components/OptionText';
 import { InfoNote } from '../../../components/InfoNote';
 
 
@@ -92,7 +93,7 @@ export function RegisterFacilityForm({
           <option value=""></option>
           {options.map((o) => (
             <option key={o.en} value={o.en}>
-              {o.en}
+              <OptionText en={o.en} ar={o.ar} />
             </option>
           ))}
         </select>
@@ -192,7 +193,7 @@ export function RegisterFacilityForm({
             })}
           </div>
 
-          {catKey==='transport'?<label style={{display:'grid',gap:8,marginBlock:20}}><L en="Facility type" ar="نوع المنشأة"/><select value={profile.facilityType??''} onChange={e=>setProfile(p=>({...p,facilityType:e.target.value}))} style={inputStyle}><option value=""></option>{TRANSPORT_FACILITY_TYPES.map(t=><option key={t.key} value={t.key}>{t.en} · {t.ar}</option>)}</select></label>:null}
+          {catKey==='transport'?<label style={{display:'grid',gap:8,marginBlock:20}}><L en="Facility type" ar="نوع المنشأة"/><select value={profile.facilityType??''} onChange={e=>setProfile(p=>({...p,facilityType:e.target.value}))} style={inputStyle}><option value=""></option>{TRANSPORT_FACILITY_TYPES.map(t=><option key={t.key} value={t.key}><OptionText en={t.en} ar={t.ar} /></option>)}</select></label>:null}
           {picked ? (
             <div>
               <div data-region="determination" style={{ padding: '32px 36px', background: 'var(--surface)', border: `1px solid ${CHIP[picked.state].border}`, borderRadius: 16, marginBlockEnd: 16 }}>

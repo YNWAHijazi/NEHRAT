@@ -29,7 +29,7 @@ export default async function RegisterVenuePage({searchParams}:{searchParams:Pro
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
           <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-            <L en="Register a recurring venue" ar="تسجيل موقع فعاليات دوري" />
+            <L en="Register a hosting venue" ar="تسجيل موقع مستضيف للفعاليات" />
           </h1>
           {/* The every-field-is-required banner left this screen (partner ruling,
               second sweep): the one optional field says so on its own label. */}

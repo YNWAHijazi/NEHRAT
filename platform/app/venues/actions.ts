@@ -15,11 +15,28 @@ async function owned(id:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();return {a,w};
 }
 /** A notification about one venue: the subject says what happened, the body names the venue -- never the same line twice. */
-function notify(accountId:number,isDemo:boolean,route:string,en:string,ar:string) {
+function notify(accountId:number,isDemo:boolean,route:string,en:string,ar:string,kind:'needs_action'|'for_information'='needs_action') {
  const venueId=/\/venues\/(VN-\d+)/.exec(route)?.[1];
  const venue=venueId?getDb().prepare('SELECT name_en,name_ar FROM venues WHERE id=?').get(venueId) as {name_en:string;name_ar:string}|undefined:undefined;
  const bodyEn=venue?`${venue.name_en} · ${venueId}`:en, bodyAr=venue?`${venue.name_ar} · ${venueId}`:ar;
- getDb().prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(accountId,en,ar,bodyEn,bodyAr,route,+isDemo);
+ getDb().prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,?,?,?,?,?,?,now_stamp(),?)").run(accountId,kind,en,ar,bodyEn,bodyAr,route,+isDemo);
+}
+/**
+ * The medical team's progress on one venue, as ONE notice that updates in place while unread --
+ * not one "needs action" per completed row (a single agency's work produced thirteen). It is for
+ * information until the team's required rows are all complete; then the organizer has something
+ * to do, and it says so.
+ */
+const MEDICAL_PROGRESS = ['Medical requirements:%', 'Your medical team has completed its requirements'] as const;
+function notifyMedicalProgress(ownerId:number,isDemo:boolean,id:string) {
+ const w=venuePackageFor(ownerId,id);if(!w)return;
+ const medical=w.requirements.filter(r=>r.clinical&&!r.optional),done=medical.filter(r=>r.done).length,finished=medical.length>0&&done===medical.length;
+ const en=finished?MEDICAL_PROGRESS[1]:`Medical requirements: ${done} of ${medical.length} complete`;
+ const ar=finished?'أكمل فريقكم الطبي متطلباته':`المتطلبات الطبية: اكتمل ${done} من ${medical.length}`;
+ const route=`/venues/${id}/requirements`,db=getDb();
+ const open=db.prepare('SELECT id FROM notifications WHERE account_id=? AND record_route=? AND read=0 AND (subject_en LIKE ? OR subject_en=?) ORDER BY id DESC LIMIT 1').get(ownerId,route,MEDICAL_PROGRESS[0],MEDICAL_PROGRESS[1]) as {id:number}|undefined;
+ if(!open){notify(ownerId,isDemo,route,en,ar,finished?'needs_action':'for_information');return;}
+ db.prepare('UPDATE notifications SET subject_en=?,subject_ar=?,kind=?,sent_at=now_stamp() WHERE id=?').run(en,ar,finished?'needs_action':'for_information',open.id);
 }
 function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
 export async function saveVenueDetailsAction(id:string,form:FormData) {
@@ -61,7 +78,7 @@ export async function saveVenueRequirementAction(id:string,key:string,form:FormD
  db.prepare(`INSERT INTO venue_contributions(venue_id,requirement_key,invitation_token,answers,assessment_version) VALUES(?,?,?,?,?) ON CONFLICT(venue_id,requirement_key,invitation_token) DO UPDATE SET answers=excluded.answers,assessment_version=excluded.assessment_version,completed_at=now_stamp()`).run(id,key,liveAccess.invitation.token,JSON.stringify({...values,...(key==='20'?{fileKey}: {})}),current.assessmentVersion);
  // A plan approval covers the medical arrangements as a whole; changed clinical answers need approval again.
  db.prepare('DELETE FROM venue_plan_approvals WHERE venue_id=?').run(id);
- notify(access.ownerId,a.isDemo,`/venues/${id}/requirements`,`Medical requirement completed: ${req.en}`,`اكتمل متطلب طبي: ${req.ar}`);
+ notifyMedicalProgress(access.ownerId,a.isDemo,id);
  }
  db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');if(e instanceof Error&&e.message==='STALE_VENUE_FORM')stale=true;else throw e;}
  refresh(id);revalidatePath(`/venue-team/${id}`);redirect(`${back}?${stale?'error=stale':`saved=${key}`}#r-${key}`);

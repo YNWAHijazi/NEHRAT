@@ -4,6 +4,7 @@ import { currentAccount } from '../lib/auth';
 import { DemonstrationBand } from '../components/DemonstrationBand';
 import { NeedHelp } from '../components/NeedHelp';
 import { ControlDock } from '../components/ControlDock';
+import { LangProvider } from '../components/OptionText';
 import './globals.css';
 
 export const metadata = {
@@ -49,12 +50,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
       </head>
       <body>
-        {demonstration ? <DemonstrationBand /> : null}
-        <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>{children}</div>
-        {/* The one way to the reference page (fields-only ruling, 2026-09-04):
-            every form carries its fields; the explanation lives behind this. */}
-        <NeedHelp />
-        <ControlDock />
+        <LangProvider lang={lang}>
+          {demonstration ? <DemonstrationBand /> : null}
+          <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>{children}</div>
+          {/* The one way to the reference page (fields-only ruling, 2026-09-04):
+              every form carries its fields; the explanation lives behind this. */}
+          <NeedHelp />
+          <ControlDock />
+        </LangProvider>
       </body>
     </html>
   );
