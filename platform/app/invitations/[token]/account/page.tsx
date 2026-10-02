@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { currentAccount, rememberedSignInFields } from '../../../../lib/auth';
-import { invitationByToken } from '../../../../lib/queries';
+import { invitationByToken, accountMayTakeNomination } from '../../../../lib/queries';
 import { ROLES_CONTENT } from '../../../../lib/rules';
 
 import {
@@ -47,6 +47,9 @@ export default async function NominationAccountPage({
   const N = ROLES_CONTENT.nomination;
   const declined = invitation.status === 'declined';
   const remembered = await rememberedSignInFields();
+  // Signed in under the right role but a different address: say so, rather than offer a button that refuses.
+  const mayTake = Boolean(account && account.role === expectedRole && accountMayTakeNomination(account.id, token));
+  const wrongAccount = Boolean(account && account.role === expectedRole && !mayTake);
 
   const field: React.CSSProperties = {
     height: 46,
@@ -121,6 +124,14 @@ export default async function NominationAccountPage({
                   <L en="That email and password do not match an account." ar="لا يطابق هذا البريد وكلمة المرور أي حساب." />
                 </div>
               ) : null}
+              {error === 'invited-email' || wrongAccount ? (
+                <div role="alert" data-region="invited-email" style={{ padding: '18px 24px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
+                  <L
+                    en={`This invitation was sent to ${invitation.email}. Create the account below or sign in with that address. If your organization uses another address, ask the organizer to invite that address instead.`}
+                    ar={`أُرسلت هذه الدعوة إلى \u2066${invitation.email}\u2069. أنشئوا الحساب أدناه أو سجّلوا الدخول بهذا العنوان. إذا كانت جهتكم تستخدم عنواناً آخر، اطلبوا من المنظّم دعوة ذلك العنوان.`}
+                  />
+                </div>
+              ) : null}
               {error === 'role' ? (
                 <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.65 }}>
                   <L
@@ -130,7 +141,7 @@ export default async function NominationAccountPage({
                 </div>
               ) : null}
 
-              {account?.role === expectedRole ? (
+              {mayTake ? (
                 <form action={respondToInvitationAction.bind(null, token)} style={{ marginBlockEnd: 24 }}>
                   <input type="hidden" name="response" value="accept" />
                   <button type="submit" style={{ padding: '12px 20px', border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)' }}>
@@ -149,8 +160,9 @@ export default async function NominationAccountPage({
                   <Label en="Full name" ar="الاسم الكامل">
                     <input name="fullName" required style={field} />
                   </Label>
-                  <Label en="Email" ar="البريد الإلكتروني">
-                    <input name="email" type="email" required defaultValue={invitation.email} style={field} />
+                  <Label en="Email (the invited address)" ar="البريد الإلكتروني (العنوان المدعوّ)">
+                    {/* Read-only: the account is created under the address the organizer named. */}
+                    <input name="email" type="email" readOnly value={invitation.email} style={{ ...field, background: 'var(--surface2)', color: 'var(--muted)' }} />
                   </Label>
                   <Label en="Password" ar="كلمة المرور">
                     <input name="password" type="password" required style={field} />
@@ -177,7 +189,7 @@ export default async function NominationAccountPage({
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, marginBlockEnd: 22 }}>
                     <Label en="Email" ar="البريد الإلكتروني">
                       {/* The email survives a failed attempt; the password never does. */}
-                      <input name="email" type="email" required defaultValue={remembered.email ?? ''} style={field} />
+                      <input name="email" type="email" required defaultValue={remembered.email ?? invitation.email} style={field} />
                     </Label>
                     <Label en="Password" ar="كلمة المرور">
                       <input name="password" type="password" required style={field} />

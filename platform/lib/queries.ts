@@ -2992,3 +2992,30 @@ export function demonstrationAccountsExist(): boolean {
     .get() as { n: number } | undefined;
   return (row?.n ?? 0) > 0;
 }
+
+
+/**
+ * Whether an account may take up an event nomination. The organizer named an email address,
+ * and the nomination binds to the account holding THAT address, on the event's side of the
+ * demonstration boundary. An account the nomination is already linked to keeps it. Venue
+ * invitations apply the same test (app/venues/team-actions.ts).
+ *
+ * Until email delivery is switched on, the unguessable link is still the credential: whoever
+ * holds it can create the account under the named address. This closes the other door --
+ * accepting, declining or linking under some OTHER account.
+ */
+export function accountMayTakeNomination(accountId: number, token: string): boolean {
+  const db = getDb();
+  const inv = db.prepare('SELECT event_id, email, account_id FROM invitations WHERE token = ?').get(token) as
+    | { event_id: string; email: string; account_id: number | null }
+    | undefined;
+  if (!inv) return false;
+  if (inv.account_id === accountId) return true;
+  const acc = db.prepare('SELECT email, is_demo FROM accounts WHERE id = ?').get(accountId) as { email: string | null; is_demo: number } | undefined;
+  const ev = db.prepare('SELECT is_demo FROM events WHERE id = ?').get(inv.event_id) as { is_demo: number } | undefined;
+  return Boolean(
+    acc && ev && acc.email &&
+    acc.email.trim().toLowerCase() === inv.email.trim().toLowerCase() &&
+    acc.is_demo === ev.is_demo,
+  );
+}

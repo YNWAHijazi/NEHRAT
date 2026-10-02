@@ -17,7 +17,7 @@ import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification'
 import { eventGateContext } from '../lib/event-gate-context';
 import { seriousIncidentGate, postEventReportGate } from '../lib/rules/gates';
 import { deliverPasswordReset } from '../lib/password-reset';
-import { derivedLevelFor } from '../lib/queries';
+import { derivedLevelFor, accountMayTakeNomination } from '../lib/queries';
 import { planAccess, mayEditEventDocument } from '../lib/plan-access';
 import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
@@ -1509,6 +1509,8 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     const expectedRole = inv.kind === 'ems' ? 'ems' : 'director';
     if (!account || account.role !== expectedRole) redirect(`/invitations/${token}/account`);
     if (inv.account_id !== null && inv.account_id !== account.id) redirect('/dashboard');
+    // The nomination binds to the account holding the email the organizer named.
+    if (!accountMayTakeNomination(account.id, token)) redirect(`/invitations/${token}/account?error=invited-email`);
     db.prepare(
       // COALESCE, not overwrite: a nomination already linked to an account keeps it.
       `UPDATE invitations SET status = 'confirmed', account_id = COALESCE(?, account_id),
@@ -1531,7 +1533,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     db.prepare(
       `UPDATE invitations SET status = 'declined', account_id = COALESCE(?, account_id),
          response_note = ?, answered_at = now_stamp() WHERE token = ?`,
-    ).run(account?.role === (inv.kind === 'ems' ? 'ems' : 'director') ? account.id : null, reason, token);
+    ).run(account?.role === (inv.kind === 'ems' ? 'ems' : 'director') && accountMayTakeNomination(account.id, token) ? account.id : null, reason, token);
     // Declining is a MATERIAL CHANGE the organizer must report (rule 6) -- but only
     // a FILED submission has anything on file to change. Before filing, the
     // instruction is simply to name another party; the change route would bounce.
@@ -1555,7 +1557,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
     // Not a nomination state: the nomination stays open with the note attached.
     db.prepare(
       `UPDATE invitations SET response_note = ?, account_id = COALESCE(?, account_id) WHERE token = ?`,
-    ).run(reason, account?.role === (inv.kind === 'ems' ? 'ems' : 'director') ? account.id : null, token);
+    ).run(reason, account?.role === (inv.kind === 'ems' ? 'ems' : 'director') && accountMayTakeNomination(account.id, token) ? account.id : null, token);
     notifyOrganizerOf(
       inv.event_id,
       `A named party requests a modification — ${eventName.name_en}`,
@@ -1583,7 +1585,8 @@ export async function registerAgainstInvitationAction(
   const phone = String(formData.get('phone') ?? '').trim();
   if (!validPhone(phone)) redirect(`/invitations/${token}/account?error=account`);
   const name = String(formData.get('fullName') ?? '').trim();
-  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  // The account is created under the address the organizer named -- never one typed here.
+  const email = (getDb().prepare('SELECT email FROM invitations WHERE token = ?').get(token) as { email: string }).email.trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
   if (!name || !email || !checkPasswordPolicy(password).ok) {
     redirect(`/invitations/${token}/account?error=account`);
@@ -1651,6 +1654,10 @@ export async function signInAgainstInvitationAction(
   if (row.role !== expected) redirect(`/invitations/${token}/account?error=role`);
 
   if (inv.account_id !== null && inv.account_id !== row.id) redirect('/dashboard');
+  if (!accountMayTakeNomination(row.id, token)) {
+    await forgetSignInFields();
+    redirect(`/invitations/${token}/account?error=invited-email`);
+  }
 
   getDb().prepare(`UPDATE invitations SET account_id = ? WHERE token = ?`).run(row.id, token);
   await forgetSignInFields();

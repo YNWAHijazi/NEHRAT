@@ -207,7 +207,9 @@ test.describe('stage three — the account, after the answer and never as part o
     const create = page.locator('[data-region="create-account"]');
     await expect(create).toBeVisible();
     await create.locator('input[name="fullName"]').fill('Stage Walk Operations');
-    await create.locator('input[name="email"]').fill('stages-account@example.lb');
+    // The account is created under the address the organizer named; it is shown, not typed.
+    await expect(create.locator('input[name="email"]')).toHaveValue('stages@example.lb');
+    await expect(create.locator('input[name="email"]')).not.toBeEditable();
     await create.locator('input[name="password"]').fill('Walk-the-stages-2026');
     await create.locator('button[type="submit"]').click();
 
