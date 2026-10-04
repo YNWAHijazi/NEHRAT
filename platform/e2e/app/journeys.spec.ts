@@ -125,8 +125,11 @@ for (const lang of LANGUAGES) {
       await fileBtn.click();
       await page.waitForURL(/acknowledgment/);
       const body = await page.locator('body').innerText();
-      const reference = /MOPH-EV-\d{4}-\d{4}/.exec(body)?.[0];
-      expect(reference, 'no Ministry reference number was issued').toBeTruthy();
+      // One identifier (owner ruling, 2026-09-29): the receipt carries the record ID the event
+      // was created with; no separate MOPH-EV reference is issued for a new filing.
+      const reference = /EV-\d{4}/.exec(new URL(page.url()).pathname)?.[0];
+      expect(reference, 'the receipt names no record ID').toBeTruthy();
+      expect(body).toContain(reference!);
 
       // THE MINISTRY DETERMINES. Journey 11, on the record just created.
       await signInAs(page, 'test_moph');

@@ -9,7 +9,8 @@ async function firstSection(page: Page) {
 test('Level 2 plan is optional, EMS fills it, organizer sees it automatically in separate team tabs', async ({ page, browser, baseURL }) => {
   await signInAs(page, 'test_organizer');
   await page.goto('/events/EV-0418/requirements');
-  await expect(page.getByRole('heading',{name:'Medical Director (optional)',exact:true})).toBeVisible();
+  // The section heading carries its number ("3 Medical Director (optional)"), so match the title.
+  await expect(page.getByRole('heading',{name:/Medical Director \(optional\)$/})).toBeVisible();
   const card = page.locator('[data-document=plan]');
   await expect(card.locator('summary')).toContainText('Recommended');
   await card.locator('summary').click();

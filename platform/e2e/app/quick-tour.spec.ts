@@ -26,8 +26,8 @@ for (const [login, title] of [
   expect(new URL(page.url()).pathname).toBe(LANDING[login!]);
 });
 
-for (const lang of ['en','ar']) test(`tour fits mobile, traps keyboard focus and remains steady: ${lang}`, async ({page,context}) => {
-  await context.addCookies([{name:'lang',value:lang,url:'http://localhost:3102'}]);
+for (const lang of ['en','ar']) test(`tour fits mobile, traps keyboard focus and remains steady: ${lang}`, async ({page,context,baseURL}) => {
+  await context.addCookies([{name:'lang',value:lang,url:baseURL!}]);
   await page.setViewportSize({width:320,height:640});
   await signInAs(page,'test_organizer');
   await page.goto('/dashboard?tour=1');
@@ -53,7 +53,7 @@ for (const lang of ['en','ar']) test(`tour fits mobile, traps keyboard focus and
   await expect(tour).toHaveCount(0);
 });
 
-test('new account sees the tour once and preference survives a fresh browser context', async ({page,browser}) => {
+test('new account sees the tour once and preference survives a fresh browser context', async ({page,browser,baseURL}) => {
   const email=`tour-${Date.now()}@example.test`;
   const password='Test-Tour-Long-Password9!';
   await page.goto('/signin?mode=signup');
@@ -67,7 +67,8 @@ test('new account sees the tour once and preference survives a fresh browser con
   await page.getByRole('dialog').getByRole('button',{name:'Skip',exact:true}).click();
   await page.reload();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const context=await browser.newContext({baseURL:'http://localhost:3102'});
+  // The suite's own server, not a hard-coded port (3102 is the release harness's).
+  const context=await browser.newContext({baseURL:baseURL!});
   try {
     const other=await context.newPage();
     await other.goto('/signin');

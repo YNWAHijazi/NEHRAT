@@ -414,10 +414,12 @@ test.describe('the capability shape', () => {
     // THE VENUE'S FILING MOMENT WAITS: the reassessment-open venue names the
     // amount due and the recording control is disabled with the reason.
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/venues/VN-0011/assessment');
+    // Since the venue rebuild (2026-09-30) the fee is due at the venue's Submit, not on the
+    // assessment: the amount is named there and submission waits on it.
+    await gotoRidingRestarts(page, '/venues/VN-0011/submit');
     await expect(page.locator('[data-region="amount-due"]')).toContainText('Amount due: 50 USD');
-    await expect(page.locator('button:has-text("Record the classification")')).toBeDisabled();
-    await expect(page.locator('body')).toContainText('Registration fee — awaiting payment: 50 USD');
+    await expect(page.locator('[data-region="amount-due"]')).toContainText('Payment must be recorded before you can submit.');
+    await expect(page.locator('[data-region="confirm-and-submit"] button[type="submit"]')).toBeDisabled();
 
     // THE FACILITY CARRIES A STATE, NOT A GATE: the amount due on the record,
     // with the sentence that no readiness obligation waits on it.
@@ -435,11 +437,12 @@ test.describe('the capability shape', () => {
     await page.locator('[data-region="capability-config"] button:has-text("Store the configuration")').click();
     await page.waitForURL(/notice=config/);
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/venues/VN-0011/assessment');
+    await gotoRidingRestarts(page, '/venues/VN-0011/submit');
+    await expect(page.locator('[data-region="confirm-and-submit"]')).toBeVisible();
     await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
     // The fee reason is gone; what may still hold the control is the ordinary
     // completeness rule, which is not this commit's subject.
-    await expect(page.locator('body')).not.toContainText('Registration fee — awaiting payment');
+    await expect(page.locator('body')).not.toContainText('Payment must be recorded before you can submit.');
     await gotoRidingRestarts(page, '/facilities/FC-0014');
     await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
   });

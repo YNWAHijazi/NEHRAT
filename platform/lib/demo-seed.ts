@@ -370,6 +370,9 @@ export function seedDemonstration(db: DatabaseSync): void {
   // until the renewal is decided. Every other certified venue holds its certificate read-only,
   // as a certified venue does until its operator starts the renewal.
   db.prepare(`INSERT OR REPLACE INTO venue_packages (venue_id, status, answers, assessment_version) VALUES ('VN-0028', 'draft', '{}', NULL)`).run();
+  // VN-0011's certificate has expired and its operator has started the renewal: the register
+  // still reads "Certificate expired" until a new one is issued, and the assessment is open.
+  db.prepare(`INSERT OR REPLACE INTO venue_packages (venue_id, status, answers, assessment_version) VALUES ('VN-0011', 'draft', '{}', NULL)`).run();
 
   // ---- Slice 4: the covered facility, in full ----
   // Device dates are chosen to reproduce the reference VALIDITY LEDGER exactly
@@ -582,6 +585,14 @@ export function seedDemonstration(db: DatabaseSync): void {
     'Dr. N. Salameh', 'د. ن. سلامة',
     'n.salameh@example.lb', 'confirmed', 'none', d('2026-07-20'),
   );
+  // The Medical Director's sign-off of the filed plan. Since 2026-09-30 a Level 3 plan counts as
+  // complete only with the confirmed Director's approval of that plan and assessment version;
+  // without it the seeded, already-filed EV-0362 could not even be refiled after a revision.
+  db.prepare(
+    `INSERT INTO event_plan_approvals (event_id, plan_version, assessment_version, invitation_token, approved_at)
+     SELECT 'EV-0362', (SELECT version FROM plans WHERE event_id = 'EV-0362'),
+            (SELECT MAX(version) FROM assessments WHERE event_id = 'EV-0362'), 'demo-director-0362', ?`,
+  ).run(d('2026-07-20'));
 
   // EV-0244 (Level 3, held): the post-event report is owed; the organizer has figures
   // saved but has not signed, and the Director's signature is still open.

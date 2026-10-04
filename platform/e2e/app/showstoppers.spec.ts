@@ -84,7 +84,11 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
     await fileBtn.click();
     await page.waitForURL(/acknowledgment/);
-    await expect(page.locator('body')).toContainText(/MOPH-EV-\d{4}-\d{4}/);
+    // One identifier (owner ruling, 2026-09-29): the receipt carries the record ID the event was
+    // created with; no separate MOPH-EV reference is issued for a new filing.
+    const recordId = /EV-\d{4}/.exec(new URL(page.url()).pathname)?.[0];
+    expect(recordId, 'the receipt names no record ID').toBeTruthy();
+    await expect(page.locator('body')).toContainText(recordId!);
   });
 });
 
@@ -112,7 +116,8 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
     await expect(refile).toBeVisible();
     await refile.click();
     await page.waitForURL(/acknowledgment/);
-    await expect(page.locator('body')).toContainText('MOPH-EV-2026-0362');
+    // One identifier (owner ruling, 2026-09-29): the record ID is what holds across versions.
+    await expect(page.locator('body')).toContainText('EV-0362');
 
     await signInAs(page, 'test_moph');
     await gotoRidingRestarts(page, '/ministry/submissions/EV-0362');
