@@ -14,16 +14,22 @@ for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue
  }
 });
 
+// VN-0032 holds a certificate, and a certified venue is read-only until its renewal starts
+// (2026-10-01). These two tests are about a legacy venue in PREPARATION, so they put VN-0032 in
+// that state explicitly -- a draft package on its existing assessment -- and remove it after.
+const asDraft=(db:DatabaseSync)=>db.prepare("INSERT OR REPLACE INTO venue_packages(venue_id,status,assessment_version) VALUES('VN-0032','draft',(SELECT MAX(version) FROM venue_assessments WHERE venue_id='VN-0032'))").run();
 test('legacy venue details open read-only even when a new contact field is missing',async({page})=>{
- const db=new DatabaseSync('var/release-runtime.db');const v=db.prepare("SELECT responsible_phone FROM venues WHERE id='VN-0032'").get() as {responsible_phone:string};
- db.prepare("UPDATE venues SET responsible_phone='' WHERE id='VN-0032'").run();
+ const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const v=db.prepare("SELECT responsible_phone FROM venues WHERE id='VN-0032'").get() as {responsible_phone:string};
+ asDraft(db);db.prepare("UPDATE venues SET responsible_phone='' WHERE id='VN-0032'").run();
  try{await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/details');
  await expect(page.locator('[data-region=venue-details-read-only]')).toContainText('Missing');await expectAbsent(page,{anchor:'[data-region=venue-details-read-only]',absent:'input[name=contactName], input[name=contactPhone]',because:'saved details read as text until the organizer chooses Edit details'});await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
  await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhone]')).toBeEnabled();
- }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("UPDATE venue_packages SET details_editing=0 WHERE venue_id='VN-0032'").run();db.close();}
+ }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });
 
 test('Level 1 EMS contact is set up once in Medical team and reused in Requirements',async({page})=>{
+ const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);asDraft(db);
+ try{
  await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/requirements');
  const row=page.locator('[data-requirement="7"]');
  await row.locator('summary').first().click();
@@ -42,4 +48,5 @@ test('Level 1 EMS contact is set up once in Medical team and reused in Requireme
  await row.locator('summary').first().click();
  await expect(row.locator('form,input,textarea')).toHaveCount(0);
  await expect(row.locator('dd')).toHaveCount(0);
+ }finally{db.prepare("DELETE FROM venue_contributions WHERE venue_id='VN-0032'").run();db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });

@@ -95,6 +95,13 @@ test('Director and EMS share a guided plan; organizer can only view it', async (
   await expect(page.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: /^Save the plan/ }).click();
   await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
+  // Every saved edit is a new plan version, and the Director's sign-off belongs to one version
+  // (2026-09-30). Sign the restored plan again, or the later filing tests find it unsigned.
+  await page.reload();
+  const approval = page.locator('[data-region="plan-approval"]');
+  await approval.getByRole('checkbox').check();
+  await approval.getByRole('button', { name: 'Approve medical plan', exact: true }).click();
+  await expect(page.locator('[data-region="plan-approval"]')).toContainText('Signed off by');
   await signInAs(emsPage,'test_organizer');
   await gotoRidingRestarts(emsPage,'/events/EV-0362/plan');
   await expect(emsPage.locator('[data-region=plan-readonly]')).toBeVisible();

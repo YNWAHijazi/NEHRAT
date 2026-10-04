@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// The database the server under test uses, for specs that set up or read fixtures directly.
+process.env['E2E_DATABASE_PATH'] = 'var/release-runtime.db';
+
 /** Run after test:release has built and seeded its disposable, isolated database. */
 export default defineConfig({
   testDir: 'e2e/app',

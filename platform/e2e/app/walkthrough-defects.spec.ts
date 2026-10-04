@@ -116,7 +116,8 @@ test.describe('5 — the record stops asking for what is already done', () => {
 
     const cert = page.locator('[data-region="certificate"]');
     await expect(cert).toBeVisible();
-    await expect(cert).toContainText('MOPH-EV-2026-0362');
+    // One identifier (owner ruling, 2026-09-29): the certificate carries the record ID.
+    await expect(cert).toContainText('EV-0362');
     // It states what it is NOT: a determination is not authorization of the event.
     await expect(cert).toContainText('It is not permission to hold the event.');
     await expect(cert).toContainText('permits required by the relevant authorities under Lebanese law');
