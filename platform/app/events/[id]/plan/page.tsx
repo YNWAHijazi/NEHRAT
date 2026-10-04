@@ -1,3 +1,5 @@
+import { planIsComplete } from '../../../../lib/rules';
+import { eventPlanApproval } from '../../../../lib/plan-approval';
 import {EventPlanApproval} from '../../../../components/EventPlanApproval';
 import { EventWorkspaceNav } from '../../../../components/EventWorkspaceNav';
 import { SharedPlanSync } from '../../../../components/SharedPlanSync';
@@ -47,6 +49,7 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const plan = fullPlan;
   const requirement = planRequirement(level, addedMeasuresFor(id).some(m => m.catalogKey === 'plan' && !m.clearedAt));
   const requiredSections = planSectionsForLevel(level);
+  const planWritten = Boolean(level && level >= 2 && plan && planIsComplete(plan, level as Level));
   const facility = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   // What the reference block may point at, read from the facility record -- a
   // reference, never a copy. The shortfalls derive in lib/rules from these facts
@@ -74,7 +77,14 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
           <L en="Event health and medical plan" ar="خطة التأهب الصحي والطبي للفعالية" />
         </h1>
         {access.editor === 'organizer' && <EventWorkspaceNav eventId={id} active="plan" />}
-        <p><L en={requirement === 'required' ? 'Required' : requirement === 'recommended' ? 'Recommended — not required to submit' : 'No medical plan required at Level 1'} ar={requirement === 'required' ? 'مطلوبة' : requirement === 'recommended' ? 'موصى بها — ليست شرطاً لتقديم الملف' : 'لا تُطلب خطة طبية في المستوى 1'} /></p>
+        {/* Once the plan is written the page says so, rather than "Required" for ever. */}
+        {planWritten && (level !== 3 || eventPlanApproval(id)) ? (
+          <p><L en="Complete" ar="مكتملة" /></p>
+        ) : planWritten ? (
+          <p><L en="Written — awaiting the Medical Director's sign-off" ar="مكتوبة — بانتظار اعتماد المدير الطبي" /></p>
+        ) : (
+          <p><L en={requirement === 'required' ? 'Required' : requirement === 'recommended' ? 'Recommended — not required to submit' : 'No medical plan required at Level 1'} ar={requirement === 'required' ? 'مطلوبة' : requirement === 'recommended' ? 'موصى بها — ليست شرطاً لتقديم الملف' : 'لا تُطلب خطة طبية في المستوى 1'} /></p>
+        )}
         {level >= 2 ? <div className="secondary-help"><InfoNote><L en="The Medical Director or EMS agency completes the plan. The organizer submits the package." ar="يستكمل المدير الطبي أو جهة الإسعاف الخطة، ويقدّم المنظّم الملف." /></InfoNote></div> : null}
         {level===3?<EventPlanApproval id={id} ownerId={ownerId} canApprove={access.editor==='director'&&access.canEdit}/>:null}
         {access.canEdit ? <PlanForm

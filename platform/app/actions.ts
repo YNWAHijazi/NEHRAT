@@ -571,7 +571,9 @@ export async function attachDocumentAction(
   // Constrained to this event's own paths -- a returnTo taken from a form is
   // attacker-controlled text, and an open redirect is not worth the convenience.
   const asked = String(formData.get('returnTo') ?? '');
-  const returnTo = /^\/events\/[A-Za-z0-9-]+\/[a-z-]+$/.test(asked) && asked.startsWith(`/events/${eventId}/`)
+  // The Director uploads the deployment map from their own page, which is the event's root.
+  const directorPage = asked === `/events/${eventId}`;
+  const returnTo = directorPage || (/^\/events\/[A-Za-z0-9-]+\/[a-z-]+$/.test(asked) && asked.startsWith(`/events/${eventId}/`))
     ? asked
     : `/events/${eventId}/requirements`;
   if (!docKey || !(file instanceof File)) redirect(returnTo);
@@ -596,7 +598,7 @@ export async function attachDocumentAction(
     .run(eventId, docKey, file.name.trim(), file.type, bytes.length, bytes);
   revalidatePath(`/events/${eventId}/requirements`);
   revalidatePath(returnTo);
-  redirect(returnTo);
+  redirect(directorPage ? `${returnTo}?notice=uploaded` : returnTo);
 }
 
 /**

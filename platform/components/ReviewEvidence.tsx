@@ -66,6 +66,6 @@ export function ReviewMedicalAnswers({ evidence, level }: { evidence: Evidence; 
           {DECLARATION_ITEMS.map((item, i) => <p key={i}><L en={item.en} ar={item.ar} /> — <L en={p.declarationItems[i] ? 'Confirmed by agency' : 'Not confirmed'} ar={p.declarationItems[i] ? 'أكّدته الجهة' : 'غير مؤكّد'} /></p>)}</>}
       </div>}
     </details>)}
-    {level === 3 && <details data-region="review-director-arrangements" style={{ paddingBlockStart: 16, borderBlockStart: '1px solid var(--line)' }}><summary><L en="Medical Director’s arrangements" ar="ترتيبات المدير الطبي" /></summary><dl>{ROLES_CONTENT.director.govSections.map(s => <div key={s.key} style={{ marginBlock: 16 }}><dt style={{ fontWeight: 600 }}><L en={s.en} ar={s.ar} /></dt><dd style={answer}><Value value={evidence.governance[s.key]} /></dd></div>)}</dl></details>}
+    {level === 3 && <details data-region="review-director-arrangements" style={{ paddingBlockStart: 16, borderBlockStart: '1px solid var(--line)' }}><summary><L en="Medical Director’s arrangements" ar="ترتيبات المدير الطبي" /></summary><dl>{ROLES_CONTENT.director.govSections.map(s => <div key={s.key} style={{ marginBlock: 16 }}><dt style={{ fontWeight: 600 }}><L en={'readerEn' in s ? s.readerEn : s.en} ar={'readerAr' in s ? s.readerAr : s.ar} /></dt><dd style={answer}><Value value={evidence.governance[s.key]} /></dd></div>)}</dl></details>}
   </section>;
 }

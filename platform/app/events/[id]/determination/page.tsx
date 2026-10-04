@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { PrintButton } from '../../../../components/PrintButton';
+import { MinistryMasthead } from '../../../../components/MinistryMasthead';
 import { currentAccount } from '../../../../lib/auth';
 import { eventFor, standingDeterminationFor, assessmentsFor } from '../../../../lib/queries';
 import { MINISTRY_CONTENT } from '../../../../lib/rules';
@@ -65,6 +66,7 @@ export default async function DeterminationCertificatePage({
     <>
       <GovernmentBand />
       <main data-pad="" data-region="certificate" style={{ maxWidth: 820, marginInline: 'auto', padding: '48px 32px 120px' }}>
+        <div style={{ marginBlockEnd: 28 }}><MinistryMasthead /></div>
         <h1 data-sec-h1="" style={{ margin: '0 0 8px', fontSize: 30, fontWeight: 600, letterSpacing: '-.03em' }}>
           <L en={C.titleEn} ar={C.titleAr} />
          <InfoNote><L en={C.introEn} ar={C.introAr} /></InfoNote>

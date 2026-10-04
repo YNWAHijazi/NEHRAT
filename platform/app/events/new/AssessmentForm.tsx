@@ -184,7 +184,9 @@ export function AssessmentForm({
   const isRunning = disciplines.includes('running');
   const isNightclub = chosenType?.nightclub === true;
 
-  const missingLabels: { en: string; ar: string }[] = derivation.missingInputs.map((k) => {
+  // The capacity field appears only once a nightclub type is chosen; until a type is chosen,
+  // "Event type" is the thing to fill in, not a field that is not on the screen yet.
+  const missingLabels: { en: string; ar: string }[] = derivation.missingInputs.filter((k) => !(k === 'venueLicensedCapacity' && !isNightclub)).map((k) => {
     if (k === 'expectedMaxSimultaneousAttendance')
       return reassess
         ? { en: 'Most people at the same time', ar: 'أكبر عدد من الحاضرين في الوقت نفسه' }

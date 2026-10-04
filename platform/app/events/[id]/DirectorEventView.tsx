@@ -71,6 +71,11 @@ export function DirectorEventView({
               )}
             </div>
           ) : null}
+          {notice === 'uploaded' ? (
+            <div role="status" style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="Medical deployment map uploaded. The organizer and the Ministry can now open it." ar="رُفعت خريطة الانتشار الطبي. ويمكن للمنظّم والوزارة فتحها الآن." />
+            </div>
+          ) : null}
           {notice === 'saved' ? (
             <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
               <L en="Saved. Your text now shows in the organizer's plan." ar="حُفظ. ويظهر نصكم الآن في خطة المنظّم." />
@@ -106,7 +111,7 @@ export function DirectorEventView({
           {confirmed ? (
             <>
               <div data-region="director-plan"><MedicalPlanTask eventId={invitation.eventId} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} /></div>
-              {invitation.eventLevel === 3 ? <section style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}><h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>{hasMap ? <a href={`/api/documents/${invitation.eventId}/deploymentMap`} target="_blank" rel="noreferrer"><L en="View uploaded map" ar="عرض الخريطة المرفوعة" /></a> : null}<form action={attachDocumentAction.bind(null, invitation.eventId)}><input type="hidden" name="docKey" value="deploymentMap" /><input type="hidden" name="returnTo" value={`/events/${invitation.eventId}/plan`} /><UploadInput name="file" required accept={acceptAttribute()} /><button type="submit"><L en="Upload map" ar="رفع الخريطة" /></button></form></section> : null}
+              {invitation.eventLevel === 3 ? <section style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}><h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>{hasMap ? <a href={`/api/documents/${invitation.eventId}/deploymentMap`} target="_blank" rel="noreferrer"><L en="View uploaded map" ar="عرض الخريطة المرفوعة" /></a> : null}<form action={attachDocumentAction.bind(null, invitation.eventId)}><input type="hidden" name="docKey" value="deploymentMap" /><input type="hidden" name="returnTo" value={`/events/${invitation.eventId}`} /><div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 12 }}><UploadInput name="file" required accept={acceptAttribute()} /><button type="submit" style={{ height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, background: 'var(--bg)', color: 'var(--ink)', fontSize: 14, cursor: 'pointer' }}><L en={hasMap ? 'Replace map' : 'Upload map'} ar={hasMap ? 'استبدال الخريطة' : 'رفع الخريطة'} /></button></div></form></section> : null}
               {invitation.eventLevel === 3 ? <><form action={saveGovernanceAction.bind(null, invitation.eventId)}>
                 <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
                   {content.govSections.map((g) => {

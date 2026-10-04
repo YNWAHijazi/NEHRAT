@@ -69,7 +69,7 @@ export default async function MedicalTeamPage({ params, searchParams }: { params
         {sharedDocumentsFor(p.token).map(d => <div key={d.id} style={{ paddingBlock: 12, borderBlockStart: '1px solid var(--line)' }}><strong><L en={d.nameEn} ar={d.nameAr} /></strong>{d.hasFile ? <DocumentViewer href={`/api/shared-documents/${d.id}`} hasFile contentType={d.contentType} label={d.nameEn} /> : <p><L en="Pending" ar="قيد الانتظار" /></p>}</div>)}
       </section>)}
       {tab === 'director' && level === 3 && <section style={card} data-region="team-governance"><h2 style={{ fontSize: 20 }}><L en="Medical arrangements" ar="الترتيبات الطبية" /></h2>
-        {ROLES_CONTENT.director.govSections.map(s => <details key={s.key} style={{ paddingBlock: 12, borderBlockEnd: '1px solid var(--line)' }}><summary><L en={s.en} ar={s.ar} /></summary><p style={{ whiteSpace: 'pre-wrap' }}>{governance[s.key] || <L en="Pending" ar="قيد الانتظار" />}</p></details>)}
+        {ROLES_CONTENT.director.govSections.map(s => <details key={s.key} style={{ paddingBlock: 12, borderBlockEnd: '1px solid var(--line)' }}><summary><L en={'readerEn' in s ? s.readerEn : s.en} ar={'readerAr' in s ? s.readerAr : s.ar} /></summary><p style={{ whiteSpace: 'pre-wrap' }}>{governance[s.key] || <L en="Pending" ar="قيد الانتظار" />}</p></details>)}
         <h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>
         {deployment?.hasFile ? <DocumentViewer href={`/api/documents/${id}/deploymentMap`} hasFile contentType={deployment.contentType} label="Medical deployment map" /> : <p><L en="Pending" ar="قيد الانتظار" /></p>}
       </section>}

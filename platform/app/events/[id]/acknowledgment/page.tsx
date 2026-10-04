@@ -16,6 +16,7 @@ import {
 } from '../../../../lib/queries';
 import { catalogueEntry, documentsForLevel, organizerEventState, type Level } from '../../../../lib/rules';
 import { PrintBar } from './PrintBar';
+import { MinistryMasthead } from '../../../../components/MinistryMasthead';
 
 const upLabel: React.CSSProperties = {
   fontSize: '11.5px',
@@ -91,19 +92,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
           </div>
         ) : (
           <div data-wallcard="" style={{ maxWidth: 820, marginBlock: 34, padding: '57px 61px', background: 'var(--surface2)', borderRadius: 4, boxShadow: '0 1px 2px rgba(0,0,0,.04)' }}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', paddingBlockEnd: 26, borderBlockEnd: '2px solid var(--brand)' }}>
-              <span style={{ display: 'grid', placeItems: 'center', width: 44, height: 44, border: '1.25px solid var(--brand)', borderRadius: '50%', flex: 'none' }}>
-                <span style={{ display: 'block', width: 17, height: 17, background: 'var(--brand)', clipPath: 'polygon(43% 0,57% 0,57% 43%,100% 43%,100% 57%,57% 57%,57% 100%,43% 100%,43% 57%,0 57%,0 43%,43% 43%)' }} />
-              </span>
-              <span>
-                <span style={{ display: 'block', fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
-                  <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />
-                </span>
-                <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 2 }}>
-                  <L en="Republic of Lebanon · Event Health Readiness" ar="الجمهورية اللبنانية · التأهب الصحي للفعاليات" />
-                </span>
-              </span>
-            </div>
+            <MinistryMasthead />
 
             <div style={{ paddingBlock: 30, borderBlockEnd: '1px solid var(--line)' }}>
               <div style={{ ...upLabel, marginBlockEnd: 8 }}>
