@@ -196,6 +196,38 @@ export function VenueAssessmentForm({
         )}
       </div>
 
+      {/* Restored (removed in the 2026-09-30 rebuild while its data stayed wired): the operator's
+          validity window and the five changes that require a new assessment before it ends. */}
+      <div data-region="validity" style={{ padding: 32, border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, marginBlockEnd: 26 }}>
+          <div>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
+              <L en="Effective from" ar="ساري اعتباراً من" />
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.03em', fontVariantNumeric: 'tabular-nums' }}>{effectivePreview}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
+              <L en="Valid through" ar="صالح حتى" />
+            </div>
+            <div style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-.03em', fontVariantNumeric: 'tabular-nums' }}>{validPreview}</div>
+          </div>
+        </div>
+        <div style={{ fontSize: '14.5px', color: 'var(--muted)', marginBlockEnd: 12 }}>
+          <L en="A new assessment is required before that date if any of these change" ar="يلزم تقييم جديد قبل ذلك التاريخ إذا تغيّر أي مما يلي" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {triggers.map((t) => (
+            <div key={t.en} style={{ display: 'flex', gap: 12, fontSize: 16, lineHeight: 1.5 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--brand)', marginBlockStart: 9, flex: 'none' }} />
+              <span>
+                <L en={t.en} ar={t.ar} />
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div data-region="declaration" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Operator declaration" ar="إقرار الجهة المشغّلة" />

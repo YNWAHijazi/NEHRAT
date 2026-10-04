@@ -365,6 +365,11 @@ export function seedDemonstration(db: DatabaseSync): void {
     JSON.stringify({ storedNote: 'recomputed at read' }),
     d('2025-09-30'), d('2026-09-30'), 'R. Haddad', 'Venue operations manager', d('2025-09-30'),
   );
+  // VN-0028's renewal has been started: inside its reassessment window, the annual assessment
+  // is open (the reference's "Annual venue assessment" tab) while its certificate stays valid
+  // until the renewal is decided. Every other certified venue holds its certificate read-only,
+  // as a certified venue does until its operator starts the renewal.
+  db.prepare(`INSERT OR REPLACE INTO venue_packages (venue_id, status, answers, assessment_version) VALUES ('VN-0028', 'draft', '{}', NULL)`).run();
 
   // ---- Slice 4: the covered facility, in full ----
   // Device dates are chosen to reproduce the reference VALIDITY LEDGER exactly

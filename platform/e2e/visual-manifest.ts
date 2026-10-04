@@ -264,7 +264,11 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Health and medical plan',
     builtRoute: '/events/EV-0418/plan',
-    signInAs: 'test_organizer',
+    // The plan's writer, not the organizer: since the owner's ruling of 2026-09-27 a confirmed
+    // EMS agency or the Medical Director completes the plan and the organizer reads it, so the
+    // sixteen-item form the reference shows is on the writer's screen. test_ems is the confirmed
+    // agency on EV-0418.
+    signInAs: 'test_ems',
     regions: [
       {
         name: 'sections',
@@ -343,10 +347,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     regions: [
       {
         name: 'obligations',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Separate obligation', container: 'display: grid' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="obligations"]',
-        note: 'The 24-hour notification and the 7-day report, side by side and never merged. Held at 2%.',
+        note: 'Expected divergent by the owner\'s language simplification (2026-09-27, commit 3d7bbb9): the two cards keep their shape -- the 24-hour notification and the 7-day report, side by side and never merged -- but both bodies were reworded in plain language, and the report card names this event\'s own requirement. Was compared at 2%; the wording, not drift, now measures 3.3%.',
       },
       {
         name: 'counts',
@@ -418,7 +421,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'validity-panel',
         mode: 'compare',
         reference: { strategy: 'containerOfText', text: 'A new assessment is required before that date', container: 'border-radius: 16px' },
-        builtSelector: '[data-region="venue-workspace-header"]',
+        builtSelector: '[data-region="validity"]',
         note: 'Effective from / valid through and the five reassessment triggers. Both sides compute from the review clock, so the dates agree. Held at 2%.',
       },
       {
@@ -822,11 +825,9 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'non-determinative',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'Verification informs', container: 'border-radius: 12px' },
+        mode: 'expectedDivergent',
         builtSelector: '[data-region="non-determinative"]',
-        threshold: 0.03,
-        note: 'Verification informs review and never decides it. Held at 3%: the second-sweep full run measured 2.11% with the paragraph verified identical word for word (the diff highlights one line’s rasterization) -- a changed word measures far above 3%, so the vocabulary ratchet still bites.',
+        note: 'Expected divergent by the owner\'s language simplification (2026-09-27, commit 3d7bbb9): the paragraph now reads "The Ministry makes the final decision, even if the licence check is still pending." -- the same rule (verification informs, never decides) in one plain sentence. Was compared at 3% against the reference\'s two-sentence wording.',
       },
     ],
   },
