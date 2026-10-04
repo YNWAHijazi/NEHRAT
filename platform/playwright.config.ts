@@ -26,7 +26,7 @@ const PORT = Number(process.env['E2E_PORT'] ?? 3000);
 const BASE_URL = `http://localhost:${PORT}`;
 // The database the server under test uses, for specs that set up or read fixtures directly.
 // The release harness sets its own (playwright.release.config.ts).
-process.env['E2E_DATABASE_PATH'] = 'var/e2e.db';
+process.env['E2E_DATABASE_PATH'] = join(HERE, 'var/e2e.db');
 
 export default defineConfig({
   // Unbypassable free-space check: see scripts/disk-check.mjs for why preflight

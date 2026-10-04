@@ -1,7 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // The database the server under test uses, for specs that set up or read fixtures directly.
-process.env['E2E_DATABASE_PATH'] = 'var/release-runtime.db';
+process.env['E2E_DATABASE_PATH'] = join(dirname(fileURLToPath(import.meta.url)), 'var/release-runtime.db');
 
 /** Run after test:release has built and seeded its disposable, isolated database. */
 export default defineConfig({
