@@ -526,7 +526,7 @@ export function seedDemonstration(db: DatabaseSync): void {
     JSON.stringify([2, 2, 2, 1, 2, 1, 2, 1, 2]),
     JSON.stringify({
       expectedMaxSimultaneousAttendance: 18000,
-      eventDisciplines: ['music'],
+      eventDisciplines: [],
       courseDistanceKm: null,
       venueLicensedCapacity: 20000,
       venueIsNightclubOrDanceVenue: false,

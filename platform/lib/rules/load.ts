@@ -71,6 +71,10 @@ export const DOMAIN_COUNT: number = domainsJson.domainCount;
 
 /** Which issue of the instrument scores assessments; stamped onto every assessment row. */
 export const NEHRAT_TOOL_VERSION: string = domainsJson.toolVersion;
+/** The tool version as the Arabic screen names it; a stored version not in the data reads as stored. */
+export function toolVersionAr(version: string): string {
+  return version === domainsJson.toolVersion ? domainsJson.toolVersionAr : version;
+}
 
 /**
  * Annex A Part F -- the organizer declaration, verbatim from each issue. The

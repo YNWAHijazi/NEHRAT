@@ -63,7 +63,7 @@ export default async function ReviewQueuePage({searchParams}:{searchParams:Promi
             </div>,
             <div key={`${r.eventId}-b`} style={{ background: 'var(--bg)', padding: '14px 16px', fontSize: 14 }}>
               {r.level !== null ? (
-                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, borderInlineStart: `2px solid var(--l${r.level})`, background: `var(--l${r.level}s)` }}>
+                <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, borderInlineStart: `2px solid var(--l${r.level})`, background: `var(--l${r.level}s)`, whiteSpace: 'nowrap' }}>
                   <L en={`Level ${r.level}`} ar={`المستوى ${r.level}`} />
                 </span>
               ) : (

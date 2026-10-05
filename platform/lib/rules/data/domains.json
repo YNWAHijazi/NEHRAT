@@ -222,6 +222,7 @@
     }
   ],
   "toolVersion": "NEHRAT v1.0 (July 2026 issue)",
+  "toolVersionAr": "NEHRAT الإصدار 1.0 (إصدار تموز 2026)",
   "partF": {
     "$comment": "The assessment tool's Part F, from the two issues under the ENGLISH-GOVERNS ruling (partner, 2026-09-03): the rendered Arabic carries the Arabic issue's wording for the limbs the English issue also has, and nothing more. The Arabic issue's statement adds two qualifiers -- recorded in setAsideAr below, never rendered. The signature line is one of the six surfaces held by open decision #9 (what a signature is): the statement and the certifying fields are captured, the signature control is deliberately not invented here.",
     "titleEn": "Part F — Organizer Declaration",

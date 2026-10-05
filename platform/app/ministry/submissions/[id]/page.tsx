@@ -34,6 +34,7 @@ import {
   bilingualMap,
   MINISTRY_CONTENT,
   NEHRAT_TOOL_VERSION,
+  toolVersionAr,
   attestationEmptyBody,
   attestationRows,
   attestationSummary,
@@ -220,7 +221,8 @@ export default async function SubmissionReviewPage({
             )}
           </div>
         </div>
-        {can(account.role, 'assignReview') && review.state !== 'progress' ? (
+        {/* Nothing to take once an outcome stands; a revision is recorded through its own panel. */}
+        {can(account.role, 'assignReview') && review.state !== 'progress' && !standing ? (
           <form action={assignReviewAction.bind(null, id)}>
             <input type="hidden" name="state" value="progress" />
             <button type="submit" style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', cursor: 'pointer' }}>
@@ -425,7 +427,7 @@ export default async function SubmissionReviewPage({
               </h2>
               {assessment ? (
                 <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
-                  <L en={`${AA.versionLabelEn} ${assessment.toolVersion}`} ar={`${AA.versionLabelAr} ${assessment.toolVersion}`} />
+                  <L en={`${AA.versionLabelEn} ${assessment.toolVersion}`} ar={`${AA.versionLabelAr} ${toolVersionAr(assessment.toolVersion)}`} />
                 </span>
               ) : null}
             </div>
@@ -489,7 +491,9 @@ export default async function SubmissionReviewPage({
                           ? raw.join(', ')
                           : typeof raw === 'boolean'
                             ? null
-                            : String(raw);
+                            : typeof raw === 'number'
+                              ? raw.toLocaleString('en-US')
+                              : String(raw);
                     return (
                       <div key={key} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <span style={{ fontSize: '13.5px' }}>
@@ -541,8 +545,8 @@ export default async function SubmissionReviewPage({
               en={requiredPlan === 'notRequired' ? 'Not required for this level.' : requiredPlan === 'recommended' ? 'Recommended — not required to submit.' : 'Required — completed by the Medical Director or EMS agency.'}
               ar={requiredPlan === 'notRequired' ? 'غير مطلوبة لهذا المستوى.' : requiredPlan === 'recommended' ? 'موصى بها — ليست شرطاً للتقديم.' : 'مطلوبة — يعدّها المدير الطبي أو جهة الإسعاف.'}
             /></p>
-            {review.level===3&&eventPlanApproval(id)?<p><L en="Medical Director approval" ar="اعتماد المدير الطبي"/>: {eventPlanApproval(id)!.display_name} · {eventPlanApproval(id)!.approved_at}</p>:null}
-            {plan && <p style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Latest saved plan" ar="آخر خطة محفوظة" /> · {plan.updatedAt}{evidence?.planEditor ? <> · {evidence.planEditor.name}</> : null}</p>}
+            {review.level===3&&eventPlanApproval(id)?<p><L en="Medical Director sign-off" ar="اعتماد المدير الطبي"/>: {eventPlanApproval(id)!.display_name} · {eventPlanApproval(id)!.approved_at}</p>:null}
+            {plan && <p style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Latest saved plan" ar="آخر خطة محفوظة" /> · <bdi dir="ltr">{plan.updatedAt.slice(0, 16)}</bdi>{evidence?.planEditor ? <> · {evidence.planEditor.name}</> : null}</p>}
             {evidence?.planChangedSinceFiling && <p data-region="plan-changed-after-filing" style={{ background: 'var(--accent-soft)', padding: 12, borderRadius: 8 }}><L en="This plan changed after the application was submitted. Review the updated answers." ar="تغيّرت هذه الخطة بعد تقديم الطلب. راجعوا الإجابات المحدّثة." /></p>}
             {!plan ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
@@ -629,7 +633,7 @@ export default async function SubmissionReviewPage({
               <L en={AP.titleEn} ar={AP.titleAr} />
             </h2>
             <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
-              <L en={`${AP.versionLabelEn} ${NEHRAT_TOOL_VERSION}`} ar={`${AP.versionLabelAr} ${NEHRAT_TOOL_VERSION}`} />
+              <L en={`${AP.versionLabelEn} ${NEHRAT_TOOL_VERSION}`} ar={`${AP.versionLabelAr} ${toolVersionAr(NEHRAT_TOOL_VERSION)}`} />
             </span>
           </div>
           <div data-region="att-intro" className="secondary-help"><InfoNote><L en={AP.notAnOutcomeEn} ar={AP.notAnOutcomeAr} /></InfoNote></div>

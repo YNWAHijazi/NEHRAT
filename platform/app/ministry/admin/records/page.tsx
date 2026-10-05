@@ -126,10 +126,12 @@ export default async function AdminRecordsPage({
         ) : null}
         {records.map((r) => {
           const def = outcomes.find((o) => o.key === r.outcome);
+          const RowTag = (r.filed ? Link : 'div') as React.ElementType;
           return (
             <div key={r.id}>
-            <Link
-              href={`/ministry/admin/records/${r.id}`}
+            {/* Only a filed record has a file to open; an unfiled one is listed, not linked. */}
+            <RowTag
+              {...(r.filed ? { href: `/ministry/admin/records/${r.id}` } : { 'data-unfiled': '' })}
               data-stack=""
               style={{ paddingBlock: '17px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${r.filed ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 12, display: 'grid', gridTemplateColumns: 'minmax(200px,1.5fr) 1fr 1.2fr auto', gap: 18, alignItems: 'center', color: 'var(--ink)' }}
             >
@@ -164,7 +166,7 @@ export default async function AdminRecordsPage({
               <div style={{ fontSize: 20, fontWeight: 600, color: r.level ? `var(--l${r.level})` : 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
                 {r.level ?? '—'}
               </div>
-            </Link>
+            </RowTag>
             {/* Archive (partner review): only a CONCLUDED event offers it — ended on
                 the Beirut clock. An archived row says so; a live one shows nothing
                 here (absent, not greyed: archiving a live obligation never applies).

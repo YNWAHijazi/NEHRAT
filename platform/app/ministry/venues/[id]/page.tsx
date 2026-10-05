@@ -135,7 +135,7 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
                 ))}
                 {r.n === 2 && s.approval ? (
                   <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--muted)' }}>
-                    <L en="Medical Director approval" ar="اعتمدها المدير الطبي" />: <bdi>{s.approval.display_name}</bdi> · {stamp(s.approval.approved_at)}
+                    <L en="Medical Director sign-off" ar="اعتمدها المدير الطبي" />: <bdi>{s.approval.display_name}</bdi> · {stamp(s.approval.approved_at)}
                   </p>
                 ) : null}
                 {rowFiles.map((f) => (

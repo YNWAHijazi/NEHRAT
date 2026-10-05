@@ -1,4 +1,5 @@
 import { MinistryServices } from './MinistryServices';
+import { can } from '../lib/rules/ministry';
 /**
  * The Ministry console's chrome: the government band, the console header naming
  * the signed-in role, and the content column. Navigation is the dashboard's
@@ -31,7 +32,9 @@ export function MinistryShell({
       <Header account={account} organization={null} unreadCount={unreadCountFor(account.id)}
         showBack={!!back} {...(back ? { back } : {})} subtitle={{ en: consoleEn, ar: consoleAr }} wide />
       <main data-pad="" style={{ maxWidth: 1320, marginInline: 'auto', padding: '32px 32px 90px' }}>
-        <MinistryServices />
+        {/* The Ministry's service tabs lead to the review console; a role without it (the platform
+            owner) would land on "There is no record here" from every one of them. */}
+        {can(account.role, 'viewMinistry') ? <MinistryServices /> : null}
         {children}
       </main>
     </>

@@ -99,7 +99,7 @@ export default async function AdminActivityPage() {
                 ) : (
                   r.subject
                 )}
-                {r.detail ? <span style={{ color: 'var(--muted)' }}> · {r.detail}</span> : null}
+                {r.detail.en ? <span style={{ color: 'var(--muted)' }}> · <L en={r.detail.en} ar={r.detail.ar} /></span> : null}
               </span>
               <span style={{ flex: '0 0 auto', fontSize: '12.5px', color: 'var(--muted)' }}>{r.actor}</span>
             </div>

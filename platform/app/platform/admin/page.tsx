@@ -66,11 +66,16 @@ export default async function MasterAdminPage({
         {[
           { en: 'Users', ar: 'المستخدمون', href: '/ministry/admin/users' },
           { en: 'Events', ar: 'الفعاليات', href: '/ministry/admin/records' },
-          { en: 'Venues', ar: 'المواقع', href: '/ministry/admin/records' },
-          { en: 'Facilities', ar: 'المرافق', href: '/ministry/admin/records' },
-        ].map((item, index) => <a key={item.en} href={item.href} style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>
-          <div style={{ fontSize: 28 }}>{totals[index]}</div><L en={item.en} ar={item.ar} />
-        </a>)}
+          // The records list holds events only; the facilities have their registry, and venues have
+          // no administration page of their own -- a count, not a link that opens the wrong list.
+          { en: 'Venues', ar: 'المواقع', href: null },
+          { en: 'Facilities', ar: 'المرافق', href: '/ministry/admin/registry' },
+        ].map((item, index) => {
+          const tile = <><div style={{ fontSize: 28 }}>{totals[index]}</div><L en={item.en} ar={item.ar} /></>;
+          return item.href
+            ? <a key={item.en} href={item.href} style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>{tile}</a>
+            : <div key={item.en} style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, color: 'var(--ink)' }}>{tile}</div>;
+        })}
       </div>
       <section data-region="email-status" style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 24 }}>
         <h2 style={{ marginBlockStart: 0, fontSize: 18 }}><L en="Invitation email" ar="بريد الدعوات" /></h2>

@@ -12,7 +12,11 @@ const states = { nominated: ['Invitation pending', 'الدعوة قيد الان
 function Value({ value }: { value: string | number | null | undefined }) {
   if (value === null || value === undefined || String(value).trim() === '') return <L en="Not provided" ar="غير مقدّم" />;
   // Counts read with separators (25,000), as they do on the invitation and the organizer's screens.
-  return <>{typeof value === 'number' ? value.toLocaleString('en-US') : value}</>;
+  if (typeof value === 'number') return <>{value.toLocaleString('en-US')}</>;
+  // A phone number, a date or a time has no strong direction of its own; in Arabic it would be
+  // laid out right to left and read reversed ("000 000 1 961+"). Pin it left to right.
+  if (/^[+\d][\d\s:\-—+()/]*$/.test(String(value).trim())) return <bdi dir="ltr">{value}</bdi>;
+  return <>{value}</>;
 }
 
 export function ReviewFileSummary({ evidence }: { evidence: Evidence }) {

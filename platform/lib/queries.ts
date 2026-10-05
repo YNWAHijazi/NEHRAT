@@ -22,6 +22,7 @@ import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
 import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, postEventReportRequired, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
+import { MINISTRY_CONTENT } from './rules/ministry';
 import { NOMINEE_DOCUMENT_KEYS, nomineeMayReadSection } from './rules/nomination-access';
 import { PLAN_SECTIONS } from './rules/content';
 import type { AccountHoldings } from './rules/accounts';
@@ -2584,8 +2585,36 @@ export interface ActivityRow {
   kind: string;
   actor: string;
   subject: string;
-  detail: string;
+  /** What happened, in both languages -- never a stored key (an outcome, a role, a status). */
+  detail: { en: string; ar: string };
   href: string | null;
+}
+
+const ORGANIZATION_STATUS: Record<string, { en: string; ar: string }> = {
+  none: { en: 'Not registered', ar: 'غير مسجّلة' },
+  pending: { en: 'Registration pending', ar: 'التسجيل قيد المراجعة' },
+  recorded: { en: 'Registration recorded', ar: 'سُجّل التسجيل' },
+  returned: { en: 'Registration returned', ar: 'أُعيد التسجيل' },
+};
+
+/** The activity log's detail column, from the key a row carries to words in both languages. */
+function activityDetail(kind: string, raw: string | null, extraAr: string | null): { en: string; ar: string } {
+  const value = raw ?? '';
+  if (kind === 'determination') {
+    const o = MINISTRY_CONTENT.outcomes.find((x) => x.key === value);
+    return o ? { en: o.en, ar: o.ar } : { en: value, ar: value };
+  }
+  if (kind === 'filed') return { en: 'Submission filed', ar: 'قُدّم الطلب' };
+  if (kind === 'inspection') return { en: value, ar: extraAr || value };
+  if (kind === 'account') {
+    const r = (MINISTRY_CONTENT.roleLabels as Record<string, { en: string; ar: string } | string>)[value];
+    return r && typeof r === 'object' ? { en: `Account issued · ${r.en}`, ar: `صدر حساب · ${r.ar}` } : { en: value, ar: value };
+  }
+  if (kind === 'organization') return ORGANIZATION_STATUS[value] ?? { en: value, ar: value };
+  if (kind === 'coverage') return { en: `No longer covered — ${value}`, ar: `لم تعد مشمولة — ${value}` };
+  // The capability page's own words for the same act.
+  if (kind === 'capability') return value === 'on' ? { en: 'Turned on', ar: 'شُغِّلت' } : { en: 'Turned off', ar: 'أُطفئت' };
+  return { en: value, ar: value };
 }
 
 export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRow[] {
@@ -2594,39 +2623,39 @@ export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRo
     .prepare(
       `SELECT * FROM (
          SELECT dt.recorded_at AS at, 'determination' AS kind, dt.recorded_by AS actor,
-                e.id AS subject, dt.outcome AS detail,
+                e.id AS subject, dt.outcome AS detail, NULL AS detail_ar,
                 '/ministry/submissions/' || e.id AS href
            FROM determinations dt JOIN events e ON e.id = dt.event_id WHERE e.is_demo = ?
          UNION ALL
          SELECT s.filed_at, 'filed', s.representative,
-                e.id, 'submission filed',
+                e.id, NULL, NULL,
                 '/ministry/submissions/' || e.id
            FROM submissions s JOIN events e ON e.id = s.event_id
            WHERE e.is_demo = ? AND s.filed_at IS NOT NULL
          UNION ALL
          SELECT i.date, 'inspection', i.inspector,
-                e.id, i.title_en,
+                e.id, i.title_en, i.title_ar,
                 '/ministry/submissions/' || e.id
            FROM inspections i JOIN events e ON e.id = i.event_id
            WHERE e.is_demo = ? AND i.date IS NOT NULL
          UNION ALL
-         SELECT a.created_at, 'account', COALESCE(a.email, a.login), a.display_name, a.role,
+         SELECT a.created_at, 'account', COALESCE(a.email, a.login), a.display_name, a.role, NULL,
                 '/ministry/admin/users'
            FROM accounts a WHERE a.is_demo = ?
          UNION ALL
-         SELECT o.recorded_at, 'organization', 'Ministry', o.name_en, o.status,
+         SELECT o.recorded_at, 'organization', 'Ministry', o.name_en, o.status, NULL,
                 '/ministry/organizations'
            FROM organizations o WHERE o.is_demo = ? AND o.recorded_at IS NOT NULL
          UNION ALL
          SELECT f.archived_at, 'coverage', COALESCE(f.archived_by, 'Ministry'), f.name_en,
-                'No longer covered — ' || COALESCE(f.archived_reason, ''),
+                COALESCE(f.archived_reason, ''), NULL,
                 '/ministry/admin/registry'
            FROM facilities f WHERE f.is_demo = ? AND f.archived_at IS NOT NULL
          UNION ALL
          -- Licensing acts are platform-global: a capability is on for every scope
          -- or none, so the act shows in both. No link: the capability pages are
          -- the owner's, and this trail is also the administrator's.
-         SELECT ca.at, 'capability', ca.actor, ca.flag, 'Turned ' || ca.state, NULL
+         SELECT ca.at, 'capability', ca.actor, ca.flag, ca.state, NULL, NULL
            FROM capability_acts ca
        )
        WHERE at IS NOT NULL
@@ -2634,14 +2663,14 @@ export function ministryActivity(viewerIsDemo: boolean, limit = 200): ActivityRo
        LIMIT ?`,
     )
     .all(d, d, d, d, d, d, limit) as unknown as {
-    at: string; kind: string; actor: string | null; subject: string; detail: string | null; href: string | null;
+    at: string; kind: string; actor: string | null; subject: string; detail: string | null; detail_ar: string | null; href: string | null;
   }[];
   return rows.map((r) => ({
     at: r.at.slice(0, 16),
     kind: r.kind,
     actor: r.actor ?? '—',
     subject: r.subject,
-    detail: r.detail ?? '',
+    detail: activityDetail(r.kind, r.detail, r.detail_ar),
     href: r.href,
   }));
 }
