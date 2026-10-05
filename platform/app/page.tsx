@@ -1,3 +1,4 @@
+import { LangInput } from '../components/OptionText';
 import Link from 'next/link';
 import { L } from '../components/L';
 import { AdFooter } from '../components/AdFooter';
@@ -45,10 +46,10 @@ export default async function OverviewPage() {
           {/* The field is dark inside the band -- a white input here would be a hole
               punched in the ground rather than a control sitting on it. */}
           <form method="get" action="/search" data-region="hero-search" style={{ maxWidth: 620, marginBlockEnd: 14 }}>
-            <input
+            <LangInput
               name="q"
-              aria-label="Search"
-              placeholder={P.searchPlaceholderEn}
+              labelEn="Search" labelAr="بحث"
+              placeholderEn={P.searchPlaceholderEn} placeholderAr={P.searchPlaceholderAr}
               style={{
                 height: 54,
                 paddingInline: 20,

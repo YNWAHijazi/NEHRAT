@@ -47,7 +47,14 @@ export function RecordHeader({ facts, nameEn, nameAr, stats }: { facts: RecordFa
           ))}
         </div>
         <h1 data-sec-h1="" style={{ margin: 0, fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-          <bdi lang="en">{nameEn}</bdi>{nameAr && nameAr !== nameEn ? <> <span style={{display:'block'}}><bdi lang="ar" style={{fontWeight: 400, fontSize: '0.7em', marginBlockStart: 4 }}>({nameAr})</bdi></span></> : null}
+          {/* The record's name in the reader's language leads; the other language follows, smaller.
+              Both stay in the DOM (data-l), so the toggle swaps them without a reload. */}
+          {nameAr && nameAr !== nameEn ? (
+            <>
+              <span data-l="en"><bdi lang="en">{nameEn}</bdi><span style={{ display: 'block' }}><bdi lang="ar" style={{ fontWeight: 400, fontSize: '0.7em', marginBlockStart: 4 }}>({nameAr})</bdi></span></span>
+              <span data-l="ar"><bdi lang="ar">{nameAr}</bdi><span style={{ display: 'block' }}><bdi lang="en" style={{ fontWeight: 400, fontSize: '0.7em', marginBlockStart: 4 }}>({nameEn})</bdi></span></span>
+            </>
+          ) : <bdi>{nameEn}</bdi>}
         </h1>
       </div>
       <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap' }}>

@@ -24,3 +24,9 @@ export function venueTypeLabel(category: string | null | undefined): { en: strin
   const known = VENUE_TYPES.find((t) => t.key === category);
   return known ? { en: known.en, ar: known.ar } : { en: category || '—', ar: category || '—' };
 }
+
+/** The district as the reader's language names it; the record stores the English name. */
+export function venueDistrictLabel(stored: string | null | undefined): { en: string; ar: string } {
+  const known = VENUE_DISTRICTS.find((d) => d.en === stored);
+  return known ? { en: known.en, ar: known.ar } : { en: stored || '', ar: stored || '' };
+}

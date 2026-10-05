@@ -1,3 +1,4 @@
+import { LangInput } from '../../components/OptionText';
 import Link from 'next/link';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
@@ -83,11 +84,11 @@ export default async function SearchPage({
       </h1>
 
       <form method="get" data-region="search-form" style={{ maxWidth: 640, marginBlockEnd: 16 }}>
-        <input
+        <LangInput
           name="q"
           defaultValue={query}
-          aria-label="Search"
-          placeholder={P.searchPlaceholderEn}
+          labelEn="Search" labelAr="بحث"
+          placeholderEn={P.searchPlaceholderEn} placeholderAr={P.searchPlaceholderAr}
           style={field}
         />
       </form>

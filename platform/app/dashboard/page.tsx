@@ -109,7 +109,7 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
           <L en={event.nameEn} ar={event.nameAr} />
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث ${(event.updatedAt || event.createdAt).slice(0, 10)}`} /></span>{!event.filed ? <span><L en={`${pending} pending requirements`} ar={`${pending} متطلبات متبقية`}/></span> : null}
+          <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث \u2066${(event.updatedAt || event.createdAt).slice(0, 10)}\u2069`} /></span>{!event.filed ? <span><L en={`${pending} pending requirements`} ar={`${pending} متطلبات متبقية`}/></span> : null}
           {/* A second running reads as one at a glance: the previous edition's
               date beside the new record's identity. The records stay separate --
               one per authorisation, each with its own reference. */}

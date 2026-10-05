@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AUTH_POLICY } from '../../../lib/rules';
 import { venueInvitation } from '../../../lib/venue/collaboration';
+import { venueDistrictLabel } from '../../../lib/rules/venue-intake';
 import { venuePackageFor } from '../../../lib/venue/workspace';
 import { getDb } from '../../../lib/db';
 import { currentAccount } from '../../../lib/auth';
@@ -60,7 +61,7 @@ export default async function VenueInvitation({ params, searchParams }: { params
                 ar={director ? 'أنتم مدعوّون بصفتكم مديراً طبياً. راجعوا الترتيبات الطبية واعتمدوا خطة المستوى الثالث.' : 'جهة الإسعاف مدعوّة لتأكيد طاقمها ومعدّاتها وترتيباتها الطبية.'}
               />
               <span style={{ display: 'block', color: 'var(--muted)', fontSize: 14, marginBlockStart: 6 }}>
-                <L en={w.venue.addressMunicipalityEn} ar={w.venue.addressMunicipalityAr || w.venue.addressMunicipalityEn} />{w.district ? ` · ${w.district}` : ''}
+                <L en={w.venue.addressMunicipalityEn} ar={w.venue.addressMunicipalityAr || w.venue.addressMunicipalityEn} />{w.district ? <> · <L en={venueDistrictLabel(w.district).en} ar={venueDistrictLabel(w.district).ar} /></> : ''}
               </span>
             </p>
 

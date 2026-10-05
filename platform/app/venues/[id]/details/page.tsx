@@ -5,6 +5,7 @@ import { reopenVenueSectionAction } from '../../actions';
 import { L } from '../../../../components/L';
 import { pageTitle, secondaryButton, noticeBand, alertBand } from '../../../../components/workspace-styles';
 import { venueTypeLabel } from '../../../../lib/rules/venue-intake';
+import { venueDistrictLabel } from '../../../../lib/rules/venue-intake';
 import type { VenueWorkspaceData } from '../../../../components/VenueWorkspace';
 
 export default async function VenueDetails({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
@@ -51,7 +52,7 @@ function VenueDetailsReadOnly({ w }: { w: VenueWorkspaceData }) {
     { en: 'Venue name (English)', ar: 'اسم الموقع (بالإنكليزية)', value: v.nameEn ? <bdi lang="en">{v.nameEn}</bdi> : null },
     { en: 'Venue name (Arabic)', ar: 'اسم الموقع (بالعربية)', value: v.nameAr ? <bdi lang="ar">{v.nameAr}</bdi> : null },
     { en: 'Venue type', ar: 'نوع الموقع', value: v.category ? <L en={type.en} ar={type.ar} /> : null },
-    { en: 'District', ar: 'القضاء', value: w.district || null },
+    { en: 'District', ar: 'القضاء', value: w.district ? <L en={venueDistrictLabel(w.district).en} ar={venueDistrictLabel(w.district).ar} /> : null },
     { en: 'Town and street address', ar: 'البلدة وعنوان الشارع', value: v.addressMunicipalityEn || null },
     { en: 'Address (Arabic)', ar: 'العنوان (بالعربية)', value: v.addressMunicipalityAr ? <bdi lang="ar">{v.addressMunicipalityAr}</bdi> : null },
     { en: 'Responsible person', ar: 'الشخص المسؤول', value: v.responsibleName || null },

@@ -10,6 +10,7 @@ import { getDb } from '../../../../lib/db';
 import { can } from '../../../../lib/rules';
 import { DOMAINS } from '../../../../lib/rules/load';
 import { venueTypeLabel } from '../../../../lib/rules/venue-intake';
+import { venueDistrictLabel } from '../../../../lib/rules/venue-intake';
 import { VENUE_STATUS, venueStatusForDecision, type VenueAnswers, type VenueRequirement } from '../../../../lib/rules/venue-workflow';
 import { venuePackageFor } from '../../../../lib/venue/workspace';
 import { reviewVenuePackageAction } from '../../../venues/actions';
@@ -47,7 +48,7 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
   const glance: { en: string; ar: string; value: React.ReactNode }[] = [
     { en: 'Venue type', ar: 'نوع الموقع', value: <L en={type.en} ar={type.ar} /> },
     { en: 'Approved or licensed capacity', ar: 'السعة المعتمدة أو المرخّصة', value: s.venue.licensedCapacity },
-    { en: 'District', ar: 'القضاء', value: s.district || '—' },
+    { en: 'District', ar: 'القضاء', value: s.district ? <L en={venueDistrictLabel(s.district).en} ar={venueDistrictLabel(s.district).ar} /> : '—' },
     { en: 'Address', ar: 'العنوان', value: <L en={s.venue.addressMunicipalityEn} ar={s.venue.addressMunicipalityAr || s.venue.addressMunicipalityEn} /> },
     { en: 'Responsible person', ar: 'الشخص المسؤول', value: <bdi>{s.venue.responsibleName || s.venue.responsibleContact}</bdi> },
     { en: 'Phone number', ar: 'رقم الهاتف', value: <bdi>{s.venue.responsiblePhone || '—'}</bdi> },

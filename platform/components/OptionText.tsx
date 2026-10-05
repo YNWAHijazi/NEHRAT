@@ -36,3 +36,12 @@ export function useDocumentLang(): 'en' | 'ar' {
 export function OptionText({ en, ar }: { en: string; ar: string }) {
   return <>{useDocumentLang() === 'ar' ? ar : en}</>;
 }
+
+/**
+ * A text input whose placeholder and accessible name follow the document's language. A
+ * placeholder is an attribute, so it cannot hold the two data-l spans the rest of the page uses.
+ */
+export function LangInput({ placeholderEn, placeholderAr, labelEn, labelAr, ...rest }: React.InputHTMLAttributes<HTMLInputElement> & { placeholderEn: string; placeholderAr: string; labelEn: string; labelAr: string }) {
+  const ar = useDocumentLang() === 'ar';
+  return <input {...rest} placeholder={ar ? placeholderAr : placeholderEn} aria-label={ar ? labelAr : labelEn} />;
+}
