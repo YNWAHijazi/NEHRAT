@@ -24,8 +24,9 @@ for (const lang of ['en', 'ar'] as const) {
         const text = await header.locator('[data-region="record-header"]').innerText();
         if (identity === undefined) identity = text;
         expect(text).toBe(identity);
-        await expect(header.locator('bdi[lang="en"]')).toBeVisible();
-        await expect(header.locator('bdi[lang="ar"]')).toBeVisible();
+        // Both names show: the reader's language leads, the other follows in brackets (2026-10-05).
+        await expect(header.locator('bdi[lang="en"]:visible')).toBeVisible();
+        await expect(header.locator('bdi[lang="ar"]:visible')).toBeVisible();
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       }
       const required = page.locator('[data-checklist="required"]');

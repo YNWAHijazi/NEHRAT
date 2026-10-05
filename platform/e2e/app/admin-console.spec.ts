@@ -33,7 +33,9 @@ test.describe('the console', () => {
     // note -- a form cannot live inside an anchor, so the row stopped being a bare
     // <a> child. The row count is the count of record LINKS inside those wrappers;
     // the empty-state div carries no link, so it still counts as zero rows.
-    const rows = page.locator('[data-region="records"] > div > a');
+    // An unfiled record has no file to open (2026-10-05), so its row is a [data-unfiled] block,
+    // not a link; every record counts.
+    const rows = page.locator('[data-region="records"] > div > :is(a, [data-unfiled])');
     const all = await rows.count();
     expect(all).toBeGreaterThanOrEqual(5);
 
