@@ -4,14 +4,15 @@ import { InfoNote } from '../InfoNote';
 import { REQUIREMENT_COPY, handledBy, type RequirementInstance } from '../../lib/rules';
 
 /** The chip's colours: amber while a required row is pending, green with a text label when complete, neutral otherwise (brief item 5). */
-export function stateTone(inst: RequirementInstance): { color: string; bg: string; edge: string } {
+export function stateTone(inst: RequirementInstance, yours = true): { color: string; bg: string; edge: string } {
   if (inst.state === 'complete') return { color: 'var(--success)', bg: 'var(--success-soft)', edge: 'var(--success)' };
-  if (inst.group === 'required' && (inst.state === 'pending' || inst.state === 'waiting')) return { color: 'var(--accent-ink)', bg: 'var(--accent-soft)', edge: 'var(--accent)' };
+  // Another party's open row is theirs to colour: it reads neutral here (owner, 2026-10-07).
+  if (yours && inst.group === 'required' && (inst.state === 'pending' || inst.state === 'waiting')) return { color: 'var(--accent-ink)', bg: 'var(--accent-soft)', edge: 'var(--accent)' };
   return { color: 'var(--muted)', bg: 'var(--surface2)', edge: 'var(--line)' };
 }
 
-export function StateChip({ inst }: { inst: RequirementInstance }) {
-  const tone = stateTone(inst);
+export function StateChip({ inst, yours = true }: { inst: RequirementInstance; yours?: boolean }) {
+  const tone = stateTone(inst, yours);
   return (
     <span data-state={inst.state} style={{ flex: 'none', padding: '5px 12px', borderRadius: 999, fontSize: 13, fontWeight: 500, background: tone.bg, color: tone.color }}>
       <L en={inst.stateEn} ar={inst.stateAr} />
@@ -25,8 +26,8 @@ export function StateChip({ inst }: { inst: RequirementInstance }) {
  * information control, and the body the caller supplies (a form, a file control,
  * an invitation, the plan). The id is the anchor the summaries jump to.
  */
-export function RequirementCard({ inst, open, children, extra }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode }) {
-  const tone = stateTone(inst);
+export function RequirementCard({ inst, open, children, extra, yours = true }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode; yours?: boolean }) {
+  const tone = stateTone(inst, yours);
   const who = handledBy(inst);
   return (
     <details id={inst.anchor} data-requirement={inst.key} data-group={inst.group} data-state={inst.state} open={open || undefined}
@@ -38,7 +39,7 @@ export function RequirementCard({ inst, open, children, extra }: { inst: Require
             <L en={inst.promptEn} ar={inst.promptAr} />
           </span>
         </span>
-        <StateChip inst={inst} />
+        <StateChip inst={inst} yours={yours} />
       </summary>
       <div className="record-card-body">
         {inst.detailEn && inst.detailAr ? (

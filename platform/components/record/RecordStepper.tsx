@@ -86,8 +86,9 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
     let node: HTMLElement | null = target;
     while (node) { if (node instanceof HTMLDetailsElement) node.open = true; node = node.parentElement; }
     target.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    const focusable = target.querySelector<HTMLElement>('summary, input, textarea, select, button, a');
-    (focusable ?? target).focus({ preventScroll: true });
+    // A form control or link inside the step takes focus; the card's summary never does (its ring read as a stray box).
+    const focusable = target.querySelector<HTMLElement>('input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), a[href]');
+    if (focusable) focusable.focus({ preventScroll: true });
   }, [current]);
 
   // The viewer's own open steps are amber until done, then green; another party's steps stay grey (owner, 2026-10-07).

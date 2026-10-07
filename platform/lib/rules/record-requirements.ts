@@ -242,6 +242,7 @@ export function fieldsFor(key: string, level: Level, service: RecordService): Fi
   if (!row) return null;
   const cell = row.levels[String(level) as '1' | '2' | '3'];
   if (!cell || !appliesAt(row, cell, service, [])) return null;
+  if (cell.completion === 'rosterLink') return [];
   return (cell.fields ?? row.fields ?? []).map((f) => venueField(f, service));
 }
 
@@ -348,7 +349,8 @@ function instance(
   // A Ministry request makes an optional or otherwise-absent row required.
   const obligation: Obligation =
     requested && (cell.obligation === 'ifRequested' || cell.obligation === 'recommended') ? 'required' : cell.obligation;
-  const fields = (cell.fields ?? row.fields ?? []).map((f) => venueField(f, facts.service));
+  // A derived row (first aid from the roster) has nothing to enter: its fields are the roster's.
+  const fields = cell.completion === 'rosterLink' ? [] : (cell.fields ?? row.fields ?? []).map((f) => venueField(f, facts.service));
   const stored = facts.answers[row.key] ?? null;
   // The organizer contact is prefilled from the account (or the venue's responsible
   // person) until the organizer saves a different one -- entered once, never retyped.
