@@ -388,10 +388,11 @@ function instance(
         const confirmed = facts.ems.filter((p) => p.status === 'confirmed');
         const nominated = facts.ems.filter((p) => p.status === 'nominated');
         missing = missingFields(fields, values);
-        if (confirmed.length === 0) {
-          if (nominated.length > 0) { state = 'waiting'; detailEn = copy.waitingEmsEn; detailAr = copy.waitingEmsAr; }
-          else { state = 'pending'; detailEn = copy.noEmsEn; detailAr = copy.noEmsAr; }
-        } else state = missing.length === 0 ? 'complete' : 'pending';
+        // A nomination is not a confirmation: an unanswered invitation holds the row,
+        // even beside an accepted one, until it is answered or withdrawn (rule 6).
+        if (nominated.length > 0) { state = 'waiting'; detailEn = copy.waitingEmsEn; detailAr = copy.waitingEmsAr; }
+        else if (confirmed.length === 0) { state = 'pending'; detailEn = copy.noEmsEn; detailAr = copy.noEmsAr; }
+        else state = missing.length === 0 ? 'complete' : 'pending';
         break;
       }
       case 'aedChoice': {

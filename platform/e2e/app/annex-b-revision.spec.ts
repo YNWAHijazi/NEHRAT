@@ -43,6 +43,7 @@ test('Level 2 plan is optional, the EMS agency writes it, and the organizer read
   await saveSection(ems, 'P13', 'Level 2 shared plan prepared by the EMS agency.');
   // The organizer's page reads the saved section at once, with who recorded it.
   await page.reload();
+  await open(page, '[data-requirement="B2"]');
   const section = await open(page, '#plan-P13');
   await expect(section).toContainText('Level 2 shared plan prepared by the EMS agency.');
   await expect(section.locator('[data-region="answered-by"]')).toContainText('EMS agency');

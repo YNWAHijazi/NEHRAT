@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../L';
 import { LangInput } from '../OptionText';
@@ -20,6 +20,9 @@ export function RequirementForm({ kind, id, instance, canEdit }: { kind: RecordS
   const [refused, setRefused] = useState<string[]>([]);
   const [pending, start] = useTransition();
   const baseVersion = instance.answeredBy?.version ?? 0;
+  // A newer answer arriving from the server (after "Show the newer answer", or after this
+  // form's own save) replaces what the form holds: the version is what the next save is read at.
+  useEffect(() => { setValues({ ...instance.values }); setRefused([]); }, [baseVersion]); // eslint-disable-line react-hooks/exhaustive-deps
   const visible = (f: FieldDef) => !f.showWhen || values[f.showWhen.field] === f.showWhen.equals;
   const missing = new Set(instance.missing);
 
