@@ -32,6 +32,7 @@ test('venue medical team completes the shared record; the Director approves; the
  const staff=await browser.newPage({baseURL:baseURL!});await signInAs(staff,'test_ems');expect((await staff.request.get(`/venue-team/${id}`)).status()).toBe(404);
  await staff.goto(`/venue-invitations/${invitations.find(i=>i.kind==='ems')!.token}`);await staff.locator('input[name=phone]').fill('+9613111111');await staff.getByRole('button',{name:'Accept invitation',exact:true}).click();await expect(staff).toHaveURL(new RegExp(`/venue-team/${id}`));
  // THE SAME RECORD, OPEN TO THE AGENCY ON THE ROWS THAT NAME IT: the response team, not medical command or emergency access.
+ await expect(staff.locator('[data-requirement="B5"]')).toBeVisible();await expect(staff.locator('[data-requirement="B5"]').getByRole('button',{name:'Save',exact:true})).toHaveCount(1);
  const editable=await staff.locator('[data-group=required] > [data-requirement]').filter({has:staff.getByRole('button',{name:'Save',exact:true})}).evaluateAll(rows=>rows.map(r=>r.getAttribute('data-requirement')!));
  expect(editable).toContain('B5');expect(editable).not.toContain('B15');expect(editable).not.toContain('B10');
  await expect(staff.locator('[data-requirement="B7"]')).toHaveAttribute('data-state','pending');

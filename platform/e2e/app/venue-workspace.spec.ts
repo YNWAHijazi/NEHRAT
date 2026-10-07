@@ -32,6 +32,8 @@ test('legacy venue details open read-only even when a new contact field is missi
 
 test('Level 1 local EMS contact is one confirmation on the record page, with no invitation and no team form',async({page})=>{
  const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);asDraft(db);
+ // The answer tables' activity triggers call the app's now_stamp(); a raw connection must supply it to clean up.
+ db.function('now_stamp',()=>new Date().toISOString().slice(0,19).replace('T',' '));
  try{
  await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032');
  const row=page.locator('[data-requirement="B7"]');
