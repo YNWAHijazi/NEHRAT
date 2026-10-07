@@ -132,7 +132,7 @@ test.describe('the capability shape', () => {
 
     // ...and on the submission package as an amount due, with filing naming it.
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418');
     const due = page.locator('[data-region="amount-due"]');
     await expect(due).toContainText('Application fee');
     await expect(due).toContainText('Amount due: 100 USD');
@@ -151,7 +151,7 @@ test.describe('the capability shape', () => {
     await gotoRidingRestarts(page, '/services/certify-an-event');
     await expect(page.locator('[data-region="fee-lines"]')).toContainText('Fee: None.');
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418');
     await expect(page.locator('[data-region="amount-due"]')).toHaveCount(0);
   });
 
@@ -191,7 +191,7 @@ test.describe('the capability shape', () => {
 
     // The two operator screens carry the one quiet link, disclaimer attached.
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
+    await gotoRidingRestarts(page, '/events/EV-0418');
     await expect(page.locator('[data-region="vendor-directory-link"]')).toContainText('Commercial vendor directory');
     await gotoRidingRestarts(page, '/facilities/FC-0014/devices');
     await expect(page.locator('[data-region="vendor-directory-link"]')).toContainText('not Ministry endorsement');
@@ -205,7 +205,7 @@ test.describe('the capability shape', () => {
     const backOff = await gotoRidingRestarts(page, '/vendors');
     expect(backOff?.status()).toBe(404);
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
+    await gotoRidingRestarts(page, '/events/EV-0418');
     await expect(page.locator('[data-region="vendor-directory-link"]')).toHaveCount(0);
   });
 
@@ -335,7 +335,7 @@ test.describe('the capability shape', () => {
     // A screen where someone is filing carries none -- the constraint is
     // structural, and this walks it with the capability ON.
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    await gotoRidingRestarts(page, '/events/EV-0418');
     await expect(page.locator('[data-region="ad-footer"]')).toHaveCount(0);
 
     // Off: the foot is empty again. The booking stays; the capability governs.

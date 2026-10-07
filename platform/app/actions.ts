@@ -675,7 +675,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
     });
   }
   revalidatePath(`/events/${eventId}/requirements`);
-  redirect(`/events/${eventId}/requirements?mail=${mail}`);
+  redirect(`/events/${eventId}?mail=${mail}#req-${String(formData.get('kind')) === 'director' ? 'B3' : 'B7'}`);
 }
 
 export interface PlanPayload {
@@ -1398,7 +1398,7 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
       ev.is_demo,
     );
   }
-  redirect(`/events/${eventId}/requirements?notice=withdrawn`);
+  redirect(`/events/${eventId}?notice=withdrawn#req-B7`);
 }
 
 export async function removeProviderAction(eventId: string, formData: FormData): Promise<void> {
@@ -1443,7 +1443,7 @@ export async function removeProviderAction(eventId: string, formData: FormData):
     );
     redirect(`/events/${eventId}/change?notice=provider-removed`);
   }
-  redirect(`/events/${eventId}/requirements?notice=removed`);
+  redirect(`/events/${eventId}?notice=removed#req-B7`);
 }
 
 /**

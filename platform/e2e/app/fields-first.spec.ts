@@ -16,10 +16,11 @@ import { signInAs } from '../helpers/signin';
 const BUDGET_PX = 900;
 
 const FORM_PAGES: { route: string; label: string; as?: string }[] = [
-  { route: '/events/EV-0418/plan', label: 'the plan' },
-  { route: '/events/EV-0418/submit', label: 'the submission package' },
+  // The record page: requirements, the plan and the submission on one page (2026-10-07).
+  { route: '/events/EV-0418', label: 'the record page' },
   { route: '/events/new', label: 'the assessment' },
-  { route: '/events/EV-0418/requirements', label: 'requirements and attachments' },
+  // The agency's view of the same record, signed in as the named provider.
+  { route: '/events/EV-0418/participation', label: 'the EMS participation page', as: 'test_ems' },
   // The EMS declaration, signed in as the named provider on its live event.
   { route: '/events/EV-0362/declaration', label: 'the EMS declaration', as: 'test_ems' },
   // The Director's governance page, signed in as the named physician.

@@ -36,13 +36,16 @@ let EMS_TOKEN = '';
 /** Nominates a provider on EV-0418 and returns the token the organizer is handed. */
 async function makeNomination(page: Page, name: string): Promise<string> {
   await signInAs(page, 'test_organizer');
-  await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-  const invite = page.locator('form:has(input[name="kind"][value="ems"])').first();
+  // The invitation is sent from inside the EMS row of the record page (catalogue B7).
+  await gotoRidingRestarts(page, '/events/EV-0418#req-B7');
+  const ems = page.locator('[data-requirement="B7"]');
+  if (!(await ems.evaluate((d) => (d as HTMLDetailsElement).open))) await ems.locator('summary').first().click();
+  const invite = ems.locator('form:has(input[name="kind"][value="ems"])').first();
   await invite.locator('input[name="name"]').fill(name);
   await invite.locator('input[name="email"]').fill('stages@example.lb');
   await invite.locator('button[type="submit"]').first().click();
-  await page.waitForURL('**/requirements**');
-  const row = page.locator('[data-region="g2"] > div > div', { hasText: name });
+  await page.waitForURL(/\/events\/EV-0418/);
+  const row = page.locator('[data-requirement="B7"] [data-region="party-ems"] [data-party="nominated"]', { hasText: name });
   await row.locator('[data-invitation-link] summary').click();
   const link = await row.locator('code').first().innerText();
   const token = new URL(link.trim(), 'http://localhost').pathname.replace('/invitations/', '');
@@ -218,7 +221,7 @@ test.describe('stage three — the account, after the answer and never as part o
     await expect(page.locator('[data-region="briefing"]')).toBeVisible();
     // The compact strip carries the attendance figure; the task sits beneath it.
     await expect(page.locator('[data-region="briefing-event"]')).toContainText('4,500 expected');
-    await expect(page.locator('[data-region="ops-detail"]')).toBeVisible();
+    await expect(page.locator('[data-region="ems-record"]')).toBeVisible();
   });
 });
 

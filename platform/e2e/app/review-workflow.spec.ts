@@ -41,20 +41,26 @@ test('Level 2 review does not invent a mandatory plan or mass-casualty checklist
   await page.screenshot({path:'test-results/reviewer-workflow-mobile.png',fullPage:true});
 });
 
-test('EMS shares useful multiline answers; the organizer sees them under the agency', async ({page,browser,baseURL}) => {
+test('EMS answers the shared response-team row; the organizer reads it with the agency named', async ({page,browser,baseURL}) => {
   await signInAs(page,'test_ems');
   await page.goto('/events/EV-0418/participation');
-  await expect(page.locator('[data-region=medical-plan-task]')).toContainText('Recommended — not required to submit');
-  const teams='Two BLS teams.\nNorth gate and finish line, 08:00–14:00.';
-  await page.locator('textarea[name=teams]').fill(teams);
-  await page.locator('textarea[name=communications]').fill('Radio channel 2. Backup: operational lead telephone.');
-  await page.getByRole('button',{name:'Share with organizer',exact:true}).click();
-  await expect(page.getByText('Your arrangements have been shared with the organizer.',{exact:true})).toBeVisible();
+  // Level 2: the plan is recommended (D2); the response team is one shared row (catalogue B5).
+  await expect(page.locator('[data-region=ems-record] [data-requirement="B2"]')).toHaveAttribute('data-group','recommended');
+  const team=page.locator('[data-requirement="B5"]');
+  if(!(await team.evaluate((d)=>(d as HTMLDetailsElement).open)))await team.locator('summary').first().click();
+  const form=team.locator('[data-region=requirement-form]').first();
+  await form.locator('input[name=team]').fill('Two BLS teams');
+  await form.locator('input[name=responders]').fill('4');
+  await form.locator('input[name=coverage]').fill('North gate and finish line, 08:00–14:00');
+  await form.getByRole('button',{name:'Save',exact:true}).click();
+  await expect(form.getByRole('status')).toContainText('Saved.');
   const organizer=await browser.newPage({baseURL:baseURL!});
   await signInAs(organizer,'test_organizer');
-  await organizer.goto('/events/EV-0418/medical-team?tab=ems');
-  await expect(organizer.locator('[data-region=medical-team-party]').first()).toContainText('North gate and finish line');
-  await expect(organizer.locator('main textarea')).toHaveCount(0);
+  await organizer.goto('/events/EV-0418#req-B5');
+  const shared=organizer.locator('[data-requirement="B5"]');
+  await expect(shared).toHaveAttribute('data-state','complete');
+  await expect(shared.locator('input[name=coverage]')).toHaveValue('North gate and finish line, 08:00–14:00');
+  await expect(shared.locator('[data-region=answered-by]')).toContainText('EMS agency');
   await organizer.close();
 });
 

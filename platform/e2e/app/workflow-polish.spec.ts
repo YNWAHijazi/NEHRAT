@@ -2,11 +2,12 @@ import { expect, test } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { gotoRidingRestarts } from '../helpers/resilient';
 
-test('organizer prepares one document at a time', async ({ page }) => {
+test('organizer prepares one requirement at a time', async ({ page }) => {
   await signInAs(page, 'test_organizer');
-  await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-  const plan = page.locator('[data-document="plan"]');
-  const map = page.locator('[data-document="siteMap"]');
+  await gotoRidingRestarts(page, '/events/EV-0418');
+  // A recommended card stays closed; opening the map card opens that card alone.
+  const plan = page.locator('[data-requirement="B2"]');
+  const map = page.locator('[data-requirement="P-M"]');
   await expect(plan).not.toHaveAttribute('open');
   await map.locator(':scope > summary').click();
   await expect(map).toHaveAttribute('open');

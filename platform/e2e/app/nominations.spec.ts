@@ -12,6 +12,7 @@ import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
+import { answerLevel1Rows, certify } from '../helpers/record';
 
 
 test.describe('the nomination loop', () => {
@@ -21,28 +22,19 @@ test.describe('the nomination loop', () => {
     test.setTimeout(120_000);
     await signInAs(page, 'test_organizer');
 
-    // THE TRAP, asserted: the unanswered nomination blocks filing by name.
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
-    await expect(page.locator('body')).toContainText(
-      'Coastal Medical Transport — a nomination is not a confirmation',
-    );
+    // THE TRAP, asserted: the unanswered nomination is named on its row, and the row waits.
+    await gotoRidingRestarts(page, '/events/EV-0418#req-B7');
+    const ems = page.locator('[data-requirement="B7"]');
+    const party = (name: string) => ems.locator('[data-region="party-ems"] [data-party]', { hasText: name });
+    await expect(party('Coastal Medical Transport')).toHaveAttribute('data-party', 'nominated');
+    await expect(party('Coastal Medical Transport')).toContainText('waiting for a reply');
 
     // WITHDRAW it. The reason-free path: nothing was confirmed, nothing is owed.
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-    const row = page.locator('[data-region="g2"] > div > div', { hasText: 'Coastal Medical Transport' });
-    await expect(row).toContainText('Withdraw the nomination');
-    await expect(row).toContainText('This disables the invitation link.');
-    await row.locator('button:has-text("Withdraw the nomination")').click();
-    await page.waitForURL('**/requirements?notice=withdrawn');
-    await expect(
-      page.locator('[data-region="g2"] > div > div', { hasText: 'Coastal Medical Transport' }),
-    ).toContainText('Withdrawn');
-
-    // The gate derives from who remains: the blocker is GONE.
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
-    await expect(page.locator('body')).not.toContainText(
-      'Coastal Medical Transport — a nomination is not a confirmation',
-    );
+    await party('Coastal Medical Transport').locator('button:has-text("Withdraw the invitation")').click();
+    await page.waitForURL(/notice=withdrawn/);
+    // A withdrawn party leaves the row entirely; its name is gone from the record.
+    await expect(page.locator('[data-requirement="B7"] [data-region="party-ems"]')).toBeVisible();
+    await expect(page.locator('[data-requirement="B7"]')).not.toContainText('Coastal Medical Transport');
 
     // The token is dead: the nominee's page shows withdrawn and offers no response.
     await gotoRidingRestarts(page, '/invitations/demo-coastal-medical-0418');
@@ -58,37 +50,31 @@ test.describe('the nomination loop', () => {
     });
 
     // REMOVE a confirmed provider. The weight is stated BEFORE the confirming click.
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-    const confirmed = page.locator('[data-region="g2"] > div > div', { hasText: 'Civil Defence — Beirut' });
-    await confirmed.locator('summary', { hasText: 'Remove this provider' }).click();
-    await expect(confirmed).toContainText('Remove — a material change');
-    await expect(confirmed).toContainText('The party will be notified when removed.');
+    await gotoRidingRestarts(page, '/events/EV-0418#req-B7');
+    const confirmed = page.locator('[data-requirement="B7"] [data-region="party-ems"] [data-party="confirmed"]', { hasText: 'Civil Defence — Beirut' });
+    await confirmed.locator('summary', { hasText: 'Remove this party' }).click();
+    await expect(confirmed).toContainText('Removing an accepted party is a material change');
     // EV-0418 is not filed: do not incorrectly require a Ministry change report.
     await expect(confirmed).not.toContainText('a change report to the Ministry is required');
-    await confirmed.locator('button:has-text("Remove — a material change")').click();
-    await page.waitForURL('**/requirements?notice=removed');
-    await expect(
-      page.locator('[data-region="g2"] > div > div', { hasText: 'Civil Defence — Beirut' }),
-    ).toContainText('Removed');
+    await confirmed.getByRole('button', { name: 'Remove', exact: true }).click();
+    await page.waitForURL(/notice=removed/);
 
     // One confirmed provider remains; neither party this flow acted on gates filing.
     //
     // PARTY-SCOPED, NOT A BLANKET SWEEP (first full-suite run since the Ministry
-    // slice, 2026-09-02). The blanket form -- no "a nomination is not a confirmation"
-    // anywhere on the page -- collided with nomination-stages.spec.ts, which
-    // legitimately nominates its own provider (Stage Walk Medical) on this same
-    // event and leaves it unanswered until late in its own serial order; under two
-    // workers that file's blocker line is honestly on this screen. What THIS flow
-    // must prove is that withdraw and remove each closed their own party's gate:
-    // the withdrawn and the removed party are gone from the submission screen
-    // entirely -- a stronger per-party pin than the blocker line alone.
-    await gotoRidingRestarts(page, '/events/EV-0418/submit');
+    // slice, 2026-09-02). nomination-stages.spec.ts legitimately nominates its own
+    // provider (Stage Walk Medical) on this same event and leaves it unanswered until
+    // late in its own serial order; under two workers that party's wait is honestly on
+    // this screen. What THIS flow must prove is that withdraw and remove each closed
+    // their own party's gate: the withdrawn and the removed party are gone from the
+    // record entirely -- a stronger per-party pin than the blocker line alone.
+    await gotoRidingRestarts(page, '/events/EV-0418');
+    await expect(page.locator('[data-requirement="B7"]')).toBeVisible();
     await expect(page.locator('body')).not.toContainText('Coastal Medical Transport');
     await expect(page.locator('body')).not.toContainText('Civil Defence — Beirut');
 
     // And a replacement can be nominated without touching who remains.
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-    await expect(page.locator('[data-region="invite"] form')).toHaveCount(1);
+    await expect(page.locator('[data-requirement="B7"] form[data-region="invite"]')).toHaveCount(1);
   });
 });
 
@@ -181,27 +167,17 @@ test.describe('creation to determination, end to end', () => {
     await fill('Authorized representative', 'R. Haddad');
     await fill('Position', 'Events director');
     await page.locator('button:has-text("Continue to requirements")').click();
-    await page.waitForURL(/\/events\/EV-\d+\/requirements$/);
+    await page.waitForURL(/\/events\/EV-\d+/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
-    // Revised Annex B: Level 1 files without a medical-plan attachment.
-    await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-    await expect(page.getByRole('heading',{name:/Requirements and attachments/})).toBeVisible();
-    await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
-    await gotoRidingRestarts(page, `/events/${eventId}/submit`);
-    for (let i = 0; i < 6; i += 1) {
-      await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
-    }
-    // The certification, which is part of making the submission and was not being
-    // made: a form could be filed with no authorized representative named.
-    await page.locator('label:has-text("Authorized representative") input').fill('R. Haddad');
-    await page.locator('label:has-text("Telephone") input').first().fill('+961 1 000 000');
-    await page.locator('label:has-text("Position") input').fill('Events director');
-    await page.keyboard.press('Tab'); // blur -> flush the last field's autosave
-    // The form AUTOSAVES (fields-only ruling, 2026-09-04); the receipt is the wait.
-    await expect(page.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
-    const fileBtn = page.locator('button:has-text("Submit")');
-    await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
+    // Revised Annex B: Level 1 files without a medical plan; the record page carries no plan card.
+    await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
+    await expect(page.locator('[data-requirement="B2"]')).toHaveCount(0);
+    // The organizer's own rows, then the certification, which is part of making the
+    // submission and was not being made: a form could be filed with no authorized
+    // representative named.
+    await answerLevel1Rows(page);
+    const fileBtn = await certify(page, { representative: 'R. Haddad', telephone: '+961 1 000 000', position: 'Events director' });
     await fileBtn.click();
     await page.waitForURL(/acknowledgment/);
     // One identifier (owner ruling, 2026-09-29): the receipt carries the record ID the event was

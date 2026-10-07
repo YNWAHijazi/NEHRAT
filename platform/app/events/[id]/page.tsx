@@ -9,6 +9,7 @@ import { NextStepCard } from '../../../components/NextStepCard';
 import { GatedAction, actionGrid } from '../../../components/RecordActions';
 import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import { FinalReview, type ReviewRow } from '../../../components/record/FinalReview';
+import { VendorDirectoryLink } from '../../../components/VendorDirectoryLink';
 import type { RailStage } from '../../../lib/rules/rail';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
@@ -366,6 +367,8 @@ export default async function EventRecordPage({
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
             />
+            {/* The commercial directory link renders only while its capability is on (non-negotiable 12). */}
+            <VendorDirectoryLink />
             <FinalReview
               eventId={id}
               level={level}

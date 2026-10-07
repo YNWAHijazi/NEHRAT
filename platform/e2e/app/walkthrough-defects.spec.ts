@@ -16,14 +16,15 @@ import { signInAs } from '../helpers/signin';
 test.describe('1 — evidence of insurance is a file, not a word', () => {
   test('the compliance form offers an upload, and no box to type Yes into', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0362/submit');
-    const row = page.locator('[data-region="insurance-evidence"]');
+    await gotoRidingRestarts(page, '/events/EV-0362#req-B17');
+    // Insurance is one card on the record page: the policy's facts and its evidence file (catalogue B17, Level 3).
+    const row = page.locator('[data-requirement="B17"]');
     await expect(row).toBeVisible();
-    await expect(row.locator('input[type="file"]')).toBeVisible();
+    await expect(row.locator('[data-region="file-control"] input[type="file"]')).toBeVisible();
     // The defect exactly: a text input the word "yes" satisfied.
     await expectAbsent(page, {
-      absent: row.locator('input[type="text"]'),
-      anchor: row.locator('input[type="file"]'),
+      absent: row.locator('input[type="text"][name*="evidence" i], input[type="text"][name*="attached" i]'),
+      anchor: row.locator('[data-region="file-control"] input[type="file"]'),
       because: 'a field asking whether evidence is attached, satisfied by typing, evidences nothing',
     });
   });

@@ -86,7 +86,8 @@ test.describe('phone help and navigation', () => {
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: `/tmp/moph-compact-event-${lang}-320.png`, fullPage: true });
       await next.getByRole('link').tap();
-      await expect(page).toHaveURL(/\/events\/EV-0418\/(requirements|plan|submit)|\/organization/);
+      // The next step is an anchor on the record page itself, or the organization screen.
+      await expect(page).toHaveURL(/\/events\/EV-0418|\/organization/);
     });
   }
 });
@@ -94,9 +95,9 @@ test.describe('phone help and navigation', () => {
 // Read-only coverage of the principal screens for each role. Tests only use the
 // disposable E2E database and never send invitations or change live records.
 for (const walk of [
-  { role: 'test_organizer', routes: ['/events/new', '/events/EV-0418/requirements', '/events/EV-0418/plan', '/events/EV-0418/submit', '/venues/VN-0028/assessment', '/facilities/new', '/facilities/FC-0014/plan', '/organization'] },
+  { role: 'test_organizer', routes: ['/events/new', '/events/EV-0418', '/events/EV-0418/documents', '/venues/VN-0028/assessment', '/venues/VN-0028', '/facilities/new', '/facilities/FC-0014/plan', '/organization'] },
   { role: 'test_ems', routes: ['/dashboard', '/profile', '/events/EV-0362/declaration'] },
-  { role: 'test_director', routes: ['/dashboard', '/events/EV-0362', '/events/EV-0362/plan', '/credentials'] },
+  { role: 'test_director', routes: ['/dashboard', '/events/EV-0362', '/credentials'] },
   { role: 'test_moph_admin', routes: ['/ministry/admin/configuration', '/ministry/admin/users', '/ministry/organizations', '/ministry/submissions/EV-0362'] },
   { role: 'test_owner', routes: ['/platform/admin', '/platform/admin/capabilities/vendorDirectory', '/platform/admin/capabilities/applicationFees'] },
 ]) {
@@ -110,7 +111,8 @@ for (const walk of [
       await expect(page.getByText('Nothing further is owed by you', { exact: true })).toHaveCount(0);
       // A help button must never be nested inside a navigation/submit control.
       expect(await page.locator('.info-note-trigger').evaluateAll((buttons) => buttons.filter((button) => button.parentElement?.closest('a, button, label, summary')).length)).toBe(0);
-      const note = page.locator('main .info-note').first();
+      // The first help note that is on screen: a note inside a collapsed requirement card is not a navigation target.
+      const note = page.locator('main .info-note').filter({ visible: true }).first();
       if (await note.count()) {
         await note.getByRole('button').click();
         await expect(note.getByRole('note')).toBeVisible();

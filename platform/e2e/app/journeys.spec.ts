@@ -26,6 +26,7 @@ import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
+import { answerLevel1Rows, certify } from '../helpers/record';
 import { LANGUAGES, useLanguage } from '../helpers/language';
 
 /** A label lookup that works in either language, from the page's own bilingual DOM. */
@@ -96,32 +97,18 @@ for (const lang of LANGUAGES) {
       // BOTH RESULTS AND WHICH GOVERNED -- never the final level alone.
       await expect(page.locator('[data-region="derivation"]')).toBeVisible();
 
-      // THE PACKAGE. No plan attachment at Level 1; six declarations and the
-      // certification -- which is part of making the submission, not decoration.
-      await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-      await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
-
-      await gotoRidingRestarts(page, `/events/${eventId}/submit`);
-      for (let i = 0; i < 6; i += 1) {
-        await page.locator('label:has(input[type="checkbox"]:not(:checked))').first().locator('input').check();
-      }
-      await fillLabelled(page, 'Authorized representative', 'R. Haddad');
-      await fillLabelled(page, 'Telephone', '+961 1 000 000');
-      await fillLabelled(page, 'Position', 'Events director');
-      // BLUR THE LAST FIELD so its autosave flushes (fields-only ruling,
-      // 2026-09-04): the form saves on blur, and a stale "Saved." from an
-      // earlier field must not let the journey reload before this one persists.
-      await page.keyboard.press('Tab');
-      // The form AUTOSAVES; no Save button exists.
-      // THE FILE BUTTON JUDGES ITS OWN FIELDS FROM CLIENT STATE (fields-only
-      // ruling, 2026-09-04): once the declarations are ticked and the
-      // certification filled, it enables without waiting for an autosave to land
-      // -- and File saves-then-files, so the click never races a pending save.
-      // No reload, no "Saved." wait: the button IS the readiness signal.
-      const fileBtn = page.locator('button:has-text("Submit"), button:has-text("تقديم الملف")').first();
-      await expect(page.locator('[data-check="declarations"]')).toContainText('Complete');
-      await expect(page.locator('[data-check="certification"]')).toContainText('Complete');
-      await expect(fileBtn).toBeEnabled({ timeout: 40_000 });
+      // THE PACKAGE, on the one record page. No plan card at Level 1; the organizer's
+      // own rows, then the certification -- which is part of making the submission,
+      // not decoration (Level 1 asks the certification alone: catalogue P-C).
+      await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
+      await expect(page.locator('[data-requirement="B2"]')).toHaveCount(0);
+      await answerLevel1Rows(page);
+      // THE SUBMIT BUTTON IS THE READINESS SIGNAL: the certification autosaves on blur
+      // and the server's blockers decide; once nothing remains, the declaration row
+      // leaves the remaining list and the button enables.
+      const fileBtn = await certify(page, { representative: 'R. Haddad', telephone: '+961 1 000 000', position: 'Events director' });
+      await expect(page.locator('[data-region="organizer-declaration"]')).toBeVisible();
+      await expect(page.locator('[data-remaining="P-C"]')).toHaveCount(0);
       await fileBtn.click();
       await page.waitForURL(/acknowledgment/);
       const body = await page.locator('body').innerText();

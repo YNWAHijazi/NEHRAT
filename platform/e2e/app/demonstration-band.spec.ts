@@ -23,7 +23,7 @@ const BAND = '[data-demonstration-band]';
 test.describe('the demonstration band', () => {
   test('rides every screen of a demonstration session, in both languages', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    for (const route of ['/dashboard', '/events/EV-0418', '/facilities/FC-0014', '/events/EV-0418/submit']) {
+    for (const route of ['/dashboard', '/events/EV-0418', '/facilities/FC-0014', '/events/EV-0418/documents']) {
       await gotoRidingRestarts(page, route);
       const band = page.locator(BAND);
       await expect(band, `${route} must carry the band`).toBeVisible();
