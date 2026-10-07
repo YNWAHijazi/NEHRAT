@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { L } from '../L';
 import type { RecordParty, RecordRequirements as RecordData } from '../../lib/record-facts';
 import type { RecordView } from '../../lib/record-view';
-import { REQUIREMENT_COPY, REQUIREMENT_GROUPS, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
+import { REQUIREMENT_COPY, REQUIREMENT_GROUPS, handledBy, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
 import { FileControl } from './FileControl';
 import { JumpTo } from './JumpTo';
 import { PartyBlock } from './PartyBlock';
@@ -113,14 +113,20 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   ) : null;
 
   // The steps: every required row, then the recommended rows, then the final review when the page has one.
+  // A step is the viewer's when the catalogue names their role on it (the organizer's invitation rows included).
+  const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3');
   const steps: StepperStep[] = [...rows('required'), ...rows('recommended')].map((inst) => ({
     key: inst.key, anchor: inst.anchor, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, state: inst.state,
     kind: inst.group === 'recommended' ? 'recommended' : 'required',
+    yours: yours(inst), whoEn: handledBy(inst).en, whoAr: handledBy(inst).ar,
     body: <RequirementCard inst={inst} open extra={planLink(inst)}>{body(inst)}</RequirementCard>,
   }));
-  if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', body: final });
-  // The page opens on the step a redirect named; else on the first required row still open; with nothing open, on the final review.
-  const initialKey = (initialStep && steps.find((s) => s.key === initialStep)?.key) || (steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key ?? steps.find((s) => s.kind === 'final')?.key ?? steps[0]?.key ?? '');
+  if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
+  // The page opens on the step a redirect named; else on the viewer's first required row still open; else any open required row; with nothing open, on the final review.
+  const initialKey = (initialStep && steps.find((s) => s.key === initialStep)?.key)
+    || steps.find((s) => s.kind === 'required' && s.yours && s.state !== 'complete')?.key
+    || steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key
+    || steps.find((s) => s.kind === 'final')?.key || steps[0]?.key || '';
 
   return (
     <div data-region="record-requirements">

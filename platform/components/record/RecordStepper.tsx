@@ -13,6 +13,11 @@ export interface StepperStep {
   stateAr: string;
   state: 'complete' | 'pending' | 'notAdded' | 'notProvided' | 'waiting' | 'later' | 'final';
   kind: 'required' | 'recommended' | 'final';
+  /** Whether the viewer may enter this step; another party's step reads grey and names who handles it. */
+  yours: boolean;
+  /** Who handles it, shown in place of the state on another party's step. */
+  whoEn: string;
+  whoAr: string;
   body: ReactNode;
 }
 
@@ -85,13 +90,18 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
     (focusable ?? target).focus({ preventScroll: true });
   }, [current]);
 
+  // The viewer's own open steps are amber until done, then green; another party's steps stay grey (owner, 2026-10-07).
   const numberStyle = (s: StepperStep, i: number): React.CSSProperties => ({
     flex: 'none', inlineSize: 28, blockSize: 28, borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontSize: 13, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
     ...(i === index ? { background: 'var(--ink)', color: 'var(--bg)' }
       : s.state === 'complete' ? { background: 'var(--brand)', color: 'var(--bg)' }
-        : { background: 'var(--bg)', color: 'var(--muted)', border: '1px solid var(--line)' }),
+        : s.yours && s.kind === 'required' ? { background: 'var(--accent-soft)', color: 'var(--accent-ink)', border: '1px solid var(--accent)' }
+          : { background: 'var(--bg)', color: 'var(--muted)', border: '1px solid var(--line)' }),
   });
+  const stateLine = (s: StepperStep) => s.yours
+    ? { en: s.stateEn, ar: s.stateAr, color: s.state === 'complete' ? 'var(--success)' : s.state === 'waiting' || s.kind === 'required' ? 'var(--accent-ink)' : 'var(--muted)' }
+    : { en: s.state === 'complete' ? s.stateEn : s.whoEn, ar: s.state === 'complete' ? s.stateAr : s.whoAr, color: s.state === 'complete' ? 'var(--success)' : 'var(--muted)' };
   const total = steps.length;
   let lastKind: StepperStep['kind'] | null = null;
 
@@ -120,13 +130,13 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
               const head = s.kind !== lastKind ? s.kind : null;
               lastKind = s.kind;
               return (
-                <li key={s.key} data-step-item={s.key} data-step-state={i === index ? 'current' : s.state} className="step-item">
+                <li key={s.key} data-step-item={s.key} data-step-state={i === index ? 'current' : s.state} data-step-yours={s.yours || undefined} className="step-item">
                   {head === 'recommended' ? <div className="step-group"><L en={`${groups.recommended.en} — optional`} ar={`${groups.recommended.ar} — اختياري`} /></div> : null}
                   <a href={`#${s.anchor}`} aria-current={i === index ? 'step' : undefined} onClick={(e) => { e.preventDefault(); go(s.key); }} className="step-link">
                     <span style={numberStyle(s, i)}>{s.state === 'complete' && i !== index ? '✓' : i + 1}</span>
                     <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <span style={{ fontSize: 14.5, lineHeight: 1.35, fontWeight: i === index ? 600 : 400, color: i === index || s.state === 'complete' ? 'var(--ink)' : 'var(--muted)' }}><L en={s.labelEn} ar={s.labelAr} /></span>
-                      {s.kind !== 'final' ? <span style={{ fontSize: 12, color: s.state === 'complete' ? 'var(--success)' : s.state === 'waiting' || (s.kind === 'required' && s.state === 'pending') ? 'var(--accent-ink)' : 'var(--muted)' }}><L en={s.stateEn} ar={s.stateAr} /></span> : null}
+                      <span style={{ fontSize: 14.5, lineHeight: 1.35, fontWeight: i === index ? 600 : 400, color: i === index || (s.yours && s.state !== 'complete') ? 'var(--ink)' : 'var(--muted)' }}><L en={s.labelEn} ar={s.labelAr} /></span>
+                      {s.kind !== 'final' ? <span style={{ fontSize: 12, color: stateLine(s).color }}><L en={stateLine(s).en} ar={stateLine(s).ar} /></span> : null}
                     </span>
                   </a>
                 </li>
