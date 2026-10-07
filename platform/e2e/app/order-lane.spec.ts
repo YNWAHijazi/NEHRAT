@@ -11,6 +11,10 @@ import { openDetails } from '../helpers/record';
  */
 test('the Order reviews a Level 3 Director once the lane is on; the organizer sees the verification state', async ({ page }) => {
   const db = () => new DatabaseSync(process.env['E2E_DATABASE_PATH']!);
+  // The demonstration data already carries the Ministry's record of this item (the lane-off fallback);
+  // the walk starts from pending and puts the seeded row back at the end.
+  const seeded = db().prepare("SELECT * FROM attestations WHERE event_id = 'EV-0362' AND item_key = 'directorCredential'").get() as Record<string, string | null> | undefined;
+  db().prepare("DELETE FROM attestations WHERE event_id = 'EV-0362' AND item_key = 'directorCredential'").run();
   try {
     // Off by default: the off state is the whole screen, and the organizer's row names the Ministry as the recorder.
     await signInAs(page, 'order_reviewer');
@@ -49,6 +53,10 @@ test('the Order reviews a Level 3 Director once the lane is on; the organizer se
     const d = db();
     d.prepare("DELETE FROM ministry_config WHERE key = 'orderLane'").run();
     d.prepare("DELETE FROM attestations WHERE event_id = 'EV-0362' AND item_key = 'directorCredential'").run();
+    if (seeded) {
+      const columns = Object.keys(seeded);
+      d.prepare(`INSERT INTO attestations (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`).run(...columns.map((c) => seeded[c] ?? null));
+    }
     d.close();
   }
 });
