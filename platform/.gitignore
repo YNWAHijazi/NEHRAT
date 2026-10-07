@@ -1,2 +1,5 @@
 tmp-*
 .next-e2e/
+
+# Playwright output directories named per run (verification chain)
+test-results-*/
