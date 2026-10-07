@@ -49,6 +49,7 @@ test('Level 1 local EMS contact is one confirmation on the record page, with no 
  await expect(page.locator('[data-requirement="B7"]')).toHaveAttribute('data-state','complete');
  await expect(page.locator('[data-region=required-count]')).toBeVisible();
  // No invitation exists at Level 1: the row names no party, and the team page carries no local-contact form.
+ await openDetails(page.locator('[data-requirement="B7"]'));
  await expectAbsent(page,{anchor:'[data-requirement="B7"]',absent:'[data-requirement="B7"] [data-region=party-ems]',because:'the Level 1 contact is a confirmation by the operator, not an invitation (catalogue B7, Level 1)'});
  await page.goto('/venues/VN-0032/team');await expect(page.locator('[data-region=team-ems]')).toBeVisible();
  await expectAbsent(page,{anchor:'[data-region=team-ems]',absent:'input[name=agency]',because:'the local contact moved to the B7 row on the record page (2026-10-07)'});

@@ -70,9 +70,11 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
   }, [keys]);
 
   // Once the step is on screen, open whatever the hash named inside it, scroll to it and give it focus.
+  // On mount the hash may name a step that is not yet current: it is left for the render that shows it.
   useEffect(() => {
     const hash = pendingHash.current;
     if (!hash) return;
+    if (stepFor(hash) !== current) return;
     pendingHash.current = null;
     const target = document.getElementById(hash.slice(1));
     if (!target) return;

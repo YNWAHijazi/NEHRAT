@@ -27,8 +27,9 @@ export async function openDetails(locator: Locator): Promise<Locator> {
   const page = locator.page();
   const id = await locator.getAttribute('id');
   if (id && !(await locator.isVisible())) {
-    await showStep(page, `#${id}`);
-    await locator.waitFor({ state: 'visible' });
+    // Named again until it shows: a hash set while the page is still hydrating is dropped
+    // when the router re-applies its own URL, and an event sent then has no listener yet.
+    await expect.poll(async () => { await showStep(page, `#${id}`); return locator.isVisible(); }, { timeout: 60_000, intervals: [250, 500, 1000] }).toBe(true);
   }
   await locator.evaluate((el) => { if (el instanceof HTMLDetailsElement) el.open = true; });
   return locator;

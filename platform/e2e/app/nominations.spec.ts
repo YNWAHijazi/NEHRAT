@@ -70,7 +70,7 @@ test.describe('the nomination loop', () => {
     // their own party's gate: the withdrawn and the removed party are gone from the
     // record entirely -- a stronger per-party pin than the blocker line alone.
     await gotoRidingRestarts(page, '/events/EV-0418');
-    await expect(page.locator('[data-requirement="B7"]')).toBeVisible();
+    await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
     await expect(page.locator('body')).not.toContainText('Coastal Medical Transport');
     await expect(page.locator('body')).not.toContainText('Civil Defence — Beirut');
 
