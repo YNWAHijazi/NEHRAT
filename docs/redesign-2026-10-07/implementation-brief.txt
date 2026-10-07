@@ -1,0 +1,219 @@
+NEHRAT EVENT AND VENUE WORKFLOW — IMPLEMENTATION BRIEF
+
+7 October 2026
+
+
+
+Purpose: replace the organizer’s tab-based, attachment-led journey with one complete, simple requirement-led page. Keep existing intake/assessment, records, invitations, files and version history. Implement confirmed rules; resolve remaining policy decisions in the companion workbook before shipping the affected features.
+
+
+
+Confirmed live finding: Test 11 (EV-0463), Level 2, shows a site-map upload, recommended medical plan and Other. Fifteen operational requirements are hidden in a collapsed read-only Final checklist. They need actual structured answers and completion rules, not another wording-only change.
+
+
+
+SOURCE ORDER AND DECISIONS
+
+Use the supplied revised Annex B (19 rows) as the proposed baseline. Keep original sources and conflicting clauses in the decision log. Do not claim that a product choice legally amends the Protocol.
+
+D1 — Level 2 Medical Director: Recommended at Level 2, required at Level 3. An uninvited Level 2 Director does not block submission. [Confirmed] Apply this clarification consistently to the page, invitations, counts and server gate.
+
+D2 — Level 2 full medical plan: Use revised B: individual required arrangements; full plan optional unless requested. Update old forms and gates together. [Confirmed] Record the older-source conflict; do not retain a hidden mandatory Level 2 plan gate.
+
+D3 — Level 2 emergency escalation: Use a short coordinated procedure at Level 2. Full major-incident plan at Level 3. [For review] Confirm the revised matrix replaces the old Level 2 major-incident gate.
+
+D4 — Who prepares and approves the Level 3 plan: EMS or Director prepares one shared plan. Named Director approves the current version. [Confirmed] Preserve this prior owner decision. EMS completion alone is not Director approval.
+
+D5 — Level 1 first-aid supplies and oxygen: Use capability/supplies confirmations with location and contact. Do not invent a universal kit inventory or require oxygen at Level 1. [For review] Partner may supply an approved kit list. Until then, examples remain guidance.
+
+D6 — Late serious-incident reports: Keep late reporting available and mark it late. Lock submitted versions; use an audited correction. [Pending] Confirm replacing the prior lock rule. A deadline does not itself authorize blocking a late report.
+
+D7 — Annual venue renewal dates: Keep same venue ID and previous certificates. Make renewal window and validity start explicit settings. [Pending] Set validity start and renewal opening window before implementing any new dates.
+
+D8 — Venue reporting: Do not create an annual venue report requirement. Keep incident/event reporting linked to the relevant occurrence. [For review] If an annual aggregate report is wanted, approve its fields and deadline separately.
+
+D9 — Required fields versus suggested questions: Approve the short questions and completion tests in Level 1–3 sheets before coding them as blockers. [For review] Review field necessity. No proof upload unless the source or a specific Ministry request requires it.
+
+D10 — Patient-care documentation: L1/L2 clinical records are not a pre-event organizer blocker. At L3 the plan names the provider process; patient records remain in the clinical system. [For review] Keep planning the record process distinct from creating records after actual care.
+
+
+
+LAYOUT
+
+Intake/details and assessment stay straightforward. After creation, use one event or venue record page.
+
+Header: English/Arabic name, record ID, dates/routine-session context, level, deadline and current status. Keep progress visible.
+
+Top: collapsible Required summary on the left and Recommended summary on the right. Stack on phones. Each row shows item, state and who handles it.
+
+Below: full-width Required group, then Recommended group, each with individual collapsible cards. A summary click opens the matching card and its parents and scrolls/focuses it. No left/right tab hunt.
+
+Bottom: final review, remaining required items with jump links, optional choices, applicable organizer declaration and Submit. After filing, the same page becomes a readable submitted snapshot with status/certificate/report actions.
+
+
+
+RULES AND FIELDS
+
+Companion workbook: Level 1, Level 2 and Level 3 contain every revised Annex B row, quoted level rule, source responsibility, proposed editor, exact short form and completion/evidence test. Separate rows cover risk assessment, map, deployment map, organizer declaration and serious-incident notice.
+
+The source matrix has 19 rows, not 20. Retain stable stored keys. Do not use row position as a database identifier.
+
+Level 1 source baseline: 8 readiness/admin rows, recommended AED, conditional clinical records/reporting. No mandatory EMS invitation, plan or proof uploads. First aid and basic supplies remain required; oxygen is not a supplied universal Level 1 minimum.
+
+Level 2 source baseline: 11 readiness/admin rows; treatment post and full plan recommended; site map and applicable organizer declaration remain package items. Owner confirmed Director recommended at Level 2 and full plan optional unless requested. Do not impose a mandatory Director or full-plan gate. D3 records the older full-MCI conflict.
+
+Level 3: full medical plan and named Director approval. EMS or Director drafts one shared plan. Requirement answers defined in the plan link to that same data. Each EMS agency signs its own readiness declaration.
+
+Responsibility is not the same as who types. For shared practical arrangements, the organizer or authorized participating provider can complete the single record; first valid completion counts once. Keep professional declarations, Director approval and organizer certification role-specific.
+
+
+
+MEDICAL PLAN
+
+Implement the 16 Protocol section 6 content areas in short collapsible sections, combining overlapping content where clearer. Reuse registration details, invitations, staffing, locations, supplies, access, communications and hospital answers. Never demand these twice.
+
+Medical plan sheet lists all 16 areas, all 11 Level 3 major-incident elements and all 10 Level 3 per-agency declaration items. An uploaded file is not proof that every plan section is complete. The rule/evidence model must support structured section answers and actual reviewed evidence.
+
+Director approval binds to current plan/assessment version. A material edit invalidates dependent approval. Keep prior versions and stop stale simultaneous writes from overwriting newer answers.
+
+
+
+IMPLEMENTATION AND ACCEPTANCE
+
+1. One intake page, then one record page
+Preserve the existing details/assessment flow that the owner likes. Record page contains identity, status/progress, compact details/assessment, required/recommended summaries, full-width requirement accordions and final submission.
+Verify: No required journey through Overview/Requirements/Director/EMS/Submit tabs. Professional invitation links remain available.
+
+2. Jump directly to a requirement
+Required list left, recommended right. Both collapsible. Below: full-width Required and Recommended groups with individual cards. Clicking an item opens all parents and the item, scrolls and focuses it.
+Verify: Works from a deep link, keyboard and phone; there is no hidden error behind a collapsed card.
+
+3. Same order, stacked lists
+At 320/375 px the two summaries stack. Full-width fields, readable labels and at least 44px touch targets. Arabic mirrors layout.
+Verify: No horizontal table scrolling or hover-only instructions. Desktop and mobile contain the same requirements.
+
+4. Short labels plus essential instruction
+Use First aid, Local EMS contact, Emergency access, Medical plan. Keep one short actionable sentence visible; examples and extended explanation behind an info control.
+Verify: A map card says what must be shown. Hiding every instruction under an info icon is not acceptable.
+
+5. Bright, clear and restrained
+White/light surfaces, dark readable text, one action accent, modest borders/spacing. Required pending amber; complete green with a text label. Recommended neutral.
+Verify: Color is never the only status signal. No decorative warnings, repeated banners or paragraphs.
+
+6. One versioned requirement catalogue
+Store stable key, source/revision, service, level, condition, phase, obligation, allowed authors, approver, answer schema, evidence, completion test and linked plan sections.
+Verify: Do not derive obligation from wording. Old row 13 removed as standalone; preserve IDs of historical answers.
+
+7. One source for every status
+Pure resolver returns applicable current-phase requirement instances. Summary counts, cards, submission validation, generated plan and reviewer use those same instances.
+Verify: Skipping the UI cannot bypass a required item. Optional and future-phase work never create false pre-event blockers.
+
+8. Organizer-only path
+All eight source readiness/admin rows actionable; AED recommended. No mandatory provider account, plan, map upload or clinical-record receipt unless specifically requested.
+Verify: Submit a realistic Level 1 draft with organizer answers and no medical invitation.
+
+9. Complete operational checklist
+Eleven source readiness/admin rows are required. Treatment point/plan recommended per revised baseline. Retain required site map and applicable Annex C. Apply confirmed D1/D2; review the older-source conflict in D3.
+Verify: Do not mistake document cards for all Annex B obligations. Every required arrangement has a useful answer.
+
+10. Shared approved plan
+EMS or Director can prepare one plan. Named Director approves the current version; changes invalidate dependent approval. Reuse its answers in each related requirement. Organizer sees preparation/approval status, then the approved plan read-only.
+Verify: No double-entry. An uploaded plan alone does not prove all sections were addressed. Organizer cannot edit it. At Level 2, a completed optional plan is readable without imposing mandatory Director approval.
+
+11. First authorized completion counts once
+Organizer/provider shared arrangements use one answer with author, role, timestamp and version. Other authorized people see it immediately.
+Verify: Test organizer-first and provider-first saves. A stale concurrent save shows a conflict instead of silently overwriting.
+
+12. Keep signatures role-specific
+Director approval and each agency’s readiness declaration remain distinct personal/organizational acts. Organizer final certification is separate.
+Verify: One party cannot complete or sign for another merely because the task is visible to both.
+
+13. Enter contacts once
+Auto-fill organizer from intake. Level 1 needs no EMS account. At Levels 2/3 the organizer invites EMS; Director invitation is recommended at Level 2 and required at Level 3. Reuse accepted profile/contact data.
+Verify: No repeated agency name/phone form elsewhere. Invited/accepted/declined states are visible. Acceptance does not itself confirm ambulance deployment or finish the medical plan.
+
+14. Use the right control
+Use checkboxes for attestations, short fields for locations, numeric counts where relevant, files only where required, and plan links for plan-based answers.
+Verify: Do not replace every item with a textarea or mandatory attachment. Keep No/Not planned distinct from Complete.
+
+15. Separate readiness from later reports
+Patient-care records arise with care; post-event report follows its trigger. At Level 3 document the provider process in the plan before the event.
+Verify: A future report or nonexistent patient record cannot block first submission. Report triggers are tested separately.
+
+16. Review at the bottom of the same page
+Show remaining required items with jump links, optional choices separately, then applicable organizer declaration and Submit.
+Verify: Use server validation. Errors open the exact incomplete cards; no generic “something missing” message.
+
+17. Show useful answers, not just green marks
+Same submitted requirement record, source rule, answer, file/map, author/date/version, Director approval and per-agency signatures. Group missing or changed items.
+Verify: Reviewer can identify where an ambulance enters, who gives first aid and how EMS is reached without opening unrelated tabs.
+
+18. Immutable submitted package
+Snapshot rules version, answers, evidence and approvals. Lock accepted/submitted content; corrections create an auditable version.
+Verify: Later edits to a profile, draft or rule catalogue must not rewrite an earlier submission.
+
+19. Preserve existing records
+Map old keys to current matrix. Keep accepted legacy records readable. For drafts, show newly required answers without fabricating completion.
+Verify: Retain certificates, files, invitations and approval history. Compare counts before/after migration in a staging copy.
+
+20. Same UI, explicit context
+Use Venues sheet. Fix current medical-only editor assumptions and the conditional patient-record pre-submission gate before reusing code.
+Verify: One Level 1 venue works without inviting a medical account; renewal preserves ID and prior certificates.
+
+21. Correct time and signature rules
+Serious notice within 24h of occurrence; Annex D within 7 days after event where required. Level 3 has organizer and Director signature blocks.
+Verify: Test incidents during multi-day events and late submissions after D6 is decided; no event-end-only clock.
+
+22. Current live Test 11
+Observed on 7 October: Level 2 page exposes site-map upload, recommended plan and Other. Its 15 operational checklist rows are collapsed and read-only below submission.
+Verify: This is the specific gap to fix. It is not evidence that the underlying matrix contains only two requirements.
+
+23. Reuse working safeguards
+Current event document filter and static Final checklist need replacement. Align event submission inputs with per-row readiness. Reuse plan version/approval controls and frozen snapshots.
+Verify: Do not copy venue logic blindly: it currently makes conditional care documentation a pre-event task and restricts several shared rows to medical editors.
+
+24. Build in stages
+Confirm decisions; implement resolver and server gates; prove Level 1 end-to-end; add Level 2/3 shared plan and reviewer; apply venue context; test Arabic/mobile; migrate and deploy.
+Verify: Tests must assert source meaning and role behavior, not only screenshots or a successful build.
+
+
+
+VENUE DIFFERENCES
+
+Eligibility: Regularly hosts organized events and approved/licensed capacity at least 1,000. Use existing initial details and assessment. Do not infer applicability from a generic venue name. Source: Annex A Part D, Recurring Event Venues.
+
+Assessment period: One routine operating session, not 365 days of operation. Describe usual activity, attendance, timing and access. Keep the annual assessment context visible. Source: Annex A Part B Domain 4.
+
+Level: Derive from answers and applicable minimum conditions. Do not copy an event level to a venue or add a universal Level 2 floor. Nightclub/dance venue minimum applies where specified. Source: Annex A Parts D–E.
+
+Requirements: Same level-based medical requirements, interpreted for routine venue operations. Use the same requirement renderer and completion rules. Replace event date/coverage context with routine sessions. Source: Protocol 2; Annex A annual assessment; Revised B.
+
+Level 1: Organizer may complete routine first-aid, EMS contact, supplies, access, communications and escalation. No mandatory EMS/Director invite just to clear a clinical-records row. AED remains recommended. Source: Revised B A–D; latest owner request.
+
+Shared roles: Organizer or authorized provider can record shared practical arrangements. One answer per requirement; accepted team identity reused. Professional declarations and Director approval remain personal. Source: Revised B responsibility column; owner instructions.
+
+Medical plan: Level-based plan with shared operational answers. Do not require independent text answers plus a conflicting plan attachment. One canonical plan record and export. Source: Revised B C; Protocol 6; D2/D4.
+
+Page layout: Same status rail, required/recommended summaries and full-width cards as event page. Single venue record page. Keep a compact details/assessment summary with deliberate edit actions where allowed. Source: Owner request; proposed UX.
+
+Locking: Submitted/accepted package is an immutable snapshot. Allow authorized revision, never silent overwrite. Keep earlier answers/certificates accessible. Source: Product specification audit/version requirements; owner instruction.
+
+Renewal: Annual reassessment; earlier reassessment after material changes. Same venue ID, new assessment/submission version and new certificate; retain prior certificates. Exact renewal window and validity start need D7. Source: Annex A recurring venues; owner instruction.
+
+Material changes: Capacity, layout, crowd configuration, activity or patient access changes trigger reassessment. Recalculate level and flag affected answers/approvals. Do not silently clear all evidence or automatically approve the revision. Source: Annex A Recurring Event Venues.
+
+Maps and declarations: Source package language is event-based; venue equivalents need an explicit mapping. Propose one permanent site map and routine deployment layout where applicable. Do not invent a route map for a building. Confirm the venue filing package before enforcing new uploads. Source: Protocol 8; Annex A; proposed venue adaptation.
+
+After-event reports: No supplied annual venue aggregate reporting rule. Keep reports for actual events/incidents. Do not invent a mandatory annual Annex D solely because venue registration renews. Source: Protocol 13; Annex D; D8.
+
+PAD facility service: Separate scope and readiness instrument. A venue may also be a covered PAD facility. Reuse accessible valid resources where permitted, but retain separate applicability and approvals. Source: 06 PAD specification, relationship between instruments.
+
+
+
+SOURCE / SCOPE LIMITS
+
+Practical fields are proposals for partner confirmation, not new clinical standards. Guidance is non-binding. No universal kit quantities, ratios or response-time pass/fail rules may be invented. The separate PAD service must keep its own applicability.
+
+Do not call the whole application launch-ready based on these changes. Real email/OTP, hosting/data migration and backup decisions need their own verified readiness checks. They are outside this workflow handoff.
+
+No application source, production records or deployment was changed in this review.
