@@ -217,15 +217,17 @@ test.describe('the organizer reads the same determination', () => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/dashboard');
     const body = page.locator('body');
-    // EV-0362 carries a recorded revision; the seeded 'Information required' must not
-    // show. Both halves pinned: the recorded wording present, the stale string absent
-    // (case-sensitive, so the lowercase 'information' inside the outcome cannot match).
-    await expect(body).toContainText('Additional information or revision required');
+    // EV-0362 carries a recorded revision: the dashboard reads the plain label the
+    // outcome maps to (owner direction, 2026-10-07), and the seeded 'Information
+    // required' must not show (case-sensitive, so 'information' inside a label cannot match).
+    await expect(body).toContainText('Modifications requested');
     await expect(body).not.toContainText('Information required');
     // EV-0244 (Tripoli Marathon) carries a recorded satisfied outcome; EV-0301
     // (Saida Night Run) carries incomplete. Both are the organizer's own records.
-    await expect(body).toContainText('Health and medical preparedness requirements satisfied');
-    await expect(body).toContainText('Submission received but incomplete');
+    await expect(body).toContainText('Certificate ready');
+    await expect(body).toContainText('More information needed');
+    // The outcomes' own words stay off the dashboard: they belong to the determination.
+    await expect(body).not.toContainText('Additional information or revision required');
 
     await gotoRidingRestarts(page, '/events/EV-0362');
     // Stage 5 of the rail is the outcome, done, in the compliance form's wording, and
