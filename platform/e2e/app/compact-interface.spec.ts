@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { openAllRequirements } from '../helpers/record';
 import { signInAs } from '../helpers/signin';
 import { gotoRidingRestarts } from '../helpers/resilient';
 
@@ -77,6 +78,7 @@ test.describe('phone help and navigation', () => {
       await account.tap();
       await expect(header.locator('[data-account-menu]')).toContainText('Beirut Road Runners');
       // A tap on the page body (the requirement summaries, which replaced the old counters strip) closes the menu.
+      await openAllRequirements(page);
       await page.locator('[data-region="requirement-summaries"]').tap({ position: { x: 8, y: 8 } });
       await expect(header.locator('[data-account-menu]')).toHaveCount(0);
       const history = page.locator('[data-region="history"]');

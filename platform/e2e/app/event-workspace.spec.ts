@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openAllRequirements } from '../helpers/record';
 import { signInAs } from '../helpers/signin';
 import { useLanguage } from '../helpers/language';
 
@@ -21,6 +22,7 @@ for (const lang of ['en', 'ar'] as const) {
       await expect(header.locator('[data-region="record-status"]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       // Level 2: the site map is required where applicable; the plan is recommended (D2); no Director row (D1).
+      await openAllRequirements(page);
       const summaries = page.locator('[data-region="requirement-summaries"]');
       await expect(summaries.locator('[data-summary="required"] [data-summary-row="P-M"]')).toBeVisible();
       await expect(summaries.locator('[data-summary="recommended"] [data-summary-row="B2"]')).toBeVisible();
@@ -71,6 +73,7 @@ test('end date and closing time follow their starts until the user changes them'
 test('Level 3 lists the plan, the Medical Director and each agency\'s declaration as required', async ({ page }) => {
   await signInAs(page, 'test_organizer');
   await page.goto('/events/EV-0362');
+  await openAllRequirements(page);
   const required = page.locator('[data-region="requirement-summaries"] [data-summary="required"]');
   await expect(required).toBeVisible();
   await expect(required.locator('[data-summary-row="B2"]')).toBeVisible();

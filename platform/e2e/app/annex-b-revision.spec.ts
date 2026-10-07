@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { useLanguage } from '../helpers/language';
-import { openDetails } from '../helpers/record';
+import { openDetails, openAllRequirements } from '../helpers/record';
 
 /** The own-text form of one plan section, inside the plan card. */
 async function sectionForm(page: Page, key: string) {
@@ -93,6 +93,7 @@ test('the Director and the EMS agency read the Level 3 record in Arabic on a pho
     await signInAs(page, login);
     await page.goto(route);
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await openAllRequirements(page);
     await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
     const plan = await openDetails(page.locator('[data-requirement="B2"]'));
     await expect(plan.locator('[data-plan-section="P01"]')).toBeVisible();
