@@ -173,8 +173,9 @@ export function seedDemonstration(db: DatabaseSync): void {
   insertAccount.run('test_moph', 'L. Nassar', 'LN', 'reviewer');
   insertAccount.run('test_moph_admin', 'R. Sfeir', 'RS', 'ministry_admin');
   insertAccount.run('test_owner', 'Platform operations', 'PO', 'platform_owner');
-  // Listed on Users and roles; holds no sign-in button. Its access follows the
-  // Order lane: off (the default) shows it suspended, not active.
+  // Listed on Users and roles, with a demonstration sign-in since the lane became usable
+  // (partner review, 2026-10-07). Its access follows the Order lane: off (the default)
+  // shows it suspended on the users page and the lane-off screen is all it sees.
   insertAccount.run('order_reviewer', 'Dr Y. Salameh', 'YS', 'order');
 
   // The showcase account: recorded, and it holds the filed submissions below.

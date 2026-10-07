@@ -51,6 +51,7 @@ const DEMO_LOGINS = new Set([
   'test_organizer',
   'test_organizer_pending',
   'test_ems',
+  'order_reviewer',
   'test_director',
   'test_moph',
   'test_moph_admin',

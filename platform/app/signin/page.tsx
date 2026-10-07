@@ -89,6 +89,13 @@ const DEMO_LOGINS: DemoLogin[] = [
     cannotEn: 'Record Ministry outcomes or attestations, or configure cardiac policy.',
     cannotAr: 'تسجيل نتائج الوزارة أو التصديقات، أو ضبط سياسة توقف القلب.',
   },
+  {
+    login: 'order_reviewer', en: 'Order of Physicians reviewer', ar: 'مراجع نقابة الأطباء',
+    canEn: 'While the lane is on: review the Medical Director’s credential information and the plan’s clinical content on designated Level 3 submissions, and record its two review items.',
+    canAr: 'عند تشغيل المسار: مراجعة بيانات اعتماد المدير الطبي والمحتوى السريري للخطة في طلبات المستوى 3 المسندة، وتسجيل بندي المراجعة الخاصين بالنقابة.',
+    cannotEn: 'Record any outcome, or see business details, facility records or any submission below Level 3.',
+    cannotAr: 'تسجيل أي نتيجة، أو الاطلاع على البيانات التجارية أو سجلات المرافق أو أي طلب دون المستوى 3.',
+  },
 ];
 
 /** Reference field geometry: 46px inputs, 8px radius. */

@@ -13,7 +13,7 @@ test('the Order reviews a Level 3 Director once the lane is on; the organizer se
   const db = () => new DatabaseSync(process.env['E2E_DATABASE_PATH']!);
   try {
     // Off by default: the off state is the whole screen, and the organizer's row names the Ministry as the recorder.
-    await signInAs(page, 'test_order');
+    await signInAs(page, 'order_reviewer');
     await expect(page.locator('[data-region="lane-off"]')).toBeVisible();
     await expect(page.locator('[data-region="order-submission"]')).toHaveCount(0);
     await signInAs(page, 'test_organizer');
@@ -25,7 +25,7 @@ test('the Order reviews a Level 3 Director once the lane is on; the organizer se
     await signInAs(page, 'test_owner');
     await page.getByRole('button', { name: 'Turn the lane on', exact: true }).click();
     await expect(page).toHaveURL(/notice=lane/);
-    await signInAs(page, 'test_order');
+    await signInAs(page, 'order_reviewer');
     const filing = page.locator('[data-region="order-submission"][data-event="EV-0362"]');
     await expect(filing).toBeVisible();
     await expect(filing.locator('[data-region="order-director"]')).toContainText('Dr. N. Salameh');
