@@ -6,14 +6,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   applicableDeclarations,
-  certifyRowGroups,
   declarationsAreComplete,
-  nextAction,
   planIsComplete,
   type PlanShape,
-  type SubmissionBlocker,
 } from '../lib/rules/submission';
-import { requirementsForLevel } from '../lib/rules/requirements';
+import { recordNextStep, resolveRequirements, type RecordFacts, type StoredAnswer } from '../lib/rules/record-requirements';
 import { seriousIncidentGate } from '../lib/rules/gates';
 import { facilityLedger, type LedgerInputs } from '../lib/rules/facility';
 import { effectiveCycles } from '../lib/rules/ministry';
@@ -259,87 +256,56 @@ describe('the public register never invents a level', () => {
   });
 });
 
-describe('the event record names ONE next action, from the gate\'s own blockers', () => {
-  const b = (kind: SubmissionBlocker['kind'], docKey?: string): SubmissionBlocker =>
-    docKey
-      ? { kind, docKey, itemEn: 'x', itemAr: 'x' }
-      : { kind, itemEn: 'x', itemAr: 'x' };
+describe('the event record names ONE next action, from the resolver\'s own instances', () => {
+  const facts = (level: 1 | 2 | 3, over: Partial<RecordFacts> = {}): RecordFacts => ({
+    service: 'event', level, answers: {}, files: {}, organizerContact: { name: 'O', phone: '1' }, assessmentComplete: true,
+    ems: [], director: null, planApprovalCurrent: false, declaration: { statementsComplete: false, certificationComplete: false }, requested: [], ...over,
+  });
+  const step = (f: RecordFacts, over: Partial<Parameters<typeof recordNextStep>[0]> = {}) =>
+    recordNextStep({ service: 'event', level: f.level, editable: true, filed: false, returned: false, organizationPending: false, instances: resolveRequirements(f), ...over })!;
 
-  it('nothing outstanding is the invitation to file', () => {
-    const a = nextAction([]);
-    expect(a.kind).toBe('ready');
-    expect(a.tone).toBe('brand');
-    expect(a.href).toBe('submit');
-    expect(a.titleEn).toBe('Ready to submit');
-    expect(a.bodyEn).toBe('Everything the level requires is in place.');
+  it('no level derived is the assessment', () => {
+    expect(recordNextStep({ service: 'event', level: null, editable: true, filed: false, returned: false, organizationPending: false, instances: [] })!.kind).toBe('assessment');
   });
 
-  it('an attachable document asks for an attachment; the plan sends the organizer to their medical team', () => {
-    expect(nextAction([b('documentMissing', 'siteMap')]).kind).toBe('documents');
-    expect(nextAction([b('documentMissing', 'siteMap')]).titleEn).toBe('Upload 1 document');
-    // The plan and the compliance form are completed ON the platform: telling the
-    // organizer to "attach" them would send them to a screen with no such control.
-    const planAction = nextAction([b('documentMissing', 'plan')]);
-    expect(planAction.kind).toBe('plan');
-    expect(planAction.href).toBe('requirements');
+  it("the organizer's own work comes first and names the first pending card", () => {
+    const a = step(facts(1));
+    expect(a.kind).toBe('requirements');
+    expect(a.href).toBe('#req-B4');
+    expect(a.tone).toBe('accent');
   });
 
-  it('waiting on somebody else offers a clear follow-up', () => {
-    const a = nextAction([b('providerUnanswered')]);
-    expect(a.kind).toBe('waitingOnOthers');
-    expect(a.titleEn).toBe('Follow up on the pending response');
-    expect(a.bodyEn).toContain('Your preparation is complete');
-    expect(a.bodyEn).toContain('response or declaration is pending');
-  });
-
-  it('the organizer\'s own work outranks waiting on others', () => {
-    // A page full of amber must lead with the thing the organizer can actually do.
-    expect(nextAction([b('providerUnanswered'), b('documentMissing', 'siteMap')]).kind).toBe('documents');
-    expect(nextAction([b('providerUnanswered'), b('directorMissing')]).kind).toBe('director');
-  });
-
-  it('pending registration allows preparation before showing the registration wait', () => {
-    expect(nextAction([b('organizationPending'), b('documentMissing', 'siteMap')]).kind).toBe('documents');
-    expect(nextAction([b('organizationPending'), b('documentMissing', 'plan')]).kind).toBe('plan');
-    expect(nextAction([b('organizationPending'), b('directorMissing')]).kind).toBe('director');
-    expect(nextAction([b('organizationPending'), b('declarationsIncomplete')]).kind).toBe('declarations');
-    const a = nextAction([b('organizationPending')]);
-    expect(a.kind).toBe('organizationPending');
-    expect(a.href).toBe('organization');
-  });
-
-  it('organizer declarations and certification can be completed while responses are pending', () => {
-    for (const own of ['declarationsIncomplete', 'certificationIncomplete'] as const) {
-      const action = nextAction([b('providerUnanswered'), b('directorUnanswered'), b(own)]);
-      expect(action.kind).toBe('declarations');
-      expect(action.href).toBe('submit');
+  it('waiting on somebody else is named as waiting; the declaration follows; then the invitation to file', () => {
+    const answered: Record<string, StoredAnswer> = {};
+    const l2 = facts(2, { ems: [{ token: 'e', name: 'EMS', status: 'nominated' }] });
+    for (const row of resolveRequirements(l2)) {
+      if (row.fields.length === 0 || !row.authors.includes('organizer')) continue;
+      const values: Record<string, string | boolean | number> = {};
+      for (const f of row.fields) if (!f.showWhen) values[f.key] = f.type === 'checkbox' ? true : f.type === 'number' ? 2 : 'x';
+      answered[row.key] = { values, savedByRole: 'organizer', savedByName: 'O', savedAt: '', version: 1 };
     }
-    // Certification alone must never claim the package is ready to file.
-    expect(nextAction([b('certificationIncomplete')]).kind).toBe('declarations');
+    const waiting = step({ ...l2, answers: answered, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } } });
+    expect(waiting.kind).toBe('waitingOnOthers');
+    const confirmed = { ...l2, answers: { ...answered, B7: { values: { whereWhen: 'x', howToCall: 'x', ifLeaves: 'x' }, savedByRole: 'ems' as const, savedByName: 'E', savedAt: '', version: 1 } }, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } }, ems: [{ token: 'e', name: 'EMS', status: 'confirmed' as const }] };
+    expect(step(confirmed).kind).toBe('declarations');
+    const ready = step({ ...confirmed, declaration: { statementsComplete: true, certificationComplete: true } });
+    expect(ready.kind).toBe('submit');
+    expect(ready.tone).toBe('brand');
+    expect(ready.href).toBe('#final-review');
+  });
+
+  it('pending registration shows only once the preparation is complete', () => {
+    expect(step(facts(1), { organizationPending: true }).kind).toBe('requirements');
+  });
+
+  it('nothing leads once the record is with the Ministry', () => {
+    expect(recordNextStep({ service: 'event', level: 1, editable: false, filed: true, returned: false, organizationPending: false, instances: [] })).toBeNull();
   });
 
   it('every state carries both languages and a button', () => {
-    for (const blockers of [[], [b('documentMissing', 'siteMap')], [b('documentMissing', 'plan')], [b('providerUnanswered')], [b('directorMissing')], [b('declarationsIncomplete')], [b('organizationPending')]]) {
-      const a = nextAction(blockers);
-      for (const s of [a.titleEn, a.titleAr, a.bodyEn, a.bodyAr, a.buttonEn, a.buttonAr]) {
-        expect(s.trim().length).toBeGreaterThan(0);
-      }
+    for (const f of [facts(1), facts(2), facts(3)]) {
+      const a = step(f);
+      for (const s of [a.titleEn, a.titleAr, a.bodyEn, a.bodyAr, a.buttonEn, a.buttonAr]) expect(s.trim().length).toBeGreaterThan(0);
     }
-  });
-});
-
-describe('the certify-to rows group by what the level added', () => {
-  it('every row lands in exactly one group, and the counts derive', () => {
-    for (const level of [1, 2, 3] as const) {
-      const rows = requirementsForLevel(level);
-      const g = certifyRowGroups(rows);
-      expect(g.everyLevel.length + g.addedOrRaised.length).toBe(rows.length);
-      expect(g.everyLevel.some((r) => r.raised)).toBe(false);
-      expect(g.addedOrRaised.every((r) => r.raised)).toBe(true);
-    }
-  });
-
-  it('Level 1 adds nothing -- there is no level below it', () => {
-    expect(certifyRowGroups(requirementsForLevel(1)).addedOrRaised).toEqual([]);
   });
 });

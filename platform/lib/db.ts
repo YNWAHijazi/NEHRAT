@@ -11,6 +11,7 @@ import { nowStamp } from './clock';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { seedDemonstration } from './demo-seed';
+import { migrateLegacyRequirementAnswers } from './requirement-migration';
 
 const DATA_DIR = join(process.cwd(), 'var');
 
@@ -113,6 +114,8 @@ export const ONE_CLOCK_COLUMNS: readonly [string, string][] = [
     ['facility_aed_decisions', 'created_at'], ['facility_profile_updates', 'created_at'],
     ['venue_package_history', 'submitted_at'], ['event_plan_approvals', 'approved_at'],
     ['venue_invitations', 'invited_at'], ['venue_contributions', 'completed_at'], ['venue_plan_approvals', 'approved_at'],
+    ['requirement_answers', 'saved_at'], ['requirement_answer_history', 'saved_at'], ['requirement_snapshots', 'filed_at'],
+    ['migrations_applied', 'applied_at'],
 ];
 
 function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
@@ -1147,6 +1150,50 @@ function migrate(d: DatabaseSync): void {
   // one names what it was copied from.
   addColumn('events', 'copied_from', 'copied_from TEXT');
   addColumn('password_resets', 'issued_by', 'issued_by INTEGER REFERENCES accounts(id)');
+
+  // THE SINGLE RECORD PAGE (redesign, 2026-10-07). One answer per requirement per
+  // record, keyed by the catalogue's stable key, with its author, role, timestamp and
+  // version: the first authorized completion counts once, and a stale save is refused
+  // on the version. Every save appends the row it replaces to the history. The filed
+  // package is frozen into requirement_snapshots with its files, so a later edit to a
+  // draft, a profile or the catalogue never rewrites what the Ministry read.
+  d.exec(`CREATE TABLE IF NOT EXISTS requirement_answers (
+    record_kind TEXT NOT NULL CHECK (record_kind IN ('event','venue')),
+    record_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    answers TEXT NOT NULL DEFAULT '{}',
+    author_id INTEGER REFERENCES accounts(id),
+    author_role TEXT NOT NULL DEFAULT 'organizer',
+    author_name TEXT NOT NULL DEFAULT '',
+    version INTEGER NOT NULL DEFAULT 1,
+    saved_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (record_kind, record_id, key)
+  ); CREATE TABLE IF NOT EXISTS requirement_answer_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    record_kind TEXT NOT NULL, record_id TEXT NOT NULL, key TEXT NOT NULL,
+    answers TEXT NOT NULL, author_id INTEGER, author_role TEXT NOT NULL, author_name TEXT NOT NULL DEFAULT '',
+    version INTEGER NOT NULL, saved_at TEXT NOT NULL DEFAULT (datetime('now'))
+  ); CREATE INDEX IF NOT EXISTS requirement_answer_history_record ON requirement_answer_history(record_kind, record_id, key, version);
+  CREATE TABLE IF NOT EXISTS requirement_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    record_kind TEXT NOT NULL, record_id TEXT NOT NULL, version INTEGER NOT NULL,
+    catalogue_revision TEXT NOT NULL, snapshot TEXT NOT NULL,
+    filed_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (record_kind, record_id, version)
+  ); CREATE TABLE IF NOT EXISTS requirement_snapshot_files (
+    snapshot_id INTEGER NOT NULL REFERENCES requirement_snapshots(id), key TEXT NOT NULL,
+    file_name TEXT NOT NULL, content_type TEXT NOT NULL DEFAULT '', bytes BLOB,
+    PRIMARY KEY (snapshot_id, key)
+  ); CREATE TABLE IF NOT EXISTS migrations_applied (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT (datetime('now')));`);
+  for (const action of ['INSERT', 'UPDATE', 'DELETE']) {
+    d.exec(`CREATE TRIGGER IF NOT EXISTS activity_requirement_answers_${action} AFTER ${action} ON requirement_answers
+      WHEN ${action === 'DELETE' ? 'OLD' : 'NEW'}.record_kind = 'event'
+      BEGIN UPDATE events SET updated_at = now_stamp() WHERE id = ${action === 'DELETE' ? 'OLD' : 'NEW'}.record_id; END;`);
+  }
+  if (!d.prepare(`SELECT name FROM migrations_applied WHERE name = 'requirement-answers-2026-10-07'`).get()) {
+    migrateLegacyRequirementAnswers(d);
+    d.prepare(`INSERT INTO migrations_applied (name) VALUES ('requirement-answers-2026-10-07')`).run();
+  }
 
   // The organizations CHECK gained 'returned' -- same rebuild dance as invitations.
   const orgSql = (d

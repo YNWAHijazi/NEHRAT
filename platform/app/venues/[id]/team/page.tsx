@@ -4,7 +4,7 @@ import { L } from '../../../../components/L';
 import { ownedVenuePage } from '../../../../lib/venue/page';
 import { venueLocalEmsContactApplies, arabicCount } from '../../../../lib/rules/venue-workflow';
 import { inviteVenuePartnerAction, withdrawVenuePartnerAction, saveVenueLocalEmsContactAction } from '../../team-actions';
-import { InvitationLinkBlock } from '../../../events/[id]/requirements/InvitationLinkBlock';
+import { InvitationLinkBlock } from '../../../../components/record/InvitationLinkBlock';
 import { alertBand, noticeBand, fieldInput } from '../../../../components/workspace-styles';
 
 /** The nomination states (SPEC 2: Nominated / Confirmed / Declined), agreeing with the party in Arabic:

@@ -52,6 +52,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     ...devices['Desktop Chrome'],
+    // A container that ships its own Chromium (and forbids downloading another) names it
+    // here; unset, Playwright launches the browser it installed. Never a product setting.
+    ...(process.env['E2E_CHROMIUM_PATH'] ? { launchOptions: { executablePath: process.env['E2E_CHROMIUM_PATH'] } } : {}),
     // The reference designs target 1160px content width; the control dock hides below
     // 900px. 1280x900 shows every screen at its designed density.
     viewport: { width: 1280, height: 900 },

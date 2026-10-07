@@ -1,15 +1,19 @@
 import Link from 'next/link';
 import { L } from './L';
 import { InfoNote } from './InfoNote';
-import { EventWorkspaceNav, type EventWorkspaceSection } from './EventWorkspaceNav';
 import { RecordHeader } from './RecordHeader';
 import { organizationFor } from '../lib/auth';
 import { assessmentsFor, beirutToday, daysBetween, archiveWindowDays, type EventRow } from '../lib/queries';
 import { clockNow } from '../lib/clock';
-import { eventFilingDeadline, isArchivedRecord, levelWhy, medicalDirectorApplies, type EventGateContext } from '../lib/rules';
+import { eventFilingDeadline, isArchivedRecord, levelWhy, type EventGateContext } from '../lib/rules';
+import { chip } from './workspace-styles';
 
-/** One identity and navigation layout for every organizer event tab. */
-export function EventWorkspaceHeader({ accountId, event, active }: { accountId: number; event: EventRow; active: EventWorkspaceSection }) {
+/**
+ * The identity header of the single event record page: name in both languages, record
+ * id, date, level, deadline and current status (brief: Layout). The tab strip that
+ * used to sit under it is gone -- there is one page.
+ */
+export function EventWorkspaceHeader({ accountId, event }: { accountId: number; event: EventRow }) {
   const latest = assessmentsFor(accountId, event.id)[0];
   const level = latest?.derivation.finalLevel ?? event.level;
   const why = latest ? levelWhy(latest.derivation, latest.inputs.eventDisciplines) : null;
@@ -20,8 +24,9 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
     archived: isArchivedRecord({ archivedAt: event.archivedAt, endDate: event.endDate }, today, archiveWindowDays()), now: clockNow() };
   const filing = eventFilingDeadline(context);
   const daysLeft = filing ? daysBetween(today, filing.date) : null;
+  const dates = event.startDate && event.endDate && event.startDate !== event.endDate ? `${event.startDate} — ${event.endDate}` : event.startDate ?? '—';
+  const statusTone = event.outcome === 'satisfied' ? 'done' : event.outcome ? 'pending' : event.filed ? 'muted' : 'pending';
   return <div data-region="event-workspace-header">
-        {/* Identity header, from the reference */}
         <RecordHeader
           facts={[
             {
@@ -34,7 +39,8 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
                 </div>
               ) : null,
             },
-            { en: 'Event date', ar: 'تاريخ الفعالية', value: event.startDate ?? '—' },
+            { en: 'Event date', ar: 'تاريخ الفعالية', value: <bdi dir="ltr">{dates}</bdi> },
+            { en: 'Status', ar: 'الحالة', value: <span data-region="record-status" style={chip(statusTone)}><L en={event.stateEn} ar={event.stateAr} /></span> },
           ]}
           nameEn={event.nameEn}
           nameAr={event.nameAr}
@@ -68,8 +74,5 @@ export function EventWorkspaceHeader({ accountId, event, active }: { accountId: 
             ] : []),
           ]}
         />
-
-        <EventWorkspaceNav eventId={event.id} active={active} showDirector={medicalDirectorApplies(level)} />
-
   </div>;
 }

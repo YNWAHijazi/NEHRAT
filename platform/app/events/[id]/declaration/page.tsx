@@ -1,5 +1,6 @@
-import { MedicalPlanTask } from '../../../../components/MedicalPlanTask';
 import { InfoNote } from '../../../../components/InfoNote';
+import { RecordRequirements } from '../../../../components/record/RecordRequirements';
+import { eventRecordView } from '../../../../lib/record-view';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -24,12 +25,13 @@ export default async function DeclarationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; upload?: string; doc?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
   const invitation = invitationForEvent(account.id, id, 'ems');
+  const { upload, doc } = await searchParams;
   // A material change reported AFTER the signature re-opens the question: the
   // declaration attests to the event as it was when signed.
   const changeAfterSigning =
@@ -202,9 +204,16 @@ export default async function DeclarationPage({
           ) : null}
 
           {confirmed ? (
-            <div style={{ marginBlockStart: 32 }}>
-              <MedicalPlanTask eventId={id} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} />
-              <SharedDocuments eventId={id} token={invitation.token} />
+            <div style={{ marginBlockStart: 40 }} data-region="ems-record">
+              <h2 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}><L en="The event's record" ar="سجل الفعالية" /></h2>
+              <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
+                <L en="Shared with the organizer and the Medical Director. Your agency prepares the medical plan with the Director and records the rows that name an EMS agency; the Director approves the plan's current version." ar="مشترك مع المنظّم والمدير الطبي. تُعدّ جهتكم الخطة الطبية مع المدير الطبي وتسجّل الصفوف التي تسمّي جهة إسعاف؛ ويعتمد المدير الطبي نسخة الخطة الحالية." />
+              </p>
+              {(() => {
+                const view = eventRecordView(invitation.organizerAccountId, id);
+                return view ? <RecordRequirements record={view.record} viewerRole="ems" viewerConfirmed contentTypes={view.contentTypes} refusal={upload && doc ? { key: doc, reason: upload } : null} derived={view.derived} governance={view.governance} facility={view.facility} /> : null;
+              })()}
+              <div style={{ marginBlockStart: 28 }}><SharedDocuments eventId={id} token={invitation.token} /></div>
             </div>
           ) : null}
         </div>

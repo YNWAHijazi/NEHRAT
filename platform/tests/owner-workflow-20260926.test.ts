@@ -26,7 +26,8 @@ import {
 } from "../app/actions";
 import { planFor } from "../lib/queries";
 import { canPreparePlan } from "../lib/rules/plan-responsibility";
-import { nextAction, planIsComplete } from "../lib/rules/submission";
+import { planIsComplete } from "../lib/rules/submission";
+import { recordNextStep, resolveRequirements } from "../lib/rules/record-requirements";
 import { seriousIncidentGate } from "../lib/rules/gates";
 import {
   eventApplicability,
@@ -338,6 +339,9 @@ test('plan responsibility and organizer next steps follow the level',()=>{
  for(const level of [1,2,3]) expect(canPreparePlan(level,'organizer')).toBe(false);
  for(const role of ['ems','director'] as const){expect(canPreparePlan(1,role)).toBe(false);expect(canPreparePlan(2,role)).toBe(true);}
  expect(canPreparePlan(3,'organizer')).toBe(false);expect(canPreparePlan(3,'ems')).toBe(true);expect(canPreparePlan(3,'director')).toBe(true);
- const blocker={kind:'documentMissing' as const,docKey:'plan',itemEn:'Plan',itemAr:'الخطة'};
- expect(nextAction([blocker],3).kind).toBe('waitingOnOthers');expect(nextAction([blocker],2).kind).toBe('plan');
+ // The plan is the medical team's work at both levels: the organizer's next step waits on them, never asks them to write it.
+ const base={service:'event' as const,editable:true,filed:false,returned:false,organizationPending:false};
+ const waiting=(level:2|3)=>recordNextStep({...base,level,instances:resolveRequirements({service:'event',level,answers:{},files:{},organizerContact:{name:'O',phone:'1'},assessmentComplete:true,ems:[{token:'e',name:'EMS',status:'confirmed'}],director:{token:'d',name:'Dr',status:'confirmed'},planApprovalCurrent:false,declaration:{statementsComplete:true,certificationComplete:true},requested:level===2?['B2']:[]})});
+ expect(waiting(3)!.kind).toBe('requirements');
+ expect(waiting(2)!.kind).toBe('requirements');
 });

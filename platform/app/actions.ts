@@ -818,18 +818,29 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
     const { revisionOpenFor } = await import('../lib/queries');
     if (!revisionOpenFor(eventId)) return { error: 'not-open-for-revision' };
     const { submissionGateFor } = await import('../lib/submission-facts');
+    const { writeRequirementSnapshot } = await import('../lib/record-facts');
     const gate = submissionGateFor(account.id, eventId);
-    if (!gate.canFile) return { error: 'blocked' };
-    db.prepare(
-      `INSERT INTO submission_versions (event_id, version, declarations, insurance, representative,
-         telephone, position, expedited, filed_at)
-       SELECT event_id, version, declarations, insurance, representative, telephone, position,
-         expedited, filed_at FROM submissions WHERE event_id = ?`,
-    ).run(eventId);
-    db.prepare(
-      `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
-       WHERE event_id = ?`,
-    ).run(gate.expedited ? 1 : 0, eventId);
+    if (!gate.canFile || !gate.record) return { error: 'blocked' };
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.prepare(
+        `INSERT INTO submission_versions (event_id, version, declarations, insurance, representative,
+           telephone, position, expedited, filed_at)
+         SELECT event_id, version, declarations, insurance, representative, telephone, position,
+           expedited, filed_at FROM submissions WHERE event_id = ?`,
+      ).run(eventId);
+      db.prepare(
+        `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
+         WHERE event_id = ?`,
+      ).run(gate.expedited ? 1 : 0, eventId);
+      const version = (db.prepare(`SELECT version FROM submissions WHERE event_id = ?`).get(eventId) as { version: number }).version;
+      // The re-filed package is frozen as its own version; the earlier one stays readable.
+      writeRequirementSnapshot('event', gate.record, version);
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
     const ref = eventId;
     revalidatePath(`/events/${eventId}`);
     revalidatePath(`/ministry/submissions/${eventId}`);
@@ -837,16 +848,31 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   }
 
   const { submissionGateFor } = await import('../lib/submission-facts');
+  const { writeRequirementSnapshot } = await import('../lib/record-facts');
   const gate = submissionGateFor(account.id, eventId);
-  if (!gate.canFile) return { error: 'blocked' };
+  if (!gate.canFile || !gate.record) return { error: 'blocked' };
 
   // One public identifier from creation through submission and renewal.
   const reference = eventId;
 
-  db.prepare(
-    `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
-  ).run(reference, gate.expedited ? 1 : 0, eventId);
-  db.prepare(`UPDATE events SET filed = 1, moph_reference = ? WHERE id = ?`).run(reference, eventId);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    // The certification row may not exist yet when nothing on the form was ever saved
+    // (a Level 1 filing needs only the certification, which the record page saves here).
+    db.prepare(`INSERT OR IGNORE INTO submissions (event_id) VALUES (?)`).run(eventId);
+    db.prepare(
+      `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
+    ).run(reference, gate.expedited ? 1 : 0, eventId);
+    db.prepare(`UPDATE events SET filed = 1, moph_reference = ? WHERE id = ?`).run(reference, eventId);
+    const version = (db.prepare(`SELECT version FROM submissions WHERE event_id = ?`).get(eventId) as { version: number }).version;
+    // THE IMMUTABLE SUBMITTED PACKAGE (brief item 18): rules version, answers, evidence
+    // and approvals as they stood at filing, with the files' bytes.
+    writeRequirementSnapshot('event', gate.record, version);
+    db.exec('COMMIT');
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
   revalidatePath(`/events/${eventId}`);
   return { reference };
 }

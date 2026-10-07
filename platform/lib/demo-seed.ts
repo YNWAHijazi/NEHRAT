@@ -24,6 +24,8 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { beirutToday } from './clock';
 import { demonstrationPdf } from './demo-pdf';
+import { seedRecordAnswers } from './demo-requirement-answers';
+import { migrateLegacyRequirementAnswers } from './requirement-migration';
 import { NEHRAT_TOOL_VERSION } from './rules';
 
 /** The prototype's pinned "today". */
@@ -926,4 +928,19 @@ export function seedDemonstration(db: DatabaseSync): void {
     'المتبقي: مستند هوية الممثل المفوّض. تستمر التقييمات والمسودات في هذه الأثناء؛ ويُفتح التقديم بعد تسجيل المؤسسة.',
     '/organization', d('2026-07-30'), 0,
   );
+
+  // THE SINGLE RECORD PAGE (2026-10-07): the old shapes above (written plans, operational
+  // detail, the insurance block) map onto the catalogue's keys exactly as a migrated
+  // database's do, and the structured answers the page asks for are then seeded so the
+  // demonstration records read as coherent files. The organizer's phone makes the
+  // contact row complete from the account.
+  migrateLegacyRequirementAnswers(db);
+  db.prepare(`UPDATE accounts SET phone = ? WHERE id = ? AND phone = ''`).run('+961 3 456 789', organizer);
+  const names = { organizer: 'Nour Khoury', ems: 'Lebanese Red Cross', director: 'Dr Karim Saad' };
+  seedRecordAnswers(db, 'event', 'EV-0362', 3, `${d('2026-08-18')} 10:00:00`, names);
+  seedRecordAnswers(db, 'event', 'EV-0244', 3, `${d('2026-07-20')} 10:00:00`, names);
+  seedRecordAnswers(db, 'event', 'EV-0301', 2, `${d('2026-08-25')} 10:00:00`, names);
+  seedRecordAnswers(db, 'event', 'EV-0455', 2, `${d('2026-08-01')} 10:00:00`, names);
+  // In preparation: the organizer's rows are in; the agency's and the map are the walkthrough's.
+  seedRecordAnswers(db, 'event', 'EV-0418', 2, `${d('2026-08-10')} 10:00:00`, names, ['organizer']);
 }
