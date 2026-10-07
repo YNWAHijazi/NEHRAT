@@ -1,5 +1,7 @@
 .DS_Store
 node_modules/
+# Also as a symlink: a linked dependency folder in a worktree was once committed (2026-10-07).
+node_modules
 .next/
 out/
 coverage/
