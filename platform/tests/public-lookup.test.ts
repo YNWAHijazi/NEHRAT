@@ -18,7 +18,7 @@ const record: SubmissionRecord = {
   referenceNumber: 'MOPH-EV-2026-0362',
   eventName: 'Beirut Coastal 12K',
   level: 2,
-  status: 'Health and medical preparedness requirements satisfied',
+  status: 'Certificate ready',
   isDemo: false,
   eventStartDate: '2026-10-01',
   // Everything below must never leave the server.

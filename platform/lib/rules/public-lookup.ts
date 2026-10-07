@@ -29,7 +29,6 @@
 
 import type { Level } from './types';
 import { applyDemonstrationFilter, demonstrationFilter } from './scope';
-import { organizerEventState } from './ministry';
 import ministryJson from './data/ministry.json';
 import lifecycleJson from './data/lifecycle.json';
 
@@ -132,8 +131,9 @@ export function resolvePublicLookup(
  */
 export function publicStatusArabic(status: string): string {
   const known: { en: string; ar: string }[] = [
+    ...Object.values(ministryJson.recordStatus as Record<string, { en: string; ar: string } | string>).filter((v): v is { en: string; ar: string } => typeof v === 'object'),
+    // The outcomes' own words, for a status stored before the plain labels existed.
     ...ministryJson.outcomes,
-    organizerEventState({ outcome: null, filed: true, assessed: true }),
     ...Object.values(lifecycleJson.states as Record<string, { en: string; ar: string }>),
   ];
   return known.find((k) => k.en === status)?.ar ?? status;

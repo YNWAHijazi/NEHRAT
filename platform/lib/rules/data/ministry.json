@@ -1,5 +1,13 @@
 {
   "$comment": "The Ministry console. The three outcomes are the ONLY regulatory determinations. A reviewer records them, and so does the master administrator -- the profile that does anything any Ministry role can do, except act on its own account (walkthrough item 6, commit 373f155). THE INSPECTOR ROLE IS MERGED INTO REVIEWER (partner review, 2026-09-01): one Ministry role reviews, flags a submission as needing inspection, self-assigns the visit, and records corrective actions and findings -- which remain acts that are not determinations. Internal workflow states are grey and are not determinations. The facility lane is separate from the event lane and carries no event outcome.",
+  "recordStatus": {
+    "$comment": "The plain status an organizer, an operator and the public register read (owner direction, 7 October 2026). A status is a reading of the record, never a fourth outcome: the three outcomes below stay verbatim wherever a determination is shown -- the determination card, the certificate, the acknowledgment's determination line and the whole Ministry console.",
+    "preparing": { "en": "In preparation", "ar": "قيد التحضير" },
+    "inProcess": { "en": "In process", "ar": "قيد المعالجة" },
+    "certificateReady": { "en": "Certificate ready", "ar": "الشهادة جاهزة" },
+    "modificationsRequested": { "en": "Modifications requested", "ar": "طُلبت تعديلات" },
+    "moreInformation": { "en": "More information needed", "ar": "يلزم مزيد من المعلومات" }
+  },
   "outcomes": [
     {
       "key": "incomplete",

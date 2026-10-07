@@ -18,6 +18,16 @@ const outcome = (key: 'incomplete' | 'revision' | 'satisfied') => {
   const o = ministryJson.outcomes.find((x) => x.key === key)!;
   return { en: o.en, ar: o.ar };
 };
+/**
+ * The plain status an operator reads on the venue's pages and the dashboard (owner
+ * direction, 2026-10-07): the same five labels as an event's. VENUE_STATUS below keeps
+ * the outcomes' own words for where a determination is shown.
+ */
+export function venueStatusLabel(status: VenuePackageStatus): { en: string; ar: string } {
+  const r = ministryJson.recordStatus;
+  const pick = status === 'draft' ? r.preparing : status === 'submitted' ? r.inProcess : status === 'revision' ? r.modificationsRequested : status === 'incomplete' ? r.moreInformation : r.certificateReady;
+  return { en: pick.en, ar: pick.ar };
+}
 /** The Ministry's three outcomes are the compliance form's own words, as on events. */
 export const VENUE_STATUS: Record<VenuePackageStatus, { en: string; ar: string }> = {
   draft: { en: 'In preparation', ar: 'قيد التحضير' },
@@ -194,9 +204,9 @@ export function arabicCount(n: number, forms: { one: string; two: string; few: s
  * returned), then its certificate. A submitted venue is never "assessment pending".
  */
 export function venueRegisterState(input: { status: VenuePackageStatus | null; validUntil: string | null; today: string }): { en: string; ar: string; tone: 'pending' | 'done' | 'bad' | 'muted' } {
-  if (input.status === 'submitted') return { ...VENUE_STATUS.submitted, tone: 'pending' };
-  if (input.status === 'revision' || input.status === 'incomplete') return { ...VENUE_STATUS[input.status], tone: 'pending' };
+  if (input.status === 'submitted') return { ...venueStatusLabel('submitted'), tone: 'pending' };
+  if (input.status === 'revision' || input.status === 'incomplete') return { ...venueStatusLabel(input.status), tone: 'pending' };
   if (input.validUntil && input.validUntil < input.today) return { en: `Certificate expired ${input.validUntil}`, ar: `انتهت الشهادة في ⁦${input.validUntil}⁩`, tone: 'bad' };
   if (input.validUntil) return { en: `Certificate valid until ${input.validUntil}`, ar: `الشهادة صالحة حتى ⁦${input.validUntil}⁩`, tone: 'done' };
-  return input.status === 'draft' ? { ...VENUE_STATUS.draft, tone: 'muted' } : { en: 'No certificate yet', ar: 'لا شهادة بعد', tone: 'muted' };
+  return input.status === 'draft' ? { ...venueStatusLabel('draft'), tone: 'muted' } : { en: 'No certificate yet', ar: 'لا شهادة بعد', tone: 'muted' };
 }

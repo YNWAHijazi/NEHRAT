@@ -2,13 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { publicStatusArabic, organizerEventState, MINISTRY_CONTENT, resolveRequirements } from '../lib/rules';
 const ministryJson = MINISTRY_CONTENT;
 
-describe('the public register reports a filed, undecided record as filed', () => {
-  it('names the filed state, never one of the three outcomes, until a reviewer records one', () => {
+describe('the record status is a plain reading of the record (owner direction, 2026-10-07)', () => {
+  it('names the filed state as in process, never one of the three outcomes, until a reviewer records one', () => {
     const filed = organizerEventState({ outcome: null, filed: true, assessed: true });
+    expect(filed.en).toBe('In process');
     expect(ministryJson.outcomes.map((o) => o.en)).not.toContain(filed.en);
-    expect(organizerEventState({ outcome: 'incomplete', filed: true, assessed: true }).en).toBe(ministryJson.outcomes.find((o) => o.key === 'incomplete')!.en);
+    expect(organizerEventState({ outcome: null, filed: false, assessed: true }).en).toBe('In preparation');
+    expect(organizerEventState({ outcome: null, filed: false, assessed: false }).en).toBe('In preparation');
+  });
+  it('turns each recorded outcome into its plain label while the outcome keeps its own words elsewhere', () => {
+    expect(organizerEventState({ outcome: 'satisfied', filed: true, assessed: true }).en).toBe('Certificate ready');
+    expect(organizerEventState({ outcome: 'revision', filed: true, assessed: true }).en).toBe('Modifications requested');
+    expect(organizerEventState({ outcome: 'incomplete', filed: true, assessed: true }).en).toBe('More information needed');
+    expect(ministryJson.outcomes.map((o) => o.en)).toEqual(['Submission received but incomplete', 'Additional information or revision required', 'Health and medical preparedness requirements satisfied']);
   });
   it('gives every status the register can show its Arabic', () => {
+    for (const key of ['satisfied', 'revision', 'incomplete'] as const) {
+      const s = organizerEventState({ outcome: key, filed: true, assessed: true });
+      expect(publicStatusArabic(s.en)).toBe(s.ar);
+    }
     const filed = organizerEventState({ outcome: null, filed: true, assessed: true });
     expect(publicStatusArabic(filed.en)).toBe(filed.ar);
     for (const o of ministryJson.outcomes) expect(publicStatusArabic(o.en)).toBe(o.ar);

@@ -243,7 +243,7 @@ describe('the public register never invents a level', () => {
       referenceNumber: 'MOPH-EV-2026-0001',
       eventName: 'Unassessed event',
       level: null,
-      status: 'Submission received but incomplete',
+      status: 'More information needed',
       isDemo: false,
       eventStartDate: '2026-09-01',
     };

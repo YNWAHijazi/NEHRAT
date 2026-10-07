@@ -8,7 +8,7 @@ import { unreadCountFor, venueAssessmentsFor, daysBetween } from '../lib/queries
 import { beirutToday } from '../lib/clock';
 import { levelWhy } from '../lib/rules';
 import { venuePackageFor } from '../lib/venue/workspace';
-import { VENUE_STATUS } from '../lib/rules/venue-workflow';
+import { venueStatusLabel } from '../lib/rules/venue-workflow';
 
 export type VenueTab = 'overview' | 'details' | 'assessment' | 'team';
 export type VenueWorkspaceData = NonNullable<ReturnType<typeof venuePackageFor>>;
@@ -23,7 +23,7 @@ const TABS: { key: VenueTab; path: string; en: string; ar: string }[] = [
 /** One identity and navigation layout for every venue tab -- the event workspace's, with the venue's facts. */
 export function VenueWorkspace({ account, w, active, children }: { account: Account; w: VenueWorkspaceData; active: VenueTab; children: React.ReactNode }) {
   const v = w.venue;
-  const state = VENUE_STATUS[w.status];
+  const state = venueStatusLabel(w.status);
   const assessed = w.assessmentVersion ? venueAssessmentsFor(account.id, v.id).find((a) => a.version === w.assessmentVersion) : undefined;
   const why = assessed ? levelWhy(assessed.derivation) : null;
   const daysLeft = v.validUntil ? daysBetween(beirutToday(), v.validUntil) : null;
