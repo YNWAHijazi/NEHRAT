@@ -5,8 +5,8 @@ import { L } from '../../../components/L';
 import { MinistryShell } from '../../../components/MinistryShell';
 import { FlagsPanel } from '../../../components/FlagsPanel';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
-import { ministryConfig } from '../../../lib/queries';
-import { DEFERRED, orderLaneActive } from '../../../lib/rules';
+import { orderLaneOn } from '../../../lib/queries';
+import { DEFERRED } from '../../../lib/rules';
 import { setOrderLaneAction } from '../../ministry-actions';
 
 /**
@@ -28,8 +28,7 @@ export default async function MasterAdminPage({
     (getDb().prepare(`SELECT COUNT(*) AS n FROM ${table} WHERE is_demo = ?`).get(account.isDemo ? 1 : 0) as { n: number }).n);
   const mailStats = getDb().prepare(`SELECT status, COUNT(*) AS n FROM email_deliveries WHERE is_demo = ? GROUP BY status`).all(account.isDemo ? 1 : 0) as unknown as { status: string; n: number }[];
 
-  const laneConfig = ministryConfig().get('orderLane');
-  const laneActive = laneConfig ? laneConfig.value === 'on' : orderLaneActive();
+  const laneActive = orderLaneOn();
 
   return (
     <MinistryShell account={account} consoleEn="Platform owner" consoleAr="مالك المنصة">

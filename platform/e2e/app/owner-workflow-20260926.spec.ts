@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAs } from "../helpers/signin";
+import { openDetails } from "../helpers/record";
 
 test("public check is concise and preserves the chosen service through signup", async ({
   page,
@@ -72,33 +73,33 @@ test("requirements have no continue links and medical tasks follow the role", as
   await signInAs(page, "test_organizer");
   await page.goto("/events/EV-0418");
   await expect(page.locator("[data-region=rail] [data-rail]")).toBeVisible();
-  await page.goto("/events/EV-0418/requirements");
-  const first = page.locator("[data-document=plan]");
-  if ((await first.getAttribute("open")) === null)
-    await first.locator("summary").click();
+  // The plan is one card on the record page; opening it offers no "Continue to" step.
+  const plan = page.locator('[data-requirement="B2"]');
+  await openDetails(plan);
   await expect(page.getByRole("link", { name: /^Continue to/ })).toHaveCount(0);
-  await page.goto("/events/EV-0418/plan");
-  await expect(page.locator("[data-region=major-incident]")).toHaveCount(0);
-  await expect(page.locator('[data-region=plan-readonly]')).toBeVisible();
-  await expect(page.getByText('Recommended — not required to submit', { exact: true })).toBeVisible();
-  await page.goto("/events/EV-0362/requirements");
-  const medicalPlan=page.locator('[data-document=plan]');await medicalPlan.locator('summary').click();
-  await expect(medicalPlan).toContainText('Completed by the Medical Director or EMS agency.');
-  await medicalPlan.getByRole('link',{name:'View plan',exact:true}).click();
-  await expect(page.locator('[data-region=plan-readonly]')).toBeVisible();
-  await expect(page.locator('main textarea, main input[type=file]')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:/Save the plan/})).toHaveCount(0);
+  // Level 2: the plan is recommended (D2) and section 12 is the short escalation row, not the eleven items (D3).
+  await expect(plan).toHaveAttribute('data-group', 'recommended');
+  await expect(plan.locator('[data-plan-section="P12"]')).toBeVisible();
+  await expect(plan.locator('[data-major-incident]')).toHaveCount(0);
+  await page.goto("/events/EV-0362");
+  const medicalPlan=page.locator('[data-requirement="B2"]');
+  await openDetails(medicalPlan);
+  await expect(medicalPlan).toContainText('The EMS agency or the Medical Director prepares it');
+  // The organizer reads the plan; no section of it is theirs to write (catalogue B2 authors).
+  await expect(medicalPlan.locator('[data-plan-section]').first()).toBeVisible();
+  await expect(medicalPlan.locator('textarea:enabled, input[type=file]')).toHaveCount(0);
   await signInAs(page, "test_ems");
-  await page.goto("/events/EV-0362/plan");
-  await expect(page.getByRole('heading',{name:'Event health and medical plan',exact:true})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Write the plan here',exact:true})).toBeEnabled();
-  await expect(page.locator('[data-region=major-incident] button').first()).toBeEnabled();
+  await page.goto("/events/EV-0362/participation");
+  const emsPlan=page.locator('[data-region=ems-record] [data-requirement="B2"]');
+  await openDetails(emsPlan);
+  const incident=emsPlan.locator('[data-plan-section="P12"]');
+  await openDetails(incident);
+  await expect(incident.locator('[data-major-incident]').first()).toBeVisible();
+  await expect(incident.locator('[data-major-incident="M01"] textarea')).toBeEnabled();
   expect((await page.request.get('/api/documents/EV-0362/plan-document')).status()).toBe(200);
   await signInAs(page, "test_director");
   await page.goto("/events/EV-0362");
-  await expect(
-    page.getByRole("heading", { name: "Medical deployment map", exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('[data-requirement="P-D"]')).toContainText("Medical deployment map");
 });
 
 test("organizer sorting, duplicate application, and venue certificate history", async ({

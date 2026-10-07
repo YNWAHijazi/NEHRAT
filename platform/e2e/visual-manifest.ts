@@ -207,96 +207,28 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: 'Expected divergent at reviewer instruction: the record reports both results and which governed. The reference record carries no such panel.',
       },
       {
-        name: 'counters',
+        name: 'requirement-summaries',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="counters"]',
-        note: 'Expected divergent, SPEC over pixel parity: the prototype leaves Report a material change ungated and omits the post-event control, while the build renders both disabled with their reasons beside them (SPEC 5b). Measured at 48% against the prototype band before the flip — the difference is those two gated controls, and 48% measures DIVERGENCE, not correspondence anywhere else in the band. The counters derive from the seeded records. UNVERIFIED as to whether the figures correspond to the prototype: this note used to assert they did, and nothing ever checked it.',
-      },
-    ],
-  },
-  {
-    id: 'organizer-requirements',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Requirements and attachments',
-    builtRoute: '/events/EV-0418/requirements',
-    signInAs: 'test_organizer',
-    regions: [
-      {
-        name: 'g2',
-        // Was a straight compare. Pass B finding B-1 (the nomination loop could not be
-        // closed from the UI) was fixed at reviewer order by surfacing the invitation
-        // link against each pending nomination -- the reference predates the block.
-        // Flips back to compare when the prototype adopts it (Pass C).
-        mode: 'expectedDivergent',
-        reference: { strategy: 'headingBlock', text: 'Named EMS providers' },
-        builtSelector: '[data-region="g2"]',
-        note: 'The named-provider rows and their nomination/declaration chips. Held at 2%. Second sweep (2026-09-02, partner ruling): the group note was rewritten plainer ("Each provider you name must answer before you can certify the submission.") and the invitation-link caption dropped its "The token is unguessable" clause.',
+        builtSelector: '[data-region="requirement-summaries"]',
+        note: 'Expected divergent by owner instruction (single record page, 2026-10-07): the Requirements and attachments tab, the Medical Director and EMS tabs and the Submit tab dissolved into one requirement-led record page. The two collapsible summaries (Required, Recommended) replace the prototype\'s counters band; each row names the item, its state and who handles it and opens the matching card. Interaction is covered in e2e/app/record-page.spec.ts.',
       },
       {
-        name: 'g3',
+        name: 'record-requirements',
         mode: 'expectedDivergent',
-        reference: { strategy: 'headingBlock', text: 'Requirements you certify to' },
-        builtSelector: '[data-region="g3"]',
-        note: 'Was a compare in English. Pass A found six recorded EN/AR divergences flagged in the data and rendered NOWHERE; requirements 7, 13 and 15 now carry a bilingual note stating what the other issue says and that the English is followed — the reference predates the note. Flips back to compare when the prototype adopts it (Pass C). Second sweep (2026-09-02, partner ruling): the collapsed group\'s explainer lost its "Nothing is attached against these and there is nothing here to tick" sentence. The certify-to rows: names, per-level values and computed responsible parties. Arabic row names come from the Arabic issue where the prototype carried translations, so the Arabic run diverges by exactly those strings (decision 3). Held at 2% in English.',
+        builtSelector: '[data-region="record-requirements"]',
+        note: 'Expected divergent by owner instruction (2026-10-07): the full-width Required and Recommended groups of collapsible requirement cards, each with structured answers from the catalogue (lib/rules/data/requirement-catalogue.json) instead of the prototype\'s read-only certify-to list and attachment cards. The questions and completion tests are proposals awaiting partner sign-off (decision D9).',
       },
       {
-        name: 'g1',
+        name: 'plan-sections',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="g1"]',
-        note: 'Expected divergent under organizer simplification (2026-09-11): this section contains only uploads and the plan, sorted missing first. Provider declarations live with the medical team; generated assessment and final certification are covered by the review section. Working attachment controls remain.',
+        builtSelector: '[data-region="plan-sections"]',
+        note: 'Expected divergent by owner instruction (2026-10-07): the standalone plan page dissolved into the medical plan row of the record page. Its sixteen sections render from the same requirement instances -- derived, linked to the rows they read, or carrying their own text -- with the eleven major-incident items under section 12 at Level 3 and the Director\'s approval bound to the current version (D4). The reference tab\'s guidance blocks live behind the footer\'s Need help link.',
       },
       {
-        name: 'invite',
+        name: 'final-review',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="invite"]',
-        note: 'Expected divergent: ROADMAP 5c requires the invitation inside the requirement; the prototype shows only already-named rows.',
-      },
-      {
-        name: 'inspections',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="inspections"]',
-        note: 'Expected divergent: inspection rows are Ministry-side data (Slice 6). The build shows the honest empty state; the prototype shows demonstration inspections. Second sweep (2026-09-02, partner ruling): the three-sentence explainer collapsed to one — "The conducting authority schedules these checks, and you will be told the date."',
-      },
-    ],
-  },
-  {
-    id: 'organizer-plan',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Health and medical plan',
-    builtRoute: '/events/EV-0418/plan',
-    // The plan's writer, not the organizer: since the owner's ruling of 2026-09-27 a confirmed
-    // EMS agency or the Medical Director completes the plan and the organizer reads it, so the
-    // sixteen-item form the reference shows is on the writer's screen. test_ems is the confirmed
-    // agency on EV-0418.
-    signInAs: 'test_ems',
-    regions: [
-      {
-        name: 'sections',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="sections"]',
-        note: 'Expected divergent by the fields-only ruling (2026-09-04): the plan page is the form -- the sixteen items opening to their fields, the route control, the facility reference as one collapsed line. The reference tab carries the guidance blocks, the workflow card and the depth table, all of which moved to the reference page behind the footer\'s Need help link (their compares left with them -- a compare on a region the ruling removed would only measure the ruling). The sixteen rows render from PLAN_SECTIONS.',
-      },
-    ],
-  },
-  {
-    id: 'organizer-submit',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Submission package',
-    builtRoute: '/events/EV-0418/submit',
-    signInAs: 'test_organizer',
-    regions: [
-      {
-        name: 'form-card',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="form-card"]',
-        note: 'Expected divergent: declaration chips reflect the account\'s real saved form, the Arabic declarations are verbatim from the Arabic issue (decision 2/3), and the blocker list is derived, not demonstration copy. Second sweep (2026-09-02, partner ruling): the "Blocked while N items are outstanding" caption beside the File control was cut — the blocker panel above it is the reason, item by item — and the filed band now links to the acknowledgment instead of describing it.',
-      },
-      {
-        name: 'package-docs',
-        mode: 'expectedDivergent',
-        reference: { strategy: 'headingBlock', text: 'Submission package' },
-        builtSelector: '[data-region="submission-checklist"]',
-        note: "User update (2026-09-30): the Submit tab separates required and optional items, links each item to its form, and updates declaration and contact completion while typing. The shared event header stays above every tab. Checked by event-workspace and filing journey browser tests; intentionally differs from the original prototype.",
+        builtSelector: '[data-region="final-review"]',
+        note: 'Expected divergent by owner instruction (2026-10-07): the review, the applicable organizer declaration and Submit sit at the foot of the record page, with the remaining items as jump links. The prototype\'s separate Submission package tab is not built.',
       },
     ],
   },
@@ -462,7 +394,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'requirements',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="rail"]',
-        note: "User request, 2026-09-30: actionable requirements now have their own tab, with saved answers controlling completion. The overview shows an always-open progress bar. Previous layout: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips. Second sweep (2026-09-02, partner ruling): the list is collapsed behind a details fold, so the locator is the fold -- the rows inside are hidden until opened.",
+        note: "Owner brief, 2026-10-07: the requirement rows are full-width cards on this single record page, below the rail, with saved answers controlling completion; the rail is the always-open progress bar. Earlier (2026-09-30) the rows had their own tab. Previous layout: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips. Second sweep (2026-09-02, partner ruling): the list is collapsed behind a details fold, so the locator is the fold -- the rows inside are hidden until opened.",
       },
     ],
   },
@@ -724,10 +656,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         note: "Expected divergent, THE GLOSSARY OVER THE PROTOTYPE'S ARABIC, English unchanged. The prototype's Arabic names the plan الخطة الصحية والطبية للفعالية; the canonical form is خطة التأهب الصحي والطبي للفعالية (SPEC 7, and CLAUDE.md states it outright). The looser form had drifted into four places in the build and is now guarded by a banned-terms pattern. The prototype's Arabic is provisional until re-issued, so the glossary wins. English matches. FOR THE REVIEWER: this is a one-phrase change in the prototype.",
       },
       {
-        name: 'ops-detail',
+        name: 'ems-record',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="ops-detail"]',
-        note: 'Expected divergent, non-negotiable 8 over pixel parity: the reference form arrives prefilled with showcase values; the detail has not yet been supplied on the seeded nomination, so the form starts empty. The ten labels are the source\'s, not the prototype\'s. UNVERIFIED as to layout: no reference-side locator.',
+        builtSelector: '[data-region="ems-record"]',
+        note: 'Expected divergent by owner instruction (single record page, 2026-10-07): the agency no longer fills a separate ten-field operational-detail form; it records its arrangements on the SAME requirement rows the organizer reads (EMS and ambulance arrangements, the response team, the hospital, communications, escalation), one answer per row, first authorized completion counting once. The prototype predates the record page. UNVERIFIED as to layout: no reference-side locator.',
       },
     ],
   },

@@ -1,12 +1,11 @@
-import { MedicalPlanTask } from '../../../../components/MedicalPlanTask';
-import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
+import { RecordRequirements } from '../../../../components/record/RecordRequirements';
 import { currentAccount } from '../../../../lib/auth';
 import { invitationForEvent, nominationBriefing, nomineePlanSlice, unreadCountFor } from '../../../../lib/queries';
-import { ROLES_CONTENT } from '../../../../lib/rules';
-import { saveOpsDetailAction, withdrawParticipationAction } from '../../../actions';
+import { eventRecordView } from '../../../../lib/record-view';
+import { withdrawParticipationAction } from '../../../actions';
 import { Briefing } from '../../../invitations/[token]/Briefing';
 import { RespondForm } from '../../../invitations/[token]/RespondForm';
 import { SharedDocuments } from '../SharedDocuments';
@@ -26,22 +25,22 @@ export default async function ParticipationPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ notice?: string }>;
+  searchParams: Promise<{ notice?: string; upload?: string; doc?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
   const invitation = invitationForEvent(account.id, id, 'ems');
   if (!invitation) notFound();
-  const { notice } = await searchParams;
+  const { notice, upload, doc } = await searchParams;
   if (invitation.eventLevel === 3) {
     redirect(`/events/${id}/declaration${notice ? `?notice=${encodeURIComponent(notice)}` : ''}`);
   }
   const unread = unreadCountFor(account.id);
-  const content = ROLES_CONTENT.ems;
   const briefing = nominationBriefing(invitation.token);
   const confirmed = invitation.status === 'confirmed';
   const plan = confirmed ? nomineePlanSlice(id) : null;
+  const view = confirmed ? eventRecordView(invitation.organizerAccountId, id) : null;
 
   return (
     <>
@@ -91,39 +90,19 @@ export default async function ParticipationPage({
             <RespondForm token={invitation.token} kind="ems" eventLevel={invitation.eventLevel} />
           ) : null}
 
-          {confirmed && <div data-region="ems-plan"><MedicalPlanTask eventId={id} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} /></div>}
-          {confirmed ? (
+          {confirmed && view ? (
             <>
               <div data-region="l2-intro" style={{ padding: '20px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 28, maxWidth: '76ch' }}>
                 <div style={{ fontSize: 15, lineHeight: 1.65 }}>
-                  <L en="Share the arrangements your agency will provide for this event." ar="شاركوا الترتيبات التي ستوفّرها جهتكم لهذه الفعالية." />
+                  <L en="The rows below are the event's record, shared with the organizer. Record the arrangements your agency provides on the rows that name an EMS agency; the first saved answer counts once and the organizer sees it immediately." ar="الصفوف أدناه هي سجل الفعالية، مشترك مع المنظّم. سجّلوا الترتيبات التي توفّرها جهتكم في الصفوف التي تسمّي جهة إسعاف؛ تُحتسب أول إجابة محفوظة مرة واحدة ويراها المنظّم فوراً." />
                 </div>
               </div>
 
-              <form action={saveOpsDetailAction.bind(null, invitation.token)}>
-                <div data-region="ops-detail" style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
-                  <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 16 }}>
-                    <L en="Your event arrangements" ar="ترتيباتكم للفعالية" />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16 }}>
-                    {content.level2Fields.map((f) => (
-                      <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.4 }}>
-                          <L en={f.en} ar={f.ar} />{f.helpEn && <InfoNote><L en={f.helpEn} ar={f.helpAr} /></InfoNote>}
-                        </span>
-                        {f.multiline ? <textarea name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} rows={3} style={{ minHeight: 96, padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 10, fontSize: 15, resize: 'vertical' }} /> : <input name={f.key} defaultValue={invitation.opsDetail[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 28 }}>
-                  <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
-                    <L en="Share with organizer" ar="مشاركة مع المنظّم" />
-                  </button>
-                </div>
-              </form>
+              <div data-region="ems-record">
+                <RecordRequirements record={view.record} viewerRole="ems" viewerConfirmed contentTypes={view.contentTypes} refusal={upload && doc ? { key: doc, reason: upload } : null} derived={view.derived} governance={view.governance} facility={view.facility} />
+              </div>
 
-              {confirmed ? <SharedDocuments eventId={id} token={invitation.token} /> : null}
+              <div style={{ marginBlockStart: 28 }}><SharedDocuments eventId={id} token={invitation.token} /></div>
 
               {confirmed ? (
                 <details style={{ marginBlockEnd: 24 }}>

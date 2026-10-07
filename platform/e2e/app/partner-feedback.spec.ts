@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { gotoRidingRestarts } from '../helpers/resilient';
+import { openDetails } from '../helpers/record';
 import { readFileSync } from 'node:fs';
 const maxUploadBytes = () => (JSON.parse(readFileSync(new URL('../../lib/rules/data/uploads.json', import.meta.url), 'utf8')) as { maxBytes: number }).maxBytes;
 
@@ -9,11 +10,9 @@ for (const lang of ['en', 'ar']) {
     await context.addCookies([{ name: 'lang', value: lang, url: baseURL! }]);
     await page.setViewportSize({ width: 390, height: 844 });
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-    const map = page.locator('[data-document="siteMap"]');
-    await map.locator(':scope > summary').click();
-    const existing = map.locator('details > summary');
-    if (await existing.count()) await existing.click();
+    await gotoRidingRestarts(page, '/events/EV-0418');
+    // The site map is one required card on the record page (catalogue P-M, Level 2).
+    const map = await openDetails(page.locator('[data-requirement="P-M"]'));
     const input = map.locator('input[type="file"]');
     await input.setInputFiles({ name: 'too-large.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(maxUploadBytes() + 1) });
     await expect(map.getByRole('alert')).toBeVisible();
@@ -21,9 +20,11 @@ for (const lang of ['en', 'ar']) {
     const bytes = Buffer.alloc(maxUploadBytes(), 32); bytes.write('%PDF-1.4\n');
     await input.setInputFiles({ name: 'full-size-route-map.pdf', mimeType: 'application/pdf', buffer: bytes });
     await input.locator('xpath=ancestor::form').locator('button[type="submit"]').click();
-    await expect(map).toContainText('full-size-route-map.pdf');
-    await expect(map.locator(':scope > summary').getByText(lang === 'ar' ? 'مكتمل' : 'Complete', { exact: true })).toBeVisible();
-    await expect(map).toHaveCSS('border-inline-start-color', 'rgb(35, 116, 67)');
+    await expect(page).toHaveURL(/saved=P-M/);
+    const uploaded = page.locator('[data-requirement="P-M"]');
+    await expect(uploaded).toContainText('full-size-route-map.pdf');
+    await expect(uploaded.locator('summary [data-state]')).toHaveAttribute('data-state', 'complete');
+    await expect(uploaded.locator('summary').getByText(lang === 'ar' ? 'مكتمل' : 'Complete', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /^(Continue to|المتابعة إلى)/ })).toHaveCount(0);
     const download = await page.request.get('/api/documents/EV-0418/siteMap');
     expect(download.status()).toBe(200);
@@ -31,7 +32,7 @@ for (const lang of ['en', 'ar']) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-    await page.screenshot({ path: test.info().outputPath('requirements-mobile.png'), fullPage: true });
+    await page.screenshot({ path: test.info().outputPath('record-mobile.png'), fullPage: true });
   });
 }
 
@@ -53,60 +54,55 @@ test('event type hides unrelated activities and a previous edition reveals the n
   await expect(history.getByRole('button').last()).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('Director and EMS share a guided plan; organizer can only view it', async ({ page, browser, baseURL }) => {
+/** The own-text form of one plan section on whichever page the party reads the record. */
+async function section(page: Page, key: string) {
+  await openDetails(page.locator('[data-requirement="B2"]'));
+  return (await openDetails(page.locator(`#plan-${key}`))).locator('[data-region="requirement-form"]').first();
+}
+
+test('Director and EMS share one plan section by section; the organizer can only read it', async ({ page, browser, baseURL }) => {
   await signInAs(page, 'test_director');
   await gotoRidingRestarts(page, '/events/EV-0362');
-  await page.locator('[data-region="director-plan"]').getByRole('link').click();
-  await expect(page).toHaveURL(/EV-0362\/plan/);
   const originalFile = await page.request.get('/api/documents/EV-0362/plan-document');
   expect(originalFile.status()).toBe(200);
-  const originalBytes = await originalFile.body();
-  await page.getByRole('button', { name: 'Write the plan here', exact: true }).click();
-  const section = page.getByRole('button', { name: /^1 / }).and(page.locator('[aria-expanded]'));
-  if (await section.getAttribute('aria-expanded') !== 'true') await section.click();
-  await expect(page.getByRole('button', { name: 'What to include', exact: true }).first()).toBeVisible();
-  await page.getByRole('button', { name: 'What to include', exact: true }).first().click();
-  const helpId = await page.getByRole('button', { name: 'What to include', exact: true }).first().getAttribute('aria-controls');
-  await expect(page.locator(`[id="${helpId}"]`)).toBeVisible();
-  await page.getByRole('textbox', { name: /^1\./ }).fill('Director medical planning contribution.');
+  const directorForm = await section(page, 'P13');
+  const original = await directorForm.locator('textarea[name="text"]').inputValue();
+  await directorForm.locator('textarea[name="text"]').fill('Director medical planning contribution.');
   const emsPage = await browser.newPage({ baseURL: baseURL! });
   await signInAs(emsPage, 'test_ems');
-  await gotoRidingRestarts(emsPage, '/events/EV-0362/plan');
-  // Unsaved edits retain their base version when another medical user saves.
-  await emsPage.getByRole('button', { name: 'Write the plan here', exact: true }).click();
-  await page.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
-  await emsPage.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(emsPage.locator('main').getByRole('alert')).toContainText('Someone updated this plan');
-  await emsPage.reload();
-  await expect(emsPage.getByRole('button', { name: 'Write the plan here', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  const first = emsPage.getByRole('button', { name: /^1 / }).and(emsPage.locator('[aria-expanded]'));
-  if (await first.getAttribute('aria-expanded') !== 'true') await first.click();
-  await expect(emsPage.getByRole('textbox', { name: /^1\./ })).toHaveValue('Director medical planning contribution.');
-  await emsPage.locator('[data-region="versions"] details > summary').first().click();
-  const oldAttachment = emsPage.getByRole('link', { name: 'Open this version’s attachment', exact: true }).first();
-  const historyDownload = await emsPage.request.get((await oldAttachment.getAttribute('href'))!);
-  expect(historyDownload.status()).toBe(200);
-  expect((await historyDownload.body()).equals(originalBytes)).toBe(true);
-  // Restore this shared fixture's complete attachment so later filing tests remain independent.
+  await gotoRidingRestarts(emsPage, '/events/EV-0362/participation');
+  // Unsaved edits keep the version they were read at when another medical user saves (brief item 11).
+  const emsForm = await section(emsPage, 'P13');
+  await emsForm.locator('textarea[name="text"]').fill('An agency edit over the same section.');
+  await directorForm.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(directorForm.getByRole('status')).toContainText('Saved.');
+  await emsForm.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(emsForm.getByRole('status')).toContainText('Someone saved a newer answer');
+  await emsForm.getByRole('button', { name: 'Show the newer answer', exact: true }).click();
+  await expect((await section(emsPage, 'P13')).locator('textarea[name="text"]')).toHaveValue('Director medical planning contribution.');
+  await emsPage.close();
+  // Restore the shared fixture's wording so later filing tests remain independent, then
+  // sign the plan again: every saved edit reopens the Director's approval (D4).
   await page.reload();
-  await page.getByRole('button', { name: 'Attach an existing plan', exact: true }).click();
-  await page.locator('[data-region="plan-attach"] input').setInputFiles({ name: 'restored-medical-plan.pdf', mimeType: 'application/pdf', buffer: originalBytes });
-  await expect(page.getByText('Attached: restored-medical-plan.pdf', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /^Save the plan/ }).click();
-  await expect(page.getByText('Saved.', { exact: true })).toBeVisible();
-  // Every saved edit is a new plan version, and the Director's sign-off belongs to one version
-  // (2026-09-30). Sign the restored plan again, or the later filing tests find it unsigned.
+  const restore = await section(page, 'P13');
+  await restore.locator('textarea[name="text"]').fill(original);
+  await restore.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(restore.getByRole('status')).toContainText('Saved.');
   await page.reload();
+  await openDetails(page.locator('[data-requirement="B2"]'));
   const approval = page.locator('[data-region="plan-approval"]');
   await approval.getByRole('checkbox').check();
-  await approval.getByRole('button', { name: 'Approve medical plan', exact: true }).click();
-  await expect(page.locator('[data-region="plan-approval"]')).toContainText('Signed off by');
-  await signInAs(emsPage,'test_organizer');
-  await gotoRidingRestarts(emsPage,'/events/EV-0362/plan');
-  await expect(emsPage.locator('[data-region=plan-readonly]')).toBeVisible();
-  await expect(emsPage.getByRole('button',{name:/Save the plan/})).toHaveCount(0);
-  await emsPage.close();
+  await approval.getByRole('button', { name: 'Approve this version', exact: true }).click();
+  await expect(page).toHaveURL(/approval=recorded/);
+  await expect(page.locator('[data-requirement="B2"]')).toHaveAttribute('data-state', 'complete');
+  const organizer = await browser.newPage({ baseURL: baseURL! });
+  await signInAs(organizer, 'test_organizer');
+  await gotoRidingRestarts(organizer, '/events/EV-0362');
+  await openDetails(organizer.locator('[data-requirement="B2"]'));
+  await expect(organizer.locator('[data-requirement="B2"] [data-plan-section]').first()).toBeVisible();
+  await expect(organizer.locator('[data-requirement="B2"] textarea:enabled')).toHaveCount(0);
+  await organizer.close();
+  // A physician not named on an event cannot open it; the agency's old plan link lands on its own page.
   expect((await page.request.get('/events/EV-0418/plan')).status()).toBe(404);
   await signInAs(page, 'test_ems');
   expect((await page.request.get('/events/EV-0362/plan')).status()).toBe(200);

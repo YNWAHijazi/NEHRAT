@@ -119,9 +119,9 @@ const WALKS: { login: string; routes: string[] }[] = [
     login: 'test_organizer',
     routes: [
       '/dashboard', '/organization', '/notifications',
-      '/events/EV-0418', '/events/EV-0418/requirements', '/events/EV-0418/plan',
-      '/events/EV-0418/submit', '/events/EV-0418/lifecycle', '/events/EV-0418/edit',
-      '/events/EV-0362', '/events/EV-0362/submit',
+      '/events/EV-0418', '/events/EV-0418/documents',
+      '/events/EV-0418/lifecycle', '/events/EV-0418/edit',
+      '/events/EV-0362',
       '/venues/VN-0032', '/venues/VN-0032/change',
       '/facilities/FC-0014', '/facilities/FC-0014/devices', '/facilities/FC-0014/plan',
     ],

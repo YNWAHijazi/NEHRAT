@@ -1,5 +1,5 @@
 'use server';
-import { invalidateVenueMedicalWork, venueMayWrite } from '../lib/venue/collaboration';
+import { invalidateVenueMedicalWork } from '../lib/venue/collaboration';
 import { facilityPersons } from '../lib/queries';
 
 /**
@@ -18,7 +18,7 @@ import { eventGateContext } from '../lib/event-gate-context';
 import { seriousIncidentGate, postEventReportGate } from '../lib/rules/gates';
 import { deliverPasswordReset } from '../lib/password-reset';
 import { derivedLevelFor, accountMayTakeNomination } from '../lib/queries';
-import { planAccess, mayEditEventDocument } from '../lib/plan-access';
+import { planAccess } from '../lib/plan-access';
 import { sendLinkEmail } from '../lib/email';
 import { redirect } from 'next/navigation';
 import { beirutToday, nowStamp } from '../lib/clock';
@@ -27,7 +27,7 @@ import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
 import { archiveWindowDays } from '../lib/queries';
-import { UPLOADS_CONTENT, maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
+import { maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
 import { missingCertificationFields } from '../lib/rules/certification';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import {
@@ -44,13 +44,14 @@ import { forgetSignInFields, rememberSignInFields,
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
   facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
-  declarationGate, isArchivedRecord, landingRouteFor } from '../lib/rules';
+  declarationGate, isArchivedRecord, landingRouteFor, requirementApplies } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
   'test_organizer',
   'test_organizer_pending',
   'test_ems',
+  'order_reviewer',
   'test_director',
   'test_moph',
   'test_moph_admin',
@@ -541,114 +542,6 @@ function ownedEvent(accountId: number, eventId: string): boolean {
 }
 
 /**
- * Stores an attached document -- THE FILE, not its name.
- *
- * The deferred storage decision is taken (reviewer ruling, 2026-08-28): the platform
- * stores the file so the Ministry reviewer can open the route map rather than read
- * that a route map exists. Acceptance is lib/rules/uploads.ts's judgement, not this
- * action's, and a refusal comes back named in both languages -- the organizer is
- * told which mistake they made, never just "invalid".
- *
- * The 20 MB ceiling is enforced HERE, on the server, against the buffer's real
- * length. A client-side accept attribute is a convenience and is not a limit.
- */
-export async function attachDocumentAction(
-  eventId: string,
-  formData: FormData,
-): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  refuseIfArchived(eventId);
-  const docKey = String(formData.get('docKey') ?? '');
-  if (!mayEditEventDocument(account, eventId, docKey)) redirect('/dashboard');
-  const { documentsForLevel } = await import('../lib/rules/submission');
-  const { derivedLevelFor } = await import('../lib/queries');
-  if (!documentsForLevel(derivedLevelFor(eventId) ?? 1).some(d => d.key === docKey && d.attach)) redirect('/dashboard');
-  const file = formData.get('file');
-  // WHERE TO COME BACK TO. The same attachment can be made from the requirements
-  // screen or from the compliance form it belongs to, and sending an organizer back
-  // to a different screen than the one they were on is its own small dead end.
-  // Constrained to this event's own paths -- a returnTo taken from a form is
-  // attacker-controlled text, and an open redirect is not worth the convenience.
-  const asked = String(formData.get('returnTo') ?? '');
-  // The Director uploads the deployment map from their own page, which is the event's root.
-  const directorPage = asked === `/events/${eventId}`;
-  const returnTo = directorPage || (/^\/events\/[A-Za-z0-9-]+\/[a-z-]+$/.test(asked) && asked.startsWith(`/events/${eventId}/`))
-    ? asked
-    : `/events/${eventId}/requirements`;
-  if (!docKey || !(file instanceof File)) redirect(returnTo);
-
-  const refusal = refuseUpload({ type: file.type, size: file.size });
-  if (refusal) {
-    redirect(`${returnTo}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
-  }
-  const bytes = Buffer.from(await file.arrayBuffer());
-  // The buffer is the truth. A declared size can lie; a length cannot.
-  if (bytes.length > maxUploadBytes()) {
-    redirect(`${returnTo}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
-  }
-  getDb()
-    .prepare(
-      `INSERT INTO event_attachments (event_id, doc_key, file_name, content_type, byte_size, bytes)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT (event_id, doc_key) DO UPDATE SET
-         file_name = excluded.file_name, content_type = excluded.content_type,
-         byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
-    )
-    .run(eventId, docKey, file.name.trim(), file.type, bytes.length, bytes);
-  revalidatePath(`/events/${eventId}/requirements`);
-  revalidatePath(returnTo);
-  redirect(directorPage ? `${returnTo}?notice=uploaded` : returnTo);
-}
-
-/**
- * Stores the plan document when the organizer attaches an existing plan rather than
- * writing one. Separate from savePlanAction because that one carries a JSON payload
- * from a client component and a file does not travel in JSON.
- */
-export async function uploadPlanFileAction(
-  eventId: string,
-  formData: FormData,
-): Promise<{ ok: true; fileName: string; version: number } | { error: string; en: string; ar: string }> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  const access = planAccess(account, eventId);
-  if (!access?.canEdit) return { error: 'not-authorized', en: 'The Medical Director or EMS agency completes this plan.', ar: 'يستكمل المدير الطبي أو جهة الإسعاف هذه الخطة.' };
-  refuseIfArchived(eventId);
-  const version = (getDb().prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
-  if (Number(formData.get('baseVersion')) !== version) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
-  const file = formData.get('file');
-  if (!(file instanceof File)) return { error: 'no-file', en: '', ar: '' };
-  const refusal = refuseUpload({ type: file.type, size: file.size });
-  if (refusal) return { error: refusal.reason, en: refusal.en, ar: refusal.ar };
-  const bytes = Buffer.from(await file.arrayBuffer());
-  if (bytes.length > maxUploadBytes()) {
-    return { error: 'tooLarge', en: UPLOADS_CONTENT.copy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: UPLOADS_CONTENT.copy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) };
-  }
-  const { derivedLevelFor } = await import('../lib/queries');
-  const savedVersion = writePlanVersion(eventId, version, account.id, (db) => {
-    db
-      .prepare(
-        `INSERT INTO plans (event_id, mode, sections, major_incident, attached_file,
-           attached_content_type, attached_byte_size, attached_bytes)
-         VALUES (?, 'attach', '{}', '{}', ?, ?, ?, ?)
-         ON CONFLICT (event_id) DO UPDATE SET
-           attached_file = excluded.attached_file,
-           attached_content_type = excluded.attached_content_type,
-           attached_byte_size = excluded.attached_byte_size,
-           attached_bytes = excluded.attached_bytes, version = plans.version + 1, updated_at = now_stamp()`,
-      )
-      .run(eventId, file.name.trim(), file.type, bytes.length, bytes);
-
-  });
-  if (savedVersion === null) return { error: 'conflict', en: 'The plan changed. Reload it before uploading.', ar: 'تغيّرت الخطة. أعيدوا تحميلها قبل رفع الملف.' };
-  revalidatePath(`/events/${eventId}/plan`);
-  revalidatePath(`/events/${eventId}/medical-team`);
-  revalidatePath(`/events/${eventId}/requirements`);
-  return { ok: true, fileName: file.name.trim(), version: savedVersion };
-}
-
-/**
  * Names a party from inside the requirement that needs them (SPEC 5c). The token is the
  * invitation: unguessable, never sequential. The review build records the link rather
  * than sending mail; the invited party self-registers against it (Slice 5).
@@ -661,6 +554,9 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   const kind = String(formData.get('kind') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
+  // The Director row exists at Level 3 only (decision D1): no invitation where the row is absent.
+  const level = derivedLevelFor(eventId);
+  if (kind === 'director' && (level === null || !requirementApplies('B3', level, 'event'))) redirect(`/events/${eventId}#req-B7`);
   let mail = '';
   if ((kind === 'ems' || kind === 'director') && name && email) {
     const token = randomBytes(24).toString('hex');
@@ -674,97 +570,8 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
       text: 'You have been invited to an event. Open the link to review the event and relevant documents. To accept, create an account or sign in.\n\nدُعيتم للمشاركة في فعالية. افتحوا الرابط لمراجعة التفاصيل والمستندات ذات الصلة. لقبول الدعوة، أنشئوا حساباً أو سجّلوا الدخول.',
     });
   }
-  revalidatePath(`/events/${eventId}/requirements`);
-  redirect(`/events/${eventId}/requirements?mail=${mail}`);
-}
-
-export interface PlanPayload {
-  baseVersion: number;
-  mode: 'write' | 'attach';
-  refConfirmed: boolean;
-  refAdmitsChildren: boolean;
-  refTemporaryAreas: boolean;
-  sections: Record<string, { text?: string; covered?: boolean }>;
-  attachedFile: string | null;
-  majorIncident: Record<string, { covered?: boolean }>;
-}
-
-/** Keep the preceding text and attachment bytes before either shared-plan mutation. */
-function snapshotPlan(eventId: string): void {
-  getDb().prepare(`INSERT INTO plan_versions (event_id, version, mode, ref_confirmed, ref_admits_children,
-    ref_temporary_areas, sections, attached_file, major_incident, saved_at, saved_by,
-    attached_content_type, attached_byte_size, attached_bytes)
-    SELECT event_id, version, mode, ref_confirmed, ref_admits_children,
-    ref_temporary_areas, sections, attached_file, major_incident, updated_at, updated_by,
-    attached_content_type, attached_byte_size, attached_bytes FROM plans WHERE event_id = ?`).run(eventId);
-}
-
-/** The conflict check, history and current row commit together, including file bytes. */
-function writePlanVersion(eventId: string, baseVersion: number, actorId: number, write: (db: ReturnType<typeof getDb>) => void): number | null {
-  const db = getDb();
-  db.exec('BEGIN IMMEDIATE');
-  try {
-    const version = (db.prepare('SELECT version FROM plans WHERE event_id = ?').get(eventId) as { version: number } | undefined)?.version ?? 0;
-    const actor=db.prepare('SELECT role,is_demo FROM accounts WHERE id=?').get(actorId) as {role:'ems'|'director';is_demo:number}|undefined;
-    const roleAccess=actor?planAccess({id:actorId,role:actor.role,isDemo:actor.is_demo===1,login:'',displayName:'',initials:''},eventId):null;
-    if (baseVersion !== version || !roleAccess?.canEdit) {
-      db.exec('ROLLBACK');
-      return null;
-    }
-    snapshotPlan(eventId);
-    write(db);
-    db.prepare('UPDATE plans SET updated_by = ? WHERE event_id = ?').run(actorId, eventId);
-    db.exec('COMMIT');
-    return version + 1;
-  } catch (error) {
-    db.exec('ROLLBACK');
-    throw error;
-  }
-}
-
-/** Saves the plan. The row being replaced is archived first -- prior versions stay readable. */
-export async function savePlanAction(eventId: string, payload: PlanPayload): Promise<{ ok: true; version: number } | { error: string }> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  const access = planAccess(account, eventId);
-  if (!access) return { error: 'not-authorized' };
-  refuseIfArchived(eventId);
-  if (!access.canEdit) return { error: 'not-authorized' };
-  const { planFor, derivedLevelFor } = await import('../lib/queries');
-  const previous = planFor(access.ownerId, eventId);
-  if (payload.baseVersion !== (previous?.version ?? 0)) return { error: 'conflict' };
-  const version = writePlanVersion(eventId, payload.baseVersion, account.id, (db) => {
-    db
-      .prepare(
-        `INSERT INTO plans (event_id, mode, ref_confirmed, ref_admits_children, ref_temporary_areas,
-           sections, attached_file, major_incident, version)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
-         ON CONFLICT (event_id) DO UPDATE SET
-           mode = excluded.mode, ref_confirmed = excluded.ref_confirmed,
-           ref_admits_children = excluded.ref_admits_children,
-           ref_temporary_areas = excluded.ref_temporary_areas, sections = excluded.sections,
-           attached_file = excluded.attached_file, major_incident = excluded.major_incident,
-           version = plans.version + 1, updated_at = now_stamp()`,
-      )
-      .run(
-        eventId, payload.mode, payload.refConfirmed ? 1 : 0,
-        payload.refAdmitsChildren ? 1 : 0, payload.refTemporaryAreas ? 1 : 0,
-        JSON.stringify(payload.sections), payload.attachedFile, JSON.stringify(payload.majorIncident),
-      );
-    // Switching back to writing the plan drops the stored file with the name: a
-    // document nothing points at is a document nobody can account for.
-    if (payload.attachedFile === null) {
-      db.prepare(
-        `UPDATE plans SET attached_content_type = NULL, attached_byte_size = NULL,
-           attached_bytes = NULL WHERE event_id = ?`,
-      ).run(eventId);
-    }
-  });
-  if (version === null) return { error: 'conflict' };
-  revalidatePath(`/events/${eventId}/plan`);
-  revalidatePath(`/events/${eventId}/medical-team`);
-  revalidatePath(`/events/${eventId}/requirements`);
-  return { ok: true, version };
+  revalidatePath(`/events/${eventId}`);
+  redirect(`/events/${eventId}?mail=${mail}#req-${String(formData.get('kind')) === 'director' ? 'B3' : 'B7'}`);
 }
 
 export interface CompliancePayload {
@@ -818,18 +625,29 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
     const { revisionOpenFor } = await import('../lib/queries');
     if (!revisionOpenFor(eventId)) return { error: 'not-open-for-revision' };
     const { submissionGateFor } = await import('../lib/submission-facts');
+    const { writeRequirementSnapshot } = await import('../lib/record-facts');
     const gate = submissionGateFor(account.id, eventId);
-    if (!gate.canFile) return { error: 'blocked' };
-    db.prepare(
-      `INSERT INTO submission_versions (event_id, version, declarations, insurance, representative,
-         telephone, position, expedited, filed_at)
-       SELECT event_id, version, declarations, insurance, representative, telephone, position,
-         expedited, filed_at FROM submissions WHERE event_id = ?`,
-    ).run(eventId);
-    db.prepare(
-      `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
-       WHERE event_id = ?`,
-    ).run(gate.expedited ? 1 : 0, eventId);
+    if (!gate.canFile || !gate.record) return { error: 'blocked' };
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.prepare(
+        `INSERT INTO submission_versions (event_id, version, declarations, insurance, representative,
+           telephone, position, expedited, filed_at)
+         SELECT event_id, version, declarations, insurance, representative, telephone, position,
+           expedited, filed_at FROM submissions WHERE event_id = ?`,
+      ).run(eventId);
+      db.prepare(
+        `UPDATE submissions SET filed_at = now_stamp(), expedited = ?, version = version + 1
+         WHERE event_id = ?`,
+      ).run(gate.expedited ? 1 : 0, eventId);
+      const version = (db.prepare(`SELECT version FROM submissions WHERE event_id = ?`).get(eventId) as { version: number }).version;
+      // The re-filed package is frozen as its own version; the earlier one stays readable.
+      writeRequirementSnapshot('event', gate.record, version);
+      db.exec('COMMIT');
+    } catch (error) {
+      db.exec('ROLLBACK');
+      throw error;
+    }
     const ref = eventId;
     revalidatePath(`/events/${eventId}`);
     revalidatePath(`/ministry/submissions/${eventId}`);
@@ -837,16 +655,31 @@ export async function fileSubmissionAction(eventId: string): Promise<{ reference
   }
 
   const { submissionGateFor } = await import('../lib/submission-facts');
+  const { writeRequirementSnapshot } = await import('../lib/record-facts');
   const gate = submissionGateFor(account.id, eventId);
-  if (!gate.canFile) return { error: 'blocked' };
+  if (!gate.canFile || !gate.record) return { error: 'blocked' };
 
   // One public identifier from creation through submission and renewal.
   const reference = eventId;
 
-  db.prepare(
-    `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
-  ).run(reference, gate.expedited ? 1 : 0, eventId);
-  db.prepare(`UPDATE events SET filed = 1, moph_reference = ? WHERE id = ?`).run(reference, eventId);
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    // The certification row may not exist yet when nothing on the form was ever saved
+    // (a Level 1 filing needs only the certification, which the record page saves here).
+    db.prepare(`INSERT OR IGNORE INTO submissions (event_id) VALUES (?)`).run(eventId);
+    db.prepare(
+      `UPDATE submissions SET filed_at = now_stamp(), moph_reference = ?, expedited = ? WHERE event_id = ?`,
+    ).run(reference, gate.expedited ? 1 : 0, eventId);
+    db.prepare(`UPDATE events SET filed = 1, moph_reference = ? WHERE id = ?`).run(reference, eventId);
+    const version = (db.prepare(`SELECT version FROM submissions WHERE event_id = ?`).get(eventId) as { version: number }).version;
+    // THE IMMUTABLE SUBMITTED PACKAGE (brief item 18): rules version, answers, evidence
+    // and approvals as they stood at filing, with the files' bytes.
+    writeRequirementSnapshot('event', gate.record, version);
+    db.exec('COMMIT');
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
   revalidatePath(`/events/${eventId}`);
   return { reference };
 }
@@ -1011,62 +844,6 @@ export interface VenueAssessmentPayload {
  * expiry date twelve months on (the Arabic issue's wording). The record identifier
  * exists from registration and stays the same on every certificate.
  */
-/**
- * A venue's requirement documents (partner ruling, 2026-09-05). Venues carried
- * requirements marked attachable and NO control that could attach one -- the
- * record counted them and pointed at the assessment. This is the event's attach
- * flow, on the venue record: same refusals, same storage shape, same return.
- */
-export async function attachVenueDocumentAction(venueId: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
-  refuseIfVenueArchived(venueId);
-  const {venuePackageFor}=await import('../lib/venue/workspace');
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  const docKey = String(formData.get('docKey') ?? '');
-  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
-  const file = formData.get('file');
-  const back = `/venues/${venueId}`;
-  if (!venuePackageFor(account.id,venueId)?.requirements.some(r=>String(r.n)===docKey) || !(file instanceof File)) redirect(back);
-
-  const refusal = refuseUpload({ type: file.type, size: file.size });
-  if (refusal) redirect(`${back}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
-  const bytes = Buffer.from(await file.arrayBuffer());
-  if (bytes.length > maxUploadBytes()) redirect(`${back}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
-
-  // Recheck after reading the file: a submitted package must not change.
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  getDb()
-    .prepare(
-      `INSERT INTO venue_attachments (venue_id, doc_key, file_name, content_type, byte_size, bytes)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT (venue_id, doc_key) DO UPDATE SET
-         file_name = excluded.file_name, content_type = excluded.content_type,
-         byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
-    )
-    .run(venueId, docKey, file.name.trim(), file.type, bytes.length, bytes);
-  revalidatePath(back);
-  redirect(back);
-}
-
-/** Removing one: the row goes, the requirement returns to outstanding. */
-export async function removeVenueAttachmentAction(venueId: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
-  refuseIfVenueArchived(venueId);
-  const {venuePackageFor}=await import('../lib/venue/workspace');
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  const docKey = String(formData.get('docKey') ?? '');
-  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
-  if (docKey) {
-    getDb().prepare(`DELETE FROM venue_attachments WHERE venue_id = ? AND doc_key = ?`).run(venueId, docKey);
-  }
-  revalidatePath(`/venues/${venueId}`);
-  redirect(`/venues/${venueId}`);
-}
-
 export async function saveVenueAssessmentAction(
   venueId: string,
   payload: VenueAssessmentPayload,
@@ -1411,7 +1188,7 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
     .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
     .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
   // Only an UNANSWERED nomination withdraws; anything else is not this act.
-  if (!inv || inv.status !== 'nominated') redirect(`/events/${eventId}/requirements`);
+  if (!inv || inv.status !== 'nominated') redirect(`/events/${eventId}`);
   db.prepare(`UPDATE invitations SET status = 'withdrawn', closed_at = now_stamp() WHERE token = ?`).run(token);
   // A modification-requested nominee holds an account already; they are told, for
   // information -- there is nothing for them to do.
@@ -1428,7 +1205,7 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
       ev.is_demo,
     );
   }
-  redirect(`/events/${eventId}/requirements?notice=withdrawn`);
+  redirect(`/events/${eventId}?notice=withdrawn#req-B7`);
 }
 
 export async function removeProviderAction(eventId: string, formData: FormData): Promise<void> {
@@ -1442,7 +1219,7 @@ export async function removeProviderAction(eventId: string, formData: FormData):
     .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
     .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
   // Only a CONFIRMED party removes; an unanswered one withdraws instead.
-  if (!inv || inv.status !== 'confirmed') redirect(`/events/${eventId}/requirements`);
+  if (!inv || inv.status !== 'confirmed') redirect(`/events/${eventId}`);
   db.prepare(`UPDATE invitations SET status = 'removed', closed_at = now_stamp() WHERE token = ?`).run(token);
 
   const ev = db.prepare(`SELECT name_en, name_ar, filed, is_demo FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; filed: number; is_demo: number };
@@ -1473,7 +1250,7 @@ export async function removeProviderAction(eventId: string, formData: FormData):
     );
     redirect(`/events/${eventId}/change?notice=provider-removed`);
   }
-  redirect(`/events/${eventId}/requirements?notice=removed`);
+  redirect(`/events/${eventId}?notice=removed#req-B7`);
 }
 
 /**
@@ -1525,7 +1302,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `قبل طرف مُسمّى — ${eventName.name_ar}`,
       `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has accepted the nomination.`,
       `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
       'for_information',
     );
     // The linked nominee lands on their own event tasks.
@@ -1552,7 +1329,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       evFiled
         ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
         : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
-      evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
+      evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}`,
     );
     redirect(`/invitations/${token}?notice=declined`);
   }
@@ -1568,7 +1345,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `طلب طرف مُسمّى تعديلاً — ${eventName.name_ar}`,
       `The nominated party can serve the event but not as described. The reason, as written: “${verbatimQuote(reason)}”. The nomination remains open.`,
       `يمكن للطرف المُرشَّح خدمة الفعالية لكن ليس بالصيغة الموصوفة. والسبب كما كُتب: «${verbatimQuote(reason)}». ويبقى الترشيح قائماً.`,
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
     );
     redirect(`/invitations/${token}?notice=modification`);
   }
@@ -1686,33 +1463,6 @@ function ownedInvitation(accountId: number, token: string): boolean {
   return owns;
 }
 
-/** Level 2: operational detail for the organizer's plan. No declaration exists. */
-export async function saveOpsDetailAction(token: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedInvitation(account.id, token)) redirect('/dashboard');
-  const detail: Record<string, string> = {};
-  for (const [k, v] of formData.entries()) {
-    if (typeof v === 'string' && k !== 'token') detail[k] = v;
-  }
-  const inv = invitationRow(token);
-  getDb()
-    .prepare(`UPDATE invitations SET ops_detail = ?, status = 'confirmed', answered_at = COALESCE(answered_at, now_stamp()) WHERE token = ?`)
-    .run(JSON.stringify(detail), token);
-  if (inv) {
-    const eventName = getDb().prepare(`SELECT name_en, name_ar FROM events WHERE id = ?`).get(inv.event_id) as { name_en: string; name_ar: string };
-    notifyOrganizerOf(
-      inv.event_id,
-      `Participation confirmed with operational detail — ${eventName.name_en}`,
-      `تأكدت المشاركة مع التفاصيل التشغيلية — ${eventName.name_ar}`,
-      'A named provider confirmed participation and supplied its operational detail for your health and medical plan.',
-      'أكد مزوّد مُسمّى مشاركته وقدّم تفاصيله التشغيلية لخطتكم الصحية والطبية.',
-      `/events/${inv.event_id}/requirements`,
-    );
-  }
-  redirect(`/events/${inv?.event_id}/participation?notice=sent`);
-}
-
 /** The Level 3 declaration draft: items and certification, visible to the agency only. */
 export async function saveDeclarationDraftAction(
   token: string,
@@ -1764,7 +1514,7 @@ export async function signDeclarationAction(
       `وُقّع إقرار جاهزية خدمات الطوارئ الطبية — ${eventName.name_ar}`,
       'A named agency has signed its readiness declaration. It is now one of the Level 3 attachments in your submission package.',
       'وقّعت جهة مُسمّاة إقرار جاهزيتها. وهو الآن أحد مرفقات المستوى 3 في حزمة تقديمكم.',
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
     );
   }
   return { ok: true };
@@ -1924,24 +1674,6 @@ export async function postponeEventAction(eventId: string, formData: FormData): 
 }
 
 /**
- * Remove an attachment -- ONLY while nothing is filed. A filed submission's record
- * corrects by replacement, never by removal: taking a document out of a filed
- * package would silently falsify what the Ministry received.
- */
-export async function removeAttachmentAction(eventId: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  refuseIfArchived(eventId);
-  const docKey = String(formData.get('docKey') ?? '');
-  if (!mayEditEventDocument(account, eventId, docKey)) redirect('/dashboard');
-  const db = getDb();
-  const ev = db.prepare(`SELECT filed FROM events WHERE id = ?`).get(eventId) as { filed: number };
-  if (ev.filed === 1) redirect(`/events/${eventId}/requirements`);
-  db.prepare(`DELETE FROM event_attachments WHERE event_id = ? AND doc_key = ?`).run(eventId, docKey);
-  redirect(`/events/${eventId}/requirements`);
-}
-
-/**
  * Edit the DESCRIPTIVE details of an event: names, venue or route, municipalities,
  * times. The figures the classification depends on are deliberately NOT here --
  * they change through a reassessment, where the level re-derives. Dates ARE here:
@@ -2042,7 +1774,7 @@ export async function withdrawParticipationAction(token: string, formData: FormD
     evFiled
       ? `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
       : `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
-    evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
+    evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}`,
   );
   redirect('/dashboard?notice=withdrawn');
 }
@@ -2077,7 +1809,7 @@ export async function reopenDeclarationAction(token: string): Promise<void> {
     `أُعيد فتح إقرار جاهزية — ${ev.name_ar}`,
     'An EMS agency is reviewing its signed declaration after your event changed. The Level 3 application needs its new signature.',
     'تراجع جهة إسعاف إقرارها الموقّع بعد تغيير تفاصيل فعاليتكم. يحتاج طلب المستوى 3 إلى توقيعها الجديد.',
-    `/events/${inv.event_id}/requirements`,
+    `/events/${inv.event_id}`,
   );
   redirect(`/events/${inv.event_id}/declaration?notice=reopened`);
 }

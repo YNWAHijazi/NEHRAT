@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { publicStatusArabic, medicalDirectorApplies, organizerEventState, MINISTRY_CONTENT } from '../lib/rules';
+import { publicStatusArabic, organizerEventState, MINISTRY_CONTENT, resolveRequirements } from '../lib/rules';
 const ministryJson = MINISTRY_CONTENT;
 
 describe('the public register reports a filed, undecided record as filed', () => {
@@ -16,12 +16,15 @@ describe('the public register reports a filed, undecided record as filed', () =>
   });
 });
 
-describe('the Event Medical Director applies from Level 2', () => {
-  it('is absent at Level 1 and with no level, optional at 2, required at 3', () => {
-    expect(medicalDirectorApplies(null)).toBe(false);
-    expect(medicalDirectorApplies(1)).toBe(false);
-    expect(medicalDirectorApplies(2)).toBe(true);
-    expect(medicalDirectorApplies(3)).toBe(true);
+describe('the Event Medical Director is a Level 3 role (decision D1, partner review 2026-10-07)', () => {
+  it('is absent at Levels 1 and 2, required at 3 -- from the catalogue, not a flag', () => {
+    const director = (level: 1 | 2 | 3) => resolveRequirements({
+      service: 'event', level, answers: {}, files: {}, organizerContact: null, assessmentComplete: true, ems: [], director: null,
+      planApprovalCurrent: false, declaration: { statementsComplete: false, certificationComplete: false }, requested: [],
+    }).find((r) => r.key === 'B3');
+    expect(director(1)).toBeUndefined();
+    expect(director(2)).toBeUndefined();
+    expect(director(3)?.group).toBe('required');
   });
 });
 

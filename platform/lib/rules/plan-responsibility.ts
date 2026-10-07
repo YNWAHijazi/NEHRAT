@@ -12,7 +12,11 @@ export function planRequirement(level: number | null, ministryRequested = false)
   return level === 2 ? 'recommended' : 'notRequired';
 }
 
-/** The owner assigns plan entry to confirmed medical partners at every applicable level. */
+/**
+ * The owner assigns plan entry to confirmed medical partners at every applicable level:
+ * the EMS agency at Level 2, the agency or the Director at Level 3. There is no Director
+ * below Level 3 (decision D1, partner review 2026-10-07).
+ */
 export function canPreparePlan(level: number | null, role: 'organizer' | 'director' | 'ems'): boolean {
-  return (level === 2 || level === 3) && (role === 'director' || role === 'ems');
+  return (level === 2 && role === 'ems') || (level === 3 && (role === 'director' || role === 'ems'));
 }

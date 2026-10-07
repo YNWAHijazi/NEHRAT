@@ -1,37 +1,27 @@
-import { MedicalPlanTask } from '../../../components/MedicalPlanTask';
-import { getDb } from '../../../lib/db';
-import { attachDocumentAction } from '../../actions';
-import { UploadInput } from '../../../components/UploadInput';
-import { acceptAttribute } from '../../../lib/rules/uploads';
 /**
  * THE DIRECTOR'S ONE PAGE (partner ruling, counterparty pass 2026-09-02): the event's
- * facts at the top with View more, then only what the Director actually fills — the
- * three governance sections that write into the organizer's plan, and the route to
- * the post-event report when one is owed. The requirement cards that looked like
- * buttons and the certified-about-you panel are gone; the full requirement rows the
- * matrix names stay readable under View more, where every counterparty reads theirs.
+ * facts at the top with View more, then what the Director actually does. Since the
+ * single record page (2026-10-07) that is the SAME requirement rows the organizer
+ * sees -- the medical plan the Director prepares with the EMS agency and approves,
+ * the deployment map, the medical command row, the shared operational rows -- plus
+ * the three governance sections and the route to the post-event report when owed.
  */
 
 import Link from 'next/link';
 import { InfoNote } from '../../../components/InfoNote';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
+import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import type { Account } from '../../../lib/auth';
 import type { InvitationDetail, NominationBriefing, NomineePlanSlice } from '../../../lib/queries';
+import type { RecordView } from '../../../lib/record-view';
 import { ROLES_CONTENT } from '../../../lib/rules';
 import { saveGovernanceAction } from '../../actions';
 import { Briefing } from '../../invitations/[token]/Briefing';
 import { RespondForm } from '../../invitations/[token]/RespondForm';
 
 export function DirectorEventView({
-  account,
-  invitation,
-  unread,
-  governance,
-  reportSigned,
-  briefing,
-  plan,
-  notice,
+  account, invitation, unread, governance, reportSigned, briefing, plan, notice, view, refusal, approval, error,
 }: {
   account: Account;
   invitation: InvitationDetail;
@@ -41,9 +31,12 @@ export function DirectorEventView({
   briefing: NominationBriefing | null;
   plan: NomineePlanSlice | null;
   notice?: string | undefined;
+  view: RecordView | null;
+  refusal: { key: string; reason: string } | null;
+  approval: string | null;
+  error: string | null;
 }) {
   const content = ROLES_CONTENT.director;
-  const hasMap = Boolean(getDb().prepare("SELECT 1 FROM event_attachments WHERE event_id = ? AND doc_key = 'deploymentMap' AND length(bytes) > 0").get(invitation.eventId));
   const confirmed = invitation.status === 'confirmed';
   const live = confirmed || invitation.status === 'nominated';
 
@@ -71,28 +64,24 @@ export function DirectorEventView({
               )}
             </div>
           ) : null}
-          {notice === 'uploaded' ? (
-            <div role="status" style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="Medical deployment map uploaded. The organizer and the Ministry can now open it." ar="رُفعت خريطة الانتشار الطبي. ويمكن للمنظّم والوزارة فتحها الآن." />
-            </div>
-          ) : null}
           {notice === 'saved' ? (
             <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
               <L en="Saved. Your text now shows in the organizer's plan." ar="حُفظ. ويظهر نصكم الآن في خطة المنظّم." />
             </div>
           ) : null}
+          {approval === 'recorded' ? (
+            <div role="status" data-region="approval-notice" style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="Your approval of the current plan version is recorded. The organizer has been told." ar="سُجّل اعتمادكم لنسخة الخطة الحالية. وأُبلغ المنظّم." />
+            </div>
+          ) : null}
+          {error === 'approval' ? (
+            <div role="alert" style={{ padding: '18px 24px', border: '1px solid var(--bad)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="The approval was not recorded: the plan is not complete, or it changed while you read it. Review the current version and approve again." ar="لم يُسجَّل الاعتماد: الخطة غير مكتملة، أو تغيّرت أثناء قراءتكم. راجعوا النسخة الحالية واعتمدوها مجدداً." />
+            </div>
+          ) : null}
 
           {briefing ? (
-            <Briefing
-              briefing={briefing}
-              token={invitation.token}
-              kind="director"
-              level={invitation.eventLevel}
-              namedEn={invitation.nameEn}
-              namedAr={invitation.nameAr}
-              confirmed={confirmed}
-              plan={plan}
-            />
+            <Briefing briefing={briefing} token={invitation.token} kind="director" level={invitation.eventLevel} namedEn={invitation.nameEn} namedAr={invitation.nameAr} confirmed={confirmed} plan={plan} />
           ) : null}
 
           <h2 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
@@ -108,64 +97,63 @@ export function DirectorEventView({
             </>
           ) : null}
 
-          {confirmed ? (
+          {confirmed && view ? (
             <>
-              <div data-region="director-plan"><MedicalPlanTask eventId={invitation.eventId} ownerId={invitation.organizerAccountId} level={invitation.eventLevel} /></div>
-              {invitation.eventLevel === 3 ? <section style={{ padding: 20, border: '1px solid var(--line)', borderRadius: 14, marginBlockEnd: 24 }}><h3><L en="Medical deployment map" ar="خريطة الانتشار الطبي" /></h3>{hasMap ? <a href={`/api/documents/${invitation.eventId}/deploymentMap`} target="_blank" rel="noreferrer"><L en="View uploaded map" ar="عرض الخريطة المرفوعة" /></a> : null}<form action={attachDocumentAction.bind(null, invitation.eventId)}><input type="hidden" name="docKey" value="deploymentMap" /><input type="hidden" name="returnTo" value={`/events/${invitation.eventId}`} /><div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 12 }}><UploadInput name="file" required accept={acceptAttribute()} /><button type="submit" style={{ height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, background: 'var(--bg)', color: 'var(--ink)', fontSize: 14, cursor: 'pointer' }}><L en={hasMap ? 'Replace map' : 'Upload map'} ar={hasMap ? 'استبدال الخريطة' : 'رفع الخريطة'} /></button></div></form></section> : null}
-              {invitation.eventLevel === 3 ? <><form action={saveGovernanceAction.bind(null, invitation.eventId)}>
-                <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
-                  {content.govSections.map((g) => {
-                    const s = stateOf(g.key);
-                    return (
-                      <div key={g.key} style={{ paddingBlock: '29px', paddingInlineStart: '32px', paddingInlineEnd: '33px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 16 }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 12 }}>
-                          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em', flex: 1, minWidth: 0 }}>
-                            <L en={g.en} ar={g.ar} />
-                            <InfoNote><L en={g.askEn} ar={g.askAr} />{' '}<L en={`Included in: ${g.intoEn}`} ar={`يُدرج في: ${g.intoAr}`} /></InfoNote>
-                          </h3>
-                          <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 13 }}>
-                            <L en={s.en} ar={s.ar} />
-                          </span>
-                        </div>
-                        <textarea
-                          name={g.key}
-                          rows={4}
-                          defaultValue={governance[g.key] ?? ''}
-                          style={{ width: '100%', padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15, lineHeight: 1.7, resize: 'vertical' }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBlockEnd: 32 }}>
-                  <L en="Save" ar="حفظ" />
-                </button>
-              </form>
-
-              {/* The report is the Director's other signature. The row states where it
-                  stands and opens it; the report page carries the figures and the act. */}
-              <div data-region="report-row" style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${reportSigned?.director ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 500 }}>
-                    <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
-                  </div>
-                  <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
-                    {reportSigned?.director ? (
-                      <L en="Signed." ar="وُقّع." />
-                    ) : reportSigned ? (
-                      <L en="The organizer's figures are in; your signature is the second of two." ar="أرقام المنظّم مدخلة؛ وتوقيعكم هو الثاني من اثنين." />
-                    ) : (
-                      <L en="Opens after the event; the organizer enters the figures and you sign." ar="يُفتح بعد الفعالية؛ يُدخل المنظّم الأرقام وتوقّعون." />
-                    )}
-                  </div>
-                </div>
-                <Link href={`/events/${invitation.eventId}/report`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center', flex: 'none' }}>
-                  <L en="Open the post-event report" ar="فتح التقرير اللاحق" />
-                </Link>
-              </div>
-            </> : null}
+              <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.65, color: 'var(--muted)', maxWidth: '76ch' }}>
+                <L en="The rows below are the event's record, shared with the organizer and the EMS agency. You may enter the rows that name the Medical Director; the medical plan is prepared here and, at Level 3, carries your approval of its current version." ar="الصفوف أدناه هي سجل الفعالية، مشترك مع المنظّم وجهة الإسعاف. يمكنكم إدخال الصفوف التي تسمّي المدير الطبي؛ وتُعدّ الخطة الطبية هنا، وفي المستوى 3 تحمل اعتمادكم لنسختها الحالية." />
+              </p>
+              <RecordRequirements record={view.record} viewerRole="director" viewerConfirmed contentTypes={view.contentTypes} refusal={refusal} derived={view.derived} governance={view.governance} facility={view.facility} />
             </>
           ) : null}
+
+          {confirmed && invitation.eventLevel === 3 ? <><form action={saveGovernanceAction.bind(null, invitation.eventId)} style={{ marginBlockStart: 32 }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}><L en="Clinical governance" ar="الحوكمة السريرية" /></h2>
+            <div data-region="gov-sections" style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 24 }}>
+              {content.govSections.map((g) => {
+                const s = stateOf(g.key);
+                return (
+                  <div key={g.key} style={{ paddingBlock: '29px', paddingInlineStart: '32px', paddingInlineEnd: '33px', background: 'var(--surface2)', borderInlineStart: `3px solid ${s.color}`, borderRadius: 16 }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'start', marginBlockEnd: 12 }}>
+                      <h3 style={{ margin: 0, fontSize: 20, fontWeight: 600, letterSpacing: '-.02em', flex: 1, minWidth: 0 }}>
+                        <L en={g.en} ar={g.ar} />
+                        <InfoNote><L en={g.askEn} ar={g.askAr} />{' '}<L en={`Included in: ${g.intoEn}`} ar={`يُدرج في: ${g.intoAr}`} /></InfoNote>
+                      </h3>
+                      <span style={{ flex: 'none', padding: '4px 10px', borderRadius: 999, background: s.bg, color: s.color, fontSize: 13 }}>
+                        <L en={s.en} ar={s.ar} />
+                      </span>
+                    </div>
+                    <textarea name={g.key} rows={4} defaultValue={governance[g.key] ?? ''} style={{ width: '100%', padding: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 15, lineHeight: 1.7, resize: 'vertical' }} />
+                  </div>
+                );
+              })}
+            </div>
+            <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer', marginBlockEnd: 32 }}>
+              <L en="Save" ar="حفظ" />
+            </button>
+          </form>
+
+          {/* The report is the Director's other signature. The row states where it
+              stands and opens it; the report page carries the figures and the act. */}
+          <div data-region="report-row" style={{ paddingBlock: '21px', paddingInlineStart: '24px', paddingInlineEnd: '25px', background: 'var(--surface2)', borderInlineStart: `3px solid ${reportSigned?.director ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+              <div style={{ fontSize: 16, fontWeight: 500 }}>
+                <L en="Post-event medical report" ar="التقرير الطبي لما بعد الفعالية" />
+              </div>
+              <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 4 }}>
+                {reportSigned?.director ? (
+                  <L en="Signed." ar="وُقّع." />
+                ) : reportSigned ? (
+                  <L en="The organizer's figures are in; your signature is the second of two." ar="أرقام المنظّم مدخلة؛ وتوقيعكم هو الثاني من اثنين." />
+                ) : (
+                  <L en="Opens after the event; the organizer enters the figures and you sign." ar="يُفتح بعد الفعالية؛ يُدخل المنظّم الأرقام وتوقّعون." />
+                )}
+              </div>
+            </div>
+            <Link href={`/events/${invitation.eventId}/report`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: 14, display: 'inline-flex', alignItems: 'center', flex: 'none' }}>
+              <L en="Open the post-event report" ar="فتح التقرير اللاحق" />
+            </Link>
+          </div>
+          </> : null}
 
           {!live ? (
             <div style={{ padding: '20px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, fontSize: 15, lineHeight: 1.65, maxWidth: '76ch' }}>

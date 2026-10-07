@@ -8,21 +8,20 @@ import {venueInvitation,venueInvitations, invalidateVenueMedicalWork} from '../.
 import {venuePackageFor,ensureVenuePackage} from '../../lib/venue/workspace';
 import {sendLinkEmail} from '../../lib/email';
 import {verifiedSignIn,validPhone} from '../../lib/email-verification';
-import {venueLocalEmsContactApplies} from '../../lib/rules/venue-workflow';
 import {checkPasswordPolicy,hashPassword} from '../../lib/password';
+import {requirementApplies} from '../../lib/rules';
 export async function inviteVenuePartnerAction(id:string,form:FormData) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();
  if(!w.editable||!w.level)redirect(`/venues/${id}/team`);
  const kind=String(form.get('kind')),name=String(form.get('name')??'').trim(),email=String(form.get('email')??'').trim().toLowerCase();
  if(!['ems','director'].includes(kind)||!name||!/^\S+@\S+\.\S+$/.test(email))redirect(`/venues/${id}/team?error=details`);
- // A Director applies from Level 2 (optional) and is required at Level 3; at Level 1 there is no Director to invite.
- if(kind==='director'&&w.level<2)redirect(`/venues/${id}/team`);
+ // The Director is a Level 3 role (decision D1): below it there is no Director to invite.
+ if(kind==='director'&&!requirementApplies('B3',w.level,'venue'))redirect(`/venues/${id}/team`);
  if(venueInvitations(id).some(i=>['nominated','confirmed'].includes(i.status)&&(i.kind===kind&&(i.email===email||kind==='director'))))redirect(`/venues/${id}/team?error=duplicate`);
  const token=randomBytes(24).toString('hex');const db=getDb();
  db.prepare('INSERT INTO venue_invitations(token,venue_id,kind,name,email,expires_at) VALUES(?,?,?,?,?,?)').run(token,id,kind,name,email,new Date(Date.now()+30*86400000).toISOString());
  ensureVenuePackage(a.id,id);
- const answers=kind==='ems'&&w.level===1?{...w.answers,'7':{...w.answers['7'],localConfirmed:''}}:w.answers;
- db.prepare('UPDATE venue_packages SET answers=?,work_revision=work_revision+1 WHERE venue_id=?').run(JSON.stringify(answers),id);
+ db.prepare('UPDATE venue_packages SET work_revision=work_revision+1 WHERE venue_id=?').run(id);
  db.prepare('DELETE FROM venue_plan_approvals WHERE venue_id=?').run(id);
  const recipient=db.prepare('SELECT id FROM accounts WHERE email=? AND role=? AND is_demo=? AND suspended=0').get(email,kind,+a.isDemo) as {id:number}|undefined;
  if(recipient)db.prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(recipient.id,`Venue invitation: ${id}`,`دعوة لموقع: ${id}`,`Review your invitation for ${w.venue.nameEn}`,`راجعوا الدعوة للموقع ${w.venue.nameAr}`,`/venue-invitations/${token}`,+a.isDemo);
@@ -62,14 +61,4 @@ export async function createVenuePartnerAccountAction(token:string,form:FormData
  // Account creation never counts as acceptance; OTP (when enabled) runs first.
  await verifiedSignIn(Number(result.lastInsertRowid),`/venue-invitations/${token}`);
  redirect(`/venue-invitations/${token}`);
-}
-
-/** Level 1 needs a confirmed local contact, not necessarily an on-site agency account. */
-export async function saveVenueLocalEmsContactAction(id:string,form:FormData) {
- const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();
- if(!w.editable||!venueLocalEmsContactApplies(w.level,w.invitations.some(i=>i.kind==='ems'&&['nominated','confirmed'].includes(i.status))))redirect(`/venues/${id}/team`);
- const agency=String(form.get('agency')??'').trim().slice(0,200),phone=String(form.get('phone')??'').trim();
- if(!agency||!validPhone(phone)||form.get('confirm')!=='yes')redirect(`/venues/${id}/team?error=local`);
- ensureVenuePackage(a.id,id);getDb().prepare('UPDATE venue_packages SET answers=?,work_revision=work_revision+1 WHERE venue_id=?').run(JSON.stringify({...w.answers,'7':{agency,phone,localConfirmed:'yes'}}),id);
- revalidatePath(`/venues/${id}`,'layout');redirect(`/venues/${id}/team?saved=contact`);
 }

@@ -13,9 +13,9 @@ function ready(over: Partial<VenuePackageFacts> = {}): VenuePackageFacts {
     editable: true, status: 'draft', detailsDone: true, assessmentDone: true, level: 2, assessmentVersion: 1,
     pendingInvitations: [],
     requirements: [
-      { n: 1, en: 'Organizer contact', ar: 'جهة اتصال لدى المنظم', optional: false, done: true, clinical: false },
-      { n: 5, en: 'BLS response team(s)', ar: 'فرق BLS', optional: false, done: true, clinical: true },
-      { n: 6, en: 'Treatment post', ar: 'نقطة علاج', optional: true, done: false, clinical: true },
+      { key: 'B1', en: 'Organizer contact', ar: 'جهة اتصال لدى المنظم', optional: false, done: true, clinical: false },
+      { key: 'B5', en: 'BLS response team(s)', ar: 'فرق BLS', optional: false, done: true, clinical: true },
+      { key: 'B6', en: 'Treatment post', ar: 'نقطة علاج', optional: true, done: false, clinical: true },
     ],
     fee: null, submittedAt: null, validUntil: null,
     ...over,
@@ -27,13 +27,13 @@ describe('venue submission checks -- one list for the screen and the action', ()
     const c = venueSubmissionChecks(ready());
     expect(c.canSubmit).toBe(true);
     expect(c.remaining).toBe(0);
-    expect(c.optional.map((o) => o.key)).toEqual(['6']);
+    expect(c.optional.map((o) => o.key)).toEqual(['B6']);
   });
   it.each([
     ['details not done', { detailsDone: false }],
     ['assessment not done', { assessmentDone: false }],
     ['a pending invitation', { pendingInvitations: [{ name: 'Agency', token: 'x'.repeat(48) }] }],
-    ['a required row not done', { requirements: [{ n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }],
+    ['a required row not done', { requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }],
     ['an unpaid fee', { fee: { amount: '50', currency: 'USD', paid: false } }],
     ['a locked package', { editable: false }],
   ] as const)('blocks on %s', (_name, over) => {
@@ -50,26 +50,26 @@ describe('venue next step', () => {
   it('leads with details, then the assessment, then the organizer\'s own rows', () => {
     expect(venueNextAction(ready({ detailsDone: false }))?.kind).toBe('details');
     expect(venueNextAction(ready({ assessmentDone: false }))?.kind).toBe('assessment');
-    expect(venueNextAction(ready({ requirements: [{ n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }))?.kind).toBe('requirements');
+    expect(venueNextAction(ready({ requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }))?.kind).toBe('requirements');
   });
   it('waits on the team when the only open rows complete from an invitation reply', () => {
     const facts = ready({
       level: 3,
       pendingInvitations: [{ name: 'Dr A', token: 't' }],
-      requirements: [{ n: 3, en: 'Event Medical Director', ar: 'المدير الطبي', optional: false, done: false, clinical: false, awaitingInvitation: true }],
+      requirements: [{ key: 'B3', en: 'Event Medical Director', ar: 'المدير الطبي', optional: false, done: false, clinical: false, awaitingInvitation: true }],
     });
     expect(venueNextAction(facts)).toMatchObject({ kind: 'waitingOnOthers', href: 'team' });
   });
   it('asks for the medical team first when medical items wait and nobody is invited', () => {
     const facts = ready({ requirements: [
-      { n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false },
-      { n: 5, en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true },
+      { key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false },
+      { key: 'B5', en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true },
     ] });
     expect(venueNextAction(facts)).toMatchObject({ kind: 'team', href: 'team' });
     expect(venueNextAction({ ...facts, medicalTeamLinked: true })).toMatchObject({ kind: 'requirements', titleEn: 'Complete your 1 requirement' });
   });
   it('waits on the medical team for clinical rows, and says ready only when everything is in place', () => {
-    expect(venueNextAction(ready({ medicalTeamLinked: true, requirements: [{ n: 5, en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true }] }))?.kind).toBe('waitingOnOthers');
+    expect(venueNextAction(ready({ medicalTeamLinked: true, requirements: [{ key: 'B5', en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true }] }))?.kind).toBe('waitingOnOthers');
     expect(venueNextAction(ready())).toMatchObject({ kind: 'submit', tone: 'brand' });
     expect(venueNextAction(ready({ fee: { amount: '50', currency: 'USD', paid: false } }))?.kind).toBe('awaitingPayment');
   });
@@ -82,11 +82,11 @@ describe('venue next step', () => {
 describe('venue progress rail', () => {
   const cases: [string, Partial<VenuePackageFacts>, number][] = [
     ['a fresh draft', { detailsDone: false, assessmentDone: false, requirements: [] }, 1],
-    ['a draft with rows open', { requirements: [{ n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
+    ['a draft with rows open', { requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
     ['a draft ready to submit', {}, 4],
     ['a submitted package', { status: 'submitted', editable: false, submittedAt: '2026-10-01 10:00:00' }, 5],
     ['an accepted package', { status: 'accepted', editable: false, submittedAt: '2026-10-01 10:00:00', validUntil: '2027-10-01' }, 5],
-    ['a returned package with rows open', { status: 'incomplete', requirements: [{ n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
+    ['a returned package with rows open', { status: 'incomplete', requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
   ];
   it.each(cases)('%s', (_name, over, stage) => {
     const r = venueRailStages(ready(over));
@@ -95,7 +95,7 @@ describe('venue progress rail', () => {
     expect(r.stage).toBeLessThanOrEqual(r.stages.length);
   });
   it('marks the requirements stage "Returned here" and names the recorded outcome', () => {
-    const r = venueRailStages(ready({ status: 'incomplete', requirements: [{ n: 1, en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }));
+    const r = venueRailStages(ready({ status: 'incomplete', requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }));
     expect(r.stages[2]?.k).toBe('returned');
     expect(r.stages[4]?.metaEn).toBe(VENUE_STATUS.incomplete.en);
   });

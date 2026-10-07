@@ -19,7 +19,7 @@ import {
   type Standing,
 } from './rules';
 import { beirutToday as beirutTodayFn, clockNow as clockNowFn } from './clock';
-import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, postEventReportRequired, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, type AttestationRecord } from './rules';
+import { planIsComplete, declarationsAreComplete, effectiveCycles, demonstrationFilter, filingDeadline, eventStage, postEventReportRequired, ARCHIVE_WINDOW, isArchivedRecord, LIFECYCLE_CONTENT, POST_EVENT_STAGE, orderLaneActive, type AttestationRecord } from './rules';
 import type { DomainAnswers, Level, LevelDerivation, MinimumConditionInputs, OutcomeKey } from './rules';
 import { organizerEventState } from './rules';
 import { MINISTRY_CONTENT } from './rules/ministry';
@@ -1809,6 +1809,54 @@ export function inspectionsFor(eventId: string): InspectionRow[] {
  * who may record, what blocks -- lives in lib/rules/attestations.ts; this only reads
  * the rows. An absent row is the pending state, so a fresh submission returns [].
  */
+/** The Order of Physicians lane as configured: the owner's recorded setting when one exists, else the data default. */
+export function orderLaneOn(): boolean {
+  const config = ministryConfig().get('orderLane');
+  return config ? config.value === 'on' : orderLaneActive();
+}
+
+export interface OrderLaneSubmission {
+  eventId: string;
+  /** The organizer's account, for reading the live record where no frozen one exists. */
+  accountId: number;
+  nameEn: string; nameAr: string;
+  startDate: string | null;
+  filedAt: string | null;
+  mophReference: string | null;
+  /** The confirmed Director's credential information: name, licence, telephone, acceptance date. */
+  director: { nameEn: string; nameAr: string; licence: string | null; phone: string | null; acceptedAt: string | null } | null;
+}
+
+/**
+ * The filed Level 3 submissions the Order of Physicians reviews, with the Director's
+ * credential information (partner review, 2026-10-07). Demo isolation as the queue's;
+ * the level is the derived one, so a Level 2 filing never reaches the Order.
+ */
+export function orderLaneSubmissions(viewerIsDemo: boolean): OrderLaneSubmission[] {
+  const rows = getDb()
+    .prepare(
+      `SELECT e.id, e.account_id, e.name_en, e.name_ar, e.start_date, s.filed_at, s.moph_reference,
+              i.name_en AS dir_en, i.name_ar AS dir_ar, i.answered_at, a.credential_licence, a.phone
+       FROM submissions s
+       JOIN events e ON e.id = s.event_id
+       LEFT JOIN invitations i ON i.event_id = e.id AND i.kind = 'director' AND i.status = 'confirmed'
+       LEFT JOIN accounts a ON a.id = i.account_id
+       WHERE e.is_demo = ? AND s.filed_at IS NOT NULL AND e.lifecycle = 'active'
+       ORDER BY s.filed_at`,
+    )
+    .all(demoFlag(viewerIsDemo)) as unknown as {
+      id: string; account_id: number; name_en: string; name_ar: string; start_date: string | null; filed_at: string | null; moph_reference: string | null;
+      dir_en: string | null; dir_ar: string | null; answered_at: string | null; credential_licence: string | null; phone: string | null;
+    }[];
+  return rows
+    .filter((r) => derivedLevelFor(r.id) === 3)
+    .map((r) => ({
+      eventId: r.id, accountId: r.account_id, nameEn: r.name_en, nameAr: r.name_ar, startDate: r.start_date,
+      filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null, mophReference: r.moph_reference,
+      director: r.dir_en ? { nameEn: r.dir_en, nameAr: r.dir_ar ?? r.dir_en, licence: r.credential_licence || null, phone: r.phone || null, acceptedAt: r.answered_at ? r.answered_at.slice(0, 10) : null } : null,
+    }));
+}
+
 export function attestationRecordsFor(eventId: string): AttestationRecord[] {
   const rows = getDb()
     .prepare(

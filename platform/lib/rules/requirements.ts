@@ -64,11 +64,6 @@ export function requirementsForLevel(level: Level): RequirementRow[] {
   return rows;
 }
 
-/** Requirement 15: the event medical command function, the Director's alone, Level 3 only. */
-export function commandFunctionRow(level: Level): RequirementRow | null {
-  return requirementsForLevel(level).find((r) => r.n === 15) ?? null;
-}
-
 /**
  * The rows a NAMED PARTY carries at a level, and which of them are theirs alone.
  *

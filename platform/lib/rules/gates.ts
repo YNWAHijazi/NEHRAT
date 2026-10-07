@@ -202,20 +202,6 @@ export function materialChangeGate(ctx: EventGateContext): Gate {
  * row is ABSENT, not greyed. Showing a greyed row implies there could be one.
  */
 /**
- * Whether an Event Medical Director applies at all. Revised Annex B (owner, 2026-09-29): required
- * at Level 3, optional at Level 2 (invited for a recommended plan), and not at Level 1 -- where the
- * Director is ABSENT, never a greyed tab or an empty page (rule 10).
- */
-export function medicalDirectorApplies(level: Level | null): boolean {
-  return level === 2 || level === 3;
-}
-
-export function eventMedicalDirectorGate(ctx: EventGateContext): Gate {
-  if (ctx.archived) return { behaviour: 'absent' };
-  return medicalDirectorApplies(ctx.finalLevel) ? ENABLED : ABSENT;
-}
-
-/**
  * The EMS readiness declaration: a level gate, like the Director. The ten-item
  * declaration exists only at Level 3; at Levels 1 and 2 there is no declaration at all,
  * so the row is ABSENT rather than greyed (rule 10).

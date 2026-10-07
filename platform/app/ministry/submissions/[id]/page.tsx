@@ -2,6 +2,8 @@ import { OptionText } from '../../../../components/OptionText';
 import {eventPlanApproval} from '../../../../lib/plan-approval';
 import { EXTRA_DISCIPLINES } from '../../../../lib/rules/event-labels';
 import { ReviewFileSummary, ReviewMedicalAnswers } from '../../../../components/ReviewEvidence';
+import { RequirementReview } from '../../../../components/record/RequirementReview';
+import { catalogueKeyForDocument, eventRecordRequirements, requirementSnapshotFor } from '../../../../lib/record-facts';
 import { reviewEvidenceFor } from '../../../../lib/review-evidence';
 import { planRequirement, planSectionsForLevel } from '../../../../lib/rules/plan-responsibility';
 import { InfoNote } from '../../../../components/InfoNote';
@@ -17,6 +19,7 @@ import {
   addedMeasuresFor,
   attachmentsForReview,
   attestationRecordsFor,
+  orderLaneOn,
   submissionVersionsFor,
   planForReview,
   determinationsFor,
@@ -88,7 +91,7 @@ export default async function SubmissionReviewPage({
   // where the screen shows the explicit empty state rather than nothing.
   const attRows =
     review.level !== null && attestationsApplyAt(review.level as Level)
-      ? attestationRows(review.level as Level, attestationRecordsFor(id))
+      ? attestationRows(review.level as Level, attestationRecordsFor(id), orderLaneOn())
       : [];
   const attSummary = attRows.length > 0 ? attestationSummary(attRows) : null;
   const AP = ATTESTATIONS_CONTENT.panel;
@@ -122,6 +125,16 @@ export default async function SubmissionReviewPage({
     return plan?.mode === 'attach' ? sec?.covered === true : Boolean(sec?.text && sec.text.trim() !== '');
   };
   const inspections = inspectionsFor(id);
+  // THE REQUIREMENT RECORD (brief item 17): the package frozen at filing, or the live
+  // record for a submission filed before the record page existed.
+  const ownerId = (getDb().prepare(`SELECT account_id FROM events WHERE id = ?`).get(id) as { account_id: number }).account_id;
+  const requirementSnapshot = requirementSnapshotFor('event', id);
+  const liveRecord = eventRecordRequirements(ownerId, id);
+  const requirementContentTypes: Record<string, string | null> = {};
+  for (const a of attachments) {
+    const key = catalogueKeyForDocument(a.docKey);
+    if (key) requirementContentTypes[key] = a.contentType;
+  }
   const blockers = await outcomeBlockersFor(id);
   const outcomes = outcomeAvailability(blockers);
   const internal = MINISTRY_CONTENT.internalStates[review.state];
@@ -234,6 +247,7 @@ export default async function SubmissionReviewPage({
 
       <nav aria-label="Review sections" style={{ display: 'flex', flexWrap: 'wrap', gap: 18, marginBlockEnd: 22 }}>
         <a href="#review-file"><L en="Application" ar="الطلب" /></a>
+        <a href="#review-requirements"><L en="Requirements" ar="المتطلبات" /></a>
         <a href="#review-medical-team"><L en="Medical team" ar="الفريق الطبي" /></a>
         <a href="#review-documents"><L en="Documents" ar="المستندات" /></a>
         <a href="#review-assessment"><L en="Assessment" ar="التقييم" /></a>
@@ -241,6 +255,7 @@ export default async function SubmissionReviewPage({
         <a href="#review-decision"><L en="Review and decision" ar="المراجعة والقرار" /></a>
       </nav>
       {evidence && <ReviewFileSummary evidence={evidence} />}
+      <RequirementReview id={id} kind="event" snapshot={requirementSnapshot} live={liveRecord} contentTypes={requirementContentTypes} />
 
       {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --
           never a bare level chip. A seeded submission without stored answers says so. */}

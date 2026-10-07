@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { L } from '../../../../components/L';
+import { L } from '../L';
 
 export function InvitationLinkBlock({ token, path = `/invitations/${token}` }: { token: string; path?: string }) {
   const [url, setUrl] = useState(path);

@@ -151,6 +151,30 @@ export function attestationBlockers(
     }));
 }
 
+/**
+ * The Level 3 Director row's verification line (partner review, 2026-10-07): once a
+ * Director is identified, the credential check has a state of its own -- awaiting the
+ * acceptance, pending verification by the lane's authority, verified -- distinct from the
+ * Ministry's outcome. Null where attestations do not apply or no Director is named.
+ */
+export function directorVerification(input: {
+  level: Level;
+  directorStatus: 'nominated' | 'confirmed' | null;
+  records: readonly AttestationRecord[];
+  laneActive: boolean;
+}): { state: 'awaiting' | 'pending' | 'verified'; en: string; ar: string } | null {
+  if (!attestationsApplyAt(input.level) || !input.directorStatus) return null;
+  const c = attestationsJson.directorVerification;
+  if (input.directorStatus !== 'confirmed') return { state: 'awaiting', en: c.awaitingEn, ar: c.awaitingAr };
+  const row = attestationRows(input.level, input.records, input.laneActive).find((r) => r.key === 'directorCredential');
+  if (!row) return null;
+  const authority = attestationsJson.authorities[row.recorder === 'order' ? 'order' : 'moph'];
+  if (row.state === 'complete') {
+    return { state: 'verified', en: c.verifiedEn.replace('{authority}', authority.en).replace('{date}', row.attestedAt ?? ''), ar: c.verifiedAr.replace('{authority}', authority.ar).replace('{date}', row.attestedAt ? `⁦${row.attestedAt}⁩` : '') };
+  }
+  return { state: 'pending', en: c.pendingEn.replace('{authority}', authority.en), ar: c.pendingAr.replace('{authority}', authority.ar) };
+}
+
 /** The empty-state body with the level written in, both languages. */
 export function attestationEmptyBody(level: Level): { en: string; ar: string } {
   return {

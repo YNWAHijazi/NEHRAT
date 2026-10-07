@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { RecordHeader } from '../../../../components/RecordHeader';
 import { SectionHeading } from '../../../../components/SectionHeading';
+import { RequirementReview } from '../../../../components/record/RequirementReview';
 import { L } from '../../../../components/L';
 import { chip, alertBand, fieldInput } from '../../../../components/workspace-styles';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
@@ -11,14 +12,18 @@ import { can } from '../../../../lib/rules';
 import { DOMAINS } from '../../../../lib/rules/load';
 import { venueTypeLabel } from '../../../../lib/rules/venue-intake';
 import { venueDistrictLabel } from '../../../../lib/rules/venue-intake';
-import { VENUE_STATUS, venueStatusForDecision, type VenueAnswers, type VenueRequirement } from '../../../../lib/rules/venue-workflow';
+import { VENUE_STATUS, venueStatusForDecision } from '../../../../lib/rules/venue-workflow';
 import { venuePackageFor } from '../../../../lib/venue/workspace';
+import { requirementSnapshotFor } from '../../../../lib/record-facts';
 import { reviewVenuePackageAction } from '../../../venues/actions';
 
 type Decision = 'satisfied' | 'revision' | 'incomplete';
 const stamp = (s: string | null | undefined) => (s ? s.slice(0, 16) : '—');
 
-/** One submitted venue package, as the reviewer reads it: who, what, the answers, then the decision. */
+/** A package submitted before the single record page: its own row list and answers, read as they were frozen. */
+interface LegacyRequirement { n: number; en: string; ar: string; done: boolean; optional: boolean; valueEn?: string; valueAr?: string; fields: { key: string; en: string; ar: string }[]; receipts?: { display_name: string; completed_at: string }[] }
+
+/** One submitted venue package, as the reviewer reads it: who, what, the record as frozen at submission, then the decision. */
 export default async function MinistryVenueFile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ revision?: string; error?: string; recorded?: string }> }) {
   const account = await requireMinistryPage('viewSubmission');
   const { id } = await params;
@@ -33,15 +38,22 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
   const record = q.revision ? history.find((h) => String(h.revision) === q.revision) : history[0];
   if (!record) notFound();
   const s = JSON.parse(record.snapshot) as {
-    venue: typeof w.venue; district: string; point: { lat: number; lng: number } | null; level: number;
-    requirements: (VenueRequirement & { receipts?: { display_name: string; completed_at: string }[] })[];
-    answers: VenueAnswers; assessmentVersion: number; approval?: { display_name: string; approved_at: string };
+    venue: typeof w.venue; district: string; point: { lat: number; lng: number } | null; level: number; assessmentVersion: number;
+    requirements?: LegacyRequirement[]; answers?: Record<string, Record<string, string>>; approval?: { display_name: string; approved_at: string } | { by: string; at: string } | null;
   };
+  const snapshot = requirementSnapshotFor('venue', id, record.revision);
   const assessment = db.prepare('SELECT answers FROM venue_assessments WHERE venue_id = ? AND version = ?').get(id, s.assessmentVersion) as { answers: string } | undefined;
   const assessmentAnswers = assessment ? (JSON.parse(assessment.answers) as (number | null)[]) : [];
   const files = db
-    .prepare('SELECT f.doc_key, f.file_name FROM venue_package_files f JOIN venue_package_history h ON h.id = f.package_id WHERE h.venue_id = ? AND h.revision = ?')
-    .all(id, record.revision) as unknown as { doc_key: string; file_name: string }[];
+    .prepare('SELECT f.doc_key, f.file_name, f.content_type FROM venue_package_files f JOIN venue_package_history h ON h.id = f.package_id WHERE h.venue_id = ? AND h.revision = ?')
+    .all(id, record.revision) as unknown as { doc_key: string; file_name: string; content_type: string }[];
+  const contentTypes: Record<string, string | null> = {};
+  for (const f of files) contentTypes[f.doc_key] = f.content_type;
+  // Each agency's signed readiness declaration is filed under 20-<its invitation token>; the reviewer sees the agency, never the token's purpose.
+  const agencyFiles = files.filter((f) => /^20-[a-f0-9]{48}$/.test(f.doc_key)).map((f) => {
+    const inv = db.prepare('SELECT name FROM venue_invitations WHERE token = ?').get(f.doc_key.slice(3)) as { name: string } | undefined;
+    return { labelEn: `Readiness declaration — ${inv?.name ?? 'EMS agency'}`, labelAr: `إقرار الجاهزية — ${inv?.name ?? 'جهة الإسعاف'}`, href: `/api/venue-documents/${id}/${f.doc_key}?revision=${record.revision}`, fileName: f.file_name };
+  });
   const outcome = record.decision ? VENUE_STATUS[venueStatusForDecision(record.decision)] : null;
   const canDecide = w.status === 'submitted' && record.revision === w.revision && can(account.role, 'recordOutcome');
   const type = venueTypeLabel(s.venue.category);
@@ -53,6 +65,7 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
     { en: 'Responsible person', ar: 'الشخص المسؤول', value: <bdi>{s.venue.responsibleName || s.venue.responsibleContact}</bdi> },
     { en: 'Phone number', ar: 'رقم الهاتف', value: <bdi>{s.venue.responsiblePhone || '—'}</bdi> },
   ];
+  const legacyApproval = s.approval && 'display_name' in s.approval ? s.approval : null;
 
   return (
     <MinistryShell account={account}>
@@ -108,46 +121,51 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
 
       <section style={{ marginBlockEnd: 40 }}>
         <SectionHeading n={2} en="Submitted requirements" ar="المتطلبات المقدّمة" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {s.requirements.map((r) => {
-            const rowFiles = files.filter((f) => f.doc_key === String(r.n) || (r.n === 20 && f.doc_key.startsWith('20-')));
-            const showValue = r.valueEn && !['Required', 'Optional', 'Recommended'].includes(r.valueEn);
-            return (
-              <section key={r.n} style={{ paddingBlock: '16px', paddingInline: '22px 23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${r.done ? 'var(--brand)' : r.optional ? 'var(--line)' : 'var(--accent-ink)'}`, borderRadius: 12 }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 16, lineHeight: 1.45 }}><L en={r.en} ar={r.ar} /></span>
-                  <span style={chip(r.done ? 'done' : r.optional ? 'muted' : 'pending')}>
-                    <L en={r.done ? 'Provided' : r.optional ? 'Optional' : 'Not provided'} ar={r.done ? 'مقدّم' : r.optional ? 'اختياري' : 'غير مقدّم'} />
-                  </span>
-                </div>
-                {showValue ? <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockStart: 4 }}><L en={r.valueEn} ar={r.valueAr} /></div> : null}
-                <dl style={{ display: 'grid', gap: 10, margin: '12px 0 0' }}>
-                  {r.fields.map((f) => (
-                    <div key={f.key}>
-                      <dt style={{ fontSize: 12.5, color: 'var(--muted)' }}><L en={f.en} ar={f.ar} /></dt>
-                      <dd style={{ margin: 0, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{s.answers[String(r.n)]?.[f.key] || '—'}</dd>
-                    </div>
+        {snapshot || !s.requirements ? (
+          <RequirementReview id={id} kind="venue" snapshot={snapshot} live={w.record} contentTypes={contentTypes} revision={record.revision} extraFiles={agencyFiles} />
+        ) : (
+          /* A package frozen before the record page: its own rows, as submitted. */
+          <div data-region="legacy-requirements" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {s.requirements.map((r) => {
+              const rowFiles = files.filter((f) => f.doc_key === String(r.n) || (r.n === 20 && f.doc_key.startsWith('20-')));
+              const showValue = r.valueEn && r.valueAr && !['Required', 'Optional', 'Recommended'].includes(r.valueEn);
+              return (
+                <section key={r.n} style={{ paddingBlock: '16px', paddingInline: '22px 23px', background: 'var(--surface2)', borderInlineStart: `3px solid ${r.done ? 'var(--brand)' : r.optional ? 'var(--line)' : 'var(--accent-ink)'}`, borderRadius: 12 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <span style={{ fontSize: 16, lineHeight: 1.45 }}><L en={r.en} ar={r.ar} /></span>
+                    <span style={chip(r.done ? 'done' : r.optional ? 'muted' : 'pending')}>
+                      <L en={r.done ? 'Provided' : r.optional ? 'Optional' : 'Not provided'} ar={r.done ? 'مقدّم' : r.optional ? 'اختياري' : 'غير مقدّم'} />
+                    </span>
+                  </div>
+                  {showValue ? <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockStart: 4 }}><L en={r.valueEn!} ar={r.valueAr!} /></div> : null}
+                  <dl style={{ display: 'grid', gap: 10, margin: '12px 0 0' }}>
+                    {r.fields.map((f) => (
+                      <div key={f.key}>
+                        <dt style={{ fontSize: 12.5, color: 'var(--muted)' }}><L en={f.en} ar={f.ar} /></dt>
+                        <dd style={{ margin: 0, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{s.answers?.[String(r.n)]?.[f.key] || '—'}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {(r.receipts ?? []).map((c, index) => (
+                    <p key={`${r.n}-${index}`} style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                      <L en="Completed by" ar="أكمله" /> <bdi>{c.display_name}</bdi> · {stamp(c.completed_at)}
+                    </p>
                   ))}
-                </dl>
-                {(r.receipts ?? []).map((c, index) => (
-                  <p key={`${r.n}-${index}`} style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    <L en="Completed by" ar="أكمله" /> <bdi>{c.display_name}</bdi> · {stamp(c.completed_at)}
-                  </p>
-                ))}
-                {r.n === 2 && s.approval ? (
-                  <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--muted)' }}>
-                    <L en="Medical Director sign-off" ar="اعتمدها المدير الطبي" />: <bdi>{s.approval.display_name}</bdi> · {stamp(s.approval.approved_at)}
-                  </p>
-                ) : null}
-                {rowFiles.map((f) => (
-                  <p key={f.doc_key} style={{ margin: '10px 0 0' }}>
-                    <a href={`/api/venue-documents/${id}/${f.doc_key}?revision=${record.revision}`} target="_blank" rel="noreferrer"><L en="Open document" ar="فتح المستند" /> · {f.file_name}</a>
-                  </p>
-                ))}
-              </section>
-            );
-          })}
-        </div>
+                  {r.n === 2 && legacyApproval ? (
+                    <p style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--muted)' }}>
+                      <L en="Medical Director sign-off" ar="اعتمدها المدير الطبي" />: <bdi>{legacyApproval.display_name}</bdi> · {stamp(legacyApproval.approved_at)}
+                    </p>
+                  ) : null}
+                  {rowFiles.map((f) => (
+                    <p key={f.doc_key} style={{ margin: '10px 0 0' }}>
+                      <a href={`/api/venue-documents/${id}/${f.doc_key}?revision=${record.revision}`} target="_blank" rel="noreferrer"><L en="Open document" ar="فتح المستند" /> · {f.file_name}</a>
+                    </p>
+                  ))}
+                </section>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {assessment ? (

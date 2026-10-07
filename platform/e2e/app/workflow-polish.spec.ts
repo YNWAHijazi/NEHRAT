@@ -2,15 +2,15 @@ import { expect, test } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { gotoRidingRestarts } from '../helpers/resilient';
 
-test('organizer prepares one document at a time', async ({ page }) => {
+test('organizer prepares one requirement at a time', async ({ page }) => {
   await signInAs(page, 'test_organizer');
-  await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-  const plan = page.locator('[data-document="plan"]');
-  const map = page.locator('[data-document="siteMap"]');
-  await expect(plan).not.toHaveAttribute('open');
-  await map.locator(':scope > summary').click();
-  await expect(map).toHaveAttribute('open');
-  await expect(plan).not.toHaveAttribute('open');
+  await gotoRidingRestarts(page, '/events/EV-0418');
+  // One step on screen; the step list names the rest. Choosing the map step shows that card alone.
+  await expect(page.locator('[data-region="step-body"] [data-step]:visible')).toHaveCount(1);
+  await page.locator('[data-step-item="P-M"] a').click();
+  await expect(page.locator('[data-step="P-M"]')).toBeVisible();
+  await expect(page.locator('[data-step="B2"]')).toBeHidden();
+  await expect(page.locator('[data-region="step-body"] [data-step]:visible')).toHaveCount(1);
 });
 
 test('the second report signature submits it and the Ministry accepts it', async ({ page }) => {

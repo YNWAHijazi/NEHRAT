@@ -9,13 +9,14 @@ vi.mock('next/navigation', () => ({ redirect: (url: string) => { throw new Error
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 import { getDb } from '../lib/db';
 import { planAccess } from '../lib/plan-access';
-import { planFor, derivedLevelFor } from '../lib/queries';
+import { derivedLevelFor } from '../lib/queries';
 import { submissionGateFor } from '../lib/submission-facts';
-import { savePlanAction, uploadPlanFileAction, type PlanPayload } from '../app/actions';
-import { GET as planState } from '../app/api/events/[id]/plan-state/route';
-import { documentsForLevel, planIsComplete, submissionGate, type SubmissionFacts } from '../lib/rules/submission';
-import { planRequirement } from '../lib/rules/plan-responsibility';
+import { saveRequirementAnswerAction } from '../app/record-actions';
+import { eventRecordRequirements } from '../lib/record-facts';
+import { documentsForLevel, planIsComplete } from '../lib/rules/submission';
+import { planRequirement, planSectionsForLevel } from '../lib/rules/plan-responsibility';
 import { requirementsForLevel } from '../lib/rules/requirements';
+import { planTextKeys, resolveRequirements, requirementBlockers, type RecordFacts, type StoredAnswer } from '../lib/rules/record-requirements';
 const folder = mkdtempSync(join(tmpdir(), 'moph-annex-b-'));
 let owner: number;
 function as(login: string) {
@@ -33,9 +34,26 @@ beforeAll(() => {
   }
 });
 afterAll(() => { getDb().close(); vi.unstubAllEnvs(); rmSync(folder, { recursive: true, force: true }); });
-function facts(level: 1 | 2 | 3): SubmissionFacts {
-  return { level, organizationStatus: 'none', documentState: Object.fromEntries(documentsForLevel(level).map(d => [d.key, d.key !== 'plan'])), certification: { representative: 'Tester', telephone: '+9613111111', position: 'Organizer' }, grandfather: { today: '2026-09-29', filedAt: null, determined: false }, providers: [{name:'EMS',status:'confirmed',declaration:'signed'}], director: {status:'confirmed'}, declarationsComplete: true, today:'2026-09-29',filingDeadline:null,fee:null };
+/** A record with every row answered EXCEPT the plan, resolved through the catalogue. */
+function facts(level: 1 | 2 | 3, requested: string[] = []): RecordFacts {
+  const base: RecordFacts = {
+    service: 'event', level, answers: {}, files: { 'P-M': { fileName: 'map.pdf', savedAt: '' }, 'P-D': { fileName: 'd.pdf', savedAt: '' }, B17: { fileName: 'i.pdf', savedAt: '' } },
+    organizerContact: { name: 'Tester', phone: '+9613111111' }, assessmentComplete: true,
+    ems: [{ token: 'e', name: 'EMS', status: 'confirmed', declarationSigned: true }], director: { token: 'd', name: 'Dr', status: 'confirmed' },
+    planApprovalCurrent: false, declaration: { statementsComplete: true, certificationComplete: true }, requested,
+  };
+  const answers: Record<string, StoredAnswer> = {};
+  for (const row of resolveRequirements(base)) {
+    if (row.key === 'B2' || row.fields.length === 0) continue;
+    const values: Record<string, string | boolean | number> = {};
+    for (const f of row.fields) if (!f.showWhen) values[f.key] = f.type === 'checkbox' ? true : f.type === 'number' ? 2 : f.type === 'choice' ? 'yes' : 'x';
+    answers[row.key] = { values, savedByRole: row.authors[0] ?? 'organizer', savedByName: 'T', savedAt: '', version: 1 };
+  }
+  // The eleven major-incident items are the Level 3 escalation row; the plan's own sections stay unwritten so B2 alone blocks.
+  for (const key of planTextKeys()) if (key.startsWith('M')) answers[key] = { values: { text: 'x' }, savedByRole: 'director', savedByName: 'T', savedAt: '', version: 1 };
+  return { ...base, answers };
 }
+const planBlocks = (f: RecordFacts) => requirementBlockers(resolveRequirements(f)).some((b) => b.key === 'B2');
 test('revised English and Arabic matrix has 19 unique requirements and no legacy notification row', () => {
   const revised = requirementsForLevel(3);
   expect(revised).toHaveLength(19);
@@ -49,48 +67,52 @@ test('revised English and Arabic matrix has 19 unique requirements and no legacy
 test('Level 1 needs no plan or medical-arrangements upload; Level 2 plan does not block filing', () => {
   expect(planRequirement(1)).toBe('notRequired');
   expect(documentsForLevel(1).some(d => ['arrangements','plan'].includes(d.key))).toBe(false);
-  expect(submissionGate(facts(1)).canFile).toBe(true);
+  expect(requirementBlockers(resolveRequirements(facts(1)))).toEqual([]);
   expect(planRequirement(2)).toBe('recommended');
-  expect(submissionGate(facts(2)).canFile).toBe(true);
-  expect(submissionGate(facts(3)).blockers).toContainEqual(expect.objectContaining({docKey:'plan'}));
+  expect(requirementBlockers(resolveRequirements(facts(2)))).toEqual([]);
+  // Level 3: the plan (B2) stands between the record and filing; everything else is in place.
+  expect(requirementBlockers(resolveRequirements(facts(3))).map((b) => b.key)).toEqual(['B2']);
 });
 test('an active Ministry request makes the Level 2 plan mandatory; clearing it removes only that gate', () => {
-  expect(submissionGate({...facts(2),planRequested:true}).blockers).toContainEqual(expect.objectContaining({docKey:'plan'}));
-  expect(submissionGate({...facts(2),planRequested:true,documentState:{...facts(2).documentState,plan:true}}).canFile).toBe(true);
+  expect(planBlocks(facts(2))).toBe(false);
+  expect(planBlocks(facts(2, ['B2']))).toBe(true);
   getDb().prepare("DELETE FROM plans WHERE event_id='EV-0418'").run();
   expect(derivedLevelFor('EV-0418')).toBe(2);
-  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='plan')).toBe(false);
+  // The gate names the catalogue key (B2 is the plan) since the single record page.
+  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='B2')).toBe(false);
   const id = getDb().prepare("INSERT INTO added_measures (event_id,catalog_key,recorded_by) VALUES ('EV-0418','plan','Test reviewer')").run().lastInsertRowid;
-  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='plan')).toBe(true);
+  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='B2')).toBe(true);
   getDb().prepare('UPDATE added_measures SET cleared_at=now_stamp() WHERE id=?').run(id);
-  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='plan')).toBe(false);
+  expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='B2')).toBe(false);
 });
-test('both confirmed Level 2 medical roles read and update one plan; stale edits cannot overwrite it', async () => {
+test('the confirmed Level 2 agency reads and updates one plan section; stale edits cannot overwrite it; a Director has no Level 2 standing (D1)', async () => {
+  const text = () => eventRecordRequirements(owner, 'EV-0418')!.plan.find((s) => s.key === 'P13')!.text;
   as('test_ems');
-  const payload: PlanPayload = {baseVersion:0,mode:'write',sections:{'1':{text:'EMS shared plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false};
   expect(planAccess(session.account!,'EV-0418')?.canEdit).toBe(true);
-  expect(await savePlanAction('EV-0418',payload)).toEqual({ok:true,version:1});
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:0,values:{text:'EMS shared plan'}})).toEqual({ok:true,version:1});
+  // A Director invitation left on a Level 2 record (legacy data) gives no standing: the row names the agency alone.
   as('test_director');
-  const access = planAccess(session.account!,'EV-0418')!;
-  expect(access.canEdit).toBe(true);
-  expect(planFor(access.ownerId,'EV-0418')?.sections['1']?.text).toBe('EMS shared plan');
-  expect(await savePlanAction('EV-0418',payload)).toEqual({error:'conflict'});
-  expect(await savePlanAction('EV-0418',{...payload,baseVersion:1,sections:{'1':{text:'Director reviewed shared content'}}})).toEqual({ok:true,version:2});
+  expect(planAccess(session.account!,'EV-0418')).toBeNull();
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:1,values:{text:'Director text at Level 2'}})).toEqual({error:'forbidden'});
+  as('test_ems');
+  expect(text()).toBe('EMS shared plan');
+  // The version this editor read is already superseded: a conflict, never an overwrite.
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:0,values:{text:'Stale agency text'}})).toEqual({error:'conflict'});
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:1,values:{text:'Agency reviewed shared content'}})).toEqual({ok:true,version:2});
   as('test_organizer');
   expect(planAccess(session.account!,'EV-0418')?.canEdit).toBe(false);
-  expect(planFor(owner,'EV-0418')?.sections['1']?.text).toBe('Director reviewed shared content');
-  expect(await savePlanAction('EV-0418',{...payload,baseVersion:2})).toEqual({error:'not-authorized'});
-  const data = new FormData(); data.set('baseVersion','2');
-  expect(await uploadPlanFileAction('EV-0418',data)).toHaveProperty('error');
+  expect(text()).toBe('Agency reviewed shared content');
+  // The plan is the medical team's (catalogue B2 authors); the organizer reads it.
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:2,values:{text:'Organizer override'}})).toEqual({error:'forbidden'});
+  // The superseded version is archived, readable, never lost.
+  expect((getDb().prepare("SELECT answers FROM requirement_answer_history WHERE record_kind='event' AND record_id='EV-0418' AND key='P13' AND version=1").get() as {answers:string}).answers).toContain('EMS shared plan');
 });
-test('plan sync requires ownership or a confirmed medical invitation, with demo isolation', async () => {
-  const request = () => planState(new Request('http://localhost/api/events/EV-0418/plan-state'),{params:Promise.resolve({id:'EV-0418'})});
-  as('test_organizer'); expect((await request()).status).toBe(200);
-  as('test_director'); expect(await (await request()).json()).toEqual({version:2});
-  session.account!.isDemo=false;expect((await request()).status).toBe(404);
-  session.account=null;expect((await request()).status).toBe(404);
-  as('test_director');getDb().prepare("UPDATE invitations SET status='removed' WHERE token='annex-b-director'").run();
-  expect((await request()).status).toBe(404);
+test('writing the shared record requires ownership or a confirmed medical invitation, with demo isolation', async () => {
+  const write = () => saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:0,values:{text:'Cover'}});
+  as('test_ems'); expect(await write()).toEqual({ok:true,version:1});
+  session.account!.isDemo=false; expect(await saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:1,values:{text:'Other tenant'}})).toEqual({error:'not-found'});
+  const emsId=as('test_ems');getDb().prepare("UPDATE invitations SET status='removed' WHERE event_id='EV-0418' AND kind='ems' AND account_id=?").run(emsId);
+  expect(await saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:1,values:{text:'Removed agency'}})).toEqual({error:'not-found'});
   expect(planAccess(session.account!,'EV-0301')).toBeNull();
 });
 
@@ -150,5 +172,4 @@ test('the same plan sections drive medical entry and Ministry review, with no se
   expect(requirementsForLevel(3).find(r=>r.n===2)!.valueEn).toBe('Required; completed by the Event Medical Director or EMS agency');
   const complete={mode:'write' as const,attachedFile:null,sections:Object.fromEntries(planSectionsForLevel(3).map(s=>[String(s.n),{text:'Specific arrangements prepared by EMS'}])),majorIncident:Object.fromEntries(Array.from({length:11},(_,i)=>[String(i+1),{covered:true}]))};
   expect(planIsComplete(complete,3)).toBe(true);
-  expect(submissionGate({...facts(3),documentState:{...facts(3).documentState,plan:true}}).canFile).toBe(true);
 });

@@ -8,12 +8,14 @@
  *     reads it in the incidents lane.
  *  4. A revision outcome reopens the submission and a revised version files, with the
  *     reference unchanged and the version visible to the reviewer.
- *  6. Saving the plan archives the version it replaced, readable on the screen.
+ *  6. Saving a plan section archives the version it replaced in the answer history.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
+import { answerLevel1Rows, certify, openDetails } from '../helpers/record';
+import { DatabaseSync } from 'node:sqlite';
 
 
 const fill = async (page: Page, label: string, value: string): Promise<void> => {
@@ -21,7 +23,7 @@ const fill = async (page: Page, label: string, value: string): Promise<void> => 
 };
 
 test.describe('showstopper 1 — a Level 1 event files end to end', () => {
-  test('create, assess to Level 1, attach, declare six, file, receive the reference', async ({ page }) => {
+  test('create, assess to Level 1, answer the rows, certify, file, receive the reference', async ({ page }) => {
     test.setTimeout(90_000);
     await signInAs(page, 'test_organizer');
 
@@ -56,32 +58,21 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     const eventId = eventUrl.pathname.split('/')[2]!;
     await expect(page.locator('body')).toContainText('Level 1');
 
-    // Revised Annex B: Level 1 has no medical-plan upload.
-    await gotoRidingRestarts(page, `/events/${eventId}/requirements`);
-    await expect(page.locator('[data-document=arrangements], [data-document=plan]')).toHaveCount(0);
+    // Revised Annex B: Level 1 has no medical plan and no map upload -- the record page
+    // carries neither card (catalogue B2 and P-M at Level 1).
+    await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
+    await expect(page.locator('[data-requirement="B2"], [data-requirement="P-M"]')).toHaveCount(0);
 
-    // The compliance form renders SIX declarations at Level 1 -- and completes on six.
-    await gotoRidingRestarts(page, `/events/${eventId}/submit`);
-    const ticks = page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' });
-    await expect(ticks).toHaveCount(6);
-    for (let i = 0; i < 6; i += 1) {
-      // The list re-renders on every tick; always take the first remaining.
-      await page.locator('label:has(input[type="checkbox"])').filter({ hasText: 'Not declared' }).first().locator('input').check();
-    }
+    // The organizer's own rows, one card at a time; the summary counts them.
+    await answerLevel1Rows(page);
+    await expect(page.locator('[data-region="required-count"]')).toContainText('8 of 8');
     // THE CERTIFICATION. This walk used to tick six boxes and file, and it PASSED --
     // which is how a submission could be filed with no authorized representative
-    // named. Ticking the declarations is not making the certification.
-    await fill(page, 'Authorized representative', 'R. Haddad');
-    await fill(page, 'Telephone', '+961 1 000 000');
-    await fill(page, 'Position', 'Events director');
-    await page.keyboard.press('Tab'); // blur -> flush the last field's autosave
-
-    // Blockers are server-derived: the form AUTOSAVES (fields-only ruling,
-    // 2026-09-04) -- the quiet Saved receipt is the wait, then file.
-    await expect(page.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
-    const fileBtn = page.locator('button:has-text("Submit")');
-    // 30s: measured too tight at 15 on the full run once the console grew.
-    await expect(fileBtn).toBeEnabled({ timeout: 30_000 });
+    // named. Answering the rows is not making the certification; Level 1 asks the
+    // certification alone (catalogue P-C: the statements apply when the Ministry
+    // requests them), and the Submit button is server-gated on it.
+    await expect(page.locator('[data-region="compliance-statements"]')).toHaveCount(0);
+    const fileBtn = await certify(page, { representative: 'R. Haddad', telephone: '+961 1 000 000', position: 'Events director' });
     await fileBtn.click();
     await page.waitForURL(/acknowledgment/);
     // One identifier (owner ruling, 2026-09-29): the receipt carries the record ID the event was
@@ -109,11 +100,13 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
     const before = Number(/version (\d+)/.exec(beforeText)?.[1] ?? '1');
 
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/events/EV-0362/submit');
-    // The revision banner, and the form unlocked despite being filed.
+    await gotoRidingRestarts(page, '/events/EV-0362');
+    // The revision banner, and the record unlocked despite being filed: the one Submit
+    // at the foot of the page re-files, and says so.
     await expect(page.locator('body')).toContainText('open for revision');
-    const refile = page.locator('button:has-text("File the revised submission")');
-    await expect(refile).toBeVisible();
+    const refile = page.locator('[data-region="submit-button"]');
+    await expect(refile).toHaveText(/Submit the revised record/);
+    await expect(refile).toBeEnabled();
     await refile.click();
     await page.waitForURL(/acknowledgment/);
     // One identifier (owner ruling, 2026-09-29): the record ID is what holds across versions.
@@ -124,6 +117,10 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
     await expect(page.locator('[data-region="review-header"]')).toContainText(
       `revised submission, version ${before + 1}`,
     );
+    // The reviewer reads the requirement record frozen at this filing, not the live answers.
+    const frozen = page.locator('#review-requirements');
+    await expect(frozen).toContainText(`Frozen at filing · version ${before + 1}`);
+    await expect(frozen.locator('[data-review-requirement="B2"]')).toHaveAttribute('data-state', 'complete');
     // The version it replaced is archived and readable, which is the showstopper.
     await expect(page.locator('[data-region="review-versions"]')).toContainText(
       `Version ${before} — superseded`,
@@ -154,33 +151,44 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
 });
 
 test.describe('showstopper 6 — plan versions survive saving', () => {
-  test('a second save archives version 1, readable under Earlier versions', async ({ page }) => {
+  test('a second save of a plan section keeps the first wording in the answer history', async ({ page }) => {
     // Two save-and-reload cycles: generous under full-suite dev-compile load.
     test.setTimeout(90_000);
     await signInAs(page, 'test_ems');
-    await gotoRidingRestarts(page, '/events/EV-0418/plan');
-    // Sections are accordion rows: expand section 1, whose textarea then renders.
-    const sectionRow = page.locator('button[aria-expanded]', { hasText: 'Event description and schedule' });
-    if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
-    const initialVersion = (await (await page.request.get('/api/events/EV-0418/plan-state')).json()).version as number;
-    const firstSection = page.locator('textarea').first();
-    await expect(firstSection).toBeVisible();
-    await firstSection.fill('Version one wording for the schedule.');
-    await page.locator('button:has-text("Save the plan")').first().click();
-    // The versions section appears only AFTER a second save; wait on the save itself.
-    await expect(page.getByText('Saved.', { exact: true })).toBeVisible({ timeout: 20_000 });
-    // The accordion may close on refresh; re-open before the second edit.
+    await gotoRidingRestarts(page, '/events/EV-0418/participation');
+    // The plan is sections on the record; section 14 carries its own text (catalogue P14).
+    const section = async () => {
+      await openDetails(page.locator('[data-requirement="B2"]'));
+      return (await openDetails(page.locator('#plan-P14'))).locator('[data-region="requirement-form"]').first();
+    };
+    let form = await section();
+    const textarea = form.locator('textarea[name="text"]');
+    await expect(textarea).toBeVisible();
+    const original = await textarea.inputValue();
+    await textarea.fill('Version one wording for the contingency.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(form.getByRole('status')).toContainText('Saved.');
+    const first = Number(/version (\d+)/.exec((await form.locator('[data-region="answered-by"]').innerText()))?.[1] ?? '0');
+    expect(first).toBeGreaterThan(0);
+    // The card may close on refresh; re-open before the second edit.
     await page.reload();
-    if (await sectionRow.getAttribute('aria-expanded') !== 'true') await sectionRow.click();
-    await page.locator('textarea').first().fill('Version two wording, replacing version one.');
-    await page.locator('button:has-text("Save the plan")').first().click();
-    // Wait for the SECOND save to land before reloading -- networkidle raced it, and a
-    // reload mid-save read the page back before version 1 had been archived.
-    await expect(page.getByText('Saved.', { exact: true })).toBeVisible({ timeout: 20_000 });
-    await page.reload();
-    const history = page.locator('[data-region=versions] details').filter({ has: page.locator('summary', { hasText: `Version ${initialVersion + 1}` }) }).first();
-    await expect(history).toBeVisible();
-    await history.locator('summary').click();
-    await expect(history).toContainText('Version one wording for the schedule.');
+    form = await section();
+    await form.locator('textarea[name="text"]').fill('Version two wording, replacing version one.');
+    await form.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(form.getByRole('status')).toContainText('Saved.');
+    await expect(form.locator('[data-region="answered-by"]')).toContainText(`version ${first + 1}`);
+    // The version it replaced is archived, not overwritten -- which is the showstopper.
+    const db = new DatabaseSync(process.env['E2E_DATABASE_PATH']!);
+    try {
+      const archived = db.prepare("SELECT answers FROM requirement_answer_history WHERE record_kind = 'event' AND record_id = 'EV-0418' AND key = 'P14' AND version = ?").get(first) as { answers: string } | undefined;
+      expect(archived?.answers).toContain('Version one wording for the contingency.');
+    } finally { db.close(); }
+    // Leave the demonstration record's own wording for the journeys that read it.
+    if (original) {
+      form = await section();
+      await form.locator('textarea[name="text"]').fill(original);
+      await form.getByRole('button', { name: 'Save', exact: true }).click();
+      await expect(form.getByRole('status')).toContainText('Saved.');
+    }
   });
 });

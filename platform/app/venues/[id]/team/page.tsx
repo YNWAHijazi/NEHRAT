@@ -2,9 +2,10 @@ import { VenueWorkspace } from '../../../../components/VenueWorkspace';
 import { SectionHeading } from '../../../../components/SectionHeading';
 import { L } from '../../../../components/L';
 import { ownedVenuePage } from '../../../../lib/venue/page';
-import { venueLocalEmsContactApplies, arabicCount } from '../../../../lib/rules/venue-workflow';
-import { inviteVenuePartnerAction, withdrawVenuePartnerAction, saveVenueLocalEmsContactAction } from '../../team-actions';
-import { InvitationLinkBlock } from '../../../events/[id]/requirements/InvitationLinkBlock';
+import { arabicCount } from '../../../../lib/rules/venue-workflow';
+import { requirementApplies } from '../../../../lib/rules';
+import { inviteVenuePartnerAction, withdrawVenuePartnerAction } from '../../team-actions';
+import { InvitationLinkBlock } from '../../../../components/record/InvitationLinkBlock';
 import { alertBand, noticeBand, fieldInput } from '../../../../components/workspace-styles';
 
 /** The nomination states (SPEC 2: Nominated / Confirmed / Declined), agreeing with the party in Arabic:
@@ -34,13 +35,13 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
   const { id } = await params;
   const { account, w } = await ownedVenuePage(id);
   const q = await searchParams;
-  const linkedEms = w.invitations.some((i) => i.kind === 'ems' && ['nominated', 'confirmed'].includes(i.status));
-  const localContact = venueLocalEmsContactApplies(w.level, linkedEms);
   const directorHeld = w.invitations.some((i) => i.kind === 'director' && ['nominated', 'confirmed'].includes(i.status));
-  // A Director is required at Level 3 and optional at Level 2; at Level 1 the section is absent, as on events.
+  // The Director is a Level 3 role (decision D1): below it the section is absent, as on events,
+  // unless an earlier invitation already exists and must stay visible.
+  const directorApplies = w.level !== null && requirementApplies('B3', w.level, 'venue');
   const sections = [
     { kind: 'ems' as const, en: 'EMS agencies', ar: 'جهات الإسعاف' },
-    ...((w.level !== null && w.level >= 2) || w.invitations.some((i) => i.kind === 'director') ? [{ kind: 'director' as const, en: w.level === 3 ? 'Event Medical Director' : w.level === 2 ? 'Medical Director (optional)' : 'Medical Director — not required at Level 1', ar: w.level === 3 ? 'المدير الطبي للفعالية' : w.level === 2 ? 'المدير الطبي (اختياري)' : 'المدير الطبي — غير مطلوب في المستوى 1' }] : []),
+    ...(directorApplies || w.invitations.some((i) => i.kind === 'director') ? [{ kind: 'director' as const, en: directorApplies ? 'Event Medical Director' : 'Medical Director — not required at this level', ar: directorApplies ? 'المدير الطبي للفعالية' : 'المدير الطبي — غير مطلوب في هذا المستوى' }] : []),
   ];
 
   return (
@@ -49,8 +50,8 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
       {q.error ? (
         <div role="alert" style={alertBand}>
           <L
-            en={q.error === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : q.error === 'local' ? 'Enter the local EMS name and phone, then confirm the contact.' : 'Enter a name and a valid email address.'}
-            ar={q.error === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : q.error === 'local' ? 'أدخلوا اسم جهة الإسعاف المحلية ورقمها، ثم أكّدوا الاتصال.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'}
+            en={q.error === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : 'Enter a name and a valid email address.'}
+            ar={q.error === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'}
           />
         </div>
       ) : null}
@@ -67,7 +68,7 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
 
       {sections.map((section, index) => {
         const people = w.invitations.filter((i) => i.kind === section.kind);
-        const canInvite = w.editable && w.level !== null && (section.kind === 'ems' || (w.level >= 2 && !directorHeld));
+        const canInvite = w.editable && w.level !== null && (section.kind === 'ems' || (directorApplies && !directorHeld));
         return (
           <div key={section.kind} data-region={`team-${section.kind}`} style={{ marginBlockEnd: 52 }}>
             <SectionHeading n={index + 1} en={section.en} ar={section.ar} />
@@ -137,37 +138,6 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
         );
       })}
 
-      {localContact ? (
-        <div data-region="team-local-ems" style={{ marginBlockEnd: 52 }}>
-          <SectionHeading
-            n={sections.length + 1}
-            en="Local EMS contact"
-            ar="جهة الاتصال بالإسعاف المحلي"
-            help={<L en="At Level 1, you can confirm a local EMS contact without inviting an on-site agency." ar="في المستوى الأول، يمكنكم تأكيد جهة اتصال إسعافية محلية دون دعوة جهة للعمل في الموقع." />}
-          />
-          {w.editable ? (
-            <form action={saveVenueLocalEmsContactAction.bind(null, id)} style={{ padding: '18px 22px', border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'end' }}>
-              <label style={label}>
-                <span style={labelText}><L en="EMS agency" ar="جهة الإسعاف" /></span>
-                <input name="agency" required defaultValue={w.answers['7']?.agency ?? ''} style={fieldInput} />
-              </label>
-              <label style={label}>
-                <span style={labelText}><L en="Phone number" ar="رقم الهاتف" /></span>
-                <input name="phone" type="tel" required defaultValue={w.answers['7']?.phone ?? ''} style={fieldInput} />
-              </label>
-              <label style={{ flexBasis: '100%', display: 'flex', gap: 10, alignItems: 'start', fontSize: '14.5px' }}>
-                <input name="confirm" type="checkbox" value="yes" required style={{ marginBlockStart: 3 }} />
-                <L en="I have confirmed this EMS contact." ar="أكّدت بيانات الاتصال بجهة الإسعاف هذه." />
-              </label>
-              <button type="submit" style={{ height: 44, paddingInline: 18, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                <L en="Save contact" ar="حفظ بيانات الاتصال" />
-              </button>
-            </form>
-          ) : (
-            <div style={noticeBand}><bdi>{w.answers['7']?.agency}</bdi> · <bdi>{w.answers['7']?.phone}</bdi></div>
-          )}
-        </div>
-      ) : null}
     </VenueWorkspace>
   );
 }

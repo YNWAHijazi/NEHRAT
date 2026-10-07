@@ -60,8 +60,9 @@ test('internal roadmap is owner-only and requirement help remains accessible', a
   await roadmap.locator('summary').click();
   await expect(roadmap.getByRole('button').first()).toBeVisible();
   await signInAs(page, 'test_organizer');
-  await gotoRidingRestarts(page, '/events/EV-0418/requirements');
-  const note = page.locator('main .info-note').first();
+  await gotoRidingRestarts(page, '/events/EV-0418');
+  // The first help note on screen: one inside a collapsed requirement card is not reachable yet.
+  const note = page.locator('main .info-note').filter({ visible: true }).first();
   await expect(note.locator('.info-note-content')).toBeHidden();
   await note.getByRole('button').click();
   await expect(note.locator('.info-note-content')).toBeVisible();

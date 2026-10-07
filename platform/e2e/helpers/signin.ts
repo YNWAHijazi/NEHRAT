@@ -39,7 +39,7 @@ export const LANDING: Record<string, string> = {
   test_moph: '/ministry',
   test_moph_admin: '/ministry',
   test_owner: '/platform/admin',
-  test_order: '/ministry/order',
+  order_reviewer: '/ministry/order',
 };
 
 export async function signInAs(page: Page, login: string): Promise<void> {

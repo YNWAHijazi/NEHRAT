@@ -1,7 +1,7 @@
 import { getDb } from '../db';
 import type { Account } from '../auth';
-import { venueRequirementEditors, type VenueEditor } from '../rules/venue-workflow';
-import type { Level } from '../rules';
+import { authorsFor, type AuthorRole, type Level } from '../rules';
+export type VenueEditor = AuthorRole;
 export interface VenueInvitation {
  token:string;venue_id:string;kind:'ems'|'director';name:string;email:string;
  status:'nominated'|'confirmed'|'declined'|'withdrawn';account_id:number|null;
@@ -22,9 +22,10 @@ export function venueAccess(a:Account,id:string) {
  const inv=venueInvitations(id).find(i=>i.account_id===a.id&&i.kind===a.role&&i.status==='confirmed');
  return inv?{ownerId:venue.account_id,role:inv.kind as VenueEditor,invitation:inv}:null;
 }
-export function venueMayWrite(a:Account,id:string,n:number,level:Level) {
+/** Who may write a catalogue key on this venue: the catalogue's authors for the level, held by this account's standing. */
+export function venueMayWrite(a:Account,id:string,key:string,level:Level) {
  const access=venueAccess(a,id);
- return access&&venueRequirementEditors(n,level).includes(access.role)?access:null;
+ return access&&authorsFor(key,level,'venue').includes(access.role)?access:null;
 }
 export function invalidateVenueMedicalWork(id:string) {
  // Keep submitted packages intact. Fresh confirmation is needed after changed venue facts or assessment.
