@@ -197,7 +197,7 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
 .step-link { display: flex; gap: 12px; align-items: flex-start; padding-block: 8px; color: var(--ink); text-decoration: none; min-block-size: 44px; }
 .step-item + .step-item .step-link::before { content: ''; position: absolute; inset-inline-start: 13px; inset-block-start: -8px; block-size: 16px; inline-size: 2px; background: var(--line); }
 .step-body { min-inline-size: 0; }
-.step-body [data-step] > .requirement-card > summary { pointer-events: none; cursor: default; }
+.step-body [data-step] > .requirement-card > summary { pointer-events: none; cursor: default; outline: none; }
 .step-body [data-step] > .requirement-card { margin-block-end: 0; }
 .step-actions { display: flex; justify-content: space-between; gap: 12px; margin-block-start: 18px; }
 @media (max-width: 900px) {

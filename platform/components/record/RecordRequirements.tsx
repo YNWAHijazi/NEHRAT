@@ -119,7 +119,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     key: inst.key, anchor: inst.anchor, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, state: inst.state,
     kind: inst.group === 'recommended' ? 'recommended' : 'required',
     yours: yours(inst), whoEn: handledBy(inst).en, whoAr: handledBy(inst).ar,
-    body: <RequirementCard inst={inst} open extra={planLink(inst)}>{body(inst)}</RequirementCard>,
+    body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)}>{body(inst)}</RequirementCard>,
   }));
   if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
   // The page opens on the step a redirect named; else on the viewer's first required row still open; else any open required row; with nothing open, on the final review.
