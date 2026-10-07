@@ -53,7 +53,7 @@ export default async function EventRecordPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string; mail?: string }>;
+  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string; mail?: string; saved?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -374,6 +374,7 @@ export default async function EventRecordPage({
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
               listHref={`/events/${id}/requirements`}
+              initialStep={query.saved ?? query.doc ?? (query.approval || query.error === 'approval' ? 'B2' : null)}
               directorVerification={record.level !== null ? directorVerification({ level: record.level, directorStatus: record.facts?.director?.status === 'confirmed' ? 'confirmed' : record.facts?.director?.status === 'nominated' ? 'nominated' : null, records: attestationRecordsFor(id), laneActive: orderLaneOn() }) : null}
               final={(
                 <FinalReview

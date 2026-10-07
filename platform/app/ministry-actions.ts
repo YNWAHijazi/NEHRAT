@@ -160,7 +160,7 @@ export async function requireMeasureAction(eventId: string, formData: FormData):
     `طُلبت تدابير إضافية — ${ev.name_ar}`,
     'The Ministry has added requirements to your application. Review the new items on the requirements page. This is not a final decision.',
     'تطلب الوزارة تدابير إضافية على هذا التقديم. وهذا مستقل عن طلب التعديل وليس نتيجة.',
-    `/events/${eventId}/requirements`,
+    `/events/${eventId}`,
   );
   revalidatePath(`/ministry/submissions/${eventId}`);
   redirect(`/ministry/submissions/${eventId}?notice=measure`);
@@ -1067,7 +1067,7 @@ export async function createInspectionAction(eventId: string, formData: FormData
     `${S.notifyTitleAr} — ${ev.name_ar}`,
     `${S.notifyBodyEn} ${titleEn}. ${date ? `Scheduled for ${date}.` : S.notifyNoDateEn}`,
     `${S.notifyBodyAr} ${titleAr}. ${date ? `مقرَّر في ⁦${date}⁩.` : S.notifyNoDateAr}`,
-    `/events/${eventId}/requirements`,
+    `/events/${eventId}`,
   );
   revalidatePath(`/ministry/submissions/${eventId}`);
   redirect(`/ministry/submissions/${eventId}?notice=inspection-scheduled`);

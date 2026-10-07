@@ -243,7 +243,7 @@ export function AssessmentForm({
       };
       const result = draft ? await updateDraftEventAction(draft.eventId, payload) : await createEventAction(payload);
       if ('error' in result) setError(result.error);
-      else router.push(`/events/${result.eventId}/requirements`);
+      else router.push(`/events/${result.eventId}`);
     });
   };
 

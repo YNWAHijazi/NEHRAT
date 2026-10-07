@@ -33,6 +33,8 @@ export interface RecordRequirementsProps {
   listHref?: string | null;
   /** Level 3 events: the Director's credential-verification state, under the Director row. */
   directorVerification?: { en: string; ar: string } | null;
+  /** The step an action's redirect names (?saved=, ?doc=, the plan after an approval): it leads, whatever the hash does. */
+  initialStep?: string | null;
 }
 
 /**
@@ -42,7 +44,7 @@ export interface RecordRequirementsProps {
  * and venues, organizer and medical parties, all read the same instances; only who may
  * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
@@ -117,8 +119,8 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     body: <RequirementCard inst={inst} open extra={planLink(inst)}>{body(inst)}</RequirementCard>,
   }));
   if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', body: final });
-  // The page opens on the first required row still open; with nothing open, on the final review.
-  const initialKey = steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key ?? steps.find((s) => s.kind === 'final')?.key ?? steps[0]?.key ?? '';
+  // The page opens on the step a redirect named; else on the first required row still open; with nothing open, on the final review.
+  const initialKey = (initialStep && steps.find((s) => s.key === initialStep)?.key) || (steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key ?? steps.find((s) => s.kind === 'final')?.key ?? steps[0]?.key ?? '');
 
   return (
     <div data-region="record-requirements">

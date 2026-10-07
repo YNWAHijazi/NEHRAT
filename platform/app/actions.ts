@@ -570,7 +570,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
       text: 'You have been invited to an event. Open the link to review the event and relevant documents. To accept, create an account or sign in.\n\nدُعيتم للمشاركة في فعالية. افتحوا الرابط لمراجعة التفاصيل والمستندات ذات الصلة. لقبول الدعوة، أنشئوا حساباً أو سجّلوا الدخول.',
     });
   }
-  revalidatePath(`/events/${eventId}/requirements`);
+  revalidatePath(`/events/${eventId}`);
   redirect(`/events/${eventId}?mail=${mail}#req-${String(formData.get('kind')) === 'director' ? 'B3' : 'B7'}`);
 }
 
@@ -1188,7 +1188,7 @@ export async function withdrawNominationAction(eventId: string, formData: FormDa
     .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
     .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
   // Only an UNANSWERED nomination withdraws; anything else is not this act.
-  if (!inv || inv.status !== 'nominated') redirect(`/events/${eventId}/requirements`);
+  if (!inv || inv.status !== 'nominated') redirect(`/events/${eventId}`);
   db.prepare(`UPDATE invitations SET status = 'withdrawn', closed_at = now_stamp() WHERE token = ?`).run(token);
   // A modification-requested nominee holds an account already; they are told, for
   // information -- there is nothing for them to do.
@@ -1219,7 +1219,7 @@ export async function removeProviderAction(eventId: string, formData: FormData):
     .prepare(`SELECT token, kind, status, account_id, name_en, name_ar FROM invitations WHERE token = ? AND event_id = ?`)
     .get(token, eventId) as { token: string; kind: 'ems' | 'director'; status: string; account_id: number | null; name_en: string; name_ar: string } | undefined;
   // Only a CONFIRMED party removes; an unanswered one withdraws instead.
-  if (!inv || inv.status !== 'confirmed') redirect(`/events/${eventId}/requirements`);
+  if (!inv || inv.status !== 'confirmed') redirect(`/events/${eventId}`);
   db.prepare(`UPDATE invitations SET status = 'removed', closed_at = now_stamp() WHERE token = ?`).run(token);
 
   const ev = db.prepare(`SELECT name_en, name_ar, filed, is_demo FROM events WHERE id = ?`).get(eventId) as { name_en: string; name_ar: string; filed: number; is_demo: number };
@@ -1302,7 +1302,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `قبل طرف مُسمّى — ${eventName.name_ar}`,
       `The nominated ${inv.kind === 'ems' ? 'EMS provider' : 'Event Medical Director'} has accepted the nomination.`,
       `قبل ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح الترشيح.`,
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
       'for_information',
     );
     // The linked nominee lands on their own event tasks.
@@ -1329,7 +1329,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       evFiled
         ? `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
         : `اعتذر ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المُرشَّح. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
-      evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
+      evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}`,
     );
     redirect(`/invitations/${token}?notice=declined`);
   }
@@ -1345,7 +1345,7 @@ export async function respondToInvitationAction(token: string, formData: FormDat
       `طلب طرف مُسمّى تعديلاً — ${eventName.name_ar}`,
       `The nominated party can serve the event but not as described. The reason, as written: “${verbatimQuote(reason)}”. The nomination remains open.`,
       `يمكن للطرف المُرشَّح خدمة الفعالية لكن ليس بالصيغة الموصوفة. والسبب كما كُتب: «${verbatimQuote(reason)}». ويبقى الترشيح قائماً.`,
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
     );
     redirect(`/invitations/${token}?notice=modification`);
   }
@@ -1514,7 +1514,7 @@ export async function signDeclarationAction(
       `وُقّع إقرار جاهزية خدمات الطوارئ الطبية — ${eventName.name_ar}`,
       'A named agency has signed its readiness declaration. It is now one of the Level 3 attachments in your submission package.',
       'وقّعت جهة مُسمّاة إقرار جاهزيتها. وهو الآن أحد مرفقات المستوى 3 في حزمة تقديمكم.',
-      `/events/${inv.event_id}/requirements`,
+      `/events/${inv.event_id}`,
     );
   }
   return { ok: true };
@@ -1774,7 +1774,7 @@ export async function withdrawParticipationAction(token: string, formData: FormD
     evFiled
       ? `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». أبلغوا الوزارة بهذا التغيير وادعوا طرفاً بديلاً.`
       : `انسحب ${inv.kind === 'ems' ? 'مزوّد خدمات الطوارئ' : 'المدير الطبي'} المؤكَّد. والسبب كما كُتب: «${verbatimQuote(reason)}». ادعوا طرفاً بديلاً من صفحة المتطلبات. لم يُقدَّم الطلب بعد، لذلك لا تحتاجون إلى إبلاغ عن تغيير.`,
-    evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}/requirements`,
+    evFiled ? `/events/${inv.event_id}/change` : `/events/${inv.event_id}`,
   );
   redirect('/dashboard?notice=withdrawn');
 }
@@ -1809,7 +1809,7 @@ export async function reopenDeclarationAction(token: string): Promise<void> {
     `أُعيد فتح إقرار جاهزية — ${ev.name_ar}`,
     'An EMS agency is reviewing its signed declaration after your event changed. The Level 3 application needs its new signature.',
     'تراجع جهة إسعاف إقرارها الموقّع بعد تغيير تفاصيل فعاليتكم. يحتاج طلب المستوى 3 إلى توقيعها الجديد.',
-    `/events/${inv.event_id}/requirements`,
+    `/events/${inv.event_id}`,
   );
   redirect(`/events/${inv.event_id}/declaration?notice=reopened`);
 }
