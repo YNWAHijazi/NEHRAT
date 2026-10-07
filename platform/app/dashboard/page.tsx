@@ -264,7 +264,9 @@ export default async function DashboardPage({
   const organization = organizationFor(account.id);
   const allEvents = eventsFor(account.id);
   const pendingById = new Map(allEvents.map(e => [e.id, e.filed || !e.level ? 0 : submissionGateFor(account.id, e.id).blockers.length]));
-  const events = allEvents.filter(e => `${e.id} ${e.nameEn} ${e.nameAr} ${e.mophReference ?? ''}`.toLowerCase().includes(query)).sort((a,b) => {
+  // A cancelled event leaves the live list for its own collapsed section at the foot (owner, 2026-10-07).
+  const cancelled = allEvents.filter((e) => e.lifecycle === 'cancelled');
+  const events = allEvents.filter(e => e.lifecycle !== 'cancelled' && `${e.id} ${e.nameEn} ${e.nameAr} ${e.mophReference ?? ''}`.toLowerCase().includes(query)).sort((a,b) => {
     if(sort==='pending') return (pendingById.get(b.id)??0)-(pendingById.get(a.id)??0);
     if(sort==='due') return (a.due??'9999').localeCompare(b.due??'9999');
     if(sort==='status') return a.stateEn.localeCompare(b.stateEn);
@@ -488,6 +490,37 @@ export default async function DashboardPage({
           </>
         )}
 
+
+        {cancelled.length > 0 ? (
+          <details data-region="cancelled-events" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 16, fontWeight: 600, letterSpacing: '-.015em' }}>
+              <L en={`Cancelled (${cancelled.length})`} ar={`الملغاة (${cancelled.length})`} />
+            </summary>
+            <div style={{ marginBlockStart: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockEnd: 4 }}>
+                <L en="Cancelled events. The record remains readable; nothing further can be filed on it." ar="فعاليات ملغاة. يبقى السجل قابلاً للقراءة؛ ولا يمكن تقديم أي شيء إضافي عليه." />
+              </div>
+              {cancelled.map((e) => (
+                <Link key={e.id} href={`/events/${e.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--ink)' }}>
+                  <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                    <L en={e.nameEn} ar={e.nameAr} />
+                  </span>
+                  <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>
+                    {e.id}{e.startDate ? ` · ${e.startDate}` : ''}
+                  </span>
+                  {e.level !== null ? (
+                    <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                      <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
+                    </span>
+                  ) : null}
+                  <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                    <L en={`Cancelled${e.lifecycleAt ? ` ${e.lifecycleAt.slice(0, 10)}` : ''}`} ar={`أُلغيت${e.lifecycleAt ? ` ⁦${e.lifecycleAt.slice(0, 10)}⁩` : ''}`} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </details>
+        ) : null}
 
         {previousCount > 0 ? (
           <details data-region="previous-services" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
