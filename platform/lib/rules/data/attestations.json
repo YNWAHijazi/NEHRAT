@@ -129,6 +129,8 @@
     "acceptedAr": "قُبلت الدعوة",
     "planEn": "Clinical content of the plan — sections 3 to 9 and 11, as filed",
     "planAr": "المحتوى السريري للخطة — الأقسام 3 إلى 9 و11، كما قُدّمت",
+    "planLiveEn": "Filed before the frozen requirement record existed: the plan is read as it stands now.",
+    "planLiveAr": "قُدّم قبل وجود سجل المتطلبات المجمَّد: تُقرأ الخطة كما هي الآن.",
     "planMissingEn": "The filed plan is not available in this form for this submission.",
     "planMissingAr": "الخطة المقدَّمة غير متاحة بهذا الشكل لهذا الطلب.",
     "readOnlyEn": "The Order records its two review items here. Business details and facility records are not shared, and the Ministry's outcome is recorded by the Ministry alone.",

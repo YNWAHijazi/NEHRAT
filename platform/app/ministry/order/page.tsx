@@ -4,7 +4,7 @@ import { MinistryShell } from '../../../components/MinistryShell';
 import { notFound, redirect } from 'next/navigation';
 import { currentAccount } from '../../../lib/auth';
 import { attestationRecordsFor, orderLaneOn, orderLaneSubmissions } from '../../../lib/queries';
-import { requirementSnapshotFor } from '../../../lib/record-facts';
+import { eventRecordRequirements, requirementSnapshotFor } from '../../../lib/record-facts';
 import { ATTESTATIONS_CONTENT, attestationRows, can, type RequirementInstance } from '../../../lib/rules';
 import { recordAttestationAction } from '../../ministry-actions';
 
@@ -90,7 +90,10 @@ export default async function OrderLanePage({ searchParams }: { searchParams: Pr
           ) : null}
           {submissions.map((s) => {
             const items = attestationRows(3, attestationRecordsFor(s.eventId), true).filter((t) => t.authority === 'order');
-            const clinical = requirementSnapshotFor('event', s.eventId)?.plan.filter((sec) => CLINICAL_SECTIONS.includes(sec.n)) ?? [];
+            // The plan as frozen at filing; a submission filed before the frozen record existed is read live, and says so.
+            const frozen = requirementSnapshotFor('event', s.eventId);
+            const plan = frozen?.plan ?? eventRecordRequirements(s.accountId, s.eventId)?.plan ?? [];
+            const clinical = plan.filter((sec) => CLINICAL_SECTIONS.includes(sec.n));
             return (
               <section key={s.eventId} id={`event-${s.eventId}`} data-region="order-submission" data-event={s.eventId} style={{ border: '1px solid var(--line)', borderRadius: 16, padding: '22px 26px', marginBlockEnd: 20 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 14 }}>
@@ -152,6 +155,7 @@ export default async function OrderLanePage({ searchParams }: { searchParams: Pr
                 </div>
                 <details data-region="order-plan" className="record-details">
                   <summary><L en={DV.planEn} ar={DV.planAr} /></summary>
+                  {!frozen && clinical.length > 0 ? <p style={{ margin: '0 0 8px', fontSize: '12.5px', color: 'var(--muted)' }}><L en={DV.planLiveEn} ar={DV.planLiveAr} /></p> : null}
                   {clinical.length === 0 ? (
                     <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted)' }}><L en={DV.planMissingEn} ar={DV.planMissingAr} /></p>
                   ) : clinical.map((sec) => (

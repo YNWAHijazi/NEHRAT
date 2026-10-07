@@ -1817,6 +1817,8 @@ export function orderLaneOn(): boolean {
 
 export interface OrderLaneSubmission {
   eventId: string;
+  /** The organizer's account, for reading the live record where no frozen one exists. */
+  accountId: number;
   nameEn: string; nameAr: string;
   startDate: string | null;
   filedAt: string | null;
@@ -1833,7 +1835,7 @@ export interface OrderLaneSubmission {
 export function orderLaneSubmissions(viewerIsDemo: boolean): OrderLaneSubmission[] {
   const rows = getDb()
     .prepare(
-      `SELECT e.id, e.name_en, e.name_ar, e.start_date, s.filed_at, s.moph_reference,
+      `SELECT e.id, e.account_id, e.name_en, e.name_ar, e.start_date, s.filed_at, s.moph_reference,
               i.name_en AS dir_en, i.name_ar AS dir_ar, i.answered_at, a.credential_licence, a.phone
        FROM submissions s
        JOIN events e ON e.id = s.event_id
@@ -1843,13 +1845,13 @@ export function orderLaneSubmissions(viewerIsDemo: boolean): OrderLaneSubmission
        ORDER BY s.filed_at`,
     )
     .all(demoFlag(viewerIsDemo)) as unknown as {
-      id: string; name_en: string; name_ar: string; start_date: string | null; filed_at: string | null; moph_reference: string | null;
+      id: string; account_id: number; name_en: string; name_ar: string; start_date: string | null; filed_at: string | null; moph_reference: string | null;
       dir_en: string | null; dir_ar: string | null; answered_at: string | null; credential_licence: string | null; phone: string | null;
     }[];
   return rows
     .filter((r) => derivedLevelFor(r.id) === 3)
     .map((r) => ({
-      eventId: r.id, nameEn: r.name_en, nameAr: r.name_ar, startDate: r.start_date,
+      eventId: r.id, accountId: r.account_id, nameEn: r.name_en, nameAr: r.name_ar, startDate: r.start_date,
       filedAt: r.filed_at ? r.filed_at.slice(0, 10) : null, mophReference: r.moph_reference,
       director: r.dir_en ? { nameEn: r.dir_en, nameAr: r.dir_ar ?? r.dir_en, licence: r.credential_licence || null, phone: r.phone || null, acceptedAt: r.answered_at ? r.answered_at.slice(0, 10) : null } : null,
     }));
