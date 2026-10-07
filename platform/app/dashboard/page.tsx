@@ -179,9 +179,10 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
         </div>
         {days !== null ? (
           <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', justifyContent: 'end' }}>
-            <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.03em', color, fontVariantNumeric: 'tabular-nums' }}>{days}</span>
-            <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-              <L en="days" ar="يوماً" />
+            {/* A passed deadline reads as days overdue, never as a negative count (owner, 2026-10-07). */}
+            <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.03em', color, fontVariantNumeric: 'tabular-nums' }}>{Math.abs(days)}</span>
+            <span style={{ fontSize: 13, color: days < 0 ? color : 'var(--muted)' }}>
+              <L en={days < 0 ? 'days overdue' : 'days'} ar={days < 0 ? 'يوماً من التأخير' : 'يوماً'} />
             </span>
           </div>
         ) : null}
