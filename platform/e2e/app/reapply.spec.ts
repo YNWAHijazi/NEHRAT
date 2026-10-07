@@ -38,7 +38,7 @@ test.describe('reapply from a concluded event', () => {
     if (await modal.count()) await modal.getByRole('button', { name: 'Continue', exact: true }).click();
     await expect(page.getByRole('textbox', { name: 'Event name (English)', exact: true })).toHaveValue('Tripoli Marathon');
     await expect(page.locator('input[type="date"]').first()).toHaveValue('');
-    await gotoRidingRestarts(page, `/events/${newId}/requirements`);
+    await gotoRidingRestarts(page, `/events/${newId}`);
     await expect(page.locator('body')).toContainText('Dr. N. Salameh');
     await expect(page.locator('body')).not.toContainText('Confirmed —');
 

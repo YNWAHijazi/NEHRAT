@@ -107,7 +107,7 @@ test.describe('cancellation and postponement', () => {
     await fill('Authorized representative', 'R. Haddad');
     await fill('Position', 'Events director');
     await page.locator('button:has-text("Continue to requirements")').click();
-    await page.waitForURL(/\/events\/EV-\d+\/requirements$/);
+    await page.waitForURL(/\/events\/EV-\d+$/);
     const eventId = new URL(page.url()).pathname.split('/')[2]!;
 
     // Postpone first -- no new date; the band says the determination cannot carry.
