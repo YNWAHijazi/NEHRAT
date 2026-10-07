@@ -1,40 +1,131 @@
-import {describe,it,expect} from 'vitest';
-import {venueRequirements,venuePackageEditable,venueRequirementEditors,venueLocalEmsContactApplies} from '../lib/rules/venue-workflow';
-import type {Level} from '../lib/rules';
-describe('venue submission requirements',()=>{
- for(const level of [1,2,3] as Level[])it(`starts pending at level ${level}; every item needs a recorded answer`,()=>{
-  const rows=venueRequirements(level,{},new Set());expect(rows.length).toBeGreaterThan(0);expect(rows.every(r=>r.fields.length>0&&!r.done)).toBe(true);expect(rows.some(r=>r.n===19)).toBe(false);
- });
- it('makes the Level 2 plan recommended and Level 3 signed plan required',()=>{
-  expect(venueRequirements(1,{},new Set()).find(r=>r.n===2)).toBeUndefined();
-  const two=venueRequirements(2,{},new Set()).find(r=>r.n===2)!;expect(two.optional).toBe(true);expect(two.fields.map(f=>f.key)).not.toContain('approvedBy');
-  const three=venueRequirements(3,{'2':{preparedBy:'EMS',approvedBy:'Director licence 123'}},new Set()).find(r=>r.n===2)!;expect(three.optional).toBe(false);expect(three.done).toBe(false);
-  expect(venueRequirements(3,{'2':{preparedBy:'EMS',approvedBy:'Director licence 123'}},new Set(['2'])).find(r=>r.n===2)?.done).toBe(true);
- });
- it('does not mistake one answer or a file alone for completed arrangements',()=>{
-  expect(venueRequirements(2,{'1':{name:'Manager'}},new Set(['1'])).find(r=>r.n===1)?.done).toBe(false);
-  expect(venueRequirements(2,{'1':{name:'Manager',phone:'+9611234567'}},new Set()).find(r=>r.n===1)?.done).toBe(true);
- });
- it('uses linked identities instead of asking medical partners to enter them again',()=>{
-  const rows=venueRequirements(3,{},new Set());
-  expect(rows.find(r=>r.n===7)!.fields.filter(f=>!f.source).map(f=>f.key)).toEqual(['arrangements']);
-  expect(rows.find(r=>r.n===5)!.fields.filter(f=>!f.source).map(f=>f.key)).toEqual(['teams']);
-  expect(rows.find(r=>r.n===2)!.fields.filter(f=>!f.source)).toEqual([]);
-  expect(rows.find(r=>r.n===20)!.fields.filter(f=>!f.source)).toEqual([]);
- });
- it('locks filed, accepted and archived packages',()=>{
-  expect(venuePackageEditable('draft',false)).toBe(true);expect(venuePackageEditable('revision',false)).toBe(true);
-  expect(venuePackageEditable('submitted',false)).toBe(false);expect(venuePackageEditable('accepted',false)).toBe(false);expect(venuePackageEditable('draft',true)).toBe(false);
- });
- it('requires only a confirmed local EMS contact at Level 1, managed from Medical team',()=>{
-  const contact=venueRequirements(1,{'7':{agency:'Local EMS',phone:'+9613111111'}},new Set()).find(r=>r.n===7)!;
-  expect(contact.done).toBe(true);
-  expect(contact.fields.map(f=>f.key)).toEqual(['agency','phone']);
-  expect(contact.fields.every(f=>f.source==='ems')).toBe(true);
-  expect(venueRequirementEditors(7,1)).toEqual([]);
-  expect(venueLocalEmsContactApplies(1,false)).toBe(true);
-  expect(venueLocalEmsContactApplies(1,true)).toBe(false);
-  expect(venueLocalEmsContactApplies(2,false)).toBe(false);
-  expect(venueLocalEmsContactApplies(3,false)).toBe(false);
- });
+/**
+ * The venue service on the shared requirement catalogue (redesign, 2026-10-07): the same
+ * rows and resolver as an event, over one routine operating session. Every assertion
+ * names the workbook row or decision it stands on.
+ */
+import { describe, it, expect } from 'vitest';
+import { venuePackageEditable } from '../lib/rules/venue-workflow';
+import { authorsFor, fieldsFor, planTextKeys, requirementBlockers, resolvePlan, resolveRequirements, type RecordFacts, type StoredAnswer } from '../lib/rules/record-requirements';
+import type { Level } from '../lib/rules';
+
+const answer = (values: Record<string, string | boolean | number>, role: 'organizer' | 'ems' | 'director' = 'organizer'): StoredAnswer =>
+  ({ values, savedByRole: role, savedByName: 'Tester', savedAt: '2026-10-07T10:00:00', version: 1 });
+function facts(level: Level, over: Partial<RecordFacts> = {}): RecordFacts {
+  return {
+    service: 'venue', level, answers: {}, files: {},
+    organizerContact: { name: 'Operator', phone: '+9613111111' },
+    assessmentComplete: true, ems: [], director: null, planApprovalCurrent: false,
+    // A venue has no organizer declaration row; the operator confirms on the submit form.
+    declaration: { statementsComplete: true, certificationComplete: true },
+    requested: [], ...over,
+  };
+}
+const rows = (level: Level, over?: Partial<RecordFacts>) => resolveRequirements(facts(level, over));
+const byKey = (level: Level, key: string, over?: Partial<RecordFacts>) => rows(level, over).find((r) => r.key === key);
+const token = (c: string) => c.repeat(48);
+
+/** Every field of a venue row filled with a plausible value. */
+function full(level: Level, key: string, role: 'organizer' | 'ems' | 'director' = 'organizer'): StoredAnswer {
+  const values: Record<string, string | boolean | number> = {};
+  for (const f of fieldsFor(key, level, 'venue') ?? []) {
+    if (f.showWhen) continue;
+    values[f.key] = f.type === 'checkbox' ? true : f.type === 'number' ? 4 : f.type === 'choice' ? 'yes' : f.type === 'date' ? '2026-11-01' : `${f.key} answer`;
+  }
+  return answer(values, role);
+}
+
+/** A Level 3 venue with everything in place except what the test changes. */
+function level3(over: Partial<RecordFacts> = {}): RecordFacts {
+  const answers: Record<string, StoredAnswer> = {};
+  for (const r of rows(3)) if (r.fields.length > 0) answers[r.key] = full(3, r.key, r.authors.includes('organizer') ? 'organizer' : 'ems');
+  for (const k of planTextKeys()) answers[k] = answer({ text: `${k} text` }, 'ems');
+  return facts(3, {
+    answers,
+    files: { 'P-M': { fileName: 'map.pdf', savedAt: '2026-10-07' }, 'P-D': { fileName: 'deployment.pdf', savedAt: '2026-10-07' }, 'B17': { fileName: 'policy.pdf', savedAt: '2026-10-07' } },
+    ems: [{ token: token('a'), name: 'Agency A', status: 'confirmed', declarationSigned: true }],
+    director: { token: token('b'), name: 'Dr B', status: 'confirmed' },
+    planApprovalCurrent: true,
+    ...over,
+  });
+}
+
+describe('the venue service on the shared catalogue', () => {
+  it.each([1, 2, 3] as Level[])('at level %s the event-only rows are absent and every pre-event row starts open', (level) => {
+    const keys = rows(level).map((r) => r.key);
+    expect(keys.length).toBeGreaterThan(0);
+    // The post-event report, the organizer declaration and the serious-incident notice are the event's.
+    expect(keys).not.toContain('B19');
+    expect(keys).not.toContain('P-C');
+    expect(keys).not.toContain('P-I');
+    // Nothing is complete without an answer -- except the two facts the venue already holds.
+    const open = rows(level).filter((r) => r.group !== 'later' && r.state === 'complete').map((r) => r.key).sort();
+    expect(open).toEqual(['B1', 'P-A']);
+  });
+
+  it('speaks of the venue: the responsible person, the permanent site map, each operating session', () => {
+    expect(byKey(1, 'B1')!.promptEn).toBe('The responsible person from your venue details.');
+    expect(byKey(1, 'B1')!.values).toEqual({ name: 'Operator', phone: '+9613111111' });
+    expect(byKey(1, 'B1', { organizerContact: null })!.state).toBe('pending');
+    expect(byKey(2, 'P-M')!.labelEn).toBe('Site map');
+    expect(byKey(1, 'B4')!.fields.find((f) => f.key === 'arranged')!.labelEn).toBe('They can provide first aid throughout each operating session.');
+  });
+
+  it('records the Level 1 local EMS contact as a confirmation by the operator alone, no invitation', () => {
+    const contact = byKey(1, 'B7')!;
+    expect(contact.labelEn).toBe('Local EMS contact');
+    expect(contact.fields.map((f) => f.key)).toEqual(['contacted', 'shared', 'knowHow', 'phone']);
+    expect(contact.fields.find((f) => f.key === 'shared')!.labelEn).toBe("I have shared the venue's location, access and operating times.");
+    expect(authorsFor('B7', 1, 'venue')).toEqual(['organizer']);
+    expect(contact.state).toBe('pending');
+    expect(byKey(1, 'B7', { answers: { B7: answer({ contacted: true, shared: true }) } })!.missing).toEqual(['knowHow', 'phone']);
+    expect(byKey(1, 'B7', { answers: { B7: full(1, 'B7') } })!.state).toBe('complete');
+  });
+
+  it('needs an accepted EMS invitation plus the shared answer from Level 2 (B7)', () => {
+    expect(byKey(2, 'B7')!.state).toBe('pending');
+    expect(byKey(2, 'B7', { ems: [{ token: token('a'), name: 'Agency', status: 'nominated' }] })!.state).toBe('waiting');
+    expect(byKey(2, 'B7', { ems: [{ token: token('a'), name: 'Agency', status: 'confirmed' }] })!.state).toBe('pending');
+    expect(byKey(2, 'B7', { ems: [{ token: token('a'), name: 'Agency', status: 'confirmed' }], answers: { B7: full(2, 'B7', 'ems') } })!.state).toBe('complete');
+    expect(authorsFor('B7', 2, 'venue')).toEqual(['organizer', 'ems']);
+  });
+
+  it('makes the Medical Director recommended at Level 2 and required at Level 3 (D1)', () => {
+    expect(byKey(1, 'B3')).toBeUndefined();
+    expect(byKey(2, 'B3')).toMatchObject({ group: 'recommended', state: 'notAdded', blocks: false });
+    expect(byKey(3, 'B3')).toMatchObject({ group: 'required', state: 'pending', blocks: true });
+    expect(byKey(3, 'B3', { director: { token: token('b'), name: 'Dr B', status: 'nominated' } })!.state).toBe('waiting');
+    expect(byKey(3, 'B3', { director: { token: token('b'), name: 'Dr B', status: 'confirmed' } })!.state).toBe('complete');
+  });
+
+  it('keeps the Level 2 plan optional and makes the Level 3 plan wait on the Director\'s approval (D2, D4)', () => {
+    expect(byKey(1, 'B2')).toBeUndefined();
+    expect(resolvePlan(facts(1), rows(1))).toEqual([]);
+    expect(byKey(2, 'B2')).toMatchObject({ group: 'recommended', state: 'notAdded', blocks: false });
+    expect(resolvePlan(facts(2), rows(2))).toHaveLength(16);
+    expect(byKey(3, 'B2')).toMatchObject({ group: 'required', state: 'pending', approver: 'director' });
+    expect(authorsFor('B2', 3, 'venue')).toEqual(['ems', 'director']);
+    const prepared = level3({ planApprovalCurrent: false });
+    expect(resolvePlan(prepared, resolveRequirements(prepared)).every((s) => s.complete)).toBe(true);
+    expect(resolveRequirements(prepared).find((r) => r.key === 'B2')!.state).toBe('waiting');
+    expect(resolveRequirements(level3()).find((r) => r.key === 'B2')!.state).toBe('complete');
+  });
+
+  it('has each participating agency sign its own declaration at Level 3, and nothing blocks a complete package', () => {
+    expect(byKey(2, 'B20')).toBeUndefined();
+    const two = level3({ ems: [{ token: token('a'), name: 'Agency A', status: 'confirmed', declarationSigned: true }, { token: token('c'), name: 'Agency C', status: 'confirmed' }] });
+    const b20 = resolveRequirements(two).find((r) => r.key === 'B20')!;
+    expect(b20.state).toBe('waiting');
+    expect(b20.detailEn).toContain('Agency C');
+    expect(authorsFor('B20', 3, 'venue')).toEqual(['ems']);
+    expect(requirementBlockers(resolveRequirements(level3())).map((r) => r.key)).toEqual([]);
+  });
+
+  it('locks filed, accepted and archived packages', () => {
+    expect(venuePackageEditable('draft', false)).toBe(true);
+    expect(venuePackageEditable('revision', false)).toBe(true);
+    expect(venuePackageEditable('incomplete', false)).toBe(true);
+    expect(venuePackageEditable('submitted', false)).toBe(false);
+    expect(venuePackageEditable('accepted', false)).toBe(false);
+    expect(venuePackageEditable('draft', true)).toBe(false);
+  });
 });

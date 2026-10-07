@@ -1,5 +1,5 @@
 import { L } from '../L';
-import type { RecordRequirements as RecordData } from '../../lib/record-facts';
+import type { RecordParty, RecordRequirements as RecordData } from '../../lib/record-facts';
 import type { RecordView } from '../../lib/record-view';
 import { REQUIREMENT_COPY, REQUIREMENT_GROUPS, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
 import { FileControl } from './FileControl';
@@ -9,6 +9,7 @@ import { PlanSections } from './PlanSections';
 import { RequirementCard } from './RequirementCard';
 import { RequirementForm } from './RequirementForm';
 import { RequirementSummaries } from './RequirementSummaries';
+import { VenueDeclarationForm } from './VenueDeclarationForm';
 
 export interface RecordRequirementsProps {
   record: RecordData;
@@ -22,6 +23,8 @@ export interface RecordRequirementsProps {
   derived: { scheduleEn: string; scheduleAr: string; contactsEn: string; contactsAr: string; organizerPhoneMissing: boolean };
   governance?: Record<string, string>;
   facility?: RecordView['facility'];
+  /** The viewer's own confirmed party on the record, when the viewer is a medical party. */
+  viewerParty?: RecordParty | null;
 }
 
 /**
@@ -30,7 +33,7 @@ export interface RecordRequirementsProps {
  * then the later-phase rows for clarity. Events and venues, organizer and medical
  * parties, all read the same instances; only who may write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
@@ -49,6 +52,9 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
             <PartyBlock kind={service} id={id} parties={record.parties} invite="ems" canInvite={false} declarations />
             {viewerRole === 'ems' && service === 'event' ? (
               <a href={`/events/${id}/declaration`} style={{ fontSize: '14.5px' }}><L en="Open your agency's readiness declaration" ar="فتح إقرار جاهزية جهتكم" /></a>
+            ) : null}
+            {viewerRole === 'ems' && service === 'venue' && viewerParty && record.editable ? (
+              <VenueDeclarationForm id={id} signed={Boolean(viewerParty.declarationSigned)} fileHref={viewerParty.declarationSigned ? `/api/venue-documents/${id}/20-${viewerParty.token}` : null} />
             ) : null}
           </>
         );

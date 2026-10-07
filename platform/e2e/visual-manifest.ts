@@ -394,7 +394,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'requirements',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="rail"]',
-        note: "User request, 2026-09-30: actionable requirements now have their own tab, with saved answers controlling completion. The overview shows an always-open progress bar. Previous layout: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips. Second sweep (2026-09-02, partner ruling): the list is collapsed behind a details fold, so the locator is the fold -- the rows inside are hidden until opened.",
+        note: "Owner brief, 2026-10-07: the requirement rows are full-width cards on this single record page, below the rail, with saved answers controlling completion; the rail is the always-open progress bar. Earlier (2026-09-30) the rows had their own tab. Previous layout: the prototype's venue requirements rows reuse the event demo's per-row status chips (Complete, Awaiting you) -- state a venue record does not carry; nothing has been attached against a venue. The build renders the Level 2 rows with values and responsible parties, no status chips. Second sweep (2026-09-02, partner ruling): the list is collapsed behind a details fold, so the locator is the fold -- the rows inside are hidden until opened.",
       },
     ],
   },

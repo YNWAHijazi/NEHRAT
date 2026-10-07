@@ -96,7 +96,7 @@ export function VenueAssessmentForm({
         representative,
         position,
       });
-      if ('level' in result) router.push(`/venues/${venueId}/requirements`);
+      if ('level' in result) router.push(`/venues/${venueId}#req-summary`);
       else setError(true);
     });
   };

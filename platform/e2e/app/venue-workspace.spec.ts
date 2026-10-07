@@ -1,17 +1,20 @@
 import {test,expect} from '@playwright/test';
 import {DatabaseSync} from 'node:sqlite';
 import {signInAs} from '../helpers/signin';
-import {mockMapTiles,chooseMapPoint} from '../helpers/facility-map';
+import {mockMapTiles} from '../helpers/facility-map';
 import {useLanguage} from '../helpers/language';
 import {expectAbsent} from '../helpers/absence';
 
 for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
- for(const [service,id,paths] of [['venue','VN-0032',['','/details','/assessment','/team','/requirements','/submit']],['facility','FC-0014',['','/profile','/devices','/plan','/submit','/incidents']]] as const){
+ // The venue's Requirements and Submit tabs became its single record page (2026-10-07); the two old paths redirect there.
+ for(const [service,id,paths] of [['venue','VN-0032',['','/details','/assessment','/team']],['facility','FC-0014',['','/profile','/devices','/plan','/submit','/incidents']]] as const){
   let y:number|undefined;let identity:string|undefined;
   for(const path of paths){await page.goto(`/${service==='venue'?'venues':'facilities'}/${id}${path}`);const h=page.locator(`[data-region=${service}-workspace-header]`);await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);const nav=h.locator('nav');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);const top=(await nav.boundingBox())!.y;if(y===undefined)y=top;expect(Math.abs(top-y)).toBeLessThanOrEqual(1);const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
   await page.screenshot({path:info.outputPath(`${service}-${lang}-${width}.png`),fullPage:true});
  }
+ await page.goto('/venues/VN-0032/requirements');await expect(page).toHaveURL(/\/venues\/VN-0032#req-summary$/);
+ await page.goto('/venues/VN-0032/submit');await expect(page).toHaveURL(/\/venues\/VN-0032#final-review$/);
 });
 
 // VN-0032 holds a certificate, and a certified venue is read-only until its renewal starts
@@ -27,26 +30,24 @@ test('legacy venue details open read-only even when a new contact field is missi
  }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });
 
-test('Level 1 EMS contact is set up once in Medical team and reused in Requirements',async({page})=>{
+test('Level 1 local EMS contact is one confirmation on the record page, with no invitation and no team form',async({page})=>{
  const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);asDraft(db);
  try{
- await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/requirements');
- const row=page.locator('[data-requirement="7"]');
- await row.locator('summary').first().click();
- await expect(row.locator('[data-completion=pending]')).toBeVisible();
- await expect(row.locator('form,input,textarea')).toHaveCount(0);
- await row.getByRole('link',{name:'Confirm EMS contact',exact:true}).click();
- const contact=page.locator('form').filter({has:page.locator('input[name=agency]')});
- await contact.locator('input[name=agency]').fill('Confirmed local EMS');
- await contact.locator('input[name=phone]').fill('+9613111111');
- await contact.locator('input[name=confirm]').check();
- await contact.getByRole('button',{name:'Save contact',exact:true}).click();
- await expect(page.getByRole('status')).toContainText('Contact saved');
- await page.goto('/venues/VN-0032/requirements');
- await expect(page.locator('[data-region=linked-medical-team]')).toContainText('Confirmed local EMS');
- await expect(row.locator('[data-completion=complete]')).toBeVisible();
- await row.locator('summary').first().click();
- await expect(row.locator('form,input,textarea')).toHaveCount(0);
- await expect(row.locator('dd')).toHaveCount(0);
- }finally{db.prepare("DELETE FROM venue_contributions WHERE venue_id='VN-0032'").run();db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
+ await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032');
+ const row=page.locator('[data-requirement="B7"]');
+ await expect(row).toHaveAttribute('data-state','pending');
+ if(await row.getAttribute('open')===null)await row.locator('summary').first().click();
+ await expect(row).toContainText('Local EMS contact');
+ for(const box of await row.locator('input[type=checkbox]').all())await box.check();
+ await row.locator('input[name=phone]').fill('+9613111111');
+ await row.getByRole('button',{name:'Save',exact:true}).click();
+ await expect(row.getByRole('status')).toContainText('Saved.');
+ await page.goto('/venues/VN-0032');
+ await expect(page.locator('[data-requirement="B7"]')).toHaveAttribute('data-state','complete');
+ await expect(page.locator('[data-region=required-count]')).toBeVisible();
+ // No invitation exists at Level 1: the row names no party, and the team page carries no local-contact form.
+ await expectAbsent(page,{anchor:'[data-requirement="B7"]',absent:'[data-requirement="B7"] [data-region=party-ems]',because:'the Level 1 contact is a confirmation by the operator, not an invitation (catalogue B7, Level 1)'});
+ await page.goto('/venues/VN-0032/team');await expect(page.locator('[data-region=team-ems]')).toBeVisible();
+ await expectAbsent(page,{anchor:'[data-region=team-ems]',absent:'input[name=agency]',because:'the local contact moved to the B7 row on the record page (2026-10-07)'});
+ }finally{db.prepare("DELETE FROM requirement_answers WHERE record_kind='venue' AND record_id='VN-0032'").run();db.prepare("DELETE FROM requirement_answer_history WHERE record_kind='venue' AND record_id='VN-0032'").run();db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });

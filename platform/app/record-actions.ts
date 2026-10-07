@@ -18,6 +18,7 @@ import { getDb } from '../lib/db';
 import { recordRequirementsFor, type RecordRequirements } from '../lib/record-facts';
 import { EVENT_FILE_KEYS } from '../lib/requirement-migration';
 import { venueAccess } from '../lib/venue/collaboration';
+import { notifyVenueMedicalProgress } from '../lib/venue/notify';
 import { authorsFor, fieldsFor, planTextKeys, type AnswerValue, type AuthorRole, type FieldDef, type RecordService } from '../lib/rules';
 import { maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
 
@@ -158,6 +159,8 @@ export async function saveRequirementAnswerAction(
     db.exec('ROLLBACK');
     if (!(error instanceof Error && error.message === 'STALE')) throw error;
   }
+  // The operator hears about its medical team's progress on a venue as ONE notice, updated in place.
+  if ('ok' in result && kind === 'venue' && access.role !== 'organizer') notifyVenueMedicalProgress(access.ownerId, account.isDemo, id);
   refresh(kind, id);
   return result;
 }
@@ -200,6 +203,7 @@ export async function saveRequirementFileAction(kind: RecordService, id: string,
     ).run(id, key, file.name.trim(), file.type, bytes.length, bytes);
   }
   if (record.level >= 2 && touchesPlan(record, key)) bumpPlanVersion(kind, id, account.id);
+  if (kind === 'venue' && access.role !== 'organizer') notifyVenueMedicalProgress(access.ownerId, account.isDemo, id);
   refresh(kind, id);
   redirect(`${back}?saved=${encodeURIComponent(key)}${anchor}`);
 }

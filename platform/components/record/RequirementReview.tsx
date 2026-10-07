@@ -14,9 +14,10 @@ function Value({ value }: { value: string | number | boolean | undefined }) {
   return <span style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{value}</span>;
 }
 
-function Row({ inst, eventId, kind, contentTypes, fileChanged }: { inst: RequirementInstance; eventId: string; kind: 'event' | 'venue'; contentTypes: Readonly<Record<string, string | null>>; fileChanged: boolean }) {
+function Row({ inst, eventId, kind, contentTypes, fileChanged, revision }: { inst: RequirementInstance; eventId: string; kind: 'event' | 'venue'; contentTypes: Readonly<Record<string, string | null>>; fileChanged: boolean; revision: number | null }) {
   const tone = inst.state === 'complete' ? 'var(--brand)' : inst.group === 'required' ? 'var(--accent-ink)' : 'var(--muted)';
-  const href = kind === 'event' ? `/api/documents/${eventId}/${EVENT_FILE_KEYS[inst.key] ?? inst.key}` : `/api/venue-documents/${eventId}/${inst.key}`;
+  // A venue's submitted files are read from the frozen submission, never the live table.
+  const href = kind === 'event' ? `/api/documents/${eventId}/${EVENT_FILE_KEYS[inst.key] ?? inst.key}` : `/api/venue-documents/${eventId}/${inst.key}${revision ? `?revision=${revision}` : ''}`;
   return (
     <details data-review-requirement={inst.key} data-state={inst.state} style={{ borderBlockStart: '1px solid var(--line)', paddingBlock: 10 }}>
       <summary className="requirement-summary" style={{ minHeight: 40 }}>
@@ -59,8 +60,12 @@ function Row({ inst, eventId, kind, contentTypes, fileChanged }: { inst: Require
  * package frozen at filing when one exists; a record filed before the record page has no
  * snapshot and is read live, and the page says so.
  */
-export function RequirementReview({ id, kind, snapshot, live, contentTypes }: {
+export function RequirementReview({ id, kind, snapshot, live, contentTypes, revision = null, extraFiles = [] }: {
   id: string; kind: 'event' | 'venue'; snapshot: RequirementSnapshot | null; live: RecordRequirements | null; contentTypes: Readonly<Record<string, string | null>>;
+  /** Venues: the submission whose frozen files the links open. */
+  revision?: number | null;
+  /** Files filed outside the catalogue's rows -- each agency's signed venue declaration. */
+  extraFiles?: readonly { labelEn: string; labelAr: string; href: string; fileName: string }[];
 }) {
   const instances: RequirementInstance[] = snapshot?.instances ?? live?.instances ?? [];
   const plan: PlanSectionInstance[] = snapshot?.plan ?? live?.plan ?? [];
@@ -90,7 +95,7 @@ export function RequirementReview({ id, kind, snapshot, live, contentTypes }: {
       {groups.map((g) => (
         <div key={g.group} data-review-group={g.group} style={{ marginBlockEnd: 16 }}>
           <h3 style={{ fontSize: 15, margin: '0 0 4px' }}><L en={REQUIREMENT_GROUPS[g.group].en} ar={REQUIREMENT_GROUPS[g.group].ar} /></h3>
-          {g.rows.map((inst) => <Row key={inst.key} inst={inst} eventId={id} kind={kind} contentTypes={contentTypes} fileChanged={fileChanged(inst)} />)}
+          {g.rows.map((inst) => <Row key={inst.key} inst={inst} eventId={id} kind={kind} contentTypes={contentTypes} fileChanged={fileChanged(inst)} revision={revision} />)}
         </div>
       ))}
       {plan.length > 0 ? (
@@ -118,6 +123,15 @@ export function RequirementReview({ id, kind, snapshot, live, contentTypes }: {
       {parties.length > 0 ? (
         <div data-region="review-parties" style={{ marginBlockStart: 12, fontSize: 13.5 }}>
           <L en="Named parties" ar="الأطراف المسمّاة" />: {parties.map((p) => `${p.name} (${p.kind === 'ems' ? 'EMS' : 'Director'}: ${p.status}${p.kind === 'ems' && p.declarationSigned ? ', declaration signed' : ''})`).join(' · ')}
+        </div>
+      ) : null}
+      {extraFiles.length > 0 ? (
+        <div data-region="review-extra-files" style={{ marginBlockStart: 10, fontSize: 13.5 }}>
+          {extraFiles.map((f) => (
+            <p key={f.href} style={{ margin: '4px 0' }}>
+              <L en={f.labelEn} ar={f.labelAr} />: <a href={f.href} target="_blank" rel="noreferrer"><L en="Open document" ar="فتح المستند" /> · {f.fileName}</a>
+            </p>
+          ))}
         </div>
       ) : null}
     </section>

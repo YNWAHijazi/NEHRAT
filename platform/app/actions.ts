@@ -1,5 +1,5 @@
 'use server';
-import { invalidateVenueMedicalWork, venueMayWrite } from '../lib/venue/collaboration';
+import { invalidateVenueMedicalWork } from '../lib/venue/collaboration';
 import { facilityPersons } from '../lib/queries';
 
 /**
@@ -1037,62 +1037,6 @@ export interface VenueAssessmentPayload {
  * expiry date twelve months on (the Arabic issue's wording). The record identifier
  * exists from registration and stays the same on every certificate.
  */
-/**
- * A venue's requirement documents (partner ruling, 2026-09-05). Venues carried
- * requirements marked attachable and NO control that could attach one -- the
- * record counted them and pointed at the assessment. This is the event's attach
- * flow, on the venue record: same refusals, same storage shape, same return.
- */
-export async function attachVenueDocumentAction(venueId: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
-  refuseIfVenueArchived(venueId);
-  const {venuePackageFor}=await import('../lib/venue/workspace');
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  const docKey = String(formData.get('docKey') ?? '');
-  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
-  const file = formData.get('file');
-  const back = `/venues/${venueId}`;
-  if (!venuePackageFor(account.id,venueId)?.requirements.some(r=>String(r.n)===docKey) || !(file instanceof File)) redirect(back);
-
-  const refusal = refuseUpload({ type: file.type, size: file.size });
-  if (refusal) redirect(`${back}?upload=${refusal.reason}&doc=${encodeURIComponent(docKey)}`);
-  const bytes = Buffer.from(await file.arrayBuffer());
-  if (bytes.length > maxUploadBytes()) redirect(`${back}?upload=tooLarge&doc=${encodeURIComponent(docKey)}`);
-
-  // Recheck after reading the file: a submitted package must not change.
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  getDb()
-    .prepare(
-      `INSERT INTO venue_attachments (venue_id, doc_key, file_name, content_type, byte_size, bytes)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT (venue_id, doc_key) DO UPDATE SET
-         file_name = excluded.file_name, content_type = excluded.content_type,
-         byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
-    )
-    .run(venueId, docKey, file.name.trim(), file.type, bytes.length, bytes);
-  revalidatePath(back);
-  redirect(back);
-}
-
-/** Removing one: the row goes, the requirement returns to outstanding. */
-export async function removeVenueAttachmentAction(venueId: string, formData: FormData): Promise<void> {
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedVenue(account.id, venueId)) redirect('/dashboard');
-  refuseIfVenueArchived(venueId);
-  const {venuePackageFor}=await import('../lib/venue/workspace');
-  if(!venuePackageFor(account.id,venueId)?.editable)redirect(`/venues/${venueId}/requirements`);
-  const docKey = String(formData.get('docKey') ?? '');
-  const vw=venuePackageFor(account.id,venueId);if(!vw?.level||!venueMayWrite(account,venueId,Number(docKey),vw.level))redirect(`/venues/${venueId}/requirements`);
-  if (docKey) {
-    getDb().prepare(`DELETE FROM venue_attachments WHERE venue_id = ? AND doc_key = ?`).run(venueId, docKey);
-  }
-  revalidatePath(`/venues/${venueId}`);
-  redirect(`/venues/${venueId}`);
-}
-
 export async function saveVenueAssessmentAction(
   venueId: string,
   payload: VenueAssessmentPayload,

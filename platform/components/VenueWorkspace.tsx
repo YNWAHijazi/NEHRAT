@@ -10,7 +10,7 @@ import { levelWhy } from '../lib/rules';
 import { venuePackageFor } from '../lib/venue/workspace';
 import { VENUE_STATUS } from '../lib/rules/venue-workflow';
 
-export type VenueTab = 'overview' | 'details' | 'assessment' | 'requirements' | 'submit' | 'team';
+export type VenueTab = 'overview' | 'details' | 'assessment' | 'team';
 export type VenueWorkspaceData = NonNullable<ReturnType<typeof venuePackageFor>>;
 
 const TABS: { key: VenueTab; path: string; en: string; ar: string }[] = [
@@ -18,8 +18,6 @@ const TABS: { key: VenueTab; path: string; en: string; ar: string }[] = [
   { key: 'details', path: '/details', en: 'Details', ar: 'التفاصيل' },
   { key: 'assessment', path: '/assessment', en: 'Assessment', ar: 'التقييم' },
   { key: 'team', path: '/team', en: 'Medical team', ar: 'الفريق الطبي' },
-  { key: 'requirements', path: '/requirements', en: 'Requirements', ar: 'المتطلبات' },
-  { key: 'submit', path: '/submit', en: 'Submit', ar: 'تقديم الطلب' },
 ];
 
 /** One identity and navigation layout for every venue tab -- the event workspace's, with the venue's facts. */
