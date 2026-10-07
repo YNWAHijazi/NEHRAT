@@ -67,7 +67,7 @@ test('an EMS editor receives the Director’s saved section without re-entry, an
   await saveSection(page, 'P13', 'Updated shared plan from the Director.');
   await emsForm.locator('textarea[name="text"]').fill('A save over an answer that moved on.');
   await emsForm.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(emsForm.getByRole('status')).toContainText('changed while you were editing');
+  await expect(emsForm.getByRole('status')).toContainText('Someone saved a newer answer while you were editing');
   await emsForm.getByRole('button', { name: 'Show the newer answer', exact: true }).click();
   await expect((await sectionForm(ems, 'P13')).locator('textarea[name="text"]')).toHaveValue('Updated shared plan from the Director.');
   await ems.close();
