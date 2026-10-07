@@ -14,7 +14,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
-import { answerLevel1Rows, certify, openDetails } from '../helpers/record';
+import { answerLevel1Rows, certify, openDetails, openAllRequirements } from '../helpers/record';
 import { DatabaseSync } from 'node:sqlite';
 
 
@@ -60,6 +60,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
 
     // Revised Annex B: Level 1 has no medical plan and no map upload -- the record page
     // carries neither card (catalogue B2 and P-M at Level 1).
+    await openAllRequirements(page);
     await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
     await expect(page.locator('[data-requirement="B2"], [data-requirement="P-M"]')).toHaveCount(0);
 

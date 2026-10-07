@@ -26,7 +26,7 @@ import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
-import { answerLevel1Rows, certify } from '../helpers/record';
+import { answerLevel1Rows, certify, openAllRequirements } from '../helpers/record';
 import { LANGUAGES, useLanguage } from '../helpers/language';
 
 /** A label lookup that works in either language, from the page's own bilingual DOM. */
@@ -100,6 +100,7 @@ for (const lang of LANGUAGES) {
       // THE PACKAGE, on the one record page. No plan card at Level 1; the organizer's
       // own rows, then the certification -- which is part of making the submission,
       // not decoration (Level 1 asks the certification alone: catalogue P-C).
+      await openAllRequirements(page);
       await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
       await expect(page.locator('[data-requirement="B2"]')).toHaveCount(0);
       await answerLevel1Rows(page);

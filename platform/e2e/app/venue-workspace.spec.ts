@@ -4,7 +4,7 @@ import {signInAs} from '../helpers/signin';
 import {mockMapTiles} from '../helpers/facility-map';
 import {useLanguage} from '../helpers/language';
 import {expectAbsent} from '../helpers/absence';
-import {openDetails} from '../helpers/record';
+import {openDetails, openAllRequirements} from '../helpers/record';
 
 for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
@@ -47,6 +47,7 @@ test('Level 1 local EMS contact is one confirmation on the record page, with no 
  await expect(row.getByRole('status')).toContainText('Saved.');
  await page.goto('/venues/VN-0032');
  await expect(page.locator('[data-requirement="B7"]')).toHaveAttribute('data-state','complete');
+ await openAllRequirements(page);
  await expect(page.locator('[data-region=required-count]')).toBeVisible();
  // No invitation exists at Level 1: the row names no party, and the team page carries no local-contact form.
  await openDetails(page.locator('[data-requirement="B7"]'));

@@ -128,12 +128,14 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
       {steps.length > 0 ? (
         <RecordStepper steps={steps} initialKey={initialKey} listHref={listHref} groups={{ required: REQUIREMENT_GROUPS.required, recommended: REQUIREMENT_GROUPS.recommended }} />
       ) : null}
-      {/* The whole list, for whoever wants it whole: the two summaries and the later-phase rows. */}
-      <section data-region="requirement-list-all" style={{ marginBlockStart: 40 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 12 }}>
-          <h2 style={{ fontSize: 20, margin: 0, fontWeight: 600, letterSpacing: '-.02em' }}><L en="All requirements" ar="جميع المتطلبات" /></h2>
-          {listHref ? <a href={listHref} style={{ fontSize: '13.5px', color: 'var(--brand)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Download the full requirement list" ar="تنزيل قائمة المتطلبات الكاملة" /></a> : null}
-        </div>
+      {/* The whole list, for whoever wants it whole: the two summaries and the later-phase rows. Collapsed by default (owner, 7 October). */}
+      <details data-region="requirement-list-all" className="record-details" style={{ marginBlockStart: 40 }}>
+        <summary><L en="All requirements" ar="جميع المتطلبات" /> · <L en={`${record.summary.required.complete} of ${record.summary.required.total} required complete`} ar={`${record.summary.required.complete} من ${record.summary.required.total} من المتطلبات المطلوبة مكتملة`} /></summary>
+        {listHref ? (
+          <div style={{ marginBlockEnd: 12 }}>
+            <a href={listHref} style={{ fontSize: '13.5px', color: 'var(--brand)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Download the full requirement list" ar="تنزيل قائمة المتطلبات الكاملة" /></a>
+          </div>
+        ) : null}
         <RequirementSummaries instances={instances} summary={record.summary} />
         {later.length > 0 ? (
           <details data-group="later" className="record-details">
@@ -151,7 +153,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
             </div>
           </details>
         ) : null}
-      </section>
+      </details>
     </div>
   );
 }

@@ -163,7 +163,7 @@ test("organizer sorting, duplicate application, and venue certificate history", 
   await page
     .getByRole("button", { name: "Continue to requirements", exact: true })
     .click();
-  await expect(page).toHaveURL(draftPath.replace("/prepare", "/requirements"));
+  await expect(page).toHaveURL(draftPath.replace("/prepare", ""));
   await page.goto(draftPath);
   await page
     .locator("dialog[open]")

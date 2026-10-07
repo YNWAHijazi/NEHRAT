@@ -13,7 +13,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { signInAs } from '../helpers/signin';
 import { LANGUAGES, useLanguage } from '../helpers/language';
-import { card, cardForm as form, stateChip as chip, saveCard, openDetails } from '../helpers/record';
+import { card, cardForm as form, stateChip as chip, saveCard, openDetails, openAllRequirements } from '../helpers/record';
 
 async function fillLabelled(page: Page, en: string, value: string): Promise<void> {
   await page.locator('label', { hasText: en }).first().locator('input, textarea').first().fill(value);
@@ -56,6 +56,7 @@ for (const lang of LANGUAGES) {
       const eventId = await createLevel1(page, lang);
 
       // One page: the two summaries, the required group, the final review -- and no tab strip.
+      await openAllRequirements(page);
       const summaries = page.locator('[data-region="requirement-summaries"]');
       await expect(summaries).toBeVisible();
       await expect(page.locator('[data-region="event-workspace-nav"]')).toHaveCount(0);
@@ -143,6 +144,7 @@ test('at phone width the summaries stack, cards are full width and nothing scrol
   await page.setViewportSize({ width: 320, height: 800 });
   await signInAs(page, 'test_organizer');
   await gotoRidingRestarts(page, '/events/EV-0418');
+  await openAllRequirements(page);
   const required = page.locator('[data-summary="required"]');
   const recommended = page.locator('[data-summary="recommended"]');
   const a = (await required.boundingBox())!;

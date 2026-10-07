@@ -35,6 +35,13 @@ export async function openDetails(locator: Locator): Promise<Locator> {
   return locator;
 }
 
+/** Opens the collapsed "All requirements" list below the steps (closed by default, owner direction 2026-10-07). */
+export async function openAllRequirements(page: Page): Promise<void> {
+  const all = page.locator('[data-region="requirement-list-all"]');
+  await expect(all).toBeAttached();
+  await all.evaluate((el) => { if (el instanceof HTMLDetailsElement) el.open = true; });
+}
+
 /** Fills one card's short form by field name and saves it; the chip must read Complete after. */
 export async function saveCard(page: Page, key: string, values: Record<string, string | boolean>): Promise<void> {
   await openDetails(card(page, key));
