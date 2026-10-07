@@ -10,6 +10,7 @@ import { GatedAction, actionGrid } from '../../../components/RecordActions';
 import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import { FinalReview, type ReviewRow } from '../../../components/record/FinalReview';
 import { VendorDirectoryLink } from '../../../components/VendorDirectoryLink';
+import { EmailDeliveryNotice } from '../../../components/EmailDeliveryNotice';
 import type { RailStage } from '../../../lib/rules/rail';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
@@ -48,7 +49,7 @@ export default async function EventRecordPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string }>;
+  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string; mail?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -352,6 +353,8 @@ export default async function EventRecordPage({
 
         {record && level !== null && declarationInst ? (
           <div id="req-summary" tabIndex={-1}>
+            {/* How the last invitation was delivered (sent, link only, demonstration), after the row's action returns here. */}
+            <EmailDeliveryNotice status={typeof query.mail === 'string' ? query.mail : undefined} />
             {record.filed && !returned ? (
               <div data-region="submitted-band" style={{ padding: '14px 20px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
                 <L en={`Submitted on ${submission?.filedAt?.slice(0, 10) ?? ''} · version ${submission?.version ?? 1}. The answers below are the record as the Ministry reads it.`} ar={`قُدِّم في ⁦${submission?.filedAt?.slice(0, 10) ?? ''}⁩ · النسخة ${submission?.version ?? 1}. الإجابات أدناه هي السجل كما تقرأه الوزارة.`} />

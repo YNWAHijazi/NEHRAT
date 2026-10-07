@@ -88,3 +88,18 @@ test('the organizer reads the Level 3 Director and agency rows in Arabic, with e
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'test-results/annex-b-record-arabic.png', fullPage: true });
 });
+
+test('the Director and the EMS agency read the Level 3 record in Arabic on a phone', async ({ page, context }) => {
+  await useLanguage(context, 'ar');
+  await page.setViewportSize({ width: 375, height: 812 });
+  for (const [login, route] of [['test_director', '/events/EV-0362'], ['test_ems', '/events/EV-0362/participation']] as const) {
+    await signInAs(page, login);
+    await page.goto(route);
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
+    const plan = await open(page, '[data-requirement="B2"]');
+    await expect(plan.locator('[data-plan-section="P01"]')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+    await page.screenshot({ path: `test-results/annex-b-${login}-arabic-phone.png`, fullPage: true });
+  }
+});
