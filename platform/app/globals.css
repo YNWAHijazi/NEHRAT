@@ -208,3 +208,51 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   .step-list-wrap { padding: 4px 20px 16px; border-radius: 0; max-block-size: 60vh; overflow-y: auto; }
 }
 @media print { .step-nav, .step-actions { display: none !important; } }
+
+/* THE RECORD CARD'S OWN GEOMETRY. The class .requirement-card carries the older document
+   cards' padding; the record card pads its summary and body itself, so the class padding
+   is zeroed inline and the sizes live here, where a phone can tighten them. */
+.record-card-summary { padding: 14px 18px; min-block-size: 44px; }
+.record-card-title { font-size: 17px; font-weight: 600; line-height: 1.35; }
+.record-card-prompt { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.record-card-body { padding: 4px 18px 20px; }
+.record-card-detail { margin: 0 0 14px; font-size: 13.5px; line-height: 1.55; }
+.record-card-foot { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin-block-start: 16px; font-size: 12.5px; color: var(--muted); }
+
+/* A DENSER PHONE (owner, 7 October 2026, after seeing the live page): the same content
+   with less dead space -- tighter paddings and gaps, slightly smaller type, touch targets
+   still 44px. Rules carry !important only where an inline style would otherwise win. */
+@media (max-width: 600px) {
+  main[data-pad] { padding-block-start: 22px !important; padding-block-end: 72px !important; }
+  [data-sec-h1] { font-size: 26px !important; margin-block-end: 14px !important; }
+  .record-card-summary { padding: 11px 14px; gap: 10px; }
+  .record-card-title { font-size: 16px; }
+  .record-card-prompt { font-size: 13px; line-height: 1.45; }
+  .record-card-body { padding: 0 14px 14px; }
+  .record-card-detail { margin-block-end: 10px; font-size: 13px; }
+  .record-card-foot { margin-block-start: 10px; gap: 4px 14px; font-size: 12px; }
+  .record-card [data-region$="-form"] label, .record-card form label { gap: 4px !important; }
+  .record-card form[style] { padding: 12px !important; gap: 8px !important; }
+  .record-card input[type="text"], .record-card input[type="email"], .record-card input[type="tel"], .record-card input[type="number"], .record-card input[type="date"], .record-card select { height: 44px !important; }
+  .record-card textarea { min-height: 88px !important; }
+  .step-nav-toggle { min-block-size: 48px; padding: 7px 16px; gap: 10px; }
+  .step-nav-toggle > span:first-child { inline-size: 26px !important; block-size: 26px !important; font-size: 12px !important; }
+  .step-nav { margin-inline: -16px; }
+  .step-list-wrap { padding: 2px 16px 12px; }
+  .step-link { padding-block: 6px; min-block-size: 44px; }
+  .step-actions { margin-block-start: 12px; }
+  .record-stepper { gap: 14px; }
+  [data-region="record-requirements"] [data-region="requirement-list-all"] { margin-block-start: 24px !important; }
+  [data-region="next-action"] { padding: 14px 16px !important; gap: 10px !important; }
+  [data-region="event-workspace-header"] { gap: 10px !important; }
+  /* The dashboard card: two columns for level and status, the deadline on one line beneath. */
+  [data-stack] { padding: 15px 16px !important; gap: 10px 14px !important; grid-template-columns: 1fr 1fr !important; border-radius: 12px !important; }
+  [data-stack] > :first-child { grid-column: 1 / -1; }
+  [data-stack] > [data-due] { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  [data-stack] > [data-due] > div:first-child { flex-basis: 100%; }
+  [data-stack] > [data-due] > div:last-child { flex-basis: 100%; margin-block-start: 4px !important; }
+  [data-stack] > [data-due] span[style*="font-size: 24px"] { font-size: 20px !important; }
+  [data-stack] > div > div:first-child { margin-block-end: 3px !important; }
+  [data-pad] > div[style*="margin-bottom: 52px"], [data-pad] > div[style*="margin-block-end: 52px"] { margin-block-end: 32px !important; }
+}
+

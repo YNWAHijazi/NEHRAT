@@ -30,24 +30,24 @@ export function RequirementCard({ inst, open, children, extra }: { inst: Require
   const who = handledBy(inst);
   return (
     <details id={inst.anchor} data-requirement={inst.key} data-group={inst.group} data-state={inst.state} open={open || undefined}
-      className="requirement-card" style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderInlineStart: `4px solid ${tone.edge}`, borderRadius: 12, marginBlockEnd: 12 }}>
-      <summary className="requirement-summary" style={{ padding: '14px 18px', minHeight: 44 }}>
+      className="requirement-card record-card" style={{ padding: 0, background: 'var(--bg)', border: '1px solid var(--line)', borderInlineStart: `4px solid ${tone.edge}`, borderRadius: 12, marginBlockEnd: 12 }}>
+      <summary className="requirement-summary record-card-summary">
         <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
-          <span style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.35 }}><L en={inst.labelEn} ar={inst.labelAr} /></span>
-          <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
+          <span className="record-card-title"><L en={inst.labelEn} ar={inst.labelAr} /></span>
+          <span className="record-card-prompt">
             <L en={inst.promptEn} ar={inst.promptAr} />
           </span>
         </span>
         <StateChip inst={inst} />
       </summary>
-      <div className="requirement-body" style={{ padding: '4px 18px 20px' }}>
+      <div className="record-card-body">
         {inst.detailEn && inst.detailAr ? (
-          <p data-region="state-detail" style={{ margin: '0 0 14px', fontSize: '13.5px', color: inst.state === 'waiting' ? 'var(--accent-ink)' : 'var(--muted)', lineHeight: 1.55 }}>
+          <p data-region="state-detail" className="record-card-detail" style={{ color: inst.state === 'waiting' ? 'var(--accent-ink)' : 'var(--muted)' }}>
             <L en={inst.detailEn} ar={inst.detailAr} />
           </p>
         ) : null}
         {children}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 18px', alignItems: 'center', marginBlockStart: 16, fontSize: '12.5px', color: 'var(--muted)' }}>
+        <div className="record-card-foot">
           <span><L en={`${REQUIREMENT_COPY.whoEn}: ${who.en}`} ar={`${REQUIREMENT_COPY.whoAr}: ${who.ar}`} /></span>
           <span>
             <L en={`${REQUIREMENT_COPY.sourceRuleEn}: ${inst.sourceEn}`} ar={`${REQUIREMENT_COPY.sourceRuleAr}: ${inst.sourceAr}`} />
