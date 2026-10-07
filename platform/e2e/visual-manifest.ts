@@ -209,7 +209,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       {
         name: 'requirement-summaries',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="requirement-summaries"]',
+        builtSelector: '[data-region="requirement-list-all"]',
         note: 'Expected divergent by owner instruction (single record page, 2026-10-07): the Requirements and attachments tab, the Medical Director and EMS tabs and the Submit tab dissolved into one requirement-led record page. The two collapsible summaries (Required, Recommended) replace the prototype\'s counters band; each row names the item, its state and who handles it and opens the matching card. Interaction is covered in e2e/app/record-page.spec.ts.',
       },
       {
