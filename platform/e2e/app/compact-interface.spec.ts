@@ -76,7 +76,8 @@ test.describe('phone help and navigation', () => {
       const account = header.getByRole('button', { name: lang === 'en' ? 'Account menu' : 'قائمة الحساب' });
       await account.tap();
       await expect(header.locator('[data-account-menu]')).toContainText('Beirut Road Runners');
-      await page.locator('[data-region="counters"]').tap({ position: { x: 8, y: 8 } });
+      // A tap on the page body (the requirement summaries, which replaced the old counters strip) closes the menu.
+      await page.locator('[data-region="requirement-summaries"]').tap({ position: { x: 8, y: 8 } });
       await expect(header.locator('[data-account-menu]')).toHaveCount(0);
       const history = page.locator('[data-region="history"]');
       await expect(history).not.toHaveAttribute('open');
