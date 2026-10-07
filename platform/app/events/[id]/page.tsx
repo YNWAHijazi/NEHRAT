@@ -369,25 +369,28 @@ export default async function EventRecordPage({
               derived={derived}
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
+              listHref={`/events/${id}/requirements`}
+              final={(
+                <FinalReview
+                  eventId={id}
+                  level={level}
+                  remaining={record.blockers.map(review)}
+                  optional={record.instances.filter((i) => i.group === 'recommended' && i.state !== 'complete').map(review)}
+                  statements={statementsApply ? COMPLIANCE_DECLARATIONS.filter((d) => d.minLevel <= level).map((d) => ({ en: d.en, ar: d.ar })) : []}
+                  declarationInst={declarationInst}
+                  initial={submission}
+                  filed={event.filed}
+                  revisionOpen={returned}
+                  expedited={gate.expedited}
+                  certificationStatement={COMPLIANCE_CERTIFICATION_STATEMENT}
+                  headerRows={headerRows}
+                  externalBlockers={gate.blockers.filter((b) => b.kind === 'eventCancelled' || b.kind === 'feeUnpaid').map((b) => ({ kind: b.kind, en: b.itemEn, ar: b.itemAr }))}
+                  fee={gate.fee}
+                />
+              )}
             />
             {/* The commercial directory link renders only while its capability is on (non-negotiable 12). */}
             <VendorDirectoryLink />
-            <FinalReview
-              eventId={id}
-              level={level}
-              remaining={record.blockers.map(review)}
-              optional={record.instances.filter((i) => i.group === 'recommended' && i.state !== 'complete').map(review)}
-              statements={statementsApply ? COMPLIANCE_DECLARATIONS.filter((d) => d.minLevel <= level).map((d) => ({ en: d.en, ar: d.ar })) : []}
-              declarationInst={declarationInst}
-              initial={submission}
-              filed={event.filed}
-              revisionOpen={returned}
-              expedited={gate.expedited}
-              certificationStatement={COMPLIANCE_CERTIFICATION_STATEMENT}
-              headerRows={headerRows}
-              externalBlockers={gate.blockers.filter((b) => b.kind === 'eventCancelled' || b.kind === 'feeUnpaid').map((b) => ({ kind: b.kind, en: b.itemEn, ar: b.itemAr }))}
-              fee={gate.fee}
-            />
             <p data-region="decision-note" style={{ marginBlock: '24px 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
               <L en={`The questions and completion tests on this page follow the revised requirements matrix and the owner's confirmed decisions; ${Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'proposal').map(([k]) => k).join(', ')} are proposals awaiting partner sign-off.`} ar={`تتبع الأسئلة واختبارات الاكتمال في هذه الصفحة مصفوفة المتطلبات المنقّحة وقرارات المالك المؤكَّدة؛ و${Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'proposal').map(([k]) => k).join('، ')} مقترحات بانتظار اعتماد الشريك.`} />
             </p>

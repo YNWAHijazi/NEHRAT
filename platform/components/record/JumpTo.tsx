@@ -8,12 +8,14 @@ import { usePathname, useSearchParams } from 'next/navigation';
  * the card is not enough: the card may sit inside a collapsed group, and a collapsed
  * ancestor hides the error (brief item 2). So every ancestor <details> opens too, the
  * card scrolls into view and takes focus -- from a click, from the keyboard and from
- * the address bar alike.
+ * the address bar alike. A target inside a step of the record stepper is the stepper's
+ * to show: it is told, and shows the step before revealing the target.
  */
 function reveal(hash: string): void {
-  if (!hash.startsWith('#req-') && hash !== '#final-review' && hash !== '#assessment') return;
+  if (!hash.startsWith('#req-') && !hash.startsWith('#plan-') && hash !== '#final-review' && hash !== '#assessment') return;
   const target = document.getElementById(hash.slice(1));
   if (!target) return;
+  if (target.closest('[data-step]')) { window.dispatchEvent(new CustomEvent('record:jump', { detail: hash })); return; }
   let node: HTMLElement | null = target;
   while (node) {
     if (node instanceof HTMLDetailsElement) node.open = true;
@@ -35,7 +37,7 @@ export function JumpTo(): null {
     const onHash = () => reveal(window.location.hash);
     const onClick = (event: MouseEvent) => {
       const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
-      if (!link) return;
+      if (!link || event.defaultPrevented) return;
       const hash = link.getAttribute('href') ?? '';
       if (!document.getElementById(hash.slice(1))) return;
       event.preventDefault();

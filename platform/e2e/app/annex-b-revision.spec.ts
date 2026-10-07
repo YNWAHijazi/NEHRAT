@@ -1,17 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { useLanguage } from '../helpers/language';
+import { openDetails } from '../helpers/record';
 
-/** Opens a collapsible card or plan section and returns it. */
-async function open(page: Page, selector: string) {
-  const d = page.locator(selector);
-  if (await d.getAttribute('open') === null) await d.locator('summary').first().click();
-  return d;
-}
 /** The own-text form of one plan section, inside the plan card. */
 async function sectionForm(page: Page, key: string) {
-  await open(page, '[data-requirement="B2"]');
-  const section = await open(page, `#plan-${key}`);
+  await openDetails(page.locator('[data-requirement="B2"]'));
+  const section = await openDetails(page.locator(`#plan-${key}`));
   return section.locator('[data-region="requirement-form"]').first();
 }
 async function saveSection(page: Page, key: string, text: string) {
@@ -28,7 +23,7 @@ test('Level 2 plan is optional, the EMS agency writes it, and the organizer read
   await expect(page.locator('[data-requirement="B3"]')).toHaveAttribute('data-group', 'recommended');
   const card = page.locator('[data-requirement="B2"]');
   await expect(card).toHaveAttribute('data-group', 'recommended');
-  await open(page, '[data-requirement="B2"]');
+  await openDetails(page.locator('[data-requirement="B2"]'));
   await expect(card).toContainText('Optional at Level 2 unless the Ministry requests it');
   await expect(card.locator('input[type=file]')).toHaveCount(0);
   // The organizer reads the plan; only the EMS agency or the Director writes it (catalogue B2 authors).
@@ -43,8 +38,8 @@ test('Level 2 plan is optional, the EMS agency writes it, and the organizer read
   await saveSection(ems, 'P13', 'Level 2 shared plan prepared by the EMS agency.');
   // The organizer's page reads the saved section at once, with who recorded it.
   await page.reload();
-  await open(page, '[data-requirement="B2"]');
-  const section = await open(page, '#plan-P13');
+  await openDetails(page.locator('[data-requirement="B2"]'));
+  const section = await openDetails(page.locator('#plan-P13'));
   await expect(section).toContainText('Level 2 shared plan prepared by the EMS agency.');
   await expect(section.locator('[data-region="answered-by"]')).toContainText('EMS agency');
   await page.setViewportSize({ width: 390, height: 844 });
@@ -80,9 +75,9 @@ test('the organizer reads the Level 3 Director and agency rows in Arabic, with e
   await useLanguage(context, 'ar');
   await page.goto('/events/EV-0362');
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  const director = await open(page, '[data-requirement="B3"]');
+  const director = await openDetails(page.locator('[data-requirement="B3"]'));
   await expect(director.locator('[data-region="party-director"] [data-party="confirmed"]')).toBeVisible();
-  const declarations = await open(page, '[data-requirement="B20"]');
+  const declarations = await openDetails(page.locator('[data-requirement="B20"]'));
   await expect(declarations.locator('[data-region="party-ems"]')).toContainText('الإقرار موقَّع');
   // The plan is the medical team's to write: the organizer's view carries no enabled plan field.
   await expect(page.locator('[data-requirement="B2"] textarea:enabled')).toHaveCount(0);
@@ -98,7 +93,7 @@ test('the Director and the EMS agency read the Level 3 record in Arabic on a pho
     await page.goto(route);
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await expect(page.locator('[data-region="requirement-summaries"]')).toBeVisible();
-    const plan = await open(page, '[data-requirement="B2"]');
+    const plan = await openDetails(page.locator('[data-requirement="B2"]'));
     await expect(plan.locator('[data-plan-section="P01"]')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     await page.screenshot({ path: `test-results/annex-b-${login}-arabic-phone.png`, fullPage: true });

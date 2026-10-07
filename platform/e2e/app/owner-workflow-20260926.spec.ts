@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { signInAs } from "../helpers/signin";
+import { openDetails } from "../helpers/record";
 
 test("public check is concise and preserves the chosen service through signup", async ({
   page,
@@ -74,7 +75,7 @@ test("requirements have no continue links and medical tasks follow the role", as
   await expect(page.locator("[data-region=rail] [data-rail]")).toBeVisible();
   // The plan is one card on the record page; opening it offers no "Continue to" step.
   const plan = page.locator('[data-requirement="B2"]');
-  if ((await plan.getAttribute("open")) === null) await plan.locator("summary").first().click();
+  await openDetails(plan);
   await expect(page.getByRole("link", { name: /^Continue to/ })).toHaveCount(0);
   // Level 2: the plan is recommended (D2) and section 12 is the short escalation row, not the eleven items (D3).
   await expect(plan).toHaveAttribute('data-group', 'recommended');
@@ -82,7 +83,7 @@ test("requirements have no continue links and medical tasks follow the role", as
   await expect(plan.locator('[data-major-incident]')).toHaveCount(0);
   await page.goto("/events/EV-0362");
   const medicalPlan=page.locator('[data-requirement="B2"]');
-  if ((await medicalPlan.getAttribute("open")) === null) await medicalPlan.locator("summary").first().click();
+  await openDetails(medicalPlan);
   await expect(medicalPlan).toContainText('The EMS agency or the Medical Director prepares it');
   // The organizer reads the plan; no section of it is theirs to write (catalogue B2 authors).
   await expect(medicalPlan.locator('[data-plan-section]').first()).toBeVisible();
@@ -90,9 +91,9 @@ test("requirements have no continue links and medical tasks follow the role", as
   await signInAs(page, "test_ems");
   await page.goto("/events/EV-0362/participation");
   const emsPlan=page.locator('[data-region=ems-record] [data-requirement="B2"]');
-  if ((await emsPlan.getAttribute("open")) === null) await emsPlan.locator("summary").first().click();
+  await openDetails(emsPlan);
   const incident=emsPlan.locator('[data-plan-section="P12"]');
-  if ((await incident.getAttribute("open")) === null) await incident.locator("summary").first().click();
+  await openDetails(incident);
   await expect(incident.locator('[data-major-incident]').first()).toBeVisible();
   await expect(incident.locator('[data-major-incident="M01"] textarea')).toBeEnabled();
   expect((await page.request.get('/api/documents/EV-0362/plan-document')).status()).toBe(200);

@@ -29,7 +29,9 @@ for (const lang of ['en', 'ar'] as const) {
       await expect(page.locator('[data-requirement="B3"]')).toHaveAttribute('data-group', 'recommended');
       await expect(page.locator('[data-region="final-review"] [data-region="submit-button"]')).toBeDisabled();
       await page.screenshot({ path: `/tmp/moph-workspace-${lang}-${width}.png`, fullPage: true });
-      for (const [path, hash] of [['/requirements', '#req-summary'], ['/submit', '#final-review'], ['/medical-team?tab=director', '#req-B3'], ['/medical-team?tab=ems', '#req-B7']] as const) {
+      await page.goto('/events/EV-0418/requirements');
+      await expect(page.locator('[data-region="requirement-list"] [data-list-row="P-M"]')).toBeVisible();
+      for (const [path, hash] of [['/submit', '#final-review'], ['/medical-team?tab=director', '#req-B3'], ['/medical-team?tab=ems', '#req-B7']] as const) {
         await page.goto(`/events/EV-0418${path}`);
         await expect(page).toHaveURL(new RegExp(`/events/EV-0418${hash}$`));
         await expect(header).toBeVisible();

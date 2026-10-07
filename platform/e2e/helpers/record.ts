@@ -11,9 +11,26 @@ export const card = (page: Page, key: string): Locator => page.locator(`[data-re
 export const cardForm = (page: Page, key: string): Locator => card(page, key).locator('[data-region="requirement-form"]').first();
 export const stateChip = (page: Page, key: string): Locator => card(page, key).locator('summary [data-state]');
 
-/** Opens a collapsible card (or any details element) and returns it. */
+/** Names a step by its anchor: the stepper shows it, as a summary row, a deep link or a redirect would. */
+export async function showStep(page: Page, hash: string): Promise<void> {
+  await page.evaluate((h) => {
+    if (window.location.hash !== h) window.location.hash = h;
+    window.dispatchEvent(new CustomEvent('record:jump', { detail: h }));
+  }, hash);
+}
+
+/**
+ * Shows a card or a section and opens it. A card inside the stepper is on screen only
+ * while it is the current step, so it is named by its anchor first.
+ */
 export async function openDetails(locator: Locator): Promise<Locator> {
-  if (!(await locator.evaluate((d) => (d as HTMLDetailsElement).open))) await locator.locator('summary').first().click();
+  const page = locator.page();
+  const id = await locator.getAttribute('id');
+  if (id && !(await locator.isVisible())) {
+    await showStep(page, `#${id}`);
+    await locator.waitFor({ state: 'visible' });
+  }
+  await locator.evaluate((el) => { if (el instanceof HTMLDetailsElement) el.open = true; });
   return locator;
 }
 
@@ -26,7 +43,7 @@ export async function saveCard(page: Page, key: string, values: Record<string, s
     if (typeof value === 'boolean') { if (value) await control.check(); else await control.uncheck(); }
     else await control.fill(value);
   }
-  await f.getByRole('button', { name: /^(Save|حفظ)$/ }).click();
+  await f.locator('[data-region="save"]').click();
   await expect(f.locator('[role="status"]')).toContainText(/Saved|حُفظ/);
   await expect(stateChip(page, key)).toHaveAttribute('data-state', 'complete');
 }
@@ -44,11 +61,12 @@ export async function answerLevel1Rows(page: Page): Promise<void> {
 }
 
 /**
- * The certification at the foot of the page: the three fields autosave on blur, and the
+ * The certification on the final step: the three fields autosave on blur, and the
  * Submit button judges readiness from the server's blockers. Returns the button, enabled.
  */
 export async function certify(page: Page, who: { representative: string; telephone: string; position: string }): Promise<Locator> {
   const review = page.locator('[data-region="final-review"]');
+  await showStep(page, '#final-review');
   await expect(review).toBeVisible();
   // Any compliance statements the level applies are ticked first (none at Level 1: catalogue P-C).
   const statements = review.locator('[data-region="compliance-statements"] input[type="checkbox"]:not(:checked)');

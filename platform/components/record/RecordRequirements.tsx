@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { L } from '../L';
 import type { RecordParty, RecordRequirements as RecordData } from '../../lib/record-facts';
 import type { RecordView } from '../../lib/record-view';
@@ -6,6 +7,7 @@ import { FileControl } from './FileControl';
 import { JumpTo } from './JumpTo';
 import { PartyBlock } from './PartyBlock';
 import { PlanSections } from './PlanSections';
+import { RecordStepper, type StepperStep } from './RecordStepper';
 import { RequirementCard } from './RequirementCard';
 import { RequirementForm } from './RequirementForm';
 import { RequirementSummaries } from './RequirementSummaries';
@@ -25,21 +27,25 @@ export interface RecordRequirementsProps {
   facility?: RecordView['facility'];
   /** The viewer's own confirmed party on the record, when the viewer is a medical party. */
   viewerParty?: RecordParty | null;
+  /** The last step: the final review and Submit, on the owner's page. */
+  final?: ReactNode;
+  /** The printable requirement list, offered from the step list. */
+  listHref?: string | null;
 }
 
 /**
- * The requirement-led body every record page shares (brief items 1-2): the two
- * summaries, then the full-width Required and Recommended groups of collapsible cards,
- * then the later-phase rows for clarity. Events and venues, organizer and medical
- * parties, all read the same instances; only who may write differs.
+ * The requirement-led body every record page shares, one requirement at a time (owner
+ * direction, 2026-10-07): a numbered step per required row, then the recommended rows,
+ * then the final review; the full list stays below for whoever wants it whole. Events
+ * and venues, organizer and medical parties, all read the same instances; only who may
+ * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
   const rows = (group: 'required' | 'recommended') => instances.filter((i) => i.group === group && i.section === 'requirement');
   const later = instances.filter((i) => i.group === 'later');
-  const firstPending = rows('required').find((i) => i.state !== 'complete')?.key;
 
   const body = (inst: RequirementInstance) => {
     const canEdit = canEditInst(inst);
@@ -93,51 +99,46 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     </a>
   ) : null;
 
-  const groupHead = (group: 'required' | 'recommended') => (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 12 }}>
-      <h2 style={{ fontSize: 24, margin: 0, fontWeight: 600, letterSpacing: '-.025em' }}><L en={REQUIREMENT_GROUPS[group].en} ar={REQUIREMENT_GROUPS[group].ar} /></h2>
-      <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}><L en={REQUIREMENT_GROUPS[group].noteEn} ar={REQUIREMENT_GROUPS[group].noteAr} /></span>
-    </div>
-  );
+  // The steps: every required row, then the recommended rows, then the final review when the page has one.
+  const steps: StepperStep[] = [...rows('required'), ...rows('recommended')].map((inst) => ({
+    key: inst.key, anchor: inst.anchor, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, state: inst.state,
+    kind: inst.group === 'recommended' ? 'recommended' : 'required',
+    body: <RequirementCard inst={inst} open extra={planLink(inst)}>{body(inst)}</RequirementCard>,
+  }));
+  if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', body: final });
+  // The page opens on the first required row still open; with nothing open, on the final review.
+  const initialKey = steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key ?? steps.find((s) => s.kind === 'final')?.key ?? steps[0]?.key ?? '';
 
   return (
     <div data-region="record-requirements">
       <JumpTo />
-      <RequirementSummaries instances={instances} summary={record.summary} />
-      <section data-group="required" style={{ marginBlockEnd: 32 }}>
-        {groupHead('required')}
-        {rows('required').map((inst) => (
-          <RequirementCard key={inst.key} inst={inst} open={inst.state !== 'complete' && (inst.key === firstPending || inst.state === 'waiting' || inst.key === 'B2')} extra={planLink(inst)}>
-            {body(inst)}
-          </RequirementCard>
-        ))}
+      {steps.length > 0 ? (
+        <RecordStepper steps={steps} initialKey={initialKey} listHref={listHref} groups={{ required: REQUIREMENT_GROUPS.required, recommended: REQUIREMENT_GROUPS.recommended }} />
+      ) : null}
+      {/* The whole list, for whoever wants it whole: the two summaries and the later-phase rows. */}
+      <section data-region="requirement-list-all" style={{ marginBlockStart: 40 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 12 }}>
+          <h2 style={{ fontSize: 20, margin: 0, fontWeight: 600, letterSpacing: '-.02em' }}><L en="All requirements" ar="جميع المتطلبات" /></h2>
+          {listHref ? <a href={listHref} style={{ fontSize: '13.5px', color: 'var(--brand)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Download the full requirement list" ar="تنزيل قائمة المتطلبات الكاملة" /></a> : null}
+        </div>
+        <RequirementSummaries instances={instances} summary={record.summary} />
+        {later.length > 0 ? (
+          <details data-group="later" className="record-details">
+            <summary><L en={REQUIREMENT_GROUPS.later.en} ar={REQUIREMENT_GROUPS.later.ar} /> · <L en={REQUIREMENT_GROUPS.later.noteEn} ar={REQUIREMENT_GROUPS.later.noteAr} /></summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
+              {later.map((inst) => (
+                <div key={inst.key} id={inst.anchor} data-requirement={inst.key} data-group="later" style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: '4px 16px', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '14.5px' }}>
+                    <span style={{ fontWeight: 500 }}><L en={inst.labelEn} ar={inst.labelAr} /></span>
+                    <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span>
+                  </span>
+                  <span style={{ fontSize: 13, color: 'var(--muted)' }}><L en={inst.obligationEn} ar={inst.obligationAr} /></span>
+                </div>
+              ))}
+            </div>
+          </details>
+        ) : null}
       </section>
-      {rows('recommended').length > 0 ? (
-        <section data-group="recommended" style={{ marginBlockEnd: 32 }}>
-          {groupHead('recommended')}
-          {rows('recommended').map((inst) => (
-            <RequirementCard key={inst.key} inst={inst} open={false} extra={planLink(inst)}>
-              {body(inst)}
-            </RequirementCard>
-          ))}
-        </section>
-      ) : null}
-      {later.length > 0 ? (
-        <details data-group="later" className="record-details">
-          <summary><L en={REQUIREMENT_GROUPS.later.en} ar={REQUIREMENT_GROUPS.later.ar} /> · <L en={REQUIREMENT_GROUPS.later.noteEn} ar={REQUIREMENT_GROUPS.later.noteAr} /></summary>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-            {later.map((inst) => (
-              <div key={inst.key} id={inst.anchor} data-requirement={inst.key} data-group="later" style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: '4px 16px', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '14.5px' }}>
-                  <span style={{ fontWeight: 500 }}><L en={inst.labelEn} ar={inst.labelAr} /></span>
-                  <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span>
-                </span>
-                <span style={{ fontSize: 13, color: 'var(--muted)' }}><L en={inst.obligationEn} ar={inst.obligationAr} /></span>
-              </div>
-            ))}
-          </div>
-        </details>
-      ) : null}
     </div>
   );
 }

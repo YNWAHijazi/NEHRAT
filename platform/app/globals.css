@@ -182,3 +182,29 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   .requirement-upload > .requirement-action { justify-self: start; }
   .requirement-body { margin-inline-start: 0; }
 }
+
+/* THE RECORD STEPPER (owner direction, 2026-10-07): one requirement at a time. The
+   numbered step list is a side column on desktop and a sticky, collapsible bar on a
+   phone; the current card stays open (its summary is not a disclosure control here). */
+.record-stepper { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; align-items: start; }
+.step-nav { position: sticky; inset-block-start: 76px; order: 1; }
+.step-nav-toggle { display: none; }
+.step-list-wrap { padding: 16px 18px; background: var(--surface2); border-radius: 14px; }
+.step-list-head { display: flex; flex-wrap: wrap; gap: 8px 12px; justify-content: space-between; align-items: baseline; margin-block-end: 10px; }
+.step-list { list-style: none; margin: 0; padding: 0; }
+.step-item { position: relative; }
+.step-group { font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-block: 14px 6px; }
+.step-link { display: flex; gap: 12px; align-items: flex-start; padding-block: 8px; color: var(--ink); text-decoration: none; min-block-size: 44px; }
+.step-item + .step-item .step-link::before { content: ''; position: absolute; inset-inline-start: 13px; inset-block-start: -8px; block-size: 16px; inline-size: 2px; background: var(--line); }
+.step-body { min-inline-size: 0; }
+.step-body [data-step] > .requirement-card > summary { pointer-events: none; cursor: default; }
+.step-body [data-step] > .requirement-card { margin-block-end: 0; }
+.step-actions { display: flex; justify-content: space-between; gap: 12px; margin-block-start: 18px; }
+@media (max-width: 900px) {
+  .record-stepper { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .step-nav { position: sticky; inset-block-start: 56px; z-index: 40; order: 0; margin-inline: -20px; background: var(--surface2); border-block-end: 1px solid var(--line); }
+  .step-nav-toggle { display: flex; align-items: center; gap: 12px; inline-size: 100%; min-block-size: 56px; padding: 10px 20px; border: 0; background: var(--surface2); color: var(--ink); text-align: start; cursor: pointer; font: inherit; }
+  .step-nav:not([data-open]) .step-list-wrap { display: none; }
+  .step-list-wrap { padding: 4px 20px 16px; border-radius: 0; max-block-size: 60vh; overflow-y: auto; }
+}
+@media print { .step-nav, .step-actions { display: none !important; } }

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
+import {openDetails} from '../helpers/record';
 import { useLanguage } from '../helpers/language';
 
 test('reviewer sees who supplied the answers, declarations and relevant Level 3 checks', async ({page}) => {
@@ -47,17 +48,18 @@ test('EMS answers the shared response-team row; the organizer reads it with the 
   // Level 2: the plan is recommended (D2); the response team is one shared row (catalogue B5).
   await expect(page.locator('[data-region=ems-record] [data-requirement="B2"]')).toHaveAttribute('data-group','recommended');
   const team=page.locator('[data-requirement="B5"]');
-  if(!(await team.evaluate((d)=>(d as HTMLDetailsElement).open)))await team.locator('summary').first().click();
+  await openDetails(team);
   const form=team.locator('[data-region=requirement-form]').first();
   await form.locator('input[name=team]').fill('Two BLS teams');
   await form.locator('input[name=responders]').fill('4');
   await form.locator('input[name=coverage]').fill('North gate and finish line, 08:00–14:00');
-  await form.getByRole('button',{name:'Save',exact:true}).click();
+  await form.locator('[data-region=save]').click();
   await expect(form.getByRole('status')).toContainText('Saved.');
   const organizer=await browser.newPage({baseURL:baseURL!});
   await signInAs(organizer,'test_organizer');
   await organizer.goto('/events/EV-0418#req-B5');
   const shared=organizer.locator('[data-requirement="B5"]');
+  await openDetails(shared);
   await expect(shared).toHaveAttribute('data-state','complete');
   await expect(shared.locator('input[name=coverage]')).toHaveValue('North gate and finish line, 08:00–14:00');
   await expect(shared.locator('[data-region=answered-by]')).toContainText('EMS agency');

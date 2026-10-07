@@ -13,6 +13,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { signInAs } from '../helpers/signin';
 import { LANGUAGES, useLanguage } from '../helpers/language';
+import { card, cardForm as form, stateChip as chip, saveCard, openDetails } from '../helpers/record';
 
 async function fillLabelled(page: Page, en: string, value: string): Promise<void> {
   await page.locator('label', { hasText: en }).first().locator('input, textarea').first().fill(value);
@@ -45,24 +46,6 @@ async function createLevel1(page: Page, lang: string): Promise<string> {
   return new URL(page.url()).pathname.split('/')[2]!;
 }
 
-const card = (page: Page, key: string) => page.locator(`[data-requirement="${key}"]`);
-const form = (page: Page, key: string) => card(page, key).locator('[data-region="requirement-form"]');
-const chip = (page: Page, key: string) => card(page, key).locator('summary [data-state]');
-
-async function saveCard(page: Page, key: string, values: Record<string, string | boolean>): Promise<void> {
-  const f = form(page, key);
-  await card(page, key).locator('summary').click({ force: true });
-  if (!(await card(page, key).evaluate((d) => (d as HTMLDetailsElement).open))) await card(page, key).locator('summary').click();
-  for (const [name, value] of Object.entries(values)) {
-    const control = f.locator(`[name="${name}"]`);
-    if (typeof value === 'boolean') { if (value) await control.check(); else await control.uncheck(); }
-    else await control.fill(value);
-  }
-  await f.getByRole('button', { name: /^(Save|حفظ)$/ }).click();
-  await expect(f.locator('[role="status"]')).toContainText(/Saved|حُفظ/);
-  await expect(chip(page, key)).toHaveAttribute('data-state', 'complete');
-}
-
 for (const lang of LANGUAGES) {
   test.describe(`single record page in ${lang}`, () => {
     test.beforeEach(async ({ context }) => { await useLanguage(context, lang); });
@@ -87,9 +70,11 @@ for (const lang of LANGUAGES) {
       const submit = page.locator('[data-region="submit-button"]');
       await expect(submit).toBeDisabled();
 
-      // A summary row opens the matching card (brief item 2).
+      // A summary row shows the matching step (brief item 2): one card on screen, the others named in the step list.
       await summaries.locator('[data-summary-row="B10"]').click();
+      await expect(card(page, 'B10')).toBeVisible();
       await expect(card(page, 'B10')).toHaveJSProperty('open', true);
+      await expect(page.locator('[data-region="step-body"] [data-step]:visible')).toHaveCount(1);
 
       // The organizer's own answers, one row at a time. B1 is prefilled from the account.
       await saveCard(page, 'B1', { name: 'R. Haddad', phone: '+961 3 123456' });
@@ -102,9 +87,9 @@ for (const lang of LANGUAGES) {
       await saveCard(page, 'B16', { whoCalls: 'Site manager', how: 'Calls 140', guides: 'Site manager' });
 
       // No and Not planned on the AED row stay distinct from Complete (brief item 14).
-      await card(page, 'B8').locator('summary').click();
+      await openDetails(card(page, 'B8'));
       await form(page, 'B8').locator('[data-choice="notPlanned"]').click();
-      await form(page, 'B8').getByRole('button', { name: /^(Save|حفظ)$/ }).click();
+      await form(page, 'B8').locator('[data-region="save"]').click();
       await expect(chip(page, 'B8')).toHaveAttribute('data-state', 'notProvided');
 
       // Everything required is complete; the summary says so.
@@ -127,7 +112,8 @@ for (const lang of LANGUAGES) {
       await gotoRidingRestarts(page, `/events/${eventId}`);
       await expect(page.locator('[data-region="submitted-band"]')).toBeVisible();
       await expect(page.locator('[data-region="filed-band"]')).toBeVisible();
-      await expect(form(page, 'B4').getByRole('button', { name: /^(Save|حفظ)$/ })).toHaveCount(0);
+      await openDetails(card(page, 'B4'));
+      await expect(form(page, 'B4').locator('[data-region="save"]')).toHaveCount(0);
       await expect(form(page, 'B4').locator('[name="who"]')).toBeDisabled();
     });
   });
@@ -136,6 +122,7 @@ for (const lang of LANGUAGES) {
 test('a deep link opens the card inside its collapsed group and focuses it', async ({ page }) => {
   await signInAs(page, 'test_organizer');
   await gotoRidingRestarts(page, '/events/EV-0418#req-B12');
+  await expect(card(page, 'B12')).toBeVisible();
   await expect(card(page, 'B12')).toHaveJSProperty('open', true);
   const focusedWithin = await page.evaluate(() => Boolean(document.activeElement?.closest('[data-requirement="B12"]')));
   expect(focusedWithin).toBe(true);
@@ -161,7 +148,7 @@ test('at phone width the summaries stack, cards are full width and nothing scrol
   const b = (await recommended.boundingBox())!;
   expect(b.y).toBeGreaterThanOrEqual(a.y + a.height - 1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await card(page, 'B10').locator('summary').click();
+  await openDetails(card(page, 'B10'));
   const input = form(page, 'B10').locator('[name="entrance"]');
   const box = (await input.boundingBox())!;
   expect(box.height).toBeGreaterThanOrEqual(44);

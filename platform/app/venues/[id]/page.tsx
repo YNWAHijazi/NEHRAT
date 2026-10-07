@@ -96,15 +96,18 @@ export default async function VenueRecordPage({ params, searchParams }: { params
               <L en={`Submitted on ${w.submittedAt?.slice(0, 10) ?? ''} · submission ${w.revision}. The answers below are the record as the Ministry reads it.`} ar={`قُدِّم في ⁦${w.submittedAt?.slice(0, 10) ?? ''}⁩ · الطلب ${w.revision}. الإجابات أدناه هي السجل كما تقرأه الوزارة.`} />
             </div>
           ) : null}
-          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} />
+          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`}
+            final={<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} />} />
         </div>
       ) : (
-        <div id="req-summary" role="status" style={{ padding: '16px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14.5px' }}>
-          <Link href={`/venues/${id}/assessment`}><L en="Complete the assessment to see the requirements. The level is derived from one routine operating session." ar="أكملوا التقييم للاطلاع على المتطلبات. يُستنتج المستوى من جلسة تشغيل اعتيادية واحدة." /></Link>
-        </div>
+        <>
+          <div id="req-summary" role="status" style={{ padding: '16px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14.5px' }}>
+            <Link href={`/venues/${id}/assessment`}><L en="Complete the assessment to see the requirements. The level is derived from one routine operating session." ar="أكملوا التقييم للاطلاع على المتطلبات. يُستنتج المستوى من جلسة تشغيل اعتيادية واحدة." /></Link>
+          </div>
+          {/* Without a level the final review still names the details, the assessment and the fee. */}
+          <VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} />
+        </>
       )}
-      {/* The final review stands whatever the level: it names the details, the assessment and the fee as well as the rows. */}
-      <VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} />
 
       <details data-region="history" className="record-details" style={{ marginBlockStart: 32 }}>
         <summary><L en="Certificate history" ar="سجل الشهادات" /></summary>

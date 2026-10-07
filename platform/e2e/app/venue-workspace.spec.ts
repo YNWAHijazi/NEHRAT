@@ -4,6 +4,7 @@ import {signInAs} from '../helpers/signin';
 import {mockMapTiles} from '../helpers/facility-map';
 import {useLanguage} from '../helpers/language';
 import {expectAbsent} from '../helpers/absence';
+import {openDetails} from '../helpers/record';
 
 for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
@@ -13,7 +14,7 @@ for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue
   for(const path of paths){await page.goto(`/${service==='venue'?'venues':'facilities'}/${id}${path}`);const h=page.locator(`[data-region=${service}-workspace-header]`);await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);const nav=h.locator('nav');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);const top=(await nav.boundingBox())!.y;if(y===undefined)y=top;expect(Math.abs(top-y)).toBeLessThanOrEqual(1);const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
   await page.screenshot({path:info.outputPath(`${service}-${lang}-${width}.png`),fullPage:true});
  }
- await page.goto('/venues/VN-0032/requirements');await expect(page).toHaveURL(/\/venues\/VN-0032#req-summary$/);
+ await page.goto('/venues/VN-0032/requirements');await expect(page.locator('[data-region=requirement-list]')).toBeVisible();
  await page.goto('/venues/VN-0032/submit');await expect(page).toHaveURL(/\/venues\/VN-0032#final-review$/);
 });
 
@@ -38,11 +39,11 @@ test('Level 1 local EMS contact is one confirmation on the record page, with no 
  await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032');
  const row=page.locator('[data-requirement="B7"]');
  await expect(row).toHaveAttribute('data-state','pending');
- if(await row.getAttribute('open')===null)await row.locator('summary').first().click();
+ await openDetails(row);
  await expect(row).toContainText('Local EMS contact');
  for(const box of await row.locator('input[type=checkbox]').all())await box.check();
  await row.locator('input[name=phone]').fill('+9613111111');
- await row.getByRole('button',{name:'Save',exact:true}).click();
+ await row.locator('[data-region=save]').click();
  await expect(row.getByRole('status')).toContainText('Saved.');
  await page.goto('/venues/VN-0032');
  await expect(page.locator('[data-requirement="B7"]')).toHaveAttribute('data-state','complete');

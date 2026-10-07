@@ -96,7 +96,7 @@ export function RequirementForm({ kind, id, instance, canEdit }: { kind: RecordS
       </div>
       {canEdit ? (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginBlockStart: 18 }}>
-          <button type="button" onClick={save} disabled={pending} style={primaryButton}><L en="Save" ar="حفظ" /></button>
+          <button type="button" data-region="save" onClick={save} disabled={pending} style={primaryButton}><L en="Save" ar="حفظ" /></button>
           <span role="status" aria-live="polite" style={{ fontSize: '13.5px', color: status === 'saved' ? 'var(--success)' : status === 'idle' ? 'var(--muted)' : 'var(--bad)' }}>
             {status === 'saved' ? <L en="Saved." ar="حُفظ." /> : null}
             {status === 'conflict' ? (
