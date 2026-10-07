@@ -95,7 +95,8 @@ for (const lang of LANGUAGES) {
       // Everything required is complete; the summary says so.
       await expect(summaries.locator('[data-region="required-count"]')).toContainText(/8 of 8|8 من 8/);
 
-      // The foot of the page: the declaration is what remains; the certification signs it.
+      // The last step: the declaration is what remains; the certification signs it.
+      await openDetails(page.locator('#final-review'));
       const review = page.locator('[data-region="final-review"]');
       await expect(review.locator('[data-remaining="P-C"]')).toBeVisible();
       await expect(review.locator('[data-region="compliance-statements"]')).toHaveCount(0);
