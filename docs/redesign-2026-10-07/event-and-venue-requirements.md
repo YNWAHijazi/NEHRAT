@@ -222,6 +222,13 @@ This is the implementation brief for Claude or Lovable. The supplied documents a
 | Code targets | Reuse working safeguards | Current event document filter and static Final checklist need replacement. Align event submission inputs with per-row readiness. Reuse plan version/approval controls and frozen snapshots. | Do not copy venue logic blindly: it currently makes conditional care documentation a pre-event task and restricts several shared rows to medical editors. |
 | Delivery | Build in stages | Confirm decisions; implement resolver and server gates; prove Level 1 end-to-end; add Level 2/3 shared plan and reviewer; apply venue context; test Arabic/mobile; migrate and deploy. | Tests must assert source meaning and role behavior, not only screenshots or a successful build. |
 
+Two cross-cutting requirements noted by the partner (7 October 2026), without reproducing the product specification:
+
+| Area | Requirement |
+|---|---|
+| Platform owner layer | Event and venue data and dashboards remain accessible through the platform owner's administration; the Ministry retains regulatory decision authority. |
+| AI readiness | The event and venue module exposes the workflow context, permissions, requirement logic and data needed by the user assistant and the Ministry reviewer assistant; the platform-level intelligence assistant remains a platform function. |
+
 ## Sources
 
 Sources and scope

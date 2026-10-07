@@ -25,13 +25,12 @@ import {
   attestationRows,
   attestationsApplyAt,
   can,
-  orderLaneActive,
   outcomeAvailability,
   type Level,
   type MinistryAction,
   type OutcomeBlocker,
 } from '../lib/rules';
-import { addedMeasuresFor, attestationRecordsFor, capabilityChecks, capabilityConfigFor, derivedLevelFor, inspectionsFor, inspectionConductors, ministryConfig } from '../lib/queries';
+import { addedMeasuresFor, attestationRecordsFor, orderLaneOn, capabilityChecks, capabilityConfigFor, derivedLevelFor, inspectionsFor, inspectionConductors, ministryConfig } from '../lib/queries';
 
 async function requireMinistry(action: MinistryAction): Promise<{ id: number; role: string; displayName: string; isDemo: boolean }> {
   const account = await currentAccount();
@@ -62,7 +61,7 @@ export async function outcomeBlockersFor(eventId: string): Promise<OutcomeBlocke
   const blockers: OutcomeBlocker[] = [];
   const level = derivedLevelFor(eventId);
   if (level !== null && attestationsApplyAt(level as Level)) {
-    const rows = attestationRows(level as Level, attestationRecordsFor(eventId));
+    const rows = attestationRows(level as Level, attestationRecordsFor(eventId), orderLaneOn());
     blockers.push(...attestationBlockers(rows));
   }
   for (const m of addedMeasuresFor(eventId)) {
@@ -792,7 +791,7 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
   const kind = String(formData.get('kind') ?? '');
   const level = derivedLevelFor(eventId);
   if (level === null || !attestationsApplyAt(level as Level)) redirect(`/ministry/submissions/${eventId}`);
-  const row = attestationRows(level as Level, attestationRecordsFor(eventId)).find((r) => r.key === itemKey);
+  const row = attestationRows(level as Level, attestationRecordsFor(eventId), orderLaneOn()).find((r) => r.key === itemKey);
   if (!row) redirect(`/ministry/submissions/${eventId}`);
   // Attesting needs a pending item. A DEFICIENCY does not: discovered after
   // attestation, it returns the item to pending -- completion is correctable.
@@ -800,8 +799,10 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
 
   const permitted =
     (row.recorder === 'reviewer' && can(account.role, 'recordAttestation')) ||
-    (row.recorder === 'order' && can(account.role, 'orderVerify') && orderLaneActive());
+    (row.recorder === 'order' && can(account.role, 'orderVerify') && orderLaneOn());
   if (!permitted) redirect('/signin?notice=ministry-permission');
+  // The Order records from its own lane page and returns there.
+  const back = String(formData.get('returnTo') ?? '') === 'order' ? `/ministry/order` : `/ministry/submissions/${eventId}`;
 
   const db = getDb();
   if (kind === 'attest') {
@@ -813,7 +814,7 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
     ).run(eventId, itemKey, account.displayName);
   } else if (kind === 'deficiency') {
     const reason = String(formData.get('reason') ?? '').trim();
-    if (!reason) redirect(`/ministry/submissions/${eventId}?error=deficiency-reason`);
+    if (!reason) redirect(`${back}?error=deficiency-reason${back.endsWith('/order') ? `#event-${eventId}` : ''}`);
     // Stored in the language it was typed; the row renders it in both columns rather
     // than inventing a translation for user-entered text.
     db.prepare(
@@ -826,7 +827,9 @@ export async function recordAttestationAction(eventId: string, formData: FormDat
     ).run(eventId, itemKey, reason, reason, account.displayName);
   }
   revalidatePath(`/ministry/submissions/${eventId}`);
-  const next = attestationRows(level as Level, attestationRecordsFor(eventId)).find(r => r.state === 'pending' && r.recorder === row.recorder);
+  revalidatePath('/ministry/order');
+  if (back.endsWith('/order')) redirect(`${back}#event-${eventId}`);
+  const next = attestationRows(level as Level, attestationRecordsFor(eventId), orderLaneOn()).find(r => r.state === 'pending' && r.recorder === row.recorder);
   redirect(`/ministry/submissions/${eventId}${next ? `#review-${next.key}` : '#review-outcome'}`);
 }
 

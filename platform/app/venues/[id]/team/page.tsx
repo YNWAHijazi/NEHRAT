@@ -3,6 +3,7 @@ import { SectionHeading } from '../../../../components/SectionHeading';
 import { L } from '../../../../components/L';
 import { ownedVenuePage } from '../../../../lib/venue/page';
 import { arabicCount } from '../../../../lib/rules/venue-workflow';
+import { requirementApplies } from '../../../../lib/rules';
 import { inviteVenuePartnerAction, withdrawVenuePartnerAction } from '../../team-actions';
 import { InvitationLinkBlock } from '../../../../components/record/InvitationLinkBlock';
 import { alertBand, noticeBand, fieldInput } from '../../../../components/workspace-styles';
@@ -35,10 +36,12 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
   const { account, w } = await ownedVenuePage(id);
   const q = await searchParams;
   const directorHeld = w.invitations.some((i) => i.kind === 'director' && ['nominated', 'confirmed'].includes(i.status));
-  // A Director is required at Level 3 and optional at Level 2; at Level 1 the section is absent, as on events.
+  // The Director is a Level 3 role (decision D1): below it the section is absent, as on events,
+  // unless an earlier invitation already exists and must stay visible.
+  const directorApplies = w.level !== null && requirementApplies('B3', w.level, 'venue');
   const sections = [
     { kind: 'ems' as const, en: 'EMS agencies', ar: 'جهات الإسعاف' },
-    ...((w.level !== null && w.level >= 2) || w.invitations.some((i) => i.kind === 'director') ? [{ kind: 'director' as const, en: w.level === 3 ? 'Event Medical Director' : w.level === 2 ? 'Medical Director (optional)' : 'Medical Director — not required at Level 1', ar: w.level === 3 ? 'المدير الطبي للفعالية' : w.level === 2 ? 'المدير الطبي (اختياري)' : 'المدير الطبي — غير مطلوب في المستوى 1' }] : []),
+    ...(directorApplies || w.invitations.some((i) => i.kind === 'director') ? [{ kind: 'director' as const, en: directorApplies ? 'Event Medical Director' : 'Medical Director — not required at this level', ar: directorApplies ? 'المدير الطبي للفعالية' : 'المدير الطبي — غير مطلوب في هذا المستوى' }] : []),
   ];
 
   return (
@@ -65,7 +68,7 @@ export default async function VenueTeam({ params, searchParams }: { params: Prom
 
       {sections.map((section, index) => {
         const people = w.invitations.filter((i) => i.kind === section.kind);
-        const canInvite = w.editable && w.level !== null && (section.kind === 'ems' || (w.level >= 2 && !directorHeld));
+        const canInvite = w.editable && w.level !== null && (section.kind === 'ems' || (directorApplies && !directorHeld));
         return (
           <div key={section.kind} data-region={`team-${section.kind}`} style={{ marginBlockEnd: 52 }}>
             <SectionHeading n={index + 1} en={section.en} ar={section.ar} />

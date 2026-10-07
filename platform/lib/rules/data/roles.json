@@ -235,7 +235,7 @@
   },
   "director": {
     "inviteIntro": {
-      "$comment": "No level named: since the revised Annex B (2026-09-29) a Director may be invited at Level 2 as well as Level 3, and the level is on the briefing strip above.",
+      "$comment": "No level named: the Director is a Level 3 role (decision D1, partner review 2026-10-07), and the level is on the briefing strip above.",
       "en": "You have been invited as Medical Director for this event.",
       "ar": "دُعيتم لتولّي دور المدير الطبي لهذه الفعالية."
     },

@@ -2,16 +2,16 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-07",
+  "revision": "2026-10-07.2",
   "decisions": {
-    "D1": { "state": "confirmed", "en": "Medical Director recommended at Level 2, required at Level 3. An uninvited Level 2 Director does not block submission.", "ar": "المدير الطبي موصى به في المستوى 2 ومطلوب في المستوى 3. عدم دعوة مدير طبي في المستوى 2 لا يمنع التقديم." },
+    "D1": { "state": "confirmed", "en": "The Event Medical Director is a Level 3 role. No medical-leadership title exists at Levels 1 and 2 (partner review, 7 October 2026).", "ar": "المدير الطبي للفعالية دور في المستوى 3. لا يوجد أي منصب قيادة طبية في المستويين 1 و2 (مراجعة الشريك، 7 تشرين الأول 2026)." },
     "D2": { "state": "confirmed", "en": "Level 2 records individual required arrangements; the full plan is optional unless the Ministry requests it.", "ar": "يسجّل المستوى 2 الترتيبات المطلوبة كلاً على حدة؛ والخطة الكاملة اختيارية ما لم تطلبها الوزارة." },
-    "D3": { "state": "proposal", "en": "A short coordinated escalation procedure at Level 2; the full major-incident plan at Level 3. Awaiting partner confirmation that the revised matrix replaces the older Level 2 major-incident gate.", "ar": "إجراء تصعيد قصير ومنسّق في المستوى 2؛ وخطة كاملة للحوادث الجسيمة في المستوى 3. بانتظار تأكيد الشريك أن المصفوفة المنقّحة تحلّ محل بوابة الحوادث الجسيمة السابقة للمستوى 2." },
+    "D3": { "state": "confirmed", "en": "A short coordinated escalation procedure at Level 2; the full major-incident plan at Level 3 (confirmed by the partner, 7 October 2026).", "ar": "إجراء تصعيد قصير ومنسّق في المستوى 2؛ وخطة كاملة للحوادث الجسيمة في المستوى 3 (أكّده الشريك في 7 تشرين الأول 2026)." },
     "D4": { "state": "confirmed", "en": "The EMS agency or the Medical Director prepares one shared plan; the named Director approves the current version. Completion by the agency is not approval.", "ar": "تُعدّ جهة الإسعاف أو المدير الطبي خطة مشتركة واحدة؛ ويعتمد المدير الطبي المسمّى النسخة الحالية. إكمال الجهة للخطة ليس اعتماداً." },
-    "D5": { "state": "proposal", "en": "Level 1 first-aid supplies are a confirmation with a location and a responsible person. No kit inventory is invented and oxygen is not required at Level 1.", "ar": "مستلزمات الإسعافات الأولية في المستوى 1 تأكيدٌ مع موقع وشخص مسؤول. لا تُخترع قائمة عدّة ولا يُطلب الأكسجين في المستوى 1." },
-    "D8": { "state": "proposal", "en": "No annual venue aggregate report. Reports stay attached to the event or incident that triggers them.", "ar": "لا تقرير سنوي إجمالي للمواقع. تبقى التقارير مرتبطة بالفعالية أو الحادثة التي تستوجبها." },
-    "D9": { "state": "proposal", "en": "The short questions and completion tests below are proposed; the partner approves them before they stand as blockers. No proof upload unless the source or a recorded Ministry request requires it.", "ar": "الأسئلة القصيرة واختبارات الاكتمال أدناه مقترحة؛ يعتمدها الشريك قبل أن تصبح شروطاً مانعة. لا رفع إثبات ما لم يشترطه المصدر أو طلب وزاري مسجَّل." },
-    "D10": { "state": "proposal", "en": "Patient-care records are not a pre-event organizer blocker at Levels 1 and 2. At Level 3 the plan names the provider's procedure; patient records remain in the clinical system.", "ar": "سجلات رعاية المرضى ليست شرطاً مانعاً على المنظّم قبل الفعالية في المستويين 1 و2. في المستوى 3 تسمّي الخطة إجراء المزوّد؛ وتبقى سجلات المرضى في النظام السريري." }
+    "D5": { "state": "confirmed", "en": "Level 1 first-aid supplies are a confirmation with a location and a responsible person. No kit inventory is invented and oxygen is not required at Level 1.", "ar": "مستلزمات الإسعافات الأولية في المستوى 1 تأكيدٌ مع موقع وشخص مسؤول. لا تُخترع قائمة عدّة ولا يُطلب الأكسجين في المستوى 1." },
+    "D8": { "state": "confirmed", "en": "No annual venue aggregate report. Reports stay attached to the event or incident that triggers them.", "ar": "لا تقرير سنوي إجمالي للمواقع. تبقى التقارير مرتبطة بالفعالية أو الحادثة التي تستوجبها." },
+    "D9": { "state": "confirmed", "en": "The short questions and completion tests are confirmed in principle as prompts that operationalize the requirements; they are not new regulatory requirements (partner review, 7 October 2026). No proof upload unless the source or a recorded Ministry request requires it.", "ar": "الأسئلة القصيرة واختبارات الاكتمال معتمدة مبدئياً بوصفها مطالبات تُفعّل المتطلبات؛ وهي ليست متطلبات تنظيمية جديدة (مراجعة الشريك، 7 تشرين الأول 2026). لا رفع إثبات ما لم يشترطه المصدر أو طلب وزاري مسجَّل." },
+    "D10": { "state": "confirmed", "en": "Patient-care records are not a pre-event organizer blocker at Levels 1 and 2. At Level 3 the plan names the provider's procedure; patient records remain in the clinical system.", "ar": "سجلات رعاية المرضى ليست شرطاً مانعاً على المنظّم قبل الفعالية في المستويين 1 و2. في المستوى 3 تسمّي الخطة إجراء المزوّد؛ وتبقى سجلات المرضى في النظام السريري." }
   },
   "rows": [
     {
@@ -35,7 +35,7 @@
       "promptEn": "Invite the physician once. Their name, contact and licence come from the accepted invitation.", "promptAr": "ادعوا الطبيب مرة واحدة. يُؤخذ اسمه وبيانات الاتصال به ورقم ترخيصه من الدعوة المقبولة.",
       "levels": {
         "1": { "obligation": "notRequired" },
-        "2": { "obligation": "recommended", "authors": ["organizer"], "completion": "director" },
+        "2": { "obligation": "notRequired" },
         "3": { "obligation": "required", "authors": ["organizer"], "completion": "director", "linkedPlan": ["P02"] }
       }
     },
@@ -69,7 +69,7 @@
       ],
       "levels": {
         "1": { "obligation": "notRequired" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P03"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P03"] },
         "3": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P03"] }
       }
     },
@@ -85,7 +85,7 @@
       ],
       "levels": {
         "1": { "obligation": "notRequired" },
-        "2": { "obligation": "recommended", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P04"] },
+        "2": { "obligation": "recommended", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P04"] },
         "3": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P04"] }
       }
     },
@@ -136,7 +136,7 @@
             { "key": "access", "type": "text", "labelEn": "How can it be reached?", "labelAr": "كيف يمكن الوصول إليه؟", "showWhen": { "field": "aed", "equals": "yes" } }
           ]
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P05", "P06"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P05", "P06"] },
         "3": {
           "obligation": "inPlan", "authors": ["ems", "director"], "completion": "fields", "linkedPlan": ["P05", "P06"],
           "promptEn": "Describe the CPR and AED response for the whole event area.", "promptAr": "صفوا الاستجابة بالإنعاش القلبي الرئوي وجهاز AED لكامل منطقة الفعالية.",
@@ -170,7 +170,7 @@
             { "key": "list", "type": "textarea", "optional": true, "labelEn": "List the supplies (optional)", "labelAr": "قائمة المستلزمات (اختياري)" }
           ]
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P07"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P07"] },
         "3": { "obligation": "inPlan", "authors": ["ems", "director"], "completion": "fields", "linkedPlan": ["P07"] }
       }
     },
@@ -198,7 +198,7 @@
       ],
       "levels": {
         "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P09"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P09"] },
         "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P09"] }
       }
     },
@@ -214,7 +214,7 @@
       ],
       "levels": {
         "1": { "obligation": "notRequired" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P11"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P11"] },
         "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P11"] }
       }
     },
@@ -229,7 +229,7 @@
       ],
       "levels": {
         "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P10"] },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P10"] },
         "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P10"] }
       }
     },
@@ -268,7 +268,7 @@
             { "key": "guides", "type": "text", "labelEn": "Who guides responders and decides whether to pause the event?", "labelAr": "من يرشد المستجيبين ويقرّر إيقاف الفعالية مؤقتاً؟", "venueLabelEn": "Who guides responders and decides whether to pause the activity?", "venueLabelAr": "من يرشد المستجيبين ويقرّر إيقاف النشاط مؤقتاً؟" }
           ]
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P12"], "infoEn": "Written steps coordinated with the participating providers (proposal D3). The full major-incident plan applies at Level 3.", "infoAr": "خطوات مكتوبة منسّقة مع المزوّدين المشاركين (المقترح D3). تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3." },
+        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P12"], "infoEn": "Written steps coordinated with the participating providers (decision D3). The full major-incident plan applies at Level 3.", "infoAr": "خطوات مكتوبة منسّقة مع المزوّدين المشاركين (القرار D3). تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3." },
         "3": {
           "obligation": "inPlan", "authors": ["ems", "director"], "completion": "majorIncident", "linkedPlan": ["P12"], "fields": [],
           "promptEn": "Complete the major-incident section of the medical plan.", "promptAr": "أكملوا قسم الحوادث الجسيمة في الخطة الطبية."
@@ -295,7 +295,7 @@
       "key": "B18", "n": 18, "service": "both",
       "labelEn": "Patient-care records", "labelAr": "سجلات رعاية المرضى",
       "promptEn": "If care is given, the provider records it in its own clinical system.", "promptAr": "إذا قُدّمت رعاية، يوثّقها المزوّد في نظامه السريري.",
-      "infoEn": "No patient-identifying data is entered on this platform (proposal D10).", "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (المقترح D10).",
+      "infoEn": "No patient-identifying data is entered on this platform (decision D10).", "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10).",
       "fields": [
         { "key": "provider", "type": "text", "labelEn": "Which provider will keep care records?", "labelAr": "أي مزوّد سيحتفظ بسجلات الرعاية؟" },
         { "key": "method", "type": "textarea", "labelEn": "How will it record care and hand over patients? Do not enter patient details.", "labelAr": "كيف يوثّق الرعاية ويسلّم المرضى؟ لا تدخلوا بيانات المرضى." }
@@ -312,7 +312,7 @@
       "promptEn": "One shared plan in short sections. Details, contacts and operational answers are reused automatically.", "promptAr": "خطة واحدة مشتركة في أقسام قصيرة. تُعاد تلقائياً بيانات التفاصيل وجهات الاتصال والإجابات التشغيلية.",
       "levels": {
         "1": { "obligation": "notRequired" },
-        "2": { "obligation": "recommended", "authors": ["ems", "director"], "completion": "plan", "infoEn": "Optional at Level 2 unless the Ministry requests it (decision D2). A completed plan is readable without Director approval.", "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة (القرار D2). الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي." },
+        "2": { "obligation": "recommended", "authors": ["ems"], "completion": "plan", "infoEn": "Optional at Level 2 unless the Ministry requests it (decision D2). A completed plan is readable without Director approval.", "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة (القرار D2). الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي." },
         "3": { "obligation": "required", "authors": ["ems", "director"], "approver": "director", "completion": "planApproved", "infoEn": "The EMS agency or the Medical Director prepares it; the named Medical Director approves the current version (decision D4). A later change reopens the approval.", "infoAr": "تُعدّها جهة الإسعاف أو المدير الطبي؛ ويعتمد المدير الطبي المسمّى النسخة الحالية (القرار D4). أي تعديل لاحق يعيد فتح الاعتماد." }
       }
     },
@@ -357,7 +357,14 @@
       "file": { "labelEn": "Map file", "labelAr": "ملف الخريطة" },
       "levels": {
         "1": { "obligation": "ifRequested", "authors": ["organizer"], "completion": "file" },
-        "2": { "obligation": "required", "authors": ["organizer"], "completion": "file" },
+        "2": { "obligation": "requiredWhereApplicable", "authors": ["organizer"], "completion": "fileUnlessNotApplicable",
+          "infoEn": "Required where applicable (partner review, 7 October 2026): upload the map, or record that no map applies and why. The medical deployment map is a Level 3 document.",
+          "infoAr": "مطلوبة عند الانطباق (مراجعة الشريك، 7 تشرين الأول 2026): ارفعوا الخريطة، أو سجّلوا أن لا خريطة تنطبق مع ذكر السبب. خريطة الانتشار الطبي مستند من المستوى 3.",
+          "fields": [
+            { "key": "applicable", "type": "choice", "labelEn": "Does a site or route map apply?", "labelAr": "هل تنطبق خريطة موقع أو مسار؟", "venueLabelEn": "Does a site map apply?", "venueLabelAr": "هل تنطبق خريطة موقع؟",
+              "options": [ { "value": "yes", "en": "Yes — the map is uploaded below", "ar": "نعم — الخريطة مرفوعة أدناه" }, { "value": "no", "en": "No — no map applies", "ar": "لا — لا تنطبق أي خريطة" } ] },
+            { "key": "reason", "type": "textarea", "labelEn": "Why no map applies", "labelAr": "سبب عدم انطباق أي خريطة", "showWhen": { "field": "applicable", "equals": "no" } }
+          ] },
         "3": { "obligation": "required", "authors": ["organizer"], "completion": "file" }
       }
     },
@@ -366,11 +373,11 @@
       "labelEn": "Medical deployment map", "labelAr": "خريطة الانتشار الطبي",
       "venueLabelEn": "Routine deployment layout", "venueLabelAr": "مخطط الانتشار الاعتيادي",
       "promptEn": "Show medical teams, treatment points, AEDs, ambulance points and patient routes.", "promptAr": "أظهِروا الفرق الطبية ونقاط العلاج وأجهزة AED ونقاط سيارات الإسعاف ومسارات المرضى.",
-      "infoEn": "Uploaded by the EMS agency or the Medical Director and referenced in the plan; the organizer reads it.", "infoAr": "ترفعها جهة الإسعاف أو المدير الطبي ويُشار إليها في الخطة؛ ويقرأها المنظّم.",
+      "infoEn": "Uploaded by the EMS agency, or at Level 3 the Medical Director, and referenced in the plan; the organizer reads it.", "infoAr": "ترفعها جهة الإسعاف، أو المدير الطبي في المستوى 3، ويُشار إليها في الخطة؛ ويقرأها المنظّم.",
       "file": { "labelEn": "Deployment map file", "labelAr": "ملف خريطة الانتشار" },
       "levels": {
-        "1": { "obligation": "ifRequested", "authors": ["ems", "director"], "completion": "file" },
-        "2": { "obligation": "ifRequested", "authors": ["ems", "director"], "completion": "file" },
+        "1": { "obligation": "ifRequested", "authors": ["ems"], "completion": "file" },
+        "2": { "obligation": "ifRequested", "authors": ["ems"], "completion": "file" },
         "3": { "obligation": "required", "authors": ["ems", "director"], "completion": "file", "linkedPlan": ["P03"] }
       }
     },
@@ -442,6 +449,7 @@
   },
   "obligations": {
     "required": { "en": "Required", "ar": "مطلوب" },
+    "requiredWhereApplicable": { "en": "Required where applicable", "ar": "مطلوب عند الانطباق" },
     "inPlan": { "en": "Required, in the medical plan", "ar": "مطلوب، ضمن الخطة الطبية" },
     "recommended": { "en": "Recommended", "ar": "موصى به" },
     "perAgency": { "en": "Required from each agency", "ar": "مطلوب من كل جهة" },
@@ -474,6 +482,7 @@
     "responsibilityEn": "Source responsibility", "responsibilityAr": "المسؤولية بحسب المصدر",
     "planSectionEn": "Plan section {n}", "planSectionAr": "قسم الخطة {n}",
     "requestedEn": "Requested by the Ministry", "requestedAr": "بطلب من الوزارة",
+    "notApplicableEn": "Recorded as not applicable, with the reason", "notApplicableAr": "سُجّل أنه غير منطبق، مع السبب",
     "waivedEn": "Not required for this filing: the requirement took effect after it was filed. The Ministry asks for it through revision.", "waivedAr": "غير مطلوب لهذا التقديم: دخل المتطلب حيّز التنفيذ بعد التقديم. وتطلبه الوزارة عبر التعديل.",
     "assessmentIncompleteEn": "The assessment is not complete; no level is derived", "assessmentIncompleteAr": "التقييم غير مكتمل؛ لم يُستنتج مستوى"
   }

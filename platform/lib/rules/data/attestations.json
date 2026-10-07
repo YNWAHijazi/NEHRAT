@@ -104,5 +104,34 @@
   "blocker": {
     "prefixEn": "Review pending",
     "prefixAr": "بانتظار المراجعة"
+  },
+  "directorVerification": {
+    "$comment": "The Level 3 Director row's own state once a Director is identified (partner review, 2026-10-07): credential information, then verification by the Order of Physicians where its lane is active, else by the Ministry; distinct from the Ministry's outcome. Shown to the organizer on the row and to the Order on its lane page.",
+    "awaitingEn": "Credential information follows the Director's acceptance.",
+    "awaitingAr": "تُستكمل بيانات الاعتماد بعد قبول المدير الطبي.",
+    "pendingEn": "Credential information received. Verification is recorded by the {authority} during review; it is distinct from the Ministry's outcome.",
+    "pendingAr": "وردت بيانات الاعتماد. يسجّل التحقق {authority} أثناء المراجعة؛ وهو مستقل عن نتيجة الوزارة.",
+    "verifiedEn": "Credential verified by the {authority} · {date}",
+    "verifiedAr": "تم التحقق من الاعتماد من قِبل {authority} · {date}",
+    "laneTitleEn": "Level 3 submissions designated to the Order",
+    "laneTitleAr": "طلبات المستوى 3 المسندة إلى النقابة",
+    "laneEmptyEn": "No Level 3 submission is designated to the Order at present.",
+    "laneEmptyAr": "لا يوجد حالياً أي طلب من المستوى 3 مسند إلى النقابة.",
+    "directorEn": "Event Medical Director",
+    "directorAr": "المدير الطبي للفعالية",
+    "noDirectorEn": "No Medical Director has accepted yet.",
+    "noDirectorAr": "لم يقبل أي مدير طبي بعد.",
+    "licenceEn": "Licence",
+    "licenceAr": "الترخيص",
+    "licenceMissingEn": "Licence number not yet recorded by the physician",
+    "licenceMissingAr": "لم يسجّل الطبيب رقم الترخيص بعد",
+    "acceptedEn": "Accepted",
+    "acceptedAr": "قُبلت الدعوة",
+    "planEn": "Clinical content of the plan — sections 3 to 9 and 11, as filed",
+    "planAr": "المحتوى السريري للخطة — الأقسام 3 إلى 9 و11، كما قُدّمت",
+    "planMissingEn": "The filed plan is not available in this form for this submission.",
+    "planMissingAr": "الخطة المقدَّمة غير متاحة بهذا الشكل لهذا الطلب.",
+    "readOnlyEn": "The Order records its two review items here. Business details and facility records are not shared, and the Ministry's outcome is recorded by the Ministry alone.",
+    "readOnlyAr": "تسجّل النقابة هنا بندي المراجعة الخاصين بها. لا تُشارك البيانات التجارية ولا سجلات المرافق، وتسجّل الوزارة وحدها نتيجتها."
   }
 }

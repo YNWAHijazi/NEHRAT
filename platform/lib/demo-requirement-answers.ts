@@ -74,9 +74,11 @@ export function seedRecordAnswers(db: DatabaseSync, kind: 'event' | 'venue', id:
     if (values) write(db, kind, id, inst.key, values, author, names[author], at);
   }
   if (level >= 2 && (!only || only.includes('ems') || only.includes('director'))) {
+    // The plan's own text is the medical team's: the agency at Level 2, the Director at Level 3 (D1).
+    const author = level === 3 ? 'director' : 'ems';
     for (const key of planTextKeys()) {
       if (key.startsWith('M') && level < 3) continue;
-      write(db, kind, id, key, { text: SAMPLE['text']! }, 'director', names.director, at);
+      write(db, kind, id, key, { text: SAMPLE['text']! }, author, names[author], at);
     }
   }
 }

@@ -11,6 +11,7 @@ import {
   mayAuthor,
   planTextKeys,
   REQUIREMENT_DECISIONS,
+  requirementApplies,
   requirementBlockers,
   requirementSummary,
   resolvePlan,
@@ -101,10 +102,12 @@ describe('the catalogue', () => {
     }
   });
 
-  it('records the owner decisions: D1, D2, D4 confirmed; D3, D5, D8, D9, D10 proposals', () => {
+  it('records the decisions as confirmed by the owner and the partner (7 October 2026); none is open', () => {
     const d = REQUIREMENT_DECISIONS;
-    expect(['D1', 'D2', 'D4'].map((k) => d[k]!.state)).toEqual(['confirmed', 'confirmed', 'confirmed']);
-    expect(['D3', 'D5', 'D8', 'D9', 'D10'].map((k) => d[k]!.state)).toEqual(['proposal', 'proposal', 'proposal', 'proposal', 'proposal']);
+    expect(['D1', 'D2', 'D3', 'D4', 'D5', 'D8', 'D9', 'D10'].map((k) => d[k]!.state)).toEqual(Array(8).fill('confirmed'));
+    expect(Object.values(d).some((x) => x.state === 'proposal')).toBe(false);
+    // D1 is the partner's correction: the Director is a Level 3 role.
+    expect(d['D1']!.en).toContain('Level 3 role');
     // D6 and D7 stay as they work today and are deliberately not in the catalogue.
     expect(d['D6']).toBeUndefined();
     expect(d['D7']).toBeUndefined();
@@ -192,18 +195,49 @@ describe('Level 1: the organizer-only path (brief item 8)', () => {
 describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)', () => {
   const rows = resolveRequirements(facts(2));
 
-  it('requires the eleven readiness and admin rows plus the map and declaration; treatment point, Director and plan are recommended', () => {
+  it('requires the eleven readiness and admin rows plus the map and declaration; treatment point and plan are recommended', () => {
     expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-A', 'P-M', 'P-C']);
-    expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['B3', 'B6', 'B2']);
+    expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['B6', 'B2']);
   });
 
-  it('D1: an uninvited Director does not block; a nominated one is waiting; a confirmed one completes', () => {
-    expect(byKey(rows, 'B3').state).toBe('notAdded');
-    expect(byKey(rows, 'B3').blocks).toBe(false);
-    const nominated = resolveRequirements(facts(2, { director: { token: 't', name: 'Dr A', status: 'nominated' } }));
-    expect(byKey(nominated, 'B3').state).toBe('waiting');
-    const confirmed = resolveRequirements(facts(2, { director: { token: 't', name: 'Dr A', status: 'confirmed' } }));
-    expect(byKey(confirmed, 'B3').state).toBe('complete');
+  it('D1: no Director below Level 3 -- the row is absent, nobody may invite one, and no Level 2 row names a Director author', () => {
+    expect(rows.find((r) => r.key === 'B3')).toBeUndefined();
+    expect(requirementApplies('B3', 2, 'event')).toBe(false);
+    expect(requirementApplies('B3', 2, 'venue')).toBe(false);
+    expect(requirementApplies('B3', 3, 'event')).toBe(true);
+    expect(rows.every((r) => !r.authors.includes('director'))).toBe(true);
+    expect(authorsFor('P13', 2, 'event')).toEqual(['ems']);
+    expect(authorsFor('P13', 3, 'event')).toEqual(['ems', 'director']);
+    expect(authorsFor('P13', 1, 'event')).toEqual([]);
+    // A confirmed Director on a Level 2 record (legacy data) changes nothing: the row stays absent.
+    const legacy = resolveRequirements(facts(2, { director: { token: 't', name: 'Dr A', status: 'confirmed' } }));
+    expect(legacy.find((r) => r.key === 'B3')).toBeUndefined();
+  });
+
+  it('the site or route map is required where applicable: a file, or a recorded "does not apply" with its reason, discharges it', () => {
+    const map = byKey(rows, 'P-M');
+    expect(map.obligation).toBe('requiredWhereApplicable');
+    expect(map.obligationEn).toBe('Required where applicable');
+    expect(map.group).toBe('required');
+    expect(map.state).toBe('pending');
+    expect(map.blocks).toBe(true);
+    expect(map.missing).toEqual(['applicable']);
+    const uploaded = byKey(resolveRequirements(facts(2, { files: { 'P-M': { fileName: 'route.pdf', savedAt: '2026-10-07' } } })), 'P-M');
+    expect(uploaded.state).toBe('complete');
+    expect(uploaded.detailEn).toBeNull();
+    const yesNoFile = byKey(resolveRequirements(facts(2, { answers: { 'P-M': answer({ applicable: 'yes' }) } })), 'P-M');
+    expect(yesNoFile.state).toBe('pending');
+    expect(yesNoFile.blocks).toBe(true);
+    const noWithoutReason = byKey(resolveRequirements(facts(2, { answers: { 'P-M': answer({ applicable: 'no' }) } })), 'P-M');
+    expect(noWithoutReason.state).toBe('pending');
+    expect(noWithoutReason.missing).toEqual(['reason']);
+    const notApplicable = byKey(resolveRequirements(facts(2, { answers: { 'P-M': answer({ applicable: 'no', reason: 'A single hall with one entrance; no route.' }) } })), 'P-M');
+    expect(notApplicable.state).toBe('complete');
+    expect(notApplicable.blocks).toBe(false);
+    expect(notApplicable.detailEn).toContain('not applicable');
+    // Level 3 keeps the plain requirement: a file, nothing else.
+    expect(byKey(resolveRequirements(facts(3)), 'P-M').obligation).toBe('required');
+    expect(fieldsFor('P-M', 3, 'event')).toEqual([]);
   });
 
   it('D2: the plan is optional unless the Ministry requests it; a request makes it required', () => {
@@ -246,11 +280,11 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
 
   it('shared rows take the first authorized completion from either side (brief item 11)', () => {
     for (const key of ['B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16']) {
-      expect(authorsFor(key, 2, 'event'), key).toEqual(['organizer', 'ems', 'director']);
+      expect(authorsFor(key, 2, 'event'), key).toEqual(['organizer', 'ems']);
     }
     expect(authorsFor('B10', 2, 'event')).toEqual(['organizer']);
     expect(authorsFor('B7', 2, 'event')).toEqual(['organizer', 'ems']);
-    expect(authorsFor('B2', 2, 'event')).toEqual(['ems', 'director']);
+    expect(authorsFor('B2', 2, 'event')).toEqual(['ems']);
     expect(mayAuthor(byKey(rows, 'B2'), 'organizer')).toBe(false);
   });
 

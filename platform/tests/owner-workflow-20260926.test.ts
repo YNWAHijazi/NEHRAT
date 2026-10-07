@@ -300,7 +300,9 @@ test("removed medical partners and lower-level organizers cannot edit plans",asy
 
 test('plan responsibility and organizer next steps follow the level',()=>{
  for(const level of [1,2,3]) expect(canPreparePlan(level,'organizer')).toBe(false);
- for(const role of ['ems','director'] as const){expect(canPreparePlan(1,role)).toBe(false);expect(canPreparePlan(2,role)).toBe(true);}
+ for(const role of ['ems','director'] as const)expect(canPreparePlan(1,role)).toBe(false);
+ // D1: the EMS agency prepares the Level 2 plan; there is no Director below Level 3.
+ expect(canPreparePlan(2,'ems')).toBe(true);expect(canPreparePlan(2,'director')).toBe(false);
  expect(canPreparePlan(3,'organizer')).toBe(false);expect(canPreparePlan(3,'ems')).toBe(true);expect(canPreparePlan(3,'director')).toBe(true);
  // The plan is the medical team's work at both levels: the organizer's next step waits on them, never asks them to write it.
  const base={service:'event' as const,editable:true,filed:false,returned:false,organizationPending:false};

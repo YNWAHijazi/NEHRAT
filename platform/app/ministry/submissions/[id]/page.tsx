@@ -19,6 +19,7 @@ import {
   addedMeasuresFor,
   attachmentsForReview,
   attestationRecordsFor,
+  orderLaneOn,
   submissionVersionsFor,
   planForReview,
   determinationsFor,
@@ -90,7 +91,7 @@ export default async function SubmissionReviewPage({
   // where the screen shows the explicit empty state rather than nothing.
   const attRows =
     review.level !== null && attestationsApplyAt(review.level as Level)
-      ? attestationRows(review.level as Level, attestationRecordsFor(id))
+      ? attestationRows(review.level as Level, attestationRecordsFor(id), orderLaneOn())
       : [];
   const attSummary = attRows.length > 0 ? attestationSummary(attRows) : null;
   const AP = ATTESTATIONS_CONTENT.panel;

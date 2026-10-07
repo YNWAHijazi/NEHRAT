@@ -5,7 +5,7 @@ import { AdminTabs } from '../../../../components/AdminTabs';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
-import { administeredAccounts, ministryConfig } from '../../../../lib/queries';
+import { administeredAccounts, orderLaneOn } from '../../../../lib/queries';
 import { addMinistryUserAction, changeUserRoleAction, reissueActivationAction, setUserSuspensionAction } from '../../../ministry-actions';
 import {
   ACCOUNTS_CONTENT,
@@ -16,7 +16,6 @@ import {
   bilingualMap,
   consequencesOf,
   isPending,
-  orderLaneActive,
   permissionMatrix,
 } from '../../../../lib/rules';
 
@@ -56,8 +55,7 @@ export default async function UsersPage({
   const segments = bilingualMap(ACCOUNTS_CONSOLE.segments);
   const segmentCounts = new Map<string, number>();
   for (const u of all) segmentCounts.set(segmentOf(u.role), (segmentCounts.get(segmentOf(u.role)) ?? 0) + 1);
-  const laneConfig = ministryConfig().get('orderLane');
-  const laneActive = laneConfig ? laneConfig.value === 'on' : orderLaneActive();
+  const laneActive = orderLaneOn();
   const matrix = permissionMatrix();
   const roleLabels = bilingualMap(MINISTRY_CONTENT.roleLabels);
   const matrixRoles = ['reviewer', 'ministry_admin', 'order', 'platform_owner'];

@@ -19,8 +19,9 @@ async function saveSection(page: Page, key: string, text: string) {
 test('Level 2 plan is optional, the EMS agency writes it, and the organizer reads it on the same record', async ({ page, browser, baseURL }) => {
   await signInAs(page, 'test_organizer');
   await page.goto('/events/EV-0418');
-  // D1: a Level 2 Medical Director is recommended, never a blocker. D2: so is the plan.
-  await expect(page.locator('[data-requirement="B3"]')).toHaveAttribute('data-group', 'recommended');
+  await expect(page.locator('[data-region="record-stepper"]')).toBeVisible();
+  // D1: there is no Medical Director row at Level 2. D2: the plan is recommended, never a blocker.
+  await expect(page.locator('[data-requirement="B3"]')).toHaveCount(0);
   const card = page.locator('[data-requirement="B2"]');
   await expect(card).toHaveAttribute('data-group', 'recommended');
   await openDetails(page.locator('[data-requirement="B2"]'));

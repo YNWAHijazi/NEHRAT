@@ -31,6 +31,8 @@ export interface RecordRequirementsProps {
   final?: ReactNode;
   /** The printable requirement list, offered from the step list. */
   listHref?: string | null;
+  /** Level 3 events: the Director's credential-verification state, under the Director row. */
+  directorVerification?: { en: string; ar: string } | null;
 }
 
 /**
@@ -40,7 +42,7 @@ export interface RecordRequirementsProps {
  * and venues, organizer and medical parties, all read the same instances; only who may
  * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
@@ -51,7 +53,16 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     const canEdit = canEditInst(inst);
     switch (inst.key) {
       case 'B3':
-        return <PartyBlock kind={service} id={id} parties={record.parties} invite="director" canInvite={canInvite} />;
+        return (
+          <>
+            <PartyBlock kind={service} id={id} parties={record.parties} invite="director" canInvite={canInvite} />
+            {directorVerification ? (
+              <p data-region="director-verification" style={{ margin: '0 0 8px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+                <L en={directorVerification.en} ar={directorVerification.ar} />
+              </p>
+            ) : null}
+          </>
+        );
       case 'B20':
         return (
           <>

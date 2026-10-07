@@ -9,13 +9,14 @@ import {venuePackageFor,ensureVenuePackage} from '../../lib/venue/workspace';
 import {sendLinkEmail} from '../../lib/email';
 import {verifiedSignIn,validPhone} from '../../lib/email-verification';
 import {checkPasswordPolicy,hashPassword} from '../../lib/password';
+import {requirementApplies} from '../../lib/rules';
 export async function inviteVenuePartnerAction(id:string,form:FormData) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();
  if(!w.editable||!w.level)redirect(`/venues/${id}/team`);
  const kind=String(form.get('kind')),name=String(form.get('name')??'').trim(),email=String(form.get('email')??'').trim().toLowerCase();
  if(!['ems','director'].includes(kind)||!name||!/^\S+@\S+\.\S+$/.test(email))redirect(`/venues/${id}/team?error=details`);
- // A Director applies from Level 2 (optional) and is required at Level 3; at Level 1 there is no Director to invite.
- if(kind==='director'&&w.level<2)redirect(`/venues/${id}/team`);
+ // The Director is a Level 3 role (decision D1): below it there is no Director to invite.
+ if(kind==='director'&&!requirementApplies('B3',w.level,'venue'))redirect(`/venues/${id}/team`);
  if(venueInvitations(id).some(i=>['nominated','confirmed'].includes(i.status)&&(i.kind===kind&&(i.email===email||kind==='director'))))redirect(`/venues/${id}/team?error=duplicate`);
  const token=randomBytes(24).toString('hex');const db=getDb();
  db.prepare('INSERT INTO venue_invitations(token,venue_id,kind,name,email,expires_at) VALUES(?,?,?,?,?,?)').run(token,id,kind,name,email,new Date(Date.now()+30*86400000).toISOString());

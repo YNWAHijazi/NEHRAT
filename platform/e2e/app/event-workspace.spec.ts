@@ -20,18 +20,19 @@ for (const lang of ['en', 'ar'] as const) {
       await expect(header.locator('bdi[lang="ar"]:visible')).toBeVisible();
       await expect(header.locator('[data-region="record-status"]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-      // Level 2: the site map is required; the plan and the Medical Director are recommended (D1, D2).
+      // Level 2: the site map is required where applicable; the plan is recommended (D2); no Director row (D1).
       const summaries = page.locator('[data-region="requirement-summaries"]');
       await expect(summaries.locator('[data-summary="required"] [data-summary-row="P-M"]')).toBeVisible();
       await expect(summaries.locator('[data-summary="recommended"] [data-summary-row="B2"]')).toBeVisible();
-      await expect(summaries.locator('[data-summary="recommended"] [data-summary-row="B3"]')).toBeVisible();
+      await expect(summaries.locator('[data-summary-row="B3"]')).toHaveCount(0);
       await expect(summaries.locator('[data-summary="required"] [data-summary-row="B2"]')).toHaveCount(0);
-      await expect(page.locator('[data-requirement="B3"]')).toHaveAttribute('data-group', 'recommended');
+      await expect(page.locator('[data-requirement="B3"]')).toHaveCount(0);
       await expect(page.locator('[data-region="final-review"] [data-region="submit-button"]')).toBeDisabled();
       await page.screenshot({ path: `/tmp/moph-workspace-${lang}-${width}.png`, fullPage: true });
       await page.goto('/events/EV-0418/requirements');
       await expect(page.locator('[data-region="requirement-list"] [data-list-row="P-M"]')).toBeVisible();
-      for (const [path, hash] of [['/submit', '#final-review'], ['/medical-team?tab=director', '#req-B3'], ['/medical-team?tab=ems', '#req-B7']] as const) {
+      await expect(page.locator('[data-region="requirement-list"] [data-list-row="P-M"]')).toContainText('Required where applicable');
+      for (const [path, hash] of [['/submit', '#final-review'], ['/medical-team?tab=director', '#req-B7'], ['/medical-team?tab=ems', '#req-B7']] as const) {
         await page.goto(`/events/EV-0418${path}`);
         await expect(page).toHaveURL(new RegExp(`/events/EV-0418${hash}$`));
         await expect(header).toBeVisible();

@@ -16,14 +16,14 @@ describe('the public register reports a filed, undecided record as filed', () =>
   });
 });
 
-describe('the Event Medical Director applies from Level 2', () => {
-  it('is absent at Level 1, recommended at 2, required at 3 -- from the catalogue, not a flag', () => {
+describe('the Event Medical Director is a Level 3 role (decision D1, partner review 2026-10-07)', () => {
+  it('is absent at Levels 1 and 2, required at 3 -- from the catalogue, not a flag', () => {
     const director = (level: 1 | 2 | 3) => resolveRequirements({
       service: 'event', level, answers: {}, files: {}, organizerContact: null, assessmentComplete: true, ems: [], director: null,
       planApprovalCurrent: false, declaration: { statementsComplete: false, certificationComplete: false }, requested: [],
     }).find((r) => r.key === 'B3');
     expect(director(1)).toBeUndefined();
-    expect(director(2)?.group).toBe('recommended');
+    expect(director(2)).toBeUndefined();
     expect(director(3)?.group).toBe('required');
   });
 });

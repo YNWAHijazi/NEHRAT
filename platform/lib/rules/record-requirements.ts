@@ -24,7 +24,7 @@ import type { Level } from './types';
 export type RecordService = 'event' | 'venue';
 export type AuthorRole = 'organizer' | 'ems' | 'director';
 export type Obligation =
-  | 'required' | 'inPlan' | 'recommended' | 'perAgency'
+  | 'required' | 'requiredWhereApplicable' | 'inPlan' | 'recommended' | 'perAgency'
   | 'afterEvent' | 'whenCare' | 'ifIncident' | 'ifRequested' | 'notRequired';
 export type RequirementGroup = 'required' | 'recommended' | 'later';
 /** Where the page shows it: the readiness rows, the compact assessment block, or the final declaration. */
@@ -247,12 +247,21 @@ export function fieldsFor(key: string, level: Level, service: RecordService): Fi
 
 /** The authors allowed on a key at a level, for the save action's role check. */
 export function authorsFor(key: string, level: Level, service: RecordService): AuthorRole[] {
-  if (planTextKeys().includes(key)) return ['ems', 'director'];
+  // The plan is the medical team's: the EMS agency at Level 2, with the Director at Level 3
+  // (decision D1: no Director below Level 3). No plan at Level 1.
+  if (planTextKeys().includes(key)) return level === 3 ? ['ems', 'director'] : level === 2 ? ['ems'] : [];
   if (key === FACILITY_REFERENCE_KEY) return service === 'event' && level >= 2 ? ['organizer'] : [];
   const row = catalogueRow(key);
   const cell = row?.levels[String(level) as '1' | '2' | '3'];
   if (!row || !cell || !appliesAt(row, cell, service, [])) return [];
   return [...(cell.authors ?? [])];
+}
+
+/** Whether a row exists at a level and service at all -- an absent row is never shown and never invited for. */
+export function requirementApplies(key: string, level: Level, service: RecordService): boolean {
+  const row = catalogueRow(key);
+  const cell = row?.levels[String(level) as '1' | '2' | '3'];
+  return Boolean(row && cell && appliesAt(row, cell, service, []));
 }
 
 function appliesAt(row: CatalogueRow, cell: CatalogueCell, service: RecordService, requested: readonly string[]): boolean {
@@ -404,6 +413,15 @@ function instance(
       }
       case 'file':
         state = file?.present ? 'complete' : group === 'recommended' ? 'notAdded' : 'pending';
+        break;
+      case 'fileUnlessNotApplicable':
+        // Required where applicable (partner review, 2026-10-07): the file discharges the row;
+        // so does recording that none applies, with the reason. Neither, and the row stays open.
+        if (file?.present) state = 'complete';
+        else {
+          missing = missingFields(fields, values);
+          if (values['applicable'] === 'no' && missing.length === 0) { state = 'complete'; detailEn = copy.notApplicableEn; detailAr = copy.notApplicableAr; }
+        }
         break;
       case 'fieldsAndFile':
         missing = missingFields(fields, values);
@@ -606,9 +624,11 @@ export function recordNextStep(input: {
       buttonEn: `Open ${first.labelEn}`, buttonAr: `فتح ${first.labelAr}` };
   }
   if (theirs.length > 0) {
+    const withDirector = theirs.some((b) => b.authors.includes('director'));
     return { kind: 'waitingOnOthers', href: `#${theirs[0]!.anchor}`, tone: 'accent',
       titleEn: 'Medical items pending', titleAr: 'البنود الطبية قيد الإنجاز',
-      bodyEn: 'Your EMS agency or Medical Director completes the remaining items on this page.', bodyAr: 'تستكمل جهة الإسعاف أو المدير الطبي البنود المتبقية في هذه الصفحة.',
+      bodyEn: withDirector ? 'Your EMS agency or Medical Director completes the remaining items on this page.' : 'Your EMS agency completes the remaining items on this page.',
+      bodyAr: withDirector ? 'تستكمل جهة الإسعاف أو المدير الطبي البنود المتبقية في هذه الصفحة.' : 'تستكمل جهة الإسعاف البنود المتبقية في هذه الصفحة.',
       buttonEn: 'View the items', buttonAr: 'عرض البنود' };
   }
   if (waiting.length > 0) {

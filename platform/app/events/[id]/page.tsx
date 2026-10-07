@@ -14,7 +14,7 @@ import { EmailDeliveryNotice } from '../../../components/EmailDeliveryNotice';
 import type { RailStage } from '../../../lib/rules/rail';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { DirectorEventView } from './DirectorEventView';
-import { invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFacts, postEventReportFor, standingDeterminationFor, submissionFor, venueRouteFor, revisionOpenFor } from '../../../lib/queries';
+import { attestationRecordsFor, orderLaneOn, invitationForEvent, governanceFor, nominationBriefing, nomineePlanSlice, postEventReportFacts, postEventReportFor, standingDeterminationFor, submissionFor, venueRouteFor, revisionOpenFor } from '../../../lib/queries';
 import { submissionGateFor } from '../../../lib/submission-facts';
 import { requirementSnapshotVersions } from '../../../lib/record-facts';
 import { eventRecordView } from '../../../lib/record-view';
@@ -42,7 +42,11 @@ import {
   COMPLIANCE_CERTIFICATION_STATEMENT,
   COMPLIANCE_HEADER,
   REQUIREMENT_DECISIONS,
+  directorVerification,
 } from '../../../lib/rules';
+
+const CONFIRMED_DECISIONS = Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'confirmed').map(([k]) => k);
+const OPEN_DECISIONS = Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state !== 'confirmed').map(([k]) => k);
 
 export default async function EventRecordPage({
   params,
@@ -370,6 +374,7 @@ export default async function EventRecordPage({
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
               listHref={`/events/${id}/requirements`}
+              directorVerification={record.level !== null ? directorVerification({ level: record.level, directorStatus: record.facts?.director?.status === 'confirmed' ? 'confirmed' : record.facts?.director?.status === 'nominated' ? 'nominated' : null, records: attestationRecordsFor(id), laneActive: orderLaneOn() }) : null}
               final={(
                 <FinalReview
                   eventId={id}
@@ -392,7 +397,7 @@ export default async function EventRecordPage({
             {/* The commercial directory link renders only while its capability is on (non-negotiable 12). */}
             <VendorDirectoryLink />
             <p data-region="decision-note" style={{ marginBlock: '24px 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
-              <L en={`The questions and completion tests on this page follow the revised requirements matrix and the owner's confirmed decisions; ${Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'proposal').map(([k]) => k).join(', ')} are proposals awaiting partner sign-off.`} ar={`تتبع الأسئلة واختبارات الاكتمال في هذه الصفحة مصفوفة المتطلبات المنقّحة وقرارات المالك المؤكَّدة؛ و${Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'proposal').map(([k]) => k).join('، ')} مقترحات بانتظار اعتماد الشريك.`} />
+              <L en={`The questions and completion tests on this page follow the revised requirements matrix and the decisions confirmed by the owner and the partner (${CONFIRMED_DECISIONS.join(', ')}, 7 October 2026)${OPEN_DECISIONS.length > 0 ? `; ${OPEN_DECISIONS.join(', ')} remain for review and change no rule` : ''}.`} ar={`تتبع الأسئلة واختبارات الاكتمال في هذه الصفحة مصفوفة المتطلبات المنقّحة والقرارات التي أكّدها المالك والشريك (${CONFIRMED_DECISIONS.join('، ')}، 7 تشرين الأول 2026)${OPEN_DECISIONS.length > 0 ? `؛ ولا تزال ${OPEN_DECISIONS.join('، ')} قيد المراجعة ولا تغيّر أي قاعدة` : ''}.`} />
             </p>
           </div>
         ) : null}

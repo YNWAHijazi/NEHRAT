@@ -89,9 +89,9 @@ describe('the venue service on the shared catalogue', () => {
     expect(authorsFor('B7', 2, 'venue')).toEqual(['organizer', 'ems']);
   });
 
-  it('makes the Medical Director recommended at Level 2 and required at Level 3 (D1)', () => {
+  it('makes the Medical Director a Level 3 role: absent at Levels 1 and 2, required at Level 3 (D1)', () => {
     expect(byKey(1, 'B3')).toBeUndefined();
-    expect(byKey(2, 'B3')).toMatchObject({ group: 'recommended', state: 'notAdded', blocks: false });
+    expect(byKey(2, 'B3')).toBeUndefined();
     expect(byKey(3, 'B3')).toMatchObject({ group: 'required', state: 'pending', blocks: true });
     expect(byKey(3, 'B3', { director: { token: token('b'), name: 'Dr B', status: 'nominated' } })!.state).toBe('waiting');
     expect(byKey(3, 'B3', { director: { token: token('b'), name: 'Dr B', status: 'confirmed' } })!.state).toBe('complete');

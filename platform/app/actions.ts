@@ -44,7 +44,7 @@ import { forgetSignInFields, rememberSignInFields,
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
   facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
-  declarationGate, isArchivedRecord, landingRouteFor } from '../lib/rules';
+  declarationGate, isArchivedRecord, landingRouteFor, requirementApplies } from '../lib/rules';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -553,6 +553,9 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   const kind = String(formData.get('kind') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const email = String(formData.get('email') ?? '').trim();
+  // The Director row exists at Level 3 only (decision D1): no invitation where the row is absent.
+  const level = derivedLevelFor(eventId);
+  if (kind === 'director' && (level === null || !requirementApplies('B3', level, 'event'))) redirect(`/events/${eventId}#req-B7`);
   let mail = '';
   if ((kind === 'ems' || kind === 'director') && name && email) {
     const token = randomBytes(24).toString('hex');
