@@ -316,10 +316,10 @@ export default async function EventRecordPage({
         <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
         {/* The compact details and assessment block, with deliberate edit actions. */}
-        <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 28px', justifyContent: 'space-between', alignItems: 'center', padding: '16px 22px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>
-          <div style={{ fontSize: '14.5px', lineHeight: 1.6, minWidth: 0 }}>
+        <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>
+          <div style={{ fontSize: 14, lineHeight: 1.5, minWidth: 0 }}>
             <span style={{ fontWeight: 500 }}><L en="Details and assessment" ar="البيانات والتقييم" /></span>
-            <span style={{ display: 'block', color: 'var(--muted)', fontSize: '13.5px' }}>
+            <span style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
               {assessed ? (
                 <>
                   <L en={`Level ${level} · assessment version ${latest?.version ?? '—'} · ${latestDate}`} ar={`المستوى ${level} · نسخة التقييم ${latest?.version ?? '—'} · ⁦${latestDate}⁩`} />
@@ -329,15 +329,22 @@ export default async function EventRecordPage({
             </span>
           </div>
           {event.lifecycle !== 'cancelled' && !recordArchived ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', alignItems: 'center' }}>
               {!event.filed ? (
-                <Link href={`/events/${event.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 40, paddingInline: 16, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>
+                <Link href={`/events/${event.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 36, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 18, fontSize: '13.5px', color: 'var(--ink)' }}>
                   <L en="Edit event details" ar="تعديل تفاصيل الفعالية" />
                 </Link>
               ) : null}
-              <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 40, paddingInline: 16, border: '1px solid var(--line)', borderRadius: 20, fontSize: 14, color: 'var(--ink)' }}>
-                <L en={assessed ? 'Run the assessment again' : 'Complete the assessment'} ar={assessed ? 'إعادة إجراء التقييم' : 'إكمال التقييم'} />
-              </Link>
+              {/* Re-assessment is a correction path, not a step (owner, 2026-10-07): a quiet link once the level stands. */}
+              {assessed ? (
+                <Link href={`/events/${event.id}/reassess`} data-region="reassess-link" style={{ fontSize: '12.5px', color: 'var(--muted)', textDecoration: 'underline', textUnderlineOffset: 3, minHeight: 36, display: 'inline-flex', alignItems: 'center' }}>
+                  <L en="Something changed? Update the assessment" ar="تغيّر شيء؟ حدّثوا التقييم" />
+                </Link>
+              ) : (
+                <Link href={`/events/${event.id}/reassess`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 36, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 18, fontSize: '13.5px', color: 'var(--ink)' }}>
+                  <L en="Complete the assessment" ar="إكمال التقييم" />
+                </Link>
+              )}
             </div>
           ) : null}
         </section>

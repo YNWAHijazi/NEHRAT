@@ -115,7 +115,8 @@ export function AssessmentForm({
   const closingTimeEdited = useRef(Boolean(draft?.partA.closingTime));
   const [partA, setPartA] = useState({
     venueRoute: draft?.partA.venueRoute ?? '', municipalities: draft?.partA.municipalities ?? '',
-    openingTime: draft?.partA.openingTime ?? '', closingTime: draft?.partA.closingTime || draft?.partA.openingTime || '',
+    // A new event opens at 07:00 (owner, 2026-10-07: that is when a marathon starts); a draft keeps its own times.
+    openingTime: draft?.partA.openingTime ?? (draft ? '' : '07:00'), closingTime: draft?.partA.closingTime || draft?.partA.openingTime || (draft ? '' : '07:00'),
     expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
     previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
@@ -284,10 +285,10 @@ export function AssessmentForm({
               <input type="date" value={endDate} onChange={(e) => { endDateEdited.current = Boolean(e.target.value); setEndDate(e.target.value || startDate); }} min={startDate || undefined} style={inputStyle} />
             </Field>
             <Field labelEn="Opening time" labelAr="وقت الافتتاح">
-              <input type="time" value={partA.openingTime} onChange={(e) => { const value = e.target.value; setPartA(prev => ({ ...prev, openingTime: value, ...(!closingTimeEdited.current ? { closingTime: value } : {}) })); }} style={inputStyle} />
+              <input type="time" step={300} value={partA.openingTime} onChange={(e) => { const value = e.target.value; setPartA(prev => ({ ...prev, openingTime: value, ...(!closingTimeEdited.current ? { closingTime: value } : {}) })); }} style={inputStyle} />
             </Field>
             <Field labelEn="Closing time" labelAr="وقت الإغلاق">
-              <input type="time" value={partA.closingTime} onChange={(e) => { closingTimeEdited.current = Boolean(e.target.value); setA('closingTime', e.target.value || partA.openingTime); }} style={inputStyle} />
+              <input type="time" step={300} value={partA.closingTime} onChange={(e) => { closingTimeEdited.current = Boolean(e.target.value); setA('closingTime', e.target.value || partA.openingTime); }} style={inputStyle} />
             </Field>
             <Field labelEn="Venue, route, or location" labelAr="الموقع أو المسار أو مكان الانعقاد">
               <input value={partA.venueRoute} onChange={(e) => setA('venueRoute', e.target.value)} style={inputStyle} />
