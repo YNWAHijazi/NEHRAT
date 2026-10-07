@@ -9,10 +9,10 @@ vi.mock('next/navigation', () => ({ redirect: (url: string) => { throw new Error
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 import { getDb } from '../lib/db';
 import { planAccess } from '../lib/plan-access';
-import { planFor, derivedLevelFor } from '../lib/queries';
+import { derivedLevelFor } from '../lib/queries';
 import { submissionGateFor } from '../lib/submission-facts';
-import { savePlanAction, uploadPlanFileAction, type PlanPayload } from '../app/actions';
-import { GET as planState } from '../app/api/events/[id]/plan-state/route';
+import { saveRequirementAnswerAction } from '../app/record-actions';
+import { eventRecordRequirements } from '../lib/record-facts';
 import { documentsForLevel, planIsComplete } from '../lib/rules/submission';
 import { planRequirement, planSectionsForLevel } from '../lib/rules/plan-responsibility';
 import { requirementsForLevel } from '../lib/rules/requirements';
@@ -85,32 +85,31 @@ test('an active Ministry request makes the Level 2 plan mandatory; clearing it r
   getDb().prepare('UPDATE added_measures SET cleared_at=now_stamp() WHERE id=?').run(id);
   expect(submissionGateFor(owner,'EV-0418').blockers.some(b=>b.docKey==='B2')).toBe(false);
 });
-test('both confirmed Level 2 medical roles read and update one plan; stale edits cannot overwrite it', async () => {
+test('both confirmed Level 2 medical roles read and update one plan section; stale edits cannot overwrite it', async () => {
+  const text = () => eventRecordRequirements(owner, 'EV-0418')!.plan.find((s) => s.key === 'P13')!.text;
   as('test_ems');
-  const payload: PlanPayload = {baseVersion:0,mode:'write',sections:{'1':{text:'EMS shared plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false};
   expect(planAccess(session.account!,'EV-0418')?.canEdit).toBe(true);
-  expect(await savePlanAction('EV-0418',payload)).toEqual({ok:true,version:1});
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:0,values:{text:'EMS shared plan'}})).toEqual({ok:true,version:1});
   as('test_director');
-  const access = planAccess(session.account!,'EV-0418')!;
-  expect(access.canEdit).toBe(true);
-  expect(planFor(access.ownerId,'EV-0418')?.sections['1']?.text).toBe('EMS shared plan');
-  expect(await savePlanAction('EV-0418',payload)).toEqual({error:'conflict'});
-  expect(await savePlanAction('EV-0418',{...payload,baseVersion:1,sections:{'1':{text:'Director reviewed shared content'}}})).toEqual({ok:true,version:2});
+  expect(planAccess(session.account!,'EV-0418')?.canEdit).toBe(true);
+  expect(text()).toBe('EMS shared plan');
+  // The version the Director read is already superseded: a conflict, never an overwrite.
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:0,values:{text:'Stale director text'}})).toEqual({error:'conflict'});
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:1,values:{text:'Director reviewed shared content'}})).toEqual({ok:true,version:2});
   as('test_organizer');
   expect(planAccess(session.account!,'EV-0418')?.canEdit).toBe(false);
-  expect(planFor(owner,'EV-0418')?.sections['1']?.text).toBe('Director reviewed shared content');
-  expect(await savePlanAction('EV-0418',{...payload,baseVersion:2})).toEqual({error:'not-authorized'});
-  const data = new FormData(); data.set('baseVersion','2');
-  expect(await uploadPlanFileAction('EV-0418',data)).toHaveProperty('error');
+  expect(text()).toBe('Director reviewed shared content');
+  // The plan is the medical team's (catalogue B2 authors); the organizer reads it.
+  expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:2,values:{text:'Organizer override'}})).toEqual({error:'forbidden'});
+  // The superseded version is archived, readable, never lost.
+  expect((getDb().prepare("SELECT answers FROM requirement_answer_history WHERE record_kind='event' AND record_id='EV-0418' AND key='P13' AND version=1").get() as {answers:string}).answers).toContain('EMS shared plan');
 });
-test('plan sync requires ownership or a confirmed medical invitation, with demo isolation', async () => {
-  const request = () => planState(new Request('http://localhost/api/events/EV-0418/plan-state'),{params:Promise.resolve({id:'EV-0418'})});
-  as('test_organizer'); expect((await request()).status).toBe(200);
-  as('test_director'); expect(await (await request()).json()).toEqual({version:2});
-  session.account!.isDemo=false;expect((await request()).status).toBe(404);
-  session.account=null;expect((await request()).status).toBe(404);
+test('writing the shared record requires ownership or a confirmed medical invitation, with demo isolation', async () => {
+  const write = () => saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:0,values:{text:'Cover'}});
+  as('test_director'); expect(await write()).toEqual({ok:true,version:1});
+  session.account!.isDemo=false; expect(await saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:1,values:{text:'Other tenant'}})).toEqual({error:'not-found'});
   as('test_director');getDb().prepare("UPDATE invitations SET status='removed' WHERE token='annex-b-director'").run();
-  expect((await request()).status).toBe(404);
+  expect(await saveRequirementAnswerAction('event','EV-0418','P14',{baseVersion:1,values:{text:'Removed director'}})).toEqual({error:'not-found'});
   expect(planAccess(session.account!,'EV-0301')).toBeNull();
 });
 

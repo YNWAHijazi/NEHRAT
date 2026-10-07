@@ -14,17 +14,14 @@ vi.mock("next/navigation", () => ({
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import { getDb } from "../lib/db";
 import {
-  uploadPlanFileAction,
   saveVenueAssessmentAction,
-  savePlanAction,
-  attachDocumentAction,
   notifySeriousIncidentAction,
   savePostEventReportAction,
   updateDraftEventAction,
   reapplyEventAction,
-  type PlanPayload,
 } from "../app/actions";
-import { planFor } from "../lib/queries";
+import { saveRequirementAnswerAction, saveRequirementFileAction } from "../app/record-actions";
+import { eventRecordRequirements } from "../lib/record-facts";
 import { canPreparePlan } from "../lib/rules/plan-responsibility";
 import { planIsComplete } from "../lib/rules/submission";
 import { recordNextStep, resolveRequirements } from "../lib/rules/record-requirements";
@@ -57,10 +54,12 @@ function as(login: string) {
     isDemo: true,
   };
 }
-function payload(owner: number): PlanPayload {
-  const p = planFor(owner, "EV-0362")!;
-  return { ...p, baseVersion: p.version };
+/** A major-incident item's text on EV-0362, saved at the version the record holds. */
+function saveItem(key: string, text: string) {
+  const stored = getDb().prepare("SELECT version FROM requirement_answers WHERE record_kind = 'event' AND record_id = 'EV-0362' AND key = ?").get(key) as { version: number } | undefined;
+  return saveRequirementAnswerAction("event", "EV-0362", key, { baseVersion: stored?.version ?? 0, values: { text } });
 }
+const itemText = (owner: number, key: string) => eventRecordRequirements(owner, "EV-0362")!.plan.find((s) => s.key === "P12")!.items.find((m) => m.key === key)!.text;
 test("public check accepts any remaining criterion and all six facility categories", () => {
   expect(eventApplicability([]).en).toBe("Certification not required");
   for (let i = 0; i < 5; i++)
@@ -90,48 +89,29 @@ test("Level 2 completes without major-incident section or checklist; Level 3 can
   expect(planIsComplete(p, 2)).toBe(true);
   expect(planIsComplete(p, 3)).toBe(false);
 });
-test("organizer cannot edit any Level 3 plan section; confirmed EMS can prepare the full plan", async () => {
+test("organizer cannot edit any Level 3 plan section; confirmed EMS can prepare the major-incident items", async () => {
   as("test_organizer");
   const owner = session.account!.id;
-  const before = planFor(owner, "EV-0362")!;
-  const org = payload(owner);
-  org.sections = { ...org.sections, "12": { text: "Unauthorized override" } };
-  org.majorIncident = { "1": { covered: false } };
-  expect(await savePlanAction("EV-0362", org)).toEqual({error:"not-authorized"});
-  expect(planFor(owner,"EV-0362")).toEqual(before);
-  expect(planFor(owner, "EV-0362")!.sections["12"]).toEqual(
-    before.sections["12"],
-  );
-  expect(planFor(owner, "EV-0362")!.majorIncident).toEqual(
-    before.majorIncident,
-  );
+  const before = itemText(owner, "M01");
+  expect(await saveItem("M01", "Unauthorized override")).toEqual({ error: "forbidden" });
+  expect(itemText(owner, "M01")).toBe(before);
   as("test_ems");
-  const ems = payload(owner);
-  ems.sections = {
-    "1": { text: "EMS general planning section" },
-    "12": { text: "EMS major-incident arrangements" },
-  };
-  expect(await savePlanAction("EV-0362", ems)).toHaveProperty("ok", true);
-  const after = planFor(owner, "EV-0362")!;
-  expect(after.sections["1"]?.text).toBe("EMS general planning section");
-  expect(after.sections["12"]?.text).toBe("EMS major-incident arrangements");
-  expect(await savePlanAction("EV-0362", ems)).toEqual({ error: "conflict" });
+  expect(await saveItem("M01", "EMS major-incident arrangements")).toHaveProperty("ok", true);
+  expect(itemText(owner, "M01")).toBe("EMS major-incident arrangements");
+  // The same text at the version already superseded is a conflict, never an overwrite.
+  const stale = getDb().prepare("SELECT version FROM requirement_answers WHERE record_kind = 'event' AND record_id = 'EV-0362' AND key = 'M01'").get() as { version: number };
+  expect(await saveRequirementAnswerAction("event", "EV-0362", "M01", { baseVersion: stale.version - 1, values: { text: "Stale" } })).toEqual({ error: "conflict" });
 });
-test("only confirmed Level 3 director can upload the deployment map", async () => {
+test("only the confirmed medical team uploads the Level 3 deployment map, and it lands under the document key the reviewer reads", async () => {
   const form = new FormData();
-  form.set("docKey", "deploymentMap");
   form.set("file", new File(["map"], "map.pdf", { type: "application/pdf" }));
   as("test_organizer");
-  await expect(attachDocumentAction("EV-0362", form)).rejects.toThrow(
-    "redirect:/dashboard",
-  );
-  as("test_ems");
-  await expect(attachDocumentAction("EV-0362", form)).rejects.toThrow(
-    "redirect:/dashboard",
+  await expect(saveRequirementFileAction("event", "EV-0362", "P-D", form)).rejects.toThrow(
+    "error=forbidden#req-P-D",
   );
   as("test_director");
-  await expect(attachDocumentAction("EV-0362", form)).rejects.toThrow(
-    "/requirements",
+  await expect(saveRequirementFileAction("event", "EV-0362", "P-D", form)).rejects.toThrow(
+    "saved=P-D#req-P-D",
   );
   expect(
     getDb()
@@ -299,40 +279,23 @@ test("an incident can be recorded inside the window but future occurrences are r
   ).toHaveProperty("incident_type", "major");
 });
 
-test("organizer cannot upload a Level 3 plan; confirmed EMS can replace it and history is preserved", async () => {
-  as("test_organizer");
-  const before = planFor(session.account!.id, "EV-0362")!;
-  const form = new FormData();
-  form.set("baseVersion", String(before.version));
-  form.set(
-    "file",
-    new File(["%PDF-1.4 replacement"], "replacement.pdf", {
-      type: "application/pdf",
-    }),
-  );
-  const owner = session.account!.id;
-  expect(await uploadPlanFileAction("EV-0362",form)).toHaveProperty("error","not-authorized");
-  expect(planFor(owner,"EV-0362")).toEqual(before);
+test("every superseded plan answer stays readable in the answer history", async () => {
   as("test_ems");
-  const result = await uploadPlanFileAction("EV-0362", form);
-  expect(result).toHaveProperty("ok", true);
-  const after = planFor(owner, "EV-0362")!;
-  expect(after.version).toBe(before.version + 1);
-  expect(after.sections).toEqual(before.sections);
-  expect(after.attachedFile).toBe("replacement.pdf");
-  const old = getDb()
-    .prepare(
-      "SELECT sections FROM plan_versions WHERE event_id = ? AND version = ?",
-    )
-    .get("EV-0362", before.version) as { sections: string };
-  expect(JSON.parse(old.sections)).toEqual(before.sections);
+  const owner = Number(getDb().prepare("SELECT account_id FROM events WHERE id='EV-0362'").get()!.account_id);
+  const before = itemText(owner, "M02");
+  expect(await saveItem("M02", "Replaced wording")).toHaveProperty("ok", true);
+  expect(itemText(owner, "M02")).toBe("Replaced wording");
+  const current = getDb().prepare("SELECT version FROM requirement_answers WHERE record_kind='event' AND record_id='EV-0362' AND key='M02'").get() as { version: number };
+  const old = getDb().prepare("SELECT answers FROM requirement_answer_history WHERE record_kind='event' AND record_id='EV-0362' AND key='M02' AND version=?").get(current.version - 1) as { answers: string } | undefined;
+  expect(old ? (JSON.parse(old.answers) as { text: string }).text : null).toBe(before);
 });
 
 test("removed medical partners and lower-level organizers cannot edit plans",async()=>{
- as('test_ems');const owner=Number(getDb().prepare("SELECT account_id FROM events WHERE id='EV-0362'").get()!.account_id);const old=payload(owner);
+ as('test_ems');
  getDb().prepare("UPDATE invitations SET status='removed' WHERE event_id='EV-0362' AND account_id=? AND kind='ems'").run(session.account!.id);
- expect(await savePlanAction('EV-0362',old)).toEqual({error:'not-authorized'});
- as('test_organizer');const low=planFor(session.account!.id,'EV-0418');expect(await savePlanAction('EV-0418',{baseVersion:low?.version??0,mode:'write',sections:{'1':{text:'Organizer Level 2 plan'}},majorIncident:{},attachedFile:null,refConfirmed:false,refAdmitsChildren:false,refTemporaryAreas:false})).toEqual({error:'not-authorized'});
+ expect(await saveItem('M03','Removed agency')).toEqual({error:'not-found'});
+ // A Level 2 organizer owns the record and still may not write the plan: the catalogue names the medical team.
+ as('test_organizer');expect(await saveRequirementAnswerAction('event','EV-0418','P13',{baseVersion:0,values:{text:'Organizer Level 2 plan'}})).toEqual({error:'forbidden'});
 });
 
 test('plan responsibility and organizer next steps follow the level',()=>{
