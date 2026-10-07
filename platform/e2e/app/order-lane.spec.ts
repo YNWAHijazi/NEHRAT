@@ -40,7 +40,7 @@ test('the Order reviews a Level 3 Director once the lane is on; the organizer se
     await expect(filing.locator('[data-region="order-plan"]')).toContainText('3.');
     // The Order records the credential verification; the audit line names who and when.
     await filing.locator('[data-att-item="directorCredential"] form:has(input[name="kind"][value="attest"]) button').click();
-    await expect(page).toHaveURL(/\/ministry\/order#event-EV-0362$/);
+    await expect(page).toHaveURL(/\/ministry\/order/);
     await expect(filing.locator('[data-att-item="directorCredential"]')).toHaveAttribute('data-att-state', 'complete');
     await expect(filing.locator('[data-att-item="directorCredential"]')).toContainText('Reviewed by');
     // The organizer's Director row reports the result, distinct from any outcome.

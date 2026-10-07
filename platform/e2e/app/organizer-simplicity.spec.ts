@@ -62,6 +62,7 @@ for (const lang of LANGUAGES) {
     }).map((el) => ({ tag: el.tagName, text: el.textContent?.slice(0, 70), style: el.getAttribute('style') })))).toEqual([]);
     await page.screenshot({ path: `/tmp/moph-record-${lang}.png`, fullPage: true });
     // The foot of the same page is where the record is submitted from.
+    await openDetails(page.locator('#final-review'));
     await expect(page.locator('[data-region="final-review"] [data-region="submit-button"]')).toBeVisible();
   });
 }
