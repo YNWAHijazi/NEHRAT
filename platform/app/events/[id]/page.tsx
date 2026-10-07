@@ -41,12 +41,8 @@ import {
   COMPLIANCE_DECLARATIONS,
   COMPLIANCE_CERTIFICATION_STATEMENT,
   COMPLIANCE_HEADER,
-  REQUIREMENT_DECISIONS,
   directorVerification,
 } from '../../../lib/rules';
-
-const CONFIRMED_DECISIONS = Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state === 'confirmed').map(([k]) => k);
-const OPEN_DECISIONS = Object.entries(REQUIREMENT_DECISIONS).filter(([, d]) => d.state !== 'confirmed').map(([k]) => k);
 
 export default async function EventRecordPage({
   params,
@@ -397,9 +393,6 @@ export default async function EventRecordPage({
             />
             {/* The commercial directory link renders only while its capability is on (non-negotiable 12). */}
             <VendorDirectoryLink />
-            <p data-region="decision-note" style={{ marginBlock: '24px 0', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
-              <L en={`The questions and completion tests on this page follow the revised requirements matrix and the decisions confirmed by the owner and the partner (${CONFIRMED_DECISIONS.join(', ')}, 7 October 2026)${OPEN_DECISIONS.length > 0 ? `; ${OPEN_DECISIONS.join(', ')} remain for review and change no rule` : ''}.`} ar={`تتبع الأسئلة واختبارات الاكتمال في هذه الصفحة مصفوفة المتطلبات المنقّحة والقرارات التي أكّدها المالك والشريك (${CONFIRMED_DECISIONS.join('، ')}، 7 تشرين الأول 2026)${OPEN_DECISIONS.length > 0 ? `؛ ولا تزال ${OPEN_DECISIONS.join('، ')} قيد المراجعة ولا تغيّر أي قاعدة` : ''}.`} />
-            </p>
           </div>
         ) : null}
 
