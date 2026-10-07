@@ -12,7 +12,7 @@ import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
-import { answerLevel1Rows, certify } from '../helpers/record';
+import { answerLevel1Rows, certify, openDetails } from '../helpers/record';
 
 
 test.describe('the nomination loop', () => {
@@ -33,6 +33,7 @@ test.describe('the nomination loop', () => {
     await party('Coastal Medical Transport').locator('button:has-text("Withdraw the invitation")').click();
     await page.waitForURL(/notice=withdrawn/);
     // A withdrawn party leaves the row entirely; its name is gone from the record.
+    await openDetails(ems);
     await expect(page.locator('[data-requirement="B7"] [data-region="party-ems"]')).toBeVisible();
     await expect(page.locator('[data-requirement="B7"]')).not.toContainText('Coastal Medical Transport');
 

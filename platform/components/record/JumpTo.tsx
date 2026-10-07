@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 /**
  * A summary row, a blocker link or a deep link names a card by its anchor. Opening
@@ -24,6 +25,12 @@ function reveal(hash: string): void {
 }
 
 export function JumpTo(): null {
+  // A server action returns to this page with a new query and a card's anchor
+  // (?saved=KEY#req-KEY, ?notice=withdrawn#req-B7). That is a client navigation on the
+  // same route: no remount, no hashchange event. The navigation itself is the signal.
+  const pathname = usePathname();
+  const search = useSearchParams();
+  useEffect(() => { reveal(window.location.hash); }, [pathname, search]);
   useEffect(() => {
     const onHash = () => reveal(window.location.hash);
     const onClick = (event: MouseEvent) => {
@@ -35,7 +42,6 @@ export function JumpTo(): null {
       history.replaceState(null, '', hash);
       reveal(hash);
     };
-    onHash();
     window.addEventListener('hashchange', onHash);
     document.addEventListener('click', onClick);
     return () => { window.removeEventListener('hashchange', onHash); document.removeEventListener('click', onClick); };
