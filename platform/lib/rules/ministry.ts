@@ -109,19 +109,23 @@ export type OutcomeKey = OutcomeAvailability['key'];
  * in the compliance form's verbatim wording; a filed event without one shows a
  * grey non-determination; otherwise the assessment progress speaks.
  */
+/**
+ * The plain status of a record as the organizer, the operator and the public register
+ * read it (owner direction, 2026-10-07): in preparation, in process, certificate ready,
+ * modifications requested, more information needed. A recorded outcome decides the
+ * label; the outcome's own words stay where a determination is shown.
+ */
 export function organizerEventState(input: {
   outcome: OutcomeKey | null;
   filed: boolean;
   assessed: boolean;
 }): { en: string; ar: string } {
-  if (input.outcome) {
-    const o = ministryJson.outcomes.find((x) => x.key === input.outcome);
-    if (o) return { en: o.en, ar: o.ar };
-  }
-  if (input.filed) return { en: 'Filed — under review', ar: 'مقدَّمة — قيد المراجعة' };
-  return input.assessed
-    ? { en: 'Assessed — not submitted', ar: 'مُقيَّمة — غير مقدَّمة' }
-    : { en: 'Assessment in progress', ar: 'التقييم قيد الإجراء' };
+  const r = ministryJson.recordStatus;
+  if (input.outcome === 'satisfied') return { en: r.certificateReady.en, ar: r.certificateReady.ar };
+  if (input.outcome === 'revision') return { en: r.modificationsRequested.en, ar: r.modificationsRequested.ar };
+  if (input.outcome === 'incomplete') return { en: r.moreInformation.en, ar: r.moreInformation.ar };
+  if (input.filed) return { en: r.inProcess.en, ar: r.inProcess.ar };
+  return { en: r.preparing.en, ar: r.preparing.ar };
 }
 
 /* ---------------- configuration values ---------------- */

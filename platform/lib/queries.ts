@@ -251,15 +251,11 @@ function toEventRow(row: EventDbRow, orgRecorded = false): EventRow {
     stateEn:
       (row.lifecycle ?? 'active') !== 'active'
         ? LIFECYCLE_CONTENT.states[(row.lifecycle ?? 'active') as 'cancelled' | 'postponed'].en
-        : outcome
-          ? derivedState.en
-          : (row.demo_state_en ?? derivedState.en),
+        : derivedState.en,
     stateAr:
       (row.lifecycle ?? 'active') !== 'active'
         ? LIFECYCLE_CONTENT.states[(row.lifecycle ?? 'active') as 'cancelled' | 'postponed'].ar
-        : outcome
-          ? derivedState.ar
-          : (row.demo_state_ar ?? derivedState.ar),
+        : derivedState.ar,
     // A filed record has met its filing deadline: no countdown to it (seeded rows set their own).
     due: row.demo_due ?? (row.filed ? null : derivedDue),
     dueLabelEn: row.demo_due_label_en ?? (row.filed ? 'Filed' : 'File by'),
@@ -2479,15 +2475,14 @@ export function findSubmissionByReference(reference: string): SubmissionRecord |
   if (!row) return null;
   // The same precedence as the organizer's own screens: a recorded outcome wins,
   // so the public register never disagrees with the dashboard on the same event.
-  // A filed record with no recorded outcome is "Filed — under review", exactly as the organizer
-  // sees it; it is never one of the three outcomes, which only a Ministry reviewer records.
+  // A filed record with no recorded outcome is "In process", exactly as the organizer sees it;
+  // it is never one of the three outcomes, which only a Ministry reviewer records. The seeded
+  // presentation strings (demo_state_en/ar) no longer apply: every row derives its status.
   const outcome = latestOutcomeFor(row.id);
   const lifecycle = row.lifecycle ?? 'active';
   const state = lifecycle !== 'active'
     ? LIFECYCLE_CONTENT.states[lifecycle as 'cancelled' | 'postponed'].en
-    : outcome
-      ? organizerEventState({ outcome, filed: true, assessed: true }).en
-      : (row.demo_state_en ?? organizerEventState({ outcome: null, filed: true, assessed: true }).en);
+    : organizerEventState({ outcome, filed: true, assessed: true }).en;
   return {
     referenceNumber: row.id,
     eventName: row.name_en,
