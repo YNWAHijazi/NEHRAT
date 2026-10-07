@@ -117,6 +117,10 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
     await expect(page.locator('[data-region="review-header"]')).toContainText(
       `revised submission, version ${before + 1}`,
     );
+    // The reviewer reads the requirement record frozen at this filing, not the live answers.
+    const frozen = page.locator('#review-requirements');
+    await expect(frozen).toContainText(`Frozen at filing · version ${before + 1}`);
+    await expect(frozen.locator('[data-review-requirement="B2"]')).toHaveAttribute('data-state', 'complete');
     // The version it replaced is archived and readable, which is the showstopper.
     await expect(page.locator('[data-region="review-versions"]')).toContainText(
       `Version ${before} — superseded`,

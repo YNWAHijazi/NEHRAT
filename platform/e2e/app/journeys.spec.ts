@@ -121,6 +121,9 @@ for (const lang of LANGUAGES) {
       // THE MINISTRY DETERMINES. Journey 11, on the record just created.
       await signInAs(page, 'test_moph');
       await gotoRidingRestarts(page, `/ministry/submissions/${eventId}`);
+      // The record as frozen at filing: the Level 1 rows the organizer answered, each Complete.
+      await expect(page.locator('#review-requirements')).toContainText('Frozen at filing');
+      await expect(page.locator('#review-requirements [data-review-requirement="B7"]')).toHaveAttribute('data-state', 'complete');
       const outcome = page.locator('[data-region="outcome"]');
       await expect(outcome).toBeVisible();
       await outcome.locator('input[type="radio"][value="satisfied"]').check();
