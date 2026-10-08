@@ -32,7 +32,8 @@ export function ReviewFileSummary({ evidence }: { evidence: Evidence }) {
   ] as const;
   return <section id="review-file" data-region="review-file-summary" style={panel}>
     <h2 style={{ fontSize: 20, marginBlockStart: 0 }}><L en="Application at a glance" ar="ملخص الطلب" /></h2>
-    <dl style={grid}>{facts.map(([en, ar, value]) => <div key={en}><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en={en} ar={ar} /></dt><dd style={answer}><Value value={value} /></dd></div>)}</dl>
+    <dl style={grid}>{facts.map(([en, ar, value]) => <div key={en}><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en={en} ar={ar} /></dt><dd style={answer}><Value value={value} /></dd></div>)}
+      {evidence.hostingVenue ? <div data-region="review-hosting-venue"><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Hosting venue" ar="الموقع المستضيف" /></dt><dd style={answer}><L en={`${evidence.hostingVenue.nameEn} · ${evidence.hostingVenue.id}`} ar={`${evidence.hostingVenue.nameAr} · ⁦${evidence.hostingVenue.id}⁩`} /></dd></div> : null}</dl>
     <details data-region="review-document-checklist">
       <summary><L en="Required and optional documents" ar="المستندات المطلوبة والاختيارية" /></summary>
       <div style={{ marginBlockStart: 12 }}>

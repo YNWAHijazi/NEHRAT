@@ -21,6 +21,7 @@ import { eventRecordView } from '../../../lib/record-view';
 import { clockNow } from '../../../lib/clock';
 import { reapplyEventAction } from '../../actions';
 import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
+import { hostingVenueForEvent } from '../../../lib/hosting-venues';
 import {
   archiveWindowDays,
   assessmentsFor,
@@ -200,6 +201,7 @@ export default async function EventRecordPage({
   const contentTypes = view?.contentTypes ?? {};
   const derived = view?.derived ?? { scheduleEn: '', scheduleAr: '', contactsEn: '', contactsAr: '', organizerPhoneMissing: true };
   const venueRoute = venueRouteFor(account.id, id);
+  const hostingVenue = hostingVenueForEvent(id);
   const dates = event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`;
   const review = (inst: { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; state: string }): ReviewRow =>
     ({ key: inst.key, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, anchor: inst.anchor, complete: inst.state === 'complete' });
@@ -328,6 +330,11 @@ export default async function EventRecordPage({
                 </>
               ) : <L en="The assessment is not complete; no level is derived and no requirements apply yet." ar="التقييم غير مكتمل؛ لم يُستنتج مستوى ولا تنطبق متطلبات بعد." />}
             </span>
+            {hostingVenue ? (
+              <span data-region="hosting-venue" style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
+                <L en={`Hosting venue: ${hostingVenue.nameEn} · ${hostingVenue.id}`} ar={`الموقع المستضيف: ${hostingVenue.nameAr} · ⁦${hostingVenue.id}⁩`} />
+              </span>
+            ) : null}
           </div>
           {event.lifecycle !== 'cancelled' && !recordArchived ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', alignItems: 'center' }}>

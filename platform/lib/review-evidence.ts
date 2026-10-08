@@ -1,6 +1,7 @@
 import type { Account } from './auth';
 import { getDb } from './db';
 import { can, documentsForLevel } from './rules';
+import { hostingVenueForEvent } from './hosting-venues';
 import { addedMeasuresFor, complianceForReview, documentStateFor, governanceFor, invitationByToken, invitationsFor, planLastEditorFor, submissionForReview } from './queries';
 
 /** Review-only evidence. No invitation tokens or unsigned declaration answers leave this query. */
@@ -21,6 +22,7 @@ export function reviewEvidenceFor(account: Pick<Account, 'role' | 'isDemo'>, eve
   const state = review.level ? documentStateFor(event.account_id, eventId, review.level) : {};
   return {
     event,
+    hostingVenue: hostingVenueForEvent(eventId),
     compliance: review.level ? complianceForReview(eventId, review.level) : null,
     documents: review.level ? documentsForLevel(review.level, requested).map(d => ({ ...d, complete: state[d.key] === true })) : [],
     planEditor: planLastEditorFor(event.account_id, eventId),

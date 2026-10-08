@@ -5,6 +5,9 @@ import { L } from '../../../../components/L';
 import { deleteDraftEventAction, editEventDetailsAction } from '../../../actions';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { eventFor, unreadCountFor, venueRouteFor, municipalitiesFor } from '../../../../lib/queries';
+import { getDb } from '../../../../lib/db';
+import { hostingVenueOptions } from '../../../../lib/hosting-venues';
+import { HostingVenuePicker } from '../../../../components/HostingVenuePicker';
 
 /**
  * Edit the descriptive details. Figures the classification depends on are NOT
@@ -29,6 +32,12 @@ export default async function EditEventPage({
   // server action refuses too; this keeps the screen from offering what it will refuse.
   if (event.filed) redirect(`/events/${id}`);
   const { error } = await searchParams;
+  // The hosting venue is edited here only for an event at a fixed venue that hosts events
+  // repeatedly; whether it is one changes through the assessment form, not this screen.
+  const fixedVenue = getDb()
+    .prepare(`SELECT recurring_fixed_venue, hosting_venue_id FROM events WHERE id = ? AND account_id = ?`)
+    .get(id, account.id) as { recurring_fixed_venue: number; hosting_venue_id: string | null };
+  const hostingVenues = fixedVenue.recurring_fixed_venue === 1 ? hostingVenueOptions(account.isDemo) : [];
 
   const label: React.CSSProperties = { fontSize: '12.5px', color: 'var(--muted)', display: 'block', marginBlockEnd: 6 };
   const input: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 14 };
@@ -48,6 +57,11 @@ export default async function EditEventPage({
           {error === 'required' ? (
             <div style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
               <L en="Both names and both dates are required." ar="الاسمان والتاريخان مطلوبة جميعاً." />
+            </div>
+          ) : null}
+          {error === 'hosting-venue' ? (
+            <div role="alert" style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="The chosen venue is not a registered hosting venue. Choose a venue from the list." ar="الموقع المختار ليس موقعاً مستضيفاً مسجّلاً. اختاروا موقعاً من القائمة." />
             </div>
           ) : null}
           <div className="secondary-help"><InfoNote>{/* Second sweep: the sentence explaining where classification figures
@@ -70,6 +84,15 @@ export default async function EditEventPage({
               <input name="venueRoute" defaultValue={venueRouteFor(account.id, id)} style={input} /></label>
             <label style={{ gridColumn: '1 / -1' }}><span style={label}><L en="Municipality or municipalities" ar="البلدية أو البلديات" /></span>
               <input name="municipalities" defaultValue={municipalitiesFor(account.id, id)} style={input} /></label>
+            {fixedVenue.recurring_fixed_venue === 1 ? (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <HostingVenuePicker
+                  options={hostingVenues}
+                  name="hostingVenueId"
+                  defaultValue={hostingVenues.some((v) => v.id === fixedVenue.hosting_venue_id) ? (fixedVenue.hosting_venue_id ?? '') : ''}
+                />
+              </div>
+            ) : null}
             <div style={{ gridColumn: '1 / -1' }}>
               <button type="submit" style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
                 <L en="Save the details" ar="حفظ التفاصيل" />
