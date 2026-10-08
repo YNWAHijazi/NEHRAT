@@ -6,8 +6,10 @@
  *
  * One component serves every counterparty surface: the anonymous token page, the
  * EMS participation and declaration pages, the Director's event page and post-event
- * report. One scope, so what a party is shown cannot drift between the moment they
- * are invited and the working screens they hold afterwards.
+ * report -- and, since the owner's 8 October 2026 request for one interface, the
+ * hosting venue's nomination page (service 'venue'). One scope, so what a party is
+ * shown cannot drift between the moment they are invited and the working screens they
+ * hold afterwards.
  *
  * WHAT IS NOT HERE, deliberately: the submission. Not the assessment answers, not the
  * compliance form, not the other parties' declarations, not a document outside the
@@ -31,6 +33,7 @@ import {
   bilingualMap,
 } from '../../../lib/rules';
 import type { NominationBriefing, NomineePlanSlice } from '../../../lib/queries';
+import type { VenueNominationBriefing } from '../../../lib/venue/briefing';
 
 const N = ROLES_CONTENT.nomination;
 
@@ -52,16 +55,8 @@ const Intro = ({ en, ar }: { en: string; ar: string }) => (
   </p>
 );
 
-export function Briefing({
-  briefing,
-  token,
-  kind,
-  level,
-  namedEn,
-  namedAr,
-  confirmed = false,
-  plan = null,
-}: {
+type EventBriefingProps = {
+  service?: 'event';
   briefing: NominationBriefing;
   token: string;
   kind: 'ems' | 'director';
@@ -72,60 +67,139 @@ export function Briefing({
   confirmed?: boolean;
   /** The plan slice a confirmed party may read; null while the organizer has none. */
   plan?: NomineePlanSlice | null;
-}) {
+};
+
+/**
+ * A hosting venue's medical-team nomination. The same sections in the same order; the
+ * organizer's filing deadline, the role documents and the plan slice are ABSENT for a
+ * venue -- none of them exists for one (non-negotiable 10: absent, not greyed).
+ */
+type VenueBriefingProps = {
+  service: 'venue';
+  briefing: VenueNominationBriefing;
+  kind: 'ems' | 'director';
+  level: Level | null;
+  namedEn: string;
+  namedAr: string;
+};
+
+type Pair = { en: string; ar: string };
+type BriefRow = { key: string; n: number | null; en: string; ar: string; valueEn: string; valueAr: string; sole: boolean };
+type BriefParty = { kind: 'ems' | 'director'; nameEn: string; nameAr: string; status: string; isThisOne: boolean };
+type EventOnly = {
+  briefing: NominationBriefing;
+  token: string;
+  confirmed: boolean;
+  plan: NomineePlanSlice | null;
+  deadline: ReturnType<typeof filingDeadline> | null;
+};
+
+export function Briefing(props: EventBriefingProps | VenueBriefingProps) {
+  const { kind, level, namedEn, namedAr } = props;
   const unset = { en: N.unsetEn, ar: N.unsetAr };
-  const or = (v: string | null): { en: string; ar: string } =>
+  const or = (v: string | null): Pair =>
     v && v.trim() !== '' ? { en: v, ar: v } : unset;
 
-  const dates =
-    briefing.startDate && briefing.endDate && briefing.startDate !== briefing.endDate
-      ? `${briefing.startDate} — ${briefing.endDate}`
-      : briefing.startDate;
-  const times =
-    briefing.openingTime && briefing.closingTime
-      ? `${briefing.openingTime} — ${briefing.closingTime}`
-      : briefing.openingTime;
+  let title: Pair;
+  let compact: { key: string; value: Pair }[];
+  let moreFacts: { key: string; label: Pair; value: Pair }[];
+  let rows: BriefRow[];
+  let parties: BriefParty[];
+  let partiesIntro: Pair = { en: N.partiesIntroEn, ar: N.partiesIntroAr };
+  let partiesNone: Pair = { en: N.partiesNoneEn, ar: N.partiesNoneAr };
+  let kinds: Record<string, Pair | undefined> = bilingualMap(N.kinds);
+  let event: EventOnly | null = null;
 
-  // The five facts a counterparty needs, in one compact strip. Everything else
-  // lives behind View more.
-  const compact: { key: string; value: { en: string; ar: string } }[] = [
-    { key: 'dates', value: or(dates) },
-    { key: 'venue', value: or(briefing.venueRoute) },
-    {
-      key: 'expected',
-      value:
-        briefing.expectedAttendance !== null
-          ? { en: `${briefing.expectedAttendance.toLocaleString('en-US')} expected`, ar: `${briefing.expectedAttendance.toLocaleString('en-US')} متوقعاً` }
-          : { en: `${N.labels.expected.en}: ${N.unsetEn}`, ar: `${N.labels.expected.ar}: ${N.unsetAr}` },
-    },
-  ];
+  if (props.service === 'venue') {
+    const b = props.briefing;
+    const V = N.venue;
+    title = { en: b.venueNameEn, ar: b.venueNameAr };
+    const place: Pair = b.district
+      ? { en: `${b.municipalityEn} · ${b.district.en}`, ar: `${b.municipalityAr} · ${b.district.ar}` }
+      : { en: b.municipalityEn, ar: b.municipalityAr };
+    const capacity = b.licensedCapacity !== null ? b.licensedCapacity.toLocaleString('en-US') : null;
+    // The venue's compact strip: where it is and how many it holds, beside the level.
+    compact = [
+      { key: 'venue', value: place.en.trim() !== '' ? place : unset },
+      {
+        key: 'capacity',
+        value: capacity !== null
+          ? { en: V.capacityEn.replace('{n}', capacity), ar: V.capacityAr.replace('{n}', capacity) }
+          : { en: `${V.labels.capacity.en}: ${N.unsetEn}`, ar: `${V.labels.capacity.ar}: ${N.unsetAr}` },
+      },
+    ];
+    moreFacts = [
+      { key: 'operator', label: V.labels.operator, value: { en: b.operatorNameEn || N.unsetEn, ar: b.operatorNameAr || N.unsetAr } },
+      { key: 'venueType', label: V.labels.venueType, value: b.venueType },
+      { key: 'municipality', label: N.labels.municipality, value: { en: b.municipalityEn || N.unsetEn, ar: b.municipalityAr || N.unsetAr } },
+      { key: 'district', label: V.labels.district, value: b.district ?? unset },
+      { key: 'namedAs', label: N.labels.namedAs, value: { en: namedEn, ar: namedAr } },
+    ];
+    // The rows the record resolver names this role on, at the venue's level.
+    rows = b.rows;
+    parties = b.otherParties;
+    partiesIntro = { en: V.partiesIntroEn, ar: V.partiesIntroAr };
+    partiesNone = { en: V.partiesNoneEn, ar: V.partiesNoneAr };
+    kinds = bilingualMap(V.kinds);
+  } else {
+    const briefing = props.briefing;
+    title = { en: briefing.eventNameEn, ar: briefing.eventNameAr };
+    const dates =
+      briefing.startDate && briefing.endDate && briefing.startDate !== briefing.endDate
+        ? `${briefing.startDate} — ${briefing.endDate}`
+        : briefing.startDate;
+    const times =
+      briefing.openingTime && briefing.closingTime
+        ? `${briefing.openingTime} — ${briefing.closingTime}`
+        : briefing.openingTime;
 
-  const moreFacts: { key: string; label: { en: string; ar: string }; value: { en: string; ar: string } }[] = [
-    { key: 'organizer', label: N.labels.organizer, value: { en: briefing.organizationNameEn || N.unsetEn, ar: briefing.organizationNameAr || N.unsetAr } },
-    { key: 'eventType', label: N.labels.eventType, value: or(briefing.eventType) },
-    { key: 'times', label: N.labels.times, value: or(times) },
-    { key: 'municipality', label: N.labels.municipality, value: or(briefing.municipalities) },
-    { key: 'namedAs', label: N.labels.namedAs, value: { en: namedEn, ar: namedAr } },
-  ];
+    // The five facts a counterparty needs, in one compact strip. Everything else
+    // lives behind View more.
+    compact = [
+      { key: 'dates', value: or(dates) },
+      { key: 'venue', value: or(briefing.venueRoute) },
+      {
+        key: 'expected',
+        value:
+          briefing.expectedAttendance !== null
+            ? { en: `${briefing.expectedAttendance.toLocaleString('en-US')} expected`, ar: `${briefing.expectedAttendance.toLocaleString('en-US')} متوقعاً` }
+            : { en: `${N.labels.expected.en}: ${N.unsetEn}`, ar: `${N.labels.expected.ar}: ${N.unsetAr}` },
+      },
+    ];
 
-  // The party's OWN requirement rows, derived from the matrix rather than described in
-  // prose somebody has to keep in step. At Level 3 the Director carries five and
-  // requirement 15 names no other party at any level.
-  const partyKey = kind === 'ems' ? 'E' : 'D';
-  const rows = level ? requirementsForParty(level, partyKey) : [];
+    moreFacts = [
+      { key: 'organizer', label: N.labels.organizer, value: { en: briefing.organizationNameEn || N.unsetEn, ar: briefing.organizationNameAr || N.unsetAr } },
+      { key: 'eventType', label: N.labels.eventType, value: or(briefing.eventType) },
+      { key: 'times', label: N.labels.times, value: or(times) },
+      { key: 'municipality', label: N.labels.municipality, value: or(briefing.municipalities) },
+      { key: 'namedAs', label: N.labels.namedAs, value: { en: namedEn, ar: namedAr } },
+    ];
 
-  const deadline =
-    briefing.startDate !== null && level !== null
-      ? filingDeadline(level, new Date(`${briefing.startDate}T00:00:00Z`))
-      : null;
+    // The party's OWN requirement rows, derived from the matrix rather than described in
+    // prose somebody has to keep in step. At Level 3 the Director carries five and
+    // requirement 15 names no other party at any level.
+    const partyKey = kind === 'ems' ? 'E' : 'D';
+    rows = (level ? requirementsForParty(level, partyKey) : []).map((r) => ({
+      key: String(r.n), n: r.n, en: r.en, ar: r.ar, valueEn: r.valueEn, valueAr: r.valueAr, sole: r.sole,
+    }));
+    parties = briefing.otherParties;
+
+    const deadline =
+      briefing.startDate !== null && level !== null
+        ? filingDeadline(level, new Date(`${briefing.startDate}T00:00:00Z`))
+        : null;
+    event = { briefing, token: props.token, confirmed: props.confirmed ?? false, plan: props.plan ?? null, deadline };
+  }
+  const confirmed = event?.confirmed ?? false;
+  const plan = event?.plan ?? null;
 
   return (
-    <div data-region="briefing" style={{ marginBlockEnd: 28 }}>
+    <div data-region="briefing" data-service={props.service ?? 'event'} style={{ marginBlockEnd: 28 }}>
       {/* THE COMPACT STRIP: name, date, venue, expected attendance, level. */}
       <div data-region="briefing-event" style={{ marginBlockEnd: 10 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
           <h2 style={{ margin: 0, fontSize: 27, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en={briefing.eventNameEn} ar={briefing.eventNameAr} />
+            <L en={title.en} ar={title.ar} />
           </h2>
           <span style={{ flex: 'none', padding: '3px 11px', borderRadius: 999, background: level ? `var(--l${level}s)` : 'var(--surface2)', borderInlineStart: level ? `2px solid var(--l${level})` : undefined, fontSize: '13.5px', fontWeight: 500 }}>
             {level ? <L en={`Level ${level}`} ar={`المستوى ${level}`} /> : <L en={N.unsetEn} ar={N.unsetAr} />}
@@ -166,28 +240,30 @@ export function Briefing({
 
           {/* THE ORGANIZER'S DEADLINE, because it is the nominee's deadline in practice:
               an answer after it is an answer to a package already filed. */}
-          <Panel region="briefing-deadline">
-            <Heading en={N.deadlineTitleEn} ar={N.deadlineTitleAr} />
-            <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
-              {deadline === null ? (
-                <L en={N.deadlineUnknownEn} ar={N.deadlineUnknownAr} />
-              ) : briefing.filed ? (
-                <L en={N.deadlineFiledEn} ar={N.deadlineFiledAr} />
-              ) : (
-                <>
-                  <div style={{ fontSize: 19, fontWeight: 600, fontVariantNumeric: 'tabular-nums', marginBlockEnd: 6 }}>
-                    {deadline.date}
-                  </div>
-                  <L en={N.deadlineBodyEn} ar={N.deadlineBodyAr} />
-                  {deadline.conditional && deadline.conditionEn ? (
-                    <div style={{ marginBlockStart: 8, fontSize: '13px', color: 'var(--muted)' }}>
-                      <L en={deadline.conditionEn} ar={deadline.conditionAr ?? deadline.conditionEn} />
+          {event ? (
+            <Panel region="briefing-deadline">
+              <Heading en={N.deadlineTitleEn} ar={N.deadlineTitleAr} />
+              <div style={{ padding: '16px 20px', background: 'var(--surface2)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+                {event.deadline === null ? (
+                  <L en={N.deadlineUnknownEn} ar={N.deadlineUnknownAr} />
+                ) : event.briefing.filed ? (
+                  <L en={N.deadlineFiledEn} ar={N.deadlineFiledAr} />
+                ) : (
+                  <>
+                    <div style={{ fontSize: 19, fontWeight: 600, fontVariantNumeric: 'tabular-nums', marginBlockEnd: 6 }}>
+                      {event.deadline.date}
                     </div>
-                  ) : null}
-                </>
-              )}
-            </div>
-          </Panel>
+                    <L en={N.deadlineBodyEn} ar={N.deadlineBodyAr} />
+                    {event.deadline.conditional && event.deadline.conditionEn ? (
+                      <div style={{ marginBlockStart: 8, fontSize: '13px', color: 'var(--muted)' }}>
+                        <L en={event.deadline.conditionEn} ar={event.deadline.conditionAr ?? event.deadline.conditionEn} />
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            </Panel>
+          ) : null}
 
           <Panel region="briefing-requirements">
             <Heading en={N.requirementsTitleEn} ar={N.requirementsTitleAr} />
@@ -199,10 +275,10 @@ export function Briefing({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
                 {rows.map((r) => (
-                  <div key={r.n} style={{ background: 'var(--bg)', padding: '14px 18px', borderInlineStart: `3px solid ${r.sole ? 'var(--accent)' : 'var(--brand)'}` }}>
+                  <div key={r.key} data-briefing-row={r.key} style={{ background: 'var(--bg)', padding: '14px 18px', borderInlineStart: `3px solid ${r.sole ? 'var(--accent)' : 'var(--brand)'}` }}>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span style={{ display: 'flex', gap: 12, alignItems: 'baseline', flex: 1, minWidth: 220 }}>
-                        <span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 20 }}>{r.n}</span>
+                        <span style={{ flex: 'none', fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minWidth: 20 }}>{r.n ?? ''}</span>
                         <span style={{ fontSize: '14.5px', lineHeight: 1.45 }}>
                           <L en={r.en} ar={r.ar} />
                         </span>
@@ -227,16 +303,16 @@ export function Briefing({
 
           <Panel region="briefing-parties">
             <Heading en={N.partiesTitleEn} ar={N.partiesTitleAr} />
-            <Intro en={N.partiesIntroEn} ar={N.partiesIntroAr} />
-            {briefing.otherParties.length === 0 ? (
+            <Intro en={partiesIntro.en} ar={partiesIntro.ar} />
+            {parties.length === 0 ? (
               <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en={N.partiesNoneEn} ar={N.partiesNoneAr} />
+                <L en={partiesNone.en} ar={partiesNone.ar} />
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-                {briefing.otherParties.map((p, i) => {
+                {parties.map((p, i) => {
                   const state = bilingualMap(N.partyStates)[p.status];
-                  const kindLabel = bilingualMap(N.kinds)[p.kind];
+                  const kindLabel = kinds[p.kind];
                   return (
                     <div key={`${p.kind}-${i}`} style={{ background: 'var(--bg)', padding: '13px 18px', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
                       <span style={{ fontSize: '14px', flex: 1, minWidth: 220 }}>
@@ -265,37 +341,39 @@ export function Briefing({
             )}
           </Panel>
 
-          <Panel region="briefing-documents">
-            <Heading en={N.documentsTitleEn} ar={N.documentsTitleAr} />
-            <Intro en={N.documentsIntroEn} ar={N.documentsIntroAr} />
-            {briefing.documents.length === 0 ? (
-              <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
-                <L en={N.documentsNoneEn} ar={N.documentsNoneAr} />
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-                {briefing.documents.map((d) => {
-                  const doc = catalogueEntry(d.docKey);
-                  return (
-                    <div key={d.docKey} style={{ background: 'var(--bg)', padding: '13px 18px' }}>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <span style={{ fontSize: '14px' }}>{doc ? <L en={doc.en} ar={doc.ar} /> : d.docKey}</span>
-                        <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                          {d.fileName} · {d.attachedAt}
-                        </span>
+          {event ? (
+            <Panel region="briefing-documents">
+              <Heading en={N.documentsTitleEn} ar={N.documentsTitleAr} />
+              <Intro en={N.documentsIntroEn} ar={N.documentsIntroAr} />
+              {event.briefing.documents.length === 0 ? (
+                <div style={{ padding: '14px 18px', border: '1px dashed var(--line)', borderRadius: 10, fontSize: 14, color: 'var(--muted)' }}>
+                  <L en={N.documentsNoneEn} ar={N.documentsNoneAr} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {event.briefing.documents.map((d) => {
+                    const doc = catalogueEntry(d.docKey);
+                    return (
+                      <div key={d.docKey} style={{ background: 'var(--bg)', padding: '13px 18px' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span style={{ fontSize: '14px' }}>{doc ? <L en={doc.en} ar={doc.ar} /> : d.docKey}</span>
+                          <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                            {d.fileName} · {d.attachedAt}
+                          </span>
+                        </div>
+                        <DocumentViewer
+                          href={`/api/nomination-documents/${event.token}/${encodeURIComponent(d.docKey)}`}
+                          hasFile={d.hasFile}
+                          contentType={d.contentType}
+                          label={doc ? doc.en : d.docKey}
+                        />
                       </div>
-                      <DocumentViewer
-                        href={`/api/nomination-documents/${token}/${encodeURIComponent(d.docKey)}`}
-                        hasFile={d.hasFile}
-                        contentType={d.contentType}
-                        label={doc ? doc.en : d.docKey}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </Panel>
+                    );
+                  })}
+                </div>
+              )}
+            </Panel>
+          ) : null}
 
           {/* THE PLAN SLICE a confirmed party may read: the four sections fixed in
               lib/rules/nomination-access, with the version it is read at. A standing
