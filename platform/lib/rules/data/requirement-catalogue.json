@@ -205,8 +205,8 @@
       "labelAr": "فريق (فرق) الاستجابة الطبية للدعم الحيوي الأساسي",
       "promptEn": "Name the participating EMS or medical provider responsible for BLS coverage and confirm it.",
       "promptAr": "سمّوا جهة الإسعاف أو المزوّد الطبي المشارك المسؤول عن تغطية الدعم الحيوي الأساسي وأكّدوها.",
-      "infoEn": "BLS: basic life support. Invite each participating provider once; each remains responsible for its own personnel and clinical practice. Staffing and deployment detail belongs in the medical plan, not here.",
-      "infoAr": "الدعم الحيوي الأساسي (BLS). ادعوا كل مزوّد مشارك مرة واحدة؛ ويبقى كل منهم مسؤولاً عن أفراده وممارسته السريرية. تفاصيل الملاك والانتشار مكانها الخطة الطبية لا هنا.",
+      "infoEn": "BLS: basic life support. Invite each participating provider once (the EMS and ambulance row holds the invitation); each remains responsible for its own personnel and clinical practice. Staffing and deployment detail belongs in the medical plan, not here.",
+      "infoAr": "الدعم الحيوي الأساسي (BLS). ادعوا كل مزوّد مشارك مرة واحدة (صف ترتيبات الإسعاف يحمل الدعوة)؛ ويبقى كل منهم مسؤولاً عن أفراده وممارسته السريرية. تفاصيل الملاك والانتشار مكانها الخطة الطبية لا هنا.",
       "fields": [
         {
           "key": "bls",
@@ -243,7 +243,7 @@
             "organizer",
             "ems"
           ],
-          "completion": "emsAndFields",
+          "completion": "fields",
           "linkedPlan": [
             "P03"
           ]
@@ -255,7 +255,7 @@
             "ems",
             "director"
           ],
-          "completion": "emsAndFields",
+          "completion": "fields",
           "linkedPlan": [
             "P03"
           ]

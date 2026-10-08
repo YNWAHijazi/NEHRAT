@@ -299,8 +299,8 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
     expect(byKey(notFromTeam, 'B4').missing).toEqual(['separate']);
     const separate = resolveRequirements(facts(2, { ems, answers: { B5: answer({ bls: true, firstAid: 'no' }, 'ems'), B4: answer({ separate: true }) } }));
     expect(byKey(separate, 'B4').state).toBe('complete');
-    // The BLS row itself needs the accepted provider: a nomination alone holds it.
-    expect(byKey(rows, 'B5').detailEn).toBe('No EMS agency has been invited');
+    // The provider's acceptance is the EMS row's business (B7): the BLS row is the two confirmations.
+    expect(byKey(rows, 'B5').detailEn).toBeNull();
   });
 
   it('shared rows take the first authorized completion from either side (brief item 11)', () => {
