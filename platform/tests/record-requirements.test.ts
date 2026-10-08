@@ -433,25 +433,55 @@ describe('later phases never create pre-event blockers (brief item 15, D10)', ()
   }
 });
 
-describe('venues on the same catalogue (brief items 20-21)', () => {
-  it('a Level 1 venue is organizer-only, with no after-event rows and no invented annual report (D8)', () => {
-    const rows = resolveRequirements(facts(1, { service: 'venue' }));
-    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B7', 'B9', 'B10', 'B11', 'B14', 'B16', 'P-A']);
-    expect(keys(rows)).not.toContain('B19');
-    expect(keys(rows)).not.toContain('P-I');
-    expect(keys(rows)).not.toContain('P-C');
-    expect(rows.every((r) => r.group !== 'later' || r.key === 'B18')).toBe(true);
-    const done = resolveRequirements(facts(1, { service: 'venue', answers: Object.fromEntries(rows.filter((r) => r.fields.length).map((r) => [r.key, fullAnswer(1, r.key)])) }));
-    expect(requirementBlockers(done)).toEqual([]);
+describe('a hosting venue: the reusable baseline, not an event registration (8 October 2026)', () => {
+  const venueAnswer = (key: string, values: Record<string, string | boolean>) => answer(values, 'organizer');
+  it.each([1, 2, 3] as Level[])('at level %s the venue carries the same organizer-only rows and no event row', (level) => {
+    const rows = resolveRequirements(facts(level, { service: 'venue' }));
+    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['V1', 'V2', 'V3', 'V4', 'V5', 'V7']);
+    expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['V6']);
+    expect(rows.every((r) => r.authors.length === 1 && r.authors[0] === 'organizer')).toBe(true);
+    // No Director, EMS agency, BLS team, medical plan, insurance, readiness declaration or post-event report.
+    for (const absent of ['B3', 'B5', 'B7', 'B2', 'B17', 'B20', 'B19', 'P-D', 'P-C']) expect(keys(rows)).not.toContain(absent);
+    expect(rows.some((r) => r.group === 'later')).toBe(false);
   });
 
-  it('venue wording replaces the event wording where the brief maps it', () => {
-    const rows = resolveRequirements(facts(3, { service: 'venue' }));
-    expect(byKey(rows, 'P-M').labelEn).toBe('Site map');
-    expect(byKey(rows, 'P-D').labelEn).toBe('Routine deployment layout');
-    const first = byKey(resolveRequirements(facts(1, { service: 'venue' })), 'B4');
-    expect(first.fields.find((f) => f.key === 'available')!.labelEn).toContain('operating session');
-    expect(byKey(resolveRequirements(facts(1)), 'B4').fields.find((f) => f.key === 'available')!.labelEn).toContain('during the event');
+  it('an event never carries a venue row', () => {
+    for (const level of [1, 2, 3] as const) expect(keys(resolveRequirements(facts(level))).some((k) => k.startsWith('V'))).toBe(false);
+  });
+
+  it('the layout row needs the map file as well as its answers; the first-aid room asks where only when there is one', () => {
+    const answered = { V1: venueAnswer('V1', { configuration: 'indoor', zones: 'Main hall' }), V4: venueAnswer('V4', { exists: 'no' }) };
+    const rows = resolveRequirements(facts(2, { service: 'venue', answers: answered }));
+    expect(byKey(rows, 'V1').state).toBe('pending');
+    expect(byKey(rows, 'V4').state).toBe('complete');
+    const withMap = resolveRequirements(facts(2, { service: 'venue', answers: answered, files: { V1: { fileName: 'map.pdf', savedAt: '2026-10-08' } } }));
+    expect(byKey(withMap, 'V1').state).toBe('complete');
+    const roomYes = resolveRequirements(facts(2, { service: 'venue', answers: { V4: venueAnswer('V4', { exists: 'yes' }) } }));
+    expect(byKey(roomYes, 'V4').state).toBe('pending');
+  });
+
+  it('AEDs come from the PAD facility on the same site; with none, the operator records that there is none', () => {
+    const open = byKey(resolveRequirements(facts(1, { service: 'venue' })), 'V7');
+    expect(open.state).toBe('pending');
+    const linked = byKey(resolveRequirements(facts(1, { service: 'venue', padFacility: { id: 'FC-0014', nameEn: 'Beirut Sports Complex', nameAr: 'مجمّع بيروت الرياضي', devices: 3 } })), 'V7');
+    expect(linked.state).toBe('complete');
+    expect(linked.detailEn).toBe('Linked to the facility registration Beirut Sports Complex (FC-0014) · 3 registered AEDs');
+    const none = byKey(resolveRequirements(facts(1, { service: 'venue', answers: { V7: venueAnswer('V7', { none: true }) } })), 'V7');
+    expect(none.state).toBe('complete');
+    expect(none.detailEn).toBe('Recorded: no facility registration for this place');
+  });
+
+  it('a complete venue has no blockers', () => {
+    const answers = {
+      V1: venueAnswer('V1', { configuration: 'both', zones: 'Hall and forecourt' }),
+      V2: venueAnswer('V2', { entry: 'East gate' }),
+      V3: venueAnswer('V3', { routes: 'Through the loading bay' }),
+      V4: venueAnswer('V4', { exists: 'yes', location: 'Ground floor' }),
+      V5: venueAnswer('V5', { systems: 'Public address' }),
+      V7: venueAnswer('V7', { none: true }),
+    };
+    const rows = resolveRequirements(facts(3, { service: 'venue', answers, files: { V1: { fileName: 'map.pdf', savedAt: '2026-10-08' } } }));
+    expect(requirementBlockers(rows)).toEqual([]);
   });
 });
 
@@ -460,6 +490,9 @@ describe('the catalogue decides obligation, not the wording (brief item 6)', () 
     expect(fieldsFor('B17', 1, 'event')).toBeNull();
     expect(fieldsFor('B3', 1, 'event')).toBeNull();
     expect(fieldsFor('P-C', 2, 'venue')).toBeNull();
+    expect(fieldsFor('B10', 2, 'venue')).toBeNull();
+    expect(fieldsFor('V2', 2, 'event')).toBeNull();
+    expect(fieldsFor('V2', 2, 'venue')!.map((f) => f.key)).toEqual(['entry', 'staging']);
     expect(fieldsFor('B5', 2, 'event')!.map((f) => f.key)).toEqual(['bls', 'firstAid']);
     expect(fieldsFor('M04', 3, 'event')!.map((f) => f.key)).toEqual(['text']);
     expect(fieldsFor('nope', 2, 'event')).toBeNull();

@@ -2,7 +2,7 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-08.4",
+  "revision": "2026-10-08.5",
   "decisions": {
     "D1": {
       "state": "confirmed",
@@ -47,9 +47,348 @@
   },
   "rows": [
     {
+      "key": "V1",
+      "service": "venue",
+      "labelEn": "Layout and zones",
+      "labelAr": "المخطط العام والمناطق",
+      "promptEn": "Upload one map of the venue showing its entrances, exits and emergency access.",
+      "promptAr": "ارفعوا خريطة واحدة للموقع تُظهر مداخله ومخارجه ومنافذ وصول الطوارئ.",
+      "file": {
+        "labelEn": "Site or layout map",
+        "labelAr": "خريطة الموقع أو مخططه"
+      },
+      "fields": [
+        {
+          "key": "configuration",
+          "type": "choice",
+          "labelEn": "Is the venue indoor, outdoor or both?",
+          "labelAr": "هل الموقع داخلي أم خارجي أم الاثنان معاً؟",
+          "options": [
+            {
+              "value": "indoor",
+              "en": "Indoor",
+              "ar": "داخلي"
+            },
+            {
+              "value": "outdoor",
+              "en": "Outdoor",
+              "ar": "خارجي"
+            },
+            {
+              "value": "both",
+              "en": "Both",
+              "ar": "الاثنان معاً"
+            }
+          ]
+        },
+        {
+          "key": "zones",
+          "type": "textarea",
+          "labelEn": "Which halls, floors and zones does the public use?",
+          "labelAr": "ما القاعات والطوابق والمناطق التي يستخدمها الجمهور؟"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fieldsAndFile"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fieldsAndFile"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fieldsAndFile"
+        }
+      }
+    },
+    {
+      "key": "V2",
+      "service": "venue",
+      "labelEn": "Emergency vehicle access",
+      "labelAr": "وصول مركبات الطوارئ",
+      "fields": [
+        {
+          "key": "entry",
+          "type": "textarea",
+          "labelEn": "Where do emergency vehicles enter the venue, and where do they stop?",
+          "labelAr": "من أين تدخل مركبات الطوارئ إلى الموقع، وأين تتوقف؟"
+        },
+        {
+          "key": "staging",
+          "type": "text",
+          "optional": true,
+          "labelEn": "Where can an ambulance wait during an operating session? (optional)",
+          "labelAr": "أين يمكن لسيارة إسعاف أن تنتظر خلال جلسة التشغيل؟ (اختياري)"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        }
+      }
+    },
+    {
+      "key": "V3",
+      "service": "venue",
+      "labelEn": "Patient access and extraction routes",
+      "labelAr": "مسارات الوصول إلى المريض وإخراجه",
+      "fields": [
+        {
+          "key": "routes",
+          "type": "textarea",
+          "labelEn": "How do responders reach a patient in each zone and bring them out to an ambulance?",
+          "labelAr": "كيف يصل المسعفون إلى المريض في كل منطقة ويُخرجونه إلى سيارة الإسعاف؟"
+        },
+        {
+          "key": "lifts",
+          "type": "text",
+          "optional": true,
+          "labelEn": "Lifts or stairs that take a stretcher (optional)",
+          "labelAr": "المصاعد أو الأدراج التي تتّسع لنقّالة (اختياري)"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        }
+      }
+    },
+    {
+      "key": "V4",
+      "service": "venue",
+      "labelEn": "First-aid or treatment room",
+      "labelAr": "غرفة الإسعافات الأولية أو العلاج",
+      "fields": [
+        {
+          "key": "exists",
+          "type": "choice",
+          "labelEn": "Does the venue have a permanent first-aid or treatment room?",
+          "labelAr": "هل في الموقع غرفة دائمة للإسعافات الأولية أو العلاج؟",
+          "options": [
+            {
+              "value": "yes",
+              "en": "Yes",
+              "ar": "نعم"
+            },
+            {
+              "value": "no",
+              "en": "No",
+              "ar": "لا"
+            }
+          ]
+        },
+        {
+          "key": "location",
+          "type": "text",
+          "labelEn": "Where is it?",
+          "labelAr": "أين تقع؟",
+          "showWhen": {
+            "field": "exists",
+            "equals": "yes"
+          }
+        },
+        {
+          "key": "equipment",
+          "type": "textarea",
+          "optional": true,
+          "labelEn": "What is kept there permanently? (optional)",
+          "labelAr": "ما الذي يُحفظ فيها بشكل دائم؟ (اختياري)",
+          "showWhen": {
+            "field": "exists",
+            "equals": "yes"
+          }
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        }
+      }
+    },
+    {
+      "key": "V5",
+      "service": "venue",
+      "labelEn": "Fixed communications",
+      "labelAr": "وسائل الاتصال الثابتة",
+      "fields": [
+        {
+          "key": "systems",
+          "type": "textarea",
+          "labelEn": "Which fixed communication systems can be used in an emergency?",
+          "labelAr": "ما وسائل الاتصال الثابتة التي يمكن استخدامها في حالة طوارئ؟",
+          "placeholderEn": "For example: public address, radio repeaters, a control room",
+          "placeholderAr": "مثلاً: نظام الإعلان العام، مقوّيات إشارة اللاسلكي، غرفة تحكّم"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        }
+      }
+    },
+    {
+      "key": "V6",
+      "service": "venue",
+      "labelEn": "Other venue characteristics",
+      "labelAr": "خصائص أخرى للموقع",
+      "fields": [
+        {
+          "key": "notes",
+          "type": "textarea",
+          "labelEn": "What else stays the same from event to event and could help future events?",
+          "labelAr": "ما الذي يبقى ثابتاً من فعالية إلى أخرى ويمكن أن يفيد الفعاليات المقبلة؟"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "recommended",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "recommended",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "recommended",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        }
+      }
+    },
+    {
+      "key": "V7",
+      "service": "venue",
+      "labelEn": "AEDs and cardiac-arrest readiness",
+      "labelAr": "أجهزة إزالة الرجفان والجاهزية لتوقف القلب",
+      "infoEn": "AEDs are registered once, on the facility registration for this place, and shown here. They are not registered again for the venue.",
+      "infoAr": "تُسجَّل أجهزة إزالة الرجفان مرة واحدة، في تسجيل المنشأة لهذا المكان، وتُعرض هنا. ولا تُسجَّل مجدداً للموقع.",
+      "fields": [
+        {
+          "key": "none",
+          "type": "checkbox",
+          "labelEn": "This place has no facility registration for cardiac-arrest readiness.",
+          "labelAr": "لا يوجد لهذا المكان تسجيل منشأة للجاهزية لتوقف القلب."
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "padLink"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "padLink"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "padLink"
+        }
+      }
+    },
+    {
       "key": "B1",
       "n": 1,
-      "service": "both",
+      "service": "event",
       "labelEn": "Organizer contact",
       "labelAr": "جهة اتصال المنظّم",
       "promptEn": "The person the Ministry and responders can reach. Filled from your account; change it only if someone else holds this role.",
@@ -100,7 +439,7 @@
     {
       "key": "B3",
       "n": 3,
-      "service": "both",
+      "service": "event",
       "labelEn": "Medical Director",
       "labelAr": "المدير الطبي",
       "promptEn": "Invite the physician once. Their name, contact and licence come from the accepted invitation.",
@@ -127,7 +466,7 @@
     {
       "key": "B4",
       "n": 4,
-      "service": "both",
+      "service": "event",
       "labelEn": "First aid",
       "labelAr": "الإسعافات الأولية",
       "infoEn": "A confirmation only: no names, responder counts, shifts or certificates (partner audit, 8 October 2026).",
@@ -198,7 +537,7 @@
     {
       "key": "B5",
       "n": 5,
-      "service": "both",
+      "service": "event",
       "labelEn": "BLS medical response team(s)",
       "labelAr": "فريق (فرق) الاستجابة الطبية للدعم الحيوي الأساسي",
       "infoEn": "BLS: basic life support. The participating provider is named by its invitation on the EMS and ambulance row; when invited, the agency confirms here that it meets the first-aid and BLS requirements. Each provider remains responsible for its own personnel and clinical practice.",
@@ -261,7 +600,7 @@
     {
       "key": "B6",
       "n": 6,
-      "service": "both",
+      "service": "event",
       "labelEn": "Medical treatment post",
       "labelAr": "مركز العلاج الطبي",
       "fields": [
@@ -336,7 +675,7 @@
     {
       "key": "B7",
       "n": 7,
-      "service": "both",
+      "service": "event",
       "labelEn": "EMS and ambulance arrangements",
       "labelAr": "ترتيبات الإسعاف وخدمات الطوارئ الطبية",
       "promptEn": "Invite each participating EMS provider once, then record the basic ambulance arrangement.",
@@ -430,7 +769,7 @@
     {
       "key": "B8",
       "n": 8,
-      "service": "both",
+      "service": "event",
       "labelEn": "CPR and AED response",
       "labelAr": "الاستجابة بالإنعاش القلبي الرئوي وجهاز AED",
       "fields": [
@@ -578,7 +917,7 @@
     {
       "key": "B9",
       "n": 9,
-      "service": "both",
+      "service": "event",
       "labelEn": "Medical supplies",
       "labelAr": "المستلزمات الطبية",
       "infoEn": "A confirmation only. No kit list, quantity, storage place or checker is asked (partner audit, 8 October 2026).",
@@ -676,7 +1015,7 @@
     {
       "key": "B10",
       "n": 10,
-      "service": "both",
+      "service": "event",
       "labelEn": "Emergency vehicle access",
       "labelAr": "وصول مركبات الطوارئ",
       "fields": [
@@ -744,7 +1083,7 @@
     {
       "key": "B11",
       "n": 11,
-      "service": "both",
+      "service": "event",
       "labelEn": "Patient access and extraction",
       "labelAr": "الوصول إلى المريض وإخلاؤه",
       "fields": [
@@ -838,7 +1177,7 @@
     {
       "key": "B12",
       "n": 12,
-      "service": "both",
+      "service": "event",
       "labelEn": "Receiving emergency department(s)",
       "labelAr": "قسم (أقسام) الطوارئ المستقبِل",
       "infoEn": "No hospital acceptance letter is required.",
@@ -930,7 +1269,7 @@
     {
       "key": "B14",
       "n": 14,
-      "service": "both",
+      "service": "event",
       "labelEn": "Communication",
       "labelAr": "التواصل",
       "fields": [
@@ -1010,7 +1349,7 @@
     {
       "key": "B15",
       "n": 15,
-      "service": "both",
+      "service": "event",
       "labelEn": "Event medical command",
       "labelAr": "القيادة الطبية للفعالية",
       "fields": [
@@ -1054,7 +1393,7 @@
     {
       "key": "B16",
       "n": 16,
-      "service": "both",
+      "service": "event",
       "labelEn": "Emergency escalation",
       "labelAr": "التصعيد في حالات الطوارئ",
       "fields": [
@@ -1127,7 +1466,7 @@
     {
       "key": "B17",
       "n": 17,
-      "service": "both",
+      "service": "event",
       "labelEn": "Insurance",
       "labelAr": "التأمين",
       "promptEn": "Record the insurer, policy number and coverage dates, and upload the evidence.",
@@ -1176,7 +1515,7 @@
     },
     {
       "key": "P-M",
-      "service": "both",
+      "service": "event",
       "labelEn": "Site or route map",
       "labelAr": "خريطة الموقع أو المسار",
       "venueLabelEn": "Site map",
@@ -1251,7 +1590,7 @@
     },
     {
       "key": "P-D",
-      "service": "both",
+      "service": "event",
       "labelEn": "Medical deployment map",
       "labelAr": "خريطة الانتشار الطبي",
       "venueLabelEn": "Routine deployment layout",
@@ -1295,7 +1634,7 @@
     {
       "key": "B20",
       "n": 20,
-      "service": "both",
+      "service": "event",
       "labelEn": "EMS readiness declaration",
       "labelAr": "إقرار جاهزية خدمات الطوارئ الطبية",
       "promptEn": "Each participating EMS agency confirms its ten readiness items and signs its own declaration.",
@@ -1321,7 +1660,7 @@
     {
       "key": "B18",
       "n": 18,
-      "service": "both",
+      "service": "event",
       "labelEn": "Patient-care documentation",
       "labelAr": "توثيق رعاية المرضى",
       "promptEn": "If medical care is provided, the care provided must be documented by the provider in its own clinical system.",
@@ -1403,7 +1742,7 @@
     {
       "key": "B2",
       "n": 2,
-      "service": "both",
+      "service": "event",
       "labelEn": "Medical plan",
       "labelAr": "خطة التأهب الصحي والطبي",
       "promptEn": "One shared plan in short sections, assembled from the answers above; the medical team completes the remaining operational sections and reviews it.",
@@ -1464,7 +1803,7 @@
     },
     {
       "key": "P-A",
-      "service": "both",
+      "service": "event",
       "labelEn": "Risk assessment",
       "labelAr": "تقييم المخاطر",
       "promptEn": "Your saved answers and the derived level. Edit only through the assessment.",
@@ -1952,9 +2291,14 @@
     "summaryTitleEn": "Medical arrangements summary",
     "summaryTitleAr": "ملخص الترتيبات الطبية",
     "summaryNoteEn": "Generated from your answers. Review it before submitting; change an answer on its step.",
-    "summaryNoteAr": "مُولَّد من إجاباتكم. راجعوه قبل التقديم؛ وغيّروا أي إجابة من خطوتها."
+    "summaryNoteAr": "مُولَّد من إجاباتكم. راجعوه قبل التقديم؛ وغيّروا أي إجابة من خطوتها.",
+    "padLinkedEn": "Linked to the facility registration {name} ({id}) · {n} registered AEDs",
+    "padLinkedAr": "مرتبط بتسجيل المنشأة {name} (⁦{id}⁩) · {n} من أجهزة إزالة الرجفان المسجّلة",
+    "padNoneEn": "Recorded: no facility registration for this place",
+    "padNoneAr": "سُجّل: لا يوجد تسجيل منشأة لهذا المكان"
   },
   "$commentAudit": "Partner UI audit, 8 October 2026: the Requirements page confirms that each requirement is met; the plan carries the operational detail. Level 1 takes minutes and generates a short medical-arrangements summary; Level 2 collects only what demonstrates the requirement; Level 3 keeps its mandatory elements as short confirmations that populate the plan. No names, counts, shifts or inventories on the cards; first-aid coverage reuses the BLS provider's answer where it provides it.",
   "$commentPrompts": "Owner direction, 8 October 2026: a card whose fields ask the question carries no prompt line; a prompt is kept only where it says something the fields do not (an invitation, a derived row, a file). Rows without promptEn/promptAr render the fields alone.",
-  "$commentPlanTitles": "Owner, 8 October 2026: the plan uses the record's own names. Each section's title is the requirement name the organizer meets on the steps; the Protocol 6 wording is kept verbatim and shown beneath it."
+  "$commentPlanTitles": "Owner, 8 October 2026: the plan uses the record's own names. Each section's title is the requirement name the organizer meets on the steps; the Protocol 6 wording is kept verbatim and shown beneath it.",
+  "$commentVenue": "Hosting Venue Registration, revised logic (owner and partner, 8 October 2026): a hosting venue registration is an annual reusable venue-readiness baseline, not a standing event registration. Every B and P row is event-only; the venue carries the V rows -- the reusable infrastructure (layout and zones, emergency-vehicle access, patient access and extraction, a permanent first-aid room where one exists, fixed communications, other stable characteristics) and the link to the PAD facility registration on the same site. No Event Medical Director, EMS agency, BLS team, ambulance deployment, medical command, medical plan, insurance, readiness declaration, staffing, deployment map or post-event report: those belong to each event. The rows are the same at every level; the level is the venue's routine baseline."
 }

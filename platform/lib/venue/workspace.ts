@@ -1,4 +1,3 @@
-import { venueInvitations } from './collaboration';
 import { getDb } from '../db';
 import { venueById, venueAssessmentsFor, venueAttachmentsFor } from '../queries';
 import { venuePackageEditable, type VenuePackageStatus } from '../rules/venue-workflow';
@@ -27,11 +26,9 @@ export function venuePackageFor(accountId:number,id:string) {
  const status:VenuePackageStatus=row?.status??(venue.issued?'accepted':'draft');
  const record:RecordRequirements|null=venueRecordRequirements(accountId,id);
  const level=record?.level??null;
- const invitations=venueInvitations(id);
- const contributions=getDb().prepare(`SELECT c.requirement_key,c.invitation_token,c.answers,c.completed_at,a.display_name FROM venue_contributions c JOIN venue_invitations i ON i.token=c.invitation_token JOIN accounts a ON a.id=i.account_id WHERE c.venue_id=? AND i.status='confirmed' AND a.suspended=0`).all(id) as unknown as {requirement_key:string;invitation_token:string;answers:string;completed_at:string;display_name:string}[];
  const files=venueAttachmentsFor(accountId,id);
  const point:MapPoint|null=geo.latitude!==null&&geo.longitude!==null?{lat:geo.latitude,lng:geo.longitude}:null;
- return {venue,status,record,workRevision:row?.work_revision??0,invitations,contributions,approval:record?.approval??null,detailsEditing:Boolean(row?.details_editing),assessmentEditing:Boolean(row?.assessment_editing),assessmentVersion,level:level as Level|null,files,point,district:geo.district,revision:row?.revision??0,note:row?.review_note??'',submittedAt:row?.submitted_at??null,
+ return {venue,status,record,workRevision:row?.work_revision??0,detailsEditing:Boolean(row?.details_editing),assessmentEditing:Boolean(row?.assessment_editing),assessmentVersion,level:level as Level|null,files,point,district:geo.district,revision:row?.revision??0,note:row?.review_note??'',submittedAt:row?.submitted_at??null,
  editable:venuePackageEditable(status,Boolean(venue.archivedAt)),
  assessmentDone:assessmentVersion!==null,
  detailsDone:Boolean(point&&geo.district&&venue.nameEn&&venue.category&&venue.responsibleName&&venue.responsiblePhone&&venue.licensedCapacity),
@@ -83,12 +80,8 @@ export function venuePackageFacts(w: VenueWorkspace): VenuePackageFacts {
     assessmentDone: w.assessmentDone && !w.assessmentEditing,
     level: w.level,
     assessmentVersion: w.assessmentVersion,
-    pendingInvitations: w.invitations.filter((i) => i.status === 'nominated').map((i) => ({ name: i.name, token: i.token })),
-    medicalTeamLinked: w.invitations.some((i) => ['nominated', 'confirmed'].includes(i.status)),
     requirements: (w.record?.instances ?? []).filter((i) => i.section === 'requirement' && i.group !== 'later').map((i) => ({
       key: i.key, en: i.labelEn, ar: i.labelAr, optional: i.group === 'recommended', done: i.state === 'complete',
-      clinical: !i.authors.includes('organizer') && i.authors.length > 0,
-      awaitingInvitation: i.state === 'waiting',
     })),
     fee: fee ? { amount: fee.amount, currency: fee.currency, paid: Boolean(paymentFor(w.venue.id, 'registerVenue')) } : null,
     submittedAt: w.submittedAt,

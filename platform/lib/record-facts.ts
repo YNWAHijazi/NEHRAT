@@ -11,7 +11,7 @@ import {
   assessmentsFor, attachmentsFor, invitationsFor, latestOutcomeFor, submissionFor, venueAssessmentsFor, venueAttachmentsFor, venueById,
   addedMeasuresFor, archiveWindowDays, beirutToday, derivedLevelFor,
 } from './queries';
-import { venueInvitations } from './venue/collaboration';
+import { padFacilityForVenue } from './sites';
 import { EVENT_FILE_KEYS, REQUESTED_KEYS } from './requirement-migration';
 import {
   blocksFiling, CATALOGUE_REVISION, certificationComplete, declarationsAreComplete, isArchivedRecord,
@@ -138,22 +138,21 @@ export function venueRecordRequirements(ownerId: number, venueId: string): Recor
   const derived = assessmentVersion ? versions.find((v) => v.version === assessmentVersion)?.derivation.finalLevel ?? null : null;
   const level = (status === 'accepted' && venue.level ? venue.level : derived) as Level | null;
   const editable = !venue.archivedAt && (status === 'draft' || status === 'revision' || status === 'incomplete');
-  const invitations = venueInvitations(venueId);
-  const parties: RecordParty[] = invitations
-    .filter((i) => i.status !== 'withdrawn')
-    .map((i) => ({ kind: i.kind, token: i.token, name: i.name, status: i.status, declarationSigned: Boolean(db.prepare(`SELECT 1 FROM venue_contributions WHERE venue_id = ? AND requirement_key = '20' AND invitation_token = ?`).get(venueId, i.token)), email: i.email, invitedAt: i.invited_at, answeredAt: i.responded_at }));
-  const approvalRow = db.prepare(`SELECT p.approved_at, a.display_name FROM venue_plan_approvals p JOIN venue_invitations i ON i.token = p.invitation_token JOIN accounts a ON a.id = i.account_id WHERE p.venue_id = ? AND p.assessment_version = ? AND i.kind = 'director' AND i.status = 'confirmed' AND a.suspended = 0`).get(venueId, assessmentVersion ?? 0) as { approved_at: string; display_name: string } | undefined;
+  // A hosting venue names no EMS agency and no Medical Director (Hosting Venue Registration,
+  // 8 October 2026): those belong to each event held there. Its AEDs come from the PAD facility
+  // registration on the same site.
+  const parties: RecordParty[] = [];
   const base = {
     service: 'venue' as const, id: venueId, ownerId, level, editable, filed: status !== 'draft', parties,
     planVersion: pkg?.work_revision ?? 0, assessmentVersion,
-    approval: approvalRow ? { by: approvalRow.display_name, at: approvalRow.approved_at, planVersion: pkg?.work_revision ?? 0 } : null,
+    approval: null,
   };
   if (level === null) {
     return { ...base, facts: null, instances: [], plan: [], blockers: [], summary: { required: { total: 0, complete: 0 }, recommended: { total: 0, complete: 0 }, later: 0 } };
   }
   const files: Record<string, StoredFile> = {};
   for (const a of venueAttachmentsFor(ownerId, venueId)) if (a.hasFile) files[a.docKey] = { fileName: a.fileName, savedAt: a.attachedAt };
-  const director = parties.find((p) => p.kind === 'director' && (p.status === 'confirmed' || p.status === 'nominated')) ?? null;
+  const pad = padFacilityForVenue(venueId);
   const facts: RecordFacts = {
     service: 'venue',
     level,
@@ -161,11 +160,12 @@ export function venueRecordRequirements(ownerId: number, venueId: string): Recor
     files,
     organizerContact: venue.responsibleName && venue.responsiblePhone ? { name: venue.responsibleName, phone: venue.responsiblePhone } : null,
     assessmentComplete: assessmentVersion !== null,
-    ems: parties.filter((p) => p.kind === 'ems'),
-    director,
-    planApprovalCurrent: approvalRow !== undefined,
+    ems: [],
+    director: null,
+    planApprovalCurrent: false,
     declaration: { statementsComplete: true, certificationComplete: true },
     requested: [],
+    padFacility: pad ? { id: pad.facilityId, nameEn: pad.nameEn, nameAr: pad.nameAr, devices: pad.devices.length } : null,
   };
   const instances = resolveRequirements(facts);
   return { ...base, facts, instances, plan: resolvePlan(facts, instances), blockers: requirementBlockers(instances), summary: requirementSummary(instances) };

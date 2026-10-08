@@ -13,7 +13,6 @@ import { RecordStepper, type StepperStep } from './RecordStepper';
 import { RequirementCard } from './RequirementCard';
 import { RequirementForm } from './RequirementForm';
 import { RequirementSummaries } from './RequirementSummaries';
-import { VenueDeclarationForm } from './VenueDeclarationForm';
 
 export interface RecordRequirementsProps {
   record: RecordData;
@@ -39,6 +38,8 @@ export interface RecordRequirementsProps {
   initialStep?: string | null;
   /** Just invited (?invited=ems|director): the dialog says which steps that party fills. */
   handoff?: 'ems' | 'director' | null;
+  /** Content a page adds above a row's form, by catalogue key (a venue's linked PAD facility on V7). */
+  extras?: Readonly<Record<string, ReactNode>>;
 }
 
 /**
@@ -48,7 +49,7 @@ export interface RecordRequirementsProps {
  * and venues, organizer and medical parties, all read the same instances; only who may
  * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null, handoff = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null, handoff = null, extras = {} }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
@@ -100,9 +101,15 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
             {viewerRole === 'ems' && service === 'event' ? (
               <a href={`/events/${id}/declaration`} style={{ fontSize: '14.5px' }}><L en="Open your agency's readiness declaration" ar="فتح إقرار جاهزية جهتكم" /></a>
             ) : null}
-            {viewerRole === 'ems' && service === 'venue' && viewerParty && record.editable ? (
-              <VenueDeclarationForm id={id} signed={Boolean(viewerParty.declarationSigned)} fileHref={viewerParty.declarationSigned ? `/api/venue-documents/${id}/20-${viewerParty.token}` : null} />
-            ) : null}
+          </>
+        );
+      case 'V7':
+        // A hosting venue's AEDs: the PAD facility registration on the same site, shown and never
+        // re-entered. With none linked, the operator links one, registers one, or records that there is none.
+        return (
+          <>
+            {extras['V7'] ?? null}
+            {record.facts?.padFacility ? null : form(inst, canEdit)}
           </>
         );
       case 'B2':

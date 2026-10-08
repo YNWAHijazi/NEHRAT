@@ -25,7 +25,7 @@ import { beirutToday, nowStamp } from '../lib/clock';
 
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
-import { getDb, nextRecordId } from '../lib/db';
+import { getDb, insertSite, nextRecordId } from '../lib/db';
 import { isListableHostingVenue, resolveHostingVenue } from '../lib/hosting-venues';
 import { archiveWindowDays } from '../lib/queries';
 import { maxUploadBytes, refuseImageUpload, refuseUpload } from '../lib/rules/uploads';
@@ -857,6 +857,9 @@ export async function registerVenueAction(_prev: VenueFormState, formData: FormD
   db.prepare(`INSERT INTO venue_assessments(venue_id,version,answers,inputs,derivation,nehrat_tool_version,effective,valid_until,representative,position,certificate_issued) VALUES(?,1,?,?,?,?,'','',?,?,0)`).run(venueId,JSON.stringify(answers),JSON.stringify(inputs),JSON.stringify(derivation),NEHRAT_TOOL_VERSION,representative,position);
   db.prepare('INSERT INTO venue_packages(venue_id,assessment_version) VALUES(?,1)').run(venueId);
   db.prepare('UPDATE venues SET level=? WHERE id=?').run(derivation.finalLevel,venueId);
+  // The physical place gets its site at registration: the anchor its PAD facility and its events share.
+  const siteId=insertSite(db,{nameEn:v.nameEn,nameAr:v.nameAr,municipalityEn:v.address,municipalityAr:v.addressAr,district:v.district,latitude:v.point.lat,longitude:v.point.lng,createdBy:account.id,isDemo:account.isDemo});
+  db.prepare('UPDATE venues SET site_id=? WHERE id=?').run(siteId,venueId);
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath('/dashboard');redirect(`/venues/${venueId}`);
 }
@@ -944,6 +947,9 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   const capacityNum = Number(s('capacity'));
   if ((s('capacity') && (!Number.isSafeInteger(capacityNum) || capacityNum < 0)) || (categoryKey==='transport' && !TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType')))) redirect('/facilities/new?error=details');
   const facilityId = nextRecordId('FC');
+  // Started from a venue ("Register this venue's AEDs"): the facility stands on the venue's site.
+  const { venueSiteForNewFacility } = await import('../lib/sites');
+  const venueSite = s('fromVenue') ? venueSiteForNewFacility(account.id, s('fromVenue')) : null;
   const db = getDb();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -967,6 +973,7 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
      VALUES (?, 'coordinator', ?, ?, ?)`,
   ).run(facilityId, s('coordinatorName'), s('coordinatorPhone'), s('coordinatorEmail'));
   db.prepare('UPDATE facilities SET latitude=?,longitude=?,facility_type=?,map_confirmed_at=now_stamp() WHERE id=?').run(point.lat,point.lng,s('facilityType'),facilityId);
+  db.prepare('UPDATE facilities SET site_id=? WHERE id=?').run(venueSite ?? insertSite(db,{nameEn:s('name'),nameAr:s('nameAr')||s('name'),municipalityEn:s('municipality'),municipalityAr:s('municipalityAr')||s('municipality'),district:'',latitude:point.lat,longitude:point.lng,createdBy:account.id,isDemo:account.isDemo}),facilityId);
   db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }

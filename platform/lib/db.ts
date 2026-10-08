@@ -1352,6 +1352,64 @@ function migrate(d: DatabaseSync): void {
       'id, record_id, service, amount, currency, provider, provider_reference, paid_at',
     );
   }
+
+  migrateSites(d, addColumn);
+}
+
+/**
+ * THE SITE (Hosting Venue Registration, revised logic, 8 October 2026): one persistent
+ * record per physical place. A hosting venue registration, a PAD facility registration
+ * and the events held there each carry the site id; they are related because they belong
+ * to the same site, never because their names match. A site exists without a venue (a
+ * facility only) and an event may name no site (a route, a temporary location).
+ */
+function migrateSites(d: DatabaseSync, addColumn: (table: string, column: string, ddl: string) => void): void {
+  d.exec(`CREATE TABLE IF NOT EXISTS sites (
+    id TEXT PRIMARY KEY,               -- SITE-000184
+    name_en TEXT NOT NULL, name_ar TEXT NOT NULL DEFAULT '',
+    municipality_en TEXT NOT NULL DEFAULT '', municipality_ar TEXT NOT NULL DEFAULT '',
+    district TEXT NOT NULL DEFAULT '',
+    latitude REAL, longitude REAL,
+    created_by INTEGER REFERENCES accounts(id),
+    is_demo INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL           -- always written by insertSite, on the Beirut clock
+  )`);
+  addColumn('venues', 'site_id', 'site_id TEXT REFERENCES sites(id)');
+  addColumn('facilities', 'site_id', 'site_id TEXT REFERENCES sites(id)');
+  addColumn('events', 'site_id', 'site_id TEXT REFERENCES sites(id)');
+  // The annual venue baseline an event relied on: the venue's assessment version at the time.
+  addColumn('events', 'hosting_venue_version', 'hosting_venue_version INTEGER');
+  backfillSites(d);
+}
+
+/** Gives every venue and facility without one its own site, and every event at a venue that venue's site. Idempotent. */
+export function backfillSites(d: DatabaseSync): void {
+  const venues = d.prepare(`SELECT id, account_id, name_en, name_ar, address_municipality_en, address_municipality_ar, district, latitude, longitude, is_demo, created_at FROM venues WHERE site_id IS NULL ORDER BY id`).all() as unknown as {
+    id: string; account_id: number; name_en: string; name_ar: string; address_municipality_en: string; address_municipality_ar: string; district: string; latitude: number | null; longitude: number | null; is_demo: number; created_at: string;
+  }[];
+  for (const v of venues) {
+    const site = insertSite(d, { nameEn: v.name_en, nameAr: v.name_ar, municipalityEn: v.address_municipality_en, municipalityAr: v.address_municipality_ar, district: v.district, latitude: v.latitude, longitude: v.longitude, createdBy: v.account_id, isDemo: v.is_demo === 1, createdAt: v.created_at });
+    d.prepare('UPDATE venues SET site_id = ? WHERE id = ?').run(site, v.id);
+  }
+  const facilities = d.prepare(`SELECT id, account_id, name_en, name_ar, municipality_en, municipality_ar, is_demo, created_at FROM facilities WHERE site_id IS NULL ORDER BY id`).all() as unknown as {
+    id: string; account_id: number; name_en: string; name_ar: string; municipality_en: string; municipality_ar: string; is_demo: number; created_at: string;
+  }[];
+  for (const f of facilities) {
+    const site = insertSite(d, { nameEn: f.name_en, nameAr: f.name_ar, municipalityEn: f.municipality_en, municipalityAr: f.municipality_ar, district: '', latitude: null, longitude: null, createdBy: f.account_id, isDemo: f.is_demo === 1, createdAt: f.created_at });
+    d.prepare('UPDATE facilities SET site_id = ? WHERE id = ?').run(site, f.id);
+  }
+  d.exec(`UPDATE events SET site_id = (SELECT v.site_id FROM venues v WHERE v.id = events.hosting_venue_id)
+          WHERE site_id IS NULL AND hosting_venue_id IS NOT NULL`);
+}
+
+/** A new site, numbered SITE-nnnnnn. Sequential like every other record id: correct inside a session, never public. */
+export function insertSite(d: DatabaseSync, s: { nameEn: string; nameAr: string; municipalityEn: string; municipalityAr: string; district: string; latitude: number | null; longitude: number | null; createdBy: number | null; isDemo: boolean; createdAt?: string }): string {
+  const last = d.prepare(`SELECT id FROM sites ORDER BY id DESC LIMIT 1`).get() as { id: string } | undefined;
+  const id = `SITE-${String((last ? Number.parseInt(last.id.slice(5), 10) : 0) + 1).padStart(6, '0')}`;
+  d.prepare(`INSERT INTO sites (id, name_en, name_ar, municipality_en, municipality_ar, district, latitude, longitude, created_by, is_demo, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?, now_stamp()))`)
+    .run(id, s.nameEn, s.nameAr, s.municipalityEn, s.municipalityAr, s.district, s.latitude, s.longitude, s.createdBy, s.isDemo ? 1 : 0, s.createdAt ?? null);
+  return id;
 }
 
 /** Next EV-nnnn style identifier. Sequential by design -- correct inside a session. */

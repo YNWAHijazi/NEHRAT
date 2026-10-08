@@ -90,6 +90,11 @@ export interface RecordFacts {
    * (Ministry ruling, 2026-08-29) and is asked through revision, never as a block.
    */
   waived?: readonly string[];
+  /**
+   * A hosting venue: the PAD facility registration on the same site, read through the
+   * site and never copied (Hosting Venue Registration, 8 October 2026). Null when none.
+   */
+  padFacility?: { id: string; nameEn: string; nameAr: string; devices: number } | null;
 }
 
 export interface RequirementInstance {
@@ -468,6 +473,19 @@ function instance(
         }
         break;
       }
+      case 'padLink': {
+        // The facility registration on the same site discharges the row; so does recording that there is none.
+        const pad = facts.padFacility ?? null;
+        if (pad) {
+          state = 'complete';
+          detailEn = fill(copy.padLinkedEn, { name: pad.nameEn, id: pad.id, n: pad.devices });
+          detailAr = fill(copy.padLinkedAr, { name: pad.nameAr, id: pad.id, n: pad.devices });
+        } else if (values['none'] === true) {
+          state = 'complete';
+          detailEn = copy.padNoneEn; detailAr = copy.padNoneAr;
+        } else state = 'pending';
+        break;
+      }
       case 'organizerDeclaration':
         state = (cell.statements === false || facts.declaration.statementsComplete) && facts.declaration.certificationComplete ? 'complete' : 'pending';
         break;
@@ -569,7 +587,8 @@ function planSections(facts: RecordFacts, resolved: ReadonlyMap<string, Requirem
  * cards show, so nothing is asked twice (brief item 10). Empty below Level 2.
  */
 export function resolvePlan(facts: RecordFacts, instances: readonly RequirementInstance[]): PlanSectionInstance[] {
-  if (facts.level === 1) return [];
+  // A hosting venue has no event health and medical plan: the plan is each event's (8 October 2026).
+  if (facts.level === 1 || facts.service === 'venue') return [];
   return planSections(facts, new Map(instances.map((i) => [i.key, i])));
 }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { L } from './L';
 import { SaveDraftButton } from './record/SaveDraftButton';
+import { VENUE_DECLARATION } from '../lib/rules/venue-workflow';
 
 /**
  * The declaration and the one Submit button. The declaration counts as a remaining
@@ -17,7 +18,7 @@ export function VenueSubmitControls({ remaining }: { remaining: number }) {
     <>
       <label style={{ display: 'flex', gap: 12, alignItems: 'start', padding: '16px 20px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 22, maxWidth: '80ch', fontSize: '14.5px', lineHeight: 1.6 }}>
         <input type="checkbox" name="confirm" value="yes" required checked={declared} onChange={(e) => setDeclared(e.target.checked)} style={{ marginBlockStart: 4 }} />
-        <L en="I confirm these details and documents are accurate and cover the venue’s routine operations." ar="أؤكّد أن هذه البيانات والمستندات صحيحة وتشمل التشغيل الاعتيادي للموقع." />
+        <L en={VENUE_DECLARATION.en} ar={VENUE_DECLARATION.ar} />
       </label>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
       <button

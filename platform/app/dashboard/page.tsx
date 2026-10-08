@@ -1,5 +1,4 @@
 import { OptionText } from '../../components/OptionText';
-import {venueAssignments} from '../../lib/venue/collaboration';
 import { VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
@@ -251,7 +250,7 @@ export default async function DashboardPage({
               <L en="You have withdrawn from the event. The organizer has been told." ar="انسحبتم من الفعالية. وأُبلغ المنظّم." />
             </div>
           ) : null}
-          {venueAssignments(account).length?<section style={{marginBlockEnd:32}}><h2><L en="Hosting venues" ar="مواقع الاستضافة"/></h2>{venueAssignments(account).map(i=><p key={i.token}><Link href={i.status==='confirmed'?`/venue-team/${i.venue_id}`:`/venue-invitations/${i.token}`}>{i.venue_id} · <L en={i.name_en} ar={i.name_ar}/></Link> · <L en={i.status==='confirmed'?'View requirements':'Respond to invitation'} ar={i.status==='confirmed'?'عرض المتطلبات':'الرد على الدعوة'}/></p>)}</section>:null}
+          {/* A medical partner's hosting-venue list left with the venue medical team (8 October 2026): venues name no EMS agency or Medical Director. */}
           <RoleDashboard
             rows={rows}
             countEn={`${rows.length} events · ${owed} need a response from you`}
