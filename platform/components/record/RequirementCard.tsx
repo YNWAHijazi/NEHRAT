@@ -26,7 +26,7 @@ export function StateChip({ inst, yours = true }: { inst: RequirementInstance; y
  * information control, and the body the caller supplies (a form, a file control,
  * an invitation, the plan). The id is the anchor the summaries jump to.
  */
-export function RequirementCard({ inst, open, children, extra, yours = true, note = null }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode; yours?: boolean; note?: ReactNode }) {
+export function RequirementCard({ inst, open, children, extra, yours = true, note = null, owner = null }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode; yours?: boolean; note?: ReactNode; owner?: { en: string; ar: string } | null }) {
   const tone = stateTone(inst, yours);
   const who = handledBy(inst);
   return (
@@ -44,6 +44,12 @@ export function RequirementCard({ inst, open, children, extra, yours = true, not
         <StateChip inst={inst} yours={yours} />
       </summary>
       <div className="record-card-body">
+        {/* Who fills this step, where it is read first (owner, 8 October 2026: the footer line was too small). */}
+        {owner ? (
+          <p data-region="card-owner" data-yours={yours || undefined} style={{ margin: '0 0 12px', display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 999, fontSize: 13, fontWeight: 500, background: yours ? 'var(--accent-soft)' : 'var(--surface2)', color: yours ? 'var(--accent-ink)' : 'var(--muted)' }}>
+            <L en={owner.en} ar={owner.ar} />
+          </p>
+        ) : null}
         {inst.detailEn && inst.detailAr ? (
           <p data-region="state-detail" className="record-card-detail" style={{ color: inst.state === 'waiting' ? 'var(--accent-ink)' : 'var(--muted)' }}>
             <L en={inst.detailEn} ar={inst.detailAr} />
@@ -52,7 +58,7 @@ export function RequirementCard({ inst, open, children, extra, yours = true, not
         {note ? <p data-region="read-only-note" className="record-card-detail" style={{ color: 'var(--muted)' }}>{note}</p> : null}
         {children}
         <div className="record-card-foot">
-          <span><L en={`${REQUIREMENT_COPY.whoEn}: ${who.en}`} ar={`${REQUIREMENT_COPY.whoAr}: ${who.ar}`} /></span>
+          {owner ? null : <span><L en={`${REQUIREMENT_COPY.whoEn}: ${who.en}`} ar={`${REQUIREMENT_COPY.whoAr}: ${who.ar}`} /></span>}
           <span>
             <L en={`${REQUIREMENT_COPY.sourceRuleEn}: ${inst.sourceEn}`} ar={`${REQUIREMENT_COPY.sourceRuleAr}: ${inst.sourceAr}`} />
             {inst.infoEn && inst.infoAr ? (

@@ -308,6 +308,11 @@ export default async function DashboardPage({
             />
           </div>
         ) : null}
+        {notice === 'draft-saved' ? (
+          <div role="status" data-region="draft-saved-notice" style={{ padding: '18px 24px', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
+            <L en="Saved as a draft. Nothing is sent to the Ministry until you submit." ar="حُفظت كمسودة. لا يُرسل شيء إلى الوزارة قبل أن تقدّموا." />
+          </div>
+        ) : null}
         {notice === 'draft-deleted' ? (
           <div style={{ padding: '18px 24px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24, fontSize: '14.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
             <L en="Draft deleted." ar="حُذفت المسودة." />

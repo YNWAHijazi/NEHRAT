@@ -47,7 +47,7 @@ test('saved facts are locked, the contact is prefilled, and the organizer cannot
  // A field the catalogue does not define is refused with its name; nothing is stored.
  expect(await saveRequirementAnswerAction('venue',id,'B5',{baseVersion:0,values:{bls:true,firstAid:'maybe'}})).toEqual({error:'invalid',fields:['firstAid']});
  await saveRow('B10');expect(inst('B10').state).toBe('complete');
- for(const kind of ['ems','director'])await expect(inviteVenuePartnerAction(id,form({kind,name:`Venue ${kind}`,email:`${kind}@venue.example.test`}))).rejects.toThrow('invited=yes');
+ for(const kind of ['ems','director'])await expect(inviteVenuePartnerAction(id,form({kind,name:`Venue ${kind}`,email:`${kind}@venue.example.test`}))).rejects.toThrow(/invited=(ems|director)/);
  const inv=venueInvitations(id);expect(inv).toHaveLength(2);expect(inv[0]?.token).toMatch(/^[a-f0-9]{48}$/);expect(inv.every(i=>i.delivery==='demo')).toBe(true);
  expect(inst('B7').state).toBe('waiting');expect(inst('B3').state).toBe('waiting');
  as('test_director');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('error=account');expect(venueAccess(session.account!,id)).toBeNull();
@@ -84,7 +84,7 @@ test('accepted medical partners share one answer per row; a stale save conflicts
 });
 test('each EMS agency signs its own declaration, then submission freezes the record the Ministry reads',async()=>{
  as('test_organizer');const db=getDb();db.prepare("INSERT INTO accounts(login,email,display_name,initials,role,is_demo) VALUES('venue_second_ems','second@venue.example.test','Second EMS','SE','ems',1)").run();
- await expect(inviteVenuePartnerAction(id,form({kind:'ems',name:'Second EMS',email:'second@venue.example.test'}))).rejects.toThrow('invited=yes');
+ await expect(inviteVenuePartnerAction(id,form({kind:'ems',name:'Second EMS',email:'second@venue.example.test'}))).rejects.toThrow(/invited=(ems|director)/);
  as('venue_second_ems');const inv=venueInvitations(id).find(i=>i.email==='second@venue.example.test')!;await expect(respondVenueInvitationAction(inv.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('/venue-team/');
  expect(inst('B20').state).toBe('waiting');expect(inst('B20').detailEn).toContain('Second EMS');
  await expect(signVenueDeclarationAction(id,form({file:pdf()}))).rejects.toThrow('error=incomplete');

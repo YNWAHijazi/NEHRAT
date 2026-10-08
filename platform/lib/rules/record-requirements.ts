@@ -146,6 +146,9 @@ export interface PlanSectionInstance {
   source: 'derived' | 'linked' | 'own';
   /** The requirement instances this section reads from. */
   linked: readonly RequirementInstance[];
+  /** The Protocol's own wording for the item, kept verbatim beneath the record's name for it. */
+  protocolEn: string;
+  protocolAr: string;
   /** Own narrative text, when the section has one (optional on linked sections, the answer on own ones). */
   text: string | null;
   ownText: boolean;
@@ -539,7 +542,7 @@ function majorIncident(facts: RecordFacts, resolved: ReadonlyMap<string, Require
 }
 
 function planSections(facts: RecordFacts, resolved: ReadonlyMap<string, RequirementInstance>): PlanSectionInstance[] {
-  const defs = catalogue.planSections as { key: string; n: number; source: 'derived' | 'linked' | 'own'; linked?: string[]; ownText?: boolean; promptEn: string; promptAr: string }[];
+  const defs = catalogue.planSections as { key: string; n: number; source: 'derived' | 'linked' | 'own'; linked?: string[]; ownText?: boolean; promptEn: string; promptAr: string; titleEn?: string; titleAr?: string }[];
   return defs
     // Section 12 below Level 3 IS the escalation row; the eleven items are Level 3's.
     .map((d) => {
@@ -554,7 +557,9 @@ function planSections(facts: RecordFacts, resolved: ReadonlyMap<string, Requirem
       if (d.source === 'derived') complete = d.key === 'P02' ? Boolean(facts.organizerContact) : true;
       else if (d.source === 'own' || linked.length === 0) complete = text !== null;
       else complete = linked.every((i) => i.state === 'complete') && (items.length === 0 || items.every((i) => i.complete));
-      return { key: d.key, n: d.n, en: title?.en ?? '', ar: title?.ar ?? '', promptEn: d.promptEn, promptAr: d.promptAr, source: d.source, linked, text, ownText: Boolean(d.ownText), complete, items };
+      // The record's own name for the section (owner, 8 October 2026); section 12 below Level 3 is the escalation procedure.
+      const named = d.key === 'P12' && facts.level < 3 ? { en: 'Emergency escalation', ar: 'التصعيد في حالات الطوارئ' } : d.titleEn && d.titleAr ? { en: d.titleEn, ar: d.titleAr } : null;
+      return { key: d.key, n: d.n, en: named?.en ?? title?.en ?? '', ar: named?.ar ?? title?.ar ?? '', protocolEn: title?.en ?? '', protocolAr: title?.ar ?? '', promptEn: d.promptEn, promptAr: d.promptAr, source: d.source, linked, text, ownText: Boolean(d.ownText), complete, items };
     });
 }
 

@@ -35,9 +35,10 @@ export function VenueFinalReview({ id, facts, editable, submitted, error }: { id
       ) : null}
       {editable ? (
         <>
-          <div data-region="remaining" style={cardStyle}>
+          {/* With nothing left the card goes: no sentence saying so (owner, 8 October 2026). */}
+          <div data-region="remaining" hidden={remaining === 0} style={cardStyle}>
             <h3 style={{ fontSize: 16, margin: '0 0 10px' }}>
-              {remaining === 0 ? <L en="Nothing remains. Everything the level requires is in place." ar="لم يبقَ شيء. كل ما يقتضيه المستوى مستوفى." /> : <L en={remaining === 1 ? '1 item remaining' : `${remaining} items remaining`} ar={`${remaining} متبقٍ`} />}
+              <L en={remaining === 1 ? '1 item remaining' : `${remaining} items remaining`} ar={`${remaining} متبقٍ`} />
             </h3>
             <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {open.map((c) => (

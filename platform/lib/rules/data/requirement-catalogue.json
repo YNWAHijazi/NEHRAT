@@ -2,7 +2,7 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-08.3",
+  "revision": "2026-10-08.4",
   "decisions": {
     "D1": {
       "state": "confirmed",
@@ -262,14 +262,14 @@
       "key": "B6",
       "n": 6,
       "service": "both",
-      "labelEn": "Treatment point",
-      "labelAr": "نقطة العلاج",
+      "labelEn": "Medical treatment post",
+      "labelAr": "مركز العلاج الطبي",
       "fields": [
         {
           "key": "location",
           "type": "text",
-          "labelEn": "Where is the treatment point?",
-          "labelAr": "أين نقطة العلاج؟"
+          "labelEn": "Where is the medical treatment post?",
+          "labelAr": "أين مركز العلاج الطبي؟"
         },
         {
           "key": "hours",
@@ -312,22 +312,20 @@
           "linkedPlan": [
             "P04"
           ],
-          "labelEn": "Medical treatment post",
-          "labelAr": "مركز العلاج الطبي",
           "fields": [
             {
               "key": "location",
               "type": "text",
-              "labelEn": "Where is the treatment post?",
-              "labelAr": "أين مركز العلاج؟"
+              "labelEn": "Where is the medical treatment post?",
+              "labelAr": "أين مركز العلاج الطبي؟"
             },
             {
               "key": "operational",
               "type": "checkbox",
-              "labelEn": "The treatment post will be operational throughout the event.",
-              "labelAr": "سيكون مركز العلاج عاملاً طوال الفعالية.",
-              "venueLabelEn": "The treatment post will be operational during each operating session.",
-              "venueLabelAr": "سيكون مركز العلاج عاملاً خلال كل جلسة تشغيل."
+              "labelEn": "The medical treatment post will be operational throughout the event.",
+              "labelAr": "سيكون مركز العلاج الطبي عاملاً طوال الفعالية.",
+              "venueLabelEn": "The medical treatment post will be operational during each operating session.",
+              "venueLabelAr": "سيكون مركز العلاج الطبي عاملاً خلال كل جلسة تشغيل."
             }
           ],
           "infoEn": "Level 3 requires a treatment post. Say where it is and confirm it will be operational; staffing and equipment belong in the medical plan.",
@@ -433,8 +431,8 @@
       "key": "B8",
       "n": 8,
       "service": "both",
-      "labelEn": "CPR and AED readiness",
-      "labelAr": "الجاهزية للإنعاش القلبي الرئوي وجهاز AED",
+      "labelEn": "CPR and AED response",
+      "labelAr": "الاستجابة بالإنعاش القلبي الرئوي وجهاز AED",
       "fields": [
         {
           "key": "aed",
@@ -1258,8 +1256,8 @@
       "labelAr": "خريطة الانتشار الطبي",
       "venueLabelEn": "Routine deployment layout",
       "venueLabelAr": "مخطط الانتشار الاعتيادي",
-      "promptEn": "Show medical teams, treatment points, AEDs, ambulance points and patient routes.",
-      "promptAr": "أظهِروا الفرق الطبية ونقاط العلاج وأجهزة AED ونقاط سيارات الإسعاف ومسارات المرضى.",
+      "promptEn": "Show medical teams, medical treatment posts, AEDs, ambulance points and patient routes.",
+      "promptAr": "أظهِروا الفرق الطبية ومراكز العلاج الطبي وأجهزة AED ونقاط سيارات الإسعاف ومسارات المرضى.",
       "infoEn": "Uploaded by the EMS agency, or at Level 3 the Medical Director, and referenced in the plan; the organizer reads it.",
       "infoAr": "ترفعها جهة الإسعاف، أو المدير الطبي في المستوى 3، ويُشار إليها في الخطة؛ ويقرأها المنظّم.",
       "file": {
@@ -1363,12 +1361,42 @@
           ],
           "fields": [
             {
-              "key": "confirmed",
+              "key": "record",
+              "type": "text",
+              "labelEn": "Which consistent record is used for every patient assessed or treated?",
+              "labelAr": "ما السجل الموحّد المستخدم لكل مريض يُقيَّم أو يُعالَج؟",
+              "placeholderEn": "For example, the provider's patient-care report form",
+              "placeholderAr": "مثلاً، نموذج تقرير رعاية المرضى لدى المزوّد"
+            },
+            {
+              "key": "minimum",
               "type": "checkbox",
-              "labelEn": "Participating medical providers will document patient care.",
-              "labelAr": "سيوثّق المزوّدون الطبيون المشاركون رعاية المرضى."
+              "labelEn": "The record captures at least date and time, patient identifier, age or age group, complaint or injury, assessment, treatment, disposition, transport destination and provider.",
+              "labelAr": "يتضمن السجل على الأقل التاريخ والوقت ومعرّف المريض والعمر أو الفئة العمرية والشكوى أو الإصابة والتقييم والعلاج والمآل ووجهة النقل والمزوّد."
+            },
+            {
+              "key": "refusal",
+              "type": "text",
+              "labelEn": "How is refusal of care or transport documented?",
+              "labelAr": "كيف يُوثَّق رفض الرعاية أو النقل؟"
+            },
+            {
+              "key": "access",
+              "type": "text",
+              "labelEn": "How is patient information protected, and who may access it?",
+              "labelAr": "كيف تُحمى معلومات المرضى، ومن يحق له الاطلاع عليها؟"
+            },
+            {
+              "key": "aggregate",
+              "type": "checkbox",
+              "labelEn": "Aggregate totals can be transferred accurately to the post-event medical report without disclosing unnecessary personal information.",
+              "labelAr": "يمكن نقل المجاميع بدقة إلى التقرير الطبي لما بعد الفعالية من دون كشف معلومات شخصية غير ضرورية.",
+              "venueLabelEn": "Aggregate totals can be reported accurately without disclosing unnecessary personal information.",
+              "venueLabelAr": "يمكن الإبلاغ عن المجاميع بدقة من دون كشف معلومات شخصية غير ضرورية."
             }
-          ]
+          ],
+          "infoEn": "Guidance 5.13, for the EMS agency or the Medical Director. Records stay in the provider's clinical system; no patient-identifying data is entered on this platform (decision D10).",
+          "infoAr": "الإرشاد 5.13، لجهة الإسعاف أو المدير الطبي. تبقى السجلات في النظام السريري للمزوّد؛ ولا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10)."
         }
       }
     },
@@ -1553,7 +1581,9 @@
       ],
       "ownText": true,
       "promptEn": "Staff numbers, roles, locations and times come from the response team. Add relief and coverage changes.",
-      "promptAr": "تأتي أعداد الملاك والأدوار والمواقع والأوقات من فريق الاستجابة. أضيفوا الاستبدال وتغيّرات التغطية."
+      "promptAr": "تأتي أعداد الملاك والأدوار والمواقع والأوقات من فريق الاستجابة. أضيفوا الاستبدال وتغيّرات التغطية.",
+      "titleEn": "First aid and BLS medical response team(s)",
+      "titleAr": "الإسعافات الأولية وفريق (فرق) الاستجابة الطبية للدعم الحيوي الأساسي"
     },
     {
       "key": "P04",
@@ -1562,8 +1592,10 @@
       "linked": [
         "B6"
       ],
-      "promptEn": "From the treatment point answer.",
-      "promptAr": "من إجابة نقطة العلاج."
+      "promptEn": "From the medical treatment post answer.",
+      "promptAr": "من إجابة مركز العلاج الطبي.",
+      "titleEn": "Medical treatment post",
+      "titleAr": "مركز العلاج الطبي"
     },
     {
       "key": "P05",
@@ -1572,8 +1604,10 @@
       "linked": [
         "B8"
       ],
-      "promptEn": "From the CPR and AED readiness answer.",
-      "promptAr": "من إجابة الجاهزية للإنعاش القلبي الرئوي وجهاز AED."
+      "promptEn": "From the CPR and AED response answer.",
+      "promptAr": "من إجابة الاستجابة بالإنعاش القلبي الرئوي وجهاز AED.",
+      "titleEn": "CPR and AED response",
+      "titleAr": "الاستجابة بالإنعاش القلبي الرئوي وجهاز AED"
     },
     {
       "key": "P06",
@@ -1583,7 +1617,9 @@
         "B8"
       ],
       "promptEn": "The same device and access answer; no second inventory.",
-      "promptAr": "إجابة الجهاز والوصول نفسها؛ لا جرد ثانٍ."
+      "promptAr": "إجابة الجهاز والوصول نفسها؛ لا جرد ثانٍ.",
+      "titleEn": "AED deployment",
+      "titleAr": "انتشار أجهزة AED"
     },
     {
       "key": "P07",
@@ -1593,7 +1629,9 @@
         "B9"
       ],
       "promptEn": "From the medical supplies answer.",
-      "promptAr": "من إجابة المستلزمات الطبية."
+      "promptAr": "من إجابة المستلزمات الطبية.",
+      "titleEn": "Medical supplies",
+      "titleAr": "المستلزمات الطبية"
     },
     {
       "key": "P08",
@@ -1603,7 +1641,9 @@
         "B7"
       ],
       "promptEn": "From the EMS and ambulance arrangements. Acceptance of an invitation alone is not an arrangement.",
-      "promptAr": "من ترتيبات الإسعاف وخدمات الطوارئ الطبية. قبول الدعوة وحده ليس ترتيباً."
+      "promptAr": "من ترتيبات الإسعاف وخدمات الطوارئ الطبية. قبول الدعوة وحده ليس ترتيباً.",
+      "titleEn": "EMS and ambulance arrangements",
+      "titleAr": "ترتيبات الإسعاف وخدمات الطوارئ الطبية"
     },
     {
       "key": "P09",
@@ -1613,8 +1653,10 @@
         "B10",
         "B11"
       ],
-      "promptEn": "From the emergency access and patient access answers and the maps.",
-      "promptAr": "من إجابتَي وصول مركبات الطوارئ والوصول إلى المريض ومن الخرائط."
+      "promptEn": "From the emergency vehicle access and patient access and extraction answers, and the maps.",
+      "promptAr": "من إجابتَي وصول مركبات الطوارئ والوصول إلى المريض وإخلائه، ومن الخرائط.",
+      "titleEn": "Emergency vehicle access, patient access and extraction",
+      "titleAr": "وصول مركبات الطوارئ والوصول إلى المريض وإخلاؤه"
     },
     {
       "key": "P10",
@@ -1624,8 +1666,10 @@
         "B14",
         "B15"
       ],
-      "promptEn": "From the team communication answer; at Level 3 the Medical Director confirms medical command.",
-      "promptAr": "من إجابة التواصل بين الفرق؛ وفي المستوى 3 يؤكّد المدير الطبي القيادة الطبية."
+      "promptEn": "From the communication answer; at Level 3 the Medical Director confirms medical command.",
+      "promptAr": "من إجابة التواصل؛ وفي المستوى 3 يؤكّد المدير الطبي القيادة الطبية.",
+      "titleEn": "Communication and medical command",
+      "titleAr": "التواصل والقيادة الطبية"
     },
     {
       "key": "P11",
@@ -1634,8 +1678,10 @@
       "linked": [
         "B12"
       ],
-      "promptEn": "From the receiving hospital answer.",
-      "promptAr": "من إجابة المستشفى المستقبِل."
+      "promptEn": "From the receiving emergency department answer.",
+      "promptAr": "من إجابة قسم الطوارئ المستقبِل.",
+      "titleEn": "Receiving emergency department(s)",
+      "titleAr": "قسم (أقسام) الطوارئ المستقبِل"
     },
     {
       "key": "P12",
@@ -1645,7 +1691,9 @@
         "B16"
       ],
       "promptEn": "At Level 2 the short escalation procedure. At Level 3 the eleven major-incident items below.",
-      "promptAr": "في المستوى 2 إجراء التصعيد المختصر. وفي المستوى 3 بنود الحوادث الجسيمة الأحد عشر أدناه."
+      "promptAr": "في المستوى 2 إجراء التصعيد المختصر. وفي المستوى 3 بنود الحوادث الجسيمة الأحد عشر أدناه.",
+      "titleEn": "Major-incident plan",
+      "titleAr": "خطة الحوادث الجسيمة"
     },
     {
       "key": "P13",
@@ -1672,7 +1720,9 @@
       ],
       "ownText": true,
       "promptEn": "Who keeps clinical records, and how are patients handed over? The provider's procedure only; individual patient records stay outside this package.",
-      "promptAr": "من يحتفظ بالسجلات السريرية، وكيف يُسلَّم المرضى؟ إجراء المزوّد فقط؛ وتبقى سجلات المرضى الفردية خارج هذا الملف."
+      "promptAr": "من يحتفظ بالسجلات السريرية، وكيف يُسلَّم المرضى؟ إجراء المزوّد فقط؛ وتبقى سجلات المرضى الفردية خارج هذا الملف.",
+      "titleEn": "Patient-care documentation",
+      "titleAr": "توثيق رعاية المرضى"
     },
     {
       "key": "P16",
@@ -1905,5 +1955,6 @@
     "summaryNoteAr": "مُولَّد من إجاباتكم. راجعوه قبل التقديم؛ وغيّروا أي إجابة من خطوتها."
   },
   "$commentAudit": "Partner UI audit, 8 October 2026: the Requirements page confirms that each requirement is met; the plan carries the operational detail. Level 1 takes minutes and generates a short medical-arrangements summary; Level 2 collects only what demonstrates the requirement; Level 3 keeps its mandatory elements as short confirmations that populate the plan. No names, counts, shifts or inventories on the cards; first-aid coverage reuses the BLS provider's answer where it provides it.",
-  "$commentPrompts": "Owner direction, 8 October 2026: a card whose fields ask the question carries no prompt line; a prompt is kept only where it says something the fields do not (an invitation, a derived row, a file). Rows without promptEn/promptAr render the fields alone."
+  "$commentPrompts": "Owner direction, 8 October 2026: a card whose fields ask the question carries no prompt line; a prompt is kept only where it says something the fields do not (an invitation, a derived row, a file). Rows without promptEn/promptAr render the fields alone.",
+  "$commentPlanTitles": "Owner, 8 October 2026: the plan uses the record's own names. Each section's title is the requirement name the organizer meets on the steps; the Protocol 6 wording is kept verbatim and shown beneath it."
 }

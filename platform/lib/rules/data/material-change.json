@@ -113,8 +113,8 @@
     },
     {
       "key": "hospital",
-      "en": "Receiving hospital",
-      "ar": "المستشفى المستقبِل",
+      "en": "Receiving emergency department",
+      "ar": "قسم الطوارئ المستقبِل",
       "affectsEn": "Domain 8 — transport time to the receiving emergency department",
       "affectsAr": "المجال 8 — زمن النقل إلى قسم الطوارئ المستقبِل",
       "consequenceEn": "",

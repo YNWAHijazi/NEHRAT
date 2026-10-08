@@ -7,6 +7,7 @@ import { fileSubmissionAction, saveComplianceAction } from '../../app/actions';
 import { missingCertificationFields, type RequirementInstance } from '../../lib/rules';
 import type { SubmissionRow } from '../../lib/queries';
 import { fieldInput } from '../workspace-styles';
+import { SaveDraftButton } from './SaveDraftButton';
 
 export interface ReviewRow { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; complete: boolean }
 
@@ -115,9 +116,10 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
             </div>
           ) : null}
 
-          <div data-region="remaining" style={cardStyle}>
+          {/* With nothing left the card goes: no sentence saying so (owner, 8 October 2026). */}
+          <div data-region="remaining" hidden={outstanding === 0} style={cardStyle}>
             <h3 style={{ fontSize: 16, margin: '0 0 10px' }}>
-              {outstanding === 0 ? <L en="Nothing remains. Everything the level requires is in place." ar="لم يبقَ شيء. كل ما يقتضيه المستوى مستوفى." /> : <L en={outstanding === 1 ? '1 item remaining' : `${outstanding} items remaining`} ar={`${outstanding} متبقٍ`} />}
+              <L en={outstanding === 1 ? '1 item remaining' : `${outstanding} items remaining`} ar={`${outstanding} متبقٍ`} />
             </h3>
             <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
               {remaining.filter((r) => r.key !== 'P-C').map((r) => (
@@ -228,6 +230,7 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
               ? outstanding > 0 ? <L en={`Submit the revised record — ${outstanding} remaining`} ar={`تقديم السجل المعدَّل — ${outstanding} متبقٍ`} /> : <L en="Submit the revised record" ar="تقديم السجل المعدَّل" />
               : outstanding > 0 ? <L en={`Submit — ${outstanding} remaining`} ar={`تقديم — ${outstanding} متبقٍ`} /> : <L en="Submit" ar="تقديم" />}
           </button>
+          <SaveDraftButton />
           {fileError ? (
             <span role="alert" style={{ fontSize: '13.5px', color: 'var(--bad)' }}>
               {fileError === 'blocked' ? <L en="The server found a requirement still incomplete. The list above names it." ar="وجد الخادم متطلباً لم يكتمل. القائمة أعلاه تسمّيه." /> : <L en="The record could not be submitted." ar="تعذّر تقديم السجل." />}

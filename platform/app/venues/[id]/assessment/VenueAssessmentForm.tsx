@@ -45,11 +45,15 @@ export function VenueAssessmentForm({
   validPreview,
   triggers,
   embedded = false,
-  onComplete,
+  onMissing,
+  showMissing = false,
 }: {
   /** Inside the registration form (owner, 8 October 2026): fields and hidden inputs only; the form's own submit records it. */
   embedded?: boolean;
-  onComplete?: (complete: boolean) => void;
+  /** What is still unanswered, named, for the registration form's "Please fill" line. */
+  onMissing?: (missing: { key: string; en: string; ar: string }[]) => void;
+  /** Mark the unanswered items in red (after a Continue that found them). */
+  showMissing?: boolean;
   venueId: string;
   venueNameEn: string;
   venueNameAr: string;
@@ -91,8 +95,16 @@ export function VenueAssessmentForm({
   );
   const why = levelWhy(derivation);
   const unansweredDomains = domains.filter((_, i) => answers[i] === null);
-  const complete = derivation.complete && declarationComplete;
-  useEffect(() => { onComplete?.(complete); }, [complete]); // eslint-disable-line react-hooks/exhaustive-deps
+  const missing = [
+    ...(inputs.expectedMaxSimultaneousAttendance === null ? [{ key: 'attendance', en: 'the attendance figure', ar: 'رقم الحضور' }] : []),
+    ...unansweredDomains.map((d) => ({ key: `domain-${d.number}`, en: `assessment question ${d.number} (${d.en})`, ar: `سؤال التقييم ${d.number} (${d.ar})` })),
+    ...(representative.trim() ? [] : [{ key: 'representative', en: 'the authorized representative', ar: 'الممثل المفوّض' }]),
+    ...(position.trim() ? [] : [{ key: 'position', en: 'the position', ar: 'الصفة' }]),
+  ];
+  const missingKey = missing.map((m) => m.key).join('|');
+  useEffect(() => { onMissing?.(missing); }, [missingKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const flag = (key: string) => showMissing && missing.some((m) => m.key === key);
+  const red = '1px solid var(--bad)';
 
   const submit = () => {
     setError(false);
@@ -139,14 +151,16 @@ export function VenueAssessmentForm({
           <input
             value={attendance}
             onChange={(e) => setAttendance(e.target.value)}
-            style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }}
+            data-missing-anchor="attendance"
+            aria-invalid={flag('attendance') || undefined}
+            style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums', ...(flag('attendance') ? { border: red } : {}) }}
           />
         </label>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
         {domains.map((domain, di) => (
-          <div data-domain={domain.number} key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
+          <div data-domain={domain.number} key={domain.number} data-missing-anchor={`domain-${domain.number}`} tabIndex={-1} aria-invalid={flag(`domain-${domain.number}`) || undefined} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16, ...(flag(`domain-${domain.number}`) ? { outline: red, outlineOffset: 2 } : {}) }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
               <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -260,13 +274,13 @@ export function VenueAssessmentForm({
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Authorized representative" ar="الممثل المفوّض" />
             </span>
-            <input value={representative} onChange={(e) => setRepresentative(e.target.value)} style={inputStyle} />
+            <input value={representative} onChange={(e) => setRepresentative(e.target.value)} data-missing-anchor="representative" aria-invalid={flag('representative') || undefined} style={{ ...inputStyle, ...(flag('representative') ? { border: red } : {}) }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
               <L en="Position" ar="الصفة" />
             </span>
-            <input value={position} onChange={(e) => setPosition(e.target.value)} style={inputStyle} />
+            <input value={position} onChange={(e) => setPosition(e.target.value)} data-missing-anchor="position" aria-invalid={flag('position') || undefined} style={{ ...inputStyle, ...(flag('position') ? { border: red } : {}) }} />
           </label>
         </div>
       </div>

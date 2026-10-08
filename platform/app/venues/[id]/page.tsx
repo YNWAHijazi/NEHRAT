@@ -141,7 +141,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
               <L en={q.invite === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : 'Enter a name and a valid email address.'} ar={q.invite === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'} />
             </div>
           ) : null}
-          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null}
+          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null} handoff={q.invited === 'ems' || q.invited === 'director' ? q.invited : null}
             final={<>{w.level === 1 ? <MedicalArrangementsSummary instances={w.record.instances} /> : null}<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} /></>} />
         </div>
       ) : (

@@ -2,11 +2,12 @@ import type { ReactNode } from 'react';
 import { L } from '../L';
 import type { RecordParty, RecordRequirements as RecordData } from '../../lib/record-facts';
 import type { RecordView } from '../../lib/record-view';
-import { REQUIREMENT_COPY, REQUIREMENT_GROUPS, handledBy, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
+import { REQUIREMENT_AUTHORS, REQUIREMENT_COPY, REQUIREMENT_GROUPS, handledBy, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
 import { FileControl } from './FileControl';
 import { JumpTo } from './JumpTo';
 import { PartyBlock } from './PartyBlock';
-import { PlanSections } from './PlanSections';
+import { LinkedAnswers, PlanSections, textInstance } from './PlanSections';
+import { HandoffDialog } from './HandoffDialog';
 import { RecordStepper, type StepperStep } from './RecordStepper';
 import { RequirementCard } from './RequirementCard';
 import { RequirementForm } from './RequirementForm';
@@ -35,6 +36,8 @@ export interface RecordRequirementsProps {
   directorVerification?: { en: string; ar: string } | null;
   /** The step an action's redirect names (?saved=, ?doc=, the plan after an approval): it leads, whatever the hash does. */
   initialStep?: string | null;
+  /** Just invited (?invited=ems|director): the dialog says which steps that party fills. */
+  handoff?: 'ems' | 'director' | null;
 }
 
 /**
@@ -44,12 +47,36 @@ export interface RecordRequirementsProps {
  * and venues, organizer and medical parties, all read the same instances; only who may
  * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null, handoff = null }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
   const rows = (group: 'required' | 'recommended') => instances.filter((i) => i.group === group && i.section === 'requirement');
   const later = instances.filter((i) => i.group === 'later');
+
+  // Who fills a row, in words, for the card's ownership line and the italic placeholder (owner, 8 October 2026).
+  const names = (roles: readonly AuthorRole[]) => ({ en: roles.map((r) => REQUIREMENT_AUTHORS[r].en).join(' or the '), ar: roles.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' أو ') });
+  const awaitingFor = (inst: RequirementInstance): { en: string; ar: string } | null => {
+    if (canEditInst(inst)) return null;
+    if (!mayAuthor(inst, viewerRole) && inst.authors.length > 0) {
+      const n = { en: inst.authors.map((r) => REQUIREMENT_AUTHORS[r].en).join(' / '), ar: inst.authors.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' / ') };
+      return { en: `Awaiting ${n.en} input`, ar: `بانتظار إدخال ${n.ar}` };
+    }
+    return { en: 'Not answered', ar: 'لم تُقدَّم إجابة' };
+  };
+  const ownerLine = (inst: RequirementInstance): { en: string; ar: string } | null => {
+    if (inst.authors.length === 0) return null;
+    const others = inst.authors.filter((r) => r !== viewerRole);
+    if (mayAuthor(inst, viewerRole)) {
+      if (others.length === 0) return { en: 'You fill this step', ar: 'تملؤون هذه الخطوة' };
+      const o = names(others);
+      return { en: `You or the ${o.en} fill this step`, ar: `تملؤون هذه الخطوة أنتم أو ${o.ar}` };
+    }
+    const o = names(inst.authors);
+    return { en: `Filled by the ${o.en}`, ar: `تملؤها ${o.ar}` };
+  };
+  const hasParty = (kind: 'ems' | 'director') => record.parties.some((p) => p.kind === kind && (p.status === 'nominated' || p.status === 'confirmed'));
+  const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
 
   const body = (inst: RequirementInstance) => {
     const canEdit = canEditInst(inst);
@@ -88,23 +115,42 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
         if (team && team.values['firstAid'] === 'yes') {
           return <p style={{ margin: 0, fontSize: '14.5px', color: 'var(--muted)' }}><a href="#req-B5"><L en="Open the BLS medical response team" ar="فتح فريق الاستجابة الطبية للدعم الحيوي الأساسي" /></a></p>;
         }
-        return inst.fields.length === 0 ? null : <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />;
+        return inst.fields.length === 0 ? null : form(inst, canEdit);
       }
       case 'B7':
+        // Invitation first (owner, 8 October 2026): while no agency is invited, the organizer who
+        // cannot answer this row sees only the invitation; the agency's questions follow it.
         return (
           <>
             {record.level !== 1 ? <PartyBlock kind={service} id={id} parties={record.parties} invite="ems" canInvite={canInvite} /> : null}
-            <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />
+            {!canEdit && viewerRole === 'organizer' && record.level !== 1 && !hasParty('ems') ? null : form(inst, canEdit)}
           </>
         );
-      case 'B16':
-        return inst.fields.length === 0 ? (
-          <p style={{ margin: 0, fontSize: '14.5px' }}><a href="#plan-P12"><L en="Open the major-incident section of the medical plan" ar="فتح قسم الحوادث الجسيمة في الخطة الطبية" /></a></p>
-        ) : <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />;
+      case 'B16': {
+        // Level 3: the eleven major-incident items are answered here and are the plan's section 12 (owner, 8 October 2026).
+        const items = record.plan.find((p) => p.key === 'P12')?.items ?? [];
+        if (inst.fields.length > 0 || items.length === 0) return form(inst, canEdit);
+        const itemAuthors: AuthorRole[] = ['ems', 'director'];
+        const itemEdit = record.editable && viewerConfirmed && itemAuthors.includes(viewerRole);
+        return (
+          <div data-region="major-incident-items" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {items.map((m) => (
+              <div key={m.key} data-major-incident-item={m.key} data-complete={m.complete} style={{ padding: '12px 14px', border: '1px solid var(--line)', borderRadius: 10 }}>
+                <div style={{ fontSize: '14.5px', fontWeight: 500, marginBlockEnd: 4 }}><span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 8 }}>{m.n}</span><L en={m.en} ar={m.ar} /></div>
+                <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--muted)' }}><L en={m.promptEn} ar={m.promptAr} /></p>
+                {m.linked.length > 0 ? <LinkedAnswers linked={m.linked} /> : (
+                  <RequirementForm kind={service} id={id} instance={textInstance(m.key, m.en, m.ar, record, itemAuthors)} canEdit={itemEdit}
+                    awaiting={itemEdit ? null : itemAuthors.includes(viewerRole) || !record.editable ? { en: 'Not answered', ar: 'لم تُقدَّم إجابة' } : { en: 'Awaiting EMS agency / Medical Director input', ar: 'بانتظار إدخال جهة الإسعاف / المدير الطبي' }} />
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      }
       default:
         return (
           <>
-            {inst.fields.length > 0 ? <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} /> : null}
+            {inst.fields.length > 0 ? form(inst, canEdit) : null}
             {inst.file ? <FileControl kind={service} id={id} inst={inst} canEdit={canEdit} filed={record.filed} contentType={contentTypes[inst.key] ?? null} refusal={refusal?.key === inst.key ? refusal.reason : null} /> : null}
           </>
         );
@@ -129,7 +175,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     key: inst.key, anchor: inst.anchor, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, state: inst.state,
     kind: inst.group === 'recommended' ? 'recommended' : 'required',
     yours: yours(inst), whoEn: handledBy(inst).en, whoAr: handledBy(inst).ar,
-    body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)} note={yours(inst) ? readOnlyNote : null}>{body(inst)}</RequirementCard>,
+    body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)} owner={ownerLine(inst)} note={yours(inst) ? readOnlyNote : null}>{body(inst)}</RequirementCard>,
   }));
   if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
   // The page opens on the step a redirect named; else on the viewer's first required row still open; else any open required row; with nothing open, on the final review.
@@ -138,9 +184,42 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     || steps.find((s) => s.kind === 'required' && s.state !== 'complete')?.key
     || steps.find((s) => s.kind === 'final')?.key || steps[0]?.key || '';
 
+  // Who completes this record, said once above the steps (owner, 8 October 2026).
+  const roles = new Set(instances.flatMap((i) => i.authors));
+  const parties: AuthorRole[] = (['organizer', 'ems', 'director'] as AuthorRole[]).filter((r) => roles.has(r));
+  const guide = parties.length > 1 ? (() => {
+    const others = parties.filter((r) => r !== viewerRole);
+    const o = { en: others.map((r) => `the ${REQUIREMENT_AUTHORS[r].en}`).join(' and '), ar: others.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' و') };
+    return {
+      en: `${parties.length === 3 ? 'Three' : 'Two'} parties complete this record: you and ${o.en}. Each step says who fills it: amber steps are yours; grey steps are filled by ${o.en} once invited and accepted, and you see their answers there. Your answers save when you move to another step; the record stays a draft until every required step is complete and you submit it.`,
+      ar: `${parties.length === 3 ? 'ثلاثة أطراف' : 'طرفان'} ${parties.length === 3 ? 'يستكملون' : 'يستكملان'} هذا السجل: أنتم و${o.ar}. تذكر كل خطوة من يملؤها: الخطوات الكهرمانية لكم؛ والخطوات الرمادية يملؤها ${o.ar} بعد الدعوة والقبول، وترون إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى؛ ويبقى السجل مسودة حتى تكتمل كل الخطوات المطلوبة وتقدّموه.`,
+    };
+  })() : null;
+  const handoffParty = handoff && record.editable && viewerRole === 'organizer' ? handoff : null;
+  const handoffSteps = handoffParty ? steps.map((s, i) => ({ s, n: i + 1, inst: instances.find((x) => x.key === s.key) })).filter(({ s: st, inst }) => st.kind === 'required' && inst && !mayAuthor(inst, 'organizer') && inst.authors.includes(handoffParty)) : [];
+  const handoffRow = handoffParty === 'ems' ? instances.find((x) => x.key === 'B7') : handoffSteps[0]?.inst;
+  const currentIndex = Math.max(0, steps.findIndex((s) => s.key === initialKey));
+  // On to the organizer's own steps: the next one still open, else the next one of theirs.
+  const mine = (s: StepperStep) => s.yours && s.kind !== 'final' && s.key !== 'B3';
+  const skipStep = steps.slice(currentIndex + 1).find((s) => mine(s) && s.state !== 'complete') ?? steps.find((s) => mine(s) && s.state !== 'complete')
+    ?? steps.slice(currentIndex + 1).find(mine) ?? steps.find(mine);
+
   return (
     <div data-region="record-requirements">
       <JumpTo />
+      {guide ? (
+        <div data-region="record-guide" role="note" style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14px', lineHeight: 1.6 }}>
+          <L en={guide.en} ar={guide.ar} />
+        </div>
+      ) : null}
+      {handoffParty && handoffSteps.length > 0 ? (
+        <HandoffDialog
+          party={REQUIREMENT_AUTHORS[handoffParty]}
+          steps={handoffSteps.map(({ s, n }) => ({ n, anchor: s.anchor, labelEn: s.labelEn, labelAr: s.labelAr }))}
+          questions={(handoffRow?.fields ?? []).map((f) => ({ en: f.labelEn, ar: f.labelAr }))}
+          skipTo={skipStep?.anchor ?? null}
+        />
+      ) : null}
       {steps.length > 0 ? (
         <RecordStepper steps={steps} initialKey={initialKey} listHref={listHref} groups={{ required: REQUIREMENT_GROUPS.required, recommended: REQUIREMENT_GROUPS.recommended }} />
       ) : null}

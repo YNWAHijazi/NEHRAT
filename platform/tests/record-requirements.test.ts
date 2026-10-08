@@ -412,10 +412,10 @@ describe('Level 3: the shared approved plan (brief item 10, D4)', () => {
     expect(byKey(noFile, 'B17').state).toBe('pending');
     const withFile = resolveRequirements(facts(3, { answers: { B17: fullAnswer(3, 'B17') }, files: { B17: { fileName: 'policy.pdf', savedAt: '' } } }));
     expect(byKey(withFile, 'B17').state).toBe('complete');
-    // Patient-care documentation is one confirmation by the providers; no documentation system is designed here.
-    expect(byKey(withFile, 'B18').fields.map((f) => f.key)).toEqual(['confirmed']);
+    // Patient-care documentation at Level 3 follows guidance 5.13: the record, its minimum content, refusals, access and aggregate totals.
+    expect(byKey(withFile, 'B18').fields.map((f) => f.key)).toEqual(['record', 'minimum', 'refusal', 'access', 'aggregate']);
     expect(byKey(withFile, 'B18').authors).toEqual(['ems', 'director']);
-    expect(byKey(withFile, 'B18').infoEn).toContain('No patient-identifying data');
+    expect(byKey(withFile, 'B18').infoEn).toContain('no patient-identifying data');
   });
 });
 

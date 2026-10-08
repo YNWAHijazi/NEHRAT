@@ -28,7 +28,7 @@ export async function inviteVenuePartnerAction(id:string,form:FormData) {
  if(recipient)db.prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(recipient.id,`Venue invitation: ${id}`,`دعوة لموقع: ${id}`,`Review your invitation for ${w.venue.nameEn}`,`راجعوا الدعوة للموقع ${w.venue.nameAr}`,`/venue-invitations/${token}`,+a.isDemo);
  const delivery=await sendLinkEmail({to:email,path:`/venue-invitations/${token}`,subject:`Venue medical team invitation: ${id}`,text:`You are invited to support ${w.venue.nameEn}. Review the venue and your tasks, then sign in or create an account to accept.\nدُعيتم للمشاركة في الفريق الطبي للموقع. راجعوا التفاصيل ثم سجّلوا الدخول أو أنشئوا حساباً للقبول.`,isDemo:a.isDemo});
  db.prepare('UPDATE venue_invitations SET delivery=? WHERE token=?').run(delivery,token);
- revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(back(`invited=yes&mail=${delivery}`));
+ revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(back(`invited=${kind}&mail=${delivery}`));
 }
 export async function withdrawVenuePartnerAction(id:string,token:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w?.editable)notFound();

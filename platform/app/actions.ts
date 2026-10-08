@@ -573,7 +573,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   revalidatePath(`/events/${eventId}`);
   // The row the invitation came from leads on return (?step=): the BLS row waits on the same nomination and would otherwise open first.
   const row = String(formData.get('kind')) === 'director' ? 'B3' : 'B7';
-  redirect(`/events/${eventId}?mail=${mail}&step=${row}#req-${row}`);
+  redirect(`/events/${eventId}?mail=${mail}&invited=${String(formData.get('kind')) === 'director' ? 'director' : 'ems'}&step=${row}#req-${row}`);
 }
 
 export interface CompliancePayload {

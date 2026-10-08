@@ -5,7 +5,7 @@ import type { RecordView } from '../../lib/record-view';
 import { FACILITY_CONTENT, FACILITY_REFERENCE_KEY, GOVERNANCE_LANDING, REQUIREMENT_COPY, ROLES_CONTENT, fieldsFor, referenceShortfalls, type AuthorRole, type PlanSectionInstance, type RequirementInstance } from '../../lib/rules';
 import { RequirementForm } from './RequirementForm';
 
-function textInstance(key: string, labelEn: string, labelAr: string, record: RecordRequirements, authors: readonly AuthorRole[]): RequirementInstance {
+export function textInstance(key: string, labelEn: string, labelAr: string, record: RecordRequirements, authors: readonly AuthorRole[]): RequirementInstance {
   const stored = record.facts?.answers[key] ?? null;
   const text = typeof stored?.values['text'] === 'string' ? stored.values['text'] : '';
   return {
@@ -21,7 +21,7 @@ function textInstance(key: string, labelEn: string, labelAr: string, record: Rec
   };
 }
 
-function LinkedAnswers({ linked }: { linked: readonly RequirementInstance[] }) {
+export function LinkedAnswers({ linked }: { linked: readonly RequirementInstance[] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {linked.map((inst) => (
@@ -92,6 +92,9 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
             <span style={{ flex: 'none', fontSize: 13, color: s.complete ? 'var(--success)' : 'var(--accent-ink)' }}><L en={s.complete ? 'Addressed' : 'Pending'} ar={s.complete ? 'مستوفى' : 'قيد الإنجاز'} /></span>
           </summary>
           <div style={{ padding: '0 14px 14px' }}>
+            {s.protocolEn && s.protocolEn !== s.en ? (
+              <p data-region="protocol-wording" style={{ margin: '0 0 6px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5, fontStyle: 'italic' }}><L en={s.protocolEn} ar={s.protocolAr} /></p>
+            ) : null}
             <p style={{ margin: '0 0 10px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}><L en={s.promptEn} ar={s.promptAr} /></p>
             {s.source === 'derived' ? (
               <p style={{ margin: 0, fontSize: '14.5px', lineHeight: 1.6 }}>
