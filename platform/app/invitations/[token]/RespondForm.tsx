@@ -1,11 +1,20 @@
 'use client';
 
-/** Read first, choose a response, then complete acceptance through the account screen. */
+/**
+ * Read first, choose a response, then complete acceptance through the account screen.
+ * One form for both services (owner, 8 October 2026): an event nomination answers
+ * through respondToInvitationAction, a hosting venue's through
+ * respondVenueInvitationAction. The controls and their order are the same; only the
+ * sentences that name the event or its organizer read for the venue and its operator.
+ */
 
 import { useState } from 'react';
 import { L } from '../../../components/L';
 import { respondToInvitationAction } from '../../actions';
+import { respondVenueInvitationAction } from '../../venues/team-actions';
 import { ROLES_CONTENT, emsDeclarationGate, type Level } from '../../../lib/rules';
+
+const V = ROLES_CONTENT.nomination.venue;
 
 const inputStyle: React.CSSProperties = {
   height: 46,
@@ -20,32 +29,50 @@ export function RespondForm({
   token,
   kind,
   eventLevel,
+  service = 'event',
 }: {
   token: string;
   kind: 'ems' | 'director';
   eventLevel: Level | null;
+  service?: 'event' | 'venue';
 }) {
   const content = ROLES_CONTENT.ems;
+  const venue = service === 'venue';
   // Accept promised "the declaration opens" at every level. It opens only at Level 3.
   const declarationOpens = emsDeclarationGate(eventLevel).behaviour === 'enabled';
   const accept = content.nominationResponses.find((r) => r.key === 'accept');
-  const acceptCopy = {
-    en: accept?.descNoDeclarationEn ?? accept?.descEn ?? '',
-    ar: accept?.descNoDeclarationAr ?? accept?.descAr ?? '',
-  };
+  const acceptCopy = venue
+    ? { en: V.acceptEmsNoDeclarationEn, ar: V.acceptEmsNoDeclarationAr }
+    : {
+        en: accept?.descNoDeclarationEn ?? accept?.descEn ?? '',
+        ar: accept?.descNoDeclarationAr ?? accept?.descAr ?? '',
+      };
   // A Director is appointed, not named as a provider, and has no readiness declaration.
-  const directorCopy = ROLES_CONTENT.director.responseDescriptions;
+  const directorCopy = venue
+    ? { acceptEn: V.acceptDirectorEn, acceptAr: V.acceptDirectorAr, declineEn: V.declineDirectorEn, declineAr: V.declineDirectorAr }
+    : ROLES_CONTENT.director.responseDescriptions;
   const [picked, setPicked] = useState<string | null>(null);
   const [declineOpen, setDeclineOpen] = useState(false);
   // ALL THREE RESPONSES, FOR BOTH KINDS. The Director used to be offered two: the
   // request-for-information option was filtered out, which left a physician deciding
   // on personal responsibility with no way to ask a question first -- accept blind or
   // decline. Declining is a material change; asking is not. (Reviewer, 2026-08-28.)
-  const responses = content.nominationResponses;
+  // A venue's nomination carries the same three, read for the venue and its operator.
+  const responses = venue
+    ? content.nominationResponses.map((r) =>
+        r.key === 'accept' ? { ...r, descEn: V.acceptEmsEn, descAr: V.acceptEmsAr }
+          : r.key === 'decline' ? { ...r, descEn: V.declineEmsEn, descAr: V.declineEmsAr }
+            : { ...r, descEn: V.modificationEn, descAr: V.modificationAr })
+    : content.nominationResponses;
+  const reasonRequired = venue ? { en: V.reasonRequiredEn, ar: V.reasonRequiredAr } : content.reasonRequired;
+  const declineWarning = venue
+    ? { titleEn: V.declineWarningTitleEn, titleAr: V.declineWarningTitleAr, bodyEn: V.declineWarningBodyEn, bodyAr: V.declineWarningBodyAr }
+    : content.declineWarning;
   const needsReason = picked === 'decline' || picked === 'modification';
+  const action = venue ? respondVenueInvitationAction.bind(null, token) : respondToInvitationAction.bind(null, token);
 
   return (
-    <form action={respondToInvitationAction.bind(null, token)}>
+    <form action={action}>
       <div data-region="respond" style={{ padding: '29px 33px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
           <L en="Respond to the nomination" ar="الردّ على الترشيح" />
@@ -84,7 +111,7 @@ export function RespondForm({
         {needsReason ? (
           <div style={{ marginBlockEnd: 18 }}>
             <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockEnd: 6 }}>
-              <L en={content.reasonRequired.en} ar={content.reasonRequired.ar} />
+              <L en={reasonRequired.en} ar={reasonRequired.ar} />
             </div>
             <textarea name="reason" rows={3} required style={{ width: '100%', padding: 12, background: 'var(--bg)', border: '1px solid var(--accent)', borderRadius: 8, fontSize: 15, lineHeight: 1.6, resize: 'vertical' }} />
           </div>
@@ -97,10 +124,10 @@ export function RespondForm({
       {picked === 'decline' && !declineOpen ? (
         <div style={{ padding: '28px 32px', border: '2px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 16, marginBlockEnd: 20, maxWidth: '76ch' }}>
           <div style={{ fontSize: 20, fontWeight: 600, lineHeight: 1.5, marginBlockEnd: 12 }}>
-            <L en={content.declineWarning.titleEn} ar={content.declineWarning.titleAr} />
+            <L en={declineWarning.titleEn} ar={declineWarning.titleAr} />
           </div>
           <div style={{ fontSize: 16, lineHeight: 1.7, marginBlockEnd: 20 }}>
-            <L en={content.declineWarning.bodyEn} ar={content.declineWarning.bodyAr} />
+            <L en={declineWarning.bodyEn} ar={declineWarning.bodyAr} />
           </div>
           <button
             type="button"
@@ -120,7 +147,7 @@ export function RespondForm({
           {picked === 'accept' ? (
             <L en="Accept the nomination" ar="قبول الترشيح" />
           ) : picked === 'decline' ? (
-            <L en="Decline and notify the organizer" ar="الاعتذار وإبلاغ المنظّم" />
+            venue ? <L en={V.declineButtonEn} ar={V.declineButtonAr} /> : <L en="Decline and notify the organizer" ar="الاعتذار وإبلاغ المنظّم" />
           ) : (
             <L en="Send the modification request" ar="إرسال طلب التعديل" />
           )}

@@ -24,8 +24,10 @@ export function VenueFinalReview({ id, facts, editable, submitted, error }: { id
     <section id="final-review" data-region="final-review" tabIndex={-1} style={{ marginBlockStart: 40, scrollMarginBlockStart: 16 }}>
       <h2 style={{ fontSize: 24, margin: '0 0 16px', fontWeight: 600, letterSpacing: '-.025em' }}><L en="Review and submit" ar="المراجعة والتقديم" /></h2>
       {submitted ? (
-        <div role="status" data-region="submitted-notice" style={{ ...cardStyle, border: '1px solid var(--brand)', background: 'var(--brand-soft)', fontSize: 15 }}>
-          <L en="Submitted. You can follow the Ministry’s review here." ar="تم التقديم. يمكنكم متابعة مراجعة الوزارة هنا." />
+        <div role="status" data-region="submitted-notice" style={{ ...cardStyle, border: '1px solid var(--brand)', background: 'var(--brand-soft)', fontSize: 15, lineHeight: 1.65 }}>
+          {/* As on the event: the record ID, and the receipt one click away. A venue's record ID is its id. */}
+          <L en={`Submitted. The record ID is ${id}.`} ar={`قُدِّم. معرّف السجل هو ⁦${id}⁩.`} />{' '}
+          <a href={`/venues/${id}/acknowledgment`} style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Open the acknowledgment of receipt" ar="فتح إشعار الاستلام" /></a>
         </div>
       ) : null}
       {error === 'incomplete' ? (

@@ -1,19 +1,15 @@
-import { InfoNote } from '../../../components/InfoNote';
 import { notFound } from 'next/navigation';
-import { GovernmentBand, Header } from '../../../components/Header';
-import { L } from '../../../components/L';
-import { RespondForm } from './RespondForm';
 import { currentAccount } from '../../../lib/auth';
 import { invitationByToken, nominationBriefing } from '../../../lib/queries';
 import { Briefing } from './Briefing';
-import { ROLES_CONTENT } from '../../../lib/rules';
+import { InvitationView } from './InvitationView';
 
 /**
  * The nomination, IN THREE STAGES (reviewer ruling, 2026-08-28).
  *
- *   1. VIEW    -- this page's Briefing: what the party is being asked to take on,
+ *   1. VIEW    -- the Briefing: what the party is being asked to take on,
  *                 readable on the token before any response and without an account.
- *   2. RESPOND -- this page's RespondForm: accept, decline with a reason, or ask the
+ *   2. RESPOND -- the RespondForm: accept, decline with a reason, or ask the
  *                 organizer a question. Also on the token, also without an account.
  *   3. ACCOUNT -- /invitations/[token]/account, AFTER accepting and never as part of
  *                 it. Create one, or sign in to one that already exists.
@@ -26,6 +22,9 @@ import { ROLES_CONTENT } from '../../../lib/rules';
  * The token is the credential (rule 6): unguessable, never sequential, and it shows
  * this one nomination -- no event the holder was not named in, and not the organizer's
  * submission for the one they were.
+ *
+ * The screen itself is InvitationView, shared with the hosting venue's nomination
+ * (/venue-invitations/[token]) so the two cannot drift apart again.
  */
 export default async function InvitationPage({
   params,
@@ -40,149 +39,32 @@ export default async function InvitationPage({
   const { notice, error } = await searchParams;
   const account = await currentAccount();
   const briefing = nominationBriefing(token);
-  const content = ROLES_CONTENT;
-  const isDirector = invitation.kind === 'director';
-  // A declined, withdrawn or removed nomination is closed: the banner says so, and
-  // the event's facts and document links are not re-served to a party no longer in it.
-  const live = invitation.status === 'nominated' || invitation.status === 'confirmed';
-
 
   return (
-    <>
-      <GovernmentBand />
-      {/* A signed-in counterparty gets the Dashboard pill like everyone else; only
-          the anonymous token view has nowhere to go back to. */}
-      <Header account={account} organization={null} unreadCount={0} showBack={account !== null} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <div style={{ maxWidth: 900 }}>
-          {invitation.status === 'withdrawn' ? (
-            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
-              <L
-                en="The organizer withdrew this nomination before it was answered. This link no longer accepts a response, and nothing is needed from you."
-                ar="سحب المنظّم هذا الترشيح قبل الإجابة عليه. لم يعد هذا الرابط يقبل رداً، ولا يُطلب منكم شيء."
-              />
-            </div>
-          ) : null}
-          {invitation.status === 'removed' ? (
-            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
-              <L
-                en="The organizer has removed your participation in this event. Nothing more is needed from you."
-                ar="أزال المنظّم مشاركتكم في هذه الفعالية. ولا يُطلب منكم شيء بعد الآن."
-              />
-            </div>
-          ) : null}
-          {invitation.status === 'declined' || notice === 'declined' ? (
-            <div style={{ padding: '26px 30px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24, fontSize: 16, lineHeight: 1.65 }}>
-              <L
-                en="This nomination has been declined. The organizer has been told, with the reason as written."
-                ar="اعتُذر عن هذا الترشيح. وأُبلغ المنظّم بالسبب كما كُتب."
-              />
-            </div>
-          ) : null}
-          {notice === 'modification' ? (
-            <div style={{ padding: '20px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="Your modification request has been sent to the organizer. The nomination remains open." ar="أُرسل طلب التعديل إلى المنظّم. ويبقى الترشيح قائماً." />
-            </div>
-          ) : null}
-          {error === 'reason' ? (
-            <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="A reason is required for that response." ar="السبب مطلوب لهذا الرد." />
-            </div>
-          ) : null}
-          {error === 'account' || error === 'email-taken' ? (
-            <div style={{ padding: '18px 24px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              {error === 'email-taken' ? (
-                <L en="An account with that email already exists. Sign in first, then respond." ar="يوجد حساب بهذا البريد. سجّلوا الدخول أولاً ثم ردّوا." />
-              ) : (
-                <L en="The account details are incomplete or the password does not meet the policy." ar="بيانات الحساب ناقصة أو كلمة المرور لا تستوفي السياسة." />
-              )}
-            </div>
-          ) : null}
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockEnd: 14 }}>
-            <span style={{ padding: '4px 11px', borderRadius: 999, background: invitation.status === 'confirmed' ? 'var(--brand-soft)' : invitation.status === 'withdrawn' || invitation.status === 'removed' ? 'var(--surface2)' : 'var(--accent-soft)', color: invitation.status === 'confirmed' ? 'var(--brand)' : invitation.status === 'withdrawn' || invitation.status === 'removed' ? 'var(--muted)' : 'var(--accent-ink)', fontSize: '12.5px' }}>
-              {invitation.status === 'confirmed' ? (
-                <L en="Nomination — accepted" ar="ترشيح — مقبول" />
-              ) : invitation.status === 'declined' ? (
-                <L en="Nomination — declined" ar="ترشيح — معتذَر عنه" />
-              ) : invitation.status === 'withdrawn' ? (
-                <L en="Nomination — withdrawn by the organizer" ar="ترشيح — سحبه المنظّم" />
-              ) : invitation.status === 'removed' ? (
-                <L en="Participation — removed by the organizer" ar="مشاركة — أزالها المنظّم" />
-              ) : (
-                <L en="Nomination — awaiting your response" ar="ترشيح — بانتظار ردّكم" />
-              )}
-            </span>
-            <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-              <L en={`Sent ${invitation.invitedAt.slice(0, 10)}`} ar={`أُرسل في ⁦${invitation.invitedAt.slice(0, 10)}⁩`} />
-            </span>
-          </div>
-          <h1 data-sec-h1="" style={{ margin: '0 0 32px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em', maxWidth: '26ch' }}>
-            {isDirector ? (
-              <L en="You have been nominated as Event Medical Director" ar="رُشِّحتم مديراً طبياً للفعالية" />
-            ) : (
-              <L
-                en={`${invitation.organizationNameEn} has named your organization in an event`}
-                ar={`سمّت ${invitation.organizationNameAr} مؤسستكم في فعالية`}
-              />
-            )}
-          </h1>
-          {isDirector ? (
-            <div className="secondary-help"><InfoNote><L en={content.director.inviteIntro.en} ar={content.director.inviteIntro.ar} /></InfoNote></div>
-          ) : null}
-
-          {briefing && live ? (
-            <Briefing
-              briefing={briefing}
-              token={token}
-              kind={invitation.kind}
-              level={invitation.eventLevel}
-              namedEn={invitation.nameEn}
-              namedAr={invitation.nameAr}
-            />
-          ) : null}
-
-          {/* Details, then the choice (partner ruling, counterparty pass): the
-              Director's personal-responsibility sentence stays directly above the
-              answer -- it is what accepting MEANS, not narration -- compact, with the
-              requirement rows themselves behind the briefing's View more. */}
-          {isDirector && live && invitation.status === 'nominated' ? (
-            <div data-region="accepting" style={{ marginBlockEnd: 16, maxWidth: '70ch' }}>
-              <p style={{ margin: 0, fontSize: '15.5px', lineHeight: 1.65 }}>
-                <L en={content.director.accepting.en} ar={content.director.accepting.ar} />
-              </p>
-            </div>
-          ) : null}
-
-          {invitation.status === 'nominated' ? (
-            <RespondForm token={token} kind={invitation.kind} eventLevel={invitation.eventLevel} />
-          ) : null}
-          {invitation.status === 'confirmed' && account ? (
-            <div style={{ padding: '22px 26px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, fontSize: 15 }}>
-              <a href="/dashboard">
-                <L en="Accepted. Open your dashboard." ar="تم القبول. افتحوا لوحتكم." />
-              </a>
-            </div>
-          ) : null}
-          {/* ACCEPTED, NOT YET REGISTERED -- a real state now that accepting no longer
-              creates an account. It must not be a dead end: the answer stands, and the
-              route to the working screens is named. */}
-          {invitation.status === 'confirmed' && !account ? (
-            <div data-region="accepted-no-account" style={{ padding: '22px 26px', border: '2px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, fontSize: 15, lineHeight: 1.65 }}>
-              <div style={{ marginBlockEnd: 12 }}>
-                <L en={content.nomination.stage3AcceptedEn} ar={content.nomination.stage3AcceptedAr} />{' '}
-                <L en={content.nomination.stage3IntroEn} ar={content.nomination.stage3IntroAr} />
-              </div>
-              <a
-                href={`/invitations/${token}/account`}
-                style={{ display: 'inline-flex', alignItems: 'center', height: 44, paddingInline: 22, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500 }}
-              >
-                <L en={content.nomination.stage3CreateEn} ar={content.nomination.stage3CreateAr} />
-              </a>
-            </div>
-          ) : null}
-        </div>
-      </main>
-    </>
+    <InvitationView
+      service="event"
+      token={token}
+      kind={invitation.kind}
+      status={invitation.status}
+      invitedAt={invitation.invitedAt}
+      level={invitation.eventLevel}
+      organizationNameEn={invitation.organizationNameEn}
+      organizationNameAr={invitation.organizationNameAr}
+      account={account}
+      notice={notice}
+      error={error}
+      briefing={
+        briefing ? (
+          <Briefing
+            briefing={briefing}
+            token={token}
+            kind={invitation.kind}
+            level={invitation.eventLevel}
+            namedEn={invitation.nameEn}
+            namedAr={invitation.nameAr}
+          />
+        ) : null
+      }
+    />
   );
 }
