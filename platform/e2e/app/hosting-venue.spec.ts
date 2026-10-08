@@ -8,6 +8,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { signInAs } from '../helpers/signin';
+import { expectAbsent } from '../helpers/absence';
 
 async function fillLabelled(page: Page, en: string, value: string): Promise<void> {
   await page.locator('label', { hasText: en }).first().locator('input, textarea').first().fill(value);
@@ -33,7 +34,7 @@ test('an event at a fixed venue names a registered hosting venue and the record 
 
   // Absent until the box says the event is at a fixed venue.
   const picker = page.locator('[data-region="hosting-venue"]');
-  await expect(picker).toHaveCount(0);
+  await expectAbsent(page, { anchor: page.locator('button[aria-pressed]', { hasText: 'It is at a fixed venue that hosts events repeatedly' }), absent: '[data-region="hosting-venue"]', because: 'the venue choice appears only once the event is said to be at a fixed venue' });
   await page.locator('button[aria-pressed]', { hasText: 'It is at a fixed venue that hosts events repeatedly' }).click();
   await expect(picker).toBeVisible();
 
