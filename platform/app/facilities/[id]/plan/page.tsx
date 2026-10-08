@@ -1,12 +1,13 @@
-import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
+import { FacilityWorkspaceHeader, facilityPreparation } from '../../../../components/FacilityWorkspaceHeader';
 import { facilityPoint } from '../../../../lib/facility-gis';
 import { InfoNote } from '../../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
-import { PlanConfirmation, PersonsForm, PrintButton } from './PlanConfirmation';
+import { PlanConfirmation, PrintButton } from './PlanConfirmation';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
+import { beirutToday } from '../../../../lib/clock';
 import {
   facilityDetail,
   facilityDevices,
@@ -18,19 +19,23 @@ import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
 
 /**
  * The cardiac emergency response plan (step 5). Held on the platform as a
- * structured record: the facility information and responsible persons are the
- * facility's own records; the device section DERIVES from the registry and is not
- * editable here (ROADMAP 2d); the readiness confirmation is the plan's own form,
- * signed by the coordinator.
+ * structured record: the facility information and the responsible facility contact
+ * are the facility's own records, shown read-only here; the AED section DERIVES from
+ * the registry and is not editable here (ROADMAP 2d); the readiness confirmation
+ * and the facility confirmation under it are the plan's own form, signed by the
+ * facility representative (partner audit, 2026-10-08).
+ *
+ * Type sizes match the other record pages (partner audit): the wall card's steps
+ * read at body size on screen and are enlarged only on paper (globals.css).
  */
 export default async function FacilityPlanPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{error?:string}>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const query=await searchParams;
+  const query = await searchParams;
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
@@ -43,25 +48,23 @@ export default async function FacilityPlanPage({
   const confirmation = facilityPlanConfirmation(facility.id);
   const content = FACILITY_CONTENT;
   const category = facilityCategory(facility.categoryKey);
-  const coordinator = persons.find((p) => p.role === 'coordinator') ?? null;
+  const contact = persons.find((p) => p.role === 'coordinator') ?? null;
+  const required = facilityPreparation(id).filter((r) => r.key !== 'confirmation');
 
   const accessible = devices.filter((d) => d.accessibleHours).length;
-  const checks = [...devices.map((d) => d.latestCheck).filter((c): c is string => c !== null)];
-  const latestCheck = checks.length ? checks.reduce((a, b) => (a > b ? a : b)) : null;
   const pediatricCount = devices.filter((d) => d.pediatric === 'yes').length;
 
   const derived: { en: string; ar: string; vEn: string; vAr: string }[] = [
-    { en: 'A defibrillator is available', ar: 'يتوفر جهاز إزالة رجفان', vEn: devices.length ? 'Yes' : 'No', vAr: devices.length ? 'نعم' : 'لا' },
-    { en: 'Number registered', ar: 'العدد المسجَّل', vEn: String(devices.length), vAr: String(devices.length) },
+    { en: 'An AED is available', ar: 'يتوفر جهاز إزالة رجفان خارجي آلي', vEn: devices.length ? 'Yes' : 'No', vAr: devices.length ? 'نعم' : 'لا' },
+    { en: 'Number of AEDs', ar: 'عدد الأجهزة', vEn: String(devices.length), vAr: String(devices.length) },
     { en: 'Exact locations', ar: 'المواقع الدقيقة', vEn: devices.map((d) => d.locationEn).join(' · ') || '—', vAr: devices.map((d) => d.locationAr).join(' · ') || '—' },
     {
       en: 'Accessible during operating hours', ar: 'متاحة خلال ساعات العمل',
       vEn: devices.length === 0 ? '—' : accessible === devices.length ? 'Yes' : `${accessible} of ${devices.length}`,
       vAr: devices.length === 0 ? '—' : accessible === devices.length ? 'نعم' : `${accessible} من ${devices.length}`,
     },
-    { en: 'Latest readiness check', ar: 'آخر فحص للجاهزية', vEn: latestCheck ?? '—', vAr: latestCheck ? `⁦${latestCheck}⁩` : '—' },
     {
-      en: 'Pediatric capability', ar: 'خاصية الاستخدام للأطفال',
+      en: 'Pediatric capability, where applicable', ar: 'خاصية الاستخدام للأطفال، عند الاقتضاء',
       vEn: devices.length === 0 ? '—' : pediatricCount === 0 ? 'None registered' : `On ${pediatricCount} of ${devices.length}`,
       vAr: devices.length === 0 ? '—' : pediatricCount === 0 ? 'غير مسجّلة' : `على ${pediatricCount} من ${devices.length}`,
     },
@@ -75,8 +78,17 @@ export default async function FacilityPlanPage({
     { en: 'Facility email', ar: 'البريد الإلكتروني للمنشأة', vEn: facility.email, vAr: facility.email },
     { en: 'Operating hours', ar: 'ساعات العمل', vEn: facility.operatingHours, vAr: facility.operatingHours },
     { en: 'Main EMS entrance', ar: 'المدخل الرئيسي أو نقطة وصول خدمات الطوارئ الطبية', vEn: facility.accessPoint, vAr: facility.accessPoint },
-    { en: 'EMS contact number used', ar: 'رقم خدمات الطوارئ الطبية المعتمد', vEn: facility.emsNumber, vAr: facility.emsNumber },
+    { en: 'EMS contact number used by the facility', ar: 'رقم الاتصال بخدمات الطوارئ الطبية المعتمد لدى المنشأة', vEn: facility.emsNumber, vAr: facility.emsNumber },
   ];
+
+  const contactRows: { en: string; ar: string; v: string }[] = [
+    { en: 'Name or position', ar: 'الاسم أو المسمى الوظيفي', v: contact?.nameOrPosition ?? '' },
+    { en: 'Telephone', ar: 'رقم الهاتف', v: contact?.phone ?? '' },
+    { en: 'Email', ar: 'البريد الإلكتروني', v: contact?.email ?? '' },
+  ];
+
+  const rowStyle: React.CSSProperties = { background: 'var(--bg)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: '14.5px', lineHeight: 1.5 };
+  const tableStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden' };
 
   return (
     <>
@@ -84,46 +96,45 @@ export default async function FacilityPlanPage({
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}><FacilityWorkspaceHeader facility={facility} active="plan"/>
 
-        <h2 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+        <h2 style={{ margin: '0 0 18px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
           <L en="Cardiac emergency response plan" ar={content.planTitle.ar} />
          <InfoNote><L
-            en="Update it whenever responsible persons, AED locations or emergency arrangements change."
-            ar="حدّثوها عند تغيّر الأشخاص المسؤولين أو مواقع الأجهزة أو الترتيبات الطارئة."
+            en="Update it whenever the responsible contact, AED locations or emergency arrangements change."
+            ar="حدّثوها عند تغيّر جهة الاتصال المسؤولة أو مواقع الأجهزة أو الترتيبات الطارئة."
           /></InfoNote>
-</h2>
+        </h2>
 
-
-        <div data-region="procedure" data-wallcard="" style={{ padding: 36, border: '2px solid var(--brand)', borderRadius: 16, background: 'var(--surface)', marginBlockEnd: 44 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 26 }}>
-            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+        <div data-region="procedure" data-wallcard="" style={{ padding: 32, border: '2px solid var(--brand)', borderRadius: 16, background: 'var(--surface)', marginBlockEnd: 44 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 22 }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
               <L en="Immediate response procedure" ar="إجراءات الاستجابة الفورية" />
-            </h2>
+            </h3>
             <PrintButton />
           </div>
           <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
             {content.procedure.map((p) => (
-              <li key={p.n} style={{ background: 'var(--bg)', padding: '18px 22px', display: 'flex', gap: 20, alignItems: 'baseline' }}>
-                <span style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)', minWidth: 28, fontVariantNumeric: 'tabular-nums' }}>{p.n}</span>
-                <span style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.4 }}>
+              <li key={p.n} style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', gap: 16, alignItems: 'baseline' }}>
+                <span data-step-number="" style={{ fontSize: 16, fontWeight: 600, color: 'var(--brand)', minWidth: 24, fontVariantNumeric: 'tabular-nums' }}>{p.n}</span>
+                <span data-step-text="" style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.5 }}>
                   <L en={p.en} ar={p.ar} />
                 </span>
               </li>
             ))}
           </ol>
-          <div style={{ marginBlockStart: 22, display: 'flex', flexWrap: 'wrap', gap: 32 }}>
+          <div style={{ marginBlockStart: 20, display: 'flex', flexWrap: 'wrap', gap: 28 }}>
             {content.emergencyNumbers.map((n) => (
               <div key={n.number}>
                 <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockEnd: 4 }}>
                   <L en={n.en} ar={n.ar} />
                 </div>
-                <div style={{ fontSize: 30, fontWeight: 600, color: 'var(--accent-ink)' }}>{n.number}</div>
+                <div data-emergency-number="" style={{ fontSize: 22, fontWeight: 600, color: 'var(--accent-ink)', fontVariantNumeric: 'tabular-nums' }}>{n.number}</div>
               </div>
             ))}
             <div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginBlockEnd: 4 }}>
-                <L en="Facility EMS number" ar="رقم خدمات الطوارئ الطبية المعتمد" />
+                <L en="EMS contact number used by the facility" ar="رقم الاتصال بخدمات الطوارئ الطبية المعتمد لدى المنشأة" />
               </div>
-              <div style={{ fontSize: 30, fontWeight: 600 }}>{facility.emsNumber}</div>
+              <div data-emergency-number="" style={{ fontSize: 22, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{facility.emsNumber}</div>
             </div>
           </div>
         </div>
@@ -131,7 +142,7 @@ export default async function FacilityPlanPage({
         <div data-region="derived" style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 8 }}>
             <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' }}>
-              <L en="Defibrillator information" ar="معلومات جهاز إزالة الرجفان الخارجي الآلي" />
+              <L en="AED information" ar="معلومات جهاز إزالة الرجفان الخارجي الآلي" />
             </h2>
             <span style={{ padding: '3px 9px', borderRadius: 999, background: 'var(--surface2)', color: 'var(--muted)', fontSize: 12 }}>
               <L en="Derived from the registry" ar="مستمدة من السجل" />
@@ -154,9 +165,9 @@ export default async function FacilityPlanPage({
           </div>
           <Link
             href={`/facilities/${facility.id}/devices`}
-            style={{ height: 40, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 20, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}
+            style={{ height: 44, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center' }}
           >
-            <L en="Open the device registry to change any of this" ar="فتح سجل الأجهزة لتغيير أي من ذلك" />
+            <L en="Open the AED registry to change any of this" ar="فتح سجل الأجهزة لتغيير أي من ذلك" />
           </Link>
         </div>
 
@@ -165,9 +176,9 @@ export default async function FacilityPlanPage({
             <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
               <L en="Facility information" ar="معلومات المرفق" />
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden' }}>
+            <div style={tableStyle}>
               {profileRows.map((r) => (
-                <div key={r.en} style={{ background: 'var(--bg)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: '14.5px', lineHeight: 1.5 }}>
+                <div key={r.en} style={rowStyle}>
                   <span style={{ color: 'var(--muted)' }}>
                     <L en={r.en} ar={r.ar} />
                   </span>
@@ -179,38 +190,62 @@ export default async function FacilityPlanPage({
             </div>
           </div>
 
-          <div data-region="plan-persons" id="persons" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16 }}>
-            <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600 }}>
-              <L en="Responsible persons" ar="الأشخاص المسؤولون" />
-             <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
-            </h3>
-
-            <PersonsForm facilityId={facility.id} persons={persons} />
+          {/* ONE responsible facility contact, read-only (partner audit, 2026-10-08):
+              the alternate contact and the assigned-guide person are gone; the
+              contact is edited on the facility details screen. */}
+          <div data-region="plan-contact" id="persons" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 18 }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
+                <L en="Responsible facility contact" ar="جهة الاتصال المسؤولة في المنشأة" />
+                <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
+              </h3>
+              <Link href={`/facilities/${facility.id}/profile#contact`} style={{ minHeight: 44, paddingInline: 14, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center' }}>
+                <L en="Edit contact" ar="تعديل جهة الاتصال" />
+              </Link>
+            </div>
+            <div style={tableStyle}>
+              {contactRows.map((r) => (
+                <div key={r.en} style={rowStyle}>
+                  <span style={{ color: 'var(--muted)' }}>
+                    <L en={r.en} ar={r.ar} />
+                  </span>
+                  <span style={{ textAlign: 'end' }} dir="ltr">{r.v || '—'}</span>
+                </div>
+              ))}
+            </div>
+            {!contact?.nameOrPosition || !contact.phone || !contact.email ? (
+              <p style={{ margin: '12px 0 0', fontSize: '13.5px', color: 'var(--muted)' }}>
+                <L en="The responsible contact is incomplete. Add a name or position, telephone and email on the facility details screen." ar="جهة الاتصال المسؤولة غير مكتملة. أضيفوا الاسم أو المسمى الوظيفي ورقم الهاتف والبريد الإلكتروني في شاشة تفاصيل المنشأة." />
+              </p>
+            ) : null}
           </div>
         </div>
 
         {!facilityPoint(id)?<p><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin" ar="إضافة موقع المنشأة على الخريطة"/></a></p>:<p><a href={`https://www.openstreetmap.org/?mlat=${facilityPoint(id)!.lat}&mlon=${facilityPoint(id)!.lng}#map=18/${facilityPoint(id)!.lat}/${facilityPoint(id)!.lng}`} target="_blank" rel="noreferrer"><L en="View facility map" ar="عرض خريطة المنشأة"/></a></p>}
-        {query.error==='contact'?<p role="alert"><L en="Enter the responsible contact’s name, phone and email." ar="أدخلوا اسم جهة الاتصال المسؤولة ورقم الهاتف والبريد الإلكتروني."/></p>:query.error?<p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the facility map and AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من الخريطة وحالة الأجهزة."/></p>:null}
-        <p><Link href={`/facilities/${id}/submit`} style={{display:'inline-flex',padding:'12px 24px',borderRadius:24,background:'var(--brand)',color:'var(--bg)'}}><L en="Review and submit" ar="المراجعة والتقديم"/></Link></p>
+        {query.error?<p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the facility map and AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من الخريطة وحالة الأجهزة."/></p>:null}
 
-        {/* Step 5 of the registration continues to step 6 -- the registered
+        {facility.archivedAt ? (
+          <p><L en="Archived record · Read-only" ar="سجل مؤرشف · للقراءة فقط" /></p>
+        ) : (
+          <PlanConfirmation
+            facilityId={facility.id}
+            representative={contact?.nameOrPosition ?? ''}
+            today={beirutToday()}
+            existing={confirmation}
+            ready={required.every((r) => r.done)}
+          />
+        )}
 
-            record (partner ruling, 2026-09-05). */}
-
-        <div data-region="continue-to-record" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 32 }}>
-
+        <div data-region="continue-to-record" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+          <Link href={`/facilities/${id}/submit`} style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
+            <L en="Review and submit" ar="المراجعة والتقديم" />
+          </Link>
           <a
-
             href={`/facilities/${facility.id}`}
-
-            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}
-
+            style={{ height: 48, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 24, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
           >
-
-            <L en="Continue to the facility record" ar="المتابعة إلى سجل المنشأة" />
-
+            <L en="The facility record" ar="سجل المنشأة" />
           </a>
-
         </div>
 
       </main>

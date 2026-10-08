@@ -111,6 +111,22 @@ export function categoryEndsJourney(category: FacilityCategory): boolean {
   return category.state === 'awaitingMinistryValue';
 }
 
+/* ---------------- the AED record's status ---------------- */
+
+export type DeviceStatusKey = 'operational' | 'notOperational' | 'notAccessible';
+
+/**
+ * The registry status of one AED, from the current record and nothing else
+ * (partner audit, 2026-10-08): no separate annual AED-readiness record exists, so
+ * nothing here reads a date. Not operational outranks not accessible.
+ */
+export function deviceStatus(d: { operational: boolean; accessibleHours: boolean }): { key: DeviceStatusKey; en: string; ar: string } {
+  const st = facilityJson.deviceStatuses;
+  if (!d.operational) return { key: 'notOperational', ...st.notOperational };
+  if (!d.accessibleHours) return { key: 'notAccessible', ...st.notAccessible };
+  return { key: 'operational', ...st.operational };
+}
+
 /* ---------------- the validity ledger ---------------- */
 
 export type ObligationStatus = 'current' | 'lapsing' | 'lapsed' | 'notRecorded';

@@ -3,8 +3,8 @@
   "categories": [
     {
       "key": "sports",
-      "en": "Sports and aquatic facilities",
-      "ar": "المنشآت الرياضية والمائية",
+      "en": "Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities",
+      "ar": "الصالات الرياضية ومراكز اللياقة البدنية والأندية الرياضية والملاعب والمنشآت الرياضية والمائية",
       "arNote": "Part 1 of the Arabic issue adds أحواض السباحة (swimming pools) to this category; part 2's table omits it. The table wording is used; the divergence is recorded for the Ministry.",
       "state": "inForceNow",
       "alsoRecurringVenue": true,
@@ -31,8 +31,8 @@
       "key": "transport",
       "shortEn": "Transport hub or large public venue",
       "shortAr": "محطة نقل أو مكان عام كبير",
-      "en": "Transport hubs, shopping malls and public venues",
-      "ar": "محطات النقل ومراكز التسوق والأماكن العامة",
+      "en": "Airports, passenger ports, central transport terminals, shopping malls, and public venues above the MOPH capacity threshold",
+      "ar": "المطارات ومرافئ الركاب ومحطات النقل المركزية ومراكز التسوق والأماكن العامة التي تتجاوز عتبة السعة التي تحددها وزارة الصحة العامة",
       "state": "inForceNow",
       "ruleEn": "Transport hubs and malls need AEDs. Public venues follow the Ministry’s capacity threshold.",
       "ruleAr": "تلزم الأجهزة في محطات النقل ومراكز التسوق. وتخضع الأماكن العامة لعتبة السعة الوزارية.",
@@ -153,8 +153,8 @@
     },
     {
       "key": "emsNumber",
-      "en": "The ambulance number this facility uses",
-      "ar": "رقم خدمات الطوارئ الطبية المعتمد لدى المرفق"
+      "en": "EMS contact number used by the facility",
+      "ar": "رقم الاتصال بخدمات الطوارئ الطبية المعتمد لدى المنشأة"
     }
   ],
   "crewCallout": {
@@ -167,22 +167,8 @@
       "key": "coordinator",
       "en": "Responsible facility contact",
       "ar": "جهة الاتصال المسؤولة في المنشأة",
-      "noteEn": "One named person for this facility.",
-      "noteAr": "شخص واحد مُسمّى لهذه المنشأة."
-    },
-    {
-      "key": "alternate",
-      "en": "Alternate contact",
-      "ar": "جهة الاتصال البديلة",
-      "noteEn": "Reached when the coordinator is not available.",
-      "noteAr": "يُتواصَل معها عند عدم توفر المنسّق."
-    },
-    {
-      "key": "emsGuide",
-      "en": "Person assigned to receive and guide ambulance crews",
-      "ar": "الشخص المكلف باستقبال وإرشاد فرق خدمات الطوارئ الطبية",
-      "noteEn": "Meets the crew at the access point recorded in the profile and takes them to the patient.",
-      "noteAr": "يلتقي الفرقة عند نقطة الوصول المسجّلة في الملف ويأخذها إلى المريض."
+      "noteEn": "One named person or position for this facility.",
+      "noteAr": "شخص واحد أو مسمى وظيفي واحد لهذه المنشأة."
     }
   ],
   "personFields": [
@@ -203,8 +189,8 @@
     }
   ],
   "coordinatorOneRecord": {
-    "en": "Recorded once here, and used on every device record and on the response plan.",
-    "ar": "يُسجَّل مرة واحدة هنا، ويُعتمد على كل سجل جهاز وعلى خطة الاستجابة."
+    "en": "Recorded once on the facility record and shown on the response plan.",
+    "ar": "يُسجَّل مرة واحدة في سجل المنشأة ويُعرض على خطة الاستجابة."
   },
   "deviceFields": [
     {
@@ -234,45 +220,12 @@
       "en": "Pediatric capability, where applicable",
       "ar": "خاصية الاستخدام للأطفال، عند الاقتضاء",
       "kind": "yesnona"
-    }
-  ],
-  "deviceReadinessChecks": [
+    },
     {
       "key": "operational",
-      "en": "AED operational",
-      "ar": "جهاز إزالة الرجفان الخارجي الآلي صالح للتشغيل"
-    },
-    {
-      "key": "pads",
-      "en": "Pads present and within expiry",
-      "ar": "الأقطاب الكهربائية متوافرة ولم تتجاوز تاريخ انتهاء صلاحيتها"
-    },
-    {
-      "key": "battery",
-      "en": "Battery functional",
-      "ar": "البطارية صالحة للاستعمال"
-    },
-    {
-      "key": "signage",
-      "en": "Signage visible",
-      "ar": "لافتات جهاز إزالة الرجفان الخارجي الآلي واضحة وظاهرة"
-    }
-  ],
-  "deviceDates": [
-    {
-      "key": "latestCheck",
-      "en": "Date of latest readiness check",
-      "ar": "تاريخ آخر فحص للجاهزية"
-    },
-    {
-      "key": "padExpiry",
-      "en": "Electrode pad expiry date",
-      "ar": "تاريخ انتهاء صلاحية الأقطاب الكهربائية"
-    },
-    {
-      "key": "batteryExpiry",
-      "en": "Battery replacement or expiry date, if available",
-      "ar": "تاريخ استبدال البطارية أو تاريخ انتهاء صلاحيتها، إن وجد"
+      "en": "Operational",
+      "ar": "صالح للتشغيل",
+      "kind": "yesno"
     }
   ],
   "devicePurposes": [
@@ -284,44 +237,37 @@
       "ctaAr": "تسجيل الجهاز"
     },
     {
-      "key": "annual",
-      "en": "Annual readiness confirmation",
-      "ar": "تأكيد الجاهزية السنوي",
-      "ctaEn": "Confirm readiness",
-      "ctaAr": "تأكيد الجاهزية"
-    },
-    {
       "key": "relocation",
-      "en": "Update after relocation",
-      "ar": "تحديث بعد نقل الجهاز إلى موقع آخر",
+      "en": "Relocation",
+      "ar": "نقل الجهاز إلى موقع آخر",
       "ctaEn": "Save new location",
       "ctaAr": "حفظ الموقع الجديد"
     },
     {
       "key": "replacement",
-      "en": "Update after replacement",
-      "ar": "تحديث بعد استبدال الجهاز",
+      "en": "Replacement",
+      "ar": "استبدال الجهاز",
       "ctaEn": "Save replacement",
       "ctaAr": "حفظ الاستبدال"
     },
     {
       "key": "statusChange",
-      "en": "Update operational status",
-      "ar": "تحديث الحالة التشغيلية",
+      "en": "Operational-status change",
+      "ar": "تغيير في الحالة التشغيلية",
       "ctaEn": "Save change",
       "ctaAr": "حفظ التغيير"
     },
     {
       "key": "accessibility",
-      "en": "Update accessibility",
-      "ar": "تحديث إمكانية الوصول",
+      "en": "Accessibility-status change",
+      "ar": "تغيير في حالة إمكانية الوصول",
       "ctaEn": "Save accessibility",
       "ctaAr": "حفظ إمكانية الوصول"
     },
     {
       "key": "ministryUpdate",
-      "en": "Other Ministry-requested update",
-      "ar": "تحديث آخر بطلب من الوزارة",
+      "en": "Ministry-requested update",
+      "ar": "تحديث بطلب من الوزارة",
       "ctaEn": "Save update",
       "ctaAr": "حفظ التحديث"
     }
@@ -361,8 +307,8 @@
     },
     {
       "n": 6,
-      "en": "Send the assigned person to meet and guide EMS",
-      "ar": "تكليف الشخص المحدد باستقبال فرق خدمات الطوارئ الطبية وإرشادها إلى موقع الحالة"
+      "en": "Ensure EMS personnel are met or directed promptly to the patient",
+      "ar": "التأكد من استقبال أفراد خدمات الطوارئ الطبية أو توجيههم فوراً إلى المريض"
     },
     {
       "n": 7,
@@ -626,8 +572,8 @@
       },
       {
         "key": "coordinator",
-        "en": "Coordinator details",
-        "ar": "بيانات المنسّق",
+        "en": "Responsible contact details",
+        "ar": "بيانات جهة الاتصال المسؤولة",
         "source": "coordinator",
         "cycleKey": "annualMonths",
         "actionEn": "Review details",
@@ -759,5 +705,53 @@
     }
   },
   "$commentOwner20260926": "Owner instruction: all listed facility categories are active. Registration is available for every category; old activation waiting screens are removed.",
-  "$commentPadGis20260926": "Updated Annexes A–D from PAD Annexes GIS Ready.docx supplied by the owner. Category-specific AED conditions are preserved; all categories can register. Existing extra contacts and maintenance dates are retained as optional records."
+  "$commentPadGis20260926": "Updated Annexes A–D from PAD Annexes GIS Ready.docx supplied by the owner. Category-specific AED conditions are preserved; all categories can register. Existing extra contacts and maintenance dates are retained as optional records.",
+  "devicePhoto": {
+    "en": "Photo of the installed AED (optional)",
+    "ar": "صورة الجهاز المركّب (اختيارية)",
+    "currentEn": "Current photo",
+    "currentAr": "الصورة الحالية",
+    "hintEn": "An image file. A new photo replaces the current one.",
+    "hintAr": "ملف صورة. تحلّ الصورة الجديدة محل الحالية."
+  },
+  "deviceMapPin": {
+    "en": "Use a separate map pin for this AED.",
+    "ar": "استخدام علامة منفصلة على الخريطة لهذا الجهاز.",
+    "noteEn": "Only needed for a large campus, a multi-building facility, an outdoor site, or where the facility pin does not adequately identify the AED location.",
+    "noteAr": "لا يلزم إلا في حرم واسع أو منشأة متعددة المباني أو موقع مكشوف أو حيث لا تحدد علامة المنشأة موقع الجهاز تحديداً كافياً.",
+    "usesFacilityEn": "Uses the facility map pin.",
+    "usesFacilityAr": "يستخدم علامة موقع المنشأة."
+  },
+  "deviceStatuses": {
+    "$comment": "The registry status derives from the current AED record itself (partner audit, 2026-10-08): no separate annual AED-readiness record exists.",
+    "operational": {
+      "en": "Operational",
+      "ar": "صالح للتشغيل"
+    },
+    "notOperational": {
+      "en": "Not operational",
+      "ar": "غير صالح للتشغيل"
+    },
+    "notAccessible": {
+      "en": "Not accessible during operating hours",
+      "ar": "غير متاح للوصول خلال ساعات العمل"
+    }
+  },
+  "facilityConfirmation": {
+    "en": "The facility confirms that this plan is current and that the above readiness arrangements are in place.",
+    "ar": "تؤكد المنشأة أن هذه الخطة محدّثة وأن ترتيبات الجاهزية المذكورة أعلاه قائمة.",
+    "representativeEn": "Facility representative (name or position)",
+    "representativeAr": "ممثل المنشأة (الاسم أو المسمى الوظيفي)",
+    "dateEn": "Date",
+    "dateAr": "التاريخ"
+  },
+  "certificate": {
+    "titleEn": "Facility registration certificate",
+    "titleAr": "شهادة تسجيل المنشأة",
+    "statusEn": "Registration complete",
+    "statusAr": "التسجيل مكتمل",
+    "pendingEn": "Registration not yet complete",
+    "pendingAr": "التسجيل غير مكتمل بعد"
+  },
+  "$commentAudit20261008": "Partner UI audit (2026-10-08): step 3 is one responsible contact; the AED record is lean (identifier, location, optional separate pin, accessibility, operational, pediatric, purpose, optional photo, facility confirmation); annual readiness confirmation and maintenance dates left the AED form; the plan shows the contact read-only and carries the facility confirmation. Existing alternate/emsGuide rows and device dates stay readable but are no longer collected or rendered."
 }

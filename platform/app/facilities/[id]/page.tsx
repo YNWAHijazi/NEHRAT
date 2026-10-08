@@ -1,4 +1,4 @@
-import { FacilityWorkspaceHeader, FacilityProgress } from '../../../components/FacilityWorkspaceHeader';
+import { FacilityWorkspaceHeader, FacilityProgress, facilityRegistrationComplete } from '../../../components/FacilityWorkspaceHeader';
 import { facilityPoint, facilityAedStatus } from '../../../lib/facility-gis';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -24,6 +24,7 @@ import {
   facilityCategory,
   facilityStanding,
   addDaysIso,
+  deviceStatus,
   type ObligationStatus,
 } from '../../../lib/rules';
 
@@ -48,7 +49,7 @@ const ACTION_ROUTE: Record<string, (id: string) => string> = {
   latestCheck: (id) => `/facilities/${id}/devices`,
   drill: (id) => `/facilities/${id}/plan`,
   annualConfirmation: (id) => `/facilities/${id}/submit`,
-  coordinator: (id) => `/facilities/${id}/plan#persons`,
+  coordinator: (id) => `/facilities/${id}/profile#contact`,
 };
 
 export default async function FacilityReadinessPage({
@@ -116,11 +117,6 @@ export default async function FacilityReadinessPage({
         {notice === 'confirmed' ? (
           <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
             <L en="The readiness confirmation has been recorded." ar="سُجِّل تأكيد الجاهزية." />
-          </div>
-        ) : null}
-        {notice === 'coordinator' ? (
-          <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-            <L en="The responsible persons have been reviewed and recorded." ar="روجعت بيانات الأشخاص المسؤولين وسُجِّلت." />
           </div>
         ) : null}
 
@@ -216,6 +212,26 @@ export default async function FacilityReadinessPage({
           </div>
         ) : null}
 
+        {/* THE CERTIFICATE (partner audit, 2026-10-08): surfaced once every
+            registration item is complete -- map, responsible contact, required
+            AEDs operational and accessible, readiness confirmation current. Absent
+            until then: the progress section above says what is pending. */}
+        {facility.archivedAt === null && facilityRegistrationComplete(facility.id) ? (
+          <div data-region="certificate-card" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 24 }}>
+            <div style={{ flex: '1 1 240px', minWidth: 0 }}>
+              <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 6 }}>
+                <L en={content.certificate.titleEn} ar={content.certificate.titleAr} />
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.45 }}>
+                <L en={content.certificate.statusEn} ar={content.certificate.statusAr} />
+              </div>
+            </div>
+            <Link href={`/facilities/${facility.id}/certificate`} style={{ flex: 'none', height: 44, paddingInline: 22, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
+              <L en="Open the certificate" ar="فتح الشهادة" />
+            </Link>
+          </div>
+        ) : null}
+
         {facility.archivedAt === null ? (
           <section data-region="facility-tasks" style={{ padding: 20, background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 24 }}>
             <h2 style={{ fontSize: 20, marginBlockStart: 0 }}><L en="Your next tasks" ar="مهامكم التالية" /></h2>
@@ -274,13 +290,10 @@ export default async function FacilityReadinessPage({
         </h2>
         <div data-region="devices" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 16, marginBlockEnd: 44 }}>
           {devices.map((d) => {
-            const until = [d.padExpiry, d.batteryExpiry].filter((x): x is string => x !== null);
-            const min = until.length ? until.reduce((a, b) => (a < b ? a : b)) : null;
-            const st = !d.operational
-              ? { ...STATUS_STYLE['lapsed'], en: 'Out of service — reported', ar: 'خارج الخدمة — مبلَّغ عنه' }
-              : STATUS_STYLE[
-                  !d.accessibleHours ? 'lapsed' : min === null ? 'notRecorded' : min < asOfDate ? 'lapsed' : addDaysIso(asOfDate, days) >= min ? 'lapsing' : 'current'
-                ];
+            // The card's state is the AED record's own (partner audit, 2026-10-08):
+            // operational, not operational, or not accessible -- never a date.
+            const status = deviceStatus(d);
+            const st = STATUS_STYLE[status.key === 'operational' ? 'current' : 'lapsed'];
             return (
               <Link
                 key={d.label}
@@ -294,13 +307,7 @@ export default async function FacilityReadinessPage({
                   <L en={d.locationEn} ar={d.locationAr} />
                 </div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>
-                  {!d.accessibleHours ? (
-                    <L en="Reported not accessible during operating hours" ar="أُبلغ أنه غير متاح للوصول خلال ساعات العمل" />
-                  ) : d.padExpiry ? (
-                    <L en={`Pads valid to ${d.padExpiry}${d.pediatric === 'yes' ? ' · pediatric capable' : ''}`} ar={`اللواصق صالحة حتى ⁦${d.padExpiry}⁩${d.pediatric === 'yes' ? ' · متاح للأطفال' : ''}`} />
-                  ) : (
-                    <L en="Readiness dates not yet recorded" ar="لم تُسجَّل تواريخ الجاهزية بعد" />
-                  )}
+                  <L en={`${status.en}${d.pediatric === 'yes' ? ' · pediatric capable' : ''}`} ar={`${status.ar}${d.pediatric === 'yes' ? ' · متاح للأطفال' : ''}`} />
                 </div>
               </Link>
             );

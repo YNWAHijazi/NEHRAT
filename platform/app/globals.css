@@ -66,6 +66,12 @@ html[data-demonstration] [data-demonstration-band]{position:absolute;inset-block
 html[data-demonstration] [data-wallcard],html[data-demonstration] [data-region="certificate"]{inset-block-start:72px}
 [data-wallcard],[data-region="certificate"]{position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;border:0 !important;padding:0 !important;background:#fff !important;color:#000 !important}
 [data-region="certificate"]{--bg:#ffffff;--surface:#ffffff;--surface2:#ffffff;--ink:#000000;--muted:#333333}
+/* The response-plan wall card reads at body size on screen (partner audit, 2026-10-08:
+   the plan's type matches the other record pages) and is enlarged only on paper, where
+   it hangs beside the AED cabinet. */
+[data-wallcard] [data-step-text]{font-size:20px !important;line-height:1.4 !important}
+[data-wallcard] [data-step-number]{font-size:24px !important}
+[data-wallcard] [data-emergency-number]{font-size:30px !important}
 [data-region="certificate"]>div>div{break-inside:avoid}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}[data-sk]{background:var(--surface2) !important}button:not(:disabled):active,a:active{transform:none !important}}

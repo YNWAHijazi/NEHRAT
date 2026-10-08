@@ -96,6 +96,25 @@ export function refuseUpload(file: { type: string; size: number }): UploadRefusa
   return null;
 }
 
+/** The `accept` attribute for a picker that takes only images, from the same allow-list. */
+export function imageAcceptAttribute(): string {
+  return ACCEPTED.filter((a) => a.inline === 'image').map((a) => a.mime).join(',');
+}
+
+/**
+ * Is this file an acceptable IMAGE? The size and emptiness rules are the general
+ * ones; the type rule is narrower, because a photo of an installed AED is a
+ * picture and a PDF is not one.
+ */
+export function refuseImageUpload(file: { type: string; size: number }): UploadRefusal | null {
+  const general = refuseUpload(file);
+  if (general) return general;
+  if (servedType(file.type)?.inline !== 'image') {
+    return { reason: 'wrongType', en: uploadsJson.copy.notImageEn, ar: uploadsJson.copy.notImageAr };
+  }
+  return null;
+}
+
 /** A size a person can read, for the row beside a file name. */
 export function humanSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

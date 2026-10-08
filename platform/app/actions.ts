@@ -27,7 +27,7 @@ import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, nextRecordId } from '../lib/db';
 import { archiveWindowDays } from '../lib/queries';
-import { maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
+import { maxUploadBytes, refuseImageUpload, refuseUpload } from '../lib/rules/uploads';
 import { missingCertificationFields } from '../lib/rules/certification';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import {
@@ -934,13 +934,13 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
     s('capacity') !== '' && Number.isFinite(capacityNum) ? capacityNum : null,
     account.isDemo ? 1 : 0,
   );
-  const person = db.prepare(
+  // ONE responsible facility contact (partner audit, 2026-10-08). The alternate
+  // contact and the assigned-guide person are no longer collected; rows that
+  // predate the audit stay readable and are simply not rendered.
+  db.prepare(
     `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email)
-     VALUES (?, ?, ?, ?, ?)`,
-  );
-  for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
-    person.run(facilityId, role, s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`));
-  }
+     VALUES (?, 'coordinator', ?, ?, ?)`,
+  ).run(facilityId, s('coordinatorName'), s('coordinatorPhone'), s('coordinatorEmail'));
   db.prepare('UPDATE facilities SET latitude=?,longitude=?,facility_type=?,map_confirmed_at=now_stamp() WHERE id=?').run(point.lat,point.lng,s('facilityType'),facilityId);
   db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
   db.exec('COMMIT');
@@ -960,9 +960,13 @@ export async function recordFacilityInterestAction(formData: FormData): Promise<
 }
 
 /**
- * One action for the five Annex C purposes. What is asked -- and what changes --
- * depends on the purpose; every path stamps updated_at (the ledger's affirmation
- * date) and logs the update with the facility representative who signed it.
+ * One action for the AED registration and update purposes (partner audit,
+ * 2026-10-08: initial registration, relocation, replacement, operational-status
+ * change, accessibility-status change, Ministry-requested update -- never an
+ * annual readiness confirmation, and no maintenance dates). What is asked -- and
+ * what changes -- depends on the purpose; every path stamps updated_at and logs
+ * the update with the facility representative who signed it. An optional photo of
+ * the installed AED is stored with the record on any purpose.
  */
 export async function saveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
@@ -975,12 +979,23 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   const yes = (k: string): number => (formData.get(k) === 'yes' ? 1 : 0);
   let label = s('label');
   const device = db.prepare('SELECT * FROM facility_devices WHERE facility_id=? AND label=?').get(facilityId,label);
-  const allowed = ['initial','annual','relocation','replacement','statusChange','accessibility','ministryUpdate'];
+  const allowed = ['initial','relocation','replacement','statusChange','accessibility','ministryUpdate'];
   const point = readMapPoint(formData, 'aedMap');
   if (!allowed.includes(purpose) || !s('representative') || (purpose !== 'initial' && !device)
     || (['initial','relocation'].includes(purpose) && !facilityPoint(facilityId)) || (s('separatePin') === 'yes' && !point)
     || (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification'))
     || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) redirect(`/facilities/${facilityId}/devices?error=details`);
+  // The photo is checked BEFORE anything is written: a refused file must not leave a
+  // half-saved record behind it. The server enforces the same allow-list the picker does.
+  // An untouched file input still submits an empty File; only a non-empty one is a photo.
+  const photo = formData.get('photo');
+  let photoBytes: Buffer | null = null;
+  if (photo instanceof File && photo.size > 0) {
+    const refusal = refuseImageUpload({ type: photo.type, size: photo.size });
+    if (refusal) redirect(`/facilities/${facilityId}/devices?error=photo-${refusal.reason}`);
+    photoBytes = Buffer.from(await photo.arrayBuffer());
+    if (photoBytes.length > maxUploadBytes()) redirect(`/facilities/${facilityId}/devices?error=photo-tooLarge`);
+  }
   db.exec('BEGIN IMMEDIATE');
   try {
   if (purpose === 'initial') {
@@ -991,22 +1006,13 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
     label = `AED-${String(n).padStart(3, '0')}`;
     db.prepare(
       `INSERT INTO facility_devices (facility_id, label, identification, location_en, location_ar,
-         accessible_hours, publicly_accessible, pediatric, pad_expiry, battery_expiry, latest_check)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         accessible_hours, publicly_accessible, pediatric)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       facilityId, label, s('identification'), s('location'), s('locationAr') || s('location'),
       yes('accessibleHours'), yes('publiclyAccessible'),
       ['yes', 'no', 'na'].includes(s('pediatric')) ? s('pediatric') : 'no',
-      s('padExpiry') || null, s('batteryExpiry') || null, s('latestCheck') || null,
     );
-  } else if (purpose === 'annual') {
-    const operational = ['operational','pads','battery'].every(k=>s(`check_${k}`)==='yes');
-    db.prepare('UPDATE facility_devices SET operational=? WHERE facility_id=? AND label=?').run(Number(operational),facilityId,label);
-    if(!operational) bumpFacilityRevision(facilityId);
-    db.prepare(
-      `UPDATE facility_devices SET latest_check = ?, updated_at = now_stamp()
-       WHERE facility_id = ? AND label = ?`,
-    ).run(s('latestCheck') || null, facilityId, label);
   } else if (purpose === 'relocation') {
     db.prepare(
       `UPDATE facility_devices SET location_en = ?, location_ar = ?, accessible_hours = ?, updated_at = now_stamp()
@@ -1014,9 +1020,9 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
     ).run(s('location'), s('locationAr') || s('location'), yes('accessibleHours'), facilityId, label);
   } else if (purpose === 'replacement') {
     db.prepare(
-      `UPDATE facility_devices SET identification = ?, pad_expiry = ?, battery_expiry = ?, updated_at = now_stamp()
+      `UPDATE facility_devices SET identification = ?, updated_at = now_stamp()
        WHERE facility_id = ? AND label = ?`,
-    ).run(s('identification'), s('padExpiry') || null, s('batteryExpiry') || null, facilityId, label);
+    ).run(s('identification'), facilityId, label);
   } else if (purpose === 'ministryUpdate') {
     db.prepare('UPDATE facility_devices SET identification=?,location_en=?,location_ar=?,operational=?,accessible_hours=?,publicly_accessible=?,updated_at=now_stamp() WHERE facility_id=? AND label=?').run(s('identification'),s('location'),s('location'),yes('operational'),yes('accessibleHours'),yes('publiclyAccessible'),facilityId,label);
   } else if (purpose === 'accessibility') {
@@ -1032,7 +1038,15 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   if (['initial','relocation','replacement','ministryUpdate'].includes(purpose)) {
     db.prepare('UPDATE facility_devices SET latitude=?,longitude=?,map_confirmed_at=now_stamp() WHERE facility_id=? AND label=?').run(s('separatePin')==='yes'?point?.lat ?? null:null,s('separatePin')==='yes'?point?.lng ?? null:null,facilityId,label);
   }
-  if (purpose !== 'annual') bumpFacilityRevision(facilityId);
+  if (photoBytes && photo instanceof File) {
+    db.prepare(
+      `INSERT INTO facility_device_photos (facility_id, label, file_name, content_type, byte_size, bytes, uploaded_at)
+       VALUES (?, ?, ?, ?, ?, ?, now_stamp())
+       ON CONFLICT (facility_id, label) DO UPDATE SET file_name = excluded.file_name, content_type = excluded.content_type,
+         byte_size = excluded.byte_size, bytes = excluded.bytes, uploaded_at = excluded.uploaded_at`,
+    ).run(facilityId, label, photo.name.trim(), photo.type, photoBytes.length, photoBytes);
+  }
+  bumpFacilityRevision(facilityId);
   db.prepare(
     `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative, reason)
      VALUES (?, ?, ?, ?, NULLIF(?, ''))`,
@@ -1045,7 +1059,14 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   redirect(`/facilities/${facilityId}/devices?notice=saved`);
 }
 
-/** Annex B section 5, signed by the coordinator. Drives the drill and annual rows. */
+/**
+ * The plan's readiness confirmation (section 5), signed by the FACILITY
+ * REPRESENTATIVE under the facility confirmation statement (partner audit,
+ * 2026-10-08): six confirmations, the latest drill date, the representative's name
+ * or position; the date is the platform's own (Asia/Beirut), never typed. Drives
+ * the drill and annual rows. The representative is stored in the row's
+ * `coordinator` column -- the column name predates the audit and stays readable.
+ */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
@@ -1055,10 +1076,11 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   const checks = Object.fromEntries(checkKeys.map((k) => [k, formData.get(`check_${k}`) === 'on']));
   const drill=String(formData.get('drillDate')??'').trim();
   const today=beirutToday();
+  const representative=String(formData.get('representative')??'').trim();
 
   const devices=getDb().prepare('SELECT operational,accessible_hours FROM facility_devices WHERE facility_id=?').all(facilityId) as unknown as {operational:number;accessible_hours:number}[];
   const priorYear=new Date(`${today}T12:00:00Z`);priorYear.setUTCFullYear(priorYear.getUTCFullYear()-1);
-  if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!String(formData.get('coordinator')??'').trim()
+  if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!representative
     ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
     ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
     ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}/submit?error=readiness`);
@@ -1073,9 +1095,9 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
     )
     .run(
       facilityId, JSON.stringify(checks),
-      String(formData.get('drillDate') ?? '').trim() || null,
-      String(formData.get('coordinator') ?? '').trim(),
-      String(formData.get('position') ?? '').trim(),
+      drill || null,
+      representative,
+      '',
     );
   // Recording the confirmation ANSWERS any open Ministry readiness-confirmation
   // request -- the request closes itself, with the closure naming this recording.
@@ -1094,7 +1116,12 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   redirect(`/facilities/${facilityId}?notice=confirmed`);
 }
 
-/** Coordinator review: stamps updated_at, the ledger's affirmation date. */
+/**
+ * The responsible facility contact -- one person, edited on the facility details
+ * screen and shown read-only on the plan (partner audit, 2026-10-08). Stamps
+ * updated_at, the ledger's affirmation date. The row is upserted: a record that
+ * predates the contact row still gets one.
+ */
 export async function saveFacilityPersonsAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
   const account = await currentAccount();
@@ -1102,19 +1129,21 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
   const db = getDb();
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
-  if(!['coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k)))redirect(`/facilities/${facilityId}/plan?error=contact`);
+  if(!['coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=contact`);
   db.exec('BEGIN IMMEDIATE');try {
-  for (const role of ['coordinator', 'alternate', 'emsGuide'] as const) {
-    db.prepare(
-      `UPDATE facility_persons SET name_or_position = ?, phone = ?, email = ?, updated_at = now_stamp()
-       WHERE facility_id = ? AND role = ?`,
-    ).run(s(`${role}Name`), s(`${role}Phone`), s(`${role}Email`), facilityId, role);
-  }
+  db.prepare(
+    `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email, updated_at)
+     VALUES (?, 'coordinator', ?, ?, ?, now_stamp())
+     ON CONFLICT (facility_id, role) DO UPDATE SET name_or_position = excluded.name_or_position,
+       phone = excluded.phone, email = excluded.email, updated_at = excluded.updated_at`,
+  ).run(facilityId, s('coordinatorName'), s('coordinatorPhone'), s('coordinatorEmail'));
   bumpFacilityRevision(facilityId);
   db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(`/facilities/${facilityId}?notice=coordinator`);
+  revalidatePath(`/facilities/${facilityId}/plan`);
+  revalidatePath(`/facilities/${facilityId}/profile`);
+  redirect(`/facilities/${facilityId}/profile?notice=contact`);
 }
 
 /**
