@@ -982,9 +982,10 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
     || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) redirect(`/facilities/${facilityId}/devices?error=details`);
   // The photo is checked BEFORE anything is written: a refused file must not leave a
   // half-saved record behind it. The server enforces the same allow-list the picker does.
+  // An untouched file input still submits an empty File; only a non-empty one is a photo.
   const photo = formData.get('photo');
   let photoBytes: Buffer | null = null;
-  if (photo instanceof File && (photo.size > 0 || photo.name)) {
+  if (photo instanceof File && photo.size > 0) {
     const refusal = refuseImageUpload({ type: photo.type, size: photo.size });
     if (refusal) redirect(`/facilities/${facilityId}/devices?error=photo-${refusal.reason}`);
     photoBytes = Buffer.from(await photo.arrayBuffer());

@@ -252,12 +252,10 @@ export function DeviceRegistry({
             ) : null}
           </div>
 
-          {withMapAndPhoto ? (
-            <>
-              <DeviceMap initial={deviceLocations[device?.label ?? ''] ?? null} facilityLocation={facilityLocation} />
-              <DevicePhoto facilityId={facilityId} device={device} />
-            </>
-          ) : null}
+          {withMapAndPhoto ? <DeviceMap initial={deviceLocations[device?.label ?? ''] ?? null} facilityLocation={facilityLocation} /> : null}
+          {/* The current photo is part of the record and shows on every purpose; a new
+              one is taken only where the device itself is being registered or changed. */}
+          {withMapAndPhoto || device?.hasPhoto ? <DevicePhoto facilityId={facilityId} device={device} allowUpload={withMapAndPhoto} /> : null}
 
           <div style={{ paddingBlockStart: 18, borderBlockStart: '1px solid var(--line)', marginBlockEnd: 20 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
@@ -329,12 +327,12 @@ function DeviceMap({ initial, facilityLocation }: { initial: MapPoint | null; fa
 }
 
 /** The optional photo of the installed AED. Checked in the screen; the server enforces the same allow-list. */
-function DevicePhoto({ facilityId, device }: { facilityId: string; device: FacilityDevice | null }) {
+function DevicePhoto({ facilityId, device, allowUpload }: { facilityId: string; device: FacilityDevice | null; allowUpload: boolean }) {
   const copy = FACILITY_CONTENT.devicePhoto;
   const [error, setError] = useState<{ en: string; ar: string } | null>(null);
   return (
     <div data-region="device-photo" style={{ marginBlock: 20 }}>
-      <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}><L en={copy.en} ar={copy.ar} /></h3>
+      <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}><L en={allowUpload ? copy.en : copy.currentEn} ar={allowUpload ? copy.ar : copy.currentAr} /></h3>
       {device?.hasPhoto ? (
         <figure style={{ margin: '0 0 12px' }}>
           <img
@@ -345,7 +343,7 @@ function DevicePhoto({ facilityId, device }: { facilityId: string; device: Facil
           <figcaption style={{ fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 6 }}><L en={copy.currentEn} ar={copy.currentAr} /></figcaption>
         </figure>
       ) : null}
-      <input
+      {!allowUpload ? null : <><input
         type="file"
         name="photo"
         accept={imageAcceptAttribute()}
@@ -362,7 +360,7 @@ function DevicePhoto({ facilityId, device }: { facilityId: string; device: Facil
         <p role="alert" style={{ margin: '8px 0 0', color: 'var(--bad)', fontSize: 13 }}><L en={error.en} ar={error.ar} /></p>
       ) : (
         <p style={{ margin: '6px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}><L en={copy.hintEn} ar={copy.hintAr} /></p>
-      )}
+      )}</>}
     </div>
   );
 }
