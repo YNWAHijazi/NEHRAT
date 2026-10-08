@@ -86,6 +86,9 @@ for (const lang of LANGUAGES) {
       await openDetails(card(page, 'B10'));
       await form(page, 'B10').locator('[data-choice="no"]').click();
       await form(page, 'B10').locator('[data-region="save"]').click();
+      await expect(form(page, 'B10').locator('[role="status"]')).toContainText(/Saved|حُفظ/);
+      // The refreshed answer arrives before the next edit, or the refresh would overwrite it.
+      await expect(form(page, 'B10').locator('[data-region="answered-by"]')).toBeVisible();
       await expect(chip(page, 'B10')).toHaveAttribute('data-state', 'pending');
       await form(page, 'B10').locator('[name="alternative"]').fill('Vehicles stop at the ring road; a stretcher team covers the last 80 metres.');
       await form(page, 'B10').locator('[data-region="save"]').click();
