@@ -81,3 +81,9 @@ Under *generated records / Ministry review*: the platform generates formal downl
 Both are verifiable through the public verification page by their reference, which returns the four public fields only.
 
 Open after this change, for a ruling: the facility validity record still lists legacy device-date rows (pad expiry, battery expiry, latest readiness check) for records that hold old dates; new records never produce them. Hide them, or keep them read-only.
+
+## Owner direction after the audit merge (8 October 2026) — applied
+
+- One invitation block, on the EMS and ambulance row. The BLS medical response team row is a listing like first aid (its two confirmations); an invited agency confirms there that it meets the first-aid and BLS requirements.
+- A card whose fields ask the question carries no prompt line; a prompt stays only where it says something the fields do not (an invitation, a derived row, a file, the plan).
+- Level 3 follows the guidance (`05 Guidance`, sections 5.6, 5.7, 5.9) on the rows the EMS agency or the Medical Director enters, whichever completes first: EMS and ambulance arrangements (units, deployment, hours, dispatch; coverage while an ambulance transports; extra resources), receiving emergency departments (primary, alternate, travel time, contact, limitations), CPR and AED response (recognition; who starts CPR, brings the AED, activates EMS, directs until handover; AED locations; on the deployment map; access planning; checks; the recommended drill), medical equipment and supplies (by location or team and who checks; basics; oxygen, AED and airway equipment; medicines; replacement). Items that are a yes are ticked; items that need an answer take a short answer. Levels 1 and 2 keep their confirmations.
