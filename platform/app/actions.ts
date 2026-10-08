@@ -556,7 +556,7 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
   const email = String(formData.get('email') ?? '').trim();
   // The Director row exists at Level 3 only (decision D1): no invitation where the row is absent.
   const level = derivedLevelFor(eventId);
-  if (kind === 'director' && (level === null || !requirementApplies('B3', level, 'event'))) redirect(`/events/${eventId}#req-B7`);
+  if (kind === 'director' && (level === null || !requirementApplies('B3', level, 'event'))) redirect(`/events/${eventId}?step=B7#req-B7`);
   let mail = '';
   if ((kind === 'ems' || kind === 'director') && name && email) {
     const token = randomBytes(24).toString('hex');
@@ -571,7 +571,9 @@ export async function inviteParticipantAction(eventId: string, formData: FormDat
     });
   }
   revalidatePath(`/events/${eventId}`);
-  redirect(`/events/${eventId}?mail=${mail}#req-${String(formData.get('kind')) === 'director' ? 'B3' : 'B7'}`);
+  // The row the invitation came from leads on return (?step=): the BLS row waits on the same nomination and would otherwise open first.
+  const row = String(formData.get('kind')) === 'director' ? 'B3' : 'B7';
+  redirect(`/events/${eventId}?mail=${mail}&step=${row}#req-${row}`);
 }
 
 export interface CompliancePayload {

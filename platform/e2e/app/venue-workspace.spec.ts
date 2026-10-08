@@ -40,9 +40,8 @@ test('Level 1 local EMS contact is one confirmation on the record page, with no 
  const row=page.locator('[data-requirement="B7"]');
  await expect(row).toHaveAttribute('data-state','pending');
  await openDetails(row);
- await expect(row).toContainText('Local EMS contact');
- for(const box of await row.locator('input[type=checkbox]').all())await box.check();
- await row.locator('input[name=phone]').fill('+9613111111');
+ await expect(row).toContainText('Local EMS access');
+ await row.locator('input[name=how]').fill('Call 140; the station knows the operating times');
  await row.locator('[data-region=save]').click();
  await expect(row.getByRole('status')).toContainText('Saved.');
  await page.goto('/venues/VN-0032');
