@@ -23,3 +23,4 @@ next-env.d.ts
 # Local Railway SSH credentials
 /railway ssh
 /railway ssh.pub
+.claude/worktrees/
