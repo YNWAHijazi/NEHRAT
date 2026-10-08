@@ -81,10 +81,23 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
         return (
           <PlanSections record={record} viewerRole={viewerRole} canEdit={canEdit} canApprove={record.editable && viewerConfirmed} derived={derived} governance={governance} facility={facility} organizerMayEdit={record.editable && viewerConfirmed && viewerRole === 'organizer'} />
         );
-      case 'B4':
-        return inst.fields.length === 0 ? (
-          <p style={{ margin: 0, fontSize: '14.5px', color: 'var(--muted)' }}><a href="#req-B5"><L en="Open the response team" ar="فتح فريق الاستجابة" /></a></p>
-        ) : <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />;
+      case 'B4': {
+        // Levels 2 and 3: where the BLS provider also covers first aid, that answer discharges
+        // this row and there is nothing to enter twice (partner audit, 8 October 2026).
+        const team = instances.find((i) => i.key === 'B5');
+        if (team && team.values['firstAid'] === 'yes') {
+          return <p style={{ margin: 0, fontSize: '14.5px', color: 'var(--muted)' }}><a href="#req-B5"><L en="Open the BLS medical response team" ar="فتح فريق الاستجابة الطبية للدعم الحيوي الأساسي" /></a></p>;
+        }
+        return inst.fields.length === 0 ? null : <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />;
+      }
+      case 'B5':
+        // The participating provider is named by invitation; the two confirmations follow.
+        return (
+          <>
+            <PartyBlock kind={service} id={id} parties={record.parties} invite="ems" canInvite={canInvite} />
+            <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />
+          </>
+        );
       case 'B7':
         return (
           <>
@@ -115,11 +128,16 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   // The steps: every required row, then the recommended rows, then the final review when the page has one.
   // A step is the viewer's when the catalogue names their role on it (the organizer's invitation rows included).
   const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3');
+  // A row the viewer would write but cannot says why, on the card itself: a filed record
+  // waits on the Ministry; a closed one is read-only. Silence here read as a defect.
+  const readOnlyNote = record.editable ? null : record.filed
+    ? <L en="Submitted to the Ministry: read-only unless the Ministry returns it for revision." ar="قُدّم إلى الوزارة: للقراءة فقط ما لم تُعده الوزارة للتعديل." />
+    : <L en="This record is read-only: it is archived, cancelled or closed." ar="هذا السجل للقراءة فقط: فهو مؤرشف أو ملغى أو مقفل." />;
   const steps: StepperStep[] = [...rows('required'), ...rows('recommended')].map((inst) => ({
     key: inst.key, anchor: inst.anchor, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, state: inst.state,
     kind: inst.group === 'recommended' ? 'recommended' : 'required',
     yours: yours(inst), whoEn: handledBy(inst).en, whoAr: handledBy(inst).ar,
-    body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)}>{body(inst)}</RequirementCard>,
+    body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)} note={yours(inst) ? readOnlyNote : null}>{body(inst)}</RequirementCard>,
   }));
   if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
   // The page opens on the step a redirect named; else on the viewer's first required row still open; else any open required row; with nothing open, on the final review.

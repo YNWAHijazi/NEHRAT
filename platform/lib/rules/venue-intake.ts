@@ -30,3 +30,22 @@ export function venueDistrictLabel(stored: string | null | undefined): { en: str
   const known = VENUE_DISTRICTS.find((d) => d.en === stored);
   return known ? { en: known.en, ar: known.ar } : { en: stored || '', ar: stored || '' };
 }
+
+/**
+ * A telephone number as people type it: Arabic-Indic and Persian digits become Western
+ * digits, runs of spaces collapse, and nothing else changes. Validation happens after.
+ */
+export function normalizePhone(raw: string): string {
+  return raw
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** A telephone number as stored: an optional +, then digits with the usual separators, at least seven digits. */
+export const PHONE_SHAPE = /^\+?[0-9 ()./-]{7,24}$/;
+export function plausiblePhone(phone: string): boolean {
+  const MIN_DIGITS = 7;
+  return PHONE_SHAPE.test(phone) && (phone.match(/[0-9]/g) ?? []).length >= MIN_DIGITS;
+}

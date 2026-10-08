@@ -4,7 +4,7 @@ import { venueById, venueAssessmentsFor, venueAttachmentsFor } from '../queries'
 import { venuePackageEditable, type VenuePackageStatus } from '../rules/venue-workflow';
 import type { Level } from '../rules';
 import { readMapPoint, type MapPoint } from '../rules/geolocation';
-import { VENUE_TYPES, VENUE_DISTRICTS } from '../rules/venue-intake';
+import { VENUE_TYPES, VENUE_DISTRICTS, normalizePhone, plausiblePhone } from '../rules/venue-intake';
 import { applicationFee, effectiveFlag } from '../rules';
 import { capabilityConfigFor, ministryConfig } from '../queries';
 import { paymentFor } from '../payments';
@@ -48,11 +48,27 @@ export function ensureVenuePackage(accountId:number,id:string) {
  getDb().prepare('INSERT OR IGNORE INTO venue_packages(venue_id,assessment_version) VALUES (?,?)').run(id,w.assessmentVersion);
  return w;
 }
-export function readVenueDetails(form:FormData) {
- const s=(k:string)=>String(form.get(k)??'').trim();const point=readMapPoint(form);const capacity=Number(s('capacity'));
- if(!s('name')||!s('nameAr')||!s('address')||!s('contactName')||!s('contactPhone')||!/^\+?[0-9 ()-]{7,24}$/.test(s('contactPhone'))||!point||!Number.isSafeInteger(capacity)||capacity<=0||!VENUE_TYPES.some(t=>t.key===s('category'))||!VENUE_DISTRICTS.some(d=>d.en===s('district'))||!['yes','no'].includes(s('regularlyHosts'))||!['yes','no'].includes(s('isNightclub'))||(s('category')==='other'&&!s('categoryOther')))return null;
- return {nameEn:s('name'),nameAr:s('nameAr'),address:s('address'),addressAr:s('addressAr')||s('address'),contact:`${s('contactName')} ${s('contactPhone')}`,contactName:s('contactName'),contactPhone:s('contactPhone'),category:s('category')==='other'?s('categoryOther'):s('category'),district:s('district'),capacity,point,regular:s('regularlyHosts')==='yes',nightclub:s('category')==='nightclub'||s('isNightclub')==='yes'};
+/** The registration fields, in form order; a refusal names the first one that fails. */
+export type VenueDetailField = 'name'|'nameAr'|'category'|'categoryOther'|'district'|'address'|'contactName'|'contactPhone'|'capacity'|'regularlyHosts'|'isNightclub'|'map';
+export interface VenueDetails { nameEn:string;nameAr:string;address:string;addressAr:string;contact:string;contactName:string;contactPhone:string;category:string;district:string;capacity:number;point:MapPoint;regular:boolean;nightclub:boolean }
+/**
+ * Reads the registration form. A refusal names the field (partner report, 8 October
+ * 2026: the first page cleared on Continue with nothing said), so the screen can keep
+ * what was typed and point at the one thing to fix. The phone accepts Arabic-Indic
+ * digits and the separators people actually type; it is stored with Western digits.
+ */
+export function parseVenueDetails(form:FormData):{value:VenueDetails}|{refused:VenueDetailField} {
+ const s=(k:string)=>String(form.get(k)??'').trim();const point=readMapPoint(form);const capacity=Number(s('capacity'));const phone=normalizePhone(s('contactPhone'));
+ if(!s('name'))return {refused:'name'};if(!s('nameAr'))return {refused:'nameAr'};
+ if(!VENUE_TYPES.some(t=>t.key===s('category')))return {refused:'category'};if(s('category')==='other'&&!s('categoryOther'))return {refused:'categoryOther'};
+ if(!VENUE_DISTRICTS.some(d=>d.en===s('district')))return {refused:'district'};if(!s('address'))return {refused:'address'};
+ if(!s('contactName'))return {refused:'contactName'};if(!plausiblePhone(phone))return {refused:'contactPhone'};
+ if(!Number.isSafeInteger(capacity)||capacity<=0)return {refused:'capacity'};
+ if(!['yes','no'].includes(s('regularlyHosts')))return {refused:'regularlyHosts'};if(!['yes','no'].includes(s('isNightclub')))return {refused:'isNightclub'};
+ if(!point)return {refused:'map'};
+ return {value:{nameEn:s('name'),nameAr:s('nameAr'),address:s('address'),addressAr:s('addressAr')||s('address'),contact:`${s('contactName')} ${phone}`,contactName:s('contactName'),contactPhone:phone,category:s('category')==='other'?s('categoryOther'):s('category'),district:s('district'),capacity,point,regular:s('regularlyHosts')==='yes',nightclub:s('category')==='nightclub'||s('isNightclub')==='yes'}};
 }
+export function readVenueDetails(form:FormData):VenueDetails|null { const r=parseVenueDetails(form);return 'value' in r?r.value:null; }
 
 export type VenueWorkspace = NonNullable<ReturnType<typeof venuePackageFor>>;
 

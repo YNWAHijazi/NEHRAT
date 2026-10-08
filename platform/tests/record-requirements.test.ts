@@ -145,28 +145,39 @@ describe('Level 1: the organizer-only path (brief item 8)', () => {
     expect(summary.required.complete).toBe(summary.required.total);
   });
 
-  it('keeps No and Not planned distinct from Complete on the AED row (brief item 14)', () => {
+  it('keeps No distinct from Complete on the AED row (brief item 14); a Yes completes it, the location optional (partner audit, 8 October 2026)', () => {
     expect(byKey(rows, 'B8').state).toBe('notAdded');
-    const no = resolveRequirements(facts(1, { answers: { B8: answer({ aed: 'notPlanned' }) } }));
+    expect(byKey(rows, 'B8').fields.map((f) => f.key)).toEqual(['aed', 'location']);
+    const no = resolveRequirements(facts(1, { answers: { B8: answer({ aed: 'no' }) } }));
     expect(byKey(no, 'B8').state).toBe('notProvided');
     expect(byKey(no, 'B8').blocks).toBe(false);
-    const yesWithoutPlace = resolveRequirements(facts(1, { answers: { B8: answer({ aed: 'yes' }) } }));
-    expect(byKey(yesWithoutPlace, 'B8').state).toBe('pending');
-    expect(byKey(yesWithoutPlace, 'B8').missing).toEqual(['location', 'access']);
-    const yes = resolveRequirements(facts(1, { answers: { B8: answer({ aed: 'yes', location: 'By the stage', access: 'Ask the steward' }) } }));
+    const yes = resolveRequirements(facts(1, { answers: { B8: answer({ aed: 'yes' }) } }));
     expect(byKey(yes, 'B8').state).toBe('complete');
+    expect(byKey(yes, 'B8').missing).toEqual([]);
   });
 
   it('names the missing field, never a generic "something missing" (brief item 16)', () => {
-    const partial = resolveRequirements(facts(1, { answers: { B4: answer({ who: 'Red Cross volunteers', where: 'Gate 2' }) } }));
-    expect(byKey(partial, 'B4').missing).toEqual(['contact', 'arranged']);
-    expect(byKey(partial, 'B4').state).toBe('pending');
+    const partial = resolveRequirements(facts(1, { answers: { B11: answer({ clearRoute: 'no' }) } }));
+    expect(byKey(partial, 'B11').missing).toEqual(['alternative']);
+    expect(byKey(partial, 'B11').state).toBe('pending');
+    const access = resolveRequirements(facts(1, { answers: { B10: answer({ access: 'no' }) } }));
+    expect(byKey(access, 'B10').missing).toEqual(['alternative']);
+    expect(byKey(resolveRequirements(facts(1, { answers: { B10: answer({ access: 'yes' }) } })), 'B10').state).toBe('complete');
   });
 
-  it('local EMS contact is confirmations plus a number, with no invitation', () => {
+  it('Level 1 is confirmations and short fields: no names, counts, shifts or inventories (partner audit, 8 October 2026)', () => {
+    expect(byKey(rows, 'B4').fields.map((f) => f.key)).toEqual(['available']);
+    expect(byKey(rows, 'B9').fields.map((f) => f.key)).toEqual(['ready']);
+    expect(byKey(rows, 'B14').fields.map((f) => f.key)).toEqual(['method']);
+    expect(byKey(rows, 'B16').fields.map((f) => f.key)).toEqual(['how']);
+    expect(byKey(rows, 'B11').fields.map((f) => f.key)).toEqual(['clearRoute', 'route', 'alternative']);
+    expect(byKey(rows, 'B11').fields.find((f) => f.key === 'route')!.optional).toBe(true);
+  });
+
+  it('local EMS access is one short answer, with no invitation', () => {
     const b7 = byKey(rows, 'B7');
-    expect(b7.labelEn).toBe('Local EMS contact');
-    expect(b7.fields.map((f) => f.key)).toEqual(['contacted', 'shared', 'knowHow', 'phone']);
+    expect(b7.labelEn).toBe('Local EMS access');
+    expect(b7.fields.map((f) => f.key)).toEqual(['how']);
     expect(b7.authors).toEqual(['organizer']);
     expect(b7.sourceEn).toBe('Local EMS contact confirmed');
   });
@@ -196,8 +207,11 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   const rows = resolveRequirements(facts(2));
 
   it('requires the eleven readiness and admin rows plus the map and declaration; treatment point and plan are recommended', () => {
-    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-A', 'P-M', 'P-C']);
+    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-M', 'B18', 'P-A', 'P-C']);
     expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['B6', 'B2']);
+    // Patient-care documentation at Level 2 is one confirmation by the organizer or the provider (partner audit, 8 October 2026).
+    expect(byKey(rows, 'B18').fields.map((f) => f.key)).toEqual(['confirmed']);
+    expect(byKey(rows, 'B18').authors).toEqual(['organizer', 'ems']);
   });
 
   it('D1: no Director below Level 3 -- the row is absent, nobody may invite one, and no Level 2 row names a Director author', () => {
@@ -252,7 +266,7 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
 
   it('D3: escalation at Level 2 is a short coordinated procedure, not the eleven major-incident items', () => {
     const b16 = byKey(rows, 'B16');
-    expect(b16.fields.map((f) => f.key)).toEqual(['when', 'who', 'told', 'pause']);
+    expect(b16.fields.map((f) => f.key)).toEqual(['how', 'told']);
     expect(b16.infoEn).toContain('D3');
     expect(resolvePlan(facts(2), rows).find((s) => s.key === 'P12')!.items).toEqual([]);
   });
@@ -264,22 +278,33 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
     expect(byKey(nominated, 'B7').state).toBe('waiting');
     const accepted = resolveRequirements(facts(2, { ems: [{ token: 'e', name: 'Civil Defence', status: 'confirmed' }] }));
     expect(byKey(accepted, 'B7').state).toBe('pending');
-    expect(byKey(accepted, 'B7').missing).toEqual(['whereWhen', 'howToCall', 'ifLeaves']);
+    expect(byKey(accepted, 'B7').missing).toEqual(['whereWhen', 'howToCall']);
     const done = resolveRequirements(facts(2, { ems: [{ token: 'e', name: 'Civil Defence', status: 'confirmed' }], answers: { B7: fullAnswer(2, 'B7', 'ems') } }));
     expect(byKey(done, 'B7').state).toBe('complete');
     expect(byKey(done, 'B7').answeredBy?.role).toBe('ems');
   });
 
-  it('first aid at Level 2 reads the response team roster and never counts twice as a blocker', () => {
+  it('first aid at Level 2 reuses the BLS provider\'s answer where it supplies it; otherwise one confirmation (partner audit, 8 October 2026)', () => {
     expect(byKey(rows, 'B4').state).toBe('pending');
-    expect(byKey(rows, 'B4').blocks).toBe(false);
-    expect(byKey(rows, 'B5').blocks).toBe(true);
-    const roster = resolveRequirements(facts(2, { answers: { B5: fullAnswer(2, 'B5') } }));
-    expect(byKey(roster, 'B4').state).toBe('complete');
+    expect(byKey(rows, 'B4').blocks).toBe(true);
+    expect(byKey(rows, 'B4').fields.map((f) => f.key)).toEqual(['separate']);
+    expect(byKey(rows, 'B5').labelEn).toBe('BLS medical response team(s)');
+    expect(byKey(rows, 'B5').fields.map((f) => f.key)).toEqual(['bls', 'firstAid']);
+    const ems = [{ token: 'e', name: 'Civil Defence', status: 'confirmed' as const }];
+    const fromTeam = resolveRequirements(facts(2, { ems, answers: { B5: answer({ bls: true, firstAid: 'yes' }, 'ems') } }));
+    expect(byKey(fromTeam, 'B4').state).toBe('complete');
+    expect(byKey(fromTeam, 'B4').detailEn).toContain('BLS medical response team');
+    const notFromTeam = resolveRequirements(facts(2, { ems, answers: { B5: answer({ bls: true, firstAid: 'no' }, 'ems') } }));
+    expect(byKey(notFromTeam, 'B4').state).toBe('pending');
+    expect(byKey(notFromTeam, 'B4').missing).toEqual(['separate']);
+    const separate = resolveRequirements(facts(2, { ems, answers: { B5: answer({ bls: true, firstAid: 'no' }, 'ems'), B4: answer({ separate: true }) } }));
+    expect(byKey(separate, 'B4').state).toBe('complete');
+    // The BLS row itself needs the accepted provider: a nomination alone holds it.
+    expect(byKey(rows, 'B5').detailEn).toBe('No EMS agency has been invited');
   });
 
   it('shared rows take the first authorized completion from either side (brief item 11)', () => {
-    for (const key of ['B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16']) {
+    for (const key of ['B4', 'B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16', 'B18']) {
       expect(authorsFor(key, 2, 'event'), key).toEqual(['organizer', 'ems']);
     }
     expect(authorsFor('B10', 2, 'event')).toEqual(['organizer']);
@@ -289,7 +314,7 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   });
 
   it('a completed optional plan is complete without Director approval (brief item 10, Level 2)', () => {
-    const answers: Record<string, StoredAnswer> = { ...allOrganizerAnswers(2), B6: fullAnswer(2, 'B6'), B7: fullAnswer(2, 'B7', 'ems') };
+    const answers: Record<string, StoredAnswer> = { ...allOrganizerAnswers(2), B5: fullAnswer(2, 'B5', 'ems'), B6: fullAnswer(2, 'B6'), B7: fullAnswer(2, 'B7', 'ems') };
     for (const key of planTextKeys()) if (key.startsWith('P')) answers[key] = answer({ text: 'Written' }, 'ems');
     const done = resolveRequirements(facts(2, { answers, ems: [{ token: 'e', name: 'A', status: 'confirmed' }], planApprovalCurrent: false }));
     expect(byKey(done, 'B2').state).toBe('complete');
@@ -323,7 +348,7 @@ describe('Level 3: the shared approved plan (brief item 10, D4)', () => {
 
   it('plan-defined rows are required in the plan and feed its sections without retyping', () => {
     const rows = resolveRequirements(facts(3));
-    for (const k of ['B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'B18']) {
+    for (const k of ['B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16']) {
       expect(byKey(rows, k).obligation, k).toBe('inPlan');
       expect(byKey(rows, k).linkedPlan.length, k).toBeGreaterThan(0);
     }
@@ -386,8 +411,10 @@ describe('Level 3: the shared approved plan (brief item 10, D4)', () => {
     expect(byKey(noFile, 'B17').state).toBe('pending');
     const withFile = resolveRequirements(facts(3, { answers: { B17: fullAnswer(3, 'B17') }, files: { B17: { fileName: 'policy.pdf', savedAt: '' } } }));
     expect(byKey(withFile, 'B17').state).toBe('complete');
-    expect(byKey(withFile, 'B18').fields.map((f) => f.key)).toEqual(['provider', 'method']);
-    expect(byKey(withFile, 'B18').fields[1]!.labelEn).toContain('Do not enter patient details');
+    // Patient-care documentation is one confirmation by the providers; no documentation system is designed here.
+    expect(byKey(withFile, 'B18').fields.map((f) => f.key)).toEqual(['confirmed']);
+    expect(byKey(withFile, 'B18').authors).toEqual(['ems', 'director']);
+    expect(byKey(withFile, 'B18').infoEn).toContain('No patient-identifying data');
   });
 });
 
@@ -399,7 +426,7 @@ describe('later phases never create pre-event blockers (brief item 15, D10)', ()
       expect(later.every((r) => !r.blocks && r.state === 'later')).toBe(true);
       expect(keys(later)).toContain('B19');
       expect(keys(later)).toContain('P-I');
-      if (level < 3) expect(keys(later)).toContain('B18');
+      if (level === 1) expect(keys(later)).toContain('B18');
       else expect(byKey(rows, 'B18').group).toBe('required');
     });
   }
@@ -422,8 +449,8 @@ describe('venues on the same catalogue (brief items 20-21)', () => {
     expect(byKey(rows, 'P-M').labelEn).toBe('Site map');
     expect(byKey(rows, 'P-D').labelEn).toBe('Routine deployment layout');
     const first = byKey(resolveRequirements(facts(1, { service: 'venue' })), 'B4');
-    expect(first.fields.find((f) => f.key === 'arranged')!.labelEn).toContain('operating session');
-    expect(byKey(resolveRequirements(facts(1)), 'B4').fields.find((f) => f.key === 'arranged')!.labelEn).toContain('throughout the event');
+    expect(first.fields.find((f) => f.key === 'available')!.labelEn).toContain('operating session');
+    expect(byKey(resolveRequirements(facts(1)), 'B4').fields.find((f) => f.key === 'available')!.labelEn).toContain('during the event');
   });
 });
 
@@ -432,7 +459,7 @@ describe('the catalogue decides obligation, not the wording (brief item 6)', () 
     expect(fieldsFor('B17', 1, 'event')).toBeNull();
     expect(fieldsFor('B3', 1, 'event')).toBeNull();
     expect(fieldsFor('P-C', 2, 'venue')).toBeNull();
-    expect(fieldsFor('B5', 2, 'event')!.map((f) => f.key)).toEqual(['team', 'responders', 'coverage']);
+    expect(fieldsFor('B5', 2, 'event')!.map((f) => f.key)).toEqual(['bls', 'firstAid']);
     expect(fieldsFor('M04', 3, 'event')!.map((f) => f.key)).toEqual(['text']);
     expect(fieldsFor('nope', 2, 'event')).toBeNull();
   });

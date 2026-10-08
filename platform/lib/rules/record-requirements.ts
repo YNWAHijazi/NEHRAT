@@ -319,7 +319,7 @@ export function resolveRequirements(facts: RecordFacts): RequirementInstance[] {
   for (const row of ROWS) {
     const cell = row.levels[levelKey];
     if (!cell || !appliesAt(row, cell, facts.service, facts.requested)) continue;
-    if (cell.completion === 'rosterLink' || cell.completion === 'plan' || cell.completion === 'planApproved' || cell.completion === 'majorIncident') {
+    if (cell.completion === 'rosterLink' || cell.completion === 'firstAidCoverage' || cell.completion === 'plan' || cell.completion === 'planApproved' || cell.completion === 'majorIncident') {
       deferred.push({ row, cell });
       continue;
     }
@@ -393,6 +393,14 @@ function instance(
       case 'rosterLink': {
         const roster = resolved.get('B5');
         state = roster?.state === 'complete' ? 'complete' : 'pending';
+        break;
+      }
+      case 'firstAidCoverage': {
+        // Partner audit, 8 October 2026: where the BLS provider also supplies first aid, that
+        // answer discharges this row; otherwise the organizer confirms separate trained personnel.
+        const team = resolved.get('B5');
+        if (team?.values['firstAid'] === 'yes') { state = 'complete'; detailEn = copy.firstAidFromTeamEn; detailAr = copy.firstAidFromTeamAr; }
+        else { missing = missingFields(fields, values); state = missing.length === 0 ? 'complete' : 'pending'; }
         break;
       }
       case 'emsAndFields': {
@@ -661,7 +669,6 @@ export function recordNextStep(input: {
 /** "Who handles it", for the summary rows: the authors' labels, or "Included automatically". */
 export function handledBy(instance: RequirementInstance): { en: string; ar: string } {
   if (instance.authors.length === 0) {
-    if (instance.key === 'B4' && instance.group !== 'later') return { en: 'From the response team', ar: 'من فريق الاستجابة' };
     if (instance.group === 'later') return { en: 'When it arises', ar: 'عند حدوثه' };
     return { en: catalogue.copy.derivedEn, ar: catalogue.copy.derivedAr };
   }

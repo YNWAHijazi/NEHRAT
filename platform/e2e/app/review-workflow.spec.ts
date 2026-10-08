@@ -50,9 +50,9 @@ test('EMS answers the shared response-team row; the organizer reads it with the 
   const team=page.locator('[data-requirement="B5"]');
   await openDetails(team);
   const form=team.locator('[data-region=requirement-form]').first();
-  await form.locator('input[name=team]').fill('Two BLS teams');
-  await form.locator('input[name=responders]').fill('4');
-  await form.locator('input[name=coverage]').fill('North gate and finish line, 08:00–14:00');
+  // The BLS row is two confirmations (partner audit, 8 October 2026): the team, and whether it also covers first aid.
+  await form.locator('input[name=bls]').check();
+  await form.locator('[data-choice="yes"]').click();
   await form.locator('[data-region=save]').click();
   await expect(form.getByRole('status')).toContainText('Saved.');
   const organizer=await browser.newPage({baseURL:baseURL!});
@@ -61,7 +61,9 @@ test('EMS answers the shared response-team row; the organizer reads it with the 
   const shared=organizer.locator('[data-requirement="B5"]');
   await openDetails(shared);
   await expect(shared).toHaveAttribute('data-state','complete');
-  await expect(shared.locator('input[name=coverage]')).toHaveValue('North gate and finish line, 08:00–14:00');
+  await expect(shared.locator('input[name=bls]')).toBeChecked();
+  // First aid reads the provider's answer: complete, with no form to fill twice.
+  await expect(organizer.locator('[data-requirement="B4"]')).toHaveAttribute('data-state','complete');
   await expect(shared.locator('[data-region=answered-by]')).toContainText('EMS agency');
   await organizer.close();
 });

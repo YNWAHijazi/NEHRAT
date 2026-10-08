@@ -817,11 +817,14 @@ function ownedVenue(accountId: number, venueId: string): boolean {
  * above the condition's own threshold; an ineligible venue is not registered, and the
  * screen says the Ministry makes the final call.
  */
-export async function registerVenueAction(formData: FormData): Promise<void> {
+/** A refused registration names the field; the form keeps what was typed and points at it. */
+export type VenueFormState = { refused: string } | null;
+
+export async function registerVenueAction(_prev: VenueFormState, formData: FormData): Promise<VenueFormState> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
-  const {readVenueDetails}=await import('../lib/venue/workspace');
-  const v=readVenueDetails(formData);if(!v)redirect('/venues/new?error=details');
+  const {parseVenueDetails}=await import('../lib/venue/workspace');
+  const parsed=parseVenueDetails(formData);if('refused' in parsed)return {refused:parsed.refused};const v=parsed.value;
   const venueId=nextRecordId('VN');
   const db=getDb();db.exec('BEGIN IMMEDIATE');
   try {

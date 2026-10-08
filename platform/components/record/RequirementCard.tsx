@@ -26,7 +26,7 @@ export function StateChip({ inst, yours = true }: { inst: RequirementInstance; y
  * information control, and the body the caller supplies (a form, a file control,
  * an invitation, the plan). The id is the anchor the summaries jump to.
  */
-export function RequirementCard({ inst, open, children, extra, yours = true }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode; yours?: boolean }) {
+export function RequirementCard({ inst, open, children, extra, yours = true, note = null }: { inst: RequirementInstance; open: boolean; children: ReactNode; extra?: ReactNode; yours?: boolean; note?: ReactNode }) {
   const tone = stateTone(inst, yours);
   const who = handledBy(inst);
   return (
@@ -47,6 +47,7 @@ export function RequirementCard({ inst, open, children, extra, yours = true }: {
             <L en={inst.detailEn} ar={inst.detailAr} />
           </p>
         ) : null}
+        {note ? <p data-region="read-only-note" className="record-card-detail" style={{ color: 'var(--muted)' }}>{note}</p> : null}
         {children}
         <div className="record-card-foot">
           <span><L en={`${REQUIREMENT_COPY.whoEn}: ${who.en}`} ar={`${REQUIREMENT_COPY.whoAr}: ${who.ar}`} /></span>

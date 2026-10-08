@@ -6,6 +6,13 @@ test("public check is concise and preserves the chosen service through signup", 
   page,
 }) => {
   await page.goto("/applicability?subject=event");
+  // Two steps (partner audit, 8 October 2026): a planned organized event at all, then the criteria.
+  await expect(page.locator('[data-region="planned-question"]')).toBeVisible();
+  await expect(page.locator("input[type=checkbox]")).toHaveCount(0);
+  await page.locator('[data-region="planned-question"]').getByRole("button", { name: "No", exact: true }).click();
+  await expect(page.locator('[data-region="not-planned"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Certification not required", exact: true })).toBeVisible();
+  await page.locator('[data-region="planned-question"]').getByRole("button", { name: "Yes", exact: true }).click();
   await expect(page.locator("input[type=checkbox]")).toHaveCount(5);
   await page.locator("input[type=checkbox]").first().check();
   await page.getByRole("button", { name: "Continue", exact: true }).click();

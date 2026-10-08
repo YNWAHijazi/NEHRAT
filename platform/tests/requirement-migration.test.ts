@@ -64,11 +64,13 @@ test('old event answers land on the catalogue keys they stand for, with their au
 test('nothing migrated reads as complete unless the catalogue\'s own completion test is met', () => {
   const r = eventRecordRequirements(owner, 'EV-9100')!;
   const state = (key: string) => r.instances.find((i) => i.key === key)!.state;
-  // Partial answers stay pending: the EMS row lacks "if an ambulance leaves", the team lacks a count.
-  expect(state('B7')).toBe('pending');
-  expect(r.instances.find((i) => i.key === 'B7')!.missing).toEqual(['ifLeaves']);
+  // The EMS row's two migrated facts are the whole Level 2 answer now (partner audit, 8 October 2026);
+  // the legacy team row carries neither the BLS nor the first-aid confirmation, so it stays pending.
+  expect(state('B7')).toBe('complete');
   expect(state('B5')).toBe('pending');
-  expect(state('B12')).toBe('pending');
+  expect(r.instances.find((i) => i.key === 'B5')!.missing).toEqual(['bls', 'firstAid']);
+  // The receiving department alone completes the hospital row now; its contact is optional.
+  expect(state('B12')).toBe('complete');
   // A section answered by text is addressed; one answered by a structured row waits on that row.
   expect(r.plan.find((s) => s.key === 'P13')!.complete).toBe(true);
   expect(r.plan.find((s) => s.key === 'P12')!.complete).toBe(false);

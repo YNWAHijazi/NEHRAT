@@ -79,17 +79,24 @@ for (const lang of LANGUAGES) {
 
       // The organizer's own answers, one row at a time. B1 is prefilled from the account.
       await saveCard(page, 'B1', { name: 'R. Haddad', phone: '+961 3 123456' });
-      await saveCard(page, 'B4', { who: 'Lebanese Red Cross volunteers', where: 'Beside the main entrance', contact: 'Steward radio, channel 2', arranged: true });
-      await saveCard(page, 'B7', { contacted: true, shared: true, knowHow: true, phone: '140' });
-      await saveCard(page, 'B9', { ready: true, location: 'First-aid tent', responsible: 'Site manager' });
-      await saveCard(page, 'B10', { entrance: 'Gate B on the ring road', keeper: 'Parking team lead' });
-      await saveCard(page, 'B11', { route: 'Paved path from the stage to Gate B; no stairs.' });
-      await saveCard(page, 'B14', { method: 'Radios', backup: 'Mobile phones', whoCalls: 'Site manager' });
-      await saveCard(page, 'B16', { whoCalls: 'Site manager', how: 'Calls 140', guides: 'Site manager' });
+      await saveCard(page, 'B4', { available: true });
+      await saveCard(page, 'B7', { how: 'Call 140 (Lebanese Red Cross)' });
+      await saveCard(page, 'B9', { ready: true });
+      // Emergency vehicle access: a No asks for the alternative arrangement before the row completes.
+      await openDetails(card(page, 'B10'));
+      await form(page, 'B10').locator('[data-choice="no"]').click();
+      await form(page, 'B10').locator('[data-region="save"]').click();
+      await expect(chip(page, 'B10')).toHaveAttribute('data-state', 'pending');
+      await form(page, 'B10').locator('[name="alternative"]').fill('Vehicles stop at the ring road; a stretcher team covers the last 80 metres.');
+      await form(page, 'B10').locator('[data-region="save"]').click();
+      await expect(chip(page, 'B10')).toHaveAttribute('data-state', 'complete');
+      await saveCard(page, 'B11', { clearRoute: 'yes' });
+      await saveCard(page, 'B14', { method: 'Mobile phones' });
+      await saveCard(page, 'B16', { how: 'The site manager calls 140' });
 
-      // No and Not planned on the AED row stay distinct from Complete (brief item 14).
+      // No on the AED row stays distinct from Complete (brief item 14); it never blocks.
       await openDetails(card(page, 'B8'));
-      await form(page, 'B8').locator('[data-choice="notPlanned"]').click();
+      await form(page, 'B8').locator('[data-choice="no"]').click();
       await form(page, 'B8').locator('[data-region="save"]').click();
       await expect(chip(page, 'B8')).toHaveAttribute('data-state', 'notProvided');
 
@@ -116,7 +123,7 @@ for (const lang of LANGUAGES) {
       await expect(page.locator('[data-region="filed-band"]')).toBeVisible();
       await openDetails(card(page, 'B4'));
       await expect(form(page, 'B4').locator('[data-region="save"]')).toHaveCount(0);
-      await expect(form(page, 'B4').locator('[name="who"]')).toBeDisabled();
+      await expect(form(page, 'B4').locator('[name="available"]')).toBeDisabled();
     });
   });
 }
