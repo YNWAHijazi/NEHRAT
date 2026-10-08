@@ -91,6 +91,8 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     await expect(page.locator('[data-region="step-body"] [data-step]:visible [data-region="card-owner"]')).toHaveAttribute('data-yours', 'true');
   } finally {
     const d = db();
+    // The tables' activity triggers call the app's now_stamp(); a raw connection supplies it.
+    d.function('now_stamp', () => new Date().toISOString().slice(0, 19).replace('T', ' '));
     d.prepare('DELETE FROM invitations WHERE name_en = ?').run(name);
     d.close();
   }
