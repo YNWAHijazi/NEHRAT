@@ -161,8 +161,8 @@ test('at phone width the summaries stack, cards are full width and nothing scrol
   const b = (await recommended.boundingBox())!;
   expect(b.y).toBeGreaterThanOrEqual(a.y + a.height - 1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await openDetails(card(page, 'B10'));
-  const input = form(page, 'B10').locator('[name="entrance"]');
+  await openDetails(card(page, 'B14'));
+  const input = form(page, 'B14').locator('[name="method"]');
   const box = (await input.boundingBox())!;
   expect(box.height).toBeGreaterThanOrEqual(44);
   expect(box.width).toBeGreaterThan(200);
