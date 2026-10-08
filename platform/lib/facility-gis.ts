@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { facilityAedRequirement } from './rules/facility-intake';
 import { beirutToday } from './clock';
 import { getDb } from './db';
@@ -28,6 +29,32 @@ export function facilityAedStatus(id:string):'required'|'notRequired'|'review' {
  const threshold=db.prepare("SELECT value,effective FROM ministry_config WHERE key='capacityThreshold'").get() as {value:string;effective:string|null}|undefined;
  const number=threshold && (!threshold.effective||threshold.effective<=beirutToday())?Number(threshold.value):NaN;
  return facilityAedRequirement({category:f.category_key,type:f.facility_type,capacity:f.licensed_capacity,threshold:Number.isFinite(number)?number:null,decision:decision?.requirement});
+}
+
+/** The current photo of an installed AED: its metadata, never the bytes (the serving route reads those). */
+export function devicePhotoMeta(id:string,label:string):{fileName:string;contentType:string;byteSize:number;uploadedAt:string}|null {
+ const row=getDb().prepare('SELECT file_name,content_type,byte_size,uploaded_at FROM facility_device_photos WHERE facility_id=? AND label=? AND bytes IS NOT NULL').get(id,label) as {file_name:string;content_type:string;byte_size:number;uploaded_at:string}|undefined;
+ return row?{fileName:row.file_name,contentType:row.content_type,byteSize:row.byte_size,uploadedAt:row.uploaded_at}:null;
+}
+
+/**
+ * The certificate's verification token (non-negotiable 5b): unguessable, minted once,
+ * never the sequential record id. Minted lazily, the first time the completed
+ * certificate is rendered, so an incomplete registration never has one to verify.
+ */
+export function ensureFacilityCertificateToken(id:string):string {
+ const db=getDb();const row=db.prepare('SELECT certificate_token FROM facilities WHERE id=?').get(id) as {certificate_token:string|null}|undefined;
+ if(row?.certificate_token)return row.certificate_token;
+ const token=randomBytes(24).toString('hex');db.prepare('UPDATE facilities SET certificate_token=? WHERE id=? AND certificate_token IS NULL').run(token,id);
+ return (db.prepare('SELECT certificate_token FROM facilities WHERE id=?').get(id) as {certificate_token:string}).certificate_token;
+}
+
+export interface FacilityCertificateFacts { id:string;nameEn:string;nameAr:string;categoryKey:string;registeredOn:string;archivedAt:string|null;isDemo:boolean }
+/** What a certificate states, by token. Demonstration records never resolve publicly (lib/rules/scope.ts). */
+export function facilityByCertificateToken(token:string):FacilityCertificateFacts|null {
+ if(!/^[a-f0-9]{48}$/.test(token))return null;
+ const r=getDb().prepare('SELECT id,name_en,name_ar,category_key,created_at,archived_at,is_demo FROM facilities WHERE certificate_token=?').get(token) as {id:string;name_en:string;name_ar:string;category_key:string;created_at:string;archived_at:string|null;is_demo:number}|undefined;
+ return r?{id:r.id,nameEn:r.name_en,nameAr:r.name_ar,categoryKey:r.category_key,registeredOn:r.created_at.slice(0,10),archivedAt:r.archived_at,isDemo:r.is_demo===1}:null;
 }
 
 export function facilityAedDecisions(id:string):{requirement:string;reason:string;created_at:string;actor:string}[] {

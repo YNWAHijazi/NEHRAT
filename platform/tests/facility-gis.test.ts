@@ -9,7 +9,7 @@ vi.mock('next/navigation',()=>({redirect:(url:string)=>{throw new Error(`redirec
 vi.mock('next/cache',()=>({revalidatePath:vi.fn()}));
 import {getDb} from '../lib/db';
 import {registerFacilityAction,saveFacilityProfileAction,saveFacilityDeviceAction,saveFacilityPlanAction,saveFacilityPersonsAction,submitFacilityIncidentAction} from '../app/actions';
-import {facilityPoint,devicePoint,facilityMapRecords,facilityAedStatus} from '../lib/facility-gis';
+import {facilityPoint,devicePoint,facilityMapRecords,facilityAedStatus,devicePhotoMeta,ensureFacilityCertificateToken,facilityByCertificateToken} from '../lib/facility-gis';
 import {facilityPlanConfirmation} from '../lib/queries';
 import {readMapPoint} from '../lib/rules/geolocation';
 import {facilityIncidentError,facilityAedRequirement} from '../lib/rules/facility-intake';
@@ -25,7 +25,7 @@ test('coordinates require a confirmed valid map pin',()=>{expect(readMapPoint(da
 test('registration validates and saves the profile, pin and audit together',async()=>{const before=getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n;await expect(registerFacilityAction(data({...profile,mapConfirmed:'no'}))).rejects.toThrow('error=details');expect(getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n).toBe(before);await expect(registerFacilityAction(data(profile))).rejects.toThrow('/devices');id=String(getDb().prepare('SELECT id FROM facilities WHERE name_en=?').get(profile.name)!.id);expect(facilityPoint(id)).toEqual({lat:33.89,lng:35.5});expect(facilityAedStatus(id)).toBe('required');});
 test('AED record inherits the facility pin and stores its operational answer',async()=>{await expect(saveFacilityDeviceAction(id,data({purpose:'initial',identification:'SER-1',location:'Reception',accessibleHours:'yes',publiclyAccessible:'no',pediatric:'na',operational:'no',representative:'Facility manager',separatePin:'no'}))).rejects.toThrow('notice=saved');expect(devicePoint(id,'AED-001')).toEqual({point:facilityPoint(id),separate:false});expect(getDb().prepare('SELECT operational FROM facility_devices WHERE facility_id=?').get(id)!.operational).toBe(0);});
 test('status changes cannot be forged against another facility or unknown purpose',async()=>{const other='FC-9999';await expect(saveFacilityDeviceAction(other,data({purpose:'statusChange',label:'AED-001',operational:'yes',representative:'x'}))).rejects.toThrow('/dashboard');await expect(saveFacilityDeviceAction(id,data({purpose:'fake',label:'AED-001',representative:'x'}))).rejects.toThrow('error=details');});
-const plan={check_trained:'on',check_signage:'on',check_access:'on',check_routes:'on',check_staffKnow:'on',check_drill:'on',drillDate:'2026-08-01',coordinator:'Facility manager'};
+const plan={check_trained:'on',check_signage:'on',check_access:'on',check_routes:'on',check_staffKnow:'on',check_drill:'on',drillDate:'2026-08-01',representative:'Facility manager'};
 test('readiness cannot be confirmed with a failed AED or an old drill',async()=>{await expect(saveFacilityPlanAction(id,data(plan))).rejects.toThrow('error=readiness');await expect(saveFacilityDeviceAction(id,data({purpose:'statusChange',label:'AED-001',operational:'yes',accessibleHours:'yes',representative:'Facility manager'}))).rejects.toThrow('notice=saved');await expect(saveFacilityPlanAction(id,data({...plan,drillDate:'2020-01-01'}))).rejects.toThrow('error=readiness');await expect(saveFacilityPlanAction(id,data(plan))).rejects.toThrow('notice=confirmed');expect(facilityPlanConfirmation(id)?.current).toBe(true);});
 test('AED relocation creates history and requires a fresh plan confirmation',async()=>{await expect(saveFacilityDeviceAction(id,data({purpose:'relocation',label:'AED-001',location:'Pool entrance',accessibleHours:'yes',representative:'Facility manager',separatePin:'yes',aedMapLat:'33.891',aedMapLng:'35.501',aedMapConfirmed:'yes'}))).rejects.toThrow('notice=saved');expect(devicePoint(id,'AED-001')).toEqual({point:{lat:33.891,lng:35.501},separate:true});expect(facilityPlanConfirmation(id)?.current).toBe(false);expect(Number(getDb().prepare("SELECT COUNT(*) n FROM facility_device_updates WHERE facility_id=? AND snapshot != '{}'").get(id)!.n)).toBeGreaterThan(1);});
 test('profile edits preserve separate AED pins and update inherited ones',async()=>{await expect(saveFacilityProfileAction(id,data({...profile,mapLat:'33.90'}))).rejects.toThrow('notice=profile');expect(facilityPoint(id)?.lat).toBe(33.9);expect(devicePoint(id,'AED-001').point?.lat).toBe(33.891);});
@@ -42,4 +42,31 @@ test('Ministry decisions require permission, a reason, and cannot waive fixed ca
  expect(getDb().prepare('SELECT reason,actor_id FROM facility_aed_decisions WHERE facility_id=?').get(id)).toMatchObject({reason:'Sports category confirmed',actor_id:session.account!.id});as('test_organizer');
 });
 
-test('the responsible facility contact cannot be erased',async()=>{as('test_organizer');await expect(saveFacilityPersonsAction(id,data({coordinatorName:'',coordinatorPhone:'',coordinatorEmail:''}))).rejects.toThrow('error=contact');expect(getDb().prepare("SELECT name_or_position FROM facility_persons WHERE facility_id=? AND role='coordinator'").get(id)!.name_or_position).toBe('Facility manager');});
+test('the responsible facility contact cannot be erased, is the only person collected, and is edited on the details screen',async()=>{as('test_organizer');await expect(saveFacilityPersonsAction(id,data({coordinatorName:'',coordinatorPhone:'',coordinatorEmail:''}))).rejects.toThrow('/profile?error=contact');expect(getDb().prepare("SELECT name_or_position FROM facility_persons WHERE facility_id=? AND role='coordinator'").get(id)!.name_or_position).toBe('Facility manager');
+ // Registration wrote ONE row (partner audit, 2026-10-08): no alternate, no assigned guide.
+ expect(getDb().prepare('SELECT COUNT(*) n FROM facility_persons WHERE facility_id=?').get(id)!.n).toBe(1);
+ await expect(saveFacilityPersonsAction(id,data({coordinatorName:'Duty manager',coordinatorPhone:'+9611234568',coordinatorEmail:'duty@example.com'}))).rejects.toThrow('/profile?notice=contact');
+ expect(getDb().prepare("SELECT name_or_position FROM facility_persons WHERE facility_id=? AND role='coordinator'").get(id)!.name_or_position).toBe('Duty manager');});
+
+test('the AED record is lean: no annual readiness confirmation purpose, no maintenance dates',async()=>{as('test_organizer');
+ await expect(saveFacilityDeviceAction(id,data({purpose:'annual',label:'AED-001',representative:'x',check_operational:'yes'}))).rejects.toThrow('error=details');
+ await expect(saveFacilityDeviceAction(id,data({purpose:'replacement',label:'AED-001',identification:'SER-2',representative:'Facility manager',padExpiry:'2030-01-01',batteryExpiry:'2030-01-01',separatePin:'no'}))).rejects.toThrow('notice=saved');
+ const row=getDb().prepare('SELECT identification,pad_expiry,battery_expiry,latest_check FROM facility_devices WHERE facility_id=? AND label=?').get(id,'AED-001')!;
+ expect(row.identification).toBe('SER-2');expect(row.pad_expiry).toBeNull();expect(row.battery_expiry).toBeNull();expect(row.latest_check).toBeNull();});
+
+test('a photo of the installed AED is stored with the record; a non-image is refused before anything is written',async()=>{as('test_organizer');
+ const png=Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8cfc0f01f0005000201e2c3b3a10000000049454e44ae426082','hex');
+ const withFile=(file:File)=>{const f=data({purpose:'statusChange',label:'AED-001',operational:'yes',accessibleHours:'yes',representative:'Facility manager'});f.set('photo',file);return f;};
+ await expect(saveFacilityDeviceAction(id,withFile(new File([png],'aed.png',{type:'image/png'})))).rejects.toThrow('notice=saved');
+ const stored=getDb().prepare('SELECT file_name,content_type,byte_size FROM facility_device_photos WHERE facility_id=? AND label=?').get(id,'AED-001')!;
+ expect(stored).toMatchObject({file_name:'aed.png',content_type:'image/png',byte_size:png.length});
+ expect(devicePhotoMeta(id,'AED-001')?.contentType).toBe('image/png');
+ const before=getDb().prepare('SELECT COUNT(*) n FROM facility_device_updates WHERE facility_id=?').get(id)!.n;
+ await expect(saveFacilityDeviceAction(id,withFile(new File([png],'plan.pdf',{type:'application/pdf'})))).rejects.toThrow('error=photo-wrongType');
+ expect(getDb().prepare('SELECT COUNT(*) n FROM facility_device_updates WHERE facility_id=?').get(id)!.n).toBe(before);
+ expect(devicePhotoMeta(id,'AED-001')?.fileName).toBe('aed.png');});
+
+test('the certificate token is unguessable, minted once, and resolves to the certificate facts only',()=>{
+ const token=ensureFacilityCertificateToken(id);expect(token).toMatch(/^[a-f0-9]{48}$/);expect(ensureFacilityCertificateToken(id)).toBe(token);
+ const facts=facilityByCertificateToken(token);expect(facts?.id).toBe(id);expect(facts?.isDemo).toBe(session.account!.isDemo);expect(Object.keys(facts!).sort()).toEqual(['archivedAt','categoryKey','id','isDemo','nameAr','nameEn','registeredOn']);
+ expect(facilityByCertificateToken(id)).toBeNull();expect(facilityByCertificateToken('0'.repeat(48))).toBeNull();});

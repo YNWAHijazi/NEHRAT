@@ -566,23 +566,27 @@ export interface FacilityDevice {
   accessibleHours: boolean; publiclyAccessible: boolean;
   pediatric: 'yes' | 'no' | 'na';
   operational: boolean;
+  /** Historical only: dates recorded before the lean AED form (partner audit, 2026-10-08). Never collected now. */
   padExpiry: string | null; batteryExpiry: string | null; latestCheck: string | null;
+  /** A photo of the installed AED is stored for this device. */
+  hasPhoto: boolean;
   updatedAt: string;
 }
 
 export function facilityDevices(facilityId: string): FacilityDevice[] {
   const rows = getDb()
     .prepare(
-      `SELECT label, identification, location_en, location_ar, accessible_hours,
-              publicly_accessible, pediatric, operational, pad_expiry, battery_expiry,
-              latest_check, updated_at
-       FROM facility_devices WHERE facility_id = ? ORDER BY label`,
+      `SELECT d.label, d.identification, d.location_en, d.location_ar, d.accessible_hours,
+              d.publicly_accessible, d.pediatric, d.operational, d.pad_expiry, d.battery_expiry,
+              d.latest_check, d.updated_at,
+              EXISTS (SELECT 1 FROM facility_device_photos p WHERE p.facility_id = d.facility_id AND p.label = d.label AND p.bytes IS NOT NULL) AS has_photo
+       FROM facility_devices d WHERE d.facility_id = ? ORDER BY d.label`,
     )
     .all(facilityId) as unknown as {
       label: string; identification: string; location_en: string; location_ar: string;
       accessible_hours: number; publicly_accessible: number; pediatric: 'yes' | 'no' | 'na';
       operational: number; pad_expiry: string | null; battery_expiry: string | null;
-      latest_check: string | null; updated_at: string;
+      latest_check: string | null; updated_at: string; has_photo: number;
     }[];
   return rows.map((r) => ({
     label: r.label, identification: r.identification,
@@ -590,6 +594,7 @@ export function facilityDevices(facilityId: string): FacilityDevice[] {
     accessibleHours: r.accessible_hours === 1, publiclyAccessible: r.publicly_accessible === 1,
     pediatric: r.pediatric, operational: r.operational === 1,
     padExpiry: r.pad_expiry, batteryExpiry: r.battery_expiry, latestCheck: r.latest_check,
+    hasPhoto: r.has_photo === 1,
     updatedAt: r.updated_at,
   }));
 }

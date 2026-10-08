@@ -16,6 +16,8 @@
     "tooLargeAr": "حجم هذا الملف أكبر من ⁦{max}⁩. أرفقوا ملفاً أصغر.",
     "wrongTypeEn": "That file type is not accepted. Attach a PDF or an image.",
     "wrongTypeAr": "نوع هذا الملف غير مقبول. أرفقوا ملف PDF أو صورة.",
+    "notImageEn": "That file is not an image. Attach a PNG, JPEG, WebP or GIF photo.",
+    "notImageAr": "هذا الملف ليس صورة. أرفقوا صورة بصيغة PNG أو JPEG أو WebP أو GIF.",
     "emptyEn": "That file is empty.",
     "emptyAr": "هذا الملف فارغ.",
     "openEn": "Open",

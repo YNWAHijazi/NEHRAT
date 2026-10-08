@@ -8,13 +8,14 @@ import { AedWhereToBuy } from '../../../../components/AedWhereToBuy';
 import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
 import { DeviceRegistry } from './DeviceRegistry';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
-import { facilityDetail, facilityDevices, facilityPersons, unreadCountFor } from '../../../../lib/queries';
-import { beirutToday } from '../../../../lib/clock';
+import { facilityDetail, facilityDevices, unreadCountFor } from '../../../../lib/queries';
+import { UPLOADS_CONTENT } from '../../../../lib/rules/uploads';
 
 /**
- * The AED registry (step 4). One record per device, as the AED registration form requires; the coordinator shows
- * read-only from the one facility-level record; each update is signed by the
- * facility representative -- a different signatory from the plan's coordinator.
+ * The AED registry (step 4). One record per device, as the AED registration form
+ * requires; each registration or update is signed by the facility representative.
+ * The record is lean (partner audit, 2026-10-08): no coordinator, no maintenance
+ * dates, no annual readiness confirmation -- the status derives from the record.
  *
  * The reference carries a barcode/QR scan panel; the policy spec lists AI device
  * identifier capture among capabilities requiring separate approval, so it lives
@@ -37,7 +38,12 @@ export default async function DeviceRegistryPage({
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
   const devices = facilityDevices(facility.id);
-  const coordinator = facilityPersons(facility.id).find((p) => p.role === 'coordinator') ?? null;
+  const photoError = error?.startsWith('photo-') ? error.slice('photo-'.length) : null;
+  const uploadCopy = UPLOADS_CONTENT.copy;
+  const photoMessage = photoError === 'tooLarge'
+    ? { en: uploadCopy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: uploadCopy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) }
+    : photoError === 'empty' ? { en: uploadCopy.emptyEn, ar: uploadCopy.emptyAr }
+    : photoError ? { en: uploadCopy.notImageEn, ar: uploadCopy.notImageAr } : null;
 
   return (
     <>
@@ -57,14 +63,12 @@ export default async function DeviceRegistryPage({
 
 
         {!facilityPoint(id) ? <p role="status"><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin before registering an AED." ar="أضيفوا موقع المنشأة على الخريطة قبل تسجيل الجهاز."/></a></p>:null}
-        {error ? <p role="alert"><L en="Check the device ID, location, representative and map pin, then save again." ar="تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً."/></p>:null}
+        {photoMessage ? <p role="alert"><L en={photoMessage.en} ar={photoMessage.ar} /></p> : error ? <p role="alert"><L en="Check the device ID, location, representative and map pin, then save again." ar="تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً."/></p>:null}
         <DeviceRegistry
           facilityLocation={facilityPoint(id)}
           deviceLocations={Object.fromEntries(devices.map(d=>{const location=devicePoint(id,d.label);return [d.label,location.separate?location.point:null]}))}
           facilityId={facility.id}
           devices={devices}
-          coordinatorName={coordinator?.nameOrPosition ?? ''}
-          today={beirutToday()}
         />
 
         {/* THE FLOW CONTINUES (partner ruling, 2026-09-05): registering a device
