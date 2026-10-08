@@ -66,7 +66,7 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
   try {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/events/EV-0362');
-    await expect(page.locator('[data-region="record-guide"]')).toContainText('Three parties complete this record');
+    await expect(page.locator('[data-region="record-guide"]')).toContainText('Three parties fill in this record: you, the EMS agency and the Medical Director. Amber steps are yours.');
     // A row the EMS agency or the Director fills: no empty boxes, the owner said plainly.
     const cpr = await openDetails(card(page, 'B8'));
     await expect(cpr.locator('[data-region="card-owner"]')).toContainText('Filled by the EMS agency or the Medical Director');
@@ -80,10 +80,14 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     const invite = ems.locator('form[data-region="invite"]');
     await invite.locator('input[name="name"]').fill(name);
     await invite.locator('input[name="email"]').fill('handoff-agency@example.test');
+    await invite.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
     await invite.locator('button[type="submit"]').click();
     await page.waitForURL(/invited=ems/);
     const dialog = page.locator('[data-region="handoff-dialog"]');
     await expect(dialog).toBeVisible();
+    // The pop-up opens where the organizer was; the page behind it does not jump to the top.
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 80);
     await expect(dialog.locator('[data-region="handoff-steps"] li').first()).toBeVisible();
     await expect(dialog).toContainText('Number and type of committed units');
     await dialog.locator('[data-region="handoff-skip"]').click();

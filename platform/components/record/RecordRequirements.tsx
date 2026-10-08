@@ -5,6 +5,7 @@ import type { RecordView } from '../../lib/record-view';
 import { REQUIREMENT_AUTHORS, REQUIREMENT_COPY, REQUIREMENT_GROUPS, handledBy, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
 import { FileControl } from './FileControl';
 import { JumpTo } from './JumpTo';
+import { RestoreScroll } from './KeepScroll';
 import { PartyBlock } from './PartyBlock';
 import { LinkedAnswers, PlanSections, textInstance } from './PlanSections';
 import { HandoffDialog } from './HandoffDialog';
@@ -190,9 +191,10 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   const guide = parties.length > 1 ? (() => {
     const others = parties.filter((r) => r !== viewerRole);
     const o = { en: others.map((r) => `the ${REQUIREMENT_AUTHORS[r].en}`).join(' and '), ar: others.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' و') };
+    // Plain and short (owner, 8 October 2026): who fills what, when answers save, when anything is sent.
     return {
-      en: `${parties.length === 3 ? 'Three' : 'Two'} parties complete this record: you and ${o.en}. Each step says who fills it: amber steps are yours; grey steps are filled by ${o.en} once invited and accepted, and you see their answers there. Your answers save when you move to another step; the record stays a draft until every required step is complete and you submit it.`,
-      ar: `${parties.length === 3 ? 'ثلاثة أطراف' : 'طرفان'} ${parties.length === 3 ? 'يستكملون' : 'يستكملان'} هذا السجل: أنتم و${o.ar}. تذكر كل خطوة من يملؤها: الخطوات الكهرمانية لكم؛ والخطوات الرمادية يملؤها ${o.ar} بعد الدعوة والقبول، وترون إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى؛ ويبقى السجل مسودة حتى تكتمل كل الخطوات المطلوبة وتقدّموه.`,
+      en: `${parties.length === 3 ? 'Three' : 'Two'} parties fill in this record: you${parties.length === 3 ? ',' : ' and'} ${o.en}. Amber steps are yours. Grey steps are filled in by ${o.en} after they accept your invitation; their answers then appear on those steps. Your answers are saved when you move to another step. Nothing is sent to the Ministry until you submit.`,
+      ar: `${parties.length === 3 ? 'ثلاثة أطراف يملؤون' : 'طرفان يملآن'} هذا السجل: أنتم و${o.ar}. الخطوات الكهرمانية لكم. أما الخطوات الرمادية فيملؤها ${o.ar} بعد قبول دعوتكم، ثم تظهر إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى. لا يُرسل شيء إلى الوزارة قبل أن تقدّموا السجل.`,
     };
   })() : null;
   const handoffParty = handoff && record.editable && viewerRole === 'organizer' ? handoff : null;
@@ -207,6 +209,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   return (
     <div data-region="record-requirements">
       <JumpTo />
+      <RestoreScroll />
       {guide ? (
         <div data-region="record-guide" role="note" style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14px', lineHeight: 1.6 }}>
           <L en={guide.en} ar={guide.ar} />
