@@ -68,7 +68,7 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  useEffect(()=>{if(!refused||pending)return;const el=document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${refused}"], [data-refused-anchor="${refused}"]`);el?.focus();el?.scrollIntoView({block:'center'});},[refused,state,pending]);
  const reason=(name:string)=>refused===name?<span data-region="field-reason" role="alert" style={{fontSize:'13.5px',color:'var(--bad)'}}><L en={REASONS[name]!.en} ar={REASONS[name]!.ar}/></span>:null;
  const text=(name:string,en:string,ar:string,required=true,type='text')=><label style={{display:'grid',gap:6}} key={name}><L en={en} ar={ar}/><input name={name} type={type} inputMode={type==='tel'?'tel':undefined} value={values[name]??''} onChange={e=>setValues(v=>({...v,[name]:e.target.value}))} required={required} aria-invalid={flagged(name)||undefined} style={flagged(name)?refusedInput:input} dir={name.endsWith('Ar')?'rtl':undefined}/>{reason(name)}</label>;
- return <form onSubmit={submit}>
+ return <form onSubmit={submit} noValidate>
  <fieldset disabled={locked||pending} style={{border:0,padding:0,margin:0,minWidth:0}}>
  {refused?<p data-region="registration-refused" role="alert" style={{margin:'0 0 18px',padding:'12px 16px',border:'1px solid var(--bad)',borderRadius:10,fontSize:'14.5px',lineHeight:1.55}}><L en="The venue was not saved. One field needs attention:" ar="لم يُحفظ الموقع. حقل واحد يحتاج إلى مراجعة:"/> <L en={REASONS[refused]?.en??''} ar={REASONS[refused]?.ar??''}/></p>:null}
  <div data-region="registration-form" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,240px),1fr))',gap:20}}>
