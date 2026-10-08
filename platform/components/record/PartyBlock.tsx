@@ -2,6 +2,7 @@ import { L } from '../L';
 import { InvitationLinkBlock } from './InvitationLinkBlock';
 import { InviteForm } from './InviteForm';
 import { removeProviderAction, withdrawNominationAction } from '../../app/actions';
+import { withdrawVenuePartnerAction } from '../../app/venues/team-actions';
 import type { RecordParty } from '../../lib/record-facts';
 import type { RecordService } from '../../lib/rules';
 
@@ -54,15 +55,22 @@ export function PartyBlock({ kind, id, parties, invite, canInvite, declarations 
               </form>
             </details>
           ) : null}
+          {kind === 'venue' && canInvite && p.status === 'nominated' ? (
+            <div style={{ flexBasis: '100%' }}>
+              <InvitationLinkBlock token={p.token} path={`/venue-invitations/${p.token}`} />
+            </div>
+          ) : null}
+          {kind === 'venue' && canInvite ? (
+            <form action={withdrawVenuePartnerAction.bind(null, id, p.token)} style={{ flexBasis: '100%' }}>
+              <button type="submit" style={{ border: 0, background: 'transparent', color: 'var(--muted)', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, padding: 0, minHeight: 32 }}><L en="Withdraw the invitation" ar="سحب الدعوة" /></button>
+            </form>
+          ) : null}
         </div>
       ))}
       {past.map((p) => (
         <div key={`${p.kind}-${p.email}-${p.invitedAt}`} style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 6 }}>{p.name} — <L en={STATES[p.status][0]} ar={STATES[p.status][1]} /></div>
       ))}
-      {kind === 'event' && canInvite && (!single || active.length === 0) ? <InviteForm eventId={id} kind={invite} /> : null}
-      {kind === 'venue' && canInvite ? (
-        <a href={`/venues/${id}/team`} style={{ fontSize: '13.5px' }}><L en={invite === 'ems' ? 'Invite an EMS agency' : 'Invite the Medical Director'} ar={invite === 'ems' ? 'دعوة جهة إسعاف' : 'دعوة المدير الطبي'} /></a>
-      ) : null}
+      {canInvite && (!single || active.length === 0) ? <InviteForm eventId={id} kind={invite} service={kind} /> : null}
     </div>
   );
 }

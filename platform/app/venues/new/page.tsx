@@ -5,15 +5,13 @@ import { L } from '../../../components/L';
 import { RegisterVenueForm } from './RegisterVenueForm';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { unreadCountFor } from '../../../lib/queries';
-import { VENUE_REGISTRATION_FIELDS } from '../../../lib/rules';
+import { VENUE_REGISTRATION_FIELDS, VENUE_REASSESSMENT_TRIGGERS } from '../../../lib/rules';
+import { BANDS, DOMAINS, DOMAIN_COUNT, MAX_SCORE_PER_DOMAIN, MINIMUM_CONDITIONS } from '../../../lib/rules/load';
 
 /**
- * Register a recurring venue: the identity fields and Submit (partner ruling,
- * 2026-09-05). The screen no longer gates registration on the capacity and
- * regularly-hosts answers -- an operator who came here to register is registered,
- * a VN number is minted, and the annual assessment opens. The two answers are
- * still captured, because the assessment derives from them; they simply stop
- * being a door.
+ * Register a recurring venue: the identity fields, then the annual assessment, on one page
+ * (owner, 8 October 2026 -- the event's intake). A VN number is minted with the assessment's
+ * first version and the operator lands on the venue record, its requirements already derived.
  */
 export default async function RegisterVenuePage() {
   const account = await currentAccount();
@@ -34,7 +32,7 @@ export default async function RegisterVenuePage() {
               second sweep): the one optional field says so on its own label. */}
 
 
-          <RegisterVenueForm fields={[...VENUE_REGISTRATION_FIELDS]} />
+          <RegisterVenueForm fields={[...VENUE_REGISTRATION_FIELDS]} assessment={{ domains: [...DOMAINS], conditions: [...MINIMUM_CONDITIONS], bands: [...BANDS], maxScore: DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN, triggers: [...VENUE_REASSESSMENT_TRIGGERS] }} />
 
           <div data-region="exempt-footnote"><InfoNote>
             <L

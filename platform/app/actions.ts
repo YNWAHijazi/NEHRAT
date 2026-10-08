@@ -827,13 +827,24 @@ export async function registerVenueAction(_prev: VenueFormState, formData: FormD
   if (!account) redirect('/signin');
   const {parseVenueDetails}=await import('../lib/venue/workspace');
   const parsed=parseVenueDetails(formData);if('refused' in parsed)return {refused:parsed.refused};const v=parsed.value;
+  // The assessment on the same page (owner, 8 October 2026): nine answers, the attendance
+  // figure and the declaration, derived over the venue facts just entered.
+  let answers:DomainAnswers;try{answers=JSON.parse(String(formData.get('assessmentAnswers')??'')) as DomainAnswers;}catch{return {refused:'assessment'};}
+  const attendanceRaw=String(formData.get('attendance')??'').trim();const attendance=attendanceRaw===''?null:Number(attendanceRaw);
+  const representative=String(formData.get('representative')??'').trim(),position=String(formData.get('position')??'').trim();
+  const inputs:MinimumConditionInputs={expectedMaxSimultaneousAttendance:attendance!==null&&Number.isFinite(attendance)?attendance:null,eventDisciplines:[],courseDistanceKm:null,venueLicensedCapacity:v.capacity,venueIsNightclubOrDanceVenue:v.nightclub};
+  if(!Array.isArray(answers)||answers.length!==9)return {refused:'assessment'};
+  const derivation=deriveLevel({answers,inputs});
+  if(!derivation.complete||derivation.finalLevel===null||!representative||!position)return {refused:'assessment'};
   const venueId=nextRecordId('VN');
   const db=getDb();db.exec('BEGIN IMMEDIATE');
   try {
   db.prepare(`INSERT INTO venues(id,account_id,name_en,name_ar,category,address_municipality_en,address_municipality_ar,responsible_contact,licensed_capacity,regularly_hosts,is_nightclub,is_demo,district,latitude,longitude,responsible_name,responsible_phone) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(venueId,account.id,v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,+account.isDemo,v.district,v.point.lat,v.point.lng,v.contactName,v.contactPhone);
-  db.prepare('INSERT INTO venue_packages(venue_id) VALUES(?)').run(venueId);
+  db.prepare(`INSERT INTO venue_assessments(venue_id,version,answers,inputs,derivation,nehrat_tool_version,effective,valid_until,representative,position,certificate_issued) VALUES(?,1,?,?,?,?,'','',?,?,0)`).run(venueId,JSON.stringify(answers),JSON.stringify(inputs),JSON.stringify(derivation),NEHRAT_TOOL_VERSION,representative,position);
+  db.prepare('INSERT INTO venue_packages(venue_id,assessment_version) VALUES(?,1)').run(venueId);
+  db.prepare('UPDATE venues SET level=? WHERE id=?').run(derivation.finalLevel,venueId);
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
-  revalidatePath('/dashboard');redirect(`/venues/${venueId}/assessment`);
+  revalidatePath('/dashboard');redirect(`/venues/${venueId}`);
 }
 
 export interface VenueAssessmentPayload {

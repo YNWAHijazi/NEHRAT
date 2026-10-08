@@ -10,6 +10,11 @@ import { saveVenueDetailsAction } from '../actions';
 import { VENUE_TYPES, VENUE_DISTRICTS } from '../../../lib/rules/venue-intake';
 import type { MapPoint } from '../../../lib/rules/geolocation';
 import type { VenueDetail } from '../../../lib/queries';
+import { VenueAssessmentForm } from '../[id]/assessment/VenueAssessmentForm';
+import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
+
+/** The assessment's data, passed from the server page so the registration carries the assessment on the same page. */
+export interface RegistrationAssessment { domains: Domain[]; conditions: MinimumCondition[]; bands: Band[]; maxScore: number; triggers: { en: string; ar: string }[] }
 const input:React.CSSProperties={width:'100%',minHeight:44,padding:'10px 12px',border:'1px solid var(--line)',borderRadius:8,background:'var(--bg)',fontSize:15};
 const refusedInput:React.CSSProperties={...input,border:'1px solid var(--bad)'};
 
@@ -27,14 +32,17 @@ const REASONS:Record<string,{en:string;ar:string}>={
  regularlyHosts:{en:'Answer Yes or No to the question about hosting events.',ar:'أجيبوا بنعم أو لا عن سؤال استضافة الفعاليات.'},
  isNightclub:{en:'Answer Yes or No to the question about the nightclub or dance venue.',ar:'أجيبوا بنعم أو لا عن سؤال الملهى الليلي أو مكان الرقص.'},
  map:{en:'Choose the location on the map and confirm the pin.',ar:'اختاروا الموقع على الخريطة وأكّدوا العلامة.'},
+ assessment:{en:'Answer every assessment question and the attendance figure, and name the authorized representative and position.',ar:'أجيبوا عن جميع أسئلة التقييم ورقم الحضور، وسمّوا الممثل المفوّض وصفته.'},
 };
 
 /**
- * The venue's identity fields. Everything typed stays on the screen when the server
- * refuses the form (partner report, 8 October 2026: Continue cleared the page and said
- * nothing): the refusal names the field, the message sits beside it and it takes focus.
+ * The venue's identity fields and, on registration, the annual assessment below them on
+ * the same page -- the event's one-page intake (owner, 8 October 2026). Everything typed
+ * stays on the screen when the server refuses the form: the refusal names the field, the
+ * message sits beside it and it takes focus.
  */
-export function RegisterVenueForm({fields:unused,initial,point=null,district='',locked=false}:{fields?:unknown[];initial?:VenueDetail;point?:MapPoint|null;district?:string;locked?:boolean}){
+export function RegisterVenueForm({fields:unused,initial,point=null,district='',locked=false,assessment=null}:{fields?:unknown[];initial?:VenueDetail;point?:MapPoint|null;district?:string;locked?:boolean;assessment?:RegistrationAssessment|null}){
+ const [assessed,setAssessed]=useState(false);
  const [pin,setPin]=useState(point);const [regular,setRegular]=useState<boolean|null>(initial?.regularlyHosts??null);const [nightclub,setNightclub]=useState<boolean|null>(initial?.isNightclub??null);
  const known=VENUE_TYPES.some(t=>t.key===initial?.category);const [category,setCategory]=useState(initial?known?initial.category:'other':'');
  const [districtValue,setDistrict]=useState(district);
@@ -66,7 +74,11 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  {!locked?<LocationPicker initial={point} onChange={setPin}/>:point?<p><L en="Confirmed map location" ar="الموقع المؤكّد على الخريطة"/>: <a href={`https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lng}#map=17/${point.lat}/${point.lng}`} target="_blank" rel="noreferrer"><L en="View map" ar="عرض الخريطة"/></a></p>:null}
  {reason('map')}
  </div>
- {!locked?<button type="submit" disabled={!pin||regular===null||nightclub===null||pending} style={{padding:'12px 24px',border:0,borderRadius:24,background:'var(--brand)',color:'var(--bg)'}}><L en={initial?'Save and continue to the assessment':'Continue to assessment'} ar={initial?'الحفظ والمتابعة إلى التقييم':'المتابعة إلى التقييم'}/></button>:null}
- {!locked&&(!pin||regular===null||nightclub===null)?<p data-region="before-continue" style={{margin:'10px 0 0',fontSize:'13.5px',color:'var(--muted)'}}><L en="Before continuing: answer both questions and confirm the map pin." ar="قبل المتابعة: أجيبوا عن السؤالين وأكّدوا العلامة على الخريطة."/></p>:null}
+ {!initial&&assessment&&!locked?<VenueAssessmentForm embedded onComplete={setAssessed} venueId="" venueNameEn={values['name']||''} venueNameAr={values['nameAr']||''} domains={assessment.domains} conditions={assessment.conditions} bands={assessment.bands} maxScore={assessment.maxScore}
+   venueFacts={{licensedCapacity:Number.isSafeInteger(Number(values['capacity']))&&Number(values['capacity'])>0?Number(values['capacity']):null,regularlyHosts:regular===true,isNightclub:nightclub===true||category==='nightclub'}}
+   initialAnswers={null} initialAttendance={null} feeDue={null} effectivePreview="" validPreview="" triggers={assessment.triggers}/>:null}
+ {reason('assessment')}
+ {!locked?<button type="submit" disabled={!pin||regular===null||nightclub===null||(!initial&&Boolean(assessment)&&!assessed)||pending} style={{minHeight:48,padding:'12px 26px',border:0,borderRadius:24,background:'var(--brand)',color:'var(--bg)',fontSize:'14.5px',fontWeight:500,marginBlockStart:8}}><L en={initial?'Save the details':'Continue to requirements'} ar={initial?'حفظ التفاصيل':'المتابعة إلى المتطلبات'}/></button>:null}
+ {!locked&&(!pin||regular===null||nightclub===null||(!initial&&Boolean(assessment)&&!assessed))?<p data-region="before-continue" style={{margin:'10px 0 0',fontSize:'13.5px',color:'var(--muted)'}}><L en={initial?'Before saving: answer both questions and confirm the map pin.':'Before continuing: answer both questions, confirm the map pin, answer every assessment question and the attendance figure, and name the representative.'} ar={initial?'قبل الحفظ: أجيبوا عن السؤالين وأكّدوا العلامة على الخريطة.':'قبل المتابعة: أجيبوا عن السؤالين، وأكّدوا العلامة على الخريطة، وأجيبوا عن جميع أسئلة التقييم ورقم الحضور، وسمّوا الممثل.'}/></p>:null}
  </fieldset></form>;
 }

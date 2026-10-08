@@ -10,7 +10,7 @@ import { InfoNote } from '../../../../components/InfoNote';
  * issues of the regulation disagree (the recurring-venue floor is Arabic-issue only).
  */
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
 import { saveVenueAssessmentAction } from '../../../actions';
@@ -44,7 +44,12 @@ export function VenueAssessmentForm({
   effectivePreview,
   validPreview,
   triggers,
+  embedded = false,
+  onComplete,
 }: {
+  /** Inside the registration form (owner, 8 October 2026): fields and hidden inputs only; the form's own submit records it. */
+  embedded?: boolean;
+  onComplete?: (complete: boolean) => void;
   venueId: string;
   venueNameEn: string;
   venueNameAr: string;
@@ -86,6 +91,8 @@ export function VenueAssessmentForm({
   );
   const why = levelWhy(derivation);
   const unansweredDomains = domains.filter((_, i) => answers[i] === null);
+  const complete = derivation.complete && declarationComplete;
+  useEffect(() => { onComplete?.(complete); }, [complete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const submit = () => {
     setError(false);
@@ -102,11 +109,20 @@ export function VenueAssessmentForm({
   };
 
   return (
-    <div style={{ maxWidth: 900 }}>
-      <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
-        <L en={`${venueNameEn} · routine operations`} ar={`${venueNameAr} · التشغيل الاعتيادي`} />
-      </div>
-      <h2 data-sec-h1="" style={{ margin: '0 0 24px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+    <div style={{ maxWidth: 900 }} data-region={embedded ? 'registration-assessment' : undefined} data-refused-anchor={embedded ? 'assessment' : undefined} tabIndex={embedded ? -1 : undefined}>
+      {embedded ? (
+        <>
+          <input type="hidden" name="assessmentAnswers" value={JSON.stringify(answers)} />
+          <input type="hidden" name="attendance" value={inputs.expectedMaxSimultaneousAttendance ?? ''} />
+          <input type="hidden" name="representative" value={representative} />
+          <input type="hidden" name="position" value={position} />
+        </>
+      ) : (
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 14 }}>
+          <L en={`${venueNameEn} · routine operations`} ar={`${venueNameAr} · التشغيل الاعتيادي`} />
+        </div>
+      )}
+      <h2 data-sec-h1={embedded ? undefined : ''} style={{ margin: embedded ? '40px 0 20px' : '0 0 24px', fontSize: embedded ? 26 : 38, fontWeight: 600, letterSpacing: '-.035em' }}>
         <L en="Annual venue assessment" ar="التقييم السنوي للموقع" />
         <span data-region="session-callout"><InfoNote labelEn="What to assess" labelAr="ما يجب تقييمه"><L en="Assess one routine operating session. Use the session duration and the venue’s operating history." ar="قيّموا فترة تشغيل اعتيادية واحدة، باستخدام مدة الجلسة وسجل تشغيل الموقع." /></InfoNote></span>
       </h2>
@@ -198,7 +214,7 @@ export function VenueAssessmentForm({
 
       {/* Restored (removed in the 2026-09-30 rebuild while its data stayed wired): the operator's
           validity window and the five changes that require a new assessment before it ends. */}
-      <div data-region="validity" style={{ padding: 32, border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
+      {embedded ? null : <div data-region="validity" style={{ padding: 32, border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32, marginBlockEnd: 26 }}>
           <div>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 6 }}>
@@ -226,7 +242,7 @@ export function VenueAssessmentForm({
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       <div data-region="declaration" style={{ padding: 29, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
         <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 14 }}>
@@ -255,6 +271,7 @@ export function VenueAssessmentForm({
         </div>
       </div>
 
+      {embedded ? null : <>
       {error ? (
         <p style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--bad)' }}>
           <L en="Answer every question and complete your name and position." ar="أجيبوا عن جميع المجالات وأدخلوا رقم الحضور قبل حفظ التقييم." />
@@ -301,6 +318,7 @@ export function VenueAssessmentForm({
           <L en="Complete the declaration to record: authorized representative and position." ar="أكملوا الإقرار للتسجيل: الممثل المفوض والصفة." />
         </p>
       ) : null}
+      </>}
     </div>
   );
 }

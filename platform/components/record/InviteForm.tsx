@@ -7,12 +7,13 @@ import { InfoNote } from '../InfoNote';
 
 import { L } from '../L';
 import { inviteParticipantAction } from '../../app/actions';
+import { inviteVenuePartnerAction } from '../../app/venues/team-actions';
 import { fieldInput } from '../workspace-styles';
 
-export function InviteForm({ eventId, kind }: { eventId: string; kind: 'ems' | 'director' }) {
+export function InviteForm({ eventId, kind, service = 'event' }: { eventId: string; kind: 'ems' | 'director'; service?: 'event' | 'venue' }) {
   return (
     <form
-      action={inviteParticipantAction.bind(null, eventId)}
+      action={(service === 'venue' ? inviteVenuePartnerAction : inviteParticipantAction).bind(null, eventId)}
       data-region="invite"
       style={{ padding: '16px 18px', border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'end' }}
     >

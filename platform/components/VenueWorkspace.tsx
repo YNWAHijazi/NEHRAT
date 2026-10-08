@@ -13,14 +13,7 @@ import { venueStatusLabel } from '../lib/rules/venue-workflow';
 export type VenueTab = 'overview' | 'details' | 'assessment' | 'team';
 export type VenueWorkspaceData = NonNullable<ReturnType<typeof venuePackageFor>>;
 
-const TABS: { key: VenueTab; path: string; en: string; ar: string }[] = [
-  { key: 'overview', path: '', en: 'Overview', ar: 'نظرة عامة' },
-  { key: 'details', path: '/details', en: 'Details', ar: 'التفاصيل' },
-  { key: 'assessment', path: '/assessment', en: 'Assessment', ar: 'التقييم' },
-  { key: 'team', path: '/team', en: 'Medical team', ar: 'الفريق الطبي' },
-];
-
-/** One identity and navigation layout for every venue tab -- the event workspace's, with the venue's facts. */
+/** One identity layout for the venue record and its two edit screens -- the event record's, with the venue's facts. */
 export function VenueWorkspace({ account, w, active, children }: { account: Account; w: VenueWorkspaceData; active: VenueTab; children: React.ReactNode }) {
   const v = w.venue;
   const state = venueStatusLabel(w.status);
@@ -66,13 +59,13 @@ export function VenueWorkspace({ account, w, active, children }: { account: Acco
             nameAr={v.nameAr}
             stats={stats}
           />
-          <nav aria-label="Venue sections" data-region="venue-workspace-nav" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, borderBlockEnd: '1px solid var(--line)', paddingBlockEnd: 12, marginBlock: '16px 28px' }}>
-            {TABS.map((t) => (
-              <Link key={t.key} href={`/venues/${v.id}${t.path}`} aria-current={active === t.key ? 'page' : undefined} style={{ padding: '10px 16px', borderRadius: 8, textDecoration: 'none', background: active === t.key ? 'var(--brand-soft)' : 'transparent', color: active === t.key ? 'var(--brand)' : 'var(--muted)', fontWeight: active === t.key ? 600 : 400 }}>
-                <L en={t.en} ar={t.ar} />
-              </Link>
-            ))}
-          </nav>
+          {/* One record page, like the event's (owner, 8 October 2026): no section tabs. The edit
+              screens (details, assessment) lead back to the record. */}
+          {active !== 'overview' ? (
+            <Link href={`/venues/${v.id}`} data-region="back-to-record" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, marginBlock: '8px 20px', fontSize: '14.5px', color: 'var(--brand)' }}>
+              <span data-flip="" aria-hidden="true" style={{ marginInlineEnd: 6 }}>←</span><L en="Back to the venue record" ar="العودة إلى سجل الموقع" />
+            </Link>
+          ) : <div style={{ marginBlockEnd: 20 }} />}
         </div>
 
         {!w.editable ? (
