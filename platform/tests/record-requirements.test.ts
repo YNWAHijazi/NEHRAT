@@ -90,7 +90,8 @@ describe('the catalogue', () => {
         const rows = resolveRequirements(facts(level, { service }));
         for (const r of rows) {
           check(r.labelEn, r.labelAr, `${r.key}@${level}`);
-          check(r.promptEn, r.promptAr, `${r.key}@${level} prompt`);
+          // A card whose fields ask the question has no prompt in either language (owner, 8 October 2026); a prompt in one language only is a parity defect.
+          if (r.promptEn || r.promptAr) check(r.promptEn, r.promptAr, `${r.key}@${level} prompt`);
           check(r.stateEn, r.stateAr, `${r.key}@${level} state`);
           for (const f of r.fields) check(f.labelEn, f.labelAr, `${r.key}@${level}.${f.key}`);
         }

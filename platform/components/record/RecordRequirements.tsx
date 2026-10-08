@@ -90,14 +90,6 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
         }
         return inst.fields.length === 0 ? null : <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />;
       }
-      case 'B5':
-        // The participating provider is named by invitation; the two confirmations follow.
-        return (
-          <>
-            <PartyBlock kind={service} id={id} parties={record.parties} invite="ems" canInvite={canInvite} />
-            <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} />
-          </>
-        );
       case 'B7':
         return (
           <>
@@ -169,7 +161,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
                 <div key={inst.key} id={inst.anchor} data-requirement={inst.key} data-group="later" style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: '4px 16px', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '14.5px' }}>
                     <span style={{ fontWeight: 500 }}><L en={inst.labelEn} ar={inst.labelAr} /></span>
-                    <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span>
+                    {inst.promptEn ? <span style={{ display: 'block', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span> : null}
                   </span>
                   <span style={{ fontSize: 13, color: 'var(--muted)' }}><L en={inst.obligationEn} ar={inst.obligationAr} /></span>
                 </div>

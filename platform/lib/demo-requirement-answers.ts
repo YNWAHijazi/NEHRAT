@@ -33,6 +33,14 @@ const SAMPLE: Readonly<Record<string, string>> = {
   insurer: 'Cedar Assurance SAL', policyNumber: 'CA-2026-11842', coveragePeriod: 'Event dates, participants and spectators',
   provider: 'Lebanese Red Cross', text: 'Documented in the shared plan.',
   roles: 'Nearest responder starts CPR, the tent calls 140 and brings the AED, the EMT hands over to the ambulance crew',
+  units: 'Two BLS ambulances at the finish and one at the 6 km mark, 06:00 to 12:00, dispatched by radio channel 1',
+  whileTransporting: 'The second unit moves to the finish; the station sends a replacement within 20 minutes',
+  extraResources: 'The medical lead calls the Red Cross dispatcher on 140 and names the extra units needed',
+  alternate: 'Hotel-Dieu de France emergency department', travelTime: '12 minutes to Rafik Hariri, 18 minutes to Hotel-Dieu', limitations: 'No paediatric intensive care at the alternate',
+  recognition: 'Stewards and runners report a collapse by radio channel 2; the control post locates it on the course map',
+  equipment: 'Finish tent: trauma bag, oxygen, AED, stretcher, checked by the EMT lead at 05:30; each ambulance: standard BLS kit',
+  advanced: 'Two oxygen cylinders at the tent, one per ambulance; two AEDs; airway adjuncts and a bag-valve mask with each EMT',
+  replacement: 'The tent holds a reserve kit; the station restocks on request by radio',
 };
 
 function valuesFor(key: string, level: Level, service: 'event' | 'venue', fill = true): Values | null {

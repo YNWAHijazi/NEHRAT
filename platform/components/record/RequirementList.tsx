@@ -35,7 +35,7 @@ export function RequirementList({ record, nameEn, nameAr, backHref }: { record: 
                   <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
                   <span style={{ minWidth: 0 }}>
                     <span style={{ fontSize: 15, fontWeight: 500 }}><L en={inst.labelEn} ar={inst.labelAr} /></span>
-                    <span style={{ display: 'block', fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span>
+                    {inst.promptEn ? <span style={{ display: 'block', fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.5 }}><L en={inst.promptEn} ar={inst.promptAr} /></span> : null}
                     <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginBlockStart: 4 }}>
                       <L en={`${who.en} · ${inst.sourceEn}`} ar={`${who.ar} · ${inst.sourceAr}`} />
                     </span>
