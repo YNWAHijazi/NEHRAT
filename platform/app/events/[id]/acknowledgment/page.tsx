@@ -16,6 +16,7 @@ import {
 } from '../../../../lib/queries';
 import { catalogueEntry, documentsForLevel, organizerEventState, type Level } from '../../../../lib/rules';
 import { PrintBar } from './PrintBar';
+import { hostingVenueForEvent } from '../../../../lib/hosting-venues';
 import { MinistryMasthead } from '../../../../components/MinistryMasthead';
 
 const upLabel: React.CSSProperties = {
@@ -36,6 +37,7 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
   const { id } = await params;
   const event = eventFor(account.id, id);
   if (!event) notFound();
+  const hostingVenue = hostingVenueForEvent(id);
 
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
@@ -112,6 +114,9 @@ export default async function AcknowledgmentPage({ params }: { params: Promise<{
                 { en: 'Event date', ar: 'تاريخ الفعالية', vEn: event.startDate ?? '—', vAr: event.startDate ?? '—' },
                 { en: 'Final level', ar: 'المستوى النهائي', vEn: `Level ${level}`, vAr: `المستوى ${level}` },
                 { en: 'Organizer', ar: 'المنظم', vEn: organization?.nameEn ?? '—', vAr: organization?.nameAr ?? '—' },
+                ...(hostingVenue
+                  ? [{ en: 'Hosting venue', ar: 'الموقع المستضيف', vEn: `${hostingVenue.nameEn} · ${hostingVenue.id}`, vAr: `${hostingVenue.nameAr} · ⁦${hostingVenue.id}⁩` }]
+                  : []),
                 ...(submission?.expedited
                   ? [{ en: 'Filing', ar: 'التقديم', vEn: 'Expedited submission — the standard timeline could not be met', vAr: 'تقديم مستعجل — تعذّر الالتزام بالمهلة الاعتيادية' }]
                   : []),

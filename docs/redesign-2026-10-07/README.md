@@ -94,3 +94,13 @@ Open after this change, for a ruling: the facility validity record still lists l
 - **The record has no section tabs.** As on the event record: next step, rail, a compact "Details and assessment" card with "Edit venue details" and "Something changed? Update the assessment", then the step-by-step requirements and the final review. The two edit screens keep the record's identity and lead back to it.
 - **Invitations live on the rows.** The EMS agency is invited, its link copied and withdrawn on the EMS and ambulance row; the Level 3 Medical Director on the Director row. The old medical-team address lands on the EMS row.
 - **Every level carries the event edits.** The catalogue is shared, so Levels 1–3 for venues have the same confirmations, the BLS listing, the Level 3 guidance detail and the generated Level 1 summary; the fields that spoke of "the event" have venue wording (each session, the venue's activity risks, the control point).
+
+## Owner feedback on shared ownership (8 October 2026) — applied
+
+- **Who fills what.** Each card leads with an ownership line ("You fill this step", "You or the EMS agency fill this step", "Filled by the EMS agency or the Medical Director"). Above the steps, one note says which parties complete the record, that grey steps are filled by the others once they accept, and that the record stays a draft until submitted.
+- **No empty boxes.** A row another party fills reads as its answers, or as an italic "Awaiting EMS agency / Medical Director input" with the questions listed.
+- **Invite first, then hand off (Level 3).** The EMS and ambulance row shows only the invitation until an agency is invited. After an invitation, a dialog lists the steps that party fills and the row's questions, with Close and "Skip to the steps you fill".
+- **Save as you go.** Next, Previous and the step list save what was typed on the step being left. "Save as draft" beside Submit saves and returns to the dashboard ("Nothing is sent to the Ministry until you submit"). The empty "Nothing remains" card is gone.
+- **Guidance detail (Level 3).** The eleven major-incident items are answered on the major-incident requirement and are the plan's section 12. Patient-care documentation follows guidance 5.13: the record used; its minimum content; refusals; access to patient information; aggregate totals for the post-event medical report.
+- **One vocabulary.** "Medical treatment post", "CPR and AED response", "Receiving emergency department(s)". The plan's sections carry the record's names, with the Protocol 6 wording kept verbatim beneath each.
+- **Venue registration.** "Continue to requirements" stays active; pressed early it says "Please fill: …" and marks every unfilled item.

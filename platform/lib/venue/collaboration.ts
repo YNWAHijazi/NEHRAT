@@ -15,6 +15,19 @@ export function venueInvitation(token:string):VenueInvitation|null {
  if(!/^[a-f0-9]{48}$/.test(token))return null;
  return getDb().prepare('SELECT * FROM venue_invitations WHERE token=?').get(token) as unknown as VenueInvitation|null;
 }
+/**
+ * May this account take the venue invitation? The venue counterpart of
+ * accountMayTakeNomination: the invited role, the invited email, the venue's side of
+ * the demonstration boundary, not suspended, and not an invitation already linked to
+ * someone else.
+ */
+export function venueAccountMayTake(accountId:number,token:string):boolean {
+ const inv=venueInvitation(token);if(!inv)return false;
+ if(inv.account_id!==null&&inv.account_id!==accountId)return false;
+ const acc=getDb().prepare('SELECT email,role,is_demo,suspended FROM accounts WHERE id=?').get(accountId) as {email:string|null;role:string;is_demo:number;suspended:number}|undefined;
+ const venue=getDb().prepare('SELECT is_demo FROM venues WHERE id=?').get(inv.venue_id) as {is_demo:number}|undefined;
+ return Boolean(acc&&venue&&acc.suspended===0&&acc.role===inv.kind&&acc.is_demo===venue.is_demo&&acc.email&&acc.email.trim().toLowerCase()===inv.email.trim().toLowerCase());
+}
 export function venueAccess(a:Account,id:string) {
  const venue=getDb().prepare('SELECT account_id,is_demo FROM venues WHERE id=?').get(id) as {account_id:number;is_demo:number}|undefined;
  if(!venue||venue.is_demo!==+a.isDemo)return null;

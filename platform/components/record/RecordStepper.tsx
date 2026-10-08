@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { L } from '../L';
+import { saveDirtyIn } from './autosave';
 
 export interface StepperStep {
   key: string;
@@ -49,13 +50,23 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
   const index = Math.max(0, steps.findIndex((s) => s.key === current));
   const step = steps[index];
 
-  const go = (key: string) => {
+  const [saving, setSaving] = useState(false);
+  const body = useRef<HTMLDivElement>(null);
+  const show = (key: string) => {
     const target = steps.find((s) => s.key === key);
     if (!target) return;
     pendingHash.current = `#${target.anchor}`;
     history.replaceState(null, '', `#${target.anchor}`);
     setNavOpen(false);
     setCurrent(key);
+  };
+  // Leaving a step saves what was typed on it (owner, 8 October 2026); a refused save keeps the step on screen.
+  const go = async (key: string) => {
+    if (key === current) { show(key); return; }
+    setSaving(true);
+    const ok = await saveDirtyIn(body.current?.querySelector(`[data-step="${current}"]`) ?? null);
+    setSaving(false);
+    if (ok) show(key);
   };
 
   useEffect(() => {
@@ -133,7 +144,7 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
               return (
                 <li key={s.key} data-step-item={s.key} data-step-state={i === index ? 'current' : s.state} data-step-yours={s.yours || undefined} className="step-item">
                   {head === 'recommended' ? <div className="step-group"><L en={`${groups.recommended.en} — optional`} ar={`${groups.recommended.ar} — اختياري`} /></div> : null}
-                  <a href={`#${s.anchor}`} aria-current={i === index ? 'step' : undefined} onClick={(e) => { e.preventDefault(); go(s.key); }} className="step-link">
+                  <a href={`#${s.anchor}`} aria-current={i === index ? 'step' : undefined} onClick={(e) => { e.preventDefault(); void go(s.key); }} className="step-link">
                     <span style={numberStyle(s, i)}>{s.state === 'complete' && i !== index ? '✓' : i + 1}</span>
                     <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                       <span style={{ fontSize: 14.5, lineHeight: 1.35, fontWeight: i === index ? 600 : 400, color: i === index || (s.yours && s.state !== 'complete') ? 'var(--ink)' : 'var(--muted)' }}><L en={s.labelEn} ar={s.labelAr} /></span>
@@ -146,19 +157,19 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
           </ol>
         </div>
       </nav>
-      <div data-region="step-body" className="step-body">
+      <div data-region="step-body" className="step-body" ref={body}>
         {steps.map((s) => (
           <div key={s.key} data-step={s.key} hidden={s.key !== current}>{s.body}</div>
         ))}
         <div data-region="step-actions" className="step-actions">
           {index > 0 ? (
-            <button type="button" data-region="step-previous" onClick={() => go(steps[index - 1]!.key)} style={{ minHeight: 44, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14.5, cursor: 'pointer', color: 'var(--ink)' }}>
+            <button type="button" data-region="step-previous" disabled={saving} onClick={() => { void go(steps[index - 1]!.key); }} style={{ minHeight: 44, paddingInline: 20, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14.5, cursor: 'pointer', color: 'var(--ink)' }}>
               <L en="Previous" ar="السابق" />
             </button>
           ) : <span />}
           {index < total - 1 ? (
-            <button type="button" data-region="step-next" onClick={() => go(steps[index + 1]!.key)} style={{ minHeight: 44, paddingInline: 22, border: 0, background: 'var(--brand)', color: 'var(--bg)', borderRadius: 22, fontSize: 14.5, fontWeight: 500, cursor: 'pointer' }}>
-              <L en={steps[index + 1]!.kind === 'final' ? 'Next: review and submit' : 'Next'} ar={steps[index + 1]!.kind === 'final' ? 'التالي: المراجعة والتقديم' : 'التالي'} />
+            <button type="button" data-region="step-next" disabled={saving} onClick={() => { void go(steps[index + 1]!.key); }} style={{ minHeight: 44, paddingInline: 22, border: 0, background: 'var(--brand)', color: 'var(--bg)', borderRadius: 22, fontSize: 14.5, fontWeight: 500, cursor: 'pointer' }}>
+              {saving ? <L en="Saving…" ar="جارٍ الحفظ…" /> : <L en={steps[index + 1]!.kind === 'final' ? 'Next: review and submit' : 'Next'} ar={steps[index + 1]!.kind === 'final' ? 'التالي: المراجعة والتقديم' : 'التالي'} />}
             </button>
           ) : null}
         </div>

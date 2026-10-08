@@ -126,7 +126,10 @@ for (const lang of LANGUAGES) {
       await expect(page.locator('[data-region="filed-band"]')).toBeVisible();
       await openDetails(card(page, 'B4'));
       await expect(form(page, 'B4').locator('[data-region="save"]')).toHaveCount(0);
-      await expect(form(page, 'B4').locator('[name="available"]')).toBeDisabled();
+      // Read-only rows read as text, not as empty disabled boxes (owner, 8 October 2026).
+      await expect(form(page, 'B4')).toHaveAttribute('data-readonly', '');
+      await expect(form(page, 'B4').locator('[data-answer="available"]')).toContainText(/Confirmed|مؤكَّد/);
+      await expect(form(page, 'B4').locator('[name="available"]')).toHaveCount(0);
     });
   });
 }

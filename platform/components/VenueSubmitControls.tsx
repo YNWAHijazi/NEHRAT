@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { L } from './L';
+import { SaveDraftButton } from './record/SaveDraftButton';
 
 /**
  * The declaration and the one Submit button. The declaration counts as a remaining
@@ -18,6 +19,7 @@ export function VenueSubmitControls({ remaining }: { remaining: number }) {
         <input type="checkbox" name="confirm" value="yes" required checked={declared} onChange={(e) => setDeclared(e.target.checked)} style={{ marginBlockStart: 4 }} />
         <L en="I confirm these details and documents are accurate and cover the venue’s routine operations." ar="أؤكّد أن هذه البيانات والمستندات صحيحة وتشمل التشغيل الاعتيادي للموقع." />
       </label>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center' }}>
       <button
         type="submit"
         disabled={!ready}
@@ -37,6 +39,8 @@ export function VenueSubmitControls({ remaining }: { remaining: number }) {
           ? <L en="Submit to the Ministry" ar="التقديم إلى الوزارة" />
           : <L en={`Submit to the Ministry — ${left} remaining`} ar={`التقديم إلى الوزارة — ${left} متبقٍ`} />}
       </button>
+      <SaveDraftButton />
+      </div>
       {!declared && remaining === 0 ? (
         <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--accent-ink)' }}>
           <L en="Confirm the declaration above to submit." ar="أكّدوا الإقرار أعلاه للتقديم." />

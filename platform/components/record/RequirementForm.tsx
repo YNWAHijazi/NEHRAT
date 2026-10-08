@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../L';
 import { LangInput } from '../OptionText';
 import { saveRequirementAnswerAction } from '../../app/record-actions';
 import { REQUIREMENT_COPY, type AnswerValue, type FieldDef, type RecordService, type RequirementInstance } from '../../lib/rules';
 import { fieldInput, primaryButton } from '../workspace-styles';
+import { registerAutosave } from './autosave';
 
 /**
  * The short form on one requirement card: the catalogue's fields with the right
  * control each (brief item 14), one Save, and the version the answer was read at. A
  * stale save comes back as a conflict and says so; it never overwrites.
  */
-export function RequirementForm({ kind, id, instance, canEdit }: { kind: RecordService; id: string; instance: RequirementInstance; canEdit: boolean }) {
+export function RequirementForm({ kind, id, instance, canEdit, awaiting = null }: {
+  kind: RecordService; id: string; instance: RequirementInstance; canEdit: boolean;
+  /** Another party fills this row: the answers read as text, or this line in italics while none is given. */
+  awaiting?: { en: string; ar: string } | null;
+}) {
   const router = useRouter();
   const [values, setValues] = useState<Record<string, AnswerValue>>({ ...instance.values });
   const [status, setStatus] = useState<'idle' | 'saved' | 'conflict' | 'invalid' | 'error'>('idle');
@@ -26,21 +31,69 @@ export function RequirementForm({ kind, id, instance, canEdit }: { kind: RecordS
   const visible = (f: FieldDef) => !f.showWhen || values[f.showWhen.field] === f.showWhen.equals;
   const missing = new Set(instance.missing);
 
-  const save = () => {
-    setStatus('idle');
-    start(async () => {
-      const result = await saveRequirementAnswerAction(kind, id, instance.key, { baseVersion, values });
-      if ('ok' in result) { setStatus('saved'); setRefused([]); router.refresh(); }
-      else if (result.error === 'conflict') setStatus('conflict');
-      else if (result.error === 'invalid') { setStatus('invalid'); setRefused(result.fields ?? []); }
-      else setStatus('error');
-    });
+  const send = async (): Promise<boolean> => {
+    const result = await saveRequirementAnswerAction(kind, id, instance.key, { baseVersion, values: valuesRef.current });
+    if ('ok' in result) { setStatus('saved'); setRefused([]); router.refresh(); return true; }
+    if (result.error === 'conflict') setStatus('conflict');
+    else if (result.error === 'invalid') { setStatus('invalid'); setRefused(result.fields ?? []); }
+    else setStatus('error');
+    return false;
   };
+  const save = () => { setStatus('idle'); start(async () => { await send(); }); };
+
+  // Next, Previous and Save draft save a changed form on the way out (owner, 8 October 2026).
+  const root = useRef<HTMLDivElement>(null);
+  const valuesRef = useRef(values); valuesRef.current = values;
+  const savedRef = useRef(JSON.stringify(instance.values)); savedRef.current = JSON.stringify(instance.values);
+  const sendRef = useRef(send); sendRef.current = send;
+  useEffect(() => {
+    if (!canEdit || !root.current) return;
+    return registerAutosave(root.current, async () => (JSON.stringify(valuesRef.current) === savedRef.current ? true : sendRef.current()));
+  }, [canEdit]);
 
   const set = (key: string, v: AnswerValue) => setValues((prev) => ({ ...prev, [key]: v }));
 
+  // Another party's row reads as text: no empty boxes the viewer cannot fill (owner, 8 October 2026).
+  if (!canEdit && awaiting) {
+    const shown = instance.fields.filter((f) => visible(f) && values[f.key] !== undefined && values[f.key] !== '' && values[f.key] !== false);
+    return (
+      <div data-region="requirement-form" data-key={instance.key} data-readonly="">
+        {shown.length === 0 ? (
+          <>
+            <p data-region="awaiting-input" style={{ margin: '0 0 10px', fontSize: '13.5px', fontStyle: 'italic', color: 'var(--muted)' }}><L en={awaiting.en} ar={awaiting.ar} /></p>
+            {instance.fields.length > 0 ? (
+              <ul style={{ margin: 0, paddingInlineStart: 18, display: 'flex', flexDirection: 'column', gap: 4, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}>
+                {instance.fields.filter(visible).map((f) => <li key={f.key}><L en={f.labelEn} ar={f.labelAr} /></li>)}
+              </ul>
+            ) : null}
+          </>
+        ) : (
+          <dl style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {shown.map((f) => {
+              const v = values[f.key];
+              const option = f.type === 'choice' ? (f.options ?? []).find((o) => o.value === v) : null;
+              return (
+                <div key={f.key} data-answer={f.key}>
+                  <dt style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.45 }}><L en={f.labelEn} ar={f.labelAr} /></dt>
+                  <dd style={{ margin: '2px 0 0', fontSize: '14.5px', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+                    {v === true ? <L en="Confirmed" ar="مؤكَّد" /> : option ? <L en={option.en} ar={option.ar} /> : String(v)}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        )}
+        {instance.answeredBy ? (
+          <div data-region="answered-by" style={{ marginBlockStart: 12, fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+            <L en={fillCopy(REQUIREMENT_COPY.answeredByEn, instance.answeredBy, 'en')} ar={fillCopy(REQUIREMENT_COPY.answeredByAr, instance.answeredBy, 'ar')} />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
-    <div data-region="requirement-form" data-key={instance.key}>
+    <div data-region="requirement-form" data-key={instance.key} ref={root}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '14px 20px' }}>
         {instance.fields.filter(visible).map((f) => {
           const invalid = (!canEdit ? false : missing.has(f.key) && status !== 'idle') || refused.includes(f.key);

@@ -12,7 +12,7 @@ import { venuePackageFacts } from '../../../lib/venue/workspace';
 import { getDb } from '../../../lib/db';
 import { beirutToday } from '../../../lib/clock';
 import { venueReassessmentGate } from '../../../lib/rules';
-import { venueNextAction, venueRailStages } from '../../../lib/rules/venue-workflow';
+import { venueNextAction, venueRailStages, venueStatusLabel } from '../../../lib/rules/venue-workflow';
 import { venueAssessmentsFor, venueChangeSinceAssessment } from '../../../lib/queries';
 import { InfoNote } from '../../../components/InfoNote';
 import { EmailDeliveryNotice } from '../../../components/EmailDeliveryNotice';
@@ -54,6 +54,19 @@ export default async function VenueRecordPage({ params, searchParams }: { params
   return (
     <VenueWorkspace account={account} w={w} active="overview">
       {next ? <NextStepCard step={next} to={next.href.startsWith('#') ? next.href : `/venues/${id}/${next.href}`} /> : null}
+      {/* Submitted and not yet decided: say what happens next, and keep the receipt one click away -- as on the event record. */}
+      {w.status === 'submitted' && !v.archivedAt ? (
+        <NextStepCard
+          step={{
+            kind: 'underReview', href: 'acknowledgment', tone: 'brand',
+            titleEn: venueStatusLabel('submitted').en, titleAr: venueStatusLabel('submitted').ar,
+            bodyEn: 'The Ministry reviews the submission and records one of three outcomes. You are notified on this platform when it does.',
+            bodyAr: 'تراجع الوزارة الطلب وتسجّل إحدى ثلاث نتائج. يصلكم إشعار على هذه المنصة عند تسجيلها.',
+            buttonEn: 'View acknowledgment of receipt', buttonAr: 'عرض إشعار الاستلام',
+          }}
+          to={`/venues/${id}/acknowledgment`}
+        />
+      ) : null}
 
       {w.status === 'accepted' ? (
         <div data-region="certificate-card" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32 }}>
@@ -141,7 +154,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
               <L en={q.invite === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : 'Enter a name and a valid email address.'} ar={q.invite === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'} />
             </div>
           ) : null}
-          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null}
+          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null} handoff={q.invited === 'ems' || q.invited === 'director' ? q.invited : null}
             final={<>{w.level === 1 ? <MedicalArrangementsSummary instances={w.record.instances} /> : null}<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} /></>} />
         </div>
       ) : (

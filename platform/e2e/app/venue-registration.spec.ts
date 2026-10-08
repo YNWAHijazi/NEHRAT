@@ -12,9 +12,13 @@ test('a refused venue registration keeps what was typed and names the field; the
   await mockMapTiles(page);
   await signInAs(page, 'test_organizer');
   await page.goto('/venues/new');
-  // Before the two questions, the pin and the assessment, Continue is disabled and the page says what is missing.
-  await expect(page.getByRole('button', { name: 'Continue to requirements', exact: true })).toBeDisabled();
-  await expect(page.locator('[data-region="before-continue"]')).toBeVisible();
+  // Continue stays active (owner, 8 October 2026): pressed too early, it names every unfilled item and marks it.
+  await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
+  await expect(page.locator('[data-region="please-fill"]')).toContainText('Please fill: the venue name (English)');
+  await expect(page.locator('[data-region="please-fill"]')).toContainText('the map pin');
+  await expect(page.locator('[data-region="please-fill"]')).toContainText('the authorized representative');
+  await expect(page.locator('input[name=name]')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page).toHaveURL(/\/venues\/new$/);
   for (const [k, v] of Object.entries({ name: 'Registration refusal test', nameAr: 'اختبار رفض التسجيل', address: 'Tripoli corniche', contactName: 'Venue operator', contactPhone: 'call me', capacity: '2500' })) await page.locator(`input[name=${k}]`).fill(v);
   await page.locator('select[name=category]').selectOption('hall');
   await page.locator('select[name=district]').selectOption('Tripoli');

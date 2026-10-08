@@ -1166,6 +1166,9 @@ function migrate(d: DatabaseSync): void {
   // Reapply (partner ruling, 2026-09-02): a new event prefilled from a concluded
   // one names what it was copied from.
   addColumn('events', 'copied_from', 'copied_from TEXT');
+  // The hosting venue (platform owner, 8 October 2026): an event at a fixed venue that
+  // hosts events repeatedly names the registered venue. Null when none is chosen.
+  addColumn('events', 'hosting_venue_id', 'hosting_venue_id TEXT REFERENCES venues(id)');
   addColumn('password_resets', 'issued_by', 'issued_by INTEGER REFERENCES accounts(id)');
 
   // THE SINGLE RECORD PAGE (redesign, 2026-10-07). One answer per requirement per

@@ -3,6 +3,8 @@
 import { OptionText } from '../../../components/OptionText';
 import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
+import { HostingVenuePicker } from '../../../components/HostingVenuePicker';
+import type { HostingVenueOption } from '../../../lib/hosting-venues';
 
 
 /**
@@ -89,6 +91,7 @@ export function AssessmentForm({
   reassess,
   draft,
   organizerName,
+  hostingVenues = [],
 }: {
   draft?: AssessmentSubmission & { eventId: string };
   domains: Domain[];
@@ -98,6 +101,8 @@ export function AssessmentForm({
   reassess?: { eventId: string; answers: (0 | 1 | 2 | null)[]; inputs: MinimumConditionInputs };
   /** The organization's name for Part F's Organizer line, when one is recorded. */
   organizerName?: { en: string; ar: string } | null;
+  /** The registered hosting venues this account may choose (lib/hosting-venues). */
+  hostingVenues?: HostingVenueOption[];
 }) {
   const stored = reassess ?? draft;
   void conditions;
@@ -120,6 +125,10 @@ export function AssessmentForm({
     expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
     previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
+  // A stored choice that is no longer listable (the venue was archived) opens unset.
+  const [hostingVenueId, setHostingVenueId] = useState(
+    hostingVenues.some((v) => v.id === draft?.partA.hostingVenueId) ? (draft?.partA.hostingVenueId ?? '') : '',
+  );
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
 
@@ -236,6 +245,7 @@ export function AssessmentForm({
           expectedStaff: partA.expectedStaff === '' ? null : Number(partA.expectedStaff),
           previousEdition: partA.previousEdition,
           recurringFixedVenue: partA.recurringFixedVenue,
+          hostingVenueId: partA.recurringFixedVenue && hostingVenueId !== '' ? hostingVenueId : null,
         },
         answers: answers as DomainAnswers,
         inputs,
@@ -381,8 +391,8 @@ export function AssessmentForm({
             ).map(([key, en, ar]) => {
               const on = partA[key];
               return (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <button
-                  key={key}
                   type="button"
                   aria-pressed={on}
                   onClick={() => setA(key, !on)}
@@ -393,6 +403,11 @@ export function AssessmentForm({
                     <L en={en} ar={ar} />
                   </span>
                 </button>
+                {/* The registered venue, right under the box that says the event is at one. */}
+                {key === 'recurringFixedVenue' && on ? (
+                  <HostingVenuePicker options={hostingVenues} value={hostingVenueId} onChange={setHostingVenueId} />
+                ) : null}
+                </div>
               );
             })}
 
@@ -530,6 +545,8 @@ export function AssessmentForm({
         <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--bad)' }}>
           {error === 'name-required' ? (
             <L en="The event name is required in both languages." ar="اسم الفعالية مطلوب باللغتين." />
+          ) : error === 'hosting-venue' ? (
+            <L en="The chosen venue is not a registered hosting venue. Choose a venue from the list." ar="الموقع المختار ليس موقعاً مستضيفاً مسجّلاً. اختاروا موقعاً من القائمة." />
           ) : error === 'certification-required' ? (
             <L en="The declaration's representative and position are required." ar="ممثل الإقرار وصفته مطلوبان." />
           ) : (

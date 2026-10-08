@@ -47,10 +47,11 @@ test('saved facts are locked, the contact is prefilled, and the organizer cannot
  // A field the catalogue does not define is refused with its name; nothing is stored.
  expect(await saveRequirementAnswerAction('venue',id,'B5',{baseVersion:0,values:{bls:true,firstAid:'maybe'}})).toEqual({error:'invalid',fields:['firstAid']});
  await saveRow('B10');expect(inst('B10').state).toBe('complete');
- for(const kind of ['ems','director'])await expect(inviteVenuePartnerAction(id,form({kind,name:`Venue ${kind}`,email:`${kind}@venue.example.test`}))).rejects.toThrow('invited=yes');
+ for(const kind of ['ems','director'])await expect(inviteVenuePartnerAction(id,form({kind,name:`Venue ${kind}`,email:`${kind}@venue.example.test`}))).rejects.toThrow(/invited=(ems|director)/);
  const inv=venueInvitations(id);expect(inv).toHaveLength(2);expect(inv[0]?.token).toMatch(/^[a-f0-9]{48}$/);expect(inv.every(i=>i.delivery==='demo')).toBe(true);
  expect(inst('B7').state).toBe('waiting');expect(inst('B3').state).toBe('waiting');
- as('test_director');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('error=account');expect(venueAccess(session.account!,id)).toBeNull();
+ // An account of the wrong role cannot accept: it is sent to the invitation's account step, as on an event.
+ as('test_director');const emsToken=inv.find(i=>i.kind==='ems')!.token;await expect(respondVenueInvitationAction(emsToken,form({response:'accept'}))).rejects.toThrow(`redirect:/venue-invitations/${emsToken}/account`);expect(venueAccess(session.account!,id)).toBeNull();
 });
 test('incomplete legacy details still need an explicit Edit action',async()=>{
  as('test_organizer');const db=getDb();db.prepare("UPDATE venues SET responsible_phone='' WHERE id=?").run(id);
@@ -60,7 +61,7 @@ test('incomplete legacy details still need an explicit Edit action',async()=>{
  }finally{db.prepare("UPDATE venues SET responsible_phone='+9613111111' WHERE id=?").run(id);db.prepare('UPDATE venue_packages SET details_editing=0 WHERE venue_id=?').run(id);}
 });
 test('accepted medical partners share one answer per row; a stale save conflicts; the Director approves the current plan version',async()=>{
- const inv=venueInvitations(id);as('test_ems');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('/venue-team/');
+ const inv=venueInvitations(id);as('test_ems');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='ems')!.token,form({response:'accept'}))).rejects.toThrow('/venue-team/');
  expect(inst('B7').state).toBe('pending');expect(state().record!.parties.find(p=>p.kind==='ems')).toMatchObject({name:'Venue ems',status:'confirmed',declarationSigned:false});
  await fillAs('ems');for(const k of planTextKeys())await saveText(k);await upload('P-D',`/venue-team/${id}`);
  expect(inst('B5')).toMatchObject({state:'complete',answeredBy:{role:'ems',name:'test_ems — Venue ems',version:1}});expect(inst('B7').state).toBe('complete');
@@ -73,7 +74,7 @@ test('accepted medical partners share one answer per row; a stale save conflicts
  expect(state().record!.plan.filter(s=>!s.complete).map(s=>s.key)).toEqual(['P10']);expect(inst('B2').state).toBe('pending');
  await expect(approveRecordPlanAction('venue',id,form({confirm:'yes'}))).rejects.toThrow('/dashboard');
  as('test_organizer');await expect(approveRecordPlanAction('venue',id,form({confirm:'yes'}))).rejects.toThrow('/dashboard');
- as('test_director');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='director')!.token,form({response:'accept',phone:'+9613111111',licence:'LIC-123'}))).rejects.toThrow('/venue-team/');
+ as('test_director');await expect(respondVenueInvitationAction(inv.find(i=>i.kind==='director')!.token,form({response:'accept'}))).rejects.toThrow('/venue-team/');
  expect(inst('B3').state).toBe('complete');await saveRow('B15');
  expect(state().record!.plan.filter(s=>!s.complete).map(s=>s.key)).toEqual([]);expect(inst('B2').state).toBe('waiting');
  await expect(approveRecordPlanAction('venue',id,form({confirm:'yes',planVersion:'999',assessmentVersion:'1'}))).rejects.toThrow('error=approval');
@@ -84,8 +85,8 @@ test('accepted medical partners share one answer per row; a stale save conflicts
 });
 test('each EMS agency signs its own declaration, then submission freezes the record the Ministry reads',async()=>{
  as('test_organizer');const db=getDb();db.prepare("INSERT INTO accounts(login,email,display_name,initials,role,is_demo) VALUES('venue_second_ems','second@venue.example.test','Second EMS','SE','ems',1)").run();
- await expect(inviteVenuePartnerAction(id,form({kind:'ems',name:'Second EMS',email:'second@venue.example.test'}))).rejects.toThrow('invited=yes');
- as('venue_second_ems');const inv=venueInvitations(id).find(i=>i.email==='second@venue.example.test')!;await expect(respondVenueInvitationAction(inv.token,form({response:'accept',phone:'+9613111111'}))).rejects.toThrow('/venue-team/');
+ await expect(inviteVenuePartnerAction(id,form({kind:'ems',name:'Second EMS',email:'second@venue.example.test'}))).rejects.toThrow(/invited=(ems|director)/);
+ as('venue_second_ems');const inv=venueInvitations(id).find(i=>i.email==='second@venue.example.test')!;await expect(respondVenueInvitationAction(inv.token,form({response:'accept'}))).rejects.toThrow('/venue-team/');
  expect(inst('B20').state).toBe('waiting');expect(inst('B20').detailEn).toContain('Second EMS');
  await expect(signVenueDeclarationAction(id,form({file:pdf()}))).rejects.toThrow('error=incomplete');
  await expect(signVenueDeclarationAction(id,form({file:pdf(),confirm:'yes'}))).rejects.toThrow(`/venue-team/${id}?saved=B20#req-B20`);
