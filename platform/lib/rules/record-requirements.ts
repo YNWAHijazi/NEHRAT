@@ -185,7 +185,8 @@ type CatalogueRow = {
   service: 'event' | 'venue' | 'both';
   labelEn: string; labelAr: string;
   venueLabelEn?: string; venueLabelAr?: string;
-  promptEn: string; promptAr: string;
+  /** Absent when the fields ask the question themselves (owner, 8 October 2026): the card then shows no prompt line. */
+  promptEn?: string; promptAr?: string;
   venuePromptEn?: string; venuePromptAr?: string;
   infoEn?: string; infoAr?: string;
   fields?: readonly FieldDef[];
@@ -480,8 +481,8 @@ function instance(
 
   const derived = cell.completion === 'rosterLink';
   // A level's own wording wins; then the venue's; then the row's.
-  const pick = (cellText: string | undefined, venueText: string | undefined, rowText: string): string =>
-    cellText ?? (venue && venueText ? venueText : rowText);
+  const pick = (cellText: string | undefined, venueText: string | undefined, rowText: string | undefined): string =>
+    cellText ?? (venue && venueText ? venueText : rowText ?? '');
   return {
     key: row.key,
     n: row.n ?? null,

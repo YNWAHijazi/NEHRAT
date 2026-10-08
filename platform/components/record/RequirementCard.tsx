@@ -35,9 +35,11 @@ export function RequirementCard({ inst, open, children, extra, yours = true, not
       <summary className="requirement-summary record-card-summary">
         <span style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: 1 }}>
           <span className="record-card-title"><L en={inst.labelEn} ar={inst.labelAr} /></span>
-          <span className="record-card-prompt">
-            <L en={inst.promptEn} ar={inst.promptAr} />
-          </span>
+          {inst.promptEn ? (
+            <span className="record-card-prompt">
+              <L en={inst.promptEn} ar={inst.promptAr} />
+            </span>
+          ) : null}
         </span>
         <StateChip inst={inst} yours={yours} />
       </summary>
