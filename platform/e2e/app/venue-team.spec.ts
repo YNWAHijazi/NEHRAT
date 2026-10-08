@@ -30,7 +30,7 @@ test('venue medical team completes the shared record; the Director approves; the
  // The invitations are sent from the rows that need the party: the EMS agency on the EMS row, the Director on the Director row.
  for(const [kind,key] of [['ems','B7'],['director','B3']] as const){await page.goto(`/venues/${id}`);const row=await openDetails(page.locator(`[data-requirement="${key}"]`));const f=row.locator('form[data-region=invite]');await f.locator('input[name=name]').fill(`Venue ${kind}`);await f.locator('input[name=email]').fill(emails[kind]!);await f.locator('button[type=submit]').click();await expect(page).toHaveURL(new RegExp(`invited=yes.*step=${key}`));}
  // Only the EMS row invites the agency: the BLS row is a listing with its two confirmations.
- await expectAbsent(page,{anchor:'[data-requirement="B5"]',absent:'[data-requirement="B5"] form[data-region=invite]',because:'the EMS agency is invited once, on the EMS and ambulance row'});
+ await openDetails(page.locator('[data-requirement="B5"]'));await expectAbsent(page,{anchor:'[data-requirement="B5"]',absent:'[data-requirement="B5"] form[data-region=invite]',because:'the EMS agency is invited once, on the EMS and ambulance row'});
  // The URL already reads invited=yes after the first invitation, so wait for both rows to exist.
  await expect.poll(()=>{const f=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const n=(f.prepare('SELECT COUNT(*) AS n FROM venue_invitations WHERE venue_id=?').get(id) as {n:number}).n;f.close();return n;}).toBe(2);
  const fixture=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const invitations=fixture.prepare('SELECT kind,token FROM venue_invitations WHERE venue_id=?').all(id) as unknown as {kind:string;token:string}[];fixture.close();
