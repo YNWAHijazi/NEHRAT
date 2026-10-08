@@ -26,7 +26,8 @@ export async function saveVenueDetailsAction(id:string,_prev:VenueFormState,form
  invalidateVenueMedicalWork(id);
  // Facts that set the minimum level require a fresh assessment before submission.
  if(v.capacity!==w.venue.licensedCapacity||v.nightclub!==w.venue.isNightclub) getDb().prepare('UPDATE venue_packages SET assessment_version=NULL WHERE venue_id=?').run(id);
- refresh(id);redirect(`/venues/${id}/assessment`);
+ // Back to the record (owner, 8 October 2026); a changed capacity or nightclub answer has cleared the assessment and the record says so.
+ refresh(id);redirect(`/venues/${id}#assessment`);
 }
 export async function reopenVenueSectionAction(id:string,section:'details'|'assessment') {
  const {a,w}=await owned(id);if(!w.editable)redirect(`/venues/${id}`);ensureVenuePackage(a.id,id);

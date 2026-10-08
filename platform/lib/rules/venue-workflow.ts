@@ -90,7 +90,7 @@ export function venueSubmissionChecks(f: VenuePackageFacts): { required: VenueCh
 
 /**
  * The one task the venue record leads with; null once the package is with the Ministry
- * or done. href is a route under the venue ('details', 'assessment', 'team') or an
+ * or done. href is an edit screen under the venue ('details', 'assessment') or an
  * anchor on the record page itself ('#req-B4', '#final-review').
  */
 export function venueNextAction(f: VenuePackageFacts): NextStep | null {
@@ -114,11 +114,11 @@ export function venueNextAction(f: VenuePackageFacts): NextStep | null {
   const medical = f.requirements.filter((r) => !r.optional && !r.done && r.clinical).length;
   // The medical items cannot start until someone is invited to do them, so that comes first.
   if (medical > 0 && !f.medicalTeamLinked) {
-    return { kind: 'team', href: 'team', tone: 'accent',
-      titleEn: 'Invite your medical team', titleAr: 'ادعوا فريقكم الطبي',
-      bodyEn: `They complete ${medical} of the ${medical + yours} remaining requirements.`,
-      bodyAr: `يستكمل الفريق ${medical} من أصل ${medical + yours} من المتطلبات المتبقية.`,
-      buttonEn: 'Open medical team', buttonAr: 'فتح الفريق الطبي' };
+    return { kind: 'team', href: '#req-B7', tone: 'accent',
+      titleEn: 'Invite your EMS agency', titleAr: 'ادعوا جهة الإسعاف',
+      bodyEn: `The medical team completes ${medical} of the ${medical + yours} remaining requirements. Invite the agency on the EMS and ambulance row.`,
+      bodyAr: `يستكمل الفريق الطبي ${medical} من أصل ${medical + yours} من المتطلبات المتبقية. ادعوا الجهة من صف ترتيبات الإسعاف.`,
+      buttonEn: 'Open EMS and ambulance arrangements', buttonAr: 'فتح ترتيبات الإسعاف' };
   }
   if (yours > 0) {
     return { kind: 'requirements', href: `#req-${mine[0]!.key}`, tone: 'accent',
@@ -129,10 +129,10 @@ export function venueNextAction(f: VenuePackageFacts): NextStep | null {
       buttonEn: `Open ${mine[0]!.en}`, buttonAr: `فتح ${mine[0]!.ar}` };
   }
   if (f.pendingInvitations.length > 0) {
-    return { kind: 'waitingOnOthers', href: 'team', tone: 'accent',
+    return { kind: 'waitingOnOthers', href: '#req-B7', tone: 'accent',
       titleEn: 'Waiting for your medical team to reply', titleAr: 'بانتظار ردّ فريقكم الطبي',
       bodyEn: 'Invitations with no reply hold up the submission. Withdraw one to invite someone else.', bodyAr: 'الدعوات التي لم يُرد عليها تؤخّر التقديم. اسحبوا الدعوة لدعوة طرف آخر.',
-      buttonEn: 'View medical team', buttonAr: 'عرض الفريق الطبي' };
+      buttonEn: 'View the invitations', buttonAr: 'عرض الدعوات' };
   }
   if (medical > 0) {
     const first = f.requirements.find((r) => !r.optional && !r.done && r.clinical)!;

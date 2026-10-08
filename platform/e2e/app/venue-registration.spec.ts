@@ -12,8 +12,8 @@ test('a refused venue registration keeps what was typed and names the field; the
   await mockMapTiles(page);
   await signInAs(page, 'test_organizer');
   await page.goto('/venues/new');
-  // Before the two questions and the pin, Continue is disabled and the page says what is missing.
-  await expect(page.getByRole('button', { name: 'Continue to assessment', exact: true })).toBeDisabled();
+  // Before the two questions, the pin and the assessment, Continue is disabled and the page says what is missing.
+  await expect(page.getByRole('button', { name: 'Continue to requirements', exact: true })).toBeDisabled();
   await expect(page.locator('[data-region="before-continue"]')).toBeVisible();
   for (const [k, v] of Object.entries({ name: 'Registration refusal test', nameAr: 'اختبار رفض التسجيل', address: 'Tripoli corniche', contactName: 'Venue operator', contactPhone: 'call me', capacity: '2500' })) await page.locator(`input[name=${k}]`).fill(v);
   await page.locator('select[name=category]').selectOption('hall');
@@ -21,7 +21,12 @@ test('a refused venue registration keeps what was typed and names the field; the
   await page.getByRole('button', { name: 'Yes', exact: true }).first().click();
   await page.getByRole('button', { name: 'No', exact: true }).nth(1).click();
   await chooseMapPoint(page);
-  await page.getByRole('button', { name: 'Continue to assessment', exact: true }).click();
+  // The assessment on the same page (owner, 8 October 2026).
+  await page.getByLabel(/Most people at the same time during a routine operating session/).fill('2500');
+  for (const d of await page.locator('[data-domain]').all()) await d.locator('button').first().click();
+  await page.getByLabel(/Authorized representative/).fill('Operator');
+  await page.getByLabel(/Position/).fill('Manager');
+  await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
   // Refused: the telephone number is named, the rest of the form is untouched, and focus is on the field.
   await expect(page.locator('[data-region="registration-refused"]')).toContainText('telephone number');
   await expect(page.locator('input[name=contactPhone]')).toHaveAttribute('aria-invalid', 'true');
@@ -32,10 +37,11 @@ test('a refused venue registration keeps what was typed and names the field; the
   await expect(page.locator('input[name=capacity]')).toHaveValue('2500');
   await expect(page.getByRole('button', { name: 'Yes', exact: true }).first()).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('[data-map-picker=map] input[type=checkbox]')).toBeChecked();
+  await expect(page.getByLabel(/Authorized representative/)).toHaveValue('Operator');
   // Corrected with Arabic-Indic digits: accepted, stored as Western digits, and the assessment opens.
   await page.locator('input[name=contactPhone]').fill('+٩٦١ ٣ ١٢٣ ٤٥٦');
-  await page.getByRole('button', { name: 'Continue to assessment', exact: true }).click();
-  await expect(page).toHaveURL(/\/venues\/VN-\d+\/assessment/);
+  await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
+  await expect(page).toHaveURL(/\/venues\/VN-\d+$/);
   const id = new URL(page.url()).pathname.split('/')[2]!;
   await page.goto(`/venues/${id}/details`);
   await expect(page.locator('[data-region=venue-details-read-only]')).toContainText('+961 3 123 456');

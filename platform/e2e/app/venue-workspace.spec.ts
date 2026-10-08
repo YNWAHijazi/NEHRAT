@@ -6,12 +6,21 @@ import {useLanguage} from '../helpers/language';
 import {expectAbsent} from '../helpers/absence';
 import {openDetails, openAllRequirements} from '../helpers/record';
 
-for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
+for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue record has no tabs; facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
- // The venue's Requirements and Submit tabs became its single record page (2026-10-07); the two old paths redirect there.
- for(const [service,id,paths] of [['venue','VN-0032',['','/details','/assessment','/team']],['facility','FC-0014',['','/profile','/devices','/plan','/submit','/incidents']]] as const){
+ // THE VENUE IS ONE RECORD PAGE, like the event's (owner, 8 October 2026): no section tabs; the two edit
+ // screens keep the record's identity and lead back to it; the old team route lands on the EMS row.
+ {let identity:string|undefined;
+ for(const path of ['','/details','/assessment']){await page.goto(`/venues/VN-0032${path}`);const h=page.locator('[data-region=venue-workspace-header]');await expect(h).toBeVisible();
+  await expectAbsent(page,{anchor:h,absent:'[data-region=venue-workspace-nav]',because:'the venue record has no section tabs'});
+  if(path)await expect(page.locator('[data-region=back-to-record]')).toHaveAttribute('href','/venues/VN-0032');
+  else await expect(page.locator('[data-region=details-assessment]')).toBeVisible();
+  const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
+ await page.goto('/venues/VN-0032/team');await expect(page).toHaveURL(/\/venues\/VN-0032\?step=B7#req-B7$/);
+ await page.screenshot({path:info.outputPath(`venue-${lang}-${width}.png`),fullPage:true});}
+ for(const [service,id,paths] of [['facility','FC-0014',['','/profile','/devices','/plan','/submit','/incidents']]] as const){
   let y:number|undefined;let identity:string|undefined;
-  for(const path of paths){await page.goto(`/${service==='venue'?'venues':'facilities'}/${id}${path}`);const h=page.locator(`[data-region=${service}-workspace-header]`);await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);const nav=h.locator('nav');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);const top=(await nav.boundingBox())!.y;if(y===undefined)y=top;expect(Math.abs(top-y)).toBeLessThanOrEqual(1);const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
+  for(const path of paths){await page.goto(`/facilities/${id}${path}`);const h=page.locator(`[data-region=${service}-workspace-header]`);await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);const nav=h.locator('nav');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);const top=(await nav.boundingBox())!.y;if(y===undefined)y=top;expect(Math.abs(top-y)).toBeLessThanOrEqual(1);const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
   await page.screenshot({path:info.outputPath(`${service}-${lang}-${width}.png`),fullPage:true});
  }
  await page.goto('/venues/VN-0032/requirements');await expect(page.locator('[data-region=requirement-list]')).toBeVisible();
@@ -51,7 +60,6 @@ test('Level 1 local EMS contact is one confirmation on the record page, with no 
  // No invitation exists at Level 1: the row names no party, and the team page carries no local-contact form.
  await openDetails(page.locator('[data-requirement="B7"]'));
  await expectAbsent(page,{anchor:'[data-requirement="B7"]',absent:'[data-requirement="B7"] [data-region=party-ems]',because:'the Level 1 contact is a confirmation by the operator, not an invitation (catalogue B7, Level 1)'});
- await page.goto('/venues/VN-0032/team');await expect(page.locator('[data-region=team-ems]')).toBeVisible();
- await expectAbsent(page,{anchor:'[data-region=team-ems]',absent:'input[name=agency]',because:'the local contact moved to the B7 row on the record page (2026-10-07)'});
+ await expectAbsent(page,{anchor:'[data-requirement="B7"]',absent:'[data-requirement="B7"] form[data-region=invite]',because:'no EMS invitation is asked at Level 1'});
  }finally{db.prepare("DELETE FROM requirement_answers WHERE record_kind='venue' AND record_id='VN-0032'").run();db.prepare("DELETE FROM requirement_answer_history WHERE record_kind='venue' AND record_id='VN-0032'").run();db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });

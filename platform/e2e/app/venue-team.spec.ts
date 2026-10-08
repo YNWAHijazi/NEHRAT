@@ -3,6 +3,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {signInAs} from '../helpers/signin';
 import {mockMapTiles,chooseMapPoint} from '../helpers/facility-map';
 import {openDetails} from '../helpers/record';
+import {expectAbsent} from '../helpers/absence';
 
 /** Fills the short form on one requirement card and saves it through the shared answer action. */
 async function fillRow(page:Page,key:string){const r=await openDetails(page.locator(`[data-requirement="${key}"]`));const form=r.locator('[data-region=requirement-form]').first();for(const t of await form.locator('input[type=text]:enabled, textarea:enabled').all())await t.fill(`Confirmed ${key} coverage, staffing and contact +9613111111.`);for(const choice of await form.locator('fieldset:has([data-choice])').all())await choice.locator('[data-choice="yes"]').click();for(const n of await form.locator('input[type=number]:enabled').all())await n.fill('4');for(const c of await form.locator('input[type=checkbox]:enabled').all())await c.check();await form.getByRole('button',{name:'Save',exact:true}).click();await expect(form.getByRole('status')).toContainText('Saved.');}
@@ -13,8 +14,12 @@ async function upload(page:Page,key:string){const r=await openDetails(page.locat
 test('venue medical team completes the shared record; the Director approves; the organizer submits; the Ministry reads the frozen record',async({page,browser,baseURL},info)=>{
  await mockMapTiles(page);await signInAs(page,'test_organizer');await page.goto('/venues/new');
  for(const[k,v]of Object.entries({name:'Venue team browser test',nameAr:'موقع اختبار الفريق الطبي',address:'Beirut main road',contactName:'Venue operator',contactPhone:'+9613111111',capacity:'5000'}))await page.locator(`input[name=${k}]`).fill(v);
- await page.locator('select[name=category]').selectOption('hall');await page.locator('select[name=district]').selectOption('Beirut');await page.getByRole('button',{name:'Yes',exact:true}).first().click();await page.getByRole('button',{name:'No',exact:true}).nth(1).click();await chooseMapPoint(page);await page.getByRole('button',{name:'Continue to assessment',exact:true}).click();await expect(page).toHaveURL(/\/VN-\d+\/assessment/);const id=page.url().match(/VN-\d+/)![0];
- await page.getByLabel(/Most people at the same time during a routine operating session/).fill('5000');for(const d of await page.locator('[data-domain]').all())await d.locator('button').last().click();await page.getByLabel(/Authorized representative/).fill('Operator');await page.getByLabel(/Position/).fill('Manager');await page.getByRole('button',{name:'Save and view requirements',exact:true}).click();await expect(page).toHaveURL(new RegExp(`/venues/${id}#req-summary`));
+ await page.locator('select[name=category]').selectOption('hall');await page.locator('select[name=district]').selectOption('Beirut');await page.getByRole('button',{name:'Yes',exact:true}).first().click();await page.getByRole('button',{name:'No',exact:true}).nth(1).click();await chooseMapPoint(page);
+ // ONE PAGE, like the event's intake (owner, 8 October 2026): the assessment sits under the details and one Continue records both.
+ await expect(page.locator('[data-region=registration-assessment]')).toBeVisible();
+ await page.getByLabel(/Most people at the same time during a routine operating session/).fill('5000');for(const d of await page.locator('[data-domain]').all())await d.locator('button').last().click();await page.getByLabel(/Authorized representative/).fill('Operator');await page.getByLabel(/Position/).fill('Manager');
+ await page.getByRole('button',{name:'Continue to requirements',exact:true}).click();await expect(page).toHaveURL(/\/venues\/VN-\d+$/);const id=page.url().match(/VN-\d+/)![0];
+ await expect(page.locator('[data-region=details-assessment]')).toContainText('Level 3');
  // THE SINGLE RECORD PAGE: the contact is prefilled from the venue details; the clinical rows take no organizer form.
  await expect(page.locator('[data-requirement="B1"]')).toHaveAttribute('data-state','complete');await expect(page.locator('[data-requirement="B8"] [data-region=requirement-form] button')).toHaveCount(0);expect((await page.request.get(`/venues/${id}/certificate`)).status()).toBe(404);
  await openDetails(page.locator('#final-review'));await expect(page.locator('[data-region=final-review]')).toBeVisible();await expect(page.getByRole('button',{name:/^Submit to the Ministry — \d+ remaining$/})).toBeDisabled();
@@ -22,8 +27,10 @@ test('venue medical team completes the shared record; the Director approves; the
  // The organizer's own rows: emergency access, insurance (fields and evidence), the permanent site map.
  await page.goto(`/venues/${id}`);await fillRow(page,'B10');await fillRow(page,'B17');await upload(page,'B17');await upload(page,'P-M');
  const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const emails=Object.fromEntries(['ems','director'].map(role=>{const email=`browser-${role}@venue.example.test`;db.prepare('UPDATE accounts SET email=? WHERE login=?').run(email,`test_${role}`);return[role,email]}));db.close();
- await page.goto(`/venues/${id}/team`);
- for(const kind of ['ems','director']){const f=page.locator('form').filter({has:page.locator(`input[name=kind][value=${kind}]`)});await f.locator('input[name=name]').fill(`Venue ${kind}`);await f.locator('input[name=email]').fill(emails[kind]!);await f.getByRole('button',{name:'Send invitation',exact:true}).click();await expect(page).toHaveURL(/invited=yes/);}
+ // The invitations are sent from the rows that need the party: the EMS agency on the EMS row, the Director on the Director row.
+ for(const [kind,key] of [['ems','B7'],['director','B3']] as const){await page.goto(`/venues/${id}`);const row=await openDetails(page.locator(`[data-requirement="${key}"]`));const f=row.locator('form[data-region=invite]');await f.locator('input[name=name]').fill(`Venue ${kind}`);await f.locator('input[name=email]').fill(emails[kind]!);await f.locator('button[type=submit]').click();await expect(page).toHaveURL(new RegExp(`invited=yes.*step=${key}`));}
+ // Only the EMS row invites the agency: the BLS row is a listing with its two confirmations.
+ await expectAbsent(page,{anchor:'[data-requirement="B5"]',absent:'[data-requirement="B5"] form[data-region=invite]',because:'the EMS agency is invited once, on the EMS and ambulance row'});
  // The URL already reads invited=yes after the first invitation, so wait for both rows to exist.
  await expect.poll(()=>{const f=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const n=(f.prepare('SELECT COUNT(*) AS n FROM venue_invitations WHERE venue_id=?').get(id) as {n:number}).n;f.close();return n;}).toBe(2);
  const fixture=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const invitations=fixture.prepare('SELECT kind,token FROM venue_invitations WHERE venue_id=?').all(id) as unknown as {kind:string;token:string}[];fixture.close();

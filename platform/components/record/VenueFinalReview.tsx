@@ -14,7 +14,7 @@ export function VenueFinalReview({ id, facts, editable, submitted, error }: { id
   const href = (c: VenueCheck) =>
     c.target === 'details' ? `/venues/${id}/details`
       : c.target === 'assessment' ? `/venues/${id}/assessment`
-        : c.target === 'team' ? `/venues/${id}/team`
+        : c.target === 'team' ? '#req-B7'
           : c.target === 'fee' ? '#amount-due'
             : `#req-${c.key}`;
   const rowStyle: React.CSSProperties = { display: 'flex', gap: 16, justifyContent: 'space-between', alignItems: 'center', minHeight: 44, padding: '8px 14px', color: 'var(--ink)', borderBlockEnd: '1px solid var(--line)', textDecoration: 'none' };

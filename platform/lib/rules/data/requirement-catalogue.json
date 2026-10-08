@@ -2,7 +2,7 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-08.2",
+  "revision": "2026-10-08.3",
   "decisions": {
     "D1": {
       "state": "confirmed",
@@ -368,8 +368,8 @@
           "completion": "fields",
           "labelEn": "Local EMS access",
           "labelAr": "الوصول إلى خدمات الطوارئ الطبية المحلية",
-          "infoEn": "Access to local EMS is required; an EMS provider is not required for every Level 1 event. If an agency is participating directly, name it here.",
-          "infoAr": "الوصول إلى خدمات الطوارئ الطبية المحلية مطلوب؛ ولا يُشترط مزوّد إسعاف لكل فعالية من المستوى 1. إذا كانت جهة تشارك مباشرة فسمّوها هنا.",
+          "infoEn": "Access to local EMS is required; an EMS provider is not required at Level 1. If an agency participates directly, name it here.",
+          "infoAr": "الوصول إلى خدمات الطوارئ الطبية المحلية مطلوب؛ ولا يُشترط مزوّد إسعاف في المستوى 1. إذا كانت جهة تشارك مباشرة فسمّوها هنا.",
           "fields": [
             {
               "key": "how",
@@ -415,7 +415,9 @@
               "key": "whileTransporting",
               "type": "text",
               "labelEn": "How is event coverage maintained when an ambulance transports a patient?",
-              "labelAr": "كيف تُحفظ تغطية الفعالية عندما تنقل سيارة إسعاف مريضاً؟"
+              "labelAr": "كيف تُحفظ تغطية الفعالية عندما تنقل سيارة إسعاف مريضاً؟",
+              "venueLabelEn": "How is coverage of the session maintained when an ambulance transports a patient?",
+              "venueLabelAr": "كيف تُحفظ تغطية الجلسة عندما تنقل سيارة إسعاف مريضاً؟"
             },
             {
               "key": "extraResources",
@@ -563,7 +565,9 @@
               "type": "checkbox",
               "labelEn": "A brief pre-event test or drill of the cardiac-arrest response pathway is planned (recommended).",
               "labelAr": "يُخطَّط لاختبار أو تمرين قصير قبل الفعالية لمسار الاستجابة لتوقف القلب (موصى به).",
-              "optional": true
+              "optional": true,
+              "venueLabelEn": "A periodic test or drill of the cardiac-arrest response pathway is planned (recommended).",
+              "venueLabelAr": "يُخطَّط لاختبار أو تمرين دوري لمسار الاستجابة لتوقف القلب (موصى به)."
             }
           ],
           "infoEn": "Guidance 5.7. Required at Level 3: recognition, EMS activation, CPR, AED access, handover and drills. Entered by the EMS agency or the Medical Director, whichever completes it first. Plan AED placement and responder deployment so a shock can be delivered within about 3–5 minutes of collapse.",
@@ -645,19 +649,25 @@
               "key": "advanced",
               "type": "textarea",
               "labelEn": "Oxygen, AED capability and airway/resuscitation equipment appropriate to the assigned personnel, scope of practice and event risks",
-              "labelAr": "الأكسجين وقدرة جهاز AED ومعدات مجرى الهواء والإنعاش المناسبة للأفراد المكلّفين ونطاق الممارسة ومخاطر الفعالية"
+              "labelAr": "الأكسجين وقدرة جهاز AED ومعدات مجرى الهواء والإنعاش المناسبة للأفراد المكلّفين ونطاق الممارسة ومخاطر الفعالية",
+              "venueLabelEn": "Oxygen, AED capability and airway/resuscitation equipment appropriate to the assigned personnel, scope of practice and the venue's activity risks",
+              "venueLabelAr": "الأكسجين وقدرة جهاز AED ومعدات مجرى الهواء والإنعاش المناسبة للأفراد المكلّفين ونطاق الممارسة ومخاطر أنشطة الموقع"
             },
             {
               "key": "medicines",
               "type": "checkbox",
               "labelEn": "Medicines are carried or administered only by professionals authorized under Lebanese requirements and the event's medical governance.",
-              "labelAr": "لا تُحمل الأدوية ولا تُعطى إلا من مهنيين مخوّلين بموجب المتطلبات اللبنانية والحوكمة الطبية للفعالية."
+              "labelAr": "لا تُحمل الأدوية ولا تُعطى إلا من مهنيين مخوّلين بموجب المتطلبات اللبنانية والحوكمة الطبية للفعالية.",
+              "venueLabelEn": "Medicines are carried or administered only by professionals authorized under Lebanese requirements and the venue's medical governance.",
+              "venueLabelAr": "لا تُحمل الأدوية ولا تُعطى إلا من مهنيين مخوّلين بموجب المتطلبات اللبنانية والحوكمة الطبية للموقع."
             },
             {
               "key": "replacement",
               "type": "text",
               "labelEn": "How is used, expired or failed equipment replaced during the event?",
-              "labelAr": "كيف تُستبدل المعدات المستهلكة أو منتهية الصلاحية أو المعطّلة أثناء الفعالية؟"
+              "labelAr": "كيف تُستبدل المعدات المستهلكة أو منتهية الصلاحية أو المعطّلة أثناء الفعالية؟",
+              "venueLabelEn": "How is used, expired or failed equipment replaced during a session?",
+              "venueLabelAr": "كيف تُستبدل المعدات المستهلكة أو منتهية الصلاحية أو المعطّلة أثناء الجلسة؟"
             }
           ],
           "infoEn": "Guidance 5.6, for the EMS agency or the Medical Director. Examples from sport governing bodies inform the plan; they do not replace it.",
@@ -994,8 +1004,8 @@
               "venueLabelAr": "كيف سيتواصل الفريق الطبي وجهة الإسعاف ومركز التحكم بالموقع؟"
             }
           ],
-          "infoEn": "Say how the medical team, EMS and event control communicate; channels and backups are completed in the medical plan.",
-          "infoAr": "حدّدوا كيف يتواصل الفريق الطبي وجهة الإسعاف ومركز التحكم بالفعالية؛ وتُستكمل القنوات والبدائل في الخطة الطبية."
+          "infoEn": "Say how the medical team, EMS and the control point communicate; channels and backups are completed in the medical plan.",
+          "infoAr": "حدّدوا كيف يتواصل الفريق الطبي وجهة الإسعاف ونقطة التحكم؛ وتُستكمل القنوات والبدائل في الخطة الطبية."
         }
       }
     },
@@ -1016,7 +1026,9 @@
           "key": "lead",
           "type": "checkbox",
           "labelEn": "The Event Medical Director will lead and integrate event medical command.",
-          "labelAr": "سيقود المدير الطبي للفعالية القيادة الطبية للفعالية ويدمجها."
+          "labelAr": "سيقود المدير الطبي للفعالية القيادة الطبية للفعالية ويدمجها.",
+          "venueLabelEn": "The Medical Director will lead and integrate medical command for each session.",
+          "venueLabelAr": "سيقود المدير الطبي القيادة الطبية لكل جلسة ويدمجها."
         }
       ],
       "levels": {
@@ -1037,7 +1049,9 @@
             "M02"
           ]
         }
-      }
+      },
+      "venueLabelEn": "Medical command",
+      "venueLabelAr": "القيادة الطبية"
     },
     {
       "key": "B16",

@@ -12,12 +12,13 @@ import {checkPasswordPolicy,hashPassword} from '../../lib/password';
 import {requirementApplies} from '../../lib/rules';
 export async function inviteVenuePartnerAction(id:string,form:FormData) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();
- if(!w.editable||!w.level)redirect(`/venues/${id}/team`);
- const kind=String(form.get('kind')),name=String(form.get('name')??'').trim(),email=String(form.get('email')??'').trim().toLowerCase();
- if(!['ems','director'].includes(kind)||!name||!/^\S+@\S+\.\S+$/.test(email))redirect(`/venues/${id}/team?error=details`);
+ const kind=String(form.get('kind'));const row=kind==='director'?'B3':'B7';const back=(q='')=>`/venues/${id}?${q}${q?'&':''}step=${row}#req-${row}`;
+ if(!w.editable||!w.level)redirect(back());
+ const name=String(form.get('name')??'').trim(),email=String(form.get('email')??'').trim().toLowerCase();
+ if(!['ems','director'].includes(kind)||!name||!/^\S+@\S+\.\S+$/.test(email))redirect(back('invite=details'));
  // The Director is a Level 3 role (decision D1): below it there is no Director to invite.
- if(kind==='director'&&!requirementApplies('B3',w.level,'venue'))redirect(`/venues/${id}/team`);
- if(venueInvitations(id).some(i=>['nominated','confirmed'].includes(i.status)&&(i.kind===kind&&(i.email===email||kind==='director'))))redirect(`/venues/${id}/team?error=duplicate`);
+ if(kind==='director'&&!requirementApplies('B3',w.level,'venue'))redirect(`/venues/${id}?step=B7#req-B7`);
+ if(venueInvitations(id).some(i=>['nominated','confirmed'].includes(i.status)&&(i.kind===kind&&(i.email===email||kind==='director'))))redirect(back('invite=duplicate'));
  const token=randomBytes(24).toString('hex');const db=getDb();
  db.prepare('INSERT INTO venue_invitations(token,venue_id,kind,name,email,expires_at) VALUES(?,?,?,?,?,?)').run(token,id,kind,name,email,new Date(Date.now()+30*86400000).toISOString());
  ensureVenuePackage(a.id,id);
@@ -27,7 +28,7 @@ export async function inviteVenuePartnerAction(id:string,form:FormData) {
  if(recipient)db.prepare("INSERT INTO notifications(account_id,kind,subject_en,subject_ar,body_en,body_ar,record_route,sent_at,is_demo) VALUES(?,'needs_action',?,?,?,?,?,now_stamp(),?)").run(recipient.id,`Venue invitation: ${id}`,`دعوة لموقع: ${id}`,`Review your invitation for ${w.venue.nameEn}`,`راجعوا الدعوة للموقع ${w.venue.nameAr}`,`/venue-invitations/${token}`,+a.isDemo);
  const delivery=await sendLinkEmail({to:email,path:`/venue-invitations/${token}`,subject:`Venue medical team invitation: ${id}`,text:`You are invited to support ${w.venue.nameEn}. Review the venue and your tasks, then sign in or create an account to accept.\nدُعيتم للمشاركة في الفريق الطبي للموقع. راجعوا التفاصيل ثم سجّلوا الدخول أو أنشئوا حساباً للقبول.`,isDemo:a.isDemo});
  db.prepare('UPDATE venue_invitations SET delivery=? WHERE token=?').run(delivery,token);
- revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(`/venues/${id}/team?invited=yes`);
+ revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(back(`invited=yes&mail=${delivery}`));
 }
 export async function withdrawVenuePartnerAction(id:string,token:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w?.editable)notFound();
@@ -35,7 +36,8 @@ export async function withdrawVenuePartnerAction(id:string,token:string) {
  getDb().prepare("UPDATE venue_invitations SET status='withdrawn',responded_at=now_stamp() WHERE token=?").run(token);
  getDb().prepare('UPDATE venue_packages SET work_revision=work_revision+1 WHERE venue_id=?').run(id);
  getDb().prepare('DELETE FROM venue_plan_approvals WHERE venue_id=?').run(id);
- revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(`/venues/${id}/team`);
+ const row=inv.kind==='director'?'B3':'B7';
+ revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');redirect(`/venues/${id}?step=${row}#req-${row}`);
 }
 export async function respondVenueInvitationAction(token:string,form:FormData) {
  const a=await currentAccount();if(!a)redirect(`/venue-invitations/${token}`);const inv=venueInvitation(token);if(!inv)notFound();

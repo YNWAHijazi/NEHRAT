@@ -13,17 +13,19 @@ import { getDb } from '../../../lib/db';
 import { beirutToday } from '../../../lib/clock';
 import { venueReassessmentGate } from '../../../lib/rules';
 import { venueNextAction, venueRailStages } from '../../../lib/rules/venue-workflow';
-import { venueChangeSinceAssessment } from '../../../lib/queries';
-import { renewVenuePackageAction } from '../actions';
+import { venueAssessmentsFor, venueChangeSinceAssessment } from '../../../lib/queries';
+import { InfoNote } from '../../../components/InfoNote';
+import { EmailDeliveryNotice } from '../../../components/EmailDeliveryNotice';
+import { levelWhy } from '../../../lib/rules';
+import { renewVenuePackageAction, reopenVenueSectionAction } from '../actions';
 
 /**
- * THE VENUE'S SINGLE RECORD PAGE (owner brief, 2026-10-07): the next step, the certificate,
- * the rail, the record's actions, then the SAME requirement renderer the event page uses --
- * the two summaries, the full-width cards, the final review and Submit -- over one routine
- * operating session. Details, assessment and the medical team keep their own forms,
- * reached from the header's tabs with deliberate edit actions.
+ * THE VENUE'S SINGLE RECORD PAGE, laid out as the event's (owner, 8 October 2026): the next
+ * step, the certificate, the rail, the compact details-and-assessment card with its two
+ * deliberate edit actions, then the SAME step-by-step requirement renderer -- invitations
+ * on the rows that need the party, the final review and Submit. No section tabs.
  */
-export default async function VenueRecordPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string; upload?: string; doc?: string; saved?: string }> }) {
+export default async function VenueRecordPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string; upload?: string; doc?: string; saved?: string; step?: string; invite?: string; invited?: string; mail?: string }> }) {
   const { id } = await params;
   const { account, w } = await ownedVenuePage(id);
   const q = await searchParams;
@@ -36,6 +38,9 @@ export default async function VenueRecordPage({ params, searchParams }: { params
     .all(id) as unknown as { version: number; effective: string; valid_until: string }[];
   const renewal = venueReassessmentGate({ validUntil: v.validUntil, today: beirutToday(), changeReportedSinceAssessment: venueChangeSinceAssessment(account.id, id) });
   const renewalReason = gateReason(renewal);
+  const assessed = w.assessmentVersion ? venueAssessmentsFor(account.id, id).find((a) => a.version === w.assessmentVersion) ?? null : null;
+  const why = assessed ? levelWhy(assessed.derivation) : null;
+  const editLink: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', minHeight: 36, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 18, fontSize: '13.5px', color: 'var(--ink)' };
   const contentTypes: Record<string, string | null> = {};
   for (const f of w.files) contentTypes[f.docKey] = null;
   const derived = {
@@ -68,6 +73,38 @@ export default async function VenueRecordPage({ params, searchParams }: { params
 
       <StageRail titleEn="Venue progress" titleAr="مراحل الموقع" stages={stages} noteEn={`Stage ${stage} of ${stages.length}`} noteAr={`المرحلة ${stage} من ${stages.length}`} />
 
+      {/* The compact details and assessment block, with deliberate edit actions -- as on the event record. */}
+      <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>
+        <div style={{ fontSize: 14, lineHeight: 1.5, minWidth: 0 }}>
+          <span style={{ fontWeight: 500 }}><L en="Details and assessment" ar="البيانات والتقييم" /></span>
+          <span style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
+            {assessed && w.level !== null ? (
+              <>
+                <L en={`Level ${w.level} · assessment version ${assessed.version} · capacity ${v.licensedCapacity ?? '—'}`} ar={`المستوى ${w.level} · نسخة التقييم ${assessed.version} · السعة ${v.licensedCapacity ?? '—'}`} />
+                {why?.reason ? <> <InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى"><L en={why.reason.en} ar={why.reason.ar} />{why.comparison ? <> <L en={why.comparison.en} ar={why.comparison.ar} /></> : null}</InfoNote></> : null}
+              </>
+            ) : <L en="The assessment is not complete; no level is derived and no requirements apply yet." ar="التقييم غير مكتمل؛ لم يُستنتج مستوى ولا تنطبق متطلبات بعد." />}
+          </span>
+        </div>
+        {w.editable ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', alignItems: 'center' }}>
+            {/* One click straight into the form, as on the event record: each action reopens its section. */}
+            <form action={reopenVenueSectionAction.bind(null, id, 'details')}>
+              <button type="submit" data-region="edit-details-link" style={{ ...editLink, background: 'var(--bg)', cursor: 'pointer' }}><L en="Edit venue details" ar="تعديل تفاصيل الموقع" /></button>
+            </form>
+            {assessed ? (
+              <form action={reopenVenueSectionAction.bind(null, id, 'assessment')}>
+                <button type="submit" data-region="reassess-link" style={{ border: 0, background: 'transparent', padding: 0, cursor: 'pointer', fontSize: '12.5px', color: 'var(--muted)', textDecoration: 'underline', textUnderlineOffset: 3, minHeight: 36, display: 'inline-flex', alignItems: 'center' }}>
+                  <L en="Something changed? Update the assessment" ar="تغيّر شيء؟ حدّثوا التقييم" />
+                </button>
+              </form>
+            ) : (
+              <Link href={`/venues/${id}/assessment`} style={editLink}><L en="Complete the assessment" ar="إكمال التقييم" /></Link>
+            )}
+          </div>
+        ) : null}
+      </section>
+
       {/* The routes off the record that are not requirements. */}
       <div data-region="record-actions" style={{ ...actionGrid, display: 'grid', marginBlockEnd: 28 }}>
         <span style={actionCell}>
@@ -97,7 +134,14 @@ export default async function VenueRecordPage({ params, searchParams }: { params
               <L en={`Submitted on ${w.submittedAt?.slice(0, 10) ?? ''} · submission ${w.revision}. The answers below are the record as the Ministry reads it.`} ar={`قُدِّم في ⁦${w.submittedAt?.slice(0, 10) ?? ''}⁩ · الطلب ${w.revision}. الإجابات أدناه هي السجل كما تقرأه الوزارة.`} />
             </div>
           ) : null}
-          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.saved ?? q.doc ?? null}
+          {/* How the last invitation was delivered, and why one was refused, after the row's action returns here. */}
+          <EmailDeliveryNotice status={q.invited ? q.mail : undefined} />
+          {q.invite ? (
+            <div role="alert" data-region="invite-refused" style={{ padding: '12px 16px', border: '1px solid var(--bad)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px' }}>
+              <L en={q.invite === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : 'Enter a name and a valid email address.'} ar={q.invite === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'} />
+            </div>
+          ) : null}
+          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null}
             final={<>{w.level === 1 ? <MedicalArrangementsSummary instances={w.record.instances} /> : null}<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} /></>} />
         </div>
       ) : (

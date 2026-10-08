@@ -58,14 +58,14 @@ describe('venue next step', () => {
       pendingInvitations: [{ name: 'Dr A', token: 't' }],
       requirements: [{ key: 'B3', en: 'Event Medical Director', ar: 'المدير الطبي', optional: false, done: false, clinical: false, awaitingInvitation: true }],
     });
-    expect(venueNextAction(facts)).toMatchObject({ kind: 'waitingOnOthers', href: 'team' });
+    expect(venueNextAction(facts)).toMatchObject({ kind: 'waitingOnOthers', href: '#req-B7' });
   });
   it('asks for the medical team first when medical items wait and nobody is invited', () => {
     const facts = ready({ requirements: [
       { key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false },
       { key: 'B5', en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true },
     ] });
-    expect(venueNextAction(facts)).toMatchObject({ kind: 'team', href: 'team' });
+    expect(venueNextAction(facts)).toMatchObject({ kind: 'team', href: '#req-B7' });
     expect(venueNextAction({ ...facts, medicalTeamLinked: true })).toMatchObject({ kind: 'requirements', titleEn: 'Complete your 1 requirement' });
   });
   it('waits on the medical team for clinical rows, and says ready only when everything is in place', () => {
