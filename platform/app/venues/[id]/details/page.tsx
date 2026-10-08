@@ -3,15 +3,14 @@ import { ownedVenuePage } from '../../../../lib/venue/page';
 import { RegisterVenueForm } from '../../new/RegisterVenueForm';
 import { reopenVenueSectionAction } from '../../actions';
 import { L } from '../../../../components/L';
-import { pageTitle, secondaryButton, noticeBand, alertBand } from '../../../../components/workspace-styles';
+import { pageTitle, secondaryButton, noticeBand } from '../../../../components/workspace-styles';
 import { venueTypeLabel } from '../../../../lib/rules/venue-intake';
 import { venueDistrictLabel } from '../../../../lib/rules/venue-intake';
 import type { VenueWorkspaceData } from '../../../../components/VenueWorkspace';
 
-export default async function VenueDetails({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+export default async function VenueDetails({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { account, w } = await ownedVenuePage(id);
-  const { error } = await searchParams;
   const locked = !w.editable || !w.detailsEditing;
   return (
     <VenueWorkspace account={account} w={w} active="details">
@@ -23,11 +22,6 @@ export default async function VenueDetails({ params, searchParams }: { params: P
           </form>
         ) : null}
       </div>
-      {error ? (
-        <div role="alert" style={alertBand}>
-          <L en="Complete the required details and confirm the map pin." ar="أكملوا البيانات المطلوبة وأكّدوا الموقع على الخريطة." />
-        </div>
-      ) : null}
       {w.editable && !w.detailsDone && !w.detailsEditing ? (
         <div role="status" style={noticeBand}>
           <L en="Some details are missing. Choose Edit details to complete them." ar="بعض البيانات ناقصة. اختاروا تعديل التفاصيل لاستكمالها." />

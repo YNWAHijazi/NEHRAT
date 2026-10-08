@@ -20,6 +20,7 @@ import { requirementSnapshotVersions } from '../../../lib/record-facts';
 import { eventRecordView } from '../../../lib/record-view';
 import { clockNow } from '../../../lib/clock';
 import { reapplyEventAction } from '../../actions';
+import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
 import {
   archiveWindowDays,
   assessmentsFor,
@@ -49,7 +50,7 @@ export default async function EventRecordPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string; mail?: string; saved?: string }>;
+  searchParams?: Promise<{ notice?: string; upload?: string; doc?: string; error?: string; approval?: string; mail?: string; saved?: string; step?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -377,9 +378,12 @@ export default async function EventRecordPage({
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
               listHref={`/events/${id}/requirements`}
-              initialStep={query.saved ?? query.doc ?? (query.approval || query.error === 'approval' ? 'B2' : null)}
+              initialStep={query.step ?? query.saved ?? query.doc ?? (query.approval || query.error === 'approval' ? 'B2' : null)}
               directorVerification={record.level !== null ? directorVerification({ level: record.level, directorStatus: record.facts?.director?.status === 'confirmed' ? 'confirmed' : record.facts?.director?.status === 'nominated' ? 'nominated' : null, records: attestationRecordsFor(id), laneActive: orderLaneOn() }) : null}
               final={(
+                <>
+                  {/* Level 1: the documented medical arrangements, generated from the answers (partner audit, 8 October 2026). */}
+                  {level === 1 ? <MedicalArrangementsSummary instances={record.instances} /> : null}
                 <FinalReview
                   eventId={id}
                   level={level}
@@ -396,6 +400,7 @@ export default async function EventRecordPage({
                   externalBlockers={gate.blockers.filter((b) => b.kind === 'eventCancelled' || b.kind === 'feeUnpaid').map((b) => ({ kind: b.kind, en: b.itemEn, ar: b.itemAr }))}
                   fee={gate.fee}
                 />
+                </>
               )}
             />
             {/* The commercial directory link renders only while its capability is on (non-negotiable 12). */}

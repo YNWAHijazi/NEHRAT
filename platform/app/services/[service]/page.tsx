@@ -1,18 +1,15 @@
-import { arabicCount } from '../../../lib/rules/venue-workflow';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { L } from '../../../components/L';
 import { PublicShell } from '../../../components/PublicShell';
 import { currentAccount } from '../../../lib/auth';
 import { AdFooter } from '../../../components/AdFooter';
+import { InfoNote } from '../../../components/InfoNote';
 import { capabilityConfigFor, ministryConfig } from '../../../lib/queries';
 import {
   DOMAINS,
-  FACILITY_CONTENT,
   PUBLIC_LANDING,
-  documentsForLevel,
   effectiveFlag,
-  requirementsForLevel,
   serviceFeeLines,
   type FeeService,
 } from '../../../lib/rules';
@@ -131,25 +128,28 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             ))}
           </div>
 
+          {/* What each level submits, in words (partner audit, 8 October 2026): a fixed
+              document count read as a promise the catalogue could not keep. The exact
+              list derives on the record once the level is known. */}
           <h2 style={h2}>
-            <L en="Documents required at each level" ar="المستندات المطلوبة في كل مستوى" />
+            <L en={P.levelPackagesTitleEn} ar={P.levelPackagesTitleAr} />
           </h2>
           <div data-region="documents-by-level" style={listBox}>
-            {([1, 2, 3] as const).map((l) => (
-              <div key={l} style={row}>
-                <strong style={{ color: `var(--l${l})` }}>
-                  <L en={`Level ${l}`} ar={`المستوى ${l}`} />
+            {P.levelPackages.map((p) => (
+              <div key={p.level} style={row}>
+                <strong style={{ color: `var(--l${p.level})` }}>
+                  <L en={`Level ${p.level}`} ar={`المستوى ${p.level}`} />
                 </strong>
                 <span style={{ color: 'var(--muted)' }}>
                   {' — '}
-                  <L
-                    en={`${documentsForLevel(l).filter((d) => !d.optional).length} ${documentsForLevel(l).filter((d) => !d.optional).length === 1 ? 'document' : 'documents'}, ${requirementsForLevel(l).length} ${requirementsForLevel(l).length === 1 ? 'requirement' : 'requirements'}`}
-                    ar={`${arabicCount(documentsForLevel(l).filter((d) => !d.optional).length, { one: 'مستند واحد', two: 'مستندان', few: 'مستندات', many: 'مستنداً' })}، ${arabicCount(requirementsForLevel(l).length, { one: 'متطلب واحد', two: 'متطلبان', few: 'متطلبات', many: 'متطلباً' })}`}
-                  />
+                  <L en={p.en} ar={p.ar} />
                 </span>
               </div>
             ))}
           </div>
+          <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.65, maxWidth: '80ch', color: 'var(--muted)' }}>
+            <L en={P.levelPackagesNoteEn} ar={P.levelPackagesNoteAr} />
+          </p>
         </>
       ) : null}
 
@@ -187,6 +187,16 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
       {key === 'register-a-facility' ? (
         <>
+          {/* CPR and AED defined once, at first use, behind an information control
+              (partner audit, 8 October 2026); the rest of the page uses the initials. */}
+          <p data-region="term-definitions" style={{ margin: '0 0 8px', fontSize: '14.5px', lineHeight: 1.7, display: 'flex', flexWrap: 'wrap', gap: '4px 18px' }}>
+            {P.termDefinitions.map((t) => (
+              <span key={t.term}>
+                <L en={t.en} ar={t.ar} />
+                <InfoNote><L en={t.noteEn} ar={t.noteAr} /></InfoNote>
+              </span>
+            ))}
+          </p>
           <h2 style={h2}>
             <L en={P.coveredTitleEn} ar={P.coveredTitleAr} />
           </h2>

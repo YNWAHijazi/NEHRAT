@@ -5,8 +5,8 @@
   "$commentSecondSweep": "Partner ruling, second sweep: the model-teaching blocks the landing pass orphaned (servicesIntro, regulated, meet, the level arithmetic, the venue-assessment comparison, the public-tools disclaimer, the no-results advice, the facility rule intro) are removed rather than left as dead copy. What remains is what a screen still renders.",
   "toolsEn": "Public tools",
   "toolsAr": "الأدوات العامة",
-  "scopeEn": "Registration is for sporting and recreational events and venues, and for the facilities the cardiac-readiness rules cover.",
-  "scopeAr": "التسجيل مخصص للفعاليات والمواقع الرياضية والترفيهية، وللمرافق المشمولة بقواعد الجاهزية القلبية.",
+  "scopeEn": "This service applies to planned organized sporting, physical-activity, performance, festival, exhibition, ceremony and other recreational events that meet the applicable Ministry of Public Health criteria. Hosting venues and the facilities the cardiac-readiness rules cover register through their own services.",
+  "scopeAr": "تنطبق هذه الخدمة على الفعاليات المنظّمة المخطّط لها، الرياضية ومنها أنشطة البدنية والعروض والمهرجانات والمعارض والاحتفالات وسائر الفعاليات الترفيهية، التي تستوفي معايير وزارة الصحة العامة المنطبقة. أما المواقع المستضيفة والمنشآت المشمولة بقواعد الجاهزية القلبية فتُسجَّل عبر خدماتها الخاصة.",
   "jurisdictionEn": "This platform covers health and medical readiness. It does not give permission to hold an event. You still need any permits required by the relevant authorities under Lebanese law.",
   "jurisdictionAr": "تختصّ هذه المنصة بالتأهب الصحي والطبي. ولا تمنح إذناً لإقامة الفعالية. تبقى التصاريح المطلوبة من الجهات المختصة بموجب القانون اللبناني ضرورية.",
   "services": [
@@ -37,32 +37,32 @@
   ],
   "criteria": [
     {
-      "en": "A sporting or recreational event, such as a concert, festival or exhibition, that needs approval from a ministry or another authorized body.",
-      "ar": "فعالية رياضية أو ترفيهية، مثل حفل موسيقي أو مهرجان أو معرض، تحتاج إلى موافقة وزارة أو جهة مخوّلة.",
-      "shortEn": "Requires authorization from a competent authority",
-      "shortAr": "تتطلب ترخيصاً من سلطة مختصة"
-    },
-    {
-      "en": "An event with 1,000 or more people present at the same time.",
-      "ar": "فعالية يحضرها 1,000 شخص أو أكثر في الوقت نفسه.",
+      "en": "Expected maximum simultaneous attendance is 1,000 persons or more.",
+      "ar": "الحضور الأقصى المتوقع في الوقت نفسه هو 1,000 شخص أو أكثر.",
       "shortEn": "Attendance of 1,000 or more",
       "shortAr": "حضور 1,000 أو أكثر"
     },
     {
-      "en": "A sports competition or group physical activity outside normal facility use that meets any of these conditions: needs dedicated medical, EMS, traffic, security or emergency support; uses a temporary course; or appears in the minimum event levels.",
-      "ar": "مسابقة رياضية أو نشاط بدني جماعي خارج الاستخدام المعتاد للمنشأة، يستوفي أياً من الآتي: يحتاج إلى دعم طبي أو إسعافي أو مروري أو أمني أو طارئ مخصّص؛ أو يستخدم مساراً مؤقتاً؛ أو يندرج ضمن جدول المستويات الدنيا للفعاليات.",
+      "en": "The event requires authorization, notification, or approval from a competent authority.",
+      "ar": "تتطلب الفعالية ترخيصاً أو إشعاراً أو موافقة من سلطة مختصة.",
+      "shortEn": "Requires authorization from a competent authority",
+      "shortAr": "تتطلب ترخيصاً من سلطة مختصة"
+    },
+    {
+      "en": "It is an organized sporting competition or mass-participation physical activity requiring dedicated medical, EMS, traffic, security or emergency arrangements, or using a temporary road, trail, mountain, water, dispersed or multi-site course.",
+      "ar": "هي مسابقة رياضية منظّمة أو نشاط بدني بمشاركة جماهيرية يتطلب ترتيبات طبية أو إسعافية أو مرورية أو أمنية أو طارئة مخصّصة، أو يستخدم مساراً مؤقتاً على طريق أو درب أو جبل أو مياه أو مساراً متفرّقاً أو متعدد المواقع.",
       "shortEn": "Organized competition or mass-participation activity",
       "shortAr": "منافسة منظّمة أو نشاط بمشاركة جماهيرية"
     },
     {
-      "en": "A similar previous event involved a cardiac arrest, death, major incident, or a stop for medical reasons.",
-      "ar": "شهدت فعالية سابقة مماثلة توقف قلب أو وفاة أو حادثاً جسيماً أو توقّفاً لأسباب طبية.",
+      "en": "A previous edition of the event involved cardiac arrest, death, major-incident activation, or interruption or termination for medical reasons.",
+      "ar": "شهدت نسخة سابقة من الفعالية توقف قلب أو وفاة أو تفعيل خطة حادث جسيم أو توقّفاً أو إنهاءً لأسباب طبية.",
       "shortEn": "Previous edition involved a serious incident",
       "shortAr": "انطوت نسخة سابقة على حادث جسيم"
     },
     {
-      "en": "The Ministry of Public Health or another authorized body has referred the event because of a health or medical risk.",
-      "ar": "أحالت وزارة الصحة العامة أو جهة مخوّلة أخرى الفعالية بسبب خطر صحي أو طبي.",
+      "en": "The Ministry of Public Health has designated the event, or another competent authority has referred it to the Ministry because of an identifiable health or medical risk.",
+      "ar": "حدّدت وزارة الصحة العامة الفعالية، أو أحالتها سلطة مختصة أخرى إلى الوزارة بسبب خطر صحي أو طبي يمكن تحديده.",
       "shortEn": "Designated by the Ministry or referred",
       "shortAr": "محددة من الوزارة أو مُحالة"
     }
@@ -81,11 +81,11 @@
   ],
   "facilityCategories": [
     {
-      "en": "Sports and aquatic facilities",
-      "ar": "المنشآت الرياضية والمائية",
+      "en": "Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities",
+      "ar": "الصالات الرياضية ومراكز اللياقة والنوادي الرياضية والملاعب والمنشآت الرياضية والمائية",
       "state": "inforce",
-      "ruleEn": "An AED is required.",
-      "ruleAr": "يلزم توفير جهاز إزالة رجفان.",
+      "ruleEn": "AED and readiness requirements apply.",
+      "ruleAr": "تنطبق متطلبات جهاز AED والجاهزية.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -93,17 +93,17 @@
       "en": "Schools, universities and campuses",
       "ar": "المدارس والجامعات والمجمعات التعليمية",
       "state": "inforce",
-      "ruleEn": "AEDs follow the Ministry’s school and university rollout schedule.",
-      "ruleAr": "تخضع الأجهزة لجدول التنفيذ الوزاري للمدارس والجامعات.",
+      "ruleEn": "According to the Ministry’s phased implementation schedule.",
+      "ruleAr": "بحسب جدول التنفيذ المرحلي للوزارة.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
-      "en": "Transport hubs, shopping malls and public venues",
-      "ar": "محطات النقل ومراكز التسوق والأماكن العامة",
+      "en": "Airports, passenger ports, central transport terminals, shopping malls, and public venues above the Ministry capacity threshold",
+      "ar": "المطارات وموانئ الركاب ومحطات النقل المركزية ومراكز التسوق والأماكن العامة التي تتجاوز عتبة السعة الوزارية",
       "state": "inforce",
-      "ruleEn": "Transport hubs and malls need AEDs. Public venues follow the Ministry’s capacity threshold.",
-      "ruleAr": "تلزم الأجهزة في محطات النقل ومراكز التسوق. وتخضع الأماكن العامة لعتبة السعة الوزارية.",
+      "ruleEn": "AED and readiness requirements apply; public venues follow the Ministry’s capacity threshold.",
+      "ruleAr": "تنطبق متطلبات جهاز AED والجاهزية؛ وتخضع الأماكن العامة لعتبة السعة الوزارية.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -111,8 +111,8 @@
       "en": "Remote or hard-to-reach facilities",
       "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
       "state": "inforce",
-      "ruleEn": "An AED is required when the Ministry designates the facility.",
-      "ruleAr": "يلزم الجهاز عندما تحدّد الوزارة المنشأة.",
+      "ruleEn": "When designated by the Ministry.",
+      "ruleAr": "عندما تحدّدها الوزارة.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -120,8 +120,8 @@
       "en": "Facilities with a confirmed previous cardiac arrest",
       "ar": "منشآت شهدت توقف قلب مؤكداً",
       "state": "inforce",
-      "ruleEn": "The Ministry reviews the facility and sets its readiness requirements.",
-      "ruleAr": "تراجع الوزارة المنشأة وتحدّد متطلبات جاهزيتها.",
+      "ruleEn": "Subject to Ministry review and the readiness measures it requires.",
+      "ruleAr": "تخضع لمراجعة الوزارة ولتدابير الجاهزية التي تشترطها.",
       "basisEn": "Complete the facility details and emergency plan.",
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
@@ -267,8 +267,8 @@
       },
       {
         "n": 5,
-        "en": "Download your certificate when the requirements are met.",
-        "ar": "حمّلوا الشهادة عند استيفاء المتطلبات."
+        "en": "Download your Event Health and Medical Readiness Certificate from the Ministry of Public Health when the requirements are satisfied.",
+        "ar": "حمّلوا شهادة التأهب الصحي والطبي للفعالية من وزارة الصحة العامة عند استيفاء المتطلبات."
       },
       {
         "n": 6,
@@ -311,28 +311,33 @@
       },
       {
         "n": 2,
-        "en": "Add the facility details and its readiness coordinator.",
-        "ar": "أدخلوا تفاصيل المنشأة ومنسّق الجاهزية."
+        "en": "Add the facility details and name the responsible contact: the facility cardiac-readiness coordinator.",
+        "ar": "أدخلوا تفاصيل المنشأة وسمّوا جهة الاتصال المسؤولة: منسّق الجاهزية القلبية في المنشأة."
       },
       {
         "n": 3,
-        "en": "Register each AED.",
-        "ar": "سجّلوا كل جهاز إزالة رجفان."
+        "en": "Register each AED where required or present.",
+        "ar": "سجّلوا كل جهاز AED حيث يكون مطلوباً أو موجوداً."
       },
       {
         "n": 4,
-        "en": "Complete the emergency plan and record the yearly drill.",
-        "ar": "أكملوا خطة الطوارئ وسجّلوا التمرين السنوي."
+        "en": "Complete the cardiac emergency response plan and record the yearly drill.",
+        "ar": "أكملوا خطة الاستجابة لطوارئ القلب وسجّلوا التمرين السنوي."
       },
       {
         "n": 5,
-        "en": "Update your records when details change and confirm readiness each year.",
-        "ar": "حدّثوا السجلات عند تغيّر التفاصيل وأكّدوا الجاهزية كل سنة."
+        "en": "Update your records when details change and keep the plan current.",
+        "ar": "حدّثوا السجلات عند تغيّر التفاصيل وأبقوا الخطة محدّثة."
       },
       {
         "n": 6,
-        "en": "Report cardiac arrests, CPR attempts and AED use.",
-        "ar": "أبلغوا عن توقف القلب ومحاولات الإنعاش واستخدام الجهاز."
+        "en": "Report any suspected cardiac arrest, CPR attempt, or AED use.",
+        "ar": "أبلغوا عن أي اشتباه بتوقف القلب أو محاولة إنعاش قلبي رئوي أو استخدام لجهاز AED."
+      },
+      {
+        "n": 7,
+        "en": "Receive your Facility Registration Certificate from the Ministry of Public Health once the applicable requirements are satisfied.",
+        "ar": "تسلّموا شهادة تسجيل المنشأة من وزارة الصحة العامة عند استيفاء المتطلبات المنطبقة."
       }
     ]
   },
@@ -352,45 +357,110 @@
   },
   "facilityObligations": [
     {
-      "en": "Name a responsible facility contact.",
-      "ar": "حدّدوا جهة اتصال مسؤولة في المنشأة."
+      "en": "Name the facility cardiac-readiness coordinator.",
+      "ar": "سمّوا منسّق الجاهزية القلبية في المنشأة."
     },
     {
-      "en": "Keep the emergency plan up to date.",
-      "ar": "حدّثوا خطة الطوارئ."
+      "en": "Keep the cardiac emergency response plan up to date.",
+      "ar": "حدّثوا خطة الاستجابة لطوارئ القلب."
     },
     {
-      "en": "Have CPR- and AED-trained staff on duty.",
-      "ar": "وفّروا موظفين مدرّبين على الإنعاش واستخدام الجهاز خلال العمل."
+      "en": "Have CPR- and AED-trained personnel available during operating hours.",
+      "ar": "وفّروا أفراداً مدرّبين على الإنعاش القلبي الرئوي واستخدام جهاز AED خلال ساعات العمل."
     },
     {
-      "en": "Keep AEDs accessible, clearly marked and maintained.",
-      "ar": "احفظوا الأجهزة متاحة وواضحة الموقع مع صيانتها."
+      "en": "Keep AEDs accessible, clearly marked and operational.",
+      "ar": "احفظوا أجهزة AED متاحة وواضحة الموقع وصالحة للتشغيل."
     },
     {
-      "en": "Make sure staff know how to call and guide EMS.",
-      "ar": "تأكدوا أن الموظفين يعرفون كيفية الاتصال بالإسعاف وإرشاده."
+      "en": "Make sure staff know how to call EMS and direct responders to the patient.",
+      "ar": "تأكدوا أن الموظفين يعرفون كيفية الاتصال بالإسعاف وإرشاد المستجيبين إلى المريض."
     },
     {
-      "en": "Run a drill at least once a year.",
-      "ar": "نفّذوا تمريناً واحداً على الأقل كل سنة."
+      "en": "Run a practical drill at least once a year.",
+      "ar": "نفّذوا تمريناً عملياً واحداً على الأقل كل سنة."
     },
     {
-      "en": "Report incidents and fix any readiness gaps.",
-      "ar": "أبلغوا عن الحوادث وعالجوا أي نقص في الجاهزية."
+      "en": "Report any suspected cardiac arrest, CPR attempt, or AED use, and fix any readiness gaps.",
+      "ar": "أبلغوا عن أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام لجهاز AED، وعالجوا أي نقص في الجاهزية."
     }
   ],
   "stepEn": "Step",
   "stepAr": "الخطوة",
   "whatHappensEn": "What happens",
   "whatHappensAr": "ماذا يحصل",
-  "venueFloorEn": "A venue licensed for 1,000 or more starts at Level 2, whatever the score.",
-  "venueFloorAr": "الموقع المرخّص لألف شخص أو أكثر يبدأ من المستوى 2 مهما كانت النتيجة.",
+  "venueFloorEn": "A qualifying recurring venue completes the assessment annually. Its final level is determined by the assessment score and any applicable minimum-event-level rule.",
+  "venueFloorAr": "يُكمل الموقع المتكرر المستوفي للشروط التقييم سنوياً. ويُحدَّد مستواه النهائي بحسب نتيجة التقييم وأي قاعدة منطبقة للمستوى الأدنى للفعاليات.",
   "obligationsTitleEn": "Keep your facility ready",
   "obligationsTitleAr": "حافظوا على جاهزية منشأتكم",
   "coveredTitleEn": "Facilities required to register",
   "coveredTitleAr": "المنشآت المطلوب تسجيلها",
   "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page.",
   "venueScopeNoteEn": "This covers sports, athletic and aquatic venues.",
-  "venueScopeNoteAr": "يشمل ذلك المواقع الرياضية والمائية."
+  "venueScopeNoteAr": "يشمل ذلك المواقع الرياضية والمائية.",
+  "$commentAudit": "Partner UI audit, 8 October 2026: the event applicability check asks first whether this is a planned organized event, then the five criteria in the audit's wording; the certify page names the submission package per level instead of counting documents; the certificate step names the certificate; the venue floor sentence became the annual-assessment sentence; the facility page uses the official category wording, defines CPR and AED once, and ends on the certificate.",
+  "plannedEventEn": "Is this a planned organized event such as a sporting or physical-activity event, performance, festival, exhibition, ceremony, conference, meeting, or other recreational event?",
+  "plannedEventAr": "هل هذه فعالية منظّمة مخطّط لها، مثل فعالية رياضية أو نشاط بدني أو عرض أو مهرجان أو معرض أو احتفال أو مؤتمر أو اجتماع أو فعالية ترفيهية أخرى؟",
+  "plannedOptions": [
+    {
+      "value": "yes",
+      "en": "Yes",
+      "ar": "نعم"
+    },
+    {
+      "value": "no",
+      "en": "No",
+      "ar": "لا"
+    },
+    {
+      "value": "unsure",
+      "en": "Not sure",
+      "ar": "غير متأكد"
+    }
+  ],
+  "notPlannedEn": "Certification applies to planned organized events. If this is not one, no certification is required; the Ministry of Public Health makes the final determination where there is doubt.",
+  "notPlannedAr": "ينطبق الاعتماد على الفعاليات المنظّمة المخطّط لها. إذا لم تكن هذه كذلك فلا اعتماد مطلوباً؛ وتتخذ وزارة الصحة العامة القرار النهائي عند الشك.",
+  "notSureEn": "If you are not sure, answer the question below as best you can. The Ministry of Public Health makes the final determination.",
+  "notSureAr": "إذا لم تكونوا متأكدين، أجيبوا عن السؤال أدناه قدر الإمكان. وتتخذ وزارة الصحة العامة القرار النهائي.",
+  "criteriaQuestionEn": "Does any of the following apply?",
+  "criteriaQuestionAr": "هل ينطبق أي مما يلي؟",
+  "criteriaRuleEn": "If any applies, certification is required.",
+  "criteriaRuleAr": "إذا انطبق أي منها، فالاعتماد مطلوب.",
+  "levelPackagesTitleEn": "What each level submits",
+  "levelPackagesTitleAr": "ما يقدّمه كل مستوى",
+  "levelPackages": [
+    {
+      "level": 1,
+      "en": "The risk assessment and notification; additional documents only if the Ministry requests them.",
+      "ar": "تقييم المخاطر والإشعار؛ ولا مستندات إضافية إلا إذا طلبتها الوزارة."
+    },
+    {
+      "level": 2,
+      "en": "The standard Level 2 submission package.",
+      "ar": "ملف التقديم المعياري للمستوى 2."
+    },
+    {
+      "level": 3,
+      "en": "The comprehensive Level 3 submission package, including a readiness declaration from each participating EMS agency.",
+      "ar": "ملف التقديم الشامل للمستوى 3، بما فيه إقرار جاهزية من كل جهة إسعاف مشاركة."
+    }
+  ],
+  "levelPackagesNoteEn": "The exact list for your event appears on its record once the assessment derives the level.",
+  "levelPackagesNoteAr": "تظهر القائمة الدقيقة لفعاليتكم في سجلها بعد أن يستنتج التقييم المستوى.",
+  "termDefinitions": [
+    {
+      "term": "CPR",
+      "en": "CPR (Cardiopulmonary Resuscitation)",
+      "ar": "الإنعاش القلبي الرئوي (CPR)",
+      "noteEn": "An emergency procedure using chest compressions, with rescue breathing when appropriate, to help maintain blood flow and oxygen.",
+      "noteAr": "إجراء طارئ يعتمد على الضغطات الصدرية، مع التنفس الإنقاذي عند الاقتضاء، للمساعدة في الحفاظ على تدفق الدم والأكسجين."
+    },
+    {
+      "term": "AED",
+      "en": "AED (Automated External Defibrillator)",
+      "ar": "جهاز إزالة الرجفان الخارجي الآلي (AED)",
+      "noteEn": "A portable device used during suspected cardiac arrest to analyze the heart rhythm and deliver a shock when needed.",
+      "noteAr": "جهاز محمول يُستخدم عند الاشتباه بتوقف القلب لتحليل نظم القلب وإعطاء صدمة كهربائية عند الحاجة."
+    }
+  ]
 }

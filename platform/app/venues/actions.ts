@@ -4,7 +4,8 @@ import { notFound, redirect } from 'next/navigation';
 import { venueAccess, invalidateVenueMedicalWork } from '../../lib/venue/collaboration';
 import { currentAccount } from '../../lib/auth';
 import { getDb } from '../../lib/db';
-import { ensureVenuePackage, readVenueDetails, venuePackageFor, venuePackageFacts } from '../../lib/venue/workspace';
+import { ensureVenuePackage, parseVenueDetails, venuePackageFor, venuePackageFacts } from '../../lib/venue/workspace';
+import type { VenueFormState } from '../actions';
 import { venueSubmissionChecks, venueStatusForDecision, VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { maxUploadBytes, refuseUpload } from '../../lib/rules/uploads';
 import { can, REASSESSMENT_WINDOW, venueReassessmentGate } from '../../lib/rules';
@@ -17,8 +18,8 @@ async function owned(id:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();return {a,w};
 }
 function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath(`/venue-team/${id}`);revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
-export async function saveVenueDetailsAction(id:string,form:FormData) {
- const {a,w}=await owned(id);if(!w.editable||!w.detailsEditing)redirect(`/venues/${id}`);const v=readVenueDetails(form);if(!v)redirect(`/venues/${id}/details?error=details`);
+export async function saveVenueDetailsAction(id:string,_prev:VenueFormState,form:FormData):Promise<VenueFormState> {
+ const {a,w}=await owned(id);if(!w.editable||!w.detailsEditing)redirect(`/venues/${id}`);const parsed=parseVenueDetails(form);if('refused' in parsed)return {refused:parsed.refused};const v=parsed.value;
  ensureVenuePackage(a.id,id);
  getDb().prepare(`UPDATE venues SET name_en=?,name_ar=?,category=?,address_municipality_en=?,address_municipality_ar=?,responsible_contact=?,licensed_capacity=?,regularly_hosts=?,is_nightclub=?,district=?,latitude=?,longitude=?,responsible_name=?,responsible_phone=? WHERE id=?`).run(v.nameEn,v.nameAr,v.category,v.address,v.addressAr,v.contact,v.capacity,+v.regular,+v.nightclub,v.district,v.point.lat,v.point.lng,v.contactName,v.contactPhone,id);
  getDb().prepare('UPDATE venue_packages SET details_editing=0 WHERE venue_id=?').run(id);

@@ -116,6 +116,7 @@ export const ONE_CLOCK_COLUMNS: readonly [string, string][] = [
     ['venue_invitations', 'invited_at'], ['venue_contributions', 'completed_at'], ['venue_plan_approvals', 'approved_at'],
     ['requirement_answers', 'saved_at'], ['requirement_answer_history', 'saved_at'], ['requirement_snapshots', 'filed_at'],
     ['migrations_applied', 'applied_at'],
+    ['facility_device_photos', 'uploaded_at'],
 ];
 
 function stampDefaultsOnTheOneClock(d: DatabaseSync): void {
@@ -898,6 +899,22 @@ function migrate(d: DatabaseSync): void {
     actor_id INTEGER NOT NULL REFERENCES accounts(id), snapshot TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );`);
+  // Partner UI audit (2026-10-08): the AED record may carry one photo of the
+  // installed device, stored like every other upload (bytes on the platform, the
+  // served type from the allow-list). One current photo per device; a new upload
+  // replaces it. The facility_devices columns pad_expiry, battery_expiry and
+  // latest_check are no longer collected; they stay so existing rows remain readable.
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_device_photos (
+    facility_id TEXT NOT NULL REFERENCES facilities(id), label TEXT NOT NULL,
+    file_name TEXT NOT NULL DEFAULT '', content_type TEXT NOT NULL DEFAULT '',
+    byte_size INTEGER NOT NULL DEFAULT 0, bytes BLOB,
+    uploaded_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (facility_id, label)
+  );`);
+  // The facility registration certificate verifies through an unguessable token
+  // (non-negotiable 5b: a non-sequential public token, never the record id).
+  // Minted the first time the completed certificate is rendered; null until then.
+  addColumn('facilities', 'certificate_token', 'certificate_token TEXT');
   // Existing accounts keep their current experience. Only accounts created after
   // this migration receive the automatic tour; demo accounts use manual replay.
   addColumn('accounts', 'tour_pending', 'tour_pending INTEGER NOT NULL DEFAULT 0');

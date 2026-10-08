@@ -2,488 +2,1818 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-07.2",
+  "revision": "2026-10-08.1",
   "decisions": {
-    "D1": { "state": "confirmed", "en": "The Event Medical Director is a Level 3 role. No medical-leadership title exists at Levels 1 and 2 (partner review, 7 October 2026).", "ar": "المدير الطبي للفعالية دور في المستوى 3. لا يوجد أي منصب قيادة طبية في المستويين 1 و2 (مراجعة الشريك، 7 تشرين الأول 2026)." },
-    "D2": { "state": "confirmed", "en": "Level 2 records individual required arrangements; the full plan is optional unless the Ministry requests it.", "ar": "يسجّل المستوى 2 الترتيبات المطلوبة كلاً على حدة؛ والخطة الكاملة اختيارية ما لم تطلبها الوزارة." },
-    "D3": { "state": "confirmed", "en": "A short coordinated escalation procedure at Level 2; the full major-incident plan at Level 3 (confirmed by the partner, 7 October 2026).", "ar": "إجراء تصعيد قصير ومنسّق في المستوى 2؛ وخطة كاملة للحوادث الجسيمة في المستوى 3 (أكّده الشريك في 7 تشرين الأول 2026)." },
-    "D4": { "state": "confirmed", "en": "The EMS agency or the Medical Director prepares one shared plan; the named Director approves the current version. Completion by the agency is not approval.", "ar": "تُعدّ جهة الإسعاف أو المدير الطبي خطة مشتركة واحدة؛ ويعتمد المدير الطبي المسمّى النسخة الحالية. إكمال الجهة للخطة ليس اعتماداً." },
-    "D5": { "state": "confirmed", "en": "Level 1 first-aid supplies are a confirmation with a location and a responsible person. No kit inventory is invented and oxygen is not required at Level 1.", "ar": "مستلزمات الإسعافات الأولية في المستوى 1 تأكيدٌ مع موقع وشخص مسؤول. لا تُخترع قائمة عدّة ولا يُطلب الأكسجين في المستوى 1." },
-    "D8": { "state": "confirmed", "en": "No annual venue aggregate report. Reports stay attached to the event or incident that triggers them.", "ar": "لا تقرير سنوي إجمالي للمواقع. تبقى التقارير مرتبطة بالفعالية أو الحادثة التي تستوجبها." },
-    "D9": { "state": "confirmed", "en": "The short questions and completion tests are confirmed in principle as prompts that operationalize the requirements; they are not new regulatory requirements (partner review, 7 October 2026). No proof upload unless the source or a recorded Ministry request requires it.", "ar": "الأسئلة القصيرة واختبارات الاكتمال معتمدة مبدئياً بوصفها مطالبات تُفعّل المتطلبات؛ وهي ليست متطلبات تنظيمية جديدة (مراجعة الشريك، 7 تشرين الأول 2026). لا رفع إثبات ما لم يشترطه المصدر أو طلب وزاري مسجَّل." },
-    "D10": { "state": "confirmed", "en": "Patient-care records are not a pre-event organizer blocker at Levels 1 and 2. At Level 3 the plan names the provider's procedure; patient records remain in the clinical system.", "ar": "سجلات رعاية المرضى ليست شرطاً مانعاً على المنظّم قبل الفعالية في المستويين 1 و2. في المستوى 3 تسمّي الخطة إجراء المزوّد؛ وتبقى سجلات المرضى في النظام السريري." }
+    "D1": {
+      "state": "confirmed",
+      "en": "The Event Medical Director is a Level 3 role. No medical-leadership title exists at Levels 1 and 2 (partner review, 7 October 2026).",
+      "ar": "المدير الطبي للفعالية دور في المستوى 3. لا يوجد أي منصب قيادة طبية في المستويين 1 و2 (مراجعة الشريك، 7 تشرين الأول 2026)."
+    },
+    "D2": {
+      "state": "confirmed",
+      "en": "Level 2 records individual required arrangements; the full plan is optional unless the Ministry requests it.",
+      "ar": "يسجّل المستوى 2 الترتيبات المطلوبة كلاً على حدة؛ والخطة الكاملة اختيارية ما لم تطلبها الوزارة."
+    },
+    "D3": {
+      "state": "confirmed",
+      "en": "A short coordinated escalation procedure at Level 2; the full major-incident plan at Level 3 (confirmed by the partner, 7 October 2026).",
+      "ar": "إجراء تصعيد قصير ومنسّق في المستوى 2؛ وخطة كاملة للحوادث الجسيمة في المستوى 3 (أكّده الشريك في 7 تشرين الأول 2026)."
+    },
+    "D4": {
+      "state": "confirmed",
+      "en": "The EMS agency or the Medical Director prepares one shared plan; the named Director approves the current version. Completion by the agency is not approval.",
+      "ar": "تُعدّ جهة الإسعاف أو المدير الطبي خطة مشتركة واحدة؛ ويعتمد المدير الطبي المسمّى النسخة الحالية. إكمال الجهة للخطة ليس اعتماداً."
+    },
+    "D5": {
+      "state": "confirmed",
+      "en": "Level 1 first-aid supplies are a confirmation with a location and a responsible person. No kit inventory is invented and oxygen is not required at Level 1.",
+      "ar": "مستلزمات الإسعافات الأولية في المستوى 1 تأكيدٌ مع موقع وشخص مسؤول. لا تُخترع قائمة عدّة ولا يُطلب الأكسجين في المستوى 1."
+    },
+    "D8": {
+      "state": "confirmed",
+      "en": "No annual venue aggregate report. Reports stay attached to the event or incident that triggers them.",
+      "ar": "لا تقرير سنوي إجمالي للمواقع. تبقى التقارير مرتبطة بالفعالية أو الحادثة التي تستوجبها."
+    },
+    "D9": {
+      "state": "confirmed",
+      "en": "The short questions and completion tests are confirmed in principle as prompts that operationalize the requirements; they are not new regulatory requirements (partner review, 7 October 2026). No proof upload unless the source or a recorded Ministry request requires it.",
+      "ar": "الأسئلة القصيرة واختبارات الاكتمال معتمدة مبدئياً بوصفها مطالبات تُفعّل المتطلبات؛ وهي ليست متطلبات تنظيمية جديدة (مراجعة الشريك، 7 تشرين الأول 2026). لا رفع إثبات ما لم يشترطه المصدر أو طلب وزاري مسجَّل."
+    },
+    "D10": {
+      "state": "confirmed",
+      "en": "Patient-care records are not a pre-event organizer blocker at Levels 1 and 2. At Level 3 the plan names the provider's procedure; patient records remain in the clinical system.",
+      "ar": "سجلات رعاية المرضى ليست شرطاً مانعاً على المنظّم قبل الفعالية في المستويين 1 و2. في المستوى 3 تسمّي الخطة إجراء المزوّد؛ وتبقى سجلات المرضى في النظام السريري."
+    }
   },
   "rows": [
     {
-      "key": "B1", "n": 1, "service": "both",
-      "labelEn": "Organizer contact", "labelAr": "جهة اتصال المنظّم",
-      "promptEn": "The person the Ministry and responders can reach. Filled from your account; change it only if someone else holds this role.", "promptAr": "الشخص الذي تستطيع الوزارة والمستجيبون الوصول إليه. يُملأ من حسابكم؛ غيّروه فقط إذا كان شخص آخر يتولى هذا الدور.",
-      "venuePromptEn": "The responsible person from your venue details.", "venuePromptAr": "الشخص المسؤول من بيانات موقعكم.",
+      "key": "B1",
+      "n": 1,
+      "service": "both",
+      "labelEn": "Organizer contact",
+      "labelAr": "جهة اتصال المنظّم",
+      "promptEn": "The person the Ministry and responders can reach. Filled from your account; change it only if someone else holds this role.",
+      "promptAr": "الشخص الذي تستطيع الوزارة والمستجيبون الوصول إليه. يُملأ من حسابكم؛ غيّروه فقط إذا كان شخص آخر يتولى هذا الدور.",
+      "venuePromptEn": "The responsible person from your venue details.",
+      "venuePromptAr": "الشخص المسؤول من بيانات موقعكم.",
       "fields": [
-        { "key": "name", "type": "text", "labelEn": "Contact name", "labelAr": "اسم جهة الاتصال" },
-        { "key": "phone", "type": "text", "labelEn": "Phone number", "labelAr": "رقم الهاتف" }
-      ],
-      "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "organizerContact" },
-        "2": { "obligation": "required", "authors": ["organizer"], "completion": "organizerContact" },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "organizerContact", "linkedPlan": ["P02"] }
-      }
-    },
-    {
-      "key": "B3", "n": 3, "service": "both",
-      "labelEn": "Medical Director", "labelAr": "المدير الطبي",
-      "promptEn": "Invite the physician once. Their name, contact and licence come from the accepted invitation.", "promptAr": "ادعوا الطبيب مرة واحدة. يُؤخذ اسمه وبيانات الاتصال به ورقم ترخيصه من الدعوة المقبولة.",
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "notRequired" },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "director", "linkedPlan": ["P02"] }
-      }
-    },
-    {
-      "key": "B4", "n": 4, "service": "both",
-      "labelEn": "First aid", "labelAr": "الإسعافات الأولية",
-      "promptEn": "Say who gives first aid, where they are and how to reach them.", "promptAr": "حدّدوا من يقدّم الإسعافات الأولية وأين يكون وكيف يُتواصل معه.",
-      "infoEn": "A named person or team with first-aid training. No certificate upload is needed.", "infoAr": "شخص أو فريق مسمّى مدرّب على الإسعافات الأولية. لا حاجة إلى رفع شهادة.",
-      "fields": [
-        { "key": "who", "type": "text", "labelEn": "Who will give first aid?", "labelAr": "من سيقدّم الإسعافات الأولية؟", "placeholderEn": "Name or team", "placeholderAr": "اسم أو فريق" },
-        { "key": "where", "type": "text", "labelEn": "Where can people find them?", "labelAr": "أين يجدهم الناس؟", "placeholderEn": "For example, beside the main entrance", "placeholderAr": "مثلاً، بجانب المدخل الرئيسي" },
-        { "key": "contact", "type": "text", "labelEn": "How can you reach them?", "labelAr": "كيف تتواصلون معهم؟" },
-        { "key": "training", "type": "text", "optional": true, "labelEn": "What first-aid training do they have? (optional)", "labelAr": "ما تدريبهم في الإسعافات الأولية؟ (اختياري)" },
-        { "key": "arranged", "type": "checkbox", "labelEn": "They can provide first aid throughout the event.", "labelAr": "يمكنهم تقديم الإسعافات الأولية طوال الفعالية.", "venueLabelEn": "They can provide first aid throughout each operating session.", "venueLabelAr": "يمكنهم تقديم الإسعافات الأولية طوال كل جلسة تشغيل." }
-      ],
-      "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": [], "completion": "rosterLink", "promptEn": "First-aid coverage comes from the response team roster.", "promptAr": "تأتي تغطية الإسعافات الأولية من قائمة فريق الاستجابة.", "linkedPlan": ["P03"] },
-        "3": { "obligation": "required", "authors": [], "completion": "rosterLink", "promptEn": "First-aid coverage comes from the response team roster.", "promptAr": "تأتي تغطية الإسعافات الأولية من قائمة فريق الاستجابة.", "linkedPlan": ["P03"] }
-      }
-    },
-    {
-      "key": "B5", "n": 5, "service": "both",
-      "labelEn": "Response team", "labelAr": "فريق الاستجابة",
-      "promptEn": "Name the team, how many responders attend, and where and when they work.", "promptAr": "سمّوا الفريق وعدد المستجيبين الحاضرين وأين ومتى يعملون.",
-      "infoEn": "One shared staffing record linked to the participating provider. The provider remains responsible for authorising its personnel; no staff ratio is imposed.", "infoAr": "سجل واحد مشترك للملاك مرتبط بالمزوّد المشارك. يبقى المزوّد مسؤولاً عن تفويض أفراده؛ ولا تُفرض نسبة ملاك.",
-      "fields": [
-        { "key": "team", "type": "text", "labelEn": "Which team will attend?", "labelAr": "أي فريق سيحضر؟" },
-        { "key": "responders", "type": "number", "labelEn": "How many responders?", "labelAr": "كم عدد المستجيبين؟" },
-        { "key": "coverage", "type": "text", "labelEn": "Where and when will they work?", "labelAr": "أين ومتى سيعملون؟" }
-      ],
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P03"] },
-        "3": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P03"] }
-      }
-    },
-    {
-      "key": "B6", "n": 6, "service": "both",
-      "labelEn": "Treatment point", "labelAr": "نقطة العلاج",
-      "promptEn": "Say where the treatment point is, when it is open and who staffs it.", "promptAr": "حدّدوا موقع نقطة العلاج وأوقات فتحها ومن يعمل فيها.",
-      "fields": [
-        { "key": "location", "type": "text", "labelEn": "Where is the treatment point?", "labelAr": "أين نقطة العلاج؟" },
-        { "key": "hours", "type": "text", "labelEn": "When is it open?", "labelAr": "متى تكون مفتوحة؟" },
-        { "key": "staff", "type": "text", "labelEn": "Who staffs it?", "labelAr": "من يعمل فيها؟" },
-        { "key": "support", "type": "text", "optional": true, "labelEn": "What support is available there? (optional)", "labelAr": "ما الدعم المتاح فيها؟ (اختياري)" }
-      ],
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "recommended", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P04"] },
-        "3": { "obligation": "required", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P04"] }
-      }
-    },
-    {
-      "key": "B7", "n": 7, "service": "both",
-      "labelEn": "EMS and ambulance arrangements", "labelAr": "ترتيبات الإسعاف وخدمات الطوارئ الطبية",
-      "promptEn": "Invite the EMS provider once, then record where and when ambulances are available and how you call them.", "promptAr": "ادعوا مزوّد الإسعاف مرة واحدة، ثم سجّلوا أين ومتى تتوفر سيارات الإسعاف وكيف تستدعونها.",
-      "infoEn": "An accepted invitation plus one shared coverage and transport answer. Acceptance alone does not complete the arrangements.", "infoAr": "دعوة مقبولة وإجابة واحدة مشتركة عن التغطية والنقل. القبول وحده لا يُكمل الترتيبات.",
-      "fields": [
-        { "key": "whereWhen", "type": "text", "labelEn": "Where and when will ambulances be available?", "labelAr": "أين ومتى ستتوفر سيارات الإسعاف؟" },
-        { "key": "howToCall", "type": "text", "labelEn": "How will you call them?", "labelAr": "كيف تستدعونها؟" },
-        { "key": "ifLeaves", "type": "text", "labelEn": "What happens if an ambulance leaves with a patient?", "labelAr": "ماذا يحدث إذا غادرت سيارة إسعاف مع مريض؟" }
+        {
+          "key": "name",
+          "type": "text",
+          "labelEn": "Contact name",
+          "labelAr": "اسم جهة الاتصال"
+        },
+        {
+          "key": "phone",
+          "type": "text",
+          "labelEn": "Phone number",
+          "labelAr": "رقم الهاتف"
+        }
       ],
       "levels": {
         "1": {
-          "obligation": "required", "authors": ["organizer"], "completion": "fields",
-          "labelEn": "Local EMS contact", "labelAr": "الاتصال بخدمات الطوارئ الطبية المحلية",
-          "promptEn": "Confirm that you have contacted local EMS and know how to request help.", "promptAr": "أكّدوا أنكم تواصلتم مع خدمات الطوارئ الطبية المحلية وتعرفون كيف تطلبون المساعدة.",
-          "infoEn": "No EMS invitation, on-site ambulance or proof upload is needed at Level 1. The checkbox form is a proposed way of recording a confirmed contact.", "infoAr": "لا حاجة في المستوى 1 إلى دعوة جهة إسعاف أو سيارة إسعاف في الموقع أو رفع إثبات. صيغة مربعات التأكيد طريقة مقترحة لتسجيل اتصال مؤكَّد.",
-          "fields": [
-            { "key": "contacted", "type": "checkbox", "labelEn": "I have contacted local EMS.", "labelAr": "تواصلتُ مع خدمات الطوارئ الطبية المحلية." },
-            { "key": "shared", "type": "checkbox", "labelEn": "I have shared the event date, time and location.", "labelAr": "أبلغتُهم بتاريخ الفعالية ووقتها وموقعها.", "venueLabelEn": "I have shared the venue's location, access and operating times.", "venueLabelAr": "أبلغتُهم بموقع المكان ومداخله وأوقات تشغيله." },
-            { "key": "knowHow", "type": "checkbox", "labelEn": "I have confirmed how to reach them if help is needed.", "labelAr": "تأكّدتُ من كيفية الاتصال بهم عند الحاجة إلى المساعدة." },
-            { "key": "phone", "type": "text", "labelEn": "The number you will call", "labelAr": "الرقم الذي ستتصلون به" }
-          ]
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerContact"
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "emsAndFields", "linkedPlan": ["P08"] },
-        "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "emsAndFields", "linkedPlan": ["P08"] }
-      }
-    },
-    {
-      "key": "B8", "n": 8, "service": "both",
-      "labelEn": "CPR and AED readiness", "labelAr": "الجاهزية للإنعاش القلبي الرئوي وجهاز AED",
-      "promptEn": "Say where the AED is, who is trained to use it and how staff reach them.", "promptAr": "حدّدوا موقع جهاز AED ومن المدرّب على استخدامه وكيف يصل إليه العاملون.",
-      "fields": [
-        { "key": "location", "type": "text", "labelEn": "Where is the AED?", "labelAr": "أين جهاز AED؟" },
-        { "key": "responder", "type": "text", "labelEn": "Who is trained in CPR and AED use?", "labelAr": "من المدرّب على الإنعاش القلبي الرئوي واستخدام جهاز AED؟" },
-        { "key": "access", "type": "text", "labelEn": "How will staff reach the AED and the responder?", "labelAr": "كيف يصل العاملون إلى الجهاز والمستجيب؟" }
-      ],
-      "levels": {
-        "1": {
-          "obligation": "recommended", "authors": ["organizer"], "completion": "aedChoice",
-          "labelEn": "AED availability", "labelAr": "توافر جهاز AED",
-          "promptEn": "An AED is recommended. Say whether one will be available and where.", "promptAr": "يوصى بتوفير جهاز AED. حدّدوا ما إذا كان سيتوفر وأين.",
-          "fields": [
-            { "key": "aed", "type": "choice", "labelEn": "Will an AED be available?", "labelAr": "هل سيتوفر جهاز AED؟", "options": [ { "value": "yes", "en": "Yes", "ar": "نعم" }, { "value": "no", "en": "No", "ar": "لا" }, { "value": "notPlanned", "en": "Not planned", "ar": "غير مخطط له" } ] },
-            { "key": "location", "type": "text", "labelEn": "Where is it?", "labelAr": "أين يوجد؟", "showWhen": { "field": "aed", "equals": "yes" } },
-            { "key": "access", "type": "text", "labelEn": "How can it be reached?", "labelAr": "كيف يمكن الوصول إليه؟", "showWhen": { "field": "aed", "equals": "yes" } }
-          ]
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerContact"
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P05", "P06"] },
         "3": {
-          "obligation": "inPlan", "authors": ["ems", "director"], "completion": "fields", "linkedPlan": ["P05", "P06"],
-          "promptEn": "Describe the CPR and AED response for the whole event area.", "promptAr": "صفوا الاستجابة بالإنعاش القلبي الرئوي وجهاز AED لكامل منطقة الفعالية.",
-          "fields": [
-            { "key": "roles", "type": "textarea", "labelEn": "Who recognizes the emergency, calls EMS, starts CPR, brings the AED and hands over care?", "labelAr": "من يتعرّف على الحالة الطارئة ويستدعي الإسعاف ويبدأ الإنعاش ويُحضر الجهاز ويسلّم الرعاية؟" },
-            { "key": "location", "type": "text", "labelEn": "Where are the AEDs?", "labelAr": "أين أجهزة AED؟" },
-            { "key": "access", "type": "text", "labelEn": "How are they reached throughout the event?", "labelAr": "كيف يُوصل إليها طوال الفعالية؟", "venueLabelEn": "How are they reached during a session?", "venueLabelAr": "كيف يُوصل إليها أثناء الجلسة؟" }
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerContact",
+          "linkedPlan": [
+            "P02"
           ]
         }
       }
     },
     {
-      "key": "B9", "n": 9, "service": "both",
-      "labelEn": "Medical supplies", "labelAr": "المستلزمات الطبية",
-      "promptEn": "Say what supplies are available, where they are kept and who checks them.", "promptAr": "حدّدوا المستلزمات المتاحة وأين تُحفظ ومن يتفقّدها.",
-      "infoEn": "Examples in the guidance are examples. No kit list or quantity is imposed.", "infoAr": "الأمثلة في الإرشادات أمثلة فحسب. لا تُفرض قائمة عدّة أو كميات.",
-      "fields": [
-        { "key": "supplies", "type": "textarea", "labelEn": "What medical supplies will the team bring?", "labelAr": "ما المستلزمات الطبية التي سيُحضرها الفريق؟" },
-        { "key": "location", "type": "text", "labelEn": "Where are they kept?", "labelAr": "أين تُحفظ؟" },
-        { "key": "responsible", "type": "text", "labelEn": "Who checks them?", "labelAr": "من يتفقّدها؟" }
-      ],
+      "key": "B3",
+      "n": 3,
+      "service": "both",
+      "labelEn": "Medical Director",
+      "labelAr": "المدير الطبي",
+      "promptEn": "Invite the physician once. Their name, contact and licence come from the accepted invitation.",
+      "promptAr": "ادعوا الطبيب مرة واحدة. يُؤخذ اسمه وبيانات الاتصال به ورقم ترخيصه من الدعوة المقبولة.",
       "levels": {
         "1": {
-          "obligation": "required", "authors": ["organizer"], "completion": "fields",
-          "labelEn": "First-aid supplies", "labelAr": "مستلزمات الإسعافات الأولية",
-          "promptEn": "Confirm basic first-aid supplies are ready, where they are kept and who checks them.", "promptAr": "أكّدوا أن مستلزمات الإسعافات الأولية الأساسية جاهزة، وأين تُحفظ ومن يتفقّدها.",
-          "fields": [
-            { "key": "ready", "type": "checkbox", "labelEn": "Basic first-aid supplies are ready.", "labelAr": "مستلزمات الإسعافات الأولية الأساسية جاهزة." },
-            { "key": "location", "type": "text", "labelEn": "Where are they kept?", "labelAr": "أين تُحفظ؟" },
-            { "key": "responsible", "type": "text", "labelEn": "Who checks them?", "labelAr": "من يتفقّدها؟" },
-            { "key": "list", "type": "textarea", "optional": true, "labelEn": "List the supplies (optional)", "labelAr": "قائمة المستلزمات (اختياري)" }
-          ]
+          "obligation": "notRequired"
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P07"] },
-        "3": { "obligation": "inPlan", "authors": ["ems", "director"], "completion": "fields", "linkedPlan": ["P07"] }
-      }
-    },
-    {
-      "key": "B10", "n": 10, "service": "both",
-      "labelEn": "Emergency access", "labelAr": "وصول مركبات الطوارئ",
-      "promptEn": "Say which entrance emergency vehicles use and who keeps it clear.", "promptAr": "حدّدوا المدخل الذي تستخدمه مركبات الطوارئ ومن يُبقيه خالياً.",
-      "fields": [
-        { "key": "entrance", "type": "text", "labelEn": "Which entrance will emergency vehicles use?", "labelAr": "أي مدخل ستستخدمه مركبات الطوارئ؟" },
-        { "key": "keeper", "type": "text", "labelEn": "Who keeps the route and gate clear?", "labelAr": "من يُبقي الطريق والبوابة خاليين؟" }
-      ],
-      "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": ["organizer"], "completion": "fields", "linkedPlan": ["P09"] },
-        "3": { "obligation": "inPlan", "authors": ["organizer"], "completion": "fields", "linkedPlan": ["P09"] }
-      }
-    },
-    {
-      "key": "B11", "n": 11, "service": "both",
-      "labelEn": "Patient access and removal", "labelAr": "الوصول إلى المريض ونقله",
-      "promptEn": "Describe how responders reach a patient and move them to an ambulance.", "promptAr": "صفوا كيف يصل المستجيبون إلى المريض وينقلونه إلى سيارة الإسعاف.",
-      "fields": [
-        { "key": "route", "type": "textarea", "labelEn": "How will responders reach a patient and move them to an ambulance? Mention stairs, barriers or areas vehicles cannot reach.", "labelAr": "كيف يصل المستجيبون إلى المريض وينقلونه إلى سيارة الإسعاف؟ اذكروا الأدراج أو الحواجز أو المناطق التي لا تصلها المركبات." },
-        { "key": "support", "type": "text", "optional": true, "labelEn": "Who helps move patients safely? (optional)", "labelAr": "من يساعد في نقل المرضى بأمان؟ (اختياري)" }
-      ],
-      "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P09"] },
-        "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P09"] }
-      }
-    },
-    {
-      "key": "B12", "n": 12, "service": "both",
-      "labelEn": "Receiving hospital", "labelAr": "المستشفى المستقبِل",
-      "promptEn": "Name the emergency department that will receive patients and how the team contacts it.", "promptAr": "سمّوا قسم الطوارئ الذي سيستقبل المرضى وكيف يتواصل الفريق معه.",
-      "infoEn": "No hospital acceptance letter is required.", "infoAr": "لا يُطلب كتاب قبول من المستشفى.",
-      "fields": [
-        { "key": "department", "type": "text", "labelEn": "Which emergency department will receive patients?", "labelAr": "أي قسم طوارئ سيستقبل المرضى؟" },
-        { "key": "contact", "type": "text", "labelEn": "How will the team contact it?", "labelAr": "كيف يتواصل الفريق معه؟" },
-        { "key": "backup", "type": "text", "optional": true, "labelEn": "Backup, if planned (optional)", "labelAr": "البديل، إن كان مخططاً (اختياري)" }
-      ],
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P11"] },
-        "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P11"] }
-      }
-    },
-    {
-      "key": "B14", "n": 14, "service": "both",
-      "labelEn": "Team communication", "labelAr": "التواصل بين الفرق",
-      "promptEn": "Say how staff and the medical team reach each other, the backup, and who calls EMS.", "promptAr": "حدّدوا كيف يتواصل العاملون والفريق الطبي، والبديل، ومن يتصل بخدمات الطوارئ الطبية.",
-      "fields": [
-        { "key": "method", "type": "text", "labelEn": "How will event staff and the medical team contact each other?", "labelAr": "كيف يتواصل عاملو الفعالية والفريق الطبي فيما بينهم؟", "venueLabelEn": "How will venue staff and the medical team contact each other?", "venueLabelAr": "كيف يتواصل عاملو المكان والفريق الطبي فيما بينهم؟" },
-        { "key": "backup", "type": "text", "labelEn": "What is the backup?", "labelAr": "ما البديل؟" },
-        { "key": "whoCalls", "type": "text", "labelEn": "Who calls EMS?", "labelAr": "من يتصل بخدمات الطوارئ الطبية؟" }
-      ],
-      "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "fields" },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P10"] },
-        "3": { "obligation": "inPlan", "authors": ["organizer", "ems", "director"], "completion": "fields", "linkedPlan": ["P10"] }
-      }
-    },
-    {
-      "key": "B15", "n": 15, "service": "both",
-      "labelEn": "Medical command", "labelAr": "القيادة الطبية",
-      "promptEn": "Name who leads the medical response, where they are and who reports to them.", "promptAr": "سمّوا من يقود الاستجابة الطبية وأين يكون ومن يرفع التقارير إليه.",
-      "fields": [
-        { "key": "lead", "type": "text", "labelEn": "Who leads the medical response?", "labelAr": "من يقود الاستجابة الطبية؟" },
-        { "key": "where", "type": "text", "labelEn": "Where will they be?", "labelAr": "أين سيكونون؟" },
-        { "key": "reporting", "type": "textarea", "labelEn": "Who reports to them, and who can make medical decisions?", "labelAr": "من يرفع التقارير إليهم، ومن يملك صلاحية القرارات الطبية؟" }
-      ],
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "notRequired" },
-        "3": { "obligation": "required", "authors": ["director"], "completion": "fields", "linkedPlan": ["P10", "M02"] }
-      }
-    },
-    {
-      "key": "B16", "n": 16, "service": "both",
-      "labelEn": "Emergency escalation", "labelAr": "التصعيد في حالات الطوارئ",
-      "promptEn": "Write the short procedure: who calls for help, how, and who can pause the event.", "promptAr": "اكتبوا الإجراء المختصر: من يطلب المساعدة وكيف، ومن يستطيع إيقاف الفعالية مؤقتاً.",
-      "fields": [
-        { "key": "when", "type": "text", "labelEn": "When will you call for extra help?", "labelAr": "متى تطلبون مساعدة إضافية؟" },
-        { "key": "who", "type": "text", "labelEn": "Who calls?", "labelAr": "من يتصل؟" },
-        { "key": "told", "type": "text", "labelEn": "How are the participating providers told?", "labelAr": "كيف يُبلَّغ المزوّدون المشاركون؟" },
-        { "key": "pause", "type": "text", "labelEn": "Who can pause the event?", "labelAr": "من يستطيع إيقاف الفعالية مؤقتاً؟", "venueLabelEn": "Who can pause the activity?", "venueLabelAr": "من يستطيع إيقاف النشاط مؤقتاً؟" }
-      ],
-      "levels": {
-        "1": {
-          "obligation": "required", "authors": ["organizer"], "completion": "fields",
-          "infoEn": "A short usable procedure. No mass-casualty form and no proof file at Level 1.", "infoAr": "إجراء قصير قابل للتطبيق. لا نموذج إصابات جماعية ولا ملف إثبات في المستوى 1.",
-          "fields": [
-            { "key": "whoCalls", "type": "text", "labelEn": "Who calls for extra help?", "labelAr": "من يطلب مساعدة إضافية؟" },
-            { "key": "how", "type": "text", "labelEn": "How will they call?", "labelAr": "كيف سيطلبونها؟" },
-            { "key": "guides", "type": "text", "labelEn": "Who guides responders and decides whether to pause the event?", "labelAr": "من يرشد المستجيبين ويقرّر إيقاف الفعالية مؤقتاً؟", "venueLabelEn": "Who guides responders and decides whether to pause the activity?", "venueLabelAr": "من يرشد المستجيبين ويقرّر إيقاف النشاط مؤقتاً؟" }
-          ]
+        "2": {
+          "obligation": "notRequired"
         },
-        "2": { "obligation": "required", "authors": ["organizer", "ems"], "completion": "fields", "linkedPlan": ["P12"], "infoEn": "Written steps coordinated with the participating providers (decision D3). The full major-incident plan applies at Level 3.", "infoAr": "خطوات مكتوبة منسّقة مع المزوّدين المشاركين (القرار D3). تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3." },
         "3": {
-          "obligation": "inPlan", "authors": ["ems", "director"], "completion": "majorIncident", "linkedPlan": ["P12"], "fields": [],
-          "promptEn": "Complete the major-incident section of the medical plan.", "promptAr": "أكملوا قسم الحوادث الجسيمة في الخطة الطبية."
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "director",
+          "linkedPlan": [
+            "P02"
+          ]
         }
       }
     },
     {
-      "key": "B17", "n": 17, "service": "both",
-      "labelEn": "Insurance", "labelAr": "التأمين",
-      "promptEn": "Record the insurer, policy number and coverage dates, and upload the evidence.", "promptAr": "سجّلوا شركة التأمين ورقم البوليصة وتواريخ التغطية، وارفعوا الإثبات.",
+      "key": "B4",
+      "n": 4,
+      "service": "both",
+      "labelEn": "First aid",
+      "labelAr": "الإسعافات الأولية",
+      "promptEn": "Confirm that trained first-aid personnel will be available.",
+      "promptAr": "أكّدوا أن أفراداً مدرّبين على الإسعافات الأولية سيكونون متاحين.",
+      "infoEn": "A confirmation only: no names, responder counts, shifts or certificates (partner audit, 8 October 2026).",
+      "infoAr": "تأكيد فقط: لا أسماء ولا أعداد مستجيبين ولا مناوبات ولا شهادات (مراجعة الشريك، 8 تشرين الأول 2026).",
       "fields": [
-        { "key": "insurer", "type": "text", "labelEn": "Insurer", "labelAr": "شركة التأمين" },
-        { "key": "policyNumber", "type": "text", "labelEn": "Policy / certificate number", "labelAr": "رقم البوليصة أو الشهادة" },
-        { "key": "coveragePeriod", "type": "text", "labelEn": "Coverage period", "labelAr": "فترة التغطية", "placeholderEn": "Dates covered, for participants and spectators", "placeholderAr": "التواريخ المشمولة، للمشاركين والمتفرجين" }
-      ],
-      "file": { "labelEn": "Evidence covering participants and spectators", "labelAr": "إثبات يغطي المشاركين والمتفرجين" },
-      "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "notRequired" },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "fieldsAndFile" }
-      }
-    },
-    {
-      "key": "B18", "n": 18, "service": "both",
-      "labelEn": "Patient-care records", "labelAr": "سجلات رعاية المرضى",
-      "promptEn": "If care is given, the provider records it in its own clinical system.", "promptAr": "إذا قُدّمت رعاية، يوثّقها المزوّد في نظامه السريري.",
-      "infoEn": "No patient-identifying data is entered on this platform (decision D10).", "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10).",
-      "fields": [
-        { "key": "provider", "type": "text", "labelEn": "Which provider will keep care records?", "labelAr": "أي مزوّد سيحتفظ بسجلات الرعاية؟" },
-        { "key": "method", "type": "textarea", "labelEn": "How will it record care and hand over patients? Do not enter patient details.", "labelAr": "كيف يوثّق الرعاية ويسلّم المرضى؟ لا تدخلوا بيانات المرضى." }
+        {
+          "key": "available",
+          "type": "checkbox",
+          "labelEn": "Trained first-aid personnel will be available during the event.",
+          "labelAr": "سيكون أفراد مدرّبون على الإسعافات الأولية متاحين خلال الفعالية.",
+          "venueLabelEn": "Trained first-aid personnel will be available during each operating session.",
+          "venueLabelAr": "سيكون أفراد مدرّبون على الإسعافات الأولية متاحين خلال كل جلسة تشغيل."
+        }
       ],
       "levels": {
-        "1": { "obligation": "whenCare", "authors": [] },
-        "2": { "obligation": "whenCare", "authors": [] },
-        "3": { "obligation": "inPlan", "authors": ["ems", "director"], "completion": "fields", "linkedPlan": ["P15"], "promptEn": "Name the provider that keeps care records and how it hands over patients.", "promptAr": "سمّوا المزوّد الذي يحتفظ بسجلات الرعاية وكيف يسلّم المرضى." }
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "firstAidCoverage",
+          "promptEn": "First-aid coverage is reused from the BLS response team where that provider supplies it; otherwise confirm separate trained first-aid personnel.",
+          "promptAr": "تُعاد تغطية الإسعافات الأولية من فريق الاستجابة للدعم الحيوي الأساسي حيث يوفّرها ذلك المزوّد؛ وإلا فأكّدوا توفر أفراد مدرّبين على الإسعافات الأولية بشكل منفصل.",
+          "fields": [
+            {
+              "key": "separate",
+              "type": "checkbox",
+              "labelEn": "Separate trained first-aid personnel will be available.",
+              "labelAr": "سيكون أفراد مدرّبون على الإسعافات الأولية متاحين بشكل منفصل."
+            }
+          ],
+          "linkedPlan": [
+            "P03"
+          ]
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "firstAidCoverage",
+          "promptEn": "First-aid coverage is reused from the BLS response team where that provider supplies it; otherwise confirm separate trained first-aid personnel.",
+          "promptAr": "تُعاد تغطية الإسعافات الأولية من فريق الاستجابة للدعم الحيوي الأساسي حيث يوفّرها ذلك المزوّد؛ وإلا فأكّدوا توفر أفراد مدرّبين على الإسعافات الأولية بشكل منفصل.",
+          "fields": [
+            {
+              "key": "separate",
+              "type": "checkbox",
+              "labelEn": "Separate trained first-aid personnel will be available.",
+              "labelAr": "سيكون أفراد مدرّبون على الإسعافات الأولية متاحين بشكل منفصل."
+            }
+          ],
+          "linkedPlan": [
+            "P03"
+          ]
+        }
       }
     },
     {
-      "key": "B2", "n": 2, "service": "both",
-      "labelEn": "Medical plan", "labelAr": "خطة التأهب الصحي والطبي",
-      "promptEn": "One shared plan in short sections. Details, contacts and operational answers are reused automatically.", "promptAr": "خطة واحدة مشتركة في أقسام قصيرة. تُعاد تلقائياً بيانات التفاصيل وجهات الاتصال والإجابات التشغيلية.",
+      "key": "B5",
+      "n": 5,
+      "service": "both",
+      "labelEn": "BLS medical response team(s)",
+      "labelAr": "فريق (فرق) الاستجابة الطبية للدعم الحيوي الأساسي",
+      "promptEn": "Name the participating EMS or medical provider responsible for BLS coverage and confirm it.",
+      "promptAr": "سمّوا جهة الإسعاف أو المزوّد الطبي المشارك المسؤول عن تغطية الدعم الحيوي الأساسي وأكّدوها.",
+      "infoEn": "BLS: basic life support. Invite each participating provider once (the EMS and ambulance row holds the invitation); each remains responsible for its own personnel and clinical practice. Staffing and deployment detail belongs in the medical plan, not here.",
+      "infoAr": "الدعم الحيوي الأساسي (BLS). ادعوا كل مزوّد مشارك مرة واحدة (صف ترتيبات الإسعاف يحمل الدعوة)؛ ويبقى كل منهم مسؤولاً عن أفراده وممارسته السريرية. تفاصيل الملاك والانتشار مكانها الخطة الطبية لا هنا.",
+      "fields": [
+        {
+          "key": "bls",
+          "type": "checkbox",
+          "labelEn": "BLS medical response team(s) will be provided.",
+          "labelAr": "سيُوفَّر فريق (فرق) استجابة طبية للدعم الحيوي الأساسي."
+        },
+        {
+          "key": "firstAid",
+          "type": "choice",
+          "labelEn": "Will this provider also provide the required first-aid coverage?",
+          "labelAr": "هل سيوفّر هذا المزوّد أيضاً تغطية الإسعافات الأولية المطلوبة؟",
+          "options": [
+            {
+              "value": "yes",
+              "en": "Yes",
+              "ar": "نعم"
+            },
+            {
+              "value": "no",
+              "en": "No",
+              "ar": "لا"
+            }
+          ]
+        }
+      ],
       "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "recommended", "authors": ["ems"], "completion": "plan", "infoEn": "Optional at Level 2 unless the Ministry requests it (decision D2). A completed plan is readable without Director approval.", "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة (القرار D2). الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي." },
-        "3": { "obligation": "required", "authors": ["ems", "director"], "approver": "director", "completion": "planApproved", "infoEn": "The EMS agency or the Medical Director prepares it; the named Medical Director approves the current version (decision D4). A later change reopens the approval.", "infoAr": "تُعدّها جهة الإسعاف أو المدير الطبي؛ ويعتمد المدير الطبي المسمّى النسخة الحالية (القرار D4). أي تعديل لاحق يعيد فتح الاعتماد." }
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P03"
+          ]
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P03"
+          ]
+        }
       }
     },
     {
-      "key": "B19", "n": 19, "service": "event",
-      "labelEn": "Post-event report", "labelAr": "التقرير الطبي لما بعد الفعالية",
-      "promptEn": "After the event: attendance, patients treated, transports, incidents and lessons, within 7 calendar days.", "promptAr": "بعد الفعالية: الحضور والمرضى المعالجون وعمليات النقل والحوادث والدروس، خلال 7 أيام تقويمية.",
+      "key": "B6",
+      "n": 6,
+      "service": "both",
+      "labelEn": "Treatment point",
+      "labelAr": "نقطة العلاج",
+      "promptEn": "Say where the treatment point is.",
+      "promptAr": "حدّدوا موقع نقطة العلاج.",
+      "fields": [
+        {
+          "key": "location",
+          "type": "text",
+          "labelEn": "Where is the treatment point?",
+          "labelAr": "أين نقطة العلاج؟"
+        },
+        {
+          "key": "hours",
+          "type": "text",
+          "labelEn": "When is it open? (optional)",
+          "labelAr": "متى تكون مفتوحة؟ (اختياري)",
+          "optional": true
+        },
+        {
+          "key": "staff",
+          "type": "text",
+          "labelEn": "Who staffs it? (optional)",
+          "labelAr": "من يعمل فيها؟ (اختياري)",
+          "optional": true
+        }
+      ],
       "levels": {
-        "1": { "obligation": "afterEvent", "authors": [] },
-        "2": { "obligation": "afterEvent", "authors": [] },
-        "3": { "obligation": "afterEvent", "authors": [], "linkedPlan": ["P16"] }
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "recommended",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P04"
+          ]
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P04"
+          ],
+          "labelEn": "Medical treatment post",
+          "labelAr": "مركز العلاج الطبي",
+          "promptEn": "Level 3 requires a treatment post. Say where it is and confirm it will be operational; staffing and equipment belong in the medical plan.",
+          "promptAr": "يتطلب المستوى 3 مركز علاج. حدّدوا موقعه وأكّدوا أنه سيكون عاملاً؛ أما الملاك والمعدات فمكانهما الخطة الطبية.",
+          "fields": [
+            {
+              "key": "location",
+              "type": "text",
+              "labelEn": "Where is the treatment post?",
+              "labelAr": "أين مركز العلاج؟"
+            },
+            {
+              "key": "operational",
+              "type": "checkbox",
+              "labelEn": "The treatment post will be operational throughout the event.",
+              "labelAr": "سيكون مركز العلاج عاملاً طوال الفعالية.",
+              "venueLabelEn": "The treatment post will be operational during each operating session.",
+              "venueLabelAr": "سيكون مركز العلاج عاملاً خلال كل جلسة تشغيل."
+            }
+          ]
+        }
       }
     },
     {
-      "key": "B20", "n": 20, "service": "both",
-      "labelEn": "EMS readiness declaration", "labelAr": "إقرار جاهزية خدمات الطوارئ الطبية",
-      "promptEn": "Each participating EMS agency confirms its ten readiness items and signs its own declaration.", "promptAr": "تؤكّد كل جهة إسعاف مشاركة بنود جاهزيتها العشرة وتوقّع إقرارها الخاص.",
-      "infoEn": "An organizer, another agency or the plan approval cannot sign it for an agency.", "infoAr": "لا يستطيع المنظّم أو جهة أخرى أو اعتماد الخطة التوقيع نيابةً عن الجهة.",
+      "key": "B7",
+      "n": 7,
+      "service": "both",
+      "labelEn": "EMS and ambulance arrangements",
+      "labelAr": "ترتيبات الإسعاف وخدمات الطوارئ الطبية",
+      "promptEn": "Invite each participating EMS provider once, then record the basic ambulance arrangement.",
+      "promptAr": "ادعوا كل مزوّد إسعاف مشارك مرة واحدة، ثم سجّلوا ترتيب سيارات الإسعاف الأساسي.",
+      "infoEn": "An accepted invitation plus one shared coverage answer. Acceptance alone does not complete the arrangements; what happens if an ambulance leaves belongs in the medical plan.",
+      "infoAr": "دعوة مقبولة وإجابة واحدة مشتركة عن التغطية. القبول وحده لا يُكمل الترتيبات؛ وما يحدث إذا غادرت سيارة إسعاف مكانه الخطة الطبية.",
+      "fields": [
+        {
+          "key": "whereWhen",
+          "type": "text",
+          "labelEn": "Where and when will ambulances be available?",
+          "labelAr": "أين ومتى ستتوفر سيارات الإسعاف؟"
+        },
+        {
+          "key": "howToCall",
+          "type": "text",
+          "labelEn": "How will you call them?",
+          "labelAr": "كيف تستدعونها؟"
+        }
+      ],
       "levels": {
-        "1": { "obligation": "notRequired" },
-        "2": { "obligation": "notRequired" },
-        "3": { "obligation": "perAgency", "authors": ["ems"], "completion": "perAgency" }
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "labelEn": "Local EMS access",
+          "labelAr": "الوصول إلى خدمات الطوارئ الطبية المحلية",
+          "promptEn": "Say how emergency medical services will be contacted if needed.",
+          "promptAr": "حدّدوا كيف سيُتواصل مع خدمات الطوارئ الطبية عند الحاجة.",
+          "infoEn": "Access to local EMS is required; an EMS provider is not required for every Level 1 event. If an agency is participating directly, name it here.",
+          "infoAr": "الوصول إلى خدمات الطوارئ الطبية المحلية مطلوب؛ ولا يُشترط مزوّد إسعاف لكل فعالية من المستوى 1. إذا كانت جهة تشارك مباشرة فسمّوها هنا.",
+          "fields": [
+            {
+              "key": "how",
+              "type": "text",
+              "labelEn": "How will emergency medical services be contacted if needed?",
+              "labelAr": "كيف سيُتواصل مع خدمات الطوارئ الطبية عند الحاجة؟",
+              "placeholderEn": "For example, call 140, or the participating agency and its number",
+              "placeholderAr": "مثلاً، الاتصال بالرقم 140، أو الجهة المشاركة ورقمها"
+            }
+          ]
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "emsAndFields",
+          "linkedPlan": [
+            "P08"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "emsAndFields",
+          "linkedPlan": [
+            "P08"
+          ]
+        }
       }
     },
     {
-      "key": "P-A", "service": "both",
-      "labelEn": "Risk assessment", "labelAr": "تقييم المخاطر",
-      "promptEn": "Your saved answers and the derived level. Edit only through the assessment.", "promptAr": "إجاباتكم المحفوظة والمستوى المستنتج. التعديل من خلال التقييم فقط.",
+      "key": "B8",
+      "n": 8,
+      "service": "both",
+      "labelEn": "CPR and AED readiness",
+      "labelAr": "الجاهزية للإنعاش القلبي الرئوي وجهاز AED",
+      "promptEn": "Confirm at least one AED and a trained CPR and AED responder, and say where the AED is.",
+      "promptAr": "أكّدوا توفر جهاز AED واحد على الأقل ومستجيب مدرّب على الإنعاش القلبي الرئوي واستخدام الجهاز، وحدّدوا موقع الجهاز.",
+      "fields": [
+        {
+          "key": "aed",
+          "type": "checkbox",
+          "labelEn": "At least one AED will be available.",
+          "labelAr": "سيتوفر جهاز AED واحد على الأقل."
+        },
+        {
+          "key": "responder",
+          "type": "checkbox",
+          "labelEn": "A trained CPR and AED responder will be present.",
+          "labelAr": "سيكون مستجيب مدرّب على الإنعاش القلبي الرئوي واستخدام جهاز AED حاضراً."
+        },
+        {
+          "key": "location",
+          "type": "text",
+          "labelEn": "Where is the AED?",
+          "labelAr": "أين جهاز AED؟"
+        }
+      ],
       "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "assessment" },
-        "2": { "obligation": "required", "authors": ["organizer"], "completion": "assessment" },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "assessment", "linkedPlan": ["P01"] }
+        "1": {
+          "obligation": "recommended",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "aedChoice",
+          "labelEn": "AED availability",
+          "labelAr": "توافر جهاز AED",
+          "promptEn": "An AED is recommended at Level 1. Say whether one will be available; it does not block submission.",
+          "promptAr": "يوصى بتوفير جهاز AED في المستوى 1. حدّدوا ما إذا كان سيتوفر؛ وهو لا يمنع التقديم.",
+          "fields": [
+            {
+              "key": "aed",
+              "type": "choice",
+              "labelEn": "Is an AED available for the event?",
+              "labelAr": "هل يتوفر جهاز AED للفعالية؟",
+              "options": [
+                {
+                  "value": "yes",
+                  "en": "Yes",
+                  "ar": "نعم"
+                },
+                {
+                  "value": "no",
+                  "en": "No",
+                  "ar": "لا"
+                }
+              ],
+              "venueLabelEn": "Is an AED available at the venue?",
+              "venueLabelAr": "هل يتوفر جهاز AED في الموقع؟"
+            },
+            {
+              "key": "location",
+              "type": "text",
+              "labelEn": "Where is it? (optional)",
+              "labelAr": "أين يوجد؟ (اختياري)",
+              "optional": true,
+              "showWhen": {
+                "field": "aed",
+                "equals": "yes"
+              }
+            }
+          ],
+          "infoEn": "AED: automated external defibrillator. Recommended, not required, at Level 1.",
+          "infoAr": "AED: جهاز إزالة الرجفان الخارجي الآلي. موصى به لا مطلوب في المستوى 1."
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P05",
+            "P06"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P05",
+            "P06"
+          ],
+          "promptEn": "Confirm that CPR and AED response arrangements cover the event area; the response procedure lives in the medical plan.",
+          "promptAr": "أكّدوا أن ترتيبات الاستجابة بالإنعاش القلبي الرئوي وجهاز AED تغطي منطقة الفعالية؛ أما إجراء الاستجابة فمكانه الخطة الطبية.",
+          "fields": [
+            {
+              "key": "coverage",
+              "type": "checkbox",
+              "labelEn": "CPR and AED response arrangements cover the event area.",
+              "labelAr": "تغطي ترتيبات الاستجابة بالإنعاش القلبي الرئوي وجهاز AED منطقة الفعالية.",
+              "venueLabelEn": "CPR and AED response arrangements cover the venue.",
+              "venueLabelAr": "تغطي ترتيبات الاستجابة بالإنعاش القلبي الرئوي وجهاز AED الموقع."
+            },
+            {
+              "key": "aed",
+              "type": "checkbox",
+              "labelEn": "AED capability is available.",
+              "labelAr": "قدرة جهاز AED متاحة."
+            },
+            {
+              "key": "location",
+              "type": "text",
+              "labelEn": "Where are the AEDs?",
+              "labelAr": "أين أجهزة AED؟"
+            }
+          ]
+        }
+      },
+      "infoEn": "AED: automated external defibrillator. CPR: cardiopulmonary resuscitation. No responder name is collected; response mechanics belong in the medical plan.",
+      "infoAr": "AED: جهاز إزالة الرجفان الخارجي الآلي. CPR: الإنعاش القلبي الرئوي. لا يُجمع اسم المستجيب؛ وآليات الاستجابة مكانها الخطة الطبية."
+    },
+    {
+      "key": "B9",
+      "n": 9,
+      "service": "both",
+      "labelEn": "Medical supplies",
+      "labelAr": "المستلزمات الطبية",
+      "promptEn": "Confirm that basic medical supplies will be available.",
+      "promptAr": "أكّدوا أن المستلزمات الطبية الأساسية ستكون متاحة.",
+      "infoEn": "A confirmation only. No kit list, quantity, storage place or checker is asked (partner audit, 8 October 2026).",
+      "infoAr": "تأكيد فقط. لا تُطلب قائمة عدّة ولا كميات ولا مكان حفظ ولا من يتفقّدها (مراجعة الشريك، 8 تشرين الأول 2026).",
+      "fields": [
+        {
+          "key": "ready",
+          "type": "checkbox",
+          "labelEn": "Basic medical supplies will be available.",
+          "labelAr": "ستكون المستلزمات الطبية الأساسية متاحة."
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "labelEn": "Basic medical supplies",
+          "labelAr": "المستلزمات الطبية الأساسية",
+          "fields": [
+            {
+              "key": "ready",
+              "type": "checkbox",
+              "labelEn": "Basic first-aid and medical supplies will be available.",
+              "labelAr": "ستكون مستلزمات الإسعافات الأولية والمستلزمات الطبية الأساسية متاحة."
+            }
+          ]
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P07"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P07"
+          ],
+          "fields": [
+            {
+              "key": "ready",
+              "type": "checkbox",
+              "labelEn": "Required medical supplies will be available.",
+              "labelAr": "ستكون المستلزمات الطبية المطلوبة متاحة."
+            }
+          ]
+        }
       }
     },
     {
-      "key": "P-M", "service": "both",
-      "labelEn": "Site or route map", "labelAr": "خريطة الموقع أو المسار",
-      "venueLabelEn": "Site map", "venueLabelAr": "خريطة الموقع",
-      "promptEn": "Upload a map showing the event area or route, entrances, exits and emergency access.", "promptAr": "ارفعوا خريطة تُظهر منطقة الفعالية أو المسار والمداخل والمخارج ومنافذ وصول الطوارئ.",
-      "venuePromptEn": "Upload one permanent site map showing entrances, exits and emergency access.", "venuePromptAr": "ارفعوا خريطة موقع دائمة واحدة تُظهر المداخل والمخارج ومنافذ وصول الطوارئ.",
-      "infoEn": "Label medical points where applicable. A readable file is enough; optional labels are not imposed.", "infoAr": "علّموا النقاط الطبية عند الانطباق. يكفي ملف مقروء؛ ولا تُفرض العلامات الاختيارية.",
-      "file": { "labelEn": "Map file", "labelAr": "ملف الخريطة" },
+      "key": "B10",
+      "n": 10,
+      "service": "both",
+      "labelEn": "Emergency vehicle access",
+      "labelAr": "وصول مركبات الطوارئ",
+      "promptEn": "Confirm that emergency vehicles can access the event area.",
+      "promptAr": "أكّدوا أن مركبات الطوارئ تستطيع الوصول إلى منطقة الفعالية.",
+      "fields": [
+        {
+          "key": "access",
+          "type": "choice",
+          "labelEn": "Can emergency vehicles access the event area?",
+          "labelAr": "هل تستطيع مركبات الطوارئ الوصول إلى منطقة الفعالية؟",
+          "options": [
+            {
+              "value": "yes",
+              "en": "Yes",
+              "ar": "نعم"
+            },
+            {
+              "value": "no",
+              "en": "No",
+              "ar": "لا"
+            }
+          ],
+          "venueLabelEn": "Can emergency vehicles access the venue?",
+          "venueLabelAr": "هل تستطيع مركبات الطوارئ الوصول إلى الموقع؟"
+        },
+        {
+          "key": "alternative",
+          "type": "textarea",
+          "labelEn": "Briefly describe the alternative access or extraction arrangement.",
+          "labelAr": "صفوا بإيجاز ترتيب الوصول أو الإخلاء البديل.",
+          "showWhen": {
+            "field": "access",
+            "equals": "no"
+          }
+        }
+      ],
       "levels": {
-        "1": { "obligation": "ifRequested", "authors": ["organizer"], "completion": "file" },
-        "2": { "obligation": "requiredWhereApplicable", "authors": ["organizer"], "completion": "fileUnlessNotApplicable",
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P09"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P09"
+          ]
+        }
+      }
+    },
+    {
+      "key": "B11",
+      "n": 11,
+      "service": "both",
+      "labelEn": "Patient access and extraction",
+      "labelAr": "الوصول إلى المريض وإخلاؤه",
+      "promptEn": "Confirm there is a clear route for responders to reach and remove a patient.",
+      "promptAr": "أكّدوا وجود مسار واضح يصل به المستجيبون إلى المريض وينقلونه.",
+      "fields": [
+        {
+          "key": "clearRoute",
+          "type": "choice",
+          "labelEn": "Is there a clear route for responders to reach and remove a patient?",
+          "labelAr": "هل يوجد مسار واضح يصل به المستجيبون إلى المريض وينقلونه؟",
+          "options": [
+            {
+              "value": "yes",
+              "en": "Yes",
+              "ar": "نعم"
+            },
+            {
+              "value": "no",
+              "en": "No",
+              "ar": "لا"
+            }
+          ]
+        },
+        {
+          "key": "route",
+          "type": "text",
+          "labelEn": "Briefly describe the extraction route (optional).",
+          "labelAr": "صفوا بإيجاز مسار الإخلاء (اختياري).",
+          "optional": true
+        },
+        {
+          "key": "alternative",
+          "type": "textarea",
+          "labelEn": "How will a patient be reached and removed instead?",
+          "labelAr": "كيف سيُوصل إلى المريض ويُنقل بدلاً من ذلك؟",
+          "showWhen": {
+            "field": "clearRoute",
+            "equals": "no"
+          }
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P09"
+          ],
+          "fields": [
+            {
+              "key": "route",
+              "type": "textarea",
+              "labelEn": "Briefly describe how a patient can be reached and extracted.",
+              "labelAr": "صفوا بإيجاز كيف يمكن الوصول إلى المريض وإخلاؤه."
+            }
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P09"
+          ],
+          "promptEn": "Confirm the arrangement; detailed routes belong in the plan and the maps.",
+          "promptAr": "أكّدوا الترتيب؛ أما المسارات التفصيلية فمكانها الخطة والخرائط.",
+          "fields": [
+            {
+              "key": "arranged",
+              "type": "checkbox",
+              "labelEn": "A clear patient-access and extraction arrangement is in place.",
+              "labelAr": "ترتيب واضح للوصول إلى المريض وإخلائه قائم."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "B12",
+      "n": 12,
+      "service": "both",
+      "labelEn": "Receiving emergency department(s)",
+      "labelAr": "قسم (أقسام) الطوارئ المستقبِل",
+      "promptEn": "Identify the emergency department(s) that will receive patients.",
+      "promptAr": "حدّدوا قسم (أقسام) الطوارئ الذي سيستقبل المرضى.",
+      "infoEn": "No hospital acceptance letter is required.",
+      "infoAr": "لا يُطلب كتاب قبول من المستشفى.",
+      "fields": [
+        {
+          "key": "department",
+          "type": "text",
+          "labelEn": "Which emergency department(s) will receive patients?",
+          "labelAr": "أي قسم (أقسام) طوارئ سيستقبل المرضى؟"
+        },
+        {
+          "key": "contact",
+          "type": "text",
+          "labelEn": "How will the team contact it? (optional)",
+          "labelAr": "كيف يتواصل الفريق معه؟ (اختياري)",
+          "optional": true
+        },
+        {
+          "key": "backup",
+          "type": "text",
+          "labelEn": "Backup, if planned (optional)",
+          "labelAr": "البديل، إن كان مخططاً (اختياري)",
+          "optional": true
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P11"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P11"
+          ]
+        }
+      }
+    },
+    {
+      "key": "B14",
+      "n": 14,
+      "service": "both",
+      "labelEn": "Communication",
+      "labelAr": "التواصل",
+      "promptEn": "Say how event staff and the medical or EMS provider will communicate.",
+      "promptAr": "حدّدوا كيف سيتواصل عاملو الفعالية والمزوّد الطبي أو جهة الإسعاف.",
+      "fields": [
+        {
+          "key": "method",
+          "type": "text",
+          "labelEn": "How will event staff and the medical or EMS provider contact each other?",
+          "labelAr": "كيف يتواصل عاملو الفعالية والمزوّد الطبي أو جهة الإسعاف فيما بينهم؟",
+          "venueLabelEn": "How will venue staff and the medical or EMS provider contact each other?",
+          "venueLabelAr": "كيف يتواصل عاملو الموقع والمزوّد الطبي أو جهة الإسعاف فيما بينهم؟"
+        },
+        {
+          "key": "backup",
+          "type": "text",
+          "labelEn": "Backup, if planned (optional)",
+          "labelAr": "البديل، إن كان مخططاً (اختياري)",
+          "optional": true
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "fields": [
+            {
+              "key": "method",
+              "type": "text",
+              "labelEn": "How will event personnel communicate during a medical emergency?",
+              "labelAr": "كيف سيتواصل عاملو الفعالية أثناء حالة طبية طارئة؟",
+              "placeholderEn": "For example, mobile phones or radios",
+              "placeholderAr": "مثلاً، الهواتف المحمولة أو أجهزة اللاسلكي",
+              "venueLabelEn": "How will venue personnel communicate during a medical emergency?",
+              "venueLabelAr": "كيف سيتواصل عاملو الموقع أثناء حالة طبية طارئة؟"
+            }
+          ]
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P10"
+          ]
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "organizer",
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P10"
+          ],
+          "fields": [
+            {
+              "key": "method",
+              "type": "text",
+              "labelEn": "How will the medical team, EMS and event control communicate?",
+              "labelAr": "كيف سيتواصل الفريق الطبي وجهة الإسعاف ومركز التحكم بالفعالية؟",
+              "venueLabelEn": "How will the medical team, EMS and venue control communicate?",
+              "venueLabelAr": "كيف سيتواصل الفريق الطبي وجهة الإسعاف ومركز التحكم بالموقع؟"
+            }
+          ],
+          "promptEn": "Say how the medical team, EMS and event control communicate; channels and backups are completed in the medical plan.",
+          "promptAr": "حدّدوا كيف يتواصل الفريق الطبي وجهة الإسعاف ومركز التحكم بالفعالية؛ وتُستكمل القنوات والبدائل في الخطة الطبية."
+        }
+      }
+    },
+    {
+      "key": "B15",
+      "n": 15,
+      "service": "both",
+      "labelEn": "Event medical command",
+      "labelAr": "القيادة الطبية للفعالية",
+      "promptEn": "Say where medical command is located and confirm the Event Medical Director leads it.",
+      "promptAr": "حدّدوا موقع القيادة الطبية وأكّدوا أن المدير الطبي للفعالية يقودها.",
+      "fields": [
+        {
+          "key": "where",
+          "type": "text",
+          "labelEn": "Medical command location",
+          "labelAr": "موقع القيادة الطبية"
+        },
+        {
+          "key": "lead",
+          "type": "checkbox",
+          "labelEn": "The Event Medical Director will lead and integrate event medical command.",
+          "labelAr": "سيقود المدير الطبي للفعالية القيادة الطبية للفعالية ويدمجها."
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "notRequired"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P10",
+            "M02"
+          ]
+        }
+      }
+    },
+    {
+      "key": "B16",
+      "n": 16,
+      "service": "both",
+      "labelEn": "Emergency escalation",
+      "labelAr": "التصعيد في حالات الطوارئ",
+      "promptEn": "Say how additional help is requested and how participating providers are notified.",
+      "promptAr": "حدّدوا كيف تُطلب المساعدة الإضافية وكيف يُبلَّغ المزوّدون المشاركون.",
+      "fields": [
+        {
+          "key": "how",
+          "type": "text",
+          "labelEn": "How will additional emergency help be requested if the situation exceeds the event's resources?",
+          "labelAr": "كيف ستُطلب مساعدة طارئة إضافية إذا تجاوز الوضع موارد الفعالية؟",
+          "venueLabelEn": "How will additional emergency help be requested if the situation exceeds the venue's resources?",
+          "venueLabelAr": "كيف ستُطلب مساعدة طارئة إضافية إذا تجاوز الوضع موارد الموقع؟"
+        },
+        {
+          "key": "told",
+          "type": "text",
+          "labelEn": "How are the participating providers notified?",
+          "labelAr": "كيف يُبلَّغ المزوّدون المشاركون؟"
+        }
+      ],
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fields",
+          "infoEn": "An emergency escalation procedure, not a mass-casualty plan. No proof file at Level 1.",
+          "infoAr": "إجراء تصعيد في حالات الطوارئ، لا خطة إصابات جماعية. لا ملف إثبات في المستوى 1.",
+          "fields": [
+            {
+              "key": "how",
+              "type": "text",
+              "labelEn": "How will additional emergency help be requested if the situation exceeds the event's available resources?",
+              "labelAr": "كيف ستُطلب مساعدة طارئة إضافية إذا تجاوز الوضع الموارد المتاحة للفعالية؟",
+              "venueLabelEn": "How will additional emergency help be requested if the situation exceeds the venue's available resources?",
+              "venueLabelAr": "كيف ستُطلب مساعدة طارئة إضافية إذا تجاوز الوضع الموارد المتاحة للموقع؟"
+            }
+          ],
+          "promptEn": "Say how additional emergency help will be requested if the situation exceeds the event's available resources.",
+          "promptAr": "حدّدوا كيف ستُطلب مساعدة طارئة إضافية إذا تجاوز الوضع الموارد المتاحة للفعالية."
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P12"
+          ],
+          "infoEn": "A concise, coordinated escalation procedure (decision D3). The full major-incident plan applies at Level 3.",
+          "infoAr": "إجراء تصعيد موجز ومنسّق (القرار D3). تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3."
+        },
+        "3": {
+          "obligation": "inPlan",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "completion": "majorIncident",
+          "linkedPlan": [
+            "P12"
+          ],
+          "fields": [],
+          "promptEn": "Level 3 requires detailed major-incident arrangements coordinated with EMS. Complete the major-incident section of the medical plan.",
+          "promptAr": "يتطلب المستوى 3 ترتيبات تفصيلية للحوادث الجسيمة منسّقة مع جهة الإسعاف. أكملوا قسم الحوادث الجسيمة في الخطة الطبية.",
+          "labelEn": "Major-incident plan",
+          "labelAr": "خطة الحوادث الجسيمة"
+        }
+      }
+    },
+    {
+      "key": "B17",
+      "n": 17,
+      "service": "both",
+      "labelEn": "Insurance",
+      "labelAr": "التأمين",
+      "promptEn": "Record the insurer, policy number and coverage dates, and upload the evidence.",
+      "promptAr": "سجّلوا شركة التأمين ورقم البوليصة وتواريخ التغطية، وارفعوا الإثبات.",
+      "fields": [
+        {
+          "key": "insurer",
+          "type": "text",
+          "labelEn": "Insurer",
+          "labelAr": "شركة التأمين"
+        },
+        {
+          "key": "policyNumber",
+          "type": "text",
+          "labelEn": "Policy / certificate number",
+          "labelAr": "رقم البوليصة أو الشهادة"
+        },
+        {
+          "key": "coveragePeriod",
+          "type": "text",
+          "labelEn": "Coverage period",
+          "labelAr": "فترة التغطية",
+          "placeholderEn": "Dates covered, for participants and spectators",
+          "placeholderAr": "التواريخ المشمولة، للمشاركين والمتفرجين"
+        }
+      ],
+      "file": {
+        "labelEn": "Evidence covering participants and spectators",
+        "labelAr": "إثبات يغطي المشاركين والمتفرجين"
+      },
+      "levels": {
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "notRequired"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fieldsAndFile"
+        }
+      }
+    },
+    {
+      "key": "P-M",
+      "service": "both",
+      "labelEn": "Site or route map",
+      "labelAr": "خريطة الموقع أو المسار",
+      "venueLabelEn": "Site map",
+      "venueLabelAr": "خريطة الموقع",
+      "promptEn": "Upload a map showing the event area or route, entrances, exits and emergency access.",
+      "promptAr": "ارفعوا خريطة تُظهر منطقة الفعالية أو المسار والمداخل والمخارج ومنافذ وصول الطوارئ.",
+      "venuePromptEn": "Upload one permanent site map showing entrances, exits and emergency access.",
+      "venuePromptAr": "ارفعوا خريطة موقع دائمة واحدة تُظهر المداخل والمخارج ومنافذ وصول الطوارئ.",
+      "infoEn": "Label medical points where applicable. A readable file is enough; optional labels are not imposed.",
+      "infoAr": "علّموا النقاط الطبية عند الانطباق. يكفي ملف مقروء؛ ولا تُفرض العلامات الاختيارية.",
+      "file": {
+        "labelEn": "Map file",
+        "labelAr": "ملف الخريطة"
+      },
+      "levels": {
+        "1": {
+          "obligation": "ifRequested",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "file"
+        },
+        "2": {
+          "obligation": "requiredWhereApplicable",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "fileUnlessNotApplicable",
           "infoEn": "Required where applicable (partner review, 7 October 2026): upload the map, or record that no map applies and why. The medical deployment map is a Level 3 document.",
           "infoAr": "مطلوبة عند الانطباق (مراجعة الشريك، 7 تشرين الأول 2026): ارفعوا الخريطة، أو سجّلوا أن لا خريطة تنطبق مع ذكر السبب. خريطة الانتشار الطبي مستند من المستوى 3.",
           "fields": [
-            { "key": "applicable", "type": "choice", "labelEn": "Does a site or route map apply?", "labelAr": "هل تنطبق خريطة موقع أو مسار؟", "venueLabelEn": "Does a site map apply?", "venueLabelAr": "هل تنطبق خريطة موقع؟",
-              "options": [ { "value": "yes", "en": "Yes — the map is uploaded below", "ar": "نعم — الخريطة مرفوعة أدناه" }, { "value": "no", "en": "No — no map applies", "ar": "لا — لا تنطبق أي خريطة" } ] },
-            { "key": "reason", "type": "textarea", "labelEn": "Why no map applies", "labelAr": "سبب عدم انطباق أي خريطة", "showWhen": { "field": "applicable", "equals": "no" } }
-          ] },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "file" }
+            {
+              "key": "applicable",
+              "type": "choice",
+              "labelEn": "Does a site or route map apply?",
+              "labelAr": "هل تنطبق خريطة موقع أو مسار؟",
+              "venueLabelEn": "Does a site map apply?",
+              "venueLabelAr": "هل تنطبق خريطة موقع؟",
+              "options": [
+                {
+                  "value": "yes",
+                  "en": "Yes — the map is uploaded below",
+                  "ar": "نعم — الخريطة مرفوعة أدناه"
+                },
+                {
+                  "value": "no",
+                  "en": "No — no map applies",
+                  "ar": "لا — لا تنطبق أي خريطة"
+                }
+              ]
+            },
+            {
+              "key": "reason",
+              "type": "textarea",
+              "labelEn": "Why no map applies",
+              "labelAr": "سبب عدم انطباق أي خريطة",
+              "showWhen": {
+                "field": "applicable",
+                "equals": "no"
+              }
+            }
+          ]
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "file"
+        }
       }
     },
     {
-      "key": "P-D", "service": "both",
-      "labelEn": "Medical deployment map", "labelAr": "خريطة الانتشار الطبي",
-      "venueLabelEn": "Routine deployment layout", "venueLabelAr": "مخطط الانتشار الاعتيادي",
-      "promptEn": "Show medical teams, treatment points, AEDs, ambulance points and patient routes.", "promptAr": "أظهِروا الفرق الطبية ونقاط العلاج وأجهزة AED ونقاط سيارات الإسعاف ومسارات المرضى.",
-      "infoEn": "Uploaded by the EMS agency, or at Level 3 the Medical Director, and referenced in the plan; the organizer reads it.", "infoAr": "ترفعها جهة الإسعاف، أو المدير الطبي في المستوى 3، ويُشار إليها في الخطة؛ ويقرأها المنظّم.",
-      "file": { "labelEn": "Deployment map file", "labelAr": "ملف خريطة الانتشار" },
+      "key": "P-D",
+      "service": "both",
+      "labelEn": "Medical deployment map",
+      "labelAr": "خريطة الانتشار الطبي",
+      "venueLabelEn": "Routine deployment layout",
+      "venueLabelAr": "مخطط الانتشار الاعتيادي",
+      "promptEn": "Show medical teams, treatment points, AEDs, ambulance points and patient routes.",
+      "promptAr": "أظهِروا الفرق الطبية ونقاط العلاج وأجهزة AED ونقاط سيارات الإسعاف ومسارات المرضى.",
+      "infoEn": "Uploaded by the EMS agency, or at Level 3 the Medical Director, and referenced in the plan; the organizer reads it.",
+      "infoAr": "ترفعها جهة الإسعاف، أو المدير الطبي في المستوى 3، ويُشار إليها في الخطة؛ ويقرأها المنظّم.",
+      "file": {
+        "labelEn": "Deployment map file",
+        "labelAr": "ملف خريطة الانتشار"
+      },
       "levels": {
-        "1": { "obligation": "ifRequested", "authors": ["ems"], "completion": "file" },
-        "2": { "obligation": "ifRequested", "authors": ["ems"], "completion": "file" },
-        "3": { "obligation": "required", "authors": ["ems", "director"], "completion": "file", "linkedPlan": ["P03"] }
+        "1": {
+          "obligation": "ifRequested",
+          "authors": [
+            "ems"
+          ],
+          "completion": "file"
+        },
+        "2": {
+          "obligation": "ifRequested",
+          "authors": [
+            "ems"
+          ],
+          "completion": "file"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "completion": "file",
+          "linkedPlan": [
+            "P03"
+          ]
+        }
       }
     },
     {
-      "key": "P-C", "service": "event",
-      "labelEn": "Organizer declaration", "labelAr": "إقرار المنظّم",
-      "promptEn": "Confirm the applicable statements and sign as the authorized representative.", "promptAr": "أكّدوا البيانات المنطبقة ووقّعوا بصفتكم الممثّل المفوّض.",
-      "infoEn": "The individual answers above do not replace this certification.", "infoAr": "الإجابات الفردية أعلاه لا تحلّ محل هذا التصديق.",
+      "key": "B20",
+      "n": 20,
+      "service": "both",
+      "labelEn": "EMS readiness declaration",
+      "labelAr": "إقرار جاهزية خدمات الطوارئ الطبية",
+      "promptEn": "Each participating EMS agency confirms its ten readiness items and signs its own declaration.",
+      "promptAr": "تؤكّد كل جهة إسعاف مشاركة بنود جاهزيتها العشرة وتوقّع إقرارها الخاص.",
+      "infoEn": "An organizer, another agency or the plan approval cannot sign it for an agency.",
+      "infoAr": "لا يستطيع المنظّم أو جهة أخرى أو اعتماد الخطة التوقيع نيابةً عن الجهة.",
       "levels": {
-        "1": { "obligation": "required", "authors": ["organizer"], "completion": "organizerDeclaration", "statements": false, "infoEn": "At Level 1 only the certification applies; the compliance statements apply when the Ministry requests them.", "infoAr": "في المستوى 1 ينطبق التصديق وحده؛ وتنطبق بيانات الامتثال عندما تطلبها الوزارة." },
-        "2": { "obligation": "required", "authors": ["organizer"], "completion": "organizerDeclaration", "statements": true },
-        "3": { "obligation": "required", "authors": ["organizer"], "completion": "organizerDeclaration", "statements": true }
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "notRequired"
+        },
+        "3": {
+          "obligation": "perAgency",
+          "authors": [
+            "ems"
+          ],
+          "completion": "perAgency"
+        }
       }
     },
     {
-      "key": "P-I", "service": "event",
-      "labelEn": "Serious-incident notice", "labelAr": "الإبلاغ عن حادثة جسيمة",
-      "promptEn": "If a serious incident occurs, notify the Ministry within 24 hours of the occurrence.", "promptAr": "إذا وقعت حادثة جسيمة، أبلغوا الوزارة خلال 24 ساعة من وقوعها.",
+      "key": "B18",
+      "n": 18,
+      "service": "both",
+      "labelEn": "Patient-care documentation",
+      "labelAr": "توثيق رعاية المرضى",
+      "promptEn": "If medical care is provided, the care provided must be documented by the provider in its own clinical system.",
+      "promptAr": "إذا قُدّمت رعاية طبية، فعلى المزوّد توثيق الرعاية المقدّمة في نظامه السريري.",
+      "infoEn": "No patient-identifying data is entered on this platform (decision D10). The provider owns the documentation process.",
+      "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10). المزوّد هو مالك عملية التوثيق.",
+      "fields": [
+        {
+          "key": "confirmed",
+          "type": "checkbox",
+          "labelEn": "The medical provider will maintain patient-care documentation when care is provided.",
+          "labelAr": "سيحتفظ المزوّد الطبي بتوثيق رعاية المرضى عند تقديم الرعاية."
+        }
+      ],
       "levels": {
-        "1": { "obligation": "ifIncident", "authors": [] },
-        "2": { "obligation": "ifIncident", "authors": [] },
-        "3": { "obligation": "ifIncident", "authors": [] }
+        "1": {
+          "obligation": "whenCare",
+          "authors": []
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "completion": "fields",
+          "linkedPlan": [
+            "P15"
+          ],
+          "fields": [
+            {
+              "key": "confirmed",
+              "type": "checkbox",
+              "labelEn": "Participating medical providers will document patient care.",
+              "labelAr": "سيوثّق المزوّدون الطبيون المشاركون رعاية المرضى."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "key": "B2",
+      "n": 2,
+      "service": "both",
+      "labelEn": "Medical plan",
+      "labelAr": "خطة التأهب الصحي والطبي",
+      "promptEn": "One shared plan in short sections, assembled from the answers above; the medical team completes the remaining operational sections and reviews it.",
+      "promptAr": "خطة واحدة مشتركة في أقسام قصيرة، تُجمَّع من الإجابات أعلاه؛ ويستكمل الفريق الطبي الأقسام التشغيلية المتبقية ويراجعها.",
+      "levels": {
+        "1": {
+          "obligation": "notRequired"
+        },
+        "2": {
+          "obligation": "recommended",
+          "authors": [
+            "ems"
+          ],
+          "completion": "plan",
+          "infoEn": "Optional at Level 2 unless the Ministry requests it (decision D2). A completed plan is readable without Director approval.",
+          "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة (القرار D2). الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي."
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "ems",
+            "director"
+          ],
+          "approver": "director",
+          "completion": "planApproved",
+          "infoEn": "The EMS agency or the Medical Director prepares it; the named Medical Director approves the current version (decision D4). A later change reopens the approval.",
+          "infoAr": "تُعدّها جهة الإسعاف أو المدير الطبي؛ ويعتمد المدير الطبي المسمّى النسخة الحالية (القرار D4). أي تعديل لاحق يعيد فتح الاعتماد."
+        }
+      }
+    },
+    {
+      "key": "B19",
+      "n": 19,
+      "service": "event",
+      "labelEn": "Post-event report",
+      "labelAr": "التقرير الطبي لما بعد الفعالية",
+      "promptEn": "A post-event medical report is required only after a reportable event or if the Ministry requests it; it is not a pre-event task.",
+      "promptAr": "التقرير الطبي لما بعد الفعالية مطلوب فقط بعد حدث يستوجب الإبلاغ أو إذا طلبته الوزارة؛ وليس مهمة قبل الفعالية.",
+      "levels": {
+        "1": {
+          "obligation": "afterEvent",
+          "authors": []
+        },
+        "2": {
+          "obligation": "afterEvent",
+          "authors": []
+        },
+        "3": {
+          "obligation": "afterEvent",
+          "authors": [],
+          "linkedPlan": [
+            "P16"
+          ],
+          "promptEn": "Required after every Level 3 event, within 7 calendar days: attendance, patients treated, transports, incidents and lessons. It becomes an active task after the event.",
+          "promptAr": "مطلوب بعد كل فعالية من المستوى 3، خلال 7 أيام تقويمية: الحضور والمرضى المعالجون وعمليات النقل والحوادث والدروس. يصبح مهمة فعلية بعد الفعالية."
+        }
+      }
+    },
+    {
+      "key": "P-A",
+      "service": "both",
+      "labelEn": "Risk assessment",
+      "labelAr": "تقييم المخاطر",
+      "promptEn": "Your saved answers and the derived level. Edit only through the assessment.",
+      "promptAr": "إجاباتكم المحفوظة والمستوى المستنتج. التعديل من خلال التقييم فقط.",
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "assessment"
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "assessment"
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "assessment",
+          "linkedPlan": [
+            "P01"
+          ]
+        }
+      }
+    },
+    {
+      "key": "P-C",
+      "service": "event",
+      "labelEn": "Organizer declaration",
+      "labelAr": "إقرار المنظّم",
+      "promptEn": "Confirm the applicable statements and sign as the authorized representative.",
+      "promptAr": "أكّدوا البيانات المنطبقة ووقّعوا بصفتكم الممثّل المفوّض.",
+      "infoEn": "The individual answers above do not replace this certification.",
+      "infoAr": "الإجابات الفردية أعلاه لا تحلّ محل هذا التصديق.",
+      "levels": {
+        "1": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerDeclaration",
+          "statements": false,
+          "infoEn": "At Level 1 only the certification applies; the compliance statements apply when the Ministry requests them.",
+          "infoAr": "في المستوى 1 ينطبق التصديق وحده؛ وتنطبق بيانات الامتثال عندما تطلبها الوزارة."
+        },
+        "2": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerDeclaration",
+          "statements": true
+        },
+        "3": {
+          "obligation": "required",
+          "authors": [
+            "organizer"
+          ],
+          "completion": "organizerDeclaration",
+          "statements": true
+        }
+      }
+    },
+    {
+      "key": "P-I",
+      "service": "event",
+      "labelEn": "Serious-incident notice",
+      "labelAr": "الإبلاغ عن حادثة جسيمة",
+      "promptEn": "If a serious incident occurs, notify the Ministry within 24 hours of the occurrence.",
+      "promptAr": "إذا وقعت حادثة جسيمة، أبلغوا الوزارة خلال 24 ساعة من وقوعها.",
+      "levels": {
+        "1": {
+          "obligation": "ifIncident",
+          "authors": []
+        },
+        "2": {
+          "obligation": "ifIncident",
+          "authors": []
+        },
+        "3": {
+          "obligation": "ifIncident",
+          "authors": []
+        }
       }
     }
   ],
   "planSections": [
-    { "key": "P01", "n": 1, "source": "derived", "promptEn": "Name, dates, times, attendance, location and activity.", "promptAr": "الاسم والتواريخ والأوقات والحضور والموقع والنشاط." },
-    { "key": "P02", "n": 2, "source": "derived", "promptEn": "The organizer, each provider and the Medical Director, from the accepted invitations.", "promptAr": "المنظّم وكل مزوّد والمدير الطبي، من الدعوات المقبولة." },
-    { "key": "P03", "n": 3, "source": "linked", "linked": ["B5"], "ownText": true, "promptEn": "Staff numbers, roles, locations and times come from the response team. Add relief and coverage changes.", "promptAr": "تأتي أعداد الملاك والأدوار والمواقع والأوقات من فريق الاستجابة. أضيفوا الاستبدال وتغيّرات التغطية." },
-    { "key": "P04", "n": 4, "source": "linked", "linked": ["B6"], "promptEn": "From the treatment point answer.", "promptAr": "من إجابة نقطة العلاج." },
-    { "key": "P05", "n": 5, "source": "linked", "linked": ["B8"], "promptEn": "From the CPR and AED readiness answer.", "promptAr": "من إجابة الجاهزية للإنعاش القلبي الرئوي وجهاز AED." },
-    { "key": "P06", "n": 6, "source": "linked", "linked": ["B8"], "promptEn": "The same device and access answer; no second inventory.", "promptAr": "إجابة الجهاز والوصول نفسها؛ لا جرد ثانٍ." },
-    { "key": "P07", "n": 7, "source": "linked", "linked": ["B9"], "promptEn": "From the medical supplies answer.", "promptAr": "من إجابة المستلزمات الطبية." },
-    { "key": "P08", "n": 8, "source": "linked", "linked": ["B7"], "promptEn": "From the EMS and ambulance arrangements. Acceptance of an invitation alone is not an arrangement.", "promptAr": "من ترتيبات الإسعاف وخدمات الطوارئ الطبية. قبول الدعوة وحده ليس ترتيباً." },
-    { "key": "P09", "n": 9, "source": "linked", "linked": ["B10", "B11"], "promptEn": "From the emergency access and patient access answers and the maps.", "promptAr": "من إجابتَي وصول مركبات الطوارئ والوصول إلى المريض ومن الخرائط." },
-    { "key": "P10", "n": 10, "source": "linked", "linked": ["B14", "B15"], "promptEn": "From the team communication answer; at Level 3 the Medical Director confirms medical command.", "promptAr": "من إجابة التواصل بين الفرق؛ وفي المستوى 3 يؤكّد المدير الطبي القيادة الطبية." },
-    { "key": "P11", "n": 11, "source": "linked", "linked": ["B12"], "promptEn": "From the receiving hospital answer.", "promptAr": "من إجابة المستشفى المستقبِل." },
-    { "key": "P12", "n": 12, "source": "linked", "linked": ["B16"], "promptEn": "At Level 2 the short escalation procedure. At Level 3 the eleven major-incident items below.", "promptAr": "في المستوى 2 إجراء التصعيد المختصر. وفي المستوى 3 بنود الحوادث الجسيمة الأحد عشر أدناه." },
-    { "key": "P13", "n": 13, "source": "own", "ownText": true, "promptEn": "What weather, crowd or activity problems require a changed response?", "promptAr": "ما مشكلات الطقس أو الحشود أو النشاط التي تستدعي تغيير الاستجابة؟" },
-    { "key": "P14", "n": 14, "source": "own", "ownText": true, "promptEn": "Who covers the event if an ambulance or team leaves, and how is extra help called?", "promptAr": "من يغطي الفعالية إذا غادرت سيارة إسعاف أو فريق، وكيف تُطلب المساعدة الإضافية؟" },
-    { "key": "P15", "n": 15, "source": "linked", "linked": ["B18"], "ownText": true, "promptEn": "Who keeps clinical records, and how are patients handed over? The provider's procedure only; individual patient records stay outside this package.", "promptAr": "من يحتفظ بالسجلات السريرية، وكيف يُسلَّم المرضى؟ إجراء المزوّد فقط؛ وتبقى سجلات المرضى الفردية خارج هذا الملف." },
-    { "key": "P16", "n": 16, "source": "own", "ownText": true, "promptEn": "Who collects the totals and completes and signs the report? The report itself is completed after the event.", "promptAr": "من يجمع الأرقام الإجمالية ويُعدّ التقرير ويوقّعه؟ يُستكمل التقرير نفسه بعد الفعالية." }
+    {
+      "key": "P01",
+      "n": 1,
+      "source": "derived",
+      "promptEn": "Name, dates, times, attendance, location and activity.",
+      "promptAr": "الاسم والتواريخ والأوقات والحضور والموقع والنشاط."
+    },
+    {
+      "key": "P02",
+      "n": 2,
+      "source": "derived",
+      "promptEn": "The organizer, each provider and the Medical Director, from the accepted invitations.",
+      "promptAr": "المنظّم وكل مزوّد والمدير الطبي، من الدعوات المقبولة."
+    },
+    {
+      "key": "P03",
+      "n": 3,
+      "source": "linked",
+      "linked": [
+        "B5"
+      ],
+      "ownText": true,
+      "promptEn": "Staff numbers, roles, locations and times come from the response team. Add relief and coverage changes.",
+      "promptAr": "تأتي أعداد الملاك والأدوار والمواقع والأوقات من فريق الاستجابة. أضيفوا الاستبدال وتغيّرات التغطية."
+    },
+    {
+      "key": "P04",
+      "n": 4,
+      "source": "linked",
+      "linked": [
+        "B6"
+      ],
+      "promptEn": "From the treatment point answer.",
+      "promptAr": "من إجابة نقطة العلاج."
+    },
+    {
+      "key": "P05",
+      "n": 5,
+      "source": "linked",
+      "linked": [
+        "B8"
+      ],
+      "promptEn": "From the CPR and AED readiness answer.",
+      "promptAr": "من إجابة الجاهزية للإنعاش القلبي الرئوي وجهاز AED."
+    },
+    {
+      "key": "P06",
+      "n": 6,
+      "source": "linked",
+      "linked": [
+        "B8"
+      ],
+      "promptEn": "The same device and access answer; no second inventory.",
+      "promptAr": "إجابة الجهاز والوصول نفسها؛ لا جرد ثانٍ."
+    },
+    {
+      "key": "P07",
+      "n": 7,
+      "source": "linked",
+      "linked": [
+        "B9"
+      ],
+      "promptEn": "From the medical supplies answer.",
+      "promptAr": "من إجابة المستلزمات الطبية."
+    },
+    {
+      "key": "P08",
+      "n": 8,
+      "source": "linked",
+      "linked": [
+        "B7"
+      ],
+      "promptEn": "From the EMS and ambulance arrangements. Acceptance of an invitation alone is not an arrangement.",
+      "promptAr": "من ترتيبات الإسعاف وخدمات الطوارئ الطبية. قبول الدعوة وحده ليس ترتيباً."
+    },
+    {
+      "key": "P09",
+      "n": 9,
+      "source": "linked",
+      "linked": [
+        "B10",
+        "B11"
+      ],
+      "promptEn": "From the emergency access and patient access answers and the maps.",
+      "promptAr": "من إجابتَي وصول مركبات الطوارئ والوصول إلى المريض ومن الخرائط."
+    },
+    {
+      "key": "P10",
+      "n": 10,
+      "source": "linked",
+      "linked": [
+        "B14",
+        "B15"
+      ],
+      "promptEn": "From the team communication answer; at Level 3 the Medical Director confirms medical command.",
+      "promptAr": "من إجابة التواصل بين الفرق؛ وفي المستوى 3 يؤكّد المدير الطبي القيادة الطبية."
+    },
+    {
+      "key": "P11",
+      "n": 11,
+      "source": "linked",
+      "linked": [
+        "B12"
+      ],
+      "promptEn": "From the receiving hospital answer.",
+      "promptAr": "من إجابة المستشفى المستقبِل."
+    },
+    {
+      "key": "P12",
+      "n": 12,
+      "source": "linked",
+      "linked": [
+        "B16"
+      ],
+      "promptEn": "At Level 2 the short escalation procedure. At Level 3 the eleven major-incident items below.",
+      "promptAr": "في المستوى 2 إجراء التصعيد المختصر. وفي المستوى 3 بنود الحوادث الجسيمة الأحد عشر أدناه."
+    },
+    {
+      "key": "P13",
+      "n": 13,
+      "source": "own",
+      "ownText": true,
+      "promptEn": "What weather, crowd or activity problems require a changed response?",
+      "promptAr": "ما مشكلات الطقس أو الحشود أو النشاط التي تستدعي تغيير الاستجابة؟"
+    },
+    {
+      "key": "P14",
+      "n": 14,
+      "source": "own",
+      "ownText": true,
+      "promptEn": "Who covers the event if an ambulance or team leaves, and how is extra help called?",
+      "promptAr": "من يغطي الفعالية إذا غادرت سيارة إسعاف أو فريق، وكيف تُطلب المساعدة الإضافية؟"
+    },
+    {
+      "key": "P15",
+      "n": 15,
+      "source": "linked",
+      "linked": [
+        "B18"
+      ],
+      "ownText": true,
+      "promptEn": "Who keeps clinical records, and how are patients handed over? The provider's procedure only; individual patient records stay outside this package.",
+      "promptAr": "من يحتفظ بالسجلات السريرية، وكيف يُسلَّم المرضى؟ إجراء المزوّد فقط؛ وتبقى سجلات المرضى الفردية خارج هذا الملف."
+    },
+    {
+      "key": "P16",
+      "n": 16,
+      "source": "own",
+      "ownText": true,
+      "promptEn": "Who collects the totals and completes and signs the report? The report itself is completed after the event.",
+      "promptAr": "من يجمع الأرقام الإجمالية ويُعدّ التقرير ويوقّعه؟ يُستكمل التقرير نفسه بعد الفعالية."
+    }
   ],
   "majorIncidentItems": [
-    { "key": "M01", "n": 1, "promptEn": "What triggers a major incident, and who can declare or recommend it?", "promptAr": "ما الذي يستدعي إعلان حادث جسيم، ومن يستطيع إعلانه أو التوصية به؟" },
-    { "key": "M02", "n": 2, "promptEn": "Who leads, and how does medical command fit into the event's incident management?", "promptAr": "من يقود، وكيف تندمج القيادة الطبية في إدارة حوادث الفعالية؟" },
-    { "key": "M03", "n": 3, "linked": ["B14"], "promptEn": "Primary and backup communications, from the team communication answer.", "promptAr": "الاتصالات الأساسية والبديلة، من إجابة التواصل بين الفرق." },
-    { "key": "M04", "n": 4, "promptEn": "Which triage method will all teams use?", "promptAr": "ما طريقة الفرز التي ستعتمدها جميع الفرق؟" },
-    { "key": "M05", "n": 5, "promptEn": "Where will casualties be gathered and treated?", "promptAr": "أين سيُجمع المصابون ويُعالجون؟" },
-    { "key": "M06", "n": 6, "promptEn": "Where do ambulances load, and how do they reach that point?", "promptAr": "أين تُحمَّل سيارات الإسعاف، وكيف تصل إلى تلك النقطة؟" },
-    { "key": "M07", "n": 7, "promptEn": "Who requests extra EMS and public resources, and how?", "promptAr": "من يطلب موارد إسعافية وعامة إضافية، وكيف؟" },
-    { "key": "M08", "n": 8, "promptEn": "Who notifies the hospitals and coordinates where patients go?", "promptAr": "من يُبلغ المستشفيات وينسّق وجهات المرضى؟" },
-    { "key": "M09", "n": 9, "promptEn": "How will routine medical cover continue?", "promptAr": "كيف تستمر التغطية الطبية الاعتيادية؟" },
-    { "key": "M10", "n": 10, "promptEn": "Who can suspend, evacuate or end the event, and how is that communicated?", "promptAr": "من يستطيع تعليق الفعالية أو إخلاءها أو إنهاءها، وكيف يُبلَّغ ذلك؟" },
-    { "key": "M11", "n": 11, "promptEn": "How will teams identify, track and reunite patients, where applicable?", "promptAr": "كيف تعرّف الفرق المرضى وتتتبّعهم وتعيد جمعهم بذويهم، عند الانطباق؟" }
+    {
+      "key": "M01",
+      "n": 1,
+      "promptEn": "What triggers a major incident, and who can declare or recommend it?",
+      "promptAr": "ما الذي يستدعي إعلان حادث جسيم، ومن يستطيع إعلانه أو التوصية به؟"
+    },
+    {
+      "key": "M02",
+      "n": 2,
+      "promptEn": "Who leads, and how does medical command fit into the event's incident management?",
+      "promptAr": "من يقود، وكيف تندمج القيادة الطبية في إدارة حوادث الفعالية؟"
+    },
+    {
+      "key": "M03",
+      "n": 3,
+      "linked": [
+        "B14"
+      ],
+      "promptEn": "Primary and backup communications, from the team communication answer.",
+      "promptAr": "الاتصالات الأساسية والبديلة، من إجابة التواصل بين الفرق."
+    },
+    {
+      "key": "M04",
+      "n": 4,
+      "promptEn": "Which triage method will all teams use?",
+      "promptAr": "ما طريقة الفرز التي ستعتمدها جميع الفرق؟"
+    },
+    {
+      "key": "M05",
+      "n": 5,
+      "promptEn": "Where will casualties be gathered and treated?",
+      "promptAr": "أين سيُجمع المصابون ويُعالجون؟"
+    },
+    {
+      "key": "M06",
+      "n": 6,
+      "promptEn": "Where do ambulances load, and how do they reach that point?",
+      "promptAr": "أين تُحمَّل سيارات الإسعاف، وكيف تصل إلى تلك النقطة؟"
+    },
+    {
+      "key": "M07",
+      "n": 7,
+      "promptEn": "Who requests extra EMS and public resources, and how?",
+      "promptAr": "من يطلب موارد إسعافية وعامة إضافية، وكيف؟"
+    },
+    {
+      "key": "M08",
+      "n": 8,
+      "promptEn": "Who notifies the hospitals and coordinates where patients go?",
+      "promptAr": "من يُبلغ المستشفيات وينسّق وجهات المرضى؟"
+    },
+    {
+      "key": "M09",
+      "n": 9,
+      "promptEn": "How will routine medical cover continue?",
+      "promptAr": "كيف تستمر التغطية الطبية الاعتيادية؟"
+    },
+    {
+      "key": "M10",
+      "n": 10,
+      "promptEn": "Who can suspend, evacuate or end the event, and how is that communicated?",
+      "promptAr": "من يستطيع تعليق الفعالية أو إخلاءها أو إنهاءها، وكيف يُبلَّغ ذلك؟"
+    },
+    {
+      "key": "M11",
+      "n": 11,
+      "promptEn": "How will teams identify, track and reunite patients, where applicable?",
+      "promptAr": "كيف تعرّف الفرق المرضى وتتتبّعهم وتعيد جمعهم بذويهم، عند الانطباق؟"
+    }
   ],
   "states": {
-    "complete": { "en": "Complete", "ar": "مكتمل" },
-    "pending": { "en": "Pending", "ar": "قيد الإنجاز" },
-    "notAdded": { "en": "Not added", "ar": "لم يُضف" },
-    "notProvided": { "en": "Not provided", "ar": "غير متوفر" },
-    "waiting": { "en": "Waiting", "ar": "بالانتظار" },
-    "later": { "en": "Later", "ar": "لاحقاً" }
+    "complete": {
+      "en": "Complete",
+      "ar": "مكتمل"
+    },
+    "pending": {
+      "en": "Pending",
+      "ar": "قيد الإنجاز"
+    },
+    "notAdded": {
+      "en": "Not added",
+      "ar": "لم يُضف"
+    },
+    "notProvided": {
+      "en": "Not provided",
+      "ar": "غير متوفر"
+    },
+    "waiting": {
+      "en": "Waiting",
+      "ar": "بالانتظار"
+    },
+    "later": {
+      "en": "Later",
+      "ar": "لاحقاً"
+    }
   },
   "groups": {
-    "required": { "en": "Required", "ar": "المطلوب", "noteEn": "Complete these before submitting", "noteAr": "أكملوا هذه قبل التقديم" },
-    "recommended": { "en": "Recommended", "ar": "الموصى به", "noteEn": "Optional", "noteAr": "اختياري" },
-    "later": { "en": "After the event", "ar": "بعد الفعالية", "noteEn": "Not part of this submission", "noteAr": "ليست جزءاً من هذا التقديم" }
+    "required": {
+      "en": "Required",
+      "ar": "المطلوب",
+      "noteEn": "Complete these before submitting",
+      "noteAr": "أكملوا هذه قبل التقديم"
+    },
+    "recommended": {
+      "en": "Recommended",
+      "ar": "الموصى به",
+      "noteEn": "Optional",
+      "noteAr": "اختياري"
+    },
+    "later": {
+      "en": "After the event",
+      "ar": "بعد الفعالية",
+      "noteEn": "Not part of this submission",
+      "noteAr": "ليست جزءاً من هذا التقديم"
+    }
   },
   "obligations": {
-    "required": { "en": "Required", "ar": "مطلوب" },
-    "requiredWhereApplicable": { "en": "Required where applicable", "ar": "مطلوب عند الانطباق" },
-    "inPlan": { "en": "Required, in the medical plan", "ar": "مطلوب، ضمن الخطة الطبية" },
-    "recommended": { "en": "Recommended", "ar": "موصى به" },
-    "perAgency": { "en": "Required from each agency", "ar": "مطلوب من كل جهة" },
-    "afterEvent": { "en": "After the event", "ar": "بعد الفعالية" },
-    "whenCare": { "en": "When care is provided", "ar": "عند تقديم الرعاية" },
-    "ifIncident": { "en": "If a serious incident occurs", "ar": "عند وقوع حادثة جسيمة" },
-    "ifRequested": { "en": "Only if the Ministry requests it", "ar": "فقط إذا طلبته الوزارة" },
-    "notRequired": { "en": "Not required", "ar": "غير مطلوب" }
+    "required": {
+      "en": "Required",
+      "ar": "مطلوب"
+    },
+    "requiredWhereApplicable": {
+      "en": "Required where applicable",
+      "ar": "مطلوب عند الانطباق"
+    },
+    "inPlan": {
+      "en": "Required, in the medical plan",
+      "ar": "مطلوب، ضمن الخطة الطبية"
+    },
+    "recommended": {
+      "en": "Recommended",
+      "ar": "موصى به"
+    },
+    "perAgency": {
+      "en": "Required from each agency",
+      "ar": "مطلوب من كل جهة"
+    },
+    "afterEvent": {
+      "en": "After the event",
+      "ar": "بعد الفعالية"
+    },
+    "whenCare": {
+      "en": "When care is provided",
+      "ar": "عند تقديم الرعاية"
+    },
+    "ifIncident": {
+      "en": "If a serious incident occurs",
+      "ar": "عند وقوع حادثة جسيمة"
+    },
+    "ifRequested": {
+      "en": "Only if the Ministry requests it",
+      "ar": "فقط إذا طلبته الوزارة"
+    },
+    "notRequired": {
+      "en": "Not required",
+      "ar": "غير مطلوب"
+    }
   },
   "authors": {
-    "organizer": { "en": "Organizer", "ar": "المنظّم" },
-    "ems": { "en": "EMS agency", "ar": "جهة الإسعاف" },
-    "director": { "en": "Medical Director", "ar": "المدير الطبي" }
+    "organizer": {
+      "en": "Organizer",
+      "ar": "المنظّم"
+    },
+    "ems": {
+      "en": "EMS agency",
+      "ar": "جهة الإسعاف"
+    },
+    "director": {
+      "en": "Medical Director",
+      "ar": "المدير الطبي"
+    }
   },
   "copy": {
-    "whoEn": "Who handles it", "whoAr": "من يتولاه",
-    "derivedEn": "Included automatically", "derivedAr": "يُدرج تلقائياً",
-    "answeredByEn": "Recorded by {name} ({role}) · {date} · version {version}", "answeredByAr": "سجّله {name} ({role}) · {date} · النسخة {version}",
-    "conflictEn": "Someone saved a newer answer while you were editing. Review it, then save again.", "conflictAr": "حفظ شخص آخر إجابة أحدث أثناء تعديلكم. راجعوها ثم احفظوا مجدداً.",
-    "notYoursEn": "Recorded by {role}. You can read it, not change it.", "notYoursAr": "يسجّله {role}. يمكنكم قراءته لا تغييره.",
-    "waitingDirectorEn": "Waiting for the Medical Director to accept", "waitingDirectorAr": "بانتظار قبول المدير الطبي",
-    "waitingEmsEn": "Waiting for the EMS agency to accept", "waitingEmsAr": "بانتظار قبول جهة الإسعاف",
-    "noEmsEn": "No EMS agency has been invited", "noEmsAr": "لم تُدعَ أي جهة إسعاف",
-    "noDirectorEn": "No Medical Director has been invited", "noDirectorAr": "لم يُدعَ أي مدير طبي",
-    "waitingApprovalEn": "Prepared. Waiting for the Medical Director's approval", "waitingApprovalAr": "أُعدّت. بانتظار اعتماد المدير الطبي",
-    "approvalReopenedEn": "Changed since the last approval. The Medical Director approves the current version again", "approvalReopenedAr": "تغيّرت منذ آخر اعتماد. يعتمد المدير الطبي النسخة الحالية مجدداً",
-    "agencySignedEn": "{name} — signed", "agencySignedAr": "{name} — موقَّع",
-    "agencyUnsignedEn": "{name} — not yet signed", "agencyUnsignedAr": "{name} — لم يُوقَّع بعد",
-    "sourceRuleEn": "Rule at this level", "sourceRuleAr": "القاعدة في هذا المستوى",
-    "responsibilityEn": "Source responsibility", "responsibilityAr": "المسؤولية بحسب المصدر",
-    "planSectionEn": "Plan section {n}", "planSectionAr": "قسم الخطة {n}",
-    "requestedEn": "Requested by the Ministry", "requestedAr": "بطلب من الوزارة",
-    "notApplicableEn": "Recorded as not applicable, with the reason", "notApplicableAr": "سُجّل أنه غير منطبق، مع السبب",
-    "waivedEn": "Not required for this filing: the requirement took effect after it was filed. The Ministry asks for it through revision.", "waivedAr": "غير مطلوب لهذا التقديم: دخل المتطلب حيّز التنفيذ بعد التقديم. وتطلبه الوزارة عبر التعديل.",
-    "assessmentIncompleteEn": "The assessment is not complete; no level is derived", "assessmentIncompleteAr": "التقييم غير مكتمل؛ لم يُستنتج مستوى"
-  }
+    "whoEn": "Who handles it",
+    "whoAr": "من يتولاه",
+    "derivedEn": "Included automatically",
+    "derivedAr": "يُدرج تلقائياً",
+    "answeredByEn": "Recorded by {name} ({role}) · {date} · version {version}",
+    "answeredByAr": "سجّله {name} ({role}) · {date} · النسخة {version}",
+    "conflictEn": "Someone saved a newer answer while you were editing. Review it, then save again.",
+    "conflictAr": "حفظ شخص آخر إجابة أحدث أثناء تعديلكم. راجعوها ثم احفظوا مجدداً.",
+    "notYoursEn": "Recorded by {role}. You can read it, not change it.",
+    "notYoursAr": "يسجّله {role}. يمكنكم قراءته لا تغييره.",
+    "waitingDirectorEn": "Waiting for the Medical Director to accept",
+    "waitingDirectorAr": "بانتظار قبول المدير الطبي",
+    "waitingEmsEn": "Waiting for the EMS agency to accept",
+    "waitingEmsAr": "بانتظار قبول جهة الإسعاف",
+    "noEmsEn": "No EMS agency has been invited",
+    "noEmsAr": "لم تُدعَ أي جهة إسعاف",
+    "noDirectorEn": "No Medical Director has been invited",
+    "noDirectorAr": "لم يُدعَ أي مدير طبي",
+    "waitingApprovalEn": "Prepared. Waiting for the Medical Director's approval",
+    "waitingApprovalAr": "أُعدّت. بانتظار اعتماد المدير الطبي",
+    "approvalReopenedEn": "Changed since the last approval. The Medical Director approves the current version again",
+    "approvalReopenedAr": "تغيّرت منذ آخر اعتماد. يعتمد المدير الطبي النسخة الحالية مجدداً",
+    "agencySignedEn": "{name} — signed",
+    "agencySignedAr": "{name} — موقَّع",
+    "agencyUnsignedEn": "{name} — not yet signed",
+    "agencyUnsignedAr": "{name} — لم يُوقَّع بعد",
+    "sourceRuleEn": "Rule at this level",
+    "sourceRuleAr": "القاعدة في هذا المستوى",
+    "responsibilityEn": "Source responsibility",
+    "responsibilityAr": "المسؤولية بحسب المصدر",
+    "planSectionEn": "Plan section {n}",
+    "planSectionAr": "قسم الخطة {n}",
+    "requestedEn": "Requested by the Ministry",
+    "requestedAr": "بطلب من الوزارة",
+    "notApplicableEn": "Recorded as not applicable, with the reason",
+    "notApplicableAr": "سُجّل أنه غير منطبق، مع السبب",
+    "waivedEn": "Not required for this filing: the requirement took effect after it was filed. The Ministry asks for it through revision.",
+    "waivedAr": "غير مطلوب لهذا التقديم: دخل المتطلب حيّز التنفيذ بعد التقديم. وتطلبه الوزارة عبر التعديل.",
+    "assessmentIncompleteEn": "The assessment is not complete; no level is derived",
+    "assessmentIncompleteAr": "التقييم غير مكتمل؛ لم يُستنتج مستوى",
+    "firstAidFromTeamEn": "Provided by the BLS medical response team, as recorded on that row.",
+    "firstAidFromTeamAr": "يوفّرها فريق الاستجابة الطبية للدعم الحيوي الأساسي، كما هو مسجَّل في ذلك الصف.",
+    "summaryTitleEn": "Medical arrangements summary",
+    "summaryTitleAr": "ملخص الترتيبات الطبية",
+    "summaryNoteEn": "Generated from your answers. Review it before submitting; change an answer on its step.",
+    "summaryNoteAr": "مُولَّد من إجاباتكم. راجعوه قبل التقديم؛ وغيّروا أي إجابة من خطوتها."
+  },
+  "$commentAudit": "Partner UI audit, 8 October 2026: the Requirements page confirms that each requirement is met; the plan carries the operational detail. Level 1 takes minutes and generates a short medical-arrangements summary; Level 2 collects only what demonstrates the requirement; Level 3 keeps its mandatory elements as short confirmations that populate the plan. No names, counts, shifts or inventories on the cards; first-aid coverage reuses the BLS provider's answer where it provides it."
 }

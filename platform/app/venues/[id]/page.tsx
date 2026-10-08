@@ -4,6 +4,7 @@ import { NextStepCard } from '../../../components/NextStepCard';
 import { StageRail } from '../../../components/StageRail';
 import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import { VenueFinalReview } from '../../../components/record/VenueFinalReview';
+import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
 import { actionGrid, actionCell, actionPill, actionPillDisabled, actionReason, gateReason } from '../../../components/RecordActions';
 import { L } from '../../../components/L';
 import { ownedVenuePage } from '../../../lib/venue/page';
@@ -97,7 +98,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
             </div>
           ) : null}
           <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.saved ?? q.doc ?? null}
-            final={<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} />} />
+            final={<>{w.level === 1 ? <MedicalArrangementsSummary instances={w.record.instances} /> : null}<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} /></>} />
         </div>
       ) : (
         <>

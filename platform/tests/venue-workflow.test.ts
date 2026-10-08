@@ -67,17 +67,16 @@ describe('the venue service on the shared catalogue', () => {
     expect(byKey(1, 'B1')!.values).toEqual({ name: 'Operator', phone: '+9613111111' });
     expect(byKey(1, 'B1', { organizerContact: null })!.state).toBe('pending');
     expect(byKey(2, 'P-M')!.labelEn).toBe('Site map');
-    expect(byKey(1, 'B4')!.fields.find((f) => f.key === 'arranged')!.labelEn).toBe('They can provide first aid throughout each operating session.');
+    expect(byKey(1, 'B4')!.fields.find((f) => f.key === 'available')!.labelEn).toBe('Trained first-aid personnel will be available during each operating session.');
   });
 
-  it('records the Level 1 local EMS contact as a confirmation by the operator alone, no invitation', () => {
+  it('records the Level 1 local EMS access as one short answer by the operator alone, no invitation', () => {
     const contact = byKey(1, 'B7')!;
-    expect(contact.labelEn).toBe('Local EMS contact');
-    expect(contact.fields.map((f) => f.key)).toEqual(['contacted', 'shared', 'knowHow', 'phone']);
-    expect(contact.fields.find((f) => f.key === 'shared')!.labelEn).toBe("I have shared the venue's location, access and operating times.");
+    expect(contact.labelEn).toBe('Local EMS access');
+    expect(contact.fields.map((f) => f.key)).toEqual(['how']);
     expect(authorsFor('B7', 1, 'venue')).toEqual(['organizer']);
     expect(contact.state).toBe('pending');
-    expect(byKey(1, 'B7', { answers: { B7: answer({ contacted: true, shared: true }) } })!.missing).toEqual(['knowHow', 'phone']);
+    expect(byKey(1, 'B7', { answers: { B7: answer({ how: '' }) } })!.missing).toEqual(['how']);
     expect(byKey(1, 'B7', { answers: { B7: full(1, 'B7') } })!.state).toBe('complete');
   });
 

@@ -40,12 +40,12 @@ beforeAll(async()=>{vi.stubEnv('DATABASE_PATH',join(folder,'test.db'));vi.stubEn
 afterAll(()=>{getDb().close();vi.unstubAllEnvs();rmSync(folder,{recursive:true,force:true})});
 test('saved facts are locked, the contact is prefilled, and the organizer cannot enter a clinical row',async()=>{
  as('test_organizer');expect(state().level).toBe(3);expect(inst('B1')).toMatchObject({state:'complete',values:{name:'Operator',phone:'+9613111111'}});
- await expect(saveVenueDetailsAction(id,new FormData())).rejects.toThrow(`redirect:/venues/${id}`);
+ await expect(saveVenueDetailsAction(id,null,new FormData())).rejects.toThrow(`redirect:/venues/${id}`);
  expect(await saveVenueAssessmentAction(id,{answers:[0,0,0,0,0,0,0,0,0],attendance:10,representative:'x',position:'x'})).toEqual({error:'locked'});
  // The AED row is the medical team's at Level 3; the catalogue, not the screen, refuses the organizer.
  expect(await saveRequirementAnswerAction('venue',id,'B8',{baseVersion:0,values:{location:'Fake organizer answer'}})).toEqual({error:'forbidden'});expect(inst('B8').answeredBy).toBeNull();
  // A field the catalogue does not define is refused with its name; nothing is stored.
- expect(await saveRequirementAnswerAction('venue',id,'B5',{baseVersion:0,values:{team:'x',responders:'many',coverage:'y'}})).toEqual({error:'invalid',fields:['responders']});
+ expect(await saveRequirementAnswerAction('venue',id,'B5',{baseVersion:0,values:{bls:true,firstAid:'maybe'}})).toEqual({error:'invalid',fields:['firstAid']});
  await saveRow('B10');expect(inst('B10').state).toBe('complete');
  for(const kind of ['ems','director'])await expect(inviteVenuePartnerAction(id,form({kind,name:`Venue ${kind}`,email:`${kind}@venue.example.test`}))).rejects.toThrow('invited=yes');
  const inv=venueInvitations(id);expect(inv).toHaveLength(2);expect(inv[0]?.token).toMatch(/^[a-f0-9]{48}$/);expect(inv.every(i=>i.delivery==='demo')).toBe(true);
@@ -55,7 +55,7 @@ test('saved facts are locked, the contact is prefilled, and the organizer cannot
 test('incomplete legacy details still need an explicit Edit action',async()=>{
  as('test_organizer');const db=getDb();db.prepare("UPDATE venues SET responsible_phone='' WHERE id=?").run(id);
  try{expect(state().detailsDone).toBe(false);expect(state().detailsEditing).toBe(false);
- await expect(saveVenueDetailsAction(id,new FormData())).rejects.toThrow(/^redirect:\/venues\/VN-9001$/);
+ await expect(saveVenueDetailsAction(id,null,new FormData())).rejects.toThrow(/^redirect:\/venues\/VN-9001$/);
  await expect(reopenVenueSectionAction(id,'details')).rejects.toThrow(`redirect:/venues/${id}/details`);expect(state().detailsEditing).toBe(true);
  }finally{db.prepare("UPDATE venues SET responsible_phone='+9613111111' WHERE id=?").run(id);db.prepare('UPDATE venue_packages SET details_editing=0 WHERE venue_id=?').run(id);}
 });
@@ -150,10 +150,10 @@ test('Level 1 records one confirmed local EMS contact by the operator, and locks
  // The seeded venue holds a certificate (read-only). This test needs it as a Level 1 package in preparation,
  // so it says so explicitly rather than relying on a missing package row reading as a draft.
  getDb().prepare("INSERT OR REPLACE INTO venue_packages(venue_id,status,assessment_version) VALUES(?,'draft',(SELECT MAX(version) FROM venue_assessments WHERE venue_id=?))").run(venue,venue);
- expect(venuePackageFor(owner,venue)!.level).toBe(1);expect(row()).toMatchObject({state:'pending',labelEn:'Local EMS contact',authors:['organizer']});
- await saveRow('B7',{contacted:true,shared:true},venue);expect(row()).toMatchObject({state:'pending',missing:['knowHow','phone']});
- await saveRow('B7',{contacted:true,shared:true,knowHow:true,phone:'+9613111111'},venue);expect(row().state).toBe('complete');
- as('test_ems');expect(await saveRequirementAnswerAction('venue',venue,'B7',{baseVersion:2,values:{contacted:true}})).toMatchObject({error:expect.stringMatching(/^(not-found|forbidden)$/)});
+ expect(venuePackageFor(owner,venue)!.level).toBe(1);expect(row()).toMatchObject({state:'pending',labelEn:'Local EMS access',authors:['organizer']});
+ await saveRow('B7',{how:' '},venue);expect(row()).toMatchObject({state:'pending',missing:['how']});
+ await saveRow('B7',{how:'Call 140; the station knows the operating times'},venue);expect(row().state).toBe('complete');
+ as('test_ems');expect(await saveRequirementAnswerAction('venue',venue,'B7',{baseVersion:2,values:{how:'x'}})).toMatchObject({error:expect.stringMatching(/^(not-found|forbidden)$/)});
  as('test_organizer');getDb().prepare("UPDATE venue_packages SET status='submitted' WHERE venue_id=?").run(venue);
- expect(await saveRequirementAnswerAction('venue',venue,'B7',{baseVersion:2,values:{contacted:true}})).toEqual({error:'locked'});expect(row().state).toBe('complete');
+ expect(await saveRequirementAnswerAction('venue',venue,'B7',{baseVersion:2,values:{how:'x'}})).toEqual({error:'locked'});expect(row().state).toBe('complete');
 });

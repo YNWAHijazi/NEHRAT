@@ -5,14 +5,21 @@ import { currentAccount } from '../../lib/auth';
 import { PUBLIC_LANDING, RECURRING_VENUE_MIN_CAPACITY, eventApplicability, facilityApplicability, venueApplicability } from '../../lib/rules';
 
 export default async function ApplicabilityPage({ searchParams }: {
-  searchParams: Promise<{ subject?: string; c?: string | string[]; checked?: string; eligible?: string; hosts?: string; cap?: string; cat?: string }>;
+  searchParams: Promise<{ subject?: string; planned?: string; c?: string | string[]; checked?: string; eligible?: string; hosts?: string; cap?: string; cat?: string }>;
 }) {
   const account = await currentAccount();
   const q = await searchParams;
   const P = PUBLIC_LANDING;
   const subject = ['event', 'venue', 'facility'].includes(q.subject ?? '') ? q.subject : null;
   const selected = (Array.isArray(q.c) ? q.c : q.c ? [q.c] : []).map(Number);
-  const answer = subject === 'event' && (q.checked === '1' || q.c !== undefined)
+  // The event branch asks two things (partner audit, 8 October 2026): is this a planned
+  // organized event at all; if so, or if unsure, do any of the criteria apply.
+  const planned = q.planned === 'yes' || q.planned === 'no' || q.planned === 'unsure' ? q.planned : null;
+  const criteriaAsked = q.checked === '1' || q.c !== undefined;
+  const showCriteria = subject === 'event' && (planned === 'yes' || planned === 'unsure' || (planned === null && criteriaAsked));
+  const answer = subject === 'event' && planned === 'no'
+    ? eventApplicability([])
+    : subject === 'event' && criteriaAsked && planned !== 'no'
     ? eventApplicability(selected)
     : subject === 'venue' && (q.eligible !== undefined || q.hosts !== undefined)
       ? venueApplicability(q.eligible === 'yes' || q.hosts === '1', q.eligible === 'yes' || q.cap === '1')
@@ -31,15 +38,25 @@ export default async function ApplicabilityPage({ searchParams }: {
         <h2 style={{ margin: '0 0 10px', fontSize: 20 }}><L en="Events that do not need certification" ar="فعاليات لا تحتاج إلى اعتماد" /></h2>
         {P.notRoutinelyEn.map((en, i) => <p key={en} style={{ margin: '8px 0', lineHeight: 1.6 }}><L en={en} ar={P.notRoutinelyAr[i]!} /></p>)}
       </section>
-      <form method="get" data-region="event-branch">
-        <input type="hidden" name="subject" value="event" /><input type="hidden" name="checked" value="1" />
-        <h2 style={{ fontSize: 22 }}><L en="Does any of this apply to your event?" ar="هل ينطبق أي مما يلي على فعاليتكم؟" /></h2>
+      <form method="get" data-region="planned-question">
+        <input type="hidden" name="subject" value="event" />
+        <h2 style={{ fontSize: 22 }}><L en={P.plannedEventEn} ar={P.plannedEventAr} /></h2>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {P.plannedOptions.map((o) => <button key={o.value} type="submit" name="planned" value={o.value} aria-pressed={planned === o.value} style={{ ...button, marginBlockStart: 0, background: planned === o.value ? 'var(--brand)' : 'var(--surface2)', color: planned === o.value ? 'var(--bg)' : 'var(--ink)', border: '1px solid var(--line)' }}><L en={o.en} ar={o.ar} /></button>)}
+        </div>
+      </form>
+      {planned === 'no' ? <p data-region="not-planned" style={{ margin: '16px 0 0', lineHeight: 1.65, maxWidth: '70ch' }}><L en={P.notPlannedEn} ar={P.notPlannedAr} /></p> : null}
+      {showCriteria ? <form method="get" data-region="event-branch" style={{ marginBlockStart: 28 }}>
+        <input type="hidden" name="subject" value="event" /><input type="hidden" name="checked" value="1" />{planned ? <input type="hidden" name="planned" value={planned} /> : null}
+        {planned === 'unsure' ? <p data-region="not-sure" style={{ margin: '0 0 12px', lineHeight: 1.65, maxWidth: '70ch', color: 'var(--muted)' }}><L en={P.notSureEn} ar={P.notSureAr} /></p> : null}
+        <h2 style={{ fontSize: 22 }}><L en={P.criteriaQuestionEn} ar={P.criteriaQuestionAr} /></h2>
         <p><L en="Select all that apply." ar="اختاروا كل ما ينطبق." /></p>
         {P.criteria.map((c, i) => <label key={i} style={{ ...box, display: 'flex', gap: 12, marginBlockEnd: 8, lineHeight: 1.6, cursor: 'pointer' }}>
           <input type="checkbox" name="c" value={i} defaultChecked={selected.includes(i)} style={{ width: 18, height: 18, flex: 'none', marginBlockStart: 4 }} /><span><L en={c.en} ar={c.ar} /></span>
         </label>)}
+        <p style={{ margin: '4px 0 0', fontSize: '14.5px', color: 'var(--muted)' }}><L en={P.criteriaRuleEn} ar={P.criteriaRuleAr} /></p>
         <button type="submit" style={button}><L en="Continue" ar="متابعة" /></button>
-      </form>
+      </form> : null}
     </> : null}
     {subject === 'venue' ? <form method="get" data-region="venue-branch">
       <input type="hidden" name="subject" value="venue" />

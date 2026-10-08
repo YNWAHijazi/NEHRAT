@@ -5,7 +5,8 @@ import { InfoNote } from '../../../components/InfoNote';
 
 
 /**
- * Steps 1-3 from the reference: profile, category determination, coordinator.
+ * Steps 1-3 from the reference: profile, category determination, responsible contact
+ * (one person -- partner audit, 2026-10-08).
  *
  * The category step asks lib/rules which of the four state chips applies and whether
  * the journey ends (categoryEndsJourney). Where it ends, the ONLY actions are Record
@@ -47,7 +48,7 @@ const CHIP: Record<StateChip, { bg: string; color: string; border: string; en: s
 const STEPS = [
   { en: 'Facility profile', ar: 'ملف المنشأة' },
   { en: 'Category', ar: 'الفئة' },
-  { en: 'Coordinator', ar: 'المنسّق' },
+  { en: 'Responsible contact', ar: 'جهة الاتصال المسؤولة' },
   { en: 'Device records', ar: 'سجلات الأجهزة' },
   { en: 'Response plan', ar: 'خطة الاستجابة' },
   { en: 'Registered', ar: 'مُسجَّلة' },
@@ -242,7 +243,7 @@ export function RegisterFacilityForm({
                   onClick={() => {if(catKey !== 'transport' || profile.facilityType) setStep(3);}} disabled={catKey==='transport'&&!profile.facilityType}
                   style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
                 >
-                  <L en="Continue to the coordinator" ar="المتابعة إلى المنسّق" />
+                  <L en="Continue to the responsible contact" ar="المتابعة إلى جهة الاتصال المسؤولة" />
                 </button>
               ) : null}
             </div>
@@ -258,7 +259,7 @@ export function RegisterFacilityForm({
           <input type="hidden" name="category" value={catKey ?? ''} />
           <input type="hidden" name="mapLat" value={point?.lat ?? ''}/><input type="hidden" name="mapLng" value={point?.lng ?? ''}/><input type="hidden" name="mapConfirmed" value={point?'yes':'no'}/>
           <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-            <L en="Responsible facility contact" ar="جهة الاتصال المسؤولة في المنشأة" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
+            <L en="Responsible contact" ar="جهة الاتصال المسؤولة" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
           </h2>
           {/* The name-or-position explainer left this step (partner ruling, second
               sweep): the field labels already say "Name or position". */}
