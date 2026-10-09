@@ -1,10 +1,10 @@
 /**
- * THE MUNICIPALITY LIST (owner, 9 October 2026). The official list is sent by the owner; until
- * then it is empty and every municipality field stays a typed field. The fixture below exists only
- * for these tests -- it is not the list and nothing reads it.
+ * THE MUNICIPALITY LIST (owner, 9 October 2026): the owner's seven governorate files, English
+ * only, word order restored. The fixture below exists only for these tests -- it is not the list
+ * and nothing reads it.
  */
 import { describe, expect, it } from 'vitest';
-import { foldForSearch, municipalityList, municipalityNamed, searchMunicipalities, splitMunicipalities, type Municipality } from '../lib/rules/municipalities';
+import { foldForSearch, municipalityLabel, municipalityList, municipalityNamed, searchMunicipalities, splitMunicipalities, type Municipality } from '../lib/rules/municipalities';
 
 const FIXTURE: Municipality[] = [
   { en: 'Beirut', ar: 'بيروت' },
@@ -14,8 +14,23 @@ const FIXTURE: Municipality[] = [
 ];
 
 describe('the municipality list', () => {
-  it('ships empty: no municipality is invented before the official list arrives', () => {
-    expect(municipalityList()).toEqual([]);
+  it("carries the owner's lists with the word order restored, and invents no Arabic", () => {
+    const list = municipalityList();
+    expect(list.length).toBeGreaterThan(700);
+    // The files reversed every multi-word name ("Aakrine Ain"); no name may end on a leading particle.
+    // Deir Qanoun Ras Al Ain (Sour) ends on "Ain" in its own right.
+    expect(list.filter((m) => m.en !== 'Deir Qanoun Ras Al Ain' && / (Al|Ain|Deir|Beit|Kafr|Kfar|El)$/.test(m.en.replace(/ \(.*\)$/, '')))).toEqual([]);
+    expect(list.find((m) => m.en === 'Ain Aakrine')?.districtEn).toBe('Koura');
+    expect(list.some((m) => m.districtEn === 'El Chouf')).toBe(true);
+    expect(list.some((m) => m.en === 'Beirut')).toBe(true);
+    expect(list.some((m) => /Welcome|located in/.test(m.en))).toBe(false);
+    expect(list.every((m) => !m.ar)).toBe(true);
+    expect(new Set(list.map((m) => m.en)).size).toBe(list.length);
+  });
+
+  it('shows the English name on the Arabic page while the Arabic names are pending', () => {
+    expect(municipalityLabel({ en: 'Jounieh' }, 'ar')).toBe('Jounieh');
+    expect(municipalityLabel({ en: 'Jounieh', ar: 'جونيه' }, 'ar')).toBe('جونيه');
   });
 
   it('finds a municipality by its English or Arabic name, starts-with first', () => {

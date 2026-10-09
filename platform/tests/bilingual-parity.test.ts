@@ -92,7 +92,7 @@ describe('every data file, not a hand-written list of five', () => {
     k.startsWith('$') || k === 'why' || /Note$/.test(k) || /Source$/.test(k);
 
   /**
-   * Exactly four exclusions, each named with its reason. A short list of specific paths
+   * Exactly five exclusions, each named with its reason. A short list of specific paths
    * is auditable; a loosened pattern is not, and a loosened pattern is how the guard
    * this one replaces went blind in the first place.
    *
@@ -111,6 +111,10 @@ describe('every data file, not a hand-written list of five', () => {
     {
       match: /^lib\/rules\/data\/plan\.json:\.sections\[\d+\]\.summaryEn$/,
       why: 'Sixteen one-line section summaries, English only. THE PROTOTYPE CARRIES THEM ENGLISH-ONLY TOO -- its plan-section arrays are [titleEn, titleAr, bodyEn, bodyAr, summaryEn], with no Arabic fifth element. Nothing in the build renders them, so they are dead data rather than a parity violation on screen; they are on the Pass C list because the prototype needs the Arabic before either side can render them.',
+    },
+    {
+      match: /^lib\/rules\/data\/municipalities\.json:\.municipalities\[\d+\]\.(en|districtEn|governorateEn)$/,
+      why: 'Proper names from the owner\'s municipality lists (9 October 2026), which carry no Arabic. The owner accepted English options until the Arabic names arrive ("keep english ... or make each option in both languages"); the Arabic page shows the English name meanwhile, and the file says arabicPending. Inventing Arabic names for a Ministry form is the worse error. Remove this exclusion when the Arabic list is loaded.',
     },
   ];
   const excluded = (id: string): boolean => EXCLUDED.some((e) => e.match.test(id));

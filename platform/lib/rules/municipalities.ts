@@ -1,19 +1,31 @@
 /**
  * THE MUNICIPALITY LIST (owner, 9 October 2026): a searchable list, each option in the page's
  * language, both names stored. The list is data (lib/rules/data/municipalities.json) and stays
- * empty until the official list arrives; while it is empty every municipality field stays a typed field.
+ * empty until the official list arrives; while it is empty every municipality field stays a typed field. Arabic names may be pending: the English name then stands in.
  * Plain TypeScript: no React, no next/*.
  */
 import data from './data/municipalities.json';
 
 export interface Municipality {
   en: string;
-  ar: string;
+  /** The Arabic name; absent while the Arabic list is pending -- the English name stands in. */
+  ar?: string;
   districtEn?: string;
   districtAr?: string;
+  governorateEn?: string;
 }
 
-const LIST = (data.municipalities as Municipality[]).filter((m) => m.en.trim() && m.ar.trim());
+const LIST = (data.municipalities as Municipality[]).filter((m) => m.en.trim());
+
+/** The name in a language: the Arabic name where the list carries one, else the English. */
+export function municipalityLabel(m: Municipality, lang: 'en' | 'ar'): string {
+  return lang === 'ar' && m.ar?.trim() ? m.ar : m.en;
+}
+
+/** The district in a language, falling back the same way. */
+export function districtLabel(m: Municipality, lang: 'en' | 'ar'): string {
+  return lang === 'ar' && m.districtAr?.trim() ? m.districtAr : m.districtEn ?? '';
+}
 
 export function municipalityList(): Municipality[] {
   return LIST;
@@ -41,7 +53,7 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
   const starts: Municipality[] = [];
   const contains: Municipality[] = [];
   for (const m of list) {
-    const names = [m.en, m.ar, m.districtEn ?? '', m.districtAr ?? ''].map(foldForSearch);
+    const names = [m.en, m.ar ?? '', m.districtEn ?? '', m.districtAr ?? ''].map(foldForSearch);
     if (names.slice(0, 2).some((n) => n.startsWith(q))) starts.push(m);
     else if (names.some((n) => n.includes(q))) contains.push(m);
   }
@@ -52,7 +64,7 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
 export function municipalityNamed(list: readonly Municipality[], name: string): Municipality | null {
   const n = foldForSearch(name);
   if (!n) return null;
-  return list.find((m) => foldForSearch(m.en) === n || foldForSearch(m.ar) === n) ?? null;
+  return list.find((m) => foldForSearch(m.en) === n || (m.ar ? foldForSearch(m.ar) === n : false)) ?? null;
 }
 
 /** Several municipalities are stored as one line, English names joined by commas. */

@@ -15,7 +15,11 @@ export const CONTINUE = 'Continue to requirements';
 export async function fillFacilityProfile(page:Page){
  await mockMapTiles(page);
  await page.goto('/facilities/new');
- for(const[k,v]of Object.entries({name:'PAD browser facility',operatingOrganization:'PAD browser operator',address:'Main road',municipality:'Beirut',phoneNumber:'+9611234567',email:'facility@example.com',accessPoint:'North gate',emsNumber:'140'}))await page.locator(`input[name=${k}]`).fill(v);
+ for(const[k,v]of Object.entries({name:'PAD browser facility',operatingOrganization:'PAD browser operator',address:'Main road',phoneNumber:'+9611234567',email:'facility@example.com',accessPoint:'North gate',emsNumber:'140'}))await page.locator(`input[name=${k}]`).fill(v);
+ // The municipality is chosen from the list (owner, 9 October 2026): typed, then the field is left.
+ const municipality=page.locator('[data-region=facility-registration] [data-region=municipality-field] input[role=combobox]');
+ await municipality.fill('Beirut');await municipality.press('Tab');
+ await expect(page.locator('input[type=hidden][name=municipality]')).toHaveValue('Beirut');
  await page.locator('select[name=hours]').selectOption({index:1});await chooseMapPoint(page);
 }
 
