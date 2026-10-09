@@ -501,6 +501,8 @@ function Overview({ id, facility, siteId, today }: { id: string; facility: Facil
   // Expiring soon or expired (owner, 9 October 2026): the annual confirmation and drill, by the Ministry's notice window.
   const renewal = siteRenewalFor(id, today);
   const renewalNotice = siteRenewalNotice(renewal);
+  // Named by the renewal itself, whatever else the site status says (a corrective action outranks it there).
+  const renewalLabel = siteStatusLabel(renewal.key === 'expired' ? 'expired' : 'expiringSoon');
   const tiles: { key: string; en: string; ar: string; value: ReactNode }[] = [
     { key: 'site-id', en: 'Site ID', ar: 'معرّف الموقع', value: siteId ?? '—' },
     { key: 'name', en: 'Name', ar: 'الاسم', value: <L en={facility.nameEn} ar={facility.nameAr} /> },
@@ -525,7 +527,7 @@ function Overview({ id, facility, siteId, today }: { id: string; facility: Facil
       {renewalNotice ? (
         <div data-region="renewal-notice" data-renewal={renewal.key} role={renewal.key === 'expired' ? 'alert' : 'status'} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', marginBlockEnd: 16, borderRadius: 12, ...(renewal.key === 'expired' ? { border: '1px solid var(--bad)', background: 'var(--bg)' } : { background: 'var(--accent-soft)', color: 'var(--accent-ink)' }) }}>
           <span style={{ fontSize: 15, lineHeight: 1.6 }}>
-            <strong style={{ fontWeight: 600 }}><L en={`${status.en}. `} ar={`${status.ar}. `} /></strong>
+            <strong style={{ fontWeight: 600 }}><L en={`${renewalLabel.en}. `} ar={`${renewalLabel.ar}. `} /></strong>
             <L en={renewalNotice.en} ar={renewalNotice.ar} />
           </span>
           <Link href={`/facilities/${id}?tab=readiness#confirmation`} style={{ flex: 'none', minHeight: 44, paddingInline: 22, borderRadius: 22, border: '1px solid currentColor', color: 'inherit', fontSize: '14.5px', fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>

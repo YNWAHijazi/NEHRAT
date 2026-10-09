@@ -16,6 +16,10 @@ const STAGE_STYLE: Record<RailStageKind, { color: string; edge: string; ink: str
  * workspaces read the same way.
  */
 export function StageRail({ titleEn, titleAr, stages, noteEn, noteAr }: { titleEn: string; titleAr: string; stages: RailStage[]; noteEn: string; noteAr: string }) {
+  // On a phone the columns shrink to a segmented bar and this one line names where the record
+  // stands (owner, 9 October 2026: the phone layout was crowded). The full rail is unchanged above 600px.
+  const nowIndex = stages.findIndex((s) => s.k === 'current' || s.k === 'returned');
+  const now = nowIndex >= 0 ? stages[nowIndex]! : null;
   return (
     <section data-region="rail" style={{ marginBlockEnd: 28, padding: '16px 22px', background: 'var(--surface2)', borderRadius: 16 }}>
       <div style={{ cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -30,7 +34,7 @@ export function StageRail({ titleEn, titleAr, stages, noteEn, noteAr }: { titleE
         {stages.map((s, i) => {
           const st = STAGE_STYLE[s.k];
           return (
-            <div key={i} style={{ paddingBlockStart: 12, borderBlockStart: `3px ${st.edge} ${st.color}` }}>
+            <div key={i} data-rail-stage={s.k} style={{ paddingBlockStart: 12, borderBlockStart: `3px ${st.edge} ${st.color}` }}>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBlockEnd: 6 }}>
                 <span style={{ fontSize: 12, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{i + 1}</span>
                 <span style={{ padding: '2px 7px', borderRadius: 999, background: st.chipBg, color: st.chipColor, fontSize: 11, letterSpacing: '.03em' }}>
@@ -47,6 +51,12 @@ export function StageRail({ titleEn, titleAr, stages, noteEn, noteAr }: { titleE
           );
         })}
       </div>
+      {now ? (
+        <div data-rail-now="" style={{ display: 'none' }}>
+          <span style={{ fontSize: '14.5px', fontWeight: 600 }}><L en={`${nowIndex + 1}. ${now.en}`} ar={`${nowIndex + 1}. ${now.ar}`} /></span>
+          {now.metaEn ? <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}><L en={now.metaEn} ar={now.metaAr} /></span> : null}
+        </div>
+      ) : null}
     </section>
   );
 }

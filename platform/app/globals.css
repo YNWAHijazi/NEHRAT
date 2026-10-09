@@ -211,7 +211,9 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   .step-nav { position: sticky; inset-block-start: 56px; z-index: 40; order: 0; margin-inline: -20px; background: var(--surface2); border-block-end: 1px solid var(--line); }
   .step-nav-toggle { display: flex; align-items: center; gap: 12px; inline-size: 100%; min-block-size: 56px; padding: 10px 20px; border: 0; background: var(--surface2); color: var(--ink); text-align: start; cursor: pointer; font: inherit; }
   .step-nav:not([data-open]) .step-list-wrap { display: none; }
-  .step-list-wrap { padding: 4px 20px 16px; border-radius: 0; max-block-size: 60vh; overflow-y: auto; }
+  /* Open, the list leaves the pin and takes its place in the page, above the step. */
+  .step-nav[data-open] { position: relative; inset-block-start: auto; }
+  .step-list-wrap { padding: 4px 20px 16px; border-radius: 0; }
 }
 @media print { .step-nav, .step-actions { display: none !important; } }
 
@@ -260,5 +262,36 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   [data-stack] > [data-due] span[style*="font-size: 24px"] { font-size: 20px !important; }
   [data-stack] > div > div:first-child { margin-block-end: 3px !important; }
   [data-pad] > div[style*="margin-bottom: 52px"], [data-pad] > div[style*="margin-block-end: 52px"] { margin-block-end: 32px !important; }
+
+  /* LESS CROWDED (owner, 9 October 2026, from a phone): the progress rail becomes a segmented
+     bar with one line for the current stage; nested cards lose a layer of padding; label and
+     value stack instead of squeezing into two columns. Nothing is hidden that is not one tap away. */
+  [data-region="rail"] { padding: 12px 16px !important; margin-block-end: 18px !important; border-radius: 12px !important; }
+  [data-rail] { display: flex !important; gap: 4px !important; margin-block-start: 10px !important; }
+  [data-rail] > [data-rail-stage] { flex: 1; padding-block-start: 0 !important; }
+  [data-rail] > [data-rail-stage] > * { display: none !important; }
+  [data-rail-now] { display: flex !important; flex-direction: column; gap: 2px; margin-block-start: 10px; line-height: 1.4; }
+  [data-facility-step] { padding: 16px 14px !important; }
+  [data-facility-step] > div:first-child { margin-block-end: 12px !important; }
+  [data-facility-step] > div:first-child > h2 { font-size: 19px !important; }
+  [data-region="facility-plan"] [data-region="procedure"] { padding: 14px !important; border-width: 1px !important; border-radius: 12px !important; margin-block-end: 14px !important; }
+  [data-region="facility-plan"] [data-region="procedure"] > div:first-child { margin-block-end: 12px !important; }
+  [data-region="facility-plan"] [data-region="procedure"] li { padding: 10px 12px !important; gap: 10px !important; }
+  [data-region="facility-plan"] [data-step-text] { font-size: 15px !important; }
+  [data-region="facility-plan"] [data-emergency-number] { font-size: 19px !important; }
+  [data-region="facility-plan"] [data-region="procedure"] > div:last-child { gap: 16px !important; margin-block-start: 14px !important; }
+  [data-region="derived"], [data-region="plan-profile"], [data-region="plan-contact"] { padding: 14px !important; border-radius: 12px !important; margin-block-end: 14px !important; }
+  [data-region="facility-plan"] > div[style*="grid"] { gap: 14px !important; margin-block-end: 14px !important; }
+  [data-region="facility-plan"] h3 { font-size: 16px !important; }
+  [data-kv] { flex-direction: column !important; align-items: stretch !important; gap: 2px !important; padding: 9px 12px !important; }
+  [data-kv] > span:first-child { font-size: 12.5px; }
+  [data-kv] > span:last-child { text-align: start !important; }
+  [data-region="record-header"] { gap: 12px !important; margin-block-end: 16px !important; }
+  [data-region="record-header"] > div:first-child > div:first-child { gap: 8px 18px !important; margin-block-end: 8px !important; }
+  [data-region="record-header"] > div:last-child { gap: 18px !important; }
+  [data-region="record-header"] > div:last-child > div > div:last-child { font-size: 20px !important; }
+  [data-region="site-overview"] > dl { grid-template-columns: 1fr 1fr !important; margin-block-end: 12px !important; }
+  [data-region="site-overview"] > dl > div { padding: 10px 12px !important; }
+  [data-region="site-overview"] > dl dd { font-size: 15px !important; }
 }
 
