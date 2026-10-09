@@ -1,7 +1,7 @@
 'use client';
 
 import { MunicipalityField } from '../../../components/MunicipalityField';
-import { municipalityList } from '../../../lib/rules/municipalities';
+import { municipalityLabel, municipalityList } from '../../../lib/rules/municipalities';
 
 /**
  * The facility/site's one-page intake (latest revision, 9 October 2026, sections 1 and 2):
@@ -183,7 +183,7 @@ export function RegisterFacilityForm({
       return (
         <div key={f.key} data-missing-anchor="municipality">
           <MunicipalityField options={MUNICIPALITIES} value={values['municipality'] ? [values['municipality']] : []}
-            onChange={(chosen) => setValues((v) => ({ ...v, municipality: chosen[0]?.en ?? '', municipalityAr: chosen[0]?.ar ?? '' }))}
+            onChange={(chosen) => setValues((v) => ({ ...v, municipality: chosen[0]?.en ?? '', municipalityAr: chosen[0] ? municipalityLabel(chosen[0], 'ar') : '' }))}
             labelEn={f.en} labelAr={f.ar} labelStyle={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.45 }}
             inputStyle={flagged('municipality') ? refusedInput : input} nameEn="municipality" nameAr="municipalityAr" invalid={flagged('municipality')} />
         </div>

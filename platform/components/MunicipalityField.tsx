@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { L } from './L';
 import { useDocumentLang } from './OptionText';
-import { municipalityNamed, searchMunicipalities, type Municipality } from '../lib/rules/municipalities';
+import { districtLabel, municipalityLabel, municipalityNamed, searchMunicipalities, type Municipality } from '../lib/rules/municipalities';
 
 /**
  * THE MUNICIPALITY FIELD (owner, 9 October 2026): a searchable list like the site field on an
@@ -12,6 +12,10 @@ import { municipalityNamed, searchMunicipalities, type Municipality } from '../l
  * `nameAr`. With `multiple`, each chosen municipality becomes a tag with a Remove control and
  * the stored value is the names joined by commas. An ARIA combobox: arrow keys move, Enter
  * chooses, Escape closes.
+ *
+ * The list SUGGESTS; it does not restrict. The list received is incomplete (owner's files,
+ * 9 October 2026), so a name that is not on it is kept as typed: "Use ..." at the foot of the
+ * list, or leaving the field, keeps it. Leaving the field with a listed name typed chooses it.
  *
  * Used only when the official list is loaded: while it is empty the screens keep their typed field.
  */
@@ -44,15 +48,17 @@ export function MunicipalityField({
   const lang = useDocumentLang();
   const listboxId = useId();
   const optionPrefix = useId();
-  const chosen = value.map((v) => municipalityNamed(options, v)).filter((m): m is Municipality => m !== null);
-  const label = (m: Municipality) => (lang === 'ar' ? m.ar : m.en);
+  // A value the list names is that entry; any other value is kept as typed, in both languages.
+  const chosen: Municipality[] = value.map((v) => municipalityNamed(options, v) ?? { en: v, ar: v });
+  const label = (m: Municipality) => municipalityLabel(m, lang);
   // A single choice shows its name in the field; a multiple choice keeps the field for searching.
   const [query, setQuery] = useState(!multiple && chosen[0] ? label(chosen[0]) : '');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   useEffect(() => {
-    if (!multiple) setQuery(chosen[0] ? label(chosen[0]) : '');
-    // Re-label when the page language changes or the choice changes from outside.
+    // Re-label a single choice when the page language changes or the choice changes from
+    // outside. Clearing the choice by typing leaves the typed text alone.
+    if (!multiple && chosen[0]) setQuery(label(chosen[0]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, value.join('|')]);
 
@@ -61,7 +67,11 @@ export function MunicipalityField({
     () => searchMunicipalities(options, searching).filter((m) => !(multiple && chosen.some((c) => c.en === m.en))),
     [options, searching, multiple, chosen],
   );
-  const shown = open && suggestions.length > 0;
+  const typed = query.trim();
+  // "Use what you typed" closes the list when the typed name is not one the list carries.
+  const offerTyped = typed !== '' && searching !== '' && municipalityNamed(options, typed) === null && !chosen.some((c) => c.en === typed);
+  const count = suggestions.length + (offerTyped ? 1 : 0);
+  const shown = open && count > 0;
 
   useEffect(() => {
     if (shown && active >= 0) document.getElementById(`${optionPrefix}-${active}`)?.scrollIntoView({ block: 'nearest' });
@@ -79,21 +89,29 @@ export function MunicipalityField({
     setActive(-1);
   };
   const remove = (m: Municipality) => onChange(chosen.filter((c) => c.en !== m.en));
+  /** Keeps what was typed: the listed entry it names, else the text itself. */
+  const keepTyped = () => {
+    if (!typed || (!multiple && chosen[0] && query === label(chosen[0]))) return;
+    const named = municipalityNamed(options, typed);
+    if (multiple && chosen.some((c) => c.en === (named?.en ?? typed))) { setQuery(''); return; }
+    choose(named ?? { en: typed, ar: typed });
+  };
+  const pick = (i: number) => (i < suggestions.length ? choose(suggestions[i]!) : keepTyped());
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setOpen(true);
-      setActive((i) => (suggestions.length === 0 ? -1 : (i + 1) % suggestions.length));
+      setActive((i) => (count === 0 ? -1 : (i + 1) % count));
     } else if (e.key === 'ArrowUp') {
       if (!shown) return;
       e.preventDefault();
-      setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+      setActive((i) => (i <= 0 ? count - 1 : i - 1));
     } else if (e.key === 'Enter') {
-      if (shown) {
+      if (shown || typed) {
         e.preventDefault();
-        const m = suggestions[active >= 0 ? active : 0];
-        if (m) choose(m);
+        if (shown && active >= 0) pick(active);
+        else keepTyped();
       }
     } else if (e.key === 'Escape' && shown) {
       e.preventDefault();
@@ -106,6 +124,20 @@ export function MunicipalityField({
 
   return (
     <div data-region="municipality-field" data-multiple={multiple || undefined} style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
+      {/* Chosen municipalities sit above the field, where the open list never covers them. */}
+      {multiple && chosen.length > 0 ? (
+        <ul data-region="municipality-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: 0, padding: 0, listStyle: 'none' }}>
+          {chosen.map((m) => (
+            <li key={m.en} data-municipality-tag={m.en} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, paddingInlineStart: 12, borderRadius: 999, background: 'var(--surface2)', fontSize: 14 }}>
+              <span>{label(m)}</span>
+              <button type="button" onClick={() => remove(m)} aria-label={lang === 'ar' ? `إزالة ${municipalityLabel(m, 'ar')}` : `Remove ${m.en}`}
+                style={{ minBlockSize: 36, minInlineSize: 36, border: 0, background: 'transparent', color: 'var(--muted)', fontSize: 16, cursor: 'pointer', borderRadius: 999 }}>
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <div style={{ position: 'relative' }}>
         <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={labelStyle}><L en={labelEn} ar={labelAr} /></span>
@@ -129,7 +161,7 @@ export function MunicipalityField({
             }}
             onFocus={() => setOpen(true)}
             onClick={() => setOpen(true)}
-            onBlur={() => { setOpen(false); setActive(-1); }}
+            onBlur={() => { keepTyped(); setOpen(false); setActive(-1); }}
             onKeyDown={onKeyDown}
             style={inputStyle}
           />
@@ -155,27 +187,28 @@ export function MunicipalityField({
                 style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 10px', alignItems: 'baseline', minBlockSize: 44, padding: '10px 14px', cursor: 'pointer', fontSize: 14.5, background: i === active ? 'var(--surface2)' : 'var(--bg)' }}
               >
                 <span>{label(m)}</span>
-                {m.districtEn ? <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{lang === 'ar' ? m.districtAr ?? m.districtEn : m.districtEn}</span> : null}
+                {m.districtEn && !m.en.endsWith(`(${m.districtEn})`) ? <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{districtLabel(m, lang)}</span> : null}
               </li>
             ))}
+            {offerTyped ? (
+              <li
+                id={`${optionPrefix}-${suggestions.length}`}
+                role="option"
+                aria-selected={active === suggestions.length}
+                data-municipality-typed=""
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={keepTyped}
+                onMouseMove={() => setActive(suggestions.length)}
+                style={{ minBlockSize: 44, padding: '10px 14px', cursor: 'pointer', fontSize: 14, color: 'var(--muted)', borderBlockStart: suggestions.length ? '1px solid var(--line)' : undefined, background: active === suggestions.length ? 'var(--surface2)' : 'var(--bg)' }}
+              >
+                <L en={`Not on the list: use “${typed}”`} ar={`غير مدرجة في القائمة: استخدام «${typed}»`} />
+              </li>
+            ) : null}
           </ul>
         ) : null}
       </div>
-      {multiple && chosen.length > 0 ? (
-        <ul data-region="municipality-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: 0, padding: 0, listStyle: 'none' }}>
-          {chosen.map((m) => (
-            <li key={m.en} data-municipality-tag={m.en} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, paddingInlineStart: 12, borderRadius: 999, background: 'var(--surface2)', fontSize: 14 }}>
-              <span>{label(m)}</span>
-              <button type="button" onClick={() => remove(m)} aria-label={lang === 'ar' ? `إزالة ${m.ar}` : `Remove ${m.en}`}
-                style={{ minBlockSize: 36, minInlineSize: 36, border: 0, background: 'transparent', color: 'var(--muted)', fontSize: 16, cursor: 'pointer', borderRadius: 999 }}>
-                ×
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
       {nameEn ? <input type="hidden" name={nameEn} value={chosen.map((m) => m.en).join(', ')} /> : null}
-      {nameAr ? <input type="hidden" name={nameAr} value={chosen.map((m) => m.ar).join('، ')} /> : null}
+      {nameAr ? <input type="hidden" name={nameAr} value={chosen.map((m) => municipalityLabel(m, 'ar')).join('، ')} /> : null}
     </div>
   );
 }
