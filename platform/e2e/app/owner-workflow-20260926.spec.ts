@@ -184,10 +184,10 @@ test("organizer sorting, duplicate application, and venue certificate history", 
   ).toHaveValue("concert");
 
   // VN-0032 holds a current certificate (VN-0028 and VN-0011 are mid-renewal in the seed).
-  // The venue rebuild of 2026-09-30 named the link "Download venue certificate".
+  // The annual venue certificate card (Hosting Venue Registration, 8 October 2026) opens the certificate.
   await page.goto("/venues/VN-0032");
   await page
-    .getByRole("link", { name: "Download venue certificate", exact: true })
+    .getByRole("link", { name: "Open the certificate", exact: true })
     .click();
   await expect(page.locator("[data-region=certificate]")).toBeVisible();
   await expect(
