@@ -22,7 +22,7 @@ import { eventRecordView } from '../../../lib/record-view';
 import { clockNow } from '../../../lib/clock';
 import { reapplyEventAction } from '../../actions';
 import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
-import { hostingVenueForEvent } from '../../../lib/hosting-venues';
+import { EventSiteBlock, SiteAedQuestion, SiteRowHint } from '../../../components/record/SiteReuse';
 import {
   archiveWindowDays,
   assessmentsFor,
@@ -202,7 +202,7 @@ export default async function EventRecordPage({
   const contentTypes = view?.contentTypes ?? {};
   const derived = view?.derived ?? { scheduleEn: '', scheduleAr: '', contactsEn: '', contactsAr: '', organizerPhoneMissing: true };
   const venueRoute = venueRouteFor(account.id, id);
-  const hostingVenue = hostingVenueForEvent(id);
+  const site = view?.site ?? null;
   const dates = event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`;
   const review = (inst: { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; state: string }): ReviewRow =>
     ({ key: inst.key, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, anchor: inst.anchor, complete: inst.state === 'complete' });
@@ -331,9 +331,9 @@ export default async function EventRecordPage({
                 </>
               ) : <L en="The assessment is not complete; no level is derived and no requirements apply yet." ar="التقييم غير مكتمل؛ لم يُستنتج مستوى ولا تنطبق متطلبات بعد." />}
             </span>
-            {hostingVenue ? (
-              <span data-region="hosting-venue" style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
-                <L en={`Hosting venue: ${hostingVenue.nameEn} · ${hostingVenue.id}`} ar={`الموقع المستضيف: ${hostingVenue.nameAr} · ⁦${hostingVenue.id}⁩`} />
+            {site ? (
+              <span data-region="event-site" style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
+                <L en={`Site: ${site.info.nameEn} · ${site.info.siteId}`} ar={`الموقع: ${site.info.nameAr} · ⁦${site.info.siteId}⁩`} />
               </span>
             ) : null}
           </div>
@@ -357,6 +357,11 @@ export default async function EventRecordPage({
             </div>
           ) : null}
         </section>
+
+        {/* The registered Facility/Site the event is held at: what it offers, confirmed once for this event (latest revision, section 16). */}
+        {site && record ? (
+          <EventSiteBlock eventId={event.id} info={site.info} confirmation={site.confirmation} editable={record.editable} saved={query.saved === 'site'} />
+        ) : null}
 
         {/* The routes off the record that are not requirements: a material change, an incident, the report. */}
         {event.filed ? (
@@ -386,6 +391,12 @@ export default async function EventRecordPage({
               governance={view?.governance ?? {}}
               facility={view?.facility ?? null}
               listHref={`/events/${id}/requirements`}
+              extras={site ? {
+                B8: <SiteAedQuestion record={record} info={site.info} canEdit={record.editable} />,
+                B10: <SiteRowHint eventId={id} rowKey="B10" info={site.info} confirmed={site.confirmation !== null} canEdit={record.editable} hasFile={false} />,
+                B11: <SiteRowHint eventId={id} rowKey="B11" info={site.info} confirmed={site.confirmation !== null} canEdit={record.editable} hasFile={false} />,
+                'P-M': <SiteRowHint eventId={id} rowKey="P-M" info={site.info} confirmed={site.confirmation !== null} canEdit={record.editable} hasFile={Boolean(record.facts?.files['P-M'])} />,
+              } : {}}
               initialStep={query.step ?? query.saved ?? query.doc ?? (query.approval || query.error === 'approval' ? 'B2' : null)}
               handoff={query.invited === 'ems' || query.invited === 'director' ? query.invited : null}
               directorVerification={record.level !== null ? directorVerification({ level: record.level, directorStatus: record.facts?.director?.status === 'confirmed' ? 'confirmed' : record.facts?.director?.status === 'nominated' ? 'nominated' : null, records: attestationRecordsFor(id), laneActive: orderLaneOn() }) : null}

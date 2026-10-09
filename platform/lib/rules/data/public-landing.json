@@ -1,12 +1,12 @@
 {
   "$comment": "Public guidance updated by the owner on 2026-09-26. Short service wording; the recurring-venue event criterion was removed by request.",
-  "heroEn": "The public platform for event certification, hosting venues and facility readiness.",
-  "heroAr": "المنصة العامة لاعتماد الفعاليات وتسجيل المواقع المستضيفة وجاهزية المنشآت.",
+  "heroEn": "The public platform for event certification and facility and site readiness.",
+  "heroAr": "المنصة العامة لاعتماد الفعاليات وجاهزية المنشآت والمواقع.",
   "$commentSecondSweep": "Partner ruling, second sweep: the model-teaching blocks the landing pass orphaned (servicesIntro, regulated, meet, the level arithmetic, the venue-assessment comparison, the public-tools disclaimer, the no-results advice, the facility rule intro) are removed rather than left as dead copy. What remains is what a screen still renders.",
   "toolsEn": "Public tools",
   "toolsAr": "الأدوات العامة",
-  "scopeEn": "This service applies to planned organized sporting, physical-activity, performance, festival, exhibition, ceremony and other recreational events that meet the applicable Ministry of Public Health criteria. Hosting venues and the facilities the cardiac-readiness rules cover register through their own services.",
-  "scopeAr": "تنطبق هذه الخدمة على الفعاليات المنظّمة المخطّط لها، الرياضية ومنها أنشطة البدنية والعروض والمهرجانات والمعارض والاحتفالات وسائر الفعاليات الترفيهية، التي تستوفي معايير وزارة الصحة العامة المنطبقة. أما المواقع المستضيفة والمنشآت المشمولة بقواعد الجاهزية القلبية فتُسجَّل عبر خدماتها الخاصة.",
+  "scopeEn": "This service applies to planned organized sporting, physical-activity, performance, festival, exhibition, ceremony and other recreational events that meet the applicable Ministry of Public Health criteria. Facilities and sites the cardiac-readiness rules cover, including event-hosting venues, register through the facility/site service.",
+  "scopeAr": "تنطبق هذه الخدمة على الفعاليات المنظّمة المخطّط لها، الرياضية ومنها أنشطة البدنية والعروض والمهرجانات والمعارض والاحتفالات وسائر الفعاليات الترفيهية، التي تستوفي معايير وزارة الصحة العامة المنطبقة. أما المنشآت والمواقع المشمولة بقواعد الجاهزية القلبية، ومنها مواقع استضافة الفعاليات، فتُسجَّل عبر خدمة تسجيل المنشأة/الموقع.",
   "jurisdictionEn": "This platform covers health and medical readiness. It does not give permission to hold an event. You still need any permits required by the relevant authorities under Lebanese law.",
   "jurisdictionAr": "تختصّ هذه المنصة بالتأهب الصحي والطبي. ولا تمنح إذناً لإقامة الفعالية. تبقى التصاريح المطلوبة من الجهات المختصة بموجب القانون اللبناني ضرورية.",
   "services": [
@@ -19,20 +19,12 @@
       "kw": "certify event certification submit submission assessment level deadline file organizer اعتماد فعالية تقديم تقييم مستوى مهلة"
     },
     {
-      "k": "venue",
-      "en": "Register a hosting venue",
-      "ar": "تسجيل موقع مستضيف للفعاليات",
-      "descEn": "A venue licensed for 1,000 persons or more that regularly hosts organized events is classified annually.",
-      "descAr": "يُصنَّف سنوياً الموقع المرخص لـ 1,000 شخص أو أكثر ويستضيف بانتظام فعاليات منظّمة.",
-      "kw": "venue recurring register classification annual hall stadium amphitheatre capacity sports موقع متكرر تصنيف سنوي ملعب قاعة سعة رياضي"
-    },
-    {
       "k": "facility",
-      "en": "Register a facility",
-      "ar": "تسجيل منشأة",
-      "descEn": "Register your facility, add its AEDs and keep its emergency plan up to date.",
-      "descAr": "سجّلوا منشأتكم وأجهزة إزالة الرجفان فيها، وحدّثوا خطة الطوارئ.",
-      "kw": "facility register gym fitness school university airport port terminal mall aquatic pool cardiac readiness منشأة تسجيل صالة رياضية مدرسة جامعة مطار ميناء مركز تجاري مسبح جاهزية قلب"
+      "en": "Register a facility/site",
+      "ar": "تسجيل منشأة/موقع",
+      "descEn": "Register a covered facility or site, add its AEDs and keep its cardiac emergency response plan up to date. Events held there can reuse its registered information.",
+      "descAr": "سجّلوا المنشأة أو الموقع المشمول وأجهزة AED فيه، وحدّثوا خطة الاستجابة لطوارئ القلب. ويمكن للفعاليات التي تُقام فيه إعادة استخدام معلوماته المسجّلة.",
+      "kw": "facility register gym fitness school university airport port terminal mall aquatic pool cardiac readiness منشأة تسجيل صالة رياضية مدرسة جامعة مطار ميناء مركز تجاري مسبح جاهزية قلب site venue event-hosting stadium hall arena amphitheatre capacity موقع مواقع استضافة ملعب قاعة سعة"
     }
   ],
   "criteria": [
@@ -67,18 +59,6 @@
       "shortAr": "محددة من الوزارة أو مُحالة"
     }
   ],
-  "venueConditions": [
-    {
-      "k": "vHosts",
-      "en": "The venue regularly hosts organized events",
-      "ar": "يستضيف الموقع بانتظام فعاليات منظّمة"
-    },
-    {
-      "k": "vCap",
-      "en": "Approved or licensed capacity of 1,000 persons or more",
-      "ar": "سعة معتمدة أو مرخصة تبلغ 1,000 شخص أو أكثر"
-    }
-  ],
   "facilityCategories": [
     {
       "en": "Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities",
@@ -108,13 +88,23 @@
       "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
     },
     {
+      "en": "Event-hosting venues with an approved or licensed capacity of {capacity} persons or more",
+      "ar": "مواقع استضافة الفعاليات التي تبلغ سعتها المعتمدة أو المرخّصة {capacity} شخص أو أكثر",
+      "state": "inforce",
+      "ruleEn": "AED and readiness requirements apply. Events held at the site can reuse its registered information; each event still completes its own assessment.",
+      "ruleAr": "تنطبق متطلبات جهاز AED والجاهزية. ويمكن للفعاليات التي تُقام في الموقع إعادة استخدام معلوماته المسجّلة، وتستكمل كل فعالية تقييمها الخاص.",
+      "basisEn": "Complete the facility details and emergency plan.",
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+    },
+    {
       "en": "Remote or hard-to-reach facilities",
       "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
       "state": "inforce",
       "ruleEn": "When designated by the Ministry.",
       "ruleAr": "عندما تحدّدها الوزارة.",
       "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ.",
+      "designation": true
     },
     {
       "en": "Facilities with a confirmed previous cardiac arrest",
@@ -123,7 +113,8 @@
       "ruleEn": "Subject to Ministry review and the readiness measures it requires.",
       "ruleAr": "تخضع لمراجعة الوزارة ولتدابير الجاهزية التي تشترطها.",
       "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ.",
+      "designation": true
     },
     {
       "en": "Other facilities named by the Ministry",
@@ -132,7 +123,8 @@
       "ruleEn": "Follow the readiness requirements set by the Ministry for this facility.",
       "ruleAr": "اتّبعوا متطلبات الجاهزية التي تحدّدها الوزارة لهذه المنشأة.",
       "basisEn": "Complete the facility details and emergency plan.",
-      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ."
+      "basisAr": "أكملوا تفاصيل المنشأة وخطة الطوارئ.",
+      "designation": true
     }
   ],
   "notRoutinelyEn": [
@@ -276,33 +268,6 @@
         "ar": "أبلغوا عن الحوادث الجسيمة وقدّموا تقرير ما بعد الفعالية عند طلبه."
       }
     ],
-    "venue": [
-      {
-        "n": 1,
-        "en": "Create your account.",
-        "ar": "أنشئوا حسابكم."
-      },
-      {
-        "n": 2,
-        "en": "Add the hosting venue details.",
-        "ar": "أدخلوا تفاصيل الموقع المستضيف."
-      },
-      {
-        "n": 3,
-        "en": "Complete the assessment and submit.",
-        "ar": "أكملوا التقييم وقدّموا الطلب."
-      },
-      {
-        "n": 4,
-        "en": "View your classification and download the certificate.",
-        "ar": "اطّلعوا على التصنيف وحمّلوا الشهادة."
-      },
-      {
-        "n": 5,
-        "en": "Renew before expiry using the same venue record.",
-        "ar": "جدّدوا قبل انتهاء الصلاحية من سجل الموقع نفسه."
-      }
-    ],
     "facility": [
       {
         "n": 1,
@@ -338,15 +303,16 @@
         "n": 7,
         "en": "Receive your Facility Registration Certificate from the Ministry of Public Health once the applicable requirements are satisfied.",
         "ar": "تسلّموا شهادة تسجيل المنشأة من وزارة الصحة العامة عند استيفاء المتطلبات المنطبقة."
+      },
+      {
+        "n": 8,
+        "en": "Events held at the site can link to it and reuse its registered information.",
+        "ar": "يمكن للفعاليات التي تُقام في الموقع الارتباط به وإعادة استخدام معلوماته المسجّلة."
       }
     ]
   },
   "flowTitles": {
     "certify": {
-      "en": "How it works",
-      "ar": "خطوات الخدمة"
-    },
-    "venue": {
       "en": "How it works",
       "ar": "خطوات الخدمة"
     },
@@ -389,15 +355,11 @@
   "stepAr": "الخطوة",
   "whatHappensEn": "What happens",
   "whatHappensAr": "ماذا يحصل",
-  "venueFloorEn": "A qualifying recurring venue completes NEHRAT annually. Its final level is determined by the NEHRAT score and any applicable minimum-event-level rule.",
-  "venueFloorAr": "يُكمل الموقع المتكرر المستوفي للشروط أداة NEHRAT سنوياً. ويُحدَّد مستواه النهائي بحسب نتيجة NEHRAT وأي قاعدة منطبقة للمستوى الأدنى للفعاليات.",
   "obligationsTitleEn": "Keep your facility ready",
   "obligationsTitleAr": "حافظوا على جاهزية منشأتكم",
-  "coveredTitleEn": "Facilities required to register",
-  "coveredTitleAr": "المنشآت المطلوب تسجيلها",
+  "coveredTitleEn": "Facilities and sites required to register",
+  "coveredTitleAr": "المنشآت والمواقع المطلوب تسجيلها",
   "$commentChips": "One chip per kind of result, from the prototype: a service, a piece of guidance, a REAL reference number so the lookup path is discoverable, and a term that matches nothing so the no-results state is reachable without inventing a failure. Four questions that all resolve to guidance would have left two of the four states unreachable from the front page.",
-  "venueScopeNoteEn": "This covers sports, athletic and aquatic venues.",
-  "venueScopeNoteAr": "يشمل ذلك المواقع الرياضية والمائية.",
   "$commentAudit": "Partner UI audit, 8 October 2026: the event applicability check asks first whether this is a planned organized event, then the five criteria in the audit's wording; the certify page names the submission package per level instead of counting documents; the certificate step names the certificate; the venue floor sentence became the annual-assessment sentence; the facility page uses the official category wording, defines CPR and AED once, and ends on the certificate.",
   "plannedEventEn": "Is this a planned organized event such as a sporting or physical-activity event, performance, festival, exhibition, ceremony, conference, meeting, or other recreational event?",
   "plannedEventAr": "هل هذه فعالية منظّمة مخطّط لها، مثل فعالية رياضية أو نشاط بدني أو عرض أو مهرجان أو معرض أو احتفال أو مؤتمر أو اجتماع أو فعالية ترفيهية أخرى؟",
@@ -462,5 +424,6 @@
       "noteEn": "A portable device used during suspected cardiac arrest to analyze the heart rhythm and deliver a shock when needed.",
       "noteAr": "جهاز محمول يُستخدم عند الاشتباه بتوقف القلب لتحليل نظم القلب وإعطاء صدمة كهربائية عند الحاجة."
     }
-  ]
+  ],
+  "$commentTwoServices": "Owner decision, 9 October 2026: two services -- register an event; register a facility/site. Hosting venue registration is replaced by Facility/Site registration; an event-hosting venue with an approved or licensed capacity at or above the threshold registers as a Facility/Site (latest revision, Covered Facilities/Sites). The threshold renders from the configured value ({capacity}), never as a number in copy. The venue service's entry, flow, conditions and annual-assessment sentence are removed rather than left as dead copy."
 }

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { L } from '../../components/L';
 import { PublicShell } from '../../components/PublicShell';
 import { currentAccount } from '../../lib/auth';
-import { PUBLIC_LANDING, RECURRING_VENUE_MIN_CAPACITY, eventApplicability, facilityApplicability, venueApplicability } from '../../lib/rules';
+import { PUBLIC_LANDING, eventApplicability, facilityApplicability, facilityCategoryText } from '../../lib/rules';
 
 export default async function ApplicabilityPage({ searchParams }: {
   searchParams: Promise<{ subject?: string; planned?: string; c?: string | string[]; checked?: string; eligible?: string; hosts?: string; cap?: string; cat?: string }>;
@@ -10,7 +10,9 @@ export default async function ApplicabilityPage({ searchParams }: {
   const account = await currentAccount();
   const q = await searchParams;
   const P = PUBLIC_LANDING;
-  const subject = ['event', 'venue', 'facility'].includes(q.subject ?? '') ? q.subject : null;
+  // Two services (owner, 9 October 2026). A hosting venue is now a facility/site category: an
+  // old ?subject=venue link opens the facility/site branch, where the event-hosting venue is listed.
+  const subject = q.subject === 'event' ? 'event' : q.subject === 'facility' || q.subject === 'venue' ? 'facility' : null;
   const selected = (Array.isArray(q.c) ? q.c : q.c ? [q.c] : []).map(Number);
   // The event branch asks two things (partner audit, 8 October 2026): is this a planned
   // organized event at all; if so, or if unsure, do any of the criteria apply.
@@ -21,16 +23,13 @@ export default async function ApplicabilityPage({ searchParams }: {
     ? eventApplicability([])
     : subject === 'event' && criteriaAsked && planned !== 'no'
     ? eventApplicability(selected)
-    : subject === 'venue' && (q.eligible !== undefined || q.hosts !== undefined)
-      ? venueApplicability(q.eligible === 'yes' || q.hosts === '1', q.eligible === 'yes' || q.cap === '1')
-      : subject === 'facility' && q.cat !== undefined ? facilityApplicability(Number(q.cat)) : null;
-  const venueSelection = subject === 'venue' && answer ? (answer.route ? 'yes' : 'no') : null;
+    : subject === 'facility' && q.cat !== undefined ? facilityApplicability(Number(q.cat)) : null;
   const box: React.CSSProperties = { padding: '18px 20px', border: '1px solid var(--line)', borderRadius: 12 };
   const button: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 22, marginBlockStart: 16, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, cursor: 'pointer' };
   return <PublicShell signedIn={account !== null}>
     <h1 style={{ margin: '0 0 24px', fontSize: 32 }}><L en="Which service do you need?" ar="ما الخدمة التي تحتاجون إليها؟" /></h1>
     <div data-region="subject-choice" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginBlockEnd: 28 }}>
-      {[['event', 'An event', 'فعالية'], ['venue', 'A hosting venue', 'موقع مستضيف للفعاليات'], ['facility', 'A facility', 'منشأة']].map(([key, en, ar]) =>
+      {[['event', 'An event', 'فعالية'], ['facility', 'A facility or site', 'منشأة أو موقع']].map(([key, en, ar]) =>
         <Link key={key} href={`/applicability?subject=${key}`} aria-current={subject === key ? 'page' : undefined} style={{ ...box, background: subject === key ? 'var(--brand-soft)' : 'var(--bg)' }}><L en={en!} ar={ar!} /></Link>)}
     </div>
     {subject === 'event' ? <>
@@ -58,19 +57,13 @@ export default async function ApplicabilityPage({ searchParams }: {
         <button type="submit" style={button}><L en="Continue" ar="متابعة" /></button>
       </form> : null}
     </> : null}
-    {subject === 'venue' ? <form method="get" data-region="venue-branch">
-      <input type="hidden" name="subject" value="venue" />
-      <p style={{ fontSize: 18, lineHeight: 1.65, maxWidth: '65ch' }}><L en={`A hosting venue regularly holds organized events and is licensed for at least ${RECURRING_VENUE_MIN_CAPACITY.toLocaleString('en-US')} people. Does this describe your venue?`} ar={`الموقع المستضيف ينظّم فعاليات بانتظام وتبلغ سعته المرخّصة ${RECURRING_VENUE_MIN_CAPACITY.toLocaleString('en-US')} شخص على الأقل. هل ينطبق ذلك على موقعكم؟`} /></p>
-      <div style={{ display: 'flex', gap: 12 }}>
-        {(['yes', 'no'] as const).map(value => <button key={value} type="submit" name="eligible" value={value} aria-pressed={venueSelection === value} style={{ ...button, background: venueSelection === value ? 'var(--brand)' : 'var(--surface2)', color: venueSelection === value ? 'var(--bg)' : 'var(--ink)', border: '1px solid var(--line)' }}><L en={value === 'yes' ? 'Yes' : 'No'} ar={value === 'yes' ? 'نعم' : 'لا'} /></button>)}
-      </div>
-    </form> : null}
     {subject === 'facility' ? <section data-region="facility-branch">
-      <h2 style={{ fontSize: 22 }}><L en="Select the type of facility" ar="اختاروا نوع المنشأة" /></h2>
-      <div style={{ display: 'grid', gap: 8 }}>{P.facilityCategories.map((c, i) => <Link key={i} href={`/applicability?subject=facility&cat=${i}`} style={{ ...box, background: q.cat === String(i) ? 'var(--brand-soft)' : 'var(--bg)' }}><L en={c.en} ar={c.ar} /></Link>)}</div>
+      <h2 style={{ fontSize: 22 }}><L en="Select the type of facility or site" ar="اختاروا نوع المنشأة أو الموقع" /></h2>
+      <div style={{ display: 'grid', gap: 8 }}>{P.facilityCategories.map((c, i) => <Link key={i} href={`/applicability?subject=facility&cat=${i}`} aria-current={q.cat === String(i) ? 'true' : undefined} style={{ ...box, background: q.cat === String(i) ? 'var(--brand-soft)' : 'var(--bg)' }}><L en={facilityCategoryText(c).en} ar={facilityCategoryText(c).ar} /></Link>)}</div>
     </section> : null}
     {answer ? <section data-region="applicability-answer" aria-live="polite" style={{ ...box, borderColor: 'var(--brand)', marginBlockStart: 24 }}>
       <h2 style={{ margin: 0, fontSize: 22 }}><L en={answer.en} ar={answer.ar} /></h2>
+      {answer.bodyEn ? <p style={{ margin: '10px 0 0', lineHeight: 1.65, maxWidth: '70ch' }}><L en={answer.bodyEn} ar={answer.bodyAr} /></p> : null}
       {answer.route ? <Link href={answer.route} style={button}><L en="Next" ar="التالي" /></Link> : null}
     </section> : null}
   </PublicShell>;

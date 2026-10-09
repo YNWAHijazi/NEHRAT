@@ -4,7 +4,7 @@
  * names the workbook row or decision it stands on.
  */
 import { describe, it, expect } from 'vitest';
-import { venuePackageEditable } from '../lib/rules/venue-workflow';
+import { VENUE_SERVICE_RETIRED, venuePackageEditable } from '../lib/rules/venue-workflow';
 import { authorsFor, fieldsFor, requirementBlockers, resolvePlan, resolveRequirements, type RecordFacts, type StoredAnswer } from '../lib/rules/record-requirements';
 import type { Level } from '../lib/rules';
 
@@ -52,10 +52,11 @@ describe('the hosting venue on the shared catalogue (Hosting Venue Registration,
     expect(requirementBlockers(rows(2, { answers })).map((r) => r.key)).toEqual(['V1']);
   });
 
-  it('locks filed, accepted and archived packages', () => {
-    expect(venuePackageEditable('draft', false)).toBe(true);
-    expect(venuePackageEditable('revision', false)).toBe(true);
-    expect(venuePackageEditable('incomplete', false)).toBe(true);
+  it('locks every package: hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026)', () => {
+    expect(VENUE_SERVICE_RETIRED).toBe(true);
+    expect(venuePackageEditable('draft', false)).toBe(false);
+    expect(venuePackageEditable('revision', false)).toBe(false);
+    expect(venuePackageEditable('incomplete', false)).toBe(false);
     expect(venuePackageEditable('submitted', false)).toBe(false);
     expect(venuePackageEditable('accepted', false)).toBe(false);
     expect(venuePackageEditable('draft', true)).toBe(false);

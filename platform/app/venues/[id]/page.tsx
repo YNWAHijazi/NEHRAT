@@ -1,30 +1,26 @@
 import Link from 'next/link';
 import { VenueWorkspace } from '../../../components/VenueWorkspace';
-import { NextStepCard } from '../../../components/NextStepCard';
 import { StageRail } from '../../../components/StageRail';
 import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import { VenueFinalReview } from '../../../components/record/VenueFinalReview';
 import { VenuePadPanel } from '../../../components/venue/VenuePadPanel';
 import { linkableFacilitiesFor, padFacilityForVenue } from '../../../lib/sites';
-import { actionGrid, actionCell, actionPill, actionPillDisabled, actionReason, gateReason } from '../../../components/RecordActions';
 import { L } from '../../../components/L';
 import { ownedVenuePage } from '../../../lib/venue/page';
 import { venuePackageFacts } from '../../../lib/venue/workspace';
 import { getDb } from '../../../lib/db';
-import { beirutToday } from '../../../lib/clock';
-import { venueReassessmentGate } from '../../../lib/rules';
-import { venueNextAction, venueRailStages, venueStatusLabel } from '../../../lib/rules/venue-workflow';
-import { venueAssessmentsFor, venueChangeSinceAssessment } from '../../../lib/queries';
+import { venueRailStages } from '../../../lib/rules/venue-workflow';
+import { venueAssessmentsFor } from '../../../lib/queries';
 import { InfoNote } from '../../../components/InfoNote';
 import { levelWhy } from '../../../lib/rules';
-import { renewVenuePackageAction, reopenVenueSectionAction } from '../actions';
+import { reopenVenueSectionAction } from '../actions';
 
 /**
- * THE VENUE'S SINGLE RECORD PAGE, laid out as the event's (owner, 8 October 2026), in the
- * order of the Hosting Venue Registration revised logic: venue profile, annual assessment,
- * venue infrastructure and access, the linked PAD facility's AEDs, review and submit, the
- * annual venue certificate. A hosting venue names no EMS agency and no Medical Director;
- * each event held there names its own. No section tabs.
+ * THE VENUE'S SINGLE RECORD PAGE, now history: hosting venue registration is replaced by
+ * Facility/Site registration (owner, 9 October 2026). The record reads as it stood -- profile,
+ * assessment, infrastructure, AEDs, the filed package, any certificate -- under the notice the
+ * workspace shows, with the route to register the place as a facility/site. No next step, no
+ * change report, no renewal: nothing here edits, files or renews.
  */
 export default async function VenueRecordPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string; upload?: string; doc?: string; saved?: string; step?: string; pad?: string }> }) {
   const { id } = await params;
@@ -32,13 +28,10 @@ export default async function VenueRecordPage({ params, searchParams }: { params
   const q = await searchParams;
   const v = w.venue;
   const facts = venuePackageFacts(w);
-  const next = venueNextAction(facts);
   const { stage, stages } = venueRailStages(facts);
   const certificates = getDb()
     .prepare('SELECT version, effective, valid_until FROM venue_assessments WHERE venue_id = ? AND certificate_issued = 1 ORDER BY version DESC')
     .all(id) as unknown as { version: number; effective: string; valid_until: string }[];
-  const renewal = venueReassessmentGate({ validUntil: v.validUntil, today: beirutToday(), changeReportedSinceAssessment: venueChangeSinceAssessment(account.id, id) });
-  const renewalReason = gateReason(renewal);
   const assessed = w.assessmentVersion ? venueAssessmentsFor(account.id, id).find((a) => a.version === w.assessmentVersion) ?? null : null;
   const why = assessed ? levelWhy(assessed.derivation) : null;
   const pad = padFacilityForVenue(id);
@@ -58,21 +51,8 @@ export default async function VenueRecordPage({ params, searchParams }: { params
 
   return (
     <VenueWorkspace account={account} w={w} active="overview">
-      {next ? <NextStepCard step={next} to={next.href.startsWith('#') ? next.href : `/venues/${id}/${next.href}`} /> : null}
-      {/* Submitted and not yet decided: say what happens next, and keep the receipt one click away -- as on the event record. */}
-      {w.status === 'submitted' && !v.archivedAt ? (
-        <NextStepCard
-          step={{
-            kind: 'underReview', href: 'acknowledgment', tone: 'brand',
-            titleEn: venueStatusLabel('submitted').en, titleAr: venueStatusLabel('submitted').ar,
-            bodyEn: 'The Ministry reviews the submission and records one of three outcomes. You are notified on this platform when it does.',
-            bodyAr: 'تراجع الوزارة الطلب وتسجّل إحدى ثلاث نتائج. يصلكم إشعار على هذه المنصة عند تسجيلها.',
-            buttonEn: 'View acknowledgment of receipt', buttonAr: 'عرض إشعار الاستلام',
-          }}
-          to={`/venues/${id}/acknowledgment`}
-        />
-      ) : null}
-
+      {/* No next step and no review to wait for: hosting venue registration is replaced by
+          Facility/Site registration (owner, 9 October 2026), and the workspace says so above. */}
       {w.status === 'accepted' ? (
         <div data-region="certificate-card" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32 }}>
           <div style={{ flex: '1 1 240px', minWidth: 0 }}>
@@ -123,25 +103,6 @@ export default async function VenueRecordPage({ params, searchParams }: { params
         ) : null}
       </section>
 
-      {/* The routes off the record that are not requirements. */}
-      <div data-region="record-actions" style={{ ...actionGrid, display: 'grid', marginBlockEnd: 28 }}>
-        <span style={actionCell}>
-          <Link href={`/venues/${id}/change`} style={actionPill}><L en="Report a venue change" ar="الإبلاغ عن تغيير في الموقع" /></Link>
-        </span>
-        {w.status === 'accepted' && !v.archivedAt ? (
-          renewal.behaviour === 'enabled' ? (
-            <form action={renewVenuePackageAction.bind(null, id)} style={actionCell}>
-              <button type="submit" style={{ ...actionPill, cursor: 'pointer' }}><L en="Renew certificate" ar="تجديد الشهادة" /></button>
-            </form>
-          ) : renewal.behaviour === 'disabled' ? (
-            <span style={actionCell}>
-              <button type="button" disabled style={actionPillDisabled}><L en="Renew certificate" ar="تجديد الشهادة" /></button>
-              <span style={actionReason}><L en={renewalReason.en} ar={renewalReason.ar} /></span>
-            </span>
-          ) : null
-        ) : null}
-      </div>
-
       {w.record && w.level !== null ? (
         <div id="req-summary" tabIndex={-1}>
           {!w.editable && w.status !== 'draft' ? (
@@ -156,7 +117,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
       ) : (
         <>
           <div id="req-summary" role="status" style={{ padding: '16px 22px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14.5px' }}>
-            <Link href={`/venues/${id}/assessment`}><L en="Complete the assessment to see the requirements. The level is derived from one routine operating session." ar="أكملوا التقييم للاطلاع على المتطلبات. يُستنتج المستوى من جلسة تشغيل اعتيادية واحدة." /></Link>
+            <L en="No assessment was completed on this record." ar="لم يُستكمل أي تقييم على هذا السجل." />
           </div>
           {/* Without a level the final review still names the details, the assessment and the fee. */}
           <VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} filed={filed} />

@@ -2,41 +2,35 @@
 
 import { useState } from 'react';
 import { L } from '../../../../components/L';
-import { HostingVenuePicker } from '../../../../components/HostingVenuePicker';
-import { useDocumentLang } from '../../../../components/OptionText';
-import { VenueLocationField, venueNameIn } from '../../../../components/VenueLocationField';
-import type { HostingVenueOption } from '../../../../lib/hosting-venues';
+import { SiteLocationField } from '../../../../components/SiteLocationField';
+import type { SiteOption } from '../../../../lib/event-site';
 
 /**
- * The place fields of the edit-details form: the location with its registered-venue
- * suggestions, the municipalities, and -- for an event at a fixed venue -- the venue
- * selector. One client island holds the one link both venue controls read and set; the
- * hidden hostingVenueId field carries it to editEventDetailsAction with the plain form.
+ * The place fields of the edit-details form: the location with its registered Facility/Site
+ * suggestions and the municipalities. One client island holds the one link; the hidden siteId
+ * field carries it to editEventDetailsAction with the plain form.
  */
 export function EventPlaceFields({
   options,
   initialText,
   initialLinkedId,
   initialMunicipalities,
-  fixedVenue,
   labelStyle,
   inputStyle,
 }: {
-  options: HostingVenueOption[];
+  options: SiteOption[];
   initialText: string;
   initialLinkedId: string;
   initialMunicipalities: string;
-  fixedVenue: boolean;
   labelStyle: React.CSSProperties;
   inputStyle: React.CSSProperties;
 }) {
-  const lang = useDocumentLang();
   const [text, setText] = useState(initialText);
   const [linkedId, setLinkedId] = useState(options.some((o) => o.id === initialLinkedId) ? initialLinkedId : '');
   return (
     <>
       <div style={{ gridColumn: '1 / -1' }}>
-        <VenueLocationField
+        <SiteLocationField
           options={options}
           text={text}
           onTextChange={setText}
@@ -48,24 +42,11 @@ export function EventPlaceFields({
           labelStyle={{ ...labelStyle, marginBlockEnd: '0' }}
           inputStyle={inputStyle}
           textName="venueRoute"
-          linkName="hostingVenueId"
+          linkName="siteId"
         />
       </div>
       <label style={{ gridColumn: '1 / -1' }}><span style={labelStyle}><L en="Municipality or municipalities" ar="البلدية أو البلديات" /></span>
         <input name="municipalities" defaultValue={initialMunicipalities} style={inputStyle} /></label>
-      {fixedVenue ? (
-        <div style={{ gridColumn: '1 / -1' }}>
-          <HostingVenuePicker
-            options={options}
-            value={linkedId}
-            onChange={(venueId) => {
-              setLinkedId(venueId);
-              const venue = options.find((o) => o.id === venueId);
-              if (venue) setText(venueNameIn(venue, lang));
-            }}
-          />
-        </div>
-      ) : null}
     </>
   );
 }

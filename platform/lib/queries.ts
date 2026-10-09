@@ -1,6 +1,8 @@
 import {eventPlanApproval} from './plan-approval';
 import { hasReportableEvent } from './rules/gates';
 import { facilityAedStatus } from './facility-gis';
+import { EVENT_VENUE_CAPACITY_KEY, siteStatusLabel, siteStatusTone } from './rules/site';
+import { siteStatusFor } from './site-registration';
 /**
  * Read-side queries for the organizer surfaces. Ownership is enforced here: every query
  * is scoped to the session's account, so a foreign record and a missing record are the
@@ -394,6 +396,10 @@ export interface FacilityRow {
   categoryEn: string; categoryAr: string;
   devices: number; nextLapse: string | null;
   stateEn: string; stateAr: string; stateKind: string;
+  /** The facility/site's anchor (latest revision, 9 October 2026). */
+  siteId: string | null;
+  /** The site status, product-defined (lib/rules/site.ts), and its colour family. */
+  statusEn: string; statusAr: string; statusTone: 'grey' | 'accent' | 'bad' | 'brand';
 }
 
 /** Everything the ledger derives from, in one read. */
@@ -435,13 +441,14 @@ function ledgerInputsFor(facilityId: string, today: string): LedgerInputs {
 export function publishedFacilityValues(): {
   phasedSchedule: { value: string; effective: string | null } | null;
   capacityThreshold: { value: string; effective: string | null } | null;
+  eventVenueCapacity: { value: string; effective: string | null } | null;
 } {
   const config = ministryConfig();
   const pick = (key: string) => {
     const row = config.get(key);
     return row ? { value: row.value, effective: row.effective } : null;
   };
-  return { phasedSchedule: pick('phasedSchedule'), capacityThreshold: pick('capacityThreshold') };
+  return { phasedSchedule: pick('phasedSchedule'), capacityThreshold: pick('capacityThreshold'), eventVenueCapacity: pick(EVENT_VENUE_CAPACITY_KEY) };
 }
 
 /**
@@ -467,9 +474,10 @@ export function facilityLedgerFor(facilityId: string, today: string): FacilityLe
 export function facilitiesFor(accountId: number): FacilityRow[] {
   const today = beirutTodayFn();
   const rows = getDb()
-    .prepare(`SELECT id, name_en, name_ar, category_key FROM facilities WHERE account_id = ? AND archived_at IS NULL`)
-    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; category_key: string }[];
+    .prepare(`SELECT id, name_en, name_ar, category_key, site_id FROM facilities WHERE account_id = ? AND archived_at IS NULL`)
+    .all(accountId) as unknown as { id: string; name_en: string; name_ar: string; category_key: string; site_id: string | null }[];
   return rows.map((r) => {
+    const status = siteStatusFor(r.id);
     const cat = facilityCategory(r.category_key);
     const short = (FACILITY_CONTENT.categories.find((c) => c.key === r.category_key) ?? null) as
       | { shortEn?: string; shortAr?: string }
@@ -492,6 +500,8 @@ export function facilitiesFor(accountId: number): FacilityRow[] {
       nextLapse: untils.length ? untils.reduce((a, b) => (a < b ? a : b)) : null,
       stateEn: line.en, stateAr: line.ar,
       stateKind: standing.kind === 'met' ? 'ok' : standing.kind,
+      siteId: r.site_id,
+      statusEn: siteStatusLabel(status).en, statusAr: siteStatusLabel(status).ar, statusTone: siteStatusTone(status),
     };
   });
 }
@@ -519,13 +529,18 @@ export interface FacilityDetail {
   createdAt: string;
   archivedAt: string | null;
   archivedReason: string | null;
+  /** The operating organization on the site profile (latest revision, 9 October 2026). */
+  operatingOrganization: string;
+  siteId: string | null;
+  isDemo: boolean;
 }
 
 export function facilityDetail(accountId: number, facilityId: string): FacilityDetail | null {
   const r = getDb()
     .prepare(
       `SELECT id, name_en, name_ar, category_key, address, municipality_en, municipality_ar,
-              operating_hours, phone, email, access_point, ems_number, created_at, archived_at, archived_reason, facility_type, licensed_capacity
+              operating_hours, phone, email, access_point, ems_number, created_at, archived_at, archived_reason, facility_type, licensed_capacity,
+              operating_organization, site_id, is_demo
        FROM facilities WHERE id = ? AND account_id = ?`,
     )
     .get(facilityId, accountId) as
@@ -534,6 +549,7 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
         municipality_en: string; municipality_ar: string; operating_hours: string;
         facility_type: string; licensed_capacity: number | null; phone: string; email: string; access_point: string; ems_number: string; created_at: string;
         archived_at: string | null; archived_reason: string | null;
+        operating_organization: string; site_id: string | null; is_demo: number;
       }
     | undefined;
   if (!r) return null;
@@ -544,6 +560,9 @@ export function facilityDetail(accountId: number, facilityId: string): FacilityD
     accessPoint: r.access_point, emsNumber: r.ems_number, createdAt: r.created_at,
     archivedAt: r.archived_at ?? null,
     archivedReason: r.archived_reason ?? null,
+    operatingOrganization: r.operating_organization ?? '',
+    siteId: r.site_id,
+    isDemo: r.is_demo === 1,
   };
 }
 

@@ -6,7 +6,7 @@ export function quickTourSteps(role: string): TourStep[] {
   const notifications = step('Check for updates', 'تابع المستجدات', 'Open notifications to see invitations, replies and updates.', 'افتح الإشعارات للاطلاع على الدعوات والردود والمستجدات.', '[data-tour="notifications"]');
   const account = step('Your account', 'حسابك', 'Use this menu to sign out or open this tour again.', 'استخدم هذه القائمة لتسجيل الخروج أو فتح الجولة مجدداً.', '[data-tour="account"]');
   const organizer = [
-    step('Start a service', 'ابدأ خدمة', 'Choose an event, a hosting venue or a facility. Enter the details to see what you need to provide.', 'اختر فعالية أو موقع استضافة أو منشأة. أدخل التفاصيل لتظهر المتطلبات.', '[data-service-picker] > button'),
+    step('Start a service', 'ابدأ خدمة', 'Choose an event or a facility/site. Enter the details to see what you need to provide.', 'اختر فعالية أو منشأة/موقعاً. أدخل التفاصيل لتظهر المتطلبات.', '[data-service-picker] > button'),
     step('Complete your requirements', 'أكمل متطلباتك', 'Add your files and invite your medical team. If a medical plan is needed, the EMS agency or Medical Director fills it in. You can read their answers.', 'أضف ملفاتك وادعُ فريقك الطبي. عند الحاجة إلى خطة طبية، تُعدّها جهة الإسعاف أو المدير الطبي. يمكنك الاطلاع على إجاباتهم.'),
     step('Submit and follow up', 'قدّم الطلب وتابعه', 'Review your completed requirements, then submit. Open your record to follow Ministry updates and download your certificate when it is issued.', 'راجع المتطلبات المكتملة ثم قدّم الطلب. افتح سجلك لمتابعة مستجدات الوزارة وتنزيل الشهادة عند إصدارها.'),
   ];
@@ -16,7 +16,7 @@ export function quickTourSteps(role: string): TourStep[] {
     step('One shared medical plan', 'خطة طبية واحدة مشتركة', 'If a plan is needed, either the EMS agency or Medical Director can complete it. Both see the same plan. The organizer reviews it before submitting.', 'عند الحاجة إلى خطة، يمكن لجهة الإسعاف أو المدير الطبي إكمالها. يشاهد الطرفان الخطة نفسها، ويطّلع عليها المنظّم قبل التقديم.'),
   ];
   const ministry = [
-    step('Choose a service', 'اختر خدمة', 'Switch between events, hosting venues and facilities.', 'انتقل بين الفعاليات ومواقع الاستضافة والمنشآت.', '[data-tour="services"]'),
+    step('Choose a service', 'اختر خدمة', 'Switch between events and facilities and sites.', 'انتقل بين الفعاليات والمنشآت والمواقع.', '[data-tour="services"]'),
     step('Open a file to review', 'افتح ملفاً للمراجعة', 'Choose a submission to see its details, files and medical-team answers. Record your review and any changes needed.', 'اختر طلباً للاطلاع على تفاصيله وملفاته وإجابات الفريق الطبي. سجّل المراجعة وأي تعديلات مطلوبة.', '[data-region="counters"]'),
   ];
   const owner = [

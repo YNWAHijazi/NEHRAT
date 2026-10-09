@@ -37,19 +37,17 @@ test("public check is concise and preserves the chosen service through signup", 
       exact: true,
     }),
   ).toBeVisible();
+  // Two services (owner, 9 October 2026): an old venue link opens the facility/site branch, where
+  // the event-hosting venue is a category of its own.
   await page.goto("/applicability?subject=venue");
-  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "false");
-  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "false");
-  await page.getByRole("button", { name: "No", exact: true }).click();
-  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "false");
-  await expect(page.getByRole("heading", { name: "Hosting venue registration not required", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Yes", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Yes", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "No", exact: true })).toHaveAttribute("aria-pressed", "false");
+  const hosting = page.locator("[data-region=facility-branch] a", { hasText: "Event-hosting venues with an approved or licensed capacity of 1,000 persons or more" });
+  await expect(hosting).not.toHaveAttribute("aria-current", "true");
+  await hosting.click();
+  await expect(hosting).toHaveAttribute("aria-current", "true");
+  await expect(page.getByRole("heading", { name: "Facility/site registration required", exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Next", exact: true }),
-  ).toHaveAttribute("href", "/services/register-a-venue");
+  ).toHaveAttribute("href", "/services/register-a-facility");
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/applicability?subject=event");
   expect(
@@ -210,13 +208,15 @@ test("Ministry has service tabs and event search", async ({ page }) => {
   await expect(page.locator("[data-region=queue]")).not.toContainText(
     "Beirut Coastal",
   );
+  // Two services and the venue register kept as history (owner, 9 October 2026).
   await services
-    .getByRole("link", { name: "Hosting venues", exact: true })
+    .getByRole("link", { name: "Hosting venues (historical)", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Hosting venues", exact: true }),
+    page.getByRole("heading", { name: "Hosting venues (historical)", exact: true }),
   ).toBeVisible();
-  await services.getByRole("link", { name: "Facilities", exact: true }).click();
+  await expect(page.locator("[data-region=venue-retired]")).toContainText("Hosting venue registration is replaced by facility/site registration.");
+  await services.getByRole("link", { name: "Facilities and sites", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Facility oversight", exact: true }),
   ).toBeVisible();

@@ -19,7 +19,7 @@ import { recordRequirementsFor, type RecordRequirements } from '../lib/record-fa
 import { EVENT_FILE_KEYS } from '../lib/requirement-migration';
 import { venueAccess } from '../lib/venue/collaboration';
 import { notifyVenueMedicalProgress } from '../lib/venue/notify';
-import { authorsFor, fieldsFor, planTextKeys, type AnswerValue, type AuthorRole, type FieldDef, type RecordService } from '../lib/rules';
+import { FACILITY_REFERENCE_KEY, authorsFor, fieldsFor, planTextKeys, type AnswerValue, type AuthorRole, type FieldDef, type RecordService } from '../lib/rules';
 import { maxUploadBytes, refuseUpload } from '../lib/rules/uploads';
 
 export type SaveAnswerResult = { ok: true; version: number } | { error: 'conflict' | 'forbidden' | 'invalid' | 'locked' | 'not-found'; fields?: string[] };
@@ -89,6 +89,8 @@ function coerce(field: FieldDef, raw: unknown): AnswerValue | undefined {
 /** Keys whose change is a change to the plan (and so reopens the Director's approval). */
 function touchesPlan(record: RecordRequirements, key: string): boolean {
   if (planTextKeys().includes(key)) return true;
+  // The site AED answer changes what the CPR and AED step reads (latest revision, section 17).
+  if (key === FACILITY_REFERENCE_KEY) return record.service === 'event';
   const inst = record.instances.find((i) => i.key === key);
   return Boolean(inst && inst.linkedPlan.length > 0);
 }

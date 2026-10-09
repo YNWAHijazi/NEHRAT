@@ -307,32 +307,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     ],
   },
 
-  // --- Slice 3: the venue service ---
-  {
-    id: 'venue-registration',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Register a venue',
-    builtRoute: '/venues/new',
-    signInAs: 'test_organizer',
-    regions: [
-      // The required-note region entry was deleted with its region: the
-      // every-field-is-required banner left /venues/new in the partner's second
-      // sweep (the one optional field says so on its own label), so there is no
-      // longer anything to compare.
-      {
-        name: 'exempt-footnote',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="exempt-footnote"]',
-        note: 'The September 13 quiet-help change, requested by the owner, moved this explanation into an information control. The prototype still shows a permanent paragraph. This intentional change cannot be pixel-compared to that paragraph; quiet-help.spec.ts verifies the full explanation remains accessible in English and Arabic, including on mobile.',
-      },
-      {
-        name: 'registration-form',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="registration-form"]',
-        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty, its two questions UNANSWERED, and shows no verdict until the determining facts are answered -- an unset input is not a determination. At reviewer instruction (Slice 5 review) each question is a separate Yes button and No button, not one control flipping between the answers. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data) and splits the venue name and address/municipality into bilingual input pairs. Second sweep (2026-09-02, partner ruling): the issue tags ("English issue only") left the question labels -- English governs and the ruling is made; the tags remain in the data.',
-      },
-    ],
-  },
+  // --- Slice 3: the venue service (retired 9 October 2026: hosting venue registration is replaced by
+  // Facility/Site registration; /venues/new and /venues/[id]/change redirect, so their entries left) ---
   {
     id: 'venue-assessment',
     referenceFile: 'Organizer Journey.dc.html',
@@ -399,30 +375,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     ],
   },
   {
-    id: 'venue-change',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Report a venue change',
-    builtRoute: '/venues/VN-0032/change',
-    signInAs: 'test_organizer',
-    regions: [
-      {
-        name: 'change-form',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'What changed', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="change-form"]',
-        note: "The five aspect chips, description and effective date. Held at 2%. Known residuals inside the budget: the reference prefills the date (2026-09-01) and sets a placeholder on the description; a new report starts empty, as the event-side change form does.",
-      },
-      {
-        name: 'revision-footnote',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'The Ministry may require a revised', container: 'border-radius: 12px' },
-        builtSelector: '[data-region="revision-footnote"]',
-        note: 'The Ministry may require revised documents. Held at 2%.',
-      },
-    ],
-  },
-  // --- Slice 4: the facility service ---
-  {
     id: 'facility-registration',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Register a facility',
@@ -453,7 +405,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'facility-readiness',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Facility readiness',
-    builtRoute: '/facilities/FC-0014',
+    // The site dashboard's cardiac-readiness tab (latest revision, 9 October 2026, section 13).
+    builtRoute: '/facilities/FC-0014?tab=readiness',
     signInAs: 'test_organizer',
     regions: [
       {
@@ -480,15 +433,15 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'devices',
         mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'AED-001', container: 'repeat(auto-fit, minmax(280px, 1fr))' },
-        builtSelector: '[data-region="registry-table"]',
-        note: "Expected divergent BY OWNER REQUEST (9 October 2026): the readiness screen and the device registry are one management page with sections, so the device cards that linked to the registry are the registry itself, in the AEDs section. Was a compare held at 2% (residual: AED-003's note derives from the record where the reference hand-writes 'Cabinet reported locked outside class hours'). UNVERIFIED as to pixels since the merge.",
+        builtSelector: '[data-region="derived"]',
+        note: "Expected divergent BY OWNER REQUEST (latest revision, 9 October 2026, section 13): the site is a dashboard in tabs, and the AED registry is its own AEDs tab (the facility-devices mapping below compares it). The cardiac-readiness tab carries the plan's AED information derived from the registry in place of the reference's device cards. Was a compare held at 2%. UNVERIFIED as to pixels since the tabs.",
       },
       {
         name: 'ministry-request',
         mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Requested by the Ministry', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="ministry-request"]',
-        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): the request now carries its status chip, its due date or the named reason none is computed, the Ministry's close note where closed, and a link to the control that answers it. The reference shows body text and a link to /notifications, where nothing could be done. UNVERIFIED as to pixels since the flip.",
+        builtSelector: '[data-region="next-action"]',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27) and BY OWNER REQUEST (latest revision, 9 October 2026, sections 12-13): an open corrective action leads every tab of the site dashboard as its next step, linking to the Ministry history tab where the request carries its deficiency, its due date or the named reason none is computed, the operator's answer with evidence and the Ministry's verification when closed. The reference shows body text and a link to /notifications, where nothing could be done. UNVERIFIED as to pixels since the flip.",
       },
     ],
   },

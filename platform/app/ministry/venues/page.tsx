@@ -7,10 +7,15 @@ import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { getDb } from '../../../lib/db';
 import { beirutToday } from '../../../lib/clock';
 import { venueRegisterState, type VenuePackageStatus } from '../../../lib/rules/venue-workflow';
+import { VenueRetiredMinistryNotice } from '../../../components/venue/VenueRetiredNotice';
 
 const EDGE = { pending: 'var(--accent)', done: 'var(--brand)', bad: 'var(--bad)', muted: 'var(--line)' } as const;
 
-/** The Ministry's register of hosting venues: submissions waiting first, then by certificate date. */
+/**
+ * The Ministry's register of hosting venues, kept as a read-only historical list: hosting venue
+ * registration is replaced by Facility/Site registration (owner, 9 October 2026). Nothing is
+ * deleted; no venue is an active regulatory entity, so nothing here asks for a review.
+ */
 export default async function MinistryVenues({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const account = await requireMinistryPage('viewMinistry');
   const { q = '' } = await searchParams;
@@ -30,11 +35,12 @@ export default async function MinistryVenues({ searchParams }: { searchParams: P
 
   return (
     <MinistryShell account={account}>
-      <h1 style={{ margin: '0 0 8px', fontSize: 28 }}><L en="Hosting venues" ar="مواقع استضافة الفعاليات" /></h1>
+      <h1 style={{ margin: '0 0 8px', fontSize: 28 }}><L en="Hosting venues (historical)" ar="المواقع المستضيفة (سجل سابق)" /></h1>
+      <VenueRetiredMinistryNotice />
       <p style={{ margin: '0 0 20px', color: 'var(--muted)' }}>
         <L
-          en={`${rows.length} ${rows.length === 1 ? 'venue' : 'venues'} · ${waiting} waiting for review · ${expired} ${expired === 1 ? 'certificate' : 'certificates'} expired`}
-          ar={`المواقع: ${rows.length} · بانتظار المراجعة: ${waiting} · شهادات منتهية: ${expired}`}
+          en={`${rows.length} ${rows.length === 1 ? 'venue' : 'venues'} · ${waiting} submitted before the change`}
+          ar={`المواقع: ${rows.length} · مقدّمة قبل التغيير: ${waiting}`}
         />
       </p>
       <ServiceSearch value={q} en="Search hosting venues" ar="البحث عن مواقع استضافة الفعاليات" />
@@ -57,12 +63,9 @@ export default async function MinistryVenues({ searchParams }: { searchParams: P
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', flex: '0 1 auto', minWidth: 0 }}>
                 <span style={chip(state.tone)}><L en={state.en} ar={state.ar} /></span>
                 {v.submitted_at ? (
-                  <Link href={`/ministry/venues/${v.id}`} style={{ height: 36, paddingInline: 16, borderRadius: 18, background: v.status === 'submitted' ? 'var(--brand)' : 'var(--bg)', color: v.status === 'submitted' ? 'var(--bg)' : 'var(--ink)', border: v.status === 'submitted' ? 0 : '1px solid var(--line)', fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
-                    <L en={v.status === 'submitted' ? 'Review submission' : 'Open file'} ar={v.status === 'submitted' ? 'مراجعة الطلب' : 'فتح الملف'} />
+                  <Link href={`/ministry/venues/${v.id}`} style={{ minHeight: 44, paddingInline: 16, borderRadius: 22, background: 'var(--bg)', color: 'var(--ink)', border: '1px solid var(--line)', fontSize: 14, display: 'inline-flex', alignItems: 'center' }}>
+                    <L en="Open file" ar="فتح الملف" />
                   </Link>
-                ) : null}
-                {v.valid_until ? (
-                  <Link href={`/venues/${v.id}/certificate`} style={{ fontSize: 14 }}><L en="View certificate" ar="عرض الشهادة" /></Link>
                 ) : null}
               </div>
             </article>

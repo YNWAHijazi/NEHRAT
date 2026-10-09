@@ -28,7 +28,6 @@ import { recordNextStep, resolveRequirements } from "../lib/rules/record-require
 import { seriousIncidentGate } from "../lib/rules/gates";
 import {
   eventApplicability,
-  venueApplicability,
   facilityApplicability,
 } from "../lib/rules/public-landing";
 const folder = mkdtempSync(join(tmpdir(), "moph-owner-update-"));
@@ -60,19 +59,22 @@ function saveItem(key: string, text: string) {
   return saveRequirementAnswerAction("event", "EV-0362", key, { baseVersion: stored?.version ?? 0, values: { text } });
 }
 const itemText = (owner: number, key: string) => eventRecordRequirements(owner, "EV-0362")!.plan.find((s) => s.key === "P12")!.items.find((m) => m.key === key)!.text;
-test("public check accepts any remaining criterion and all six facility categories", () => {
+test("public check accepts any remaining criterion; objective facility/site categories route to registration, designated ones do not", () => {
   expect(eventApplicability([]).en).toBe("Certification not required");
   for (let i = 0; i < 5; i++)
     expect(eventApplicability([i]).route).toBe("/services/certify-an-event");
   expect(eventApplicability([5, NaN, -1]).route).toBeNull();
-  expect(venueApplicability(true, false).route).toBeNull();
-  expect(venueApplicability(true, true).route).toBe(
-    "/services/register-a-venue",
-  );
-  for (let i = 0; i < 6; i++)
+  // Sports and fitness, educational, transport and public access, event-hosting venues: objective.
+  for (let i = 0; i < 4; i++)
     expect(facilityApplicability(i)?.route).toBe(
       "/services/register-a-facility",
     );
+  // Remote access, a confirmed prior arrest, any other designation: the Ministry's, not the applicant's.
+  for (let i = 4; i < 7; i++) {
+    expect(facilityApplicability(i)?.route).toBeNull();
+    expect(facilityApplicability(i)?.en).toBe("Registration follows a Ministry designation");
+  }
+  expect(facilityApplicability(7)).toBeNull();
 });
 test("Level 2 completes without major-incident section or checklist; Level 3 cannot", () => {
   const sections = Object.fromEntries(
@@ -202,7 +204,8 @@ test("duplicates enter the editable application and preserve the source", async 
   ).toEqual(source);
 });
 
-test("renewal keeps the venue ID and reference while earlier certificate details stay unchanged", async () => {
+test("a venue is history: renewal and reassessment are refused, and the earlier certificate and record stay as they were", async () => {
+  // Hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026).
   as("test_organizer");
   const db = getDb();
   const venue = db
@@ -210,19 +213,11 @@ test("renewal keeps the venue ID and reference while earlier certificate details
       "SELECT id, moph_reference FROM venues WHERE account_id = ? AND level IS NOT NULL LIMIT 1",
     )
     .get(session.account!.id) as { id: string; moph_reference: string };
-  const previous = db
-    .prepare(
-      "SELECT version, certificate_snapshot FROM venue_assessments WHERE venue_id = ? ORDER BY version DESC LIMIT 1",
-    )
-    .get(venue.id) as { version: number; certificate_snapshot: string };
-  db.prepare("UPDATE venues SET name_en = ? WHERE id = ?").run(
-    "Updated venue name",
-    venue.id,
-  );
-  // A certified venue is read-only (2026-10-01): a reported change opens renewal, and renewal starts the
-  // new assessment cycle -- the earlier certificate is never edited in place.
+  const before = db
+    .prepare("SELECT version, certificate_snapshot FROM venue_assessments WHERE venue_id = ? ORDER BY version")
+    .all(venue.id);
   db.prepare("INSERT INTO venue_changes (venue_id, aspects, description, effective_date) VALUES (?, ?, ?, ?)").run(venue.id, JSON.stringify(['name']), 'Venue renamed', '2026-09-26');
-  await expect(renewVenuePackageAction(venue.id)).rejects.toThrow('/details');
+  await expect(renewVenuePackageAction(venue.id)).rejects.toThrow(`redirect:/venues/${venue.id}`);
   expect(
     await saveVenueAssessmentAction(venue.id, {
       answers: [1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -230,28 +225,11 @@ test("renewal keeps the venue ID and reference while earlier certificate details
       representative: "Test representative",
       position: "Operator",
     }),
-  ).toHaveProperty("level");
+  ).toEqual({ error: "locked" });
+  expect(db.prepare("SELECT id, moph_reference FROM venues WHERE id = ?").get(venue.id)).toEqual(venue);
   expect(
-    db
-      .prepare("SELECT id, moph_reference FROM venues WHERE id = ?")
-      .get(venue.id),
-  ).toEqual(venue);
-  expect(
-    db
-      .prepare(
-        "SELECT certificate_snapshot FROM venue_assessments WHERE venue_id = ? AND version = ?",
-      )
-      .get(venue.id, previous.version),
-  ).toHaveProperty("certificate_snapshot", previous.certificate_snapshot);
-  const latest = db
-    .prepare(
-      "SELECT version, certificate_snapshot FROM venue_assessments WHERE venue_id = ? ORDER BY version DESC LIMIT 1",
-    )
-    .get(venue.id) as { version: number; certificate_snapshot: string };
-  expect(latest.version).toBe(previous.version + 1);
-  expect(JSON.parse(latest.certificate_snapshot).nameEn).toBe(
-    "Updated venue name",
-  );
+    db.prepare("SELECT version, certificate_snapshot FROM venue_assessments WHERE venue_id = ? ORDER BY version").all(venue.id),
+  ).toEqual(before);
 });
 
 test("an incident can be recorded inside the window but future occurrences are refused", async () => {

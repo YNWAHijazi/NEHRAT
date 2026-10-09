@@ -17,9 +17,10 @@ export function MinistryServices() {
       }}
     >
       {[
+        // Two services (owner, 9 October 2026). The hosting venue register is a read-only
+        // historical list, linked quietly after them -- not a service of its own.
         ["/ministry", "Events", "الفعاليات"],
-        ["/ministry/venues", "Hosting venues", "مواقع استضافة الفعاليات"],
-        ["/ministry/facilities", "Facilities", "المرافق"],
+        ["/ministry/facilities", "Facilities and sites", "المنشآت والمواقع"],
       ].map(([href, en, ar]) => {
         const active =
           href === "/ministry"
@@ -42,6 +43,14 @@ export function MinistryServices() {
           </Link>
         );
       })}
+      <Link
+        href="/ministry/venues"
+        aria-current={path.startsWith("/ministry/venues") ? "page" : undefined}
+        data-region="historical-venues-link"
+        style={{ display: "inline-flex", alignItems: "center", minHeight: 44, paddingInline: 8, marginInlineStart: "auto", fontSize: "13.5px", color: "var(--muted)", textDecoration: "underline" }}
+      >
+        <L en="Hosting venues (historical)" ar="المواقع المستضيفة (سجل سابق)" />
+      </Link>
     </nav>
   );
 }

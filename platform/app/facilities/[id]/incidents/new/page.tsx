@@ -4,7 +4,8 @@ import { GovernmentBand, Header } from '../../../../../components/Header';
 import { L } from '../../../../../components/L';
 import { IncidentForm } from './IncidentForm';
 import { currentAccount, organizationFor } from '../../../../../lib/auth';
-import { facilityDetail, facilityPersons, ministryConfig, unreadCountFor } from '../../../../../lib/queries';
+import { facilityDetail, facilityDevices, ministryConfig, unreadCountFor } from '../../../../../lib/queries';
+import { siteEventChoices } from '../../../../../lib/site-registration';
 
 /**
  * The facility cardiac-arrest incident report. Tri-state answers are the
@@ -24,16 +25,15 @@ export default async function IncidentReportPage({
   if (!facility) notFound();
   const organization = organizationFor(account.id);
   const unread = unreadCountFor(account.id);
-  const coordinator = facilityPersons(facility.id).find((p) => p.role === 'coordinator') ?? null;
 
   return (
     <>
       <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
+      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}?tab=incidents`, en: 'Facility/site record', ar: 'سجل المنشأة/الموقع' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 860 }}>
           <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 10 }}>
-            <L en={`${facility.nameEn} · ${facility.id}`} ar={`${facility.nameAr} · ${facility.id}`} />
+            <L en={`${facility.nameEn} · ${facility.siteId ?? facility.id}`} ar={`${facility.nameAr} · ${facility.siteId ?? facility.id}`} />
           </div>
           <h1 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
             <L en="Facility cardiac-arrest incident report" ar="تقرير حادثة توقف القلب في المرفق" />
@@ -65,9 +65,9 @@ export default async function IncidentReportPage({
           })()}
           <IncidentForm
             facilityId={facility.id}
-            coordinatorName={coordinator?.nameOrPosition ?? ''}
-            coordinatorPhone={coordinator?.phone ?? ''}
-            coordinatorEmail={coordinator?.email ?? ''}
+            siteId={facility.siteId}
+            devices={facilityDevices(facility.id).map((d) => ({ label: d.label, locationEn: d.locationEn, locationAr: d.locationAr || d.locationEn }))}
+            events={facility.siteId ? siteEventChoices(facility.siteId, facility.isDemo) : []}
           />
         </div>
       </main>

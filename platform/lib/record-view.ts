@@ -9,6 +9,7 @@ import { organizationFor } from './auth';
 import { attachmentsFor, eventFor, facilityById, facilityDevices, facilityPlanConfirmation, governanceFor, venueRouteFor } from './queries';
 import { catalogueKeyForDocument, eventRecordRequirements, type RecordRequirements } from './record-facts';
 import type { ReferenceDeviceFacts } from './rules';
+import { siteConfirmationFor, siteForEvent, siteInformation, type SiteConfirmation, type SiteInformation } from './event-site';
 
 export interface RecordView {
   record: RecordRequirements;
@@ -18,6 +19,11 @@ export interface RecordView {
   governance: Record<string, string>;
   /** Set where the venue is itself a registered covered facility (SPEC 2e): a reference, never a copy. */
   facility: { nameEn: string; nameAr: string; devices: number; facts: ReferenceDeviceFacts } | null;
+  /**
+   * The registered Facility/Site the event is held at (latest revision, section 16): what it
+   * offers the event, read from the site record, and the organizer's confirmation for this event.
+   */
+  site: { info: SiteInformation; confirmation: SiteConfirmation | null } | null;
 }
 
 export function eventRecordView(ownerId: number, eventId: string): RecordView | null {
@@ -34,9 +40,25 @@ export function eventRecordView(ownerId: number, eventId: string): RecordView | 
   const dates = event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`;
   const confirmed = record.parties.filter((p) => p.status === 'confirmed');
   const organizerName = record.facts?.organizerContact?.name ?? '';
-  const facilityRow = event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
+  // An event at a registered site references the Facility/Site registration standing there,
+  // whoever holds it; an older reference without a site reads the organizer's own facility.
+  const linked = siteForEvent(eventId);
+  const info = linked ? siteInformation(linked.siteId) : null;
+  const siteFacility = info?.facilityId
+    ? {
+        nameEn: info.nameEn, nameAr: info.nameAr, devices: info.aeds.length,
+        facts: {
+          count: info.aeds.length,
+          locationsEn: info.aeds.map((d) => d.locationEn),
+          locationsAr: info.aeds.map((d) => d.locationAr),
+          anyPediatric: info.anyPediatric,
+          planConfirmed: facilityPlanConfirmation(info.facilityId)?.current === true,
+        },
+      }
+    : null;
+  const facilityRow = !linked && event.venueFacilityId ? facilityById(ownerId, event.venueFacilityId) : null;
   const refDevices = facilityRow ? facilityDevices(facilityRow.id) : [];
-  const facility = facilityRow
+  const facility = siteFacility ?? (facilityRow
     ? {
         nameEn: facilityRow.nameEn, nameAr: facilityRow.nameAr, devices: refDevices.length,
         facts: {
@@ -47,8 +69,9 @@ export function eventRecordView(ownerId: number, eventId: string): RecordView | 
           planConfirmed: facilityPlanConfirmation(facilityRow.id)?.current === true,
         },
       }
-    : null;
+    : null);
   return {
+    site: info ? { info, confirmation: siteConfirmationFor(eventId) } : null,
     record,
     contentTypes,
     governance: governanceFor(eventId),

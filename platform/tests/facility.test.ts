@@ -34,8 +34,19 @@ const BASE: LedgerInputs = {
 };
 
 describe('the category determination', () => {
-  it('carries six categories, each with one of the four state chips', () => {
-    expect(FACILITY_CATEGORIES).toHaveLength(6);
+  it('carries the seven covered categories of the latest revision (9 October 2026), each with one of the four state chips', () => {
+    expect(FACILITY_CATEGORIES.map((c) => c.en)).toEqual([
+      'Sports and fitness facilities',
+      'Educational facilities',
+      'Transport and major public-access facilities',
+      'Event-hosting venues with approved/licensed capacity ≥1,000',
+      'Remote/difficult-access facilities designated by MOPH',
+      'Facilities with a confirmed prior cardiac arrest',
+      'Other MOPH-designated facilities',
+    ]);
+    expect(FACILITY_CATEGORIES.map((c) => c.applicability)).toEqual(['objective', 'objective', 'objective', 'capacity', 'designation', 'designation', 'designation']);
+    // The education category keeps its phased-schedule ending.
+    expect(facilityCategory('education')?.detailEn).toMatch(/according to the phased implementation schedule established by MOPH\.$/);
     for (const c of FACILITY_CATEGORIES) {
       expect(['inForceNow', 'partlyInForce', 'awaitingMinistryValue', 'determinedByReview']).toContain(c.state);
     }

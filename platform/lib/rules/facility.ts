@@ -17,6 +17,7 @@
 import facilityJson from './data/facility.json';
 import { addDays, formatIsoDate, type CalendarDate } from './deadlines';
 import type { StateChip } from './gates';
+import { categoryApplicabilityMode, eventVenueThreshold, fillCapacity, type ApplicabilityMode } from './site';
 
 /* ---------------- categories ---------------- */
 
@@ -24,6 +25,11 @@ export interface FacilityCategory {
   key: string;
   en: string;
   ar: string;
+  /** The category's longer description (revision section "Covered Facilities/Sites"). */
+  detailEn: string;
+  detailAr: string;
+  /** How coverage is decided: by the category itself, by capacity, or only by Ministry designation. */
+  applicability: ApplicabilityMode;
   state: StateChip;
   alsoRecurringVenue: boolean;
   ruleEn: string;
@@ -35,21 +41,32 @@ export interface FacilityCategory {
   missingAr?: string | undefined;
 }
 
-export const FACILITY_CATEGORIES: readonly FacilityCategory[] = facilityJson.categories.map(
-  (c) => ({
+type CategoryData = (typeof facilityJson.categories)[number] & { unsetEn?: string; unsetAr?: string; detailEn?: string; detailAr?: string };
+
+/** A category with its capacity threshold filled in (the event-hosting category's {capacity}). */
+function categoryAt(c: CategoryData, threshold: number | null): FacilityCategory {
+  return {
     key: c.key,
-    en: c.en,
-    ar: c.ar,
+    en: fillCapacity(c.en, c.unsetEn, threshold),
+    ar: fillCapacity(c.ar, c.unsetAr, threshold),
+    detailEn: fillCapacity(c.detailEn ?? '', c.unsetEn, threshold),
+    detailAr: fillCapacity(c.detailAr ?? '', c.unsetAr, threshold),
+    applicability: categoryApplicabilityMode(c.key) ?? 'objective',
     state: c.state as StateChip,
     alsoRecurringVenue: Boolean((c as { alsoRecurringVenue?: boolean }).alsoRecurringVenue),
-    ruleEn: c.ruleEn,
-    ruleAr: c.ruleAr,
+    ruleEn: fillCapacity(c.ruleEn, c.unsetEn, threshold),
+    ruleAr: fillCapacity(c.ruleAr, c.unsetAr, threshold),
     basisEn: c.basisEn,
     basisAr: c.basisAr,
     missingEn: (c as { missingEn?: string }).missingEn,
     missingAr: (c as { missingAr?: string }).missingAr,
-  }),
-);
+  };
+}
+
+/** The instrument's own threshold, before anything the Ministry publishes (lib/rules/site.ts). */
+const DATA_THRESHOLD = eventVenueThreshold(null, '');
+
+export const FACILITY_CATEGORIES: readonly FacilityCategory[] = facilityJson.categories.map((c) => categoryAt(c, DATA_THRESHOLD));
 
 export function facilityCategory(key: string): FacilityCategory | null {
   return FACILITY_CATEGORIES.find((c) => c.key === key) ?? null;
@@ -72,9 +89,15 @@ export interface PublishedValue {
  */
 export function categoryWithPublished(
   key: string,
-  published: { phasedSchedule?: PublishedValue | null; capacityThreshold?: PublishedValue | null },
+  published: { phasedSchedule?: PublishedValue | null; capacityThreshold?: PublishedValue | null; eventVenueCapacity?: PublishedValue | null },
+  today = '',
 ): FacilityCategory | null {
-  const base = facilityCategory(key);
+  const raw = facilityJson.categories.find((c) => c.key === key);
+  if (!raw) return null;
+  // The event-hosting threshold: a published Ministry value in force governs the data figure.
+  const base = key === 'eventVenue' && published.eventVenueCapacity
+    ? categoryAt(raw, eventVenueThreshold(published.eventVenueCapacity, today))
+    : facilityCategory(key);
   if (!base) return null;
   if (key === 'education' && published.phasedSchedule) {
     const s = published.phasedSchedule;

@@ -9,6 +9,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../../components/L';
+import { OptionText } from '../../../../../components/OptionText';
 import { submitFacilityIncidentAction } from '../../../../actions';
 import { FACILITY_CONTENT, detectPersonalName } from '../../../../../lib/rules';
 
@@ -87,14 +88,17 @@ function AnswerRow({
 
 export function IncidentForm({
   facilityId,
-  coordinatorName,
-  coordinatorPhone,
-  coordinatorEmail,
+  siteId,
+  devices,
+  events,
 }: {
   facilityId: string;
-  coordinatorName: string;
-  coordinatorPhone: string;
-  coordinatorEmail: string;
+  /** The site the report links to automatically (latest revision, 9 October 2026, section 15). */
+  siteId: string | null;
+  /** The site's AEDs, for "the relevant AED where known". */
+  devices: { label: string; locationEn: string; locationAr: string }[];
+  /** The registered events held at the site, for "the Event ID if it occurred during a registered Event". */
+  events: { id: string; nameEn: string; nameAr: string; startDate: string | null; endDate: string | null }[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -111,7 +115,7 @@ export function IncidentForm({
     startTransition(async () => {
       const result = await submitFacilityIncidentAction(facilityId, formData);
       if (result && 'error' in result) setServerError(result.error);
-      else router.push(`/facilities/${facilityId}?notice=incident#incidents`);
+      else router.push(`/facilities/${facilityId}?tab=incidents&notice=incident#incidents`);
     });
   };
 
@@ -134,6 +138,27 @@ export function IncidentForm({
           <h3 style={{ margin: '0 0 18px', fontSize: 18, fontWeight: 600 }}>
             <L en="Incident information" ar="معلومات الحادثة" />
           </h3>
+          {/* What the report links to. The site is automatic; the AED and the event are chosen from this site's own. */}
+          <div data-region="incident-links" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,220px),1fr))', gap: 16, marginBlockEnd: 18 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 14, color: 'var(--muted)' }}><L en="Site" ar="الموقع" /></span>
+              <span data-region="incident-site" style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', background: 'var(--surface2)', fontVariantNumeric: 'tabular-nums' }}>{siteId ?? '—'}</span>
+            </div>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 14, color: 'var(--muted)' }}><L en="AED used or nearest, if known" ar="الجهاز المستخدم أو الأقرب، إن كان معروفاً" /></span>
+              <select name="deviceLabel" defaultValue="" style={{ ...inputStyle, paddingInlineEnd: 34 }}>
+                <option value=""><OptionText en="Not known" ar="غير معروف" /></option>
+                {devices.map((d) => <option key={d.label} value={d.label}><OptionText en={`${d.label} · ${d.locationEn}`} ar={`${d.label} · ${d.locationAr}`} /></option>)}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span style={{ fontSize: 14, color: 'var(--muted)' }}><L en="During a registered event at this site" ar="خلال فعالية مسجّلة في هذا الموقع" /></span>
+              <select name="eventId" defaultValue="" style={{ ...inputStyle, paddingInlineEnd: 34 }}>
+                <option value=""><OptionText en="Not during a registered event" ar="ليس خلال فعالية مسجّلة" /></option>
+                {events.map((e) => <option key={e.id} value={e.id}><OptionText en={`${e.id} · ${e.nameEn}${e.startDate ? ` · ${e.startDate}` : ''}`} ar={`${e.id} · ${e.nameAr}${e.startDate ? ` · ${e.startDate}` : ''}`} /></option>)}
+              </select>
+            </label>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16 }}>
             {content.infoFields.map((f) => (
               <label key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

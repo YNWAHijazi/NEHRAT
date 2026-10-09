@@ -10,7 +10,9 @@ test('service choices fit a phone in both languages and support keyboard dismiss
   await trigger.click();
   const menu = page.locator('[data-svc-menu]');
   await expect(menu.locator('a').first()).toBeVisible();
-  await expect(menu.locator('a')).toHaveCount(3);
+  // Two services (owner, 9 October 2026): an event, and a facility/site.
+  await expect(menu.locator('a')).toHaveCount(2);
+  await expect(menu.locator('a').nth(1)).toHaveAttribute('href', '/facilities/new');
   await expect(menu.locator('input')).toHaveCount(0);
   const box = await menu.boundingBox();
   expect(box).not.toBeNull();

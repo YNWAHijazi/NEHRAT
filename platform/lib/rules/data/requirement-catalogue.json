@@ -2246,6 +2246,8 @@
     }
   },
   "copy": {
+    "siteAedsEn": "Uses the site’s registered AEDs.",
+    "siteAedsAr": "يستخدم أجهزة AED المسجّلة في الموقع.",
     "whoEn": "Who handles it",
     "whoAr": "من يتولاه",
     "derivedEn": "Included automatically",

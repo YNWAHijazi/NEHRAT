@@ -1354,6 +1354,65 @@ function migrate(d: DatabaseSync): void {
   }
 
   migrateSites(d, addColumn);
+  migrateSiteRegistration(d, addColumn);
+}
+
+/**
+ * THE FACILITY/SITE REGISTRATION (latest revision, 9 October 2026, sections 2, 8, 9-12 and 15).
+ * Additive only. Every timestamp is written by the caller on the one clock (now_stamp()), so
+ * none of these columns relies on a UTC DEFAULT.
+ *
+ *  - the operating organization on the site profile;
+ *  - facility_submissions: "Submit Facility/Site registration to MOPH", versioned and auditable,
+ *    each version frozen as a snapshot of what the Ministry read;
+ *  - facility_review_acts: the Ministry's acts on a submission -- review started, accepted,
+ *    information or correction requested, an inspection, a designation. Never an event outcome;
+ *  - the corrective action's own fields on facility_requests (the deficiency, the Ministry's
+ *    note), and the operator's answers with evidence in facility_request_responses;
+ *  - the incident report's links: the site, the AED where known, the event where it happened
+ *    during one held at the site.
+ */
+function migrateSiteRegistration(d: DatabaseSync, addColumn: (table: string, column: string, ddl: string) => void): void {
+  addColumn('facilities', 'operating_organization', "operating_organization TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'deficiency', "deficiency TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'note', "note TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'submission_id', 'submission_id INTEGER');
+  addColumn('facility_incidents', 'site_id', 'site_id TEXT');
+  addColumn('facility_incidents', 'device_label', 'device_label TEXT');
+  addColumn('facility_incidents', 'event_id', 'event_id TEXT');
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    version INTEGER NOT NULL,
+    snapshot TEXT NOT NULL,
+    submitted_by INTEGER REFERENCES accounts(id),
+    submitted_at TEXT NOT NULL,
+    is_demo INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (facility_id, version)
+  ); CREATE TABLE IF NOT EXISTS facility_review_acts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    submission_id INTEGER REFERENCES facility_submissions(id),
+    kind TEXT NOT NULL CHECK (kind IN ('reviewStarted','accepted','infoRequested','correctionRequested','inspection','designation')),
+    note TEXT NOT NULL DEFAULT '',
+    inspection_date TEXT,
+    actor_id INTEGER REFERENCES accounts(id),
+    actor_name TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    is_demo INTEGER NOT NULL DEFAULT 0
+  ); CREATE INDEX IF NOT EXISTS facility_review_acts_facility ON facility_review_acts(facility_id, id);
+  CREATE TABLE IF NOT EXISTS facility_request_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER NOT NULL REFERENCES facility_requests(id),
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    note TEXT NOT NULL DEFAULT '',
+    document_id INTEGER REFERENCES facility_documents(id),
+    responded_by INTEGER REFERENCES accounts(id),
+    responded_at TEXT NOT NULL
+  );`);
+  // The declaration signed on submission, as on the event's and the venue's.
+  addColumn('facility_submissions', 'representative', "representative TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_submissions', 'position', "position TEXT NOT NULL DEFAULT ''");
 }
 
 /**
@@ -1379,6 +1438,30 @@ function migrateSites(d: DatabaseSync, addColumn: (table: string, column: string
   addColumn('events', 'site_id', 'site_id TEXT REFERENCES sites(id)');
   // The annual venue baseline an event relied on: the venue's assessment version at the time.
   addColumn('events', 'hosting_venue_version', 'hosting_venue_version INTEGER');
+  // FACILITY/SITE (Latest revision, 9 October 2026): the Site is the one place record. Its basic
+  // infrastructure -- reusable by events held there, never a regulatory blocker -- is one answer
+  // set per facility registration; its documents (the layout map, optional supporting evidence)
+  // are rows with their own metadata. A third-party document is supporting evidence only.
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_infrastructure (
+    facility_id TEXT PRIMARY KEY REFERENCES facilities(id),
+    answers TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT '',
+    updated_by INTEGER REFERENCES accounts(id)
+  ); CREATE TABLE IF NOT EXISTS facility_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    purpose TEXT NOT NULL CHECK (purpose IN ('layoutMap','evidence')),
+    doc_type TEXT NOT NULL DEFAULT '',
+    issuer TEXT NOT NULL DEFAULT '',
+    issue_date TEXT NOT NULL DEFAULT '',
+    review_date TEXT NOT NULL DEFAULT '',
+    file_name TEXT NOT NULL,
+    content_type TEXT NOT NULL DEFAULT '',
+    bytes BLOB,
+    uploaded_by INTEGER REFERENCES accounts(id),
+    uploaded_at TEXT NOT NULL DEFAULT '',
+    removed_at TEXT
+  ); CREATE INDEX IF NOT EXISTS facility_documents_facility ON facility_documents(facility_id, purpose);`);
   // An event linked to a registered venue stands on that venue's site and records the venue
   // baseline it relied on -- the venue's latest certified annual assessment, or none yet. One
   // trigger for every path that sets the link (create, edit, reapply, the location field).
@@ -1392,6 +1475,73 @@ function migrateSites(d: DatabaseSync, addColumn: (table: string, column: string
     END;`);
   }
   backfillSites(d);
+  migrateEventSiteLinks(d);
+}
+
+/**
+ * EVENTS LINK TO SITES (owner, 9 October 2026: "Link between event and facility, no longer
+ * venue"). The hosting venue stops being a regulatory entity; an event names the Site it is
+ * held at by events.site_id, and the Facility/Site registration standing on that site is the
+ * event's facility reference (events.venue_facility_id), so the existing AED reference applies.
+ *
+ * Additive only. The venue trigger is replaced by a site trigger -- one rule for every path
+ * that sets the link -- and nothing is dropped: hosting_venue_id and hosting_venue_version
+ * stay as the history of what an event named before. Existing venue links keep their site;
+ * where a facility stands on that site the event now references it.
+ */
+function migrateEventSiteLinks(d: DatabaseSync): void {
+  d.exec(`DROP TRIGGER IF EXISTS event_site_link_insert; DROP TRIGGER IF EXISTS event_site_link_update;`);
+  const facilityOnSite = (site: string) =>
+    `(SELECT f.id FROM facilities f WHERE f.site_id = ${site} AND f.archived_at IS NULL ORDER BY f.id LIMIT 1)`;
+  d.exec(`CREATE TRIGGER IF NOT EXISTS event_site_facility_insert AFTER INSERT ON events WHEN NEW.site_id IS NOT NULL BEGIN
+      UPDATE events SET venue_facility_id = ${facilityOnSite('NEW.site_id')} WHERE id = NEW.id;
+    END;
+    CREATE TRIGGER IF NOT EXISTS event_site_facility_update AFTER UPDATE OF site_id ON events WHEN NEW.site_id IS NOT OLD.site_id BEGIN
+      UPDATE events SET venue_facility_id = CASE
+        WHEN NEW.site_id IS NOT NULL THEN ${facilityOnSite('NEW.site_id')}
+        WHEN venue_facility_id IN (SELECT f.id FROM facilities f WHERE f.site_id = OLD.site_id) THEN NULL
+        ELSE venue_facility_id END
+      WHERE id = NEW.id;
+    END;
+    -- A facility reference set directly (the demonstration seeder, an older record) names the
+    -- facility's site as the event's place: the event is at that facility. Only while no site is named.
+    CREATE TRIGGER IF NOT EXISTS event_facility_site_update AFTER UPDATE OF venue_facility_id ON events
+      WHEN NEW.site_id IS NULL AND NEW.venue_facility_id IS NOT NULL BEGIN
+      UPDATE events SET site_id = (SELECT f.site_id FROM facilities f WHERE f.id = NEW.venue_facility_id) WHERE id = NEW.id;
+    END;`);
+  d.exec(`UPDATE events SET venue_facility_id = ${facilityOnSite('events.site_id')}
+          WHERE venue_facility_id IS NULL AND site_id IS NOT NULL AND ${facilityOnSite('events.site_id')} IS NOT NULL`);
+  d.exec(`UPDATE events SET site_id = (SELECT f.site_id FROM facilities f WHERE f.id = events.venue_facility_id)
+          WHERE site_id IS NULL AND venue_facility_id IS NOT NULL`);
+  // SECTION 16: the organizer confirms that the reused Site information applies to this event,
+  // and records what is different for it. Bound to the site it was given for: a different
+  // site link is a different confirmation. Nothing is copied into the event by this row.
+  // SECTION 1: the Site information the event relied on when it was filed, frozen per submission.
+  d.exec(`CREATE TABLE IF NOT EXISTS event_site_confirmations (
+    event_id TEXT PRIMARY KEY REFERENCES events(id),
+    site_id TEXT NOT NULL REFERENCES sites(id),
+    differences TEXT NOT NULL DEFAULT '',
+    confirmed_by INTEGER REFERENCES accounts(id),
+    confirmed_at TEXT NOT NULL
+  ); CREATE TABLE IF NOT EXISTS event_site_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id TEXT NOT NULL REFERENCES events(id),
+    submission_version INTEGER NOT NULL,
+    site_id TEXT NOT NULL REFERENCES sites(id),
+    facility_id TEXT,
+    snapshot TEXT NOT NULL,
+    taken_at TEXT NOT NULL,
+    UNIQUE (event_id, submission_version)
+  );`);
+  // A different site is a different place: the organizer's confirmation and the AED answer given
+  // for the old site do not carry. The AED answer goes to the answer history, as every replaced answer does.
+  d.exec(`CREATE TRIGGER IF NOT EXISTS event_site_change_resets_reuse AFTER UPDATE OF site_id ON events WHEN OLD.site_id IS NOT NULL AND NEW.site_id IS NOT OLD.site_id BEGIN
+      DELETE FROM event_site_confirmations WHERE event_id = NEW.id;
+      INSERT INTO requirement_answer_history (record_kind, record_id, key, answers, author_id, author_role, author_name, version, saved_at)
+        SELECT record_kind, record_id, key, answers, author_id, author_role, author_name, version, saved_at
+        FROM requirement_answers WHERE record_kind = 'event' AND record_id = NEW.id AND key = 'REF';
+      DELETE FROM requirement_answers WHERE record_kind = 'event' AND record_id = NEW.id AND key = 'REF';
+    END;`);
 }
 
 /** Gives every venue and facility without one its own site, and every event at a venue that venue's site. Idempotent. */
@@ -1413,6 +1563,11 @@ export function backfillSites(d: DatabaseSync): void {
   d.exec(`UPDATE events SET site_id = (SELECT v.site_id FROM venues v WHERE v.id = events.hosting_venue_id),
             hosting_venue_version = COALESCE(hosting_venue_version, (SELECT MAX(a.version) FROM venue_assessments a WHERE a.venue_id = events.hosting_venue_id AND a.certificate_issued = 1))
           WHERE site_id IS NULL AND hosting_venue_id IS NOT NULL`);
+  // An event that references a facility (the facility reference, older than sites) is held at
+  // that facility's site (owner, 9 October 2026: the event links to the facility/site).
+  d.exec(`UPDATE events SET site_id = (SELECT f.site_id FROM facilities f WHERE f.id = events.venue_facility_id)
+          WHERE site_id IS NULL AND venue_facility_id IS NOT NULL
+            AND (SELECT f.site_id FROM facilities f WHERE f.id = events.venue_facility_id) IS NOT NULL`);
 }
 
 /** A new site, numbered SITE-nnnnnn. Sequential like every other record id: correct inside a session, never public. */

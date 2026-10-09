@@ -115,6 +115,30 @@ export function linkDemonstrationCounterparties(db: DatabaseSync): number {
   return changed;
 }
 
+/**
+ * THE FACILITY/SITE REGISTRATION (latest revision, 9 October 2026), for the two seeded sites:
+ * their operating organization, and for the Beirut Sports Complex a first submission the
+ * Ministry reviewed and accepted -- so its open poolside request reads as what it is, a
+ * corrective action on a site whose readiness was current. Idempotent: guarded on the rows.
+ */
+export function seedSiteRegistration(db: DatabaseSync, d: (ref: string) => string): void {
+  db.prepare(`UPDATE facilities SET operating_organization = ? WHERE id = 'FC-0014' AND operating_organization = ''`).run('Beirut Sports Complex Management');
+  db.prepare(`UPDATE facilities SET operating_organization = ? WHERE id = 'FC-0021' AND operating_organization = ''`).run('Jounieh Aquatic Club');
+  if (!db.prepare(`SELECT id FROM facilities WHERE id = 'FC-0014'`).get()) return;
+  if (db.prepare(`SELECT id FROM facility_submissions WHERE facility_id = 'FC-0014'`).get()) return;
+  const snapshot = JSON.stringify({
+    facility: db.prepare(`SELECT * FROM facilities WHERE id = 'FC-0014'`).get(),
+    people: db.prepare(`SELECT * FROM facility_persons WHERE facility_id = 'FC-0014'`).all(),
+    devices: db.prepare(`SELECT * FROM facility_devices WHERE facility_id = 'FC-0014' ORDER BY label`).all(),
+  });
+  const reviewer = (db.prepare(`SELECT id, display_name FROM accounts WHERE login = 'test_moph'`).get() as { id: number; display_name: string } | undefined) ?? null;
+  const submission = db.prepare(`INSERT INTO facility_submissions (facility_id, version, snapshot, submitted_by, submitted_at, is_demo)
+    SELECT 'FC-0014', 1, ?, account_id, ?, 1 FROM facilities WHERE id = 'FC-0014'`).run(snapshot, `${d('2026-05-25')} 10:00:00`);
+  const act = db.prepare(`INSERT INTO facility_review_acts (facility_id, submission_id, kind, note, actor_id, actor_name, created_at, is_demo) VALUES ('FC-0014', ?, ?, ?, ?, ?, ?, 1)`);
+  act.run(Number(submission.lastInsertRowid), 'reviewStarted', '', reviewer?.id ?? null, reviewer?.display_name ?? 'Ministry reviewer', `${d('2026-05-27')} 09:00:00`);
+  act.run(Number(submission.lastInsertRowid), 'accepted', 'Registration and readiness record complete.', reviewer?.id ?? null, reviewer?.display_name ?? 'Ministry reviewer', `${d('2026-06-02')} 11:00:00`);
+}
+
 export function seedDemonstration(db: DatabaseSync): void {
   const seeded = db
     .prepare(`SELECT id FROM accounts WHERE login = 'test_organizer'`)
@@ -124,6 +148,9 @@ export function seedDemonstration(db: DatabaseSync): void {
     // database is missing, so a standing instance heals on boot instead of showing
     // the demonstration EMS and Director accounts empty dashboards.
     linkDemonstrationCounterparties(db);
+    // And the facility/site registration a database seeded before it is missing.
+    const shift = shiftDays();
+    seedSiteRegistration(db, (ref) => sh(ref, shift));
     return;
   }
 
@@ -475,6 +502,7 @@ export function seedDemonstration(db: DatabaseSync): void {
     `تأكيد أن خزانة الجهاز عند المسبح غير مقفلة خلال ساعات العمل. الإجراء التصحيحي مستحق في ⁦${d('2026-09-01')}⁩.`,
     d('2026-09-01'), d('2026-08-10'),
   );
+  seedSiteRegistration(db, d);
 
   // ---- Slice 2 demonstration state ----
   // EV-0418 (Level 2, mid-requirements): the reference's three named providers and the

@@ -12,9 +12,11 @@ import {
   addedMeasuresFor, archiveWindowDays, beirutToday, derivedLevelFor,
 } from './queries';
 import { padFacilityForVenue } from './sites';
+import { venuePackageEditable, type VenuePackageStatus } from './rules/venue-workflow';
+import { siteConfirmationFor, siteForEvent, siteInformation, sitePatientAccessText, writeSiteSnapshot } from './event-site';
 import { EVENT_FILE_KEYS, REQUESTED_KEYS } from './requirement-migration';
 import {
-  blocksFiling, CATALOGUE_REVISION, certificationComplete, declarationsAreComplete, isArchivedRecord,
+  blocksFiling, CATALOGUE_REVISION, FACILITY_REFERENCE_KEY, siteAedAnswer, certificationComplete, declarationsAreComplete, isArchivedRecord,
   requirementBlockers, requirementSummary, resolvePlan, resolveRequirements,
   type AnswerValue, type AuthorRole, type Level, type PartyFact, type PlanSectionInstance, type RecordFacts, type RecordService,
   type RequirementInstance, type RequirementSummary, type StoredAnswer, type StoredFile,
@@ -100,10 +102,12 @@ export function eventRecordRequirements(ownerId: number, eventId: string): Recor
   }
   const submission = submissionFor(ownerId, eventId);
   const director = parties.find((p) => p.kind === 'director' && (p.status === 'confirmed' || p.status === 'nominated')) ?? null;
+  const answers = answersFor('event', eventId);
   const facts: RecordFacts = {
     service: 'event',
     level,
-    answers: answersFor('event', eventId),
+    answers,
+    site: eventSiteFacts(eventId, answers),
     files,
     organizerContact: organizerContactFor(ownerId),
     // A seeded row's level stands in for stored answers (the level is the assessment's product).
@@ -127,6 +131,24 @@ export function eventRecordRequirements(ownerId: number, eventId: string): Recor
   return { ...base, facts, instances, plan: resolvePlan(facts, instances), blockers: requirementBlockers(instances), summary: requirementSummary(instances) };
 }
 
+/**
+ * What the event's registered Facility/Site supplies to its rows, on the organizer's word only
+ * (latest revision, sections 16 and 17). Null when the event names no site.
+ */
+function eventSiteFacts(eventId: string, answers: Readonly<Record<string, StoredAnswer>>): NonNullable<RecordFacts['site']> | null {
+  const site = siteForEvent(eventId);
+  if (!site) return null;
+  const info = siteInformation(site.siteId);
+  if (!info) return null;
+  const aedReuse = info.aeds.length > 0 && siteAedAnswer(answers[FACILITY_REFERENCE_KEY]?.values) === 'yes';
+  return {
+    confirmed: siteConfirmationFor(eventId) !== null,
+    patientAccess: sitePatientAccessText(info),
+    aedReuse,
+    aedLocations: info.aeds.map((a) => a.locationEn).filter((l) => l.trim() !== '').join('; '),
+  };
+}
+
 export function venueRecordRequirements(ownerId: number, venueId: string): RecordRequirements | null {
   const db = getDb();
   const venue = venueById(ownerId, venueId);
@@ -137,7 +159,7 @@ export function venueRecordRequirements(ownerId: number, venueId: string): Recor
   const status = pkg?.status ?? (venue.issued ? 'accepted' : 'draft');
   const derived = assessmentVersion ? versions.find((v) => v.version === assessmentVersion)?.derivation.finalLevel ?? null : null;
   const level = (status === 'accepted' && venue.level ? venue.level : derived) as Level | null;
-  const editable = !venue.archivedAt && (status === 'draft' || status === 'revision' || status === 'incomplete');
+  const editable = venuePackageEditable(status as VenuePackageStatus, Boolean(venue.archivedAt));
   // A hosting venue names no EMS agency and no Medical Director (Hosting Venue Registration,
   // 8 October 2026): those belong to each event held there. Its AEDs come from the PAD facility
   // registration on the same site.
@@ -238,6 +260,9 @@ export function writeRequirementSnapshot(kind: RecordService, record: RecordRequ
          SELECT ?, ?, file_name, COALESCE(content_type, ''), bytes FROM event_attachments WHERE event_id = ? AND doc_key = ? AND bytes IS NOT NULL`,
       ).run(snapshotId.id, key, record.id, docKey);
     }
+    // The Site information the event relied on, frozen with the same submission version
+    // (latest revision, section 1): a later edit to the site record never rewrites it.
+    writeSiteSnapshot(record.id, version, siteAedAnswer(record.facts?.answers[FACILITY_REFERENCE_KEY]?.values));
   } else {
     db.prepare(
       `INSERT INTO requirement_snapshot_files (snapshot_id, key, file_name, content_type, bytes)
