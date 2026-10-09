@@ -28,15 +28,21 @@ test('the site form chooses one municipality from the list, or keeps one that is
   await expect(page.locator('input[type=hidden][name=municipalityAr]')).toHaveValue('Jounieh');
 
   // A name the list does not carry is offered as typed, and kept.
-  await box.fill('Baabda');
-  await expect(field.locator('[data-municipality-typed]')).toContainText('Not on the list: use “Baabda”');
+  await box.fill('Kfar Nowhere');
+  await expect(field.locator('[data-municipality-typed]')).toContainText('Not on the list: use “Kfar Nowhere”');
   await field.locator('[data-municipality-typed]').click();
-  await expect(page.locator('input[type=hidden][name=municipality]')).toHaveValue('Baabda');
+  await expect(page.locator('input[type=hidden][name=municipality]')).toHaveValue('Kfar Nowhere');
+
+  // A main town is found by its common name or the source's spelling.
+  await box.fill('tyre');
+  await expect(field.locator('[data-municipality="Tyre"]')).toBeVisible();
+  await box.fill('sour');
+  await expect(field.locator('[data-municipality="Tyre"]')).toBeVisible();
 
   // Two places of the same name are told apart by their district.
   await box.fill('Aaba');
   await expect(field.locator('[data-municipality="Aaba (Koura)"]')).toBeVisible();
-  await expect(field.locator('[data-municipality="Aaba (Nabatiyeh)"]')).toBeVisible();
+  await expect(field.locator('[data-municipality="Aaba (Nabatieh)"]')).toBeVisible();
 
   // The Arabic page: the field and its foot read in Arabic.
   await useLanguage(context, 'ar');

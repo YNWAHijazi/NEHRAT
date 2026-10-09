@@ -21,11 +21,26 @@ describe('the municipality list', () => {
     // Deir Qanoun Ras Al Ain (Sour) ends on "Ain" in its own right.
     expect(list.filter((m) => m.en !== 'Deir Qanoun Ras Al Ain' && / (Al|Ain|Deir|Beit|Kafr|Kfar|El)$/.test(m.en.replace(/ \(.*\)$/, '')))).toEqual([]);
     expect(list.find((m) => m.en === 'Ain Aakrine')?.districtEn).toBe('Koura');
-    expect(list.some((m) => m.districtEn === 'El Chouf')).toBe(true);
+    expect(list.some((m) => m.districtEn === 'Chouf')).toBe(true);
     expect(list.some((m) => m.en === 'Beirut')).toBe(true);
     expect(list.some((m) => /Welcome|located in/.test(m.en))).toBe(false);
     expect(list.every((m) => !m.ar)).toBe(true);
     expect(new Set(list.map((m) => m.en)).size).toBe(list.length);
+  });
+
+  it('carries the main municipalities, by their common names (owner: "as long as the main ones are there")', () => {
+    const list = municipalityList();
+    const main = ['Beirut', 'Tripoli', 'Saida', 'Tyre', 'Zahle', 'Jounieh', 'Byblos (Jbeil)', 'Baabda', 'Aley', 'Nabatieh', 'Baalbek', 'Hermel', 'Halba',
+      'Zgharta-Ehden', 'Bcharre', 'Batroun', 'Amioun', 'Minieh', 'Jezzine - Ain Majdeline', 'Bint Jbeil', 'Jdeidet Marjayoun', 'Hasbaya (Hasbaya)', 'Rashaya', 'Joub Jannine',
+      'Chtaura', 'Deir el Qamar', 'Damour', 'Choueifat', 'Hadath', 'Jdeideh-Bouchrieh-Sed', 'Bourj Hammoud', 'Sin el Fil'];
+    expect(main.filter((n) => !list.some((m) => m.en === n))).toEqual([]);
+    // The clear errors in the files are gone.
+    expect(list.some((m) => ['Zahl', 'ta Zahl', 'Sidon'].includes(m.en.replace(/ \(.*\)$/, '')))).toBe(false);
+    // Found by the spelling people use, or the files' own.
+    for (const [typed, name] of [['Sour', 'Tyre'], ['Byblos', 'Byblos (Jbeil)'], ['Sidon', 'Saida'], ['Bsharri', 'Bcharre'], ['Zahleh', 'Zahle'], ['Qab Elias', 'Qab Elias - Wadi El Delm'], ['Jezzine', 'Jezzine - Ain Majdeline']]) {
+      expect(municipalityNamed(list, typed!)?.en, typed).toBe(name);
+      expect(searchMunicipalities(list, typed!)[0]?.en, typed).toBe(name);
+    }
   });
 
   it('shows the English name on the Arabic page while the Arabic names are pending', () => {

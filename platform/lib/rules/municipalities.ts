@@ -13,6 +13,8 @@ export interface Municipality {
   districtEn?: string;
   districtAr?: string;
   governorateEn?: string;
+  /** Other spellings the field also finds it by (the source files' own, a common English name). */
+  aliases?: string[];
 }
 
 const LIST = (data.municipalities as Municipality[]).filter((m) => m.en.trim());
@@ -53,8 +55,9 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
   const starts: Municipality[] = [];
   const contains: Municipality[] = [];
   for (const m of list) {
-    const names = [m.en, m.ar ?? '', m.districtEn ?? '', m.districtAr ?? ''].map(foldForSearch);
-    if (names.slice(0, 2).some((n) => n.startsWith(q))) starts.push(m);
+    const own = [m.en, m.ar ?? '', ...(m.aliases ?? [])].map(foldForSearch);
+    const names = [...own, foldForSearch(m.districtEn ?? ''), foldForSearch(m.districtAr ?? '')];
+    if (own.some((n) => n.startsWith(q))) starts.push(m);
     else if (names.some((n) => n.includes(q))) contains.push(m);
   }
   return [...starts, ...contains].slice(0, limit);
@@ -64,7 +67,7 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
 export function municipalityNamed(list: readonly Municipality[], name: string): Municipality | null {
   const n = foldForSearch(name);
   if (!n) return null;
-  return list.find((m) => foldForSearch(m.en) === n || (m.ar ? foldForSearch(m.ar) === n : false)) ?? null;
+  return list.find((m) => [m.en, m.ar ?? '', ...(m.aliases ?? [])].some((x) => x !== '' && foldForSearch(x) === n)) ?? null;
 }
 
 /** Several municipalities are stored as one line, English names joined by commas. */

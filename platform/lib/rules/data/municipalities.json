@@ -1,6 +1,6 @@
 {
- "$comment": "Lebanon's municipalities for the searchable municipality field (owner, 9 October 2026). Source: seven governorate lists the owner sent on 9 October 2026 (North, Akkar, Baalbek-Hermel, Bekaa, Mount Lebanon, South (file 'Saida'), Nabatieh), 793 rows, English only. Corrections, each recorded in 'corrections': the files reverse the word order of every multi-word name and district ('Aakrine Ain', 'Chouf El'), restored here; one name was wrapped over two lines; one row was a scraped sentence; one row was listed twice. Beirut, which no file covers, is added. One Akkar row carried only an Arabic name (حوبش) and is left out until its English name is known. ARABIC NAMES ARE PENDING: the files carry none, and none is invented here -- until they arrive the Arabic page shows the English name. Spellings are the files' own ('Aakkar', 'Kesrouane'). Two places of the same name are told apart by their district in brackets.",
- "source": "Owner, 9 October 2026: seven governorate PDFs (English only).",
+ "$comment": "Lebanon's municipalities for the searchable municipality field (owner, 9 October 2026). Built from the seven governorate files the owner sent (North, Akkar, Baalbek-Hermel, Bekaa, Mount Lebanon, South, Nabatieh; English only), then corrected on the owner's instruction 'Fix them according to google, and as long as the main ones are there, go ahead': the files' reversed word order restored; district names in their common spellings; main towns under their common names, the files' spellings kept as search aliases; clear errors fixed (Zahl, ta Zahl, the Jezzine Sidon); Beirut and 31 main municipalities the files lack added ('added': true). Every change is in 'corrections'. The list is not exhaustive (the files carry about 800 of Lebanon's 1,000+), so the field suggests and never restricts. ARABIC NAMES ARE PENDING: none is invented here -- the Arabic page shows the English name until they arrive. Two places of the same name carry their district in brackets.",
+ "source": "Owner, 9 October 2026: seven governorate PDFs (English only), corrected as recorded below.",
  "arabicPending": true,
  "corrections": [
   {
@@ -16,12 +16,220 @@
    "to": "listed twice; kept once"
   },
   {
-   "from": "(none)",
-   "to": "Beirut -- added; no file covers the Beirut governorate"
-  },
-  {
    "from": "حوبش",
    "to": "left out -- Arabic only, no English name (Aakkar)"
+  },
+  {
+   "from": "district names as the files spell them (Aakkar, Aalay, Kesrouane, Nabatiyeh, Hasbaiyya, Rachaiya, Sour, Byblos, El Chouf, Western Bekaa, Minieh - Danniyeh)",
+   "to": "their common spellings (Akkar, Aley, Keserwan, Nabatieh, Hasbaya, Rashaya, Tyre, Jbeil, Chouf, West Bekaa, Minieh-Danniyeh)"
+  },
+  {
+   "from": "Al Batroun (Batroun)",
+   "to": "Batroun"
+  },
+  {
+   "from": "Al Hermel (Hermel)",
+   "to": "Hermel"
+  },
+  {
+   "from": "Al-Laboue (Baalbek)",
+   "to": "Labweh"
+  },
+  {
+   "from": "Al-Mina (Tripoli)",
+   "to": "El Mina"
+  },
+  {
+   "from": "Al-Minya (Minieh-Danniyeh)",
+   "to": "Minieh"
+  },
+  {
+   "from": "Amyoun (Koura)",
+   "to": "Amioun"
+  },
+  {
+   "from": "Beit Meri (Matn)",
+   "to": "Beit Mery"
+  },
+  {
+   "from": "Bkassine and its dependencies (Jezzine)",
+   "to": "Bkassine"
+  },
+  {
+   "from": "Broumana (Matn)",
+   "to": "Broummana"
+  },
+  {
+   "from": "Bsharri (Bcharre)",
+   "to": "Bcharre"
+  },
+  {
+   "from": "Burj al-Barajneh (Baabda)",
+   "to": "Bourj el Barajneh"
+  },
+  {
+   "from": "Jbeil (Jbeil)",
+   "to": "Byblos (Jbeil)"
+  },
+  {
+   "from": "Kamid Al-Lawz (West Bekaa)",
+   "to": "Kamed el Loz"
+  },
+  {
+   "from": "Mashgharah (West Bekaa)",
+   "to": "Machghara"
+  },
+  {
+   "from": "Qob Elias - Wadi El-Dleim (Zahle)",
+   "to": "Qab Elias - Wadi El Delm"
+  },
+  {
+   "from": "Qubayyat (Akkar)",
+   "to": "Qobayat"
+  },
+  {
+   "from": "Sidon (Jezzine)",
+   "to": "Saydoun"
+  },
+  {
+   "from": "Sidon (Saida)",
+   "to": "Saida"
+  },
+  {
+   "from": "Sour (Tyre)",
+   "to": "Tyre"
+  },
+  {
+   "from": "ta Zahl (Jezzine)",
+   "to": "Zahlta"
+  },
+  {
+   "from": "Zahl (Zahle)",
+   "to": "Zahle"
+  },
+  {
+   "from": "(none)",
+   "to": "Aley (Aley) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Choueifat (Aley) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Kahaleh (Aley) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Bchamoun (Aley) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Baabda (Baabda) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Hadath (Baabda) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Kfarchima (Baabda) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Deir el Qamar (Chouf) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Beiteddine (Chouf) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Damour (Chouf) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Chhim (Chouf) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Kfarhim (Chouf) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Jdeideh-Bouchrieh-Sed (Matn) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Roumieh (Matn) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Mtein (Matn) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Dhour Choueir (Matn) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Zouk Mikael (Keserwan) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Harissa-Daraoun (Keserwan) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Chtaura (Zahle) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Rayak (Zahle) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Anjar (Zahle) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Joub Jannine (West Bekaa) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Sohmor (West Bekaa) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Chekka (Batroun) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Jdeidet Marjayoun (Marjayoun) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Khiam (Marjayoun) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Kfar Kila (Marjayoun) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Maghdouche (Saida) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Arsal (Baalbek) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Ras Baalbek (Baalbek) -- added; a main municipality the files lack"
+  },
+  {
+   "from": "(none)",
+   "to": "Al Qaa (Baalbek) -- added; a main municipality the files lack"
   }
  ],
  "municipalities": [
@@ -31,8 +239,8 @@
    "governorateEn": "North"
   },
   {
-   "en": "Aaba (Nabatiyeh)",
-   "districtEn": "Nabatiyeh",
+   "en": "Aaba (Nabatieh)",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -47,17 +255,17 @@
   },
   {
    "en": "Aalman and Mzaira at Al-Barghoutiyya",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Aana",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Aaqbiyeh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -77,7 +285,7 @@
   },
   {
    "en": "Ad Daghlah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -87,7 +295,7 @@
   },
   {
    "en": "Adchit",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -97,7 +305,7 @@
   },
   {
    "en": "Adma and Al-Dafnah",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -117,17 +325,17 @@
   },
   {
    "en": "Ahmouch",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Aidmoon-Shekhlar",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Aimar",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -137,42 +345,42 @@
   },
   {
    "en": "Ain Al Gowayba",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ain al-Dhahab",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ain al-Rehanah",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ain Al-Tineh",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Ain al-Zayt",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ain Arab",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Ain Ata",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Ain Baal",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -182,12 +390,12 @@
   },
   {
    "en": "Ain El Tinah",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Ain Harsha",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -197,17 +405,17 @@
   },
   {
    "en": "Ain Ouzain",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ain Qana",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Ain Qenya (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Ain Qenya (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -217,7 +425,7 @@
   },
   {
    "en": "Ain Qenye",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -232,22 +440,22 @@
   },
   {
    "en": "Ain Yaaqub",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ain Zabda",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
-   "en": "Ainab (Aalay)",
-   "districtEn": "Aalay",
+   "en": "Ainab (Aley)",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Ainab (El Chouf)",
-   "districtEn": "El Chouf",
+   "en": "Ainab (Chouf)",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -262,12 +470,12 @@
   },
   {
    "en": "Ainout",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Aintoura",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -287,12 +495,12 @@
   },
   {
    "en": "Aitryoun",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ajaltoun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -307,27 +515,27 @@
   },
   {
    "en": "Akkar el-Atiqa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Akroum",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Aamair w Rajm Issa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Abbasiyah",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Aboudiyeh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -337,32 +545,27 @@
   },
   {
    "en": "Al Aqoura",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Awainat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
-   "en": "Al Batroun",
-   "districtEn": "Batroun",
-   "governorateEn": "North"
-  },
-  {
    "en": "Al Bayyad",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Bazuriyah",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Bireh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -372,37 +575,37 @@
   },
   {
    "en": "Al Bneyeh",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Bsatin",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Burghliye",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Burj",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Bustan",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Bware",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Farid",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -412,17 +615,17 @@
   },
   {
    "en": "Al Hakour",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Hamiri",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Hasin",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -431,33 +634,28 @@
    "governorateEn": "North"
   },
   {
-   "en": "Al Hermel",
-   "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
-  },
-  {
    "en": "Al Hilaliyah",
    "districtEn": "Saida",
    "governorateEn": "South"
   },
   {
    "en": "Al Hishah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Hissa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Hlousiyeh",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Hmayra",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -467,7 +665,7 @@
   },
   {
    "en": "Al Jibbin",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -487,12 +685,12 @@
   },
   {
    "en": "Al Kfour",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Al Kholouniyeh",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -501,8 +699,8 @@
    "governorateEn": "Baalbek-Hermel"
   },
   {
-   "en": "Al Khreibeh (El Chouf)",
-   "districtEn": "El Chouf",
+   "en": "Al Khreibeh (Chouf)",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -512,7 +710,7 @@
   },
   {
    "en": "Al Kweikhat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -522,7 +720,7 @@
   },
   {
    "en": "Al Majdal",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -532,27 +730,27 @@
   },
   {
    "en": "Al Manara",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al Mansaf",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Mansoura",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al Mansouri",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Mansouriya Ain al Marj",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -562,7 +760,7 @@
   },
   {
    "en": "Al Maqybleh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -572,12 +770,12 @@
   },
   {
    "en": "Al Mashrefah",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Matallah",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -592,7 +790,7 @@
   },
   {
    "en": "Al Mukhtara",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -601,8 +799,17 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Al Qaa",
+   "districtEn": "Baalbek",
+   "governorateEn": "Baalbek-Hermel",
+   "added": true,
+   "aliases": [
+    "Qaa"
+   ]
+  },
+  {
    "en": "Al Qariyat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -612,27 +819,27 @@
   },
   {
    "en": "Al Qobeiyat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al Qsaybeh",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Al Qulayat",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Qulaylah",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Al Qurnah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -647,17 +854,17 @@
   },
   {
    "en": "Al Rawda",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al Sahylih",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al Shaatiye and Malikiyat Al Sahel",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -667,7 +874,7 @@
   },
   {
    "en": "Al Talil",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -692,17 +899,17 @@
   },
   {
    "en": "Al-Aqaba",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al-Ayoun",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al-Azra",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -712,12 +919,12 @@
   },
   {
    "en": "Al-Bireh",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al-Dabbabiya",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -727,17 +934,17 @@
   },
   {
    "en": "Al-Fardis",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Al-Ghayneh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Al-Habariyah",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -747,12 +954,12 @@
   },
   {
    "en": "Al-Hazmiyeh",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
-   "en": "Al-Kafr (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Al-Kafr (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -761,8 +968,8 @@
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Al-Khalwat (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Al-Khalwat (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -772,7 +979,7 @@
   },
   {
    "en": "Al-Khiyara",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -782,13 +989,8 @@
   },
   {
    "en": "Al-Kwashra",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
-  },
-  {
-   "en": "Al-Laboue",
-   "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
   },
   {
    "en": "Al-Louwayzeh",
@@ -797,7 +999,7 @@
   },
   {
    "en": "Al-Mahmara",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -807,27 +1009,17 @@
   },
   {
    "en": "Al-Maqeeta",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
-   "en": "Al-Mina",
-   "districtEn": "Tripoli",
-   "governorateEn": "North"
-  },
-  {
-   "en": "Al-Minya",
-   "districtEn": "Minieh - Danniyeh",
-   "governorateEn": "North"
-  },
-  {
    "en": "Al-Mounasseh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al-Muheithrah",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -837,7 +1029,7 @@
   },
   {
    "en": "Al-Muruj",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -857,17 +1049,17 @@
   },
   {
    "en": "Al-Qantara",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al-Qarqaf",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Al-Rafid",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -877,7 +1069,7 @@
   },
   {
    "en": "Al-Rihaneya",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -887,22 +1079,22 @@
   },
   {
    "en": "Al-Safira",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Al-Sawiri",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Al-Sharkiya",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Al-Sheikh Ayyash",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -911,8 +1103,14 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Aley",
+   "districtEn": "Aley",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Alhinya",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -922,52 +1120,55 @@
   },
   {
    "en": "Alkanisa",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Alma Ash Shaaab",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Alzahira",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Amatour",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ameq",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
+   "en": "Amioun",
+   "districtEn": "Koura",
+   "governorateEn": "North",
+   "aliases": [
+    "Amyoun"
+   ]
+  },
+  {
    "en": "Ammar Al-Beykat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Amshit",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Amyoun",
-   "districtEn": "Koura",
-   "governorateEn": "North"
-  },
-  {
    "en": "An Nafiseh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "An Naheriyah and Bestan Al Harsh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -977,12 +1178,12 @@
   },
   {
    "en": "An Naqoura",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Andqet",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -991,13 +1192,22 @@
    "governorateEn": "North"
   },
   {
+   "en": "Anjar",
+   "districtEn": "Zahle",
+   "governorateEn": "Bekaa",
+   "added": true,
+   "aliases": [
+    "Aanjar"
+   ]
+  },
+  {
    "en": "Anqoun",
    "districtEn": "Saida",
    "governorateEn": "South"
   },
   {
    "en": "Ansar",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -1012,12 +1222,12 @@
   },
   {
    "en": "Arabsalim",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Aramoun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1047,13 +1257,19 @@
   },
   {
    "en": "Arnoun",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Arqa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
+  },
+  {
+   "en": "Arsal",
+   "districtEn": "Baalbek",
+   "governorateEn": "Baalbek-Hermel",
+   "added": true
   },
   {
    "en": "Arsoun",
@@ -1062,17 +1278,17 @@
   },
   {
    "en": "Arzoun",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "As Sulah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ash Shuqduf",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1082,7 +1298,7 @@
   },
   {
    "en": "Ashqout",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1092,7 +1308,7 @@
   },
   {
    "en": "Asoun",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1102,27 +1318,27 @@
   },
   {
    "en": "Aytanit",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Aytit",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Ayun al-Ghazlan",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ayyat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Az-Zuweiriyah",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1132,8 +1348,14 @@
   },
   {
    "en": "Ba'loul",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
+  },
+  {
+   "en": "Baabda",
+   "districtEn": "Baabda",
+   "governorateEn": "Mount Lebanon",
+   "added": true
   },
   {
    "en": "Baabdat",
@@ -1142,12 +1364,12 @@
   },
   {
    "en": "Baadaran",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Baakline",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1162,12 +1384,12 @@
   },
   {
    "en": "Baassir",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bab Mare'",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -1177,12 +1399,12 @@
   },
   {
    "en": "Bahneen Al-Rihanah-Artoosa Farm",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Bakhoun",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1192,7 +1414,7 @@
   },
   {
    "en": "Bani Sakhr",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1217,22 +1439,22 @@
   },
   {
    "en": "Barbarah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Bariqaa",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Barja",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Barkaayl",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1247,7 +1469,7 @@
   },
   {
    "en": "Bassaba",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1257,17 +1479,17 @@
   },
   {
    "en": "Batarmaz",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Batater",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bater",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1277,12 +1499,12 @@
   },
   {
    "en": "Batha",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Batoulieh",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -1296,38 +1518,46 @@
    "governorateEn": "North"
   },
   {
+   "en": "Batroun",
+   "districtEn": "Batroun",
+   "governorateEn": "North",
+   "aliases": [
+    "Al Batroun"
+   ]
+  },
+  {
    "en": "Bawarj",
    "districtEn": "Zahle",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Bayno - Qaboula",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Baysour",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bayt Ayyub",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Bayt Mlat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Bazal",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Bazbina",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1336,9 +1566,24 @@
    "governorateEn": "North"
   },
   {
+   "en": "Bchamoun",
+   "districtEn": "Aley",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Bchamzin",
    "districtEn": "Koura",
    "governorateEn": "North"
+  },
+  {
+   "en": "Bcharre",
+   "districtEn": "Bcharre",
+   "governorateEn": "North",
+   "aliases": [
+    "Bsharri",
+    "Becharre"
+   ]
   },
   {
    "en": "Bdebba",
@@ -1347,7 +1592,7 @@
   },
   {
    "en": "Bdeghan",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1362,12 +1607,12 @@
   },
   {
    "en": "Bebnine - Al Abdeh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Bedeas",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -1377,7 +1622,7 @@
   },
   {
    "en": "Beit Al-Faqas",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1397,12 +1642,12 @@
   },
   {
    "en": "Beit El Hajj",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Beit Lahia",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -1411,9 +1656,12 @@
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Beit Meri",
+   "en": "Beit Mery",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "aliases": [
+    "Beit Meri"
+   ]
   },
   {
    "en": "Beit Shama",
@@ -1422,8 +1670,14 @@
   },
   {
    "en": "Beit Younes",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
+  },
+  {
+   "en": "Beiteddine",
+   "districtEn": "Chouf",
+   "governorateEn": "Mount Lebanon",
+   "added": true
   },
   {
    "en": "Bennihraan",
@@ -1437,17 +1691,17 @@
   },
   {
    "en": "Beqaa Safreen",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Bhamdoun Al Dayaa",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bhoueita, Afka, and Bshnata",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1462,7 +1716,7 @@
   },
   {
    "en": "Biqrazla",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1477,17 +1731,17 @@
   },
   {
    "en": "Bkaa",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Bkaatouta Achqout",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bkaatouta Kenane",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1496,13 +1750,13 @@
    "governorateEn": "North"
   },
   {
-   "en": "Bkassine and its dependencies",
+   "en": "Bkassine",
    "districtEn": "Jezzine",
    "governorateEn": "South"
   },
   {
    "en": "Bkifa",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -1512,7 +1766,7 @@
   },
   {
    "en": "Blouneh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1532,8 +1786,16 @@
   },
   {
    "en": "Bourj Al Shamali",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
+  },
+  {
+   "en": "Bourj el Barajneh",
+   "districtEn": "Baabda",
+   "governorateEn": "Mount Lebanon",
+   "aliases": [
+    "Burj al-Barajneh"
+   ]
   },
   {
    "en": "Bourj Hammoud",
@@ -1542,22 +1804,22 @@
   },
   {
    "en": "Bourj Rahhal and Ain Abou Abdallah",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Bourjein & Mrayjet",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bqaatouta",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Bqarsouna",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1571,9 +1833,12 @@
    "governorateEn": "Baalbek-Hermel"
   },
   {
-   "en": "Broumana",
+   "en": "Broummana",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "aliases": [
+    "Broumana"
+   ]
   },
   {
    "en": "Bsallim - Mazraa - Al Majdoub",
@@ -1583,11 +1848,6 @@
   {
    "en": "Bshaleh",
    "districtEn": "Batroun",
-   "governorateEn": "North"
-  },
-  {
-   "en": "Bsharri",
-   "districtEn": "Bcharre",
    "governorateEn": "North"
   },
   {
@@ -1612,7 +1872,7 @@
   },
   {
    "en": "Btouma",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1622,17 +1882,12 @@
   },
   {
    "en": "Burj Al Arab",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
-   "en": "Burj al-Barajneh",
-   "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
-  },
-  {
    "en": "Burj Al-Yahudiyya",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1646,6 +1901,15 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Byblos (Jbeil)",
+   "districtEn": "Jbeil",
+   "governorateEn": "Mount Lebanon",
+   "aliases": [
+    "Jbeil",
+    "Byblos"
+   ]
+  },
+  {
    "en": "Bzebdine",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon"
@@ -1657,17 +1921,17 @@
   },
   {
    "en": "Bzommar",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Chanehye",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Charoun",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1682,13 +1946,25 @@
   },
   {
    "en": "Chehatoal W Jouret El Mhaid",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Chehim",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
+  },
+  {
+   "en": "Chekka",
+   "districtEn": "Batroun",
+   "governorateEn": "North",
+   "added": true
+  },
+  {
+   "en": "Chhim",
+   "districtEn": "Chouf",
+   "governorateEn": "Mount Lebanon",
+   "added": true
   },
   {
    "en": "Chiyah",
@@ -1696,13 +1972,32 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Choueifat",
+   "districtEn": "Aley",
+   "governorateEn": "Mount Lebanon",
+   "added": true,
+   "aliases": [
+    "Shwayfat",
+    "Khaldeh"
+   ]
+  },
+  {
    "en": "Choukeen",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
+   "en": "Chtaura",
+   "districtEn": "Zahle",
+   "governorateEn": "Bekaa",
+   "added": true,
+   "aliases": [
+    "Shtaura"
+   ]
+  },
+  {
    "en": "Dahr al Qanbar",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1712,23 +2007,29 @@
   },
   {
    "en": "Dahr El-Mghara",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Dahr Laysina",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Dalbatta",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Dalhoun",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
+  },
+  {
+   "en": "Damour",
+   "districtEn": "Chouf",
+   "governorateEn": "Mount Lebanon",
+   "added": true
   },
   {
    "en": "Dar Bechtar",
@@ -1742,17 +2043,17 @@
   },
   {
    "en": "Daraya",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Daroun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Darya",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1782,7 +2083,7 @@
   },
   {
    "en": "Deir Al-Ashayer",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -1792,17 +2093,17 @@
   },
   {
    "en": "Deir Al-Zahrani",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Deir Amess",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Deir Ammar",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -1817,7 +2118,7 @@
   },
   {
    "en": "Deir Dalloum and Zouk al-Maqasarin",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1826,28 +2127,34 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Deir el Qamar",
+   "districtEn": "Chouf",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Deir Janine",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Deir Keifa",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Deir Nbuhe",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Deir Qanoun En Nahr",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Deir Qanoun Ras Al Ain",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -1862,22 +2169,28 @@
   },
   {
    "en": "Dfoun",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Dhour Choueir",
+   "districtEn": "Matn",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Dirdghayya",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Doueir",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "DoukMakayl",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1892,47 +2205,56 @@
   },
   {
    "en": "Dura",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Dusa and Baghdad",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Dweir Adwiya",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Eilat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Eita Al-Fakhar",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
+   "en": "El Mina",
+   "districtEn": "Tripoli",
+   "governorateEn": "North",
+   "aliases": [
+    "Al-Mina",
+    "Mina"
+   ]
+  },
+  {
    "en": "Eyha",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Ezaki",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Ezza",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Faitroun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1942,22 +2264,22 @@
   },
   {
    "en": "Faraya",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Fassikin, Ain Ashma and Ain Tenta",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Fatqa",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Fatri",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -1982,7 +2304,7 @@
   },
   {
    "en": "Fnaideq",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -1992,17 +2314,17 @@
   },
   {
    "en": "Gaza",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Ghabaleh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Gharife",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2017,12 +2339,12 @@
   },
   {
    "en": "Ghazilah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ghazir",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2032,18 +2354,24 @@
   },
   {
    "en": "Ghodras",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Ghousta",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Habbouch",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
+  },
+  {
+   "en": "Hadath",
+   "districtEn": "Baabda",
+   "governorateEn": "Mount Lebanon",
+   "added": true
   },
   {
    "en": "Hadath Baalbek",
@@ -2062,17 +2390,17 @@
   },
   {
    "en": "Halat",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Halawa",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Halba",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2087,7 +2415,7 @@
   },
   {
    "en": "Harajel",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2097,7 +2425,7 @@
   },
   {
    "en": "Harat Jandal",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2122,7 +2450,7 @@
   },
   {
    "en": "Harf Al-Siyad",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -2131,13 +2459,22 @@
    "governorateEn": "Nabatieh"
   },
   {
+   "en": "Harissa-Daraoun",
+   "districtEn": "Keserwan",
+   "governorateEn": "Mount Lebanon",
+   "added": true,
+   "aliases": [
+    "Harissa"
+   ]
+  },
+  {
    "en": "Harouf",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Harrar",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2146,8 +2483,8 @@
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Hasbaya (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Hasbaya (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -2157,7 +2494,7 @@
   },
   {
    "en": "Hasrout",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2187,12 +2524,12 @@
   },
   {
    "en": "Haytah",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Haytla",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2202,7 +2539,7 @@
   },
   {
    "en": "Hayzouq",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2226,23 +2563,31 @@
    "governorateEn": "North"
   },
   {
+   "en": "Hermel",
+   "districtEn": "Hermel",
+   "governorateEn": "Baalbek-Hermel",
+   "aliases": [
+    "Al Hermel"
+   ]
+  },
+  {
    "en": "Hilalia",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Hinawiye",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Hosh Al-Harimeh",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Hosh Al-Qanaba",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -2262,12 +2607,12 @@
   },
   {
    "en": "Houmine Al-Fawqa",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Houmine Al-Tahta",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -2282,12 +2627,12 @@
   },
   {
    "en": "Izal",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Jaba Jenin",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -2297,7 +2642,7 @@
   },
   {
    "en": "Jabal Albutm",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -2307,7 +2652,7 @@
   },
   {
    "en": "Jaj",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2322,17 +2667,17 @@
   },
   {
    "en": "Jannata",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Jargea",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Jarmnaya and Ar Rama",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2341,48 +2686,62 @@
    "governorateEn": "Baalbek-Hermel"
   },
   {
-   "en": "Jbaa (El Chouf)",
-   "districtEn": "El Chouf",
+   "en": "Jbaa (Chouf)",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Jbaa (Nabatiyeh)",
-   "districtEn": "Nabatiyeh",
+   "en": "Jbaa (Nabatieh)",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Jbeil",
-   "districtEn": "Byblos",
-   "governorateEn": "Mount Lebanon"
-  },
-  {
    "en": "Jdeideh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Jdeideh Al Juma",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Jdeideh Al Qaytaa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Jdeideh El Chouf",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Jdeideh-Bouchrieh-Sed",
+   "districtEn": "Matn",
+   "governorateEn": "Mount Lebanon",
+   "added": true,
+   "aliases": [
+    "Jdeideh",
+    "Bouchrieh"
+   ]
+  },
+  {
+   "en": "Jdeidet Marjayoun",
+   "districtEn": "Marjayoun",
+   "governorateEn": "Nabatieh",
+   "added": true,
+   "aliases": [
+    "Marjayoun"
+   ]
+  },
+  {
    "en": "Jebrayel",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Jedra",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2393,11 +2752,14 @@
   {
    "en": "Jezzine - Ain Majdeline",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "aliases": [
+    "Jezzine"
+   ]
   },
   {
    "en": "Jibchit",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -2407,32 +2769,38 @@
   },
   {
    "en": "Jiyeh",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Joub Jannine",
+   "districtEn": "West Bekaa",
+   "governorateEn": "Bekaa",
+   "added": true
+  },
+  {
    "en": "Joueita",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Joun",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Jounieh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Jourat Al Terms",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Jourat Badran",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2452,12 +2820,12 @@
   },
   {
    "en": "Kaakaiye Bridge",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Danis",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -2467,47 +2835,47 @@
   },
   {
    "en": "Kafr Fila",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Hammam",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Mashki - Mazraat Salsata",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Kafr Qouq",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Kafr Ruman",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Shuba",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Sir",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafr Tibnit",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Kafraya",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -2516,14 +2884,23 @@
    "governorateEn": "North"
   },
   {
+   "en": "Kahaleh",
+   "districtEn": "Aley",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Kaifun",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Kamid Al-Lawz",
-   "districtEn": "Western Bekaa",
-   "governorateEn": "Bekaa"
+   "en": "Kamed el Loz",
+   "districtEn": "West Bekaa",
+   "governorateEn": "Bekaa",
+   "aliases": [
+    "Kamid Al-Lawz"
+   ]
   },
   {
    "en": "Karkha",
@@ -2532,7 +2909,7 @@
   },
   {
    "en": "Karm Aassfour, Beit Ghattas, Mazraat Al Naheriyeh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2541,8 +2918,8 @@
    "governorateEn": "North"
   },
   {
-   "en": "Kawkaba (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Kawkaba (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -2551,8 +2928,8 @@
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Kawkaba (Rachaiya)",
-   "districtEn": "Rachaiya",
+   "en": "Kawkaba (Rashaya)",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
@@ -2562,13 +2939,19 @@
   },
   {
    "en": "Ketermaya",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Kfar Jirra",
    "districtEn": "Jezzine",
    "governorateEn": "South"
+  },
+  {
+   "en": "Kfar Kila",
+   "districtEn": "Marjayoun",
+   "governorateEn": "Nabatieh",
+   "added": true
   },
   {
    "en": "Kfar Sghab",
@@ -2602,7 +2985,7 @@
   },
   {
    "en": "Kfarbanin",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -2611,13 +2994,19 @@
    "governorateEn": "North"
   },
   {
+   "en": "Kfarchima",
+   "districtEn": "Baabda",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Kfardan",
    "districtEn": "Baalbek",
    "governorateEn": "Baalbek-Hermel"
   },
   {
    "en": "Kfardbian",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2637,7 +3026,7 @@
   },
   {
    "en": "Kfarhabu",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -2656,8 +3045,14 @@
    "governorateEn": "North"
   },
   {
+   "en": "Kfarhim",
+   "districtEn": "Chouf",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Kfarmatta",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2672,12 +3067,12 @@
   },
   {
    "en": "Kfarshloun",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Kfarton",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2692,12 +3087,12 @@
   },
   {
    "en": "Kfertay",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Kfouar",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2707,12 +3102,12 @@
   },
   {
    "en": "Kharba Shar",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Kharbit Dawud",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2722,22 +3117,31 @@
   },
   {
    "en": "Khat al Petrol",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
+   "en": "Khiam",
+   "districtEn": "Marjayoun",
+   "governorateEn": "Nabatieh",
+   "added": true,
+   "aliases": [
+    "Khiyam"
+   ]
+  },
+  {
    "en": "Khirbet Qanafar",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Khirbet Rouha",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
-   "en": "Khuraibeh (Aakkar)",
-   "districtEn": "Aakkar",
+   "en": "Khuraibeh (Akkar)",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2767,12 +3171,12 @@
   },
   {
    "en": "Kousha",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Kroom Arab",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2786,18 +3190,26 @@
    "governorateEn": "South"
   },
   {
+   "en": "Labweh",
+   "districtEn": "Baalbek",
+   "governorateEn": "Baalbek-Hermel",
+   "aliases": [
+    "Al-Laboue"
+   ]
+  },
+  {
    "en": "Lala",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Lassa",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Lubya",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -2812,22 +3224,36 @@
   },
   {
    "en": "Maaroub",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Maasser El Chouf",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Machghara",
+   "districtEn": "West Bekaa",
+   "governorateEn": "Bekaa",
+   "aliases": [
+    "Mashgharah"
+   ]
+  },
+  {
+   "en": "Maghdouche",
+   "districtEn": "Saida",
+   "governorateEn": "South",
+   "added": true
+  },
+  {
    "en": "Maissara",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Majadel",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -2842,12 +3268,12 @@
   },
   {
    "en": "Majdal Bani Fadel",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Majdala",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2867,12 +3293,12 @@
   },
   {
    "en": "Majdalzoun",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Majdlaya",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2882,7 +3308,7 @@
   },
   {
    "en": "Mamna",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2897,27 +3323,27 @@
   },
   {
    "en": "Mar Touma",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Marah Al-Safira",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Marah Al-Saraj",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
    "en": "Marieh wa Majideyah",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Marj al-Zuhur (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Marj al-Zuhur (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -2927,7 +3353,7 @@
   },
   {
    "en": "Markabta",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -2937,17 +3363,12 @@
   },
   {
    "en": "Marwahine",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
-   "en": "Mashgharah",
-   "districtEn": "Western Bekaa",
-   "governorateEn": "Bekaa"
-  },
-  {
    "en": "Mashha",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -2957,17 +3378,17 @@
   },
   {
    "en": "Mayfadoun",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Mazboud",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Mazraat Ad-Dahr",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -2977,17 +3398,17 @@
   },
   {
    "en": "Mazraat Ash-Shouf",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Mazraat Bleda",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Mazraat Moshref",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3002,12 +3423,12 @@
   },
   {
    "en": "Mearka",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Merouba",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3017,7 +3438,7 @@
   },
   {
    "en": "Mghayriyeh",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3027,17 +3448,17 @@
   },
   {
    "en": "Midoun and Lussia",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Mifouk Al Qattara",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Mimas (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Mimas (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3046,13 +3467,22 @@
    "governorateEn": "Nabatieh"
   },
   {
+   "en": "Minieh",
+   "districtEn": "Minieh-Danniyeh",
+   "governorateEn": "North",
+   "aliases": [
+    "Al-Minya",
+    "Miniyeh"
+   ]
+  },
+  {
    "en": "Minyara",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Mishmish",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3072,32 +3502,38 @@
   },
   {
    "en": "Mristi",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Mtein",
+   "districtEn": "Matn",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Mudawwara",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Munjaz",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Mushta Hamoud",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Nabatieh",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Nabatieh Al-Fawqa",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3127,12 +3563,12 @@
   },
   {
    "en": "Nahr Ibrahim",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Namreen and Bkoza",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -3142,17 +3578,17 @@
   },
   {
    "en": "Nemoura & Kfar Jarif",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Nemriye",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
-   "en": "Niha (El Chouf)",
-   "districtEn": "El Chouf",
+   "en": "Niha (Chouf)",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3162,8 +3598,17 @@
   },
   {
    "en": "Nurah Al-Fawqa and Al-Tahata",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
+  },
+  {
+   "en": "Qab Elias - Wadi El Delm",
+   "districtEn": "Zahle",
+   "governorateEn": "Bekaa",
+   "aliases": [
+    "Qob Elias",
+    "Qab Elias"
+   ]
   },
   {
    "en": "Qabi`",
@@ -3187,12 +3632,12 @@
   },
   {
    "en": "Qaliyat",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Qana",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3222,12 +3667,12 @@
   },
   {
    "en": "Qarawat Bani Hassan",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Qartaba",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3242,13 +3687,17 @@
   },
   {
    "en": "Qilya",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
-   "en": "Qob Elias - Wadi El-Dleim",
-   "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "en": "Qobayat",
+   "districtEn": "Akkar",
+   "governorateEn": "Akkar",
+   "aliases": [
+    "Qubayyat",
+    "Kobayat"
+   ]
   },
   {
    "en": "Qolehate",
@@ -3267,7 +3716,7 @@
   },
   {
    "en": "Qorsayta",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -3277,7 +3726,7 @@
   },
   {
    "en": "Qoubbet Chamra - Semqley",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3286,13 +3735,8 @@
    "governorateEn": "Bekaa"
   },
   {
-   "en": "Qubayyat",
-   "districtEn": "Aakkar",
-   "governorateEn": "Akkar"
-  },
-  {
    "en": "Quneya",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3312,17 +3756,17 @@
   },
   {
    "en": "Rachin",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Rahba",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Ramadiyeh",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3336,6 +3780,12 @@
    "governorateEn": "Mount Lebanon"
   },
   {
+   "en": "Ras Baalbek",
+   "districtEn": "Baalbek",
+   "governorateEn": "Baalbek-Hermel",
+   "added": true
+  },
+  {
    "en": "Ras Kifa",
    "districtEn": "Zgharta",
    "governorateEn": "North"
@@ -3347,18 +3797,30 @@
   },
   {
    "en": "Rashaya",
-   "districtEn": "Rachaiya",
-   "governorateEn": "Bekaa"
+   "districtEn": "Rashaya",
+   "governorateEn": "Bekaa",
+   "aliases": [
+    "Rachaya"
+   ]
   },
   {
    "en": "Rashaya al-Fukhar",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Rashkananiye",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
+  },
+  {
+   "en": "Rayak",
+   "districtEn": "Zahle",
+   "governorateEn": "Bekaa",
+   "added": true,
+   "aliases": [
+    "Riyaq"
+   ]
   },
   {
    "en": "Raymat and Shqadif",
@@ -3367,12 +3829,12 @@
   },
   {
    "en": "Reefoun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Remhala",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3382,7 +3844,7 @@
   },
   {
    "en": "Rimah",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3392,7 +3854,7 @@
   },
   {
    "en": "Rmeileh",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3401,13 +3863,19 @@
    "governorateEn": "South"
   },
   {
+   "en": "Roumieh",
+   "districtEn": "Matn",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Roumiyeh",
    "districtEn": "Matn",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Rumine",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3437,32 +3905,40 @@
   },
   {
    "en": "Safinat Al-Qetaa",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Safinet al-Dreib",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Safra",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Saghbin",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Sahmara",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
+   "en": "Saida",
+   "districtEn": "Saida",
+   "governorateEn": "South",
+   "aliases": [
+    "Sidon"
+   ]
+  },
+  {
    "en": "Sair Al-Gharbiya",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3487,7 +3963,7 @@
   },
   {
    "en": "Sandiyaneh Raydan",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3512,7 +3988,7 @@
   },
   {
    "en": "Sarbah",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3521,13 +3997,18 @@
    "governorateEn": "Baalbek-Hermel"
   },
   {
+   "en": "Saydoun",
+   "districtEn": "Jezzine",
+   "governorateEn": "South"
+  },
+  {
    "en": "Seen",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Seer",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -3547,7 +4028,7 @@
   },
   {
    "en": "Shahour",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3557,17 +4038,17 @@
   },
   {
    "en": "Shan",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Sharbila",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Shaykhain",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3577,32 +4058,32 @@
   },
   {
    "en": "Shebaa",
-   "districtEn": "Hasbaiyya",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Sheikh Mohammad - Aadbal",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Sheikh Taba",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Shennaya",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Shiddreh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Shmaa",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3611,8 +4092,8 @@
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Shwaya (Hasbaiyya)",
-   "districtEn": "Hasbaiyya",
+   "en": "Shwaya (Hasbaya)",
+   "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3622,18 +4103,8 @@
   },
   {
    "en": "Sibline",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
-  },
-  {
-   "en": "Sidon (Jezzine)",
-   "districtEn": "Jezzine",
-   "governorateEn": "South"
-  },
-  {
-   "en": "Sidon (Saida)",
-   "districtEn": "Saida",
-   "governorateEn": "South"
   },
   {
    "en": "Sijd",
@@ -3647,47 +4118,43 @@
   },
   {
    "en": "Sissouk",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Smakiah",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Sofar",
-   "districtEn": "Aalay",
+   "districtEn": "Aley",
    "governorateEn": "Mount Lebanon"
   },
   {
-   "en": "Sour",
-   "districtEn": "Sour",
-   "governorateEn": "South"
+   "en": "Sohmor",
+   "districtEn": "West Bekaa",
+   "governorateEn": "Bekaa",
+   "added": true
   },
   {
    "en": "Srifa",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Sultan Ya'qub almuahada",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Swayseh",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
-   "en": "ta Zahl",
-   "districtEn": "Jezzine",
-   "governorateEn": "South"
-  },
-  {
    "en": "Tabarja",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
@@ -3697,12 +4164,12 @@
   },
   {
    "en": "Takrit",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Tal Abbas Al Gharbi",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3712,17 +4179,17 @@
   },
   {
    "en": "Tall Dzanoub",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Talla Washataha",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Talmaayan",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3751,13 +4218,13 @@
    "governorateEn": "North"
   },
   {
-   "en": "Tannourine (Rachaiya)",
-   "districtEn": "Rachaiya",
+   "en": "Tannourine (Rashaya)",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Taran",
-   "districtEn": "Minieh - Danniyeh",
+   "districtEn": "Minieh-Danniyeh",
    "governorateEn": "North"
   },
   {
@@ -3772,12 +4239,12 @@
   },
   {
    "en": "Tartij",
-   "districtEn": "Byblos",
+   "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Tasha",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3792,7 +4259,7 @@
   },
   {
    "en": "Tir Dibba",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3812,22 +4279,30 @@
   },
   {
    "en": "Tura",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Tyr Felsay",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
+   "en": "Tyre",
+   "districtEn": "Tyre",
+   "governorateEn": "South",
+   "aliases": [
+    "Sour"
+   ]
+  },
+  {
    "en": "Wadi Al-Hawr",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Wadi al-Jamus",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
@@ -3842,42 +4317,42 @@
   },
   {
    "en": "Wadi Khalid",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Wardanieh",
-   "districtEn": "El Chouf",
+   "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Wata Al Joz",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Yahchouch",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Yahmar",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Yanouh",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
    "en": "Yanta",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Yarine",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3887,7 +4362,7 @@
   },
   {
    "en": "Yohmor",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
@@ -3897,12 +4372,12 @@
   },
   {
    "en": "Zaaitra",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Zabkin",
-   "districtEn": "Sour",
+   "districtEn": "Tyre",
    "governorateEn": "South"
   },
   {
@@ -3911,18 +4386,27 @@
    "governorateEn": "Baalbek-Hermel"
   },
   {
-   "en": "Zahl",
+   "en": "Zahle",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "aliases": [
+    "Zahleh",
+    "Zahl"
+   ]
+  },
+  {
+   "en": "Zahlta",
+   "districtEn": "Jezzine",
+   "governorateEn": "South"
   },
   {
    "en": "Zahr Al-Ahmar",
-   "districtEn": "Rachaiya",
+   "districtEn": "Rashaya",
    "governorateEn": "Bekaa"
   },
   {
    "en": "Zalaya",
-   "districtEn": "Western Bekaa",
+   "districtEn": "West Bekaa",
    "governorateEn": "Bekaa"
   },
   {
@@ -3937,52 +4421,62 @@
   },
   {
    "en": "Zawarib",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Zawtar Al-Gharbiya",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Zawtar Al-Sharkiya",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Zaytoun",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   },
   {
    "en": "Zefta",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Zgharta-Ehden",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "aliases": [
+    "Zgharta",
+    "Ehden"
+   ]
   },
   {
    "en": "Zibdeen",
-   "districtEn": "Nabatiyeh",
+   "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh"
   },
   {
    "en": "Zouk al-Hssayne",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
    "en": "Zouk Hadara",
-   "districtEn": "Aakkar",
+   "districtEn": "Akkar",
    "governorateEn": "Akkar"
   },
   {
+   "en": "Zouk Mikael",
+   "districtEn": "Keserwan",
+   "governorateEn": "Mount Lebanon",
+   "added": true
+  },
+  {
    "en": "Zouk Mosbeh",
-   "districtEn": "Kesrouane",
+   "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon"
   }
  ]
