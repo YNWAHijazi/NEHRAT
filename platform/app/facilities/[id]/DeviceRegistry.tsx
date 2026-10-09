@@ -10,15 +10,17 @@
  * coordinator on the record. The status column derives from the record itself.
  */
 
-import { LocationPicker } from '../../../../components/maps/LocationPicker';
-import { InfoNote } from '../../../../components/InfoNote';
-import type { MapPoint } from '../../../../lib/rules/geolocation';
-import { useState } from 'react';
-import { L } from '../../../../components/L';
-import { saveFacilityDeviceAction } from '../../../actions';
-import { FACILITY_CONTENT, deviceStatus } from '../../../../lib/rules';
-import { imageAcceptAttribute, refuseImageUpload } from '../../../../lib/rules/uploads';
-import type { FacilityDevice } from '../../../../lib/queries';
+import { LocationPicker } from '../../../components/maps/LocationPicker';
+import { InfoNote } from '../../../components/InfoNote';
+import type { MapPoint } from '../../../lib/rules/geolocation';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { L } from '../../../components/L';
+import { registerAutosave } from '../../../components/record/autosave';
+import { autosaveFacilityDeviceAction, saveFacilityDeviceAction } from '../../actions';
+import { FACILITY_CONTENT, deviceStatus } from '../../../lib/rules';
+import { imageAcceptAttribute, refuseImageUpload } from '../../../lib/rules/uploads';
+import type { FacilityDevice } from '../../../lib/queries';
 
 const inputStyle: React.CSSProperties = {
   height: 44,
@@ -62,21 +64,52 @@ function statusChip(d: Pick<FacilityDevice, 'operational' | 'accessibleHours'>):
     : { ...st, color: 'var(--bad)', chipBg: 'var(--bad-soft)' };
 }
 
+/** A form's entries as one comparable string: what was typed, chosen or attached. */
+function formSnapshot(form: HTMLFormElement): string {
+  return [...new FormData(form).entries()].map(([k, v]) => `${k}=${typeof v === 'string' ? v : `file:${v.name}:${v.size}`}`).join('&');
+}
+
 export function DeviceRegistry({
   facilityId,
   devices,
   facilityLocation,
   deviceLocations,
+  editable = true,
 }: {
   facilityId: string;
   devices: FacilityDevice[];
   facilityLocation: MapPoint | null;
   deviceLocations: Record<string, MapPoint | null>;
+  /** An archived record shows its registry and offers no form. */
+  editable?: boolean;
 }) {
   const content = FACILITY_CONTENT;
+  const router = useRouter();
+  // A new facility has no AED yet: the form opens on a first registration (owner, 9 October 2026).
   const [selected, setSelected] = useState<string | null>(devices[0]?.label ?? null);
   const [purpose, setPurpose] = useState('initial');
   const device = devices.find((d) => d.label === selected) ?? null;
+
+  // Next on the record page registers a device typed and not yet saved (components/record/autosave.ts);
+  // a refusal keeps the person on the AED step with the reason under the form.
+  const root = useRef<HTMLDivElement>(null);
+  const form = useRef<HTMLFormElement>(null);
+  const baseline = useRef('');
+  const [autosaveRefused, setAutosaveRefused] = useState(false);
+  // A saved form starts again blank, so the same device is never registered twice.
+  const [saves, setSaves] = useState(0);
+  useEffect(() => { if (form.current) baseline.current = formSnapshot(form.current); setAutosaveRefused(false); }, [selected, purpose, saves]);
+  useEffect(() => {
+    if (!editable || !root.current) return;
+    return registerAutosave(root.current, async () => {
+      const f = form.current;
+      if (!f || formSnapshot(f) === baseline.current) return true;
+      const result = await autosaveFacilityDeviceAction(facilityId, new FormData(f));
+      if ('ok' in result) { setAutosaveRefused(false); setSaves((n) => n + 1); router.refresh(); return true; }
+      setAutosaveRefused(true);
+      return false;
+    });
+  }, [editable, facilityId, router]);
   const field = (key: string) => content.deviceFields.find((f) => f.key === key)!;
 
   const textField = (key: string, en: string, ar: string, initial: string, dir?: 'rtl') => (
@@ -99,7 +132,7 @@ export function DeviceRegistry({
   const withMapAndPhoto = ['initial', 'relocation', 'replacement', 'ministryUpdate'].includes(purpose);
 
   return (
-    <div>
+    <div ref={root} data-region="device-registry">
       <div data-region="registry-table" data-stack="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 44 }}>
         {[
           { en: 'Device', ar: 'الجهاز' },
@@ -111,10 +144,15 @@ export function DeviceRegistry({
             <L en={h.en} ar={h.ar} />
           </div>
         ))}
+        {devices.length === 0 ? (
+          <div data-region="registry-empty" style={{ gridColumn: '1 / -1', background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', color: 'var(--muted)' }}>
+            <L en="No AED registered yet." ar="لم يُسجَّل أي جهاز بعد." />
+          </div>
+        ) : null}
         {devices.map((d) => {
           const st = statusChip(d);
           return [
-            <button key={`${d.label}-a`} type="button" onClick={() => { setSelected(d.label); setPurpose('statusChange'); }} style={{ textAlign: 'start', border: 0, cursor: 'pointer', background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
+            <button key={`${d.label}-a`} type="button" disabled={!editable} onClick={() => { setSelected(d.label); setPurpose('statusChange'); }} style={{ textAlign: 'start', border: 0, cursor: 'pointer', background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
               {d.label} · {d.identification}
             </button>,
             <div key={`${d.label}-b`} style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px' }}>
@@ -136,6 +174,7 @@ export function DeviceRegistry({
         })}
       </div>
 
+      {editable ? <>
       {/* REGISTER ANOTHER (partner ruling, 2026-09-05): a facility has as many
           devices as it has; the registry needed a way to say "one more" without
           leaving the page. Selecting a row edits that device; this clears the
@@ -156,7 +195,7 @@ export function DeviceRegistry({
         ) : null}
       </div>
 
-      <form key={`${selected}-${purpose}`} action={saveFacilityDeviceAction.bind(null, facilityId)}>
+      <form ref={form} key={`${selected}-${purpose}-${saves}`} action={saveFacilityDeviceAction.bind(null, facilityId)}>
         <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
@@ -278,8 +317,14 @@ export function DeviceRegistry({
           >
             <L en={purposeDef.ctaEn} ar={purposeDef.ctaAr} />
           </button>
+          {autosaveRefused ? (
+            <p role="alert" data-region="device-autosave-refused" style={{ margin: '12px 0 0', fontSize: '13.5px', color: 'var(--bad)', lineHeight: 1.55 }}>
+              <L en="The device was not saved. Check the device ID, location, representative and map pin, then save again." ar="لم يُحفظ الجهاز. تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً." />
+            </p>
+          ) : null}
         </div>
       </form>
+      </> : null}
     </div>
   );
 }

@@ -111,7 +111,7 @@ export function IncidentForm({
     startTransition(async () => {
       const result = await submitFacilityIncidentAction(facilityId, formData);
       if (result && 'error' in result) setServerError(result.error);
-      else router.push(`/facilities/${facilityId}?notice=incident`);
+      else router.push(`/facilities/${facilityId}?notice=incident#incidents`);
     });
   };
 

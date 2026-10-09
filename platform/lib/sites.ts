@@ -138,3 +138,17 @@ export function venueSiteForNewFacility(accountId: number, venueId: string): str
   const site = siteIdForVenue(venueId);
   return site && !padFacilityOnSite(site) ? site : null;
 }
+
+/**
+ * The hosting venue registration on the facility's site, for the facility record's PAD
+ * venue link: the same place, two registrations. Only a venue the facility's owner holds
+ * is named -- a record never shows another account's registration -- and only a live one.
+ */
+export function hostingVenueForFacility(accountId: number, facilityId: string): { id: string; nameEn: string; nameAr: string } | null {
+  const site = siteIdForFacility(facilityId);
+  if (!site) return null;
+  const v = getDb()
+    .prepare(`SELECT id, name_en, name_ar FROM venues WHERE site_id = ? AND account_id = ? AND archived_at IS NULL ORDER BY id LIMIT 1`)
+    .get(site, accountId) as { id: string; name_en: string; name_ar: string } | undefined;
+  return v ? { id: v.id, nameEn: v.name_en, nameAr: v.name_ar || v.name_en } : null;
+}

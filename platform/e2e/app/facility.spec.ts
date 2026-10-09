@@ -22,9 +22,10 @@ test.describe('the category determination', () => {
     await fillFacilityProfile(page);
     await page.getByRole('button', { name: /Schools, universities/ }).click();
 
-    await expect(page.getByRole('button', { name: /Continue to the responsible contact/ })).toBeVisible();
+    // The education category is open under the published schedule: the one page goes on to the contact and Continue.
+    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
     await expect(page.locator('[data-region="journey-ends"]')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /Continue to the responsible contact/ })).toBeVisible();
+    await expect(page.locator('[data-region="persons"]')).toBeVisible();
   });
 
   test('a sports facility proceeds, and the recurring-venue cross-sell is gone', async ({ page }) => {
@@ -37,7 +38,7 @@ test.describe('the category determination', () => {
     // advertise the venue instrument. The determination and the way on are the
     // screen; the anchor proves the page rendered before asserting the absence.
     await expect(page.locator('[data-region="venue-cross"]')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /Continue to the responsible contact/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
   });
 
   test('a review category proceeds -- the review states what is required', async ({ page }) => {
@@ -48,7 +49,25 @@ test.describe('the category determination', () => {
     await expect(page.locator('[data-region="determination"]')).toContainText(
       'The Ministry reviews the facility and sets its readiness requirements.',
     );
-    await expect(page.getByRole('button', { name: /Continue to the responsible contact/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
+  });
+});
+
+test.describe('the one-page registration', () => {
+  test('Continue stays active and names everything unfilled, as on the venue form', async ({ page }) => {
+    await signInAs(page, 'test_organizer');
+    await gotoRidingRestarts(page, '/facilities/new');
+    const continueButton = page.getByRole('button', { name: 'Continue to the AEDs', exact: true });
+    await expect(continueButton).toBeEnabled();
+    await continueButton.click();
+    const fill = page.locator('[data-region="please-fill"]');
+    await expect(fill).toContainText('Please fill:');
+    await expect(fill).toContainText('the facility name');
+    await expect(fill).toContainText('the map pin, confirmed');
+    await expect(fill).toContainText('the type of facility');
+    // Nothing was created: the page stays the intake.
+    await expect(page).toHaveURL(/\/facilities\/new$/);
+    await expect(page.locator('input[name="name"]')).toHaveAttribute('aria-invalid', 'true');
   });
 });
 
@@ -75,7 +94,7 @@ test.describe('the incident narrative name check', () => {
 test.describe("an organizer never sees another organizer's facilities", () => {
   test('a foreign facility id refuses like a missing one, on every facility route', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    for (const suffix of ['', '/devices', '/plan', '/profile', '/incidents', '/incidents/new']) {
+    for (const suffix of ['', '/devices', '/plan', '/submit', '/profile', '/incidents', '/incidents/new', '/certificate']) {
       const foreign = await gotoRidingRestarts(page, `/facilities/FC-0001${suffix}`);
       const foreignStatus = foreign?.status() ?? 0;
       const missing = await gotoRidingRestarts(page, `/facilities/FC-9999${suffix}`);

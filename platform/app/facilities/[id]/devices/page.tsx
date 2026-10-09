@@ -1,99 +1,17 @@
-import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
-import { facilityPoint, devicePoint } from '../../../../lib/facility-gis';
-import { InfoNote } from '../../../../components/InfoNote';
 import { notFound, redirect } from 'next/navigation';
-import { GovernmentBand, Header } from '../../../../components/Header';
-import { L } from '../../../../components/L';
-import { AedWhereToBuy } from '../../../../components/AedWhereToBuy';
-import { VendorDirectoryLink } from '../../../../components/VendorDirectoryLink';
-import { DeviceRegistry } from './DeviceRegistry';
-import { currentAccount, organizationFor } from '../../../../lib/auth';
-import { facilityDetail, facilityDevices, unreadCountFor } from '../../../../lib/queries';
-import { UPLOADS_CONTENT } from '../../../../lib/rules/uploads';
+import { currentAccount } from '../../../../lib/auth';
+import { facilityDetail } from '../../../../lib/queries';
+import { facilityRecordHref } from '../../../../lib/facility-registration';
 
 /**
- * The AED registry (step 4). One record per device, as the AED registration form
- * requires; each registration or update is signed by the facility representative.
- * The record is lean (partner audit, 2026-10-08): no coordinator, no maintenance
- * dates, no annual readiness confirmation -- the status derives from the record.
- *
- * The reference carries a barcode/QR scan panel; the policy spec lists AI device
- * identifier capture among capabilities requiring separate approval, so it lives
- * behind the aiAedIdentifierCapture flag and ships off -- the identification FIELD
- * (barcode, QR code or serial number, the form's own wording) is a plain input.
+ * The AED registry is the AED step, and once registered the AED section, of the facility
+ * record page (owner, 9 October 2026). Old links and notifications land there. A facility
+ * that is not the viewer's refuses here exactly as a missing one does.
  */
-export default async function DeviceRegistryPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ notice?: string; error?: string }>;
-}) {
+export default async function DevicesRoute({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ notice?: string; error?: string }> }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
   const { id } = await params;
-  const facility = facilityDetail(account.id, id);
-  if (!facility) notFound();
-  const { notice, error } = await searchParams;
-  const organization = organizationFor(account.id);
-  const unread = unreadCountFor(account.id);
-  const devices = facilityDevices(facility.id);
-  const photoError = error?.startsWith('photo-') ? error.slice('photo-'.length) : null;
-  const uploadCopy = UPLOADS_CONTENT.copy;
-  const photoMessage = photoError === 'tooLarge'
-    ? { en: uploadCopy.tooLargeEn.replace('{max}', UPLOADS_CONTENT.maxBytesLabel), ar: uploadCopy.tooLargeAr.replace('{max}', UPLOADS_CONTENT.maxBytesLabel) }
-    : photoError === 'empty' ? { en: uploadCopy.emptyEn, ar: uploadCopy.emptyAr }
-    : photoError ? { en: uploadCopy.notImageEn, ar: uploadCopy.notImageAr } : null;
-
-  return (
-    <>
-      <GovernmentBand />
-      <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/facilities/${id}`, en: 'Facility record', ar: 'سجل المنشأة' }} />
-      <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}><FacilityWorkspaceHeader facility={facility} active="devices"/>
-        {notice === 'saved' ? (
-          <div style={{ padding: '18px 24px', border: '1px solid var(--brand)', background: 'var(--brand-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-            <L en="The device record has been saved." ar="حُفظ سجل الجهاز." />
-          </div>
-        ) : null}
-
-        <h2 data-sec-h1="" style={{ margin: '0 0 10px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
-          <L en="AED registry" ar="سجل أجهزة إزالة الرجفان" />
-         <InfoNote><L en="Select a device to confirm or update it." ar="اختر جهازاً لتأكيده أو تحديثه." /></InfoNote>
-        </h2>
-
-
-        {!facilityPoint(id) ? <p role="status"><a href={`/facilities/${id}/profile`}><L en="Add the facility map pin before registering an AED." ar="أضيفوا موقع المنشأة على الخريطة قبل تسجيل الجهاز."/></a></p>:null}
-        {photoMessage ? <p role="alert"><L en={photoMessage.en} ar={photoMessage.ar} /></p> : error ? <p role="alert"><L en="Check the device ID, location, representative and map pin, then save again." ar="تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً."/></p>:null}
-        <DeviceRegistry
-          facilityLocation={facilityPoint(id)}
-          deviceLocations={Object.fromEntries(devices.map(d=>{const location=devicePoint(id,d.label);return [d.label,location.separate?location.point:null]}))}
-          facilityId={facility.id}
-          devices={devices}
-        />
-
-        {/* THE FLOW CONTINUES (partner ruling, 2026-09-05): registering a device
-            used to end here, and steps 5 and 6 of the registration were reachable
-            only by knowing the address. Devices are step 4; this is the way on. */}
-        <div data-region="continue-to-plan" style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBlockStart: 32 }}>
-          <a
-            href={`/facilities/${facility.id}/plan`}
-            style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}
-          >
-            <L en="Continue to the response plan" ar="المتابعة إلى خطة الاستجابة" />
-          </a>
-          <a
-            href={`/facilities/${facility.id}`}
-            style={{ height: 48, paddingInline: 22, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 24, fontSize: '14.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}
-          >
-            <L en="The facility record" ar="سجل المنشأة" />
-          </a>
-        </div>
-
-        <AedWhereToBuy />
-
-        <VendorDirectoryLink />
-
-      </main>
-    </>
-  );
+  if (!facilityDetail(account.id, id)) notFound();
+  redirect(facilityRecordHref(id, 'aeds', await searchParams));
 }

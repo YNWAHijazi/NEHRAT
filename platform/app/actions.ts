@@ -979,7 +979,8 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath('/dashboard');
-  redirect(`/facilities/${facilityId}/devices`);
+  // The one-page intake lands on the facility record, its step path open at the AEDs (owner, 9 October 2026).
+  redirect(`/facilities/${facilityId}`);
 }
 
 /** The end of the journey for an awaiting category: an interest, nothing more. */
@@ -1006,6 +1007,28 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  // The registry is the AED step and section of the facility record page (owner, 9 October 2026).
+  const result = await storeFacilityDevice(facilityId, formData);
+  if (result !== 'saved') redirect(`/facilities/${facilityId}?step=aeds&error=${result}#aeds`);
+  redirect(`/facilities/${facilityId}?step=aeds&notice=saved#aeds`);
+}
+
+/**
+ * The same save, for the record page's Next (components/record/autosave.ts): a device
+ * typed on the AED step is registered on the way to the next step, and a refusal comes
+ * back as a reason instead of a redirect so the person stays on the step.
+ */
+export async function autosaveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: string }> {
+  refuseIfFacilityArchived(facilityId);
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  const result = await storeFacilityDevice(facilityId, formData);
+  return result === 'saved' ? { ok: true } : { error: result };
+}
+
+/** Validates and writes one AED registration or update; the reason when refused. Ownership is the caller's check. */
+async function storeFacilityDevice(facilityId: string, formData: FormData): Promise<'saved' | 'details' | `photo-${string}`> {
   const db = getDb();
   const purpose = String(formData.get('purpose') ?? 'initial');
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
@@ -1017,7 +1040,7 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   if (!allowed.includes(purpose) || !s('representative') || (purpose !== 'initial' && !device)
     || (['initial','relocation'].includes(purpose) && !facilityPoint(facilityId)) || (s('separatePin') === 'yes' && !point)
     || (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification'))
-    || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) redirect(`/facilities/${facilityId}/devices?error=details`);
+    || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) return 'details';
   // The photo is checked BEFORE anything is written: a refused file must not leave a
   // half-saved record behind it. The server enforces the same allow-list the picker does.
   // An untouched file input still submits an empty File; only a non-empty one is a photo.
@@ -1025,9 +1048,9 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   let photoBytes: Buffer | null = null;
   if (photo instanceof File && photo.size > 0) {
     const refusal = refuseImageUpload({ type: photo.type, size: photo.size });
-    if (refusal) redirect(`/facilities/${facilityId}/devices?error=photo-${refusal.reason}`);
+    if (refusal) return `photo-${refusal.reason}`;
     photoBytes = Buffer.from(await photo.arrayBuffer());
-    if (photoBytes.length > maxUploadBytes()) redirect(`/facilities/${facilityId}/devices?error=photo-tooLarge`);
+    if (photoBytes.length > maxUploadBytes()) return 'photo-tooLarge';
   }
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -1087,9 +1110,8 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
   db.prepare('UPDATE facility_device_updates SET snapshot=? WHERE id=last_insert_rowid()').run(facilitySnapshot(facilityId));
   db.exec('COMMIT');
   } catch (error) { db.exec('ROLLBACK'); throw error; }
-  revalidatePath(`/facilities/${facilityId}/devices`);
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(`/facilities/${facilityId}/devices?notice=saved`);
+  return 'saved';
 }
 
 /**
@@ -1116,7 +1138,7 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!representative
     ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
     ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
-    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}/submit?error=readiness`);
+    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}?step=review&error=readiness#confirmation`);
 
   const db=getDb();
   db.exec('BEGIN IMMEDIATE');
@@ -1160,9 +1182,27 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  if (!storeFacilityContact(account.id, facilityId, formData)) redirect(`/facilities/${facilityId}/profile?error=contact`);
+  redirect(`/facilities/${facilityId}/profile?notice=contact`);
+}
+
+/**
+ * The responsible-contact step of the facility record page (owner, 9 October 2026): the
+ * same save, answered rather than redirected, so Save and Next keep the person on the record.
+ */
+export async function saveFacilityContactStepAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: 'contact' }> {
+  refuseIfFacilityArchived(facilityId);
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
+  return storeFacilityContact(account.id, facilityId, formData) ? { ok: true } : { error: 'contact' };
+}
+
+/** Validates and upserts the one responsible contact. False when a field is missing. Ownership is the caller's check. */
+function storeFacilityContact(accountId: number, facilityId: string, formData: FormData): boolean {
   const db = getDb();
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
-  if(!['coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=contact`);
+  if (!['coordinatorName', 'coordinatorPhone', 'coordinatorEmail'].every((k) => s(k))) return false;
   db.exec('BEGIN IMMEDIATE');try {
   db.prepare(
     `INSERT INTO facility_persons (facility_id, role, name_or_position, phone, email, updated_at)
@@ -1171,12 +1211,11 @@ export async function saveFacilityPersonsAction(facilityId: string, formData: Fo
        phone = excluded.phone, email = excluded.email, updated_at = excluded.updated_at`,
   ).run(facilityId, s('coordinatorName'), s('coordinatorPhone'), s('coordinatorEmail'));
   bumpFacilityRevision(facilityId);
-  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
+  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,accountId,facilitySnapshot(facilityId));
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath(`/facilities/${facilityId}`);
-  revalidatePath(`/facilities/${facilityId}/plan`);
   revalidatePath(`/facilities/${facilityId}/profile`);
-  redirect(`/facilities/${facilityId}/profile?notice=contact`);
+  return true;
 }
 
 /**
@@ -1205,7 +1244,7 @@ export async function submitFacilityIncidentAction(
     .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative, submitted_by) VALUES (?, ?, ?, ?)`)
     .run(facilityId, JSON.stringify(payload), narrative, account.id);
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(`/facilities/${facilityId}?notice=incident`);
+  redirect(`/facilities/${facilityId}?notice=incident#incidents`);
 }
 
 
