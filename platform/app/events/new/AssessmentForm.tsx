@@ -3,9 +3,8 @@
 import { OptionText, useDocumentLang } from '../../../components/OptionText';
 import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
-import { HostingVenuePicker } from '../../../components/HostingVenuePicker';
-import { VenueLocationField, venueNameIn } from '../../../components/VenueLocationField';
-import type { HostingVenueOption } from '../../../lib/hosting-venues';
+import { SiteLocationField, siteNameIn } from '../../../components/SiteLocationField';
+import type { SiteOption } from '../../../lib/event-site';
 
 
 /**
@@ -92,7 +91,8 @@ export function AssessmentForm({
   reassess,
   draft,
   organizerName,
-  hostingVenues = [],
+  sites = [],
+  initialSiteId = '',
   representativeDefault = '',
 }: {
   draft?: AssessmentSubmission & { eventId: string };
@@ -105,8 +105,10 @@ export function AssessmentForm({
   organizerName?: { en: string; ar: string } | null;
   /** The signed-in organizer's name: the declaration's representative until changed (owner, 9 October 2026). */
   representativeDefault?: string;
-  /** The registered hosting venues this account may choose (lib/hosting-venues). */
-  hostingVenues?: HostingVenueOption[];
+  /** The registered Facility/Sites this account may link the event to (lib/event-site). */
+  sites?: SiteOption[];
+  /** A new event started from a site ("Create event at this site", /events/new?site=): pre-linked. */
+  initialSiteId?: string;
 }) {
   const stored = reassess ?? draft;
   void conditions;
@@ -122,29 +124,25 @@ export function AssessmentForm({
   const [endDate, setEndDate] = useState(draft?.endDate || draft?.startDate || '');
   const endDateEdited = useRef(Boolean(draft?.endDate));
   const closingTimeEdited = useRef(Boolean(draft?.partA.closingTime));
+  const lang = useDocumentLang();
+  // A new event opened from a site starts linked to it, with the site's name and municipality filled in.
+  const startSite = draft ? null : sites.find((o) => o.id === initialSiteId) ?? null;
   const [partA, setPartA] = useState({
-    venueRoute: draft?.partA.venueRoute ?? '', municipalities: draft?.partA.municipalities ?? '',
+    venueRoute: draft?.partA.venueRoute ?? (startSite ? siteNameIn(startSite, lang) : ''),
+    municipalities: draft?.partA.municipalities ?? (startSite ? (lang === 'ar' ? startSite.municipalityAr : startSite.municipalityEn) : ''),
     // A new event opens at 07:00 (owner, 2026-10-07: that is when a marathon starts); a draft keeps its own times.
     openingTime: draft?.partA.openingTime ?? (draft ? '' : '07:00'), closingTime: draft?.partA.closingTime || draft?.partA.openingTime || (draft ? '' : '07:00'),
     expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
     previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
-  // THE ONE LINK to a registered venue: set from the suggestions under the location field,
-  // from "Show all registered venues", or from the fixed-venue selector, and read by all
-  // three. A stored link that is no longer listable (the venue was archived) opens unset.
-  const [hostingVenueId, setHostingVenueId] = useState(
-    hostingVenues.some((v) => v.id === draft?.partA.hostingVenueId) ? (draft?.partA.hostingVenueId ?? '') : '',
+  // THE ONE LINK to a registered Facility/Site, by Site ID: set from the suggestions under the
+  // location field or from "Show all registered sites". A stored link that is no longer
+  // listable (the facility registration was archived) opens unset.
+  const [siteId, setSiteId] = useState(
+    draft ? (sites.some((o) => o.id === draft.partA.siteId) ? (draft.partA.siteId ?? '') : '') : (startSite?.id ?? ''),
   );
-  const lang = useDocumentLang();
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
-  // Choosing in the fixed-venue selector writes the venue's name into the location field
-  // too, so both places read the same venue.
-  const pickFromSelector = (venueId: string) => {
-    setHostingVenueId(venueId);
-    const venue = hostingVenues.find((v) => v.id === venueId);
-    if (venue) setA('venueRoute', venueNameIn(venue, lang));
-  };
 
   const initialType = EVENT_TYPES.find((type) => [type.key, type.en, type.ar].includes(draft?.partA.eventType ?? ''))?.key
     ?? (stored ? typeFromInputs(stored.inputs) : '');
@@ -260,7 +258,7 @@ export function AssessmentForm({
           previousEdition: partA.previousEdition,
           recurringFixedVenue: partA.recurringFixedVenue,
           // The link stands on its own: the fixed-venue box describes the event, not the link.
-          hostingVenueId: hostingVenueId !== '' ? hostingVenueId : null,
+          siteId: siteId !== '' ? siteId : null,
         },
         answers: answers as DomainAnswers,
         inputs,
@@ -315,12 +313,12 @@ export function AssessmentForm({
             <Field labelEn="Closing time" labelAr="وقت الإغلاق">
               <input type="time" step={300} value={partA.closingTime} onChange={(e) => { closingTimeEdited.current = Boolean(e.target.value); setA('closingTime', e.target.value || partA.openingTime); }} style={inputStyle} />
             </Field>
-            <VenueLocationField
-              options={hostingVenues}
+            <SiteLocationField
+              options={sites}
               text={partA.venueRoute}
               onTextChange={(text) => setA('venueRoute', text)}
-              linkedId={hostingVenueId}
-              onLinkedChange={setHostingVenueId}
+              linkedId={siteId}
+              onLinkedChange={setSiteId}
               labelEn="Venue, route, or location"
               labelAr="الموقع أو المسار أو مكان الانعقاد"
               labelStyle={fieldLabel}
@@ -426,10 +424,6 @@ export function AssessmentForm({
                     <L en={en} ar={ar} />
                   </span>
                 </button>
-                {/* The registered venue, right under the box that says the event is at one. */}
-                {key === 'recurringFixedVenue' && on ? (
-                  <HostingVenuePicker options={hostingVenues} value={hostingVenueId} onChange={pickFromSelector} />
-                ) : null}
                 </div>
               );
             })}
@@ -568,8 +562,8 @@ export function AssessmentForm({
         <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--bad)' }}>
           {error === 'name-required' ? (
             <L en="The event name is required in both languages." ar="اسم الفعالية مطلوب باللغتين." />
-          ) : error === 'hosting-venue' ? (
-            <L en="The chosen venue is not a registered hosting venue. Choose a venue from the list." ar="الموقع المختار ليس موقعاً مستضيفاً مسجّلاً. اختاروا موقعاً من القائمة." />
+          ) : error === 'site' ? (
+            <L en="The chosen site is not a registered facility/site. Choose a site from the list." ar="الموقع المختار ليس منشأة/موقعاً مسجّلاً. اختاروا موقعاً من القائمة." />
           ) : error === 'certification-required' ? (
             <L en="The declaration's representative and position are required." ar="ممثل الإقرار وصفته مطلوبان." />
           ) : (

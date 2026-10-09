@@ -13,7 +13,17 @@ import ministryJson from './data/ministry.json';
  *  Ministry's recorded outcome, so the operator is told the outcome that was recorded. */
 export type VenuePackageStatus = 'draft' | 'submitted' | 'revision' | 'incomplete' | 'accepted';
 
-export function venuePackageEditable(status: VenuePackageStatus, archived: boolean) { return !archived && (status === 'draft' || status === 'revision' || status === 'incomplete'); }
+/**
+ * HOSTING VENUE REGISTRATION IS REPLACED BY FACILITY/SITE REGISTRATION (owner, 9 October 2026).
+ * No venue is an active regulatory entity: every venue package is history and takes no edit,
+ * whatever its status. Kept as a rule, not deleted, so every caller that asks still gets one answer.
+ */
+export const VENUE_SERVICE_RETIRED = true;
+
+export function venuePackageEditable(status: VenuePackageStatus, archived: boolean) {
+  if (VENUE_SERVICE_RETIRED) return false;
+  return !archived && (status === 'draft' || status === 'revision' || status === 'incomplete');
+}
 const outcome = (key: 'incomplete' | 'revision' | 'satisfied') => {
   const o = ministryJson.outcomes.find((x) => x.key === key)!;
   return { en: o.en, ar: o.ar };
@@ -93,47 +103,7 @@ export function venueSubmissionChecks(f: VenuePackageFacts): { required: VenueCh
   return { required, optional, remaining, requirementsRemaining, canSubmit: f.editable && remaining === 0 };
 }
 
-/**
- * The one task the venue record leads with; null once the package is with the Ministry
- * or done. href is an edit screen under the venue ('details', 'assessment') or an
- * anchor on the record page itself ('#req-V2', '#final-review').
- */
-export function venueNextAction(f: VenuePackageFacts): NextStep | null {
-  if (!f.editable) return null;
-  const returned = f.status === 'revision' || f.status === 'incomplete';
-  if (!f.detailsDone) {
-    return { kind: 'details', href: 'details', tone: 'accent',
-      titleEn: 'Complete the venue profile', titleAr: 'إكمال ملف الموقع',
-      bodyEn: 'Add the responsible person, the district and the map pin.', bodyAr: 'أضيفوا الشخص المسؤول والقضاء وعلامة الخريطة.',
-      buttonEn: 'Open the profile', buttonAr: 'فتح الملف' };
-  }
-  if (!f.assessmentDone) {
-    return { kind: 'assessment', href: 'assessment', tone: 'accent',
-      titleEn: 'Complete the annual assessment', titleAr: 'إكمال التقييم السنوي',
-      bodyEn: 'Assess one routine operating session. The level is the venue’s routine baseline.', bodyAr: 'قيّموا جلسة تشغيل اعتيادية واحدة. المستوى هو خط الأساس الاعتيادي للموقع.',
-      buttonEn: 'Open the assessment', buttonAr: 'فتح التقييم' };
-  }
-  const { remaining } = venueSubmissionChecks(f);
-  const open = f.requirements.filter((r) => !r.optional && !r.done);
-  if (open.length > 0) {
-    const n = open.length;
-    return { kind: 'requirements', href: `#req-${open[0]!.key}`, tone: 'accent',
-      titleEn: returned ? 'Update the venue information and resubmit' : n === 1 ? 'Complete 1 step' : `Complete ${n} steps`,
-      titleAr: returned ? 'حدّثوا معلومات الموقع وأعيدوا التقديم' : `أكملوا ${arabicCount(n, { one: 'خطوة واحدة', two: 'خطوتين', few: 'خطوات', many: 'خطوة' })}`,
-      bodyEn: 'Then review and submit at the foot of this page.', bodyAr: 'ثم راجعوا وقدّموا في أسفل هذه الصفحة.',
-      buttonEn: `Open ${open[0]!.en}`, buttonAr: `فتح ${open[0]!.ar}` };
-  }
-  if (remaining > 0) {
-    return { kind: 'awaitingPayment', href: '#final-review', tone: 'accent',
-      titleEn: 'Awaiting payment', titleAr: 'بانتظار الدفع',
-      bodyEn: 'Payment must be recorded before you can submit.', bodyAr: 'يجب تسجيل الدفع قبل التقديم.',
-      buttonEn: 'Review submission', buttonAr: 'مراجعة ملف التقديم' };
-  }
-  return { kind: 'submit', href: '#final-review', tone: 'brand',
-    titleEn: returned ? 'Ready to resubmit' : 'Ready to submit', titleAr: returned ? 'جاهز لإعادة التقديم' : 'جاهز للتقديم',
-    bodyEn: 'Review the venue information and submit it to the Ministry.', bodyAr: 'راجعوا معلومات الموقع وقدّموها إلى الوزارة.',
-    buttonEn: 'Review and submit', buttonAr: 'المراجعة والتقديم' };
-}
+/* The venue's next step left with the venue service (owner, 9 October 2026): a venue has no next step. */
 
 /** The six-stage venue rail, drawn by the same component as the event rail. */
 export function venueRailStages(f: VenuePackageFacts): { stage: number; stages: RailStage[] } {

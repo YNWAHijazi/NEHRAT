@@ -2,7 +2,7 @@ import { L } from '../L';
 import { approveRecordPlanAction } from '../../app/record-actions';
 import type { RecordRequirements } from '../../lib/record-facts';
 import type { RecordView } from '../../lib/record-view';
-import { FACILITY_CONTENT, FACILITY_REFERENCE_KEY, GOVERNANCE_LANDING, REQUIREMENT_COPY, ROLES_CONTENT, fieldsFor, referenceShortfalls, type AuthorRole, type PlanSectionInstance, type RequirementInstance } from '../../lib/rules';
+import { FACILITY_CONTENT, FACILITY_REFERENCE_KEY, GOVERNANCE_LANDING, REQUIREMENT_COPY, ROLES_CONTENT, referenceShortfalls, siteAedAnswer, type AuthorRole, type PlanSectionInstance, type RequirementInstance } from '../../lib/rules';
 import { RequirementForm } from './RequirementForm';
 
 export function textInstance(key: string, labelEn: string, labelAr: string, record: RecordRequirements, authors: readonly AuthorRole[]): RequirementInstance {
@@ -65,16 +65,10 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
     const keys = n === GOVERNANCE_LANDING.clinicalSection ? ['clinical', 'command'] : n === GOVERNANCE_LANDING.incidentSection ? ['incidentRole'] : [];
     return keys.map((k) => ({ key: k, text: governance[k]?.trim() ?? '', en: govSections.find((g) => g.key === k)?.readerEn ?? govSections.find((g) => g.key === k)?.en ?? k, ar: govSections.find((g) => g.key === k)?.readerAr ?? govSections.find((g) => g.key === k)?.ar ?? k })).filter((g) => g.text !== '');
   };
-  const refStored = record.facts?.answers[FACILITY_REFERENCE_KEY] ?? null;
-  const refValues = refStored?.values ?? {};
-  const refInstance: RequirementInstance | null = facility && record.level !== null ? {
-    key: FACILITY_REFERENCE_KEY, n: null, labelEn: 'Facility reference', labelAr: 'الإحالة إلى المنشأة', promptEn: '', promptAr: '', infoEn: null, infoAr: null,
-    sourceEn: '', sourceAr: '', responsibilityEn: '', responsibilityAr: '', obligation: 'recommended', obligationEn: '', obligationAr: '', group: 'recommended', section: 'requirement',
-    state: refValues['confirmed'] === true ? 'complete' : 'pending', stateEn: '', stateAr: '', detailEn: null, detailAr: null, authors: ['organizer'], approver: null,
-    fields: fieldsFor(FACILITY_REFERENCE_KEY, record.level, 'event') ?? [], values: refValues, missing: refValues['confirmed'] === true ? [] : ['confirmed'], file: null, linkedPlan: [],
-    answeredBy: refStored ? { role: refStored.savedByRole, name: refStored.savedByName, at: refStored.savedAt, version: refStored.version } : null,
-    requested: false, blocks: false, anchor: `req-${FACILITY_REFERENCE_KEY}`,
-  } : null;
+  // The site's AEDs are answered for in the CPR and AED step (latest revision, section 17); the
+  // plan's AED deployment section reads that answer and never asks it a second time.
+  const refValues = record.facts?.answers[FACILITY_REFERENCE_KEY]?.values ?? {};
+  const refAnswer = siteAedAnswer(refValues);
   return (
     <div data-region="plan-sections">
       {planInst?.state === 'waiting' && record.approval === null ? (
@@ -105,20 +99,21 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
             {/* THE FACILITY REFERENCE under AED deployment (SPEC 2e): the registered devices
                 are referenced, the organizer confirms they stay accessible, and the two event
                 facts derive any shortfall by name. */}
-            {s.key === 'P06' && facility && refInstance ? (
-              <details id={refInstance.anchor} data-region="facility-reference" style={{ marginBlockStart: 12, background: 'var(--surface2)', borderRadius: 10 }}>
-                <summary className="requirement-summary" style={{ padding: '10px 14px', minHeight: 44 }}>
-                  <span style={{ fontSize: '14px' }}>
-                    <L en={`${facility.nameEn} has ${facility.devices} registered ${facility.devices === 1 ? 'defibrillator' : 'defibrillators'} — use them in this plan?`} ar={`لدى ${facility.nameAr} ${facility.devices} من أجهزة إزالة الرجفان المسجّلة — استخدامها في هذه الخطة؟`} />
+            {s.key === 'P06' && facility && facility.devices > 0 ? (
+              <div id="plan-facility-reference" data-region="facility-reference" style={{ marginBlockStart: 12, padding: '10px 14px', background: 'var(--surface2)', borderRadius: 10 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '14px' }}>
+                  <a href={`#req-${FACILITY_REFERENCE_KEY}`}>
+                    <L en={`${facility.nameEn} has ${facility.devices} registered ${facility.devices === 1 ? 'AED' : 'AEDs'}`} ar={`لدى ${facility.nameAr} ${facility.devices} من أجهزة AED المسجّلة`} />
+                  </a>
+                  <span style={{ flex: 'none', fontSize: 12.5, color: refAnswer === 'yes' ? 'var(--success)' : 'var(--muted)' }}>
+                    <L en={refAnswer === 'yes' ? 'Used for this event' : refAnswer === 'no' ? 'Not used; the event documents its own' : 'Not answered'} ar={refAnswer === 'yes' ? 'مستخدمة لهذه الفعالية' : refAnswer === 'no' ? 'غير مستخدمة؛ توثّق الفعالية ترتيبها الخاص' : 'لم تُقدَّم إجابة'} />
                   </span>
-                  <span style={{ flex: 'none', fontSize: 12.5, color: refInstance.state === 'complete' ? 'var(--success)' : 'var(--muted)' }}><L en={refInstance.state === 'complete' ? 'Confirmed' : 'Not confirmed'} ar={refInstance.state === 'complete' ? 'مؤكَّد' : 'غير مؤكَّد'} /></span>
-                </summary>
-                <div style={{ padding: '0 14px 14px' }}>
+                </div>
+                <div>
                   {facility.facts.locationsEn.length > 0 ? (
-                    <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--muted)' }}><L en={facility.facts.locationsEn.join(' · ')} ar={facility.facts.locationsAr.join(' · ')} /></p>
+                    <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--muted)' }}><L en={facility.facts.locationsEn.join(' · ')} ar={facility.facts.locationsAr.join(' · ')} /></p>
                   ) : null}
-                  <RequirementForm kind="event" id={record.id} instance={refInstance} canEdit={organizerMayEdit} />
-                  {referenceShortfalls(facility.facts, { admitsChildren: refValues['admitsChildren'] === true, temporaryAreas: refValues['temporaryAreas'] === true }).map((sf) => {
+                  {refAnswer === 'yes' && referenceShortfalls(facility.facts, { admitsChildren: refValues['admitsChildren'] === true, temporaryAreas: refValues['temporaryAreas'] === true }).map((sf) => {
                     const def = FACILITY_CONTENT.reference.shortfalls[sf.key];
                     return (
                       <div key={sf.key} data-region="shortfall" style={{ marginBlockStart: 10, padding: '12px 16px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 10, fontSize: '13.5px', lineHeight: 1.6 }}>
@@ -127,7 +122,7 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
                     );
                   })}
                 </div>
-              </details>
+              </div>
             ) : null}
             {governanceFor(s.n).length > 0 ? (
               <div data-region="plan-governance" style={{ marginBlockStart: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>

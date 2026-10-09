@@ -26,9 +26,10 @@ import { beirutToday, nowStamp } from '../lib/clock';
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
 import { getDb, insertSite, nextRecordId } from '../lib/db';
-import { isListableHostingVenue, resolveHostingVenue } from '../lib/hosting-venues';
+import { isListableSite, resolveSiteChoice } from '../lib/event-site';
 import { archiveWindowDays } from '../lib/queries';
 import { maxUploadBytes, refuseImageUpload, refuseUpload } from '../lib/rules/uploads';
+import { VENUE_SERVICE_RETIRED } from '../lib/rules/venue-workflow';
 import { missingCertificationFields } from '../lib/rules/certification';
 import { verbatimQuote } from '../lib/rules/verbatim';
 import {
@@ -239,8 +240,8 @@ export interface PartAFields {
   expectedStaff: number | null;
   previousEdition: boolean;
   recurringFixedVenue: boolean;
-  /** The registered venue the event is linked to, by record id; independent of recurringFixedVenue. */
-  hostingVenueId?: string | null;
+  /** The registered Facility/Site the event is held at, by Site ID; independent of recurringFixedVenue. */
+  siteId?: string | null;
 }
 
 export interface AssessmentSubmission {
@@ -295,7 +296,7 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
     .prepare(
       `SELECT name_en, name_ar, event_type, venue_route, municipalities, opening_time, closing_time,
               expected_participants, expected_spectators, expected_staff, recurring_fixed_venue,
-              venue_facility_id, hosting_venue_id, end_date, is_demo
+              venue_facility_id, site_id, end_date, is_demo
        FROM events WHERE id = ?`,
     )
     .get(sourceEventId) as
@@ -303,7 +304,7 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
         name_en: string; name_ar: string; event_type: string | null; venue_route: string | null;
         municipalities: string | null; opening_time: string | null; closing_time: string | null;
         expected_participants: number | null; expected_spectators: number | null; expected_staff: number | null;
-        recurring_fixed_venue: number; venue_facility_id: string | null; hosting_venue_id: string | null;
+        recurring_fixed_venue: number; venue_facility_id: string | null; site_id: string | null;
         end_date: string | null; is_demo: number;
       }
     | undefined;
@@ -315,24 +316,23 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
     .prepare(`SELECT answers, inputs FROM assessments WHERE event_id = ? ORDER BY version DESC LIMIT 1`)
     .get(sourceEventId) as { answers: string; inputs: string } | undefined;
 
-  // The hosting venue carries over only while it is still a venue this account may
-  // choose; an archived venue drops to unset and the organizer chooses again. The link
-  // does not depend on the fixed-venue tick (lib/hosting-venues resolveHostingVenue).
-  const hostingVenueId = src.hosting_venue_id && isListableHostingVenue(src.hosting_venue_id, account.isDemo)
-    ? src.hosting_venue_id
-    : null;
+  // The site carries over only while it is still one this account may choose; an archived
+  // facility registration drops the link and the organizer chooses again. A site link sets the
+  // facility reference through the database trigger; without one the old reference carries as it was.
+  // The organizer's confirmation that the site information applies does NOT carry: it is asked again.
+  const siteId = src.site_id && isListableSite(src.site_id, account.isDemo) ? src.site_id : null;
   const newId = nextRecordId('EV');
   db.prepare(
     `INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date,
        event_type, venue_route, municipalities, opening_time, closing_time,
        expected_participants, expected_spectators, expected_staff,
-       previous_edition, recurring_fixed_venue, venue_facility_id, hosting_venue_id, filed, is_demo, copied_from)
+       previous_edition, recurring_fixed_venue, venue_facility_id, site_id, filed, is_demo, copied_from)
      VALUES (?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 0, ?, ?)`,
   ).run(
     newId, account.id, src.name_en, src.name_ar,
     src.event_type, src.venue_route, src.municipalities, src.opening_time, src.closing_time,
     src.expected_participants, src.expected_spectators, src.expected_staff,
-    src.recurring_fixed_venue, src.venue_facility_id, hostingVenueId, src.is_demo, sourceEventId,
+    src.recurring_fixed_venue, siteId ? null : src.site_id ? null : src.venue_facility_id, siteId, src.is_demo, sourceEventId,
   );
 
   if (assessment) {
@@ -407,8 +407,8 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
-  if (!hosting.ok) return { error: 'hosting-venue' };
+  const site = resolveSiteChoice(payload.partA.siteId, account.isDemo);
+  if (!site.ok) return { error: 'site' };
 
   const db = getDb();
   const eventId = nextRecordId('EV');
@@ -417,7 +417,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
     `INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date,
        event_type, venue_route, municipalities, opening_time, closing_time,
        expected_participants, expected_spectators, expected_staff,
-       previous_edition, recurring_fixed_venue, hosting_venue_id, filed, is_demo)
+       previous_edition, recurring_fixed_venue, site_id, filed, is_demo)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
   ).run(
     eventId,
@@ -436,7 +436,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
     a.expectedStaff,
     a.previousEdition ? 1 : 0,
     a.recurringFixedVenue ? 1 : 0,
-    hosting.venueId,
+    site.siteId,
     account.isDemo ? 1 : 0,
   );
   db.prepare(
@@ -472,8 +472,8 @@ export async function updateDraftEventAction(eventId: string, payload: Assessmen
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
-  if (!hosting.ok) return { error: 'hosting-venue' };
+  const site = resolveSiteChoice(payload.partA.siteId, account.isDemo);
+  if (!site.ok) return { error: 'site' };
 
   const db = getDb();
   if (!ownedEvent(account.id, eventId)) return { error: 'not-found' };
@@ -483,7 +483,7 @@ export async function updateDraftEventAction(eventId: string, payload: Assessmen
   db.exec('BEGIN IMMEDIATE');
   try {
     const a = payload.partA;
-    db.prepare(`UPDATE events SET name_en = ?, name_ar = ?, start_date = ?, end_date = ?, event_type = ?, venue_route = ?, municipalities = ?, opening_time = ?, closing_time = ?, expected_participants = ?, expected_spectators = ?, expected_staff = ?, previous_edition = ?, recurring_fixed_venue = ?, hosting_venue_id = ? WHERE id = ?`).run(payload.nameEn.trim(), payload.nameAr.trim(), payload.startDate, payload.endDate, a.eventType, a.venueRoute, a.municipalities, a.openingTime, a.closingTime, a.expectedParticipants, a.expectedSpectators, a.expectedStaff, a.previousEdition ? 1 : 0, a.recurringFixedVenue ? 1 : 0, hosting.venueId, eventId);
+    db.prepare(`UPDATE events SET name_en = ?, name_ar = ?, start_date = ?, end_date = ?, event_type = ?, venue_route = ?, municipalities = ?, opening_time = ?, closing_time = ?, expected_participants = ?, expected_spectators = ?, expected_staff = ?, previous_edition = ?, recurring_fixed_venue = ?, site_id = ? WHERE id = ?`).run(payload.nameEn.trim(), payload.nameAr.trim(), payload.startDate, payload.endDate, a.eventType, a.venueRoute, a.municipalities, a.openingTime, a.closingTime, a.expectedParticipants, a.expectedSpectators, a.expectedStaff, a.previousEdition ? 1 : 0, a.recurringFixedVenue ? 1 : 0, site.siteId, eventId);
     const version = (db.prepare('SELECT COALESCE(MAX(version), 0) + 1 AS n FROM assessments WHERE event_id = ?').get(eventId) as { n: number }).n;
     db.prepare(
       `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, representative, position)
@@ -840,6 +840,9 @@ export type VenueFormState = { refused: string } | null;
 export async function registerVenueAction(_prev: VenueFormState, formData: FormData): Promise<VenueFormState> {
   const account = await currentAccount();
   if (!account) redirect('/signin');
+  // Hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026):
+  // no new venue is registered. A form rendered before the change lands on the facility/site service.
+  if (VENUE_SERVICE_RETIRED) redirect('/facilities/new');
   const {parseVenueDetails}=await import('../lib/venue/workspace');
   const parsed=parseVenueDetails(formData);if('refused' in parsed)return {refused:parsed.refused};const v=parsed.value;
   // The assessment on the same page (owner, 8 October 2026): nine answers, the attendance
@@ -903,6 +906,8 @@ export async function saveVenueAssessmentAction(
 }
 
 export async function reportVenueChangeAction(venueId: string, formData: FormData): Promise<void> {
+  // A venue record is history (owner, 9 October 2026): changes are reported on the facility/site.
+  if (VENUE_SERVICE_RETIRED) redirect(`/venues/${encodeURIComponent(venueId)}`);
   refuseIfVenueArchived(venueId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -1804,21 +1809,76 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const venueRoute = String(formData.get('venueRoute') ?? '').trim();
   const municipalities = String(formData.get('municipalities') ?? '').trim();
   if (!nameEn || !nameAr || !startDate || !endDate) redirect(`/events/${eventId}/edit?error=required`);
-  // The registered venue the event is linked to, set from the location field or the
-  // fixed-venue selector; the field's absence from the form leaves the stored link as it is.
-  let hostingVenueId: string | null | undefined;
-  if (formData.has('hostingVenueId')) {
-    const hosting = resolveHostingVenue(String(formData.get('hostingVenueId') ?? ''), account.isDemo);
-    if (!hosting.ok) redirect(`/events/${eventId}/edit?error=hosting-venue`);
-    hostingVenueId = hosting.venueId;
+  // The registered Facility/Site the event is linked to, set from the location field; the
+  // field's absence from the form leaves the stored link as it is.
+  let siteId: string | null | undefined;
+  if (formData.has('siteId')) {
+    const site = resolveSiteChoice(String(formData.get('siteId') ?? ''), account.isDemo);
+    if (!site.ok) redirect(`/events/${eventId}/edit?error=site`);
+    siteId = site.siteId;
   }
   getDb()
     .prepare(
       `UPDATE events SET name_en = ?, name_ar = ?, start_date = ?, end_date = ?, venue_route = ?, municipalities = ? WHERE id = ?`,
     )
     .run(nameEn, nameAr, startDate, endDate, venueRoute, municipalities, eventId);
-  if (hostingVenueId !== undefined) getDb().prepare(`UPDATE events SET hosting_venue_id = ? WHERE id = ?`).run(hostingVenueId, eventId);
+  if (siteId !== undefined) getDb().prepare(`UPDATE events SET site_id = ? WHERE id = ?`).run(siteId, eventId);
   redirect(`/events/${eventId}?notice=details-saved`);
+}
+
+/**
+ * THE SITE INFORMATION APPLIES (latest revision, section 16). The organizer confirms, once, that
+ * the information read from the event's registered Facility/Site applies to this event, and
+ * says what is different for it. Unticked, the confirmation is withdrawn. Only the owner, only
+ * while the record takes answers, and only for the site the event names now -- and only where a
+ * Facility/Site registration stands on it. Nothing is copied into the event by this action.
+ */
+export async function confirmSiteInformationAction(eventId: string, formData: FormData): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
+  const { recordRequirementsFor } = await import('../lib/record-facts');
+  const { siteForEvent, saveSiteConfirmation, clearSiteConfirmation } = await import('../lib/event-site');
+  const record = recordRequirementsFor('event', account.id, eventId);
+  const site = siteForEvent(eventId);
+  if (!record?.editable || !site || !site.facilityId) redirect(`/events/${eventId}?error=site-locked#site-information`);
+  if (formData.get('applies') === 'yes') {
+    saveSiteConfirmation(eventId, site.siteId, account.id, String(formData.get('differences') ?? '').replace(/\r\n/g, '\n').trim().slice(0, 2000));
+  } else clearSiteConfirmation(eventId);
+  revalidatePath(`/events/${eventId}`);
+  redirect(`/events/${eventId}?saved=site#site-information`);
+}
+
+/**
+ * The site's layout map as this event's site map, on the organizer's request (section 16):
+ * copied into the event's own file once the organizer has confirmed the site information
+ * applies, never silently. The event keeps its copy; replacing or removing it is the row's own
+ * control. Refused when the row already has a file.
+ */
+export async function applySiteLayoutMapAction(eventId: string): Promise<void> {
+  const account = await currentAccount();
+  if (!account) redirect('/signin');
+  if (!ownedEvent(account.id, eventId)) redirect('/dashboard');
+  refuseIfArchived(eventId);
+  const { recordRequirementsFor } = await import('../lib/record-facts');
+  const { siteForEvent, siteConfirmationFor } = await import('../lib/event-site');
+  const record = recordRequirementsFor('event', account.id, eventId);
+  const site = siteForEvent(eventId);
+  const inst = record?.instances.find((i) => i.key === 'P-M');
+  if (!record?.editable || !site?.facilityId || !siteConfirmationFor(eventId) || !inst?.file || inst.file.present) redirect(`/events/${eventId}?error=forbidden#req-P-M`);
+  const db = getDb();
+  const map = db
+    .prepare(`SELECT file_name, content_type, bytes FROM facility_documents WHERE facility_id = ? AND purpose = 'layoutMap' AND removed_at IS NULL AND bytes IS NOT NULL ORDER BY id DESC LIMIT 1`)
+    .get(site.facilityId) as { file_name: string; content_type: string; bytes: Uint8Array } | undefined;
+  if (!map) redirect(`/events/${eventId}?error=forbidden#req-P-M`);
+  db.prepare(
+    `INSERT INTO event_attachments (event_id, doc_key, file_name, content_type, byte_size, bytes) VALUES (?, 'siteMap', ?, ?, ?, ?)
+     ON CONFLICT (event_id, doc_key) DO UPDATE SET file_name = excluded.file_name, content_type = excluded.content_type,
+       byte_size = excluded.byte_size, bytes = excluded.bytes, attached_at = now_stamp()`,
+  ).run(eventId, map.file_name, map.content_type, map.bytes.length, map.bytes);
+  revalidatePath(`/events/${eventId}`);
+  redirect(`/events/${eventId}?saved=P-M#req-P-M`);
 }
 
 /**
@@ -1849,7 +1909,7 @@ export async function deleteDraftEventAction(eventId: string): Promise<void> {
       ev.is_demo,
     );
   }
-  for (const table of ['attestations', 'invitations', 'event_attachments', 'assessments', 'plans', 'plan_versions', 'submissions', 'submission_versions', 'enquiries', 'material_changes']) {
+  for (const table of ['attestations', 'invitations', 'event_attachments', 'assessments', 'plans', 'plan_versions', 'submissions', 'submission_versions', 'enquiries', 'material_changes', 'event_site_confirmations', 'event_site_snapshots']) {
     db.prepare(`DELETE FROM ${table} WHERE event_id = ?`).run(eventId);
   }
   db.prepare(`DELETE FROM events WHERE id = ?`).run(eventId);

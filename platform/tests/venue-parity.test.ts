@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { filesUnder } from './helpers/files';
 import {
-  venueSubmissionChecks, venueNextAction, venueRailStages, venueStatusForDecision, venuePackageEditable,
+  venueSubmissionChecks, venueRailStages, venueStatusForDecision, venuePackageEditable,
   arabicCount, VENUE_STATUS, type VenuePackageFacts,
 } from '../lib/rules/venue-workflow';
 import ministryJson from '../lib/rules/data/ministry.json';
@@ -46,25 +46,6 @@ describe('venue submission checks -- one list for the screen and the action', ()
   });
 });
 
-describe('venue next step', () => {
-  it('leads with the profile, then the assessment, then the first open step', () => {
-    expect(venueNextAction(ready({ detailsDone: false }))?.kind).toBe('details');
-    expect(venueNextAction(ready({ assessmentDone: false }))?.kind).toBe('assessment');
-    expect(venueNextAction(ready({ requirements: [open('V3'), open('V7')] }))).toMatchObject({ kind: 'requirements', href: '#req-V3', titleEn: 'Complete 2 steps' });
-  });
-  it('never waits on a medical team: a venue has none', () => {
-    for (const f of [ready(), ready({ requirements: [open('V7')] })]) expect(venueNextAction(f)?.kind).not.toBe('waitingOnOthers');
-  });
-  it('says ready only when everything is in place', () => {
-    expect(venueNextAction(ready())).toMatchObject({ kind: 'submit', tone: 'brand' });
-    expect(venueNextAction(ready({ fee: { amount: '50', currency: 'USD', paid: false } }))?.kind).toBe('awaitingPayment');
-  });
-  it('has no step once the package is with the Ministry or accepted', () => {
-    expect(venueNextAction(ready({ status: 'submitted', editable: false }))).toBeNull();
-    expect(venueNextAction(ready({ status: 'accepted', editable: false }))).toBeNull();
-  });
-});
-
 describe('venue progress rail: profile, assessment, infrastructure, AEDs, review, certificate', () => {
   const cases: [string, Partial<VenuePackageFacts>, number][] = [
     ['a fresh draft', { detailsDone: false, assessmentDone: false, requirements: [] }, 1],
@@ -96,7 +77,8 @@ describe('venue outcomes', () => {
     expect(venueStatusForDecision('satisfied')).toBe('accepted');
     expect(venueStatusForDecision('revision')).toBe('revision');
     expect(venueStatusForDecision('incomplete')).toBe('incomplete');
-    expect(venuePackageEditable('incomplete', false)).toBe(true);
+    // The venue service is retired (owner, 9 October 2026): no package takes an edit, whatever its status.
+    expect(venuePackageEditable('incomplete', false)).toBe(false);
     expect(venuePackageEditable('incomplete', true)).toBe(false);
   });
   it('tells the operator the three outcomes in the compliance form\'s own words', () => {

@@ -176,22 +176,25 @@ for (const lang of LANGUAGES) {
         lang === 'ar' ? 'الاعتماد غير مطلوب' : 'Certification not required',
       );
 
-      // BRANCH TWO — a venue. Both conditions, or it routes to the event branch.
-      await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1&cap=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل الموقع المستضيف مطلوب' : 'Hosting venue registration required');
-      await gotoRidingRestarts(page, '/applicability?subject=venue&hosts=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل الموقع المستضيف غير مطلوب' : 'Hosting venue registration not required');
+      // BRANCH TWO — a facility or site (owner, 9 October 2026: two services). An
+      // event-hosting venue at or above the capacity threshold is one of its categories.
+      await gotoRidingRestarts(page, '/applicability?subject=facility&cat=1');
+      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل المنشأة/الموقع مطلوب' : 'Facility/site registration required');
+      await expect(answer.locator('a')).toHaveAttribute('href', '/services/register-a-facility');
       await expectAbsent(page, {
         absent: '[data-region="not-routinely-subject"]',
         anchor: answer,
         because: 'what is not routinely subject belongs to the event branch alone',
       });
-
-      // BRANCH THREE — a facility, which NEVER returns a bare yes or no. The schools
-      // category is the live unset state and the one most likely to look broken.
-      await gotoRidingRestarts(page, '/applicability?subject=facility&cat=1');
-      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل المنشأة مطلوب' : 'Facility registration required');
-      await expect(answer.locator('a')).toHaveAttribute('href', '/services/register-a-facility');
+      await gotoRidingRestarts(page, '/applicability?subject=facility&cat=3');
+      await expect(answer).toContainText(lang === 'ar' ? 'تسجيل المنشأة/الموقع مطلوب' : 'Facility/site registration required');
+      // A category that rests on a Ministry designation is not the applicant's to declare.
+      await gotoRidingRestarts(page, '/applicability?subject=facility&cat=4');
+      await expect(answer).toContainText(lang === 'ar' ? 'يتبع التسجيل تحديداً من الوزارة' : 'Registration follows a Ministry designation');
+      await expectAbsent(page, { anchor: answer, absent: answer.locator('a'), because: 'the applicant does not designate the facility; nothing routes to registration' });
+      // An old venue link opens the facility/site branch.
+      await gotoRidingRestarts(page, '/applicability?subject=venue');
+      await expect(page.locator('[data-region="facility-branch"]')).toBeVisible();
 
       // THE LOOKUP SCREEN, in front of the endpoint. Four fields and no more.
       await gotoRidingRestarts(page, '/lookup');

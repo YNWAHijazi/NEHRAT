@@ -5,6 +5,7 @@ import { VenueChangeForm } from './VenueChangeForm';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { unreadCountFor, venueById, venueChangesFor } from '../../../../lib/queries';
 import { VENUE_CHANGE_ASPECTS } from '../../../../lib/rules';
+import { VENUE_SERVICE_RETIRED } from '../../../../lib/rules/venue-workflow';
 
 /**
  * Report a venue change. The five reassessment circumstances are data; reporting the
@@ -22,6 +23,9 @@ export default async function VenueChangePage({
   const { id } = await params;
   const venue = venueById(account.id, id);
   if (!venue) notFound();
+  // A venue record is history (owner, 9 October 2026): no change is reported on it. The record
+  // page says so and leads to the facility/site registration, where changes are kept.
+  if (VENUE_SERVICE_RETIRED) redirect(`/venues/${id}`);
   const { notice } = await searchParams;
 
   const organization = organizationFor(account.id);

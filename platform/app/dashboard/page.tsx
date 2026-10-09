@@ -1,5 +1,4 @@
 import { OptionText } from '../../components/OptionText';
-import { VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
 import Link from 'next/link';
@@ -11,7 +10,7 @@ import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
 import { archivedEventsFor, archivedVenuesFor, archivedFacilitiesFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
-import { eventsAtVenuesOf, type EventsAtVenue } from '../../lib/hosting-venues';
+import { eventsAtSitesOf, holdsSites, type EventsAtSite } from '../../lib/event-site';
 import { REASSESSMENT_WINDOW, usesOrganizerSurface } from '../../lib/rules';
 import {
   beirutToday,
@@ -202,38 +201,39 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
 }
 
 /**
- * EVENTS AT YOUR VENUES (platform owner, 8 October 2026): other organizers' events linked
- * to this account's venues, grouped by venue. The venue owner is not a party to these
- * events, so each row is text -- name, dates, record id, level, status -- and links to no
- * record the owner cannot open. Absent for an account with no venue; an owner with no
- * linked event reads one line.
+ * EVENTS AT YOUR SITES (owner, 9 October 2026: the event links to the Facility/Site): other
+ * organizers' events linked to the sites this account's Facility/Site registrations stand on,
+ * grouped by site. The site's operator is not a party to these events, so each row is text --
+ * name, dates, record id, level, status -- and links to no record the operator cannot open.
+ * Absent for an account with no Facility/Site registration; an operator with no linked event
+ * reads one line.
  */
-function EventsAtYourVenues({ groups }: { groups: EventsAtVenue[] }) {
+function EventsAtYourSites({ groups }: { groups: EventsAtSite[] }) {
   const dates = (start: string | null, end: string | null, lang: 'en' | 'ar') => {
     const span = start && end && end !== start ? `${start} – ${end}` : (start ?? end ?? '—');
     return lang === 'ar' ? `⁦${span}⁩` : span;
   };
   return (
-    <section data-region="events-at-your-venues" style={{ marginBlockStart: 44 }}>
+    <section data-region="events-at-your-sites" style={{ marginBlockStart: 44 }}>
       <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-        <L en="Events at your venues" ar="الفعاليات في مواقعكم" />
-        <InfoNote labelEn="About events at your venues" labelAr="حول الفعاليات في مواقعكم">
+        <L en="Events at your sites" ar="الفعاليات في مواقعكم" />
+        <InfoNote labelEn="About events at your sites" labelAr="حول الفعاليات في مواقعكم">
           <L
-            en="Events other organizers have linked to your venues. You see the name, dates, record ID, level and status only."
-            ar="فعاليات ربطها منظّمون آخرون بمواقعكم. تظهر لكم الاسم والتواريخ ومعرّف السجل والمستوى والحالة فقط."
+            en="Events other organizers have linked to your registered sites. You see the name, dates, record ID, level and status only."
+            ar="فعاليات ربطها منظّمون آخرون بمواقعكم المسجّلة. تظهر لكم الاسم والتواريخ ومعرّف السجل والمستوى والحالة فقط."
           />
         </InfoNote>
       </h2>
       {groups.length === 0 ? (
         <p data-empty="" style={{ marginBlock: '12px 0', padding: '16px 22px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px' }}>
-          <L en="No other organizer has linked an event to your venues." ar="لم يربط أي منظّم آخر فعالية بمواقعكم." />
+          <L en="No other organizer has linked an event to your sites." ar="لم يربط أي منظّم آخر فعالية بمواقعكم." />
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBlockStart: 12 }}>
           {groups.map((g) => (
-            <div key={g.venueId} data-venue-id={g.venueId}>
+            <div key={g.siteId} data-site-id={g.siteId}>
               <h3 style={{ margin: '0 0 8px', fontSize: '11.5px', fontWeight: 500, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                <L en={`${g.venueNameEn} · ${g.venueId}`} ar={`${g.venueNameAr} · ⁦${g.venueId}⁩`} />
+                <L en={`${g.siteNameEn} · ${g.siteId}`} ar={`${g.siteNameAr} · ⁦${g.siteId}⁩`} />
               </h3>
               <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {g.events.map((e) => (
@@ -338,18 +338,22 @@ export default async function DashboardPage({
     return (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt);
   });
   const archived = archivedEventsFor(account.id);
-  const archivedVenues = archivedVenuesFor(account.id);
+  // Hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026):
+  // no venue is an active regulatory entity, so the account's venue records -- kept, never
+  // deleted -- are listed in the archive only, each leading to its record and the route onward.
+  const replacedVenues = venuesFor(account.id);
+  const archivedVenueIds = new Set(replacedVenues.map((v) => v.id));
+  const archivedVenues = [...replacedVenues, ...archivedVenuesFor(account.id).filter((v) => !archivedVenueIds.has(v.id))];
   const archivedFacilities = archivedFacilitiesFor(account.id);
   const previousCount = archived.length + archivedVenues.length + archivedFacilities.length;
-  const venues = venuesFor(account.id);
-  // Other organizers' events linked to this account's venues: name, dates, record id,
-  // level and status only, selected so in lib/hosting-venues (platform owner, 8 October 2026).
-  const eventsAtVenues = venues.length > 0 ? eventsAtVenuesOf(account.id, account.isDemo) : [];
+  // Other organizers' events linked to the sites this account's Facility/Site registrations stand
+  // on: name, dates, record id, level and status only, selected so in lib/event-site.
+  const eventsAtSites = holdsSites(account.id) ? eventsAtSitesOf(account.id, account.isDemo) : null;
   const facilities = facilitiesFor(account.id);
   const unread = unreadCountFor(account.id);
   const today = beirutToday();
 
-  const empty = allEvents.length === 0 && venues.length === 0 && facilities.length === 0;
+  const empty = allEvents.length === 0 && facilities.length === 0;
 
   return (
     <>
@@ -387,7 +391,7 @@ export default async function DashboardPage({
         ) : null}
 
         {empty ? (
-          <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+          <div data-wide="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
                 <L en="Events" ar="الفعاليات" />
@@ -404,30 +408,16 @@ export default async function DashboardPage({
             </div>
             <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
-                <L en="Hosting venues" ar="المواقع المستضيفة" />
+                <L en="Facilities and sites" ar="المنشآت والمواقع" />
               </div>
               <InfoNote>
                 <L
-                  en="A venue that regularly hosts organized events and is licensed for 1,000 persons or more is classified annually."
-                  ar="يُصنَّف سنوياً الموقع الذي يستضيف بانتظام فعاليات منظّمة ويكون مرخصاً لـ 1,000 شخص أو أكثر."
-                />
-              </InfoNote>
-              <Link href="/venues/new" style={serviceAction}>
-                <L en="Register a hosting venue" ar="تسجيل موقع مستضيف للفعاليات" />
-              </Link>
-            </div>
-            <div style={{ padding: 28, border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}>
-                <L en="Facilities" ar="المنشآت" />
-              </div>
-              <InfoNote>
-                <L
-                  en="A covered facility registers once with its coordinator and each defibrillator, and keeps its response plan current."
-                  ar="تُسجَّل المنشأة المشمولة مرة واحدة مع منسّقها وكل جهاز إزالة رجفان، وتُبقي خطة الاستجابة محدّثة."
+                  en="A covered facility or site registers once with its responsible contact and each AED, and keeps its cardiac emergency response plan current. Events held there can reuse its registered information."
+                  ar="تُسجَّل المنشأة أو الموقع المشمول مرة واحدة مع جهة الاتصال المسؤولة وكل جهاز AED، ويُبقي خطة الاستجابة لطوارئ القلب محدّثة. ويمكن للفعاليات التي تُقام فيه إعادة استخدام معلوماته المسجّلة."
                 />
               </InfoNote>
               <Link href="/facilities/new" style={serviceAction}>
-                <L en="Register a facility" ar="تسجيل منشأة" />
+                <L en="Register a facility/site" ar="تسجيل منشأة/موقع" />
               </Link>
             </div>
           </div>
@@ -451,7 +441,7 @@ export default async function DashboardPage({
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-                    <L en="Facilities" ar="المنشآت" />
+                    <L en="Facilities and sites" ar="المنشآت والمواقع" />
                   </h2>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 44 }}>
@@ -506,60 +496,7 @@ export default async function DashboardPage({
               </>
             ) : null}
 
-            {venues.length > 0 ? (
-              <>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
-                  <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
-                    <L en="Hosting venues" ar="المواقع المستضيفة" />
-                  </h2>
-                </div>
-                <div data-stack="" style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1.1fr 1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-                  {(
-                    [
-                      ['Venue', 'الموقع'],
-                      ['Classification', 'التصنيف'],
-                      ['Valid through', 'صالح حتى'],
-                      ['Status', 'الحالة'],
-                    ] as const
-                  ).map(([enH, arH]) => (
-                    <div key={enH} data-th="" style={{ background: 'var(--surface2)', padding: '12px 18px', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-                      <L en={enH} ar={arH} />
-                    </div>
-                  ))}
-                  {venues.map((v) => {
-                    const dleft = v.validUntil ? daysBetween(today, v.validUntil) : null;
-                    const state =
-                      v.packageStatus && v.packageStatus!=='accepted' ? {...VENUE_STATUS[v.packageStatus],color:'var(--accent-ink)',chipBg:'var(--accent-soft)'} :
-                      !v.issued ? {...VENUE_STATUS.draft,color:'var(--accent-ink)',chipBg:'var(--accent-soft)'} :
-                      dleft !== null && dleft < 0
-                        ? { en: 'Reassessment required', ar: 'يلزم إعادة التقييم', color: 'var(--bad)', chipBg: 'var(--bad-soft)' }
-                        : dleft !== null && dleft <= REASSESSMENT_WINDOW.opensDaysBeforeExpiry
-                          ? { en: 'Lapsing', ar: 'يقترب من الانتهاء', color: 'var(--accent-ink)', chipBg: 'var(--accent-soft)' }
-                          : { en: 'Classified', ar: 'مصنَّف', color: 'var(--brand)', chipBg: 'var(--brand-soft)' };
-                    return (
-                      <div key={v.id} style={{ display: 'contents' }}>
-                        <Link href={`/venues/${v.id}`} style={{ textAlign: 'start', background: 'var(--bg)', padding: '16px 18px', fontSize: 15, border: 0, borderInlineStart: `3px solid ${state.color}`, color: 'var(--ink)' }}>
-                          <span style={{ display: 'block' }}>
-                            <L en={v.nameEn} ar={v.nameAr} />
-                          </span>
-                          <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockStart: 3 }}>{v.id}</span>
-                        </Link>
-                        <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', color: 'var(--muted)' }}>
-                          <L en={v.level?`Level ${v.level}`:'Not assessed'} ar={v.level?`المستوى ${v.level}`:'لم يُقيّم بعد'} />
-                        </div>
-                        <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: 15, fontVariantNumeric: 'tabular-nums', color: state.color }}>{v.validUntil}</div>
-                        <div style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '13.5px' }}>
-                          <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: state.chipBg, color: state.color }}>
-                            <L en={state.en} ar={state.ar} />
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <EventsAtYourVenues groups={eventsAtVenues} />
-              </>
-            ) : null}
+            {eventsAtSites !== null ? <EventsAtYourSites groups={eventsAtSites} /> : null}
           </>
         )}
 
@@ -631,7 +568,7 @@ export default async function DashboardPage({
               {archivedVenues.length > 0 ? (
                 <div data-region="previous-venues">
                   <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-                    <L en="Hosting venues" ar="المواقع المستضيفة" />
+                    <L en="Hosting venues (replaced by facility/site registration)" ar="المواقع المستضيفة (حلّ محلّها تسجيل المنشأة/الموقع)" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {archivedVenues.map((v) => (

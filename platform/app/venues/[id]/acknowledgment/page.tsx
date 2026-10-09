@@ -5,6 +5,7 @@ import { MinistryMasthead } from '../../../../components/MinistryMasthead';
 import { organizationFor } from '../../../../lib/auth';
 import { unreadCountFor } from '../../../../lib/queries';
 import { ownedVenuePage } from '../../../../lib/venue/page';
+import { VenueRetiredNotice } from '../../../../components/venue/VenueRetiredNotice';
 import { venueStatusLabel } from '../../../../lib/rules/venue-workflow';
 import { PrintBar } from '../../../events/[id]/acknowledgment/PrintBar';
 
@@ -48,6 +49,7 @@ export default async function VenueAcknowledgmentPage({ params }: { params: Prom
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} back={{ href: `/venues/${id}`, en: 'Venue record', ar: 'سجل الموقع' }} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        <VenueRetiredNotice venueId={id} accountId={account.id} />
         <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Acknowledgment of receipt" ar="إشعار الاستلام" />
           <InfoNote><L

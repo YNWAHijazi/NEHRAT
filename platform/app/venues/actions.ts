@@ -6,7 +6,7 @@ import { currentAccount } from '../../lib/auth';
 import { getDb } from '../../lib/db';
 import { ensureVenuePackage, parseVenueDetails, venuePackageFor, venuePackageFacts } from '../../lib/venue/workspace';
 import type { VenueFormState } from '../actions';
-import { venueSubmissionChecks, venueStatusForDecision, VENUE_STATUS } from '../../lib/rules/venue-workflow';
+import { venueSubmissionChecks, venueStatusForDecision, VENUE_STATUS, VENUE_SERVICE_RETIRED } from '../../lib/rules/venue-workflow';
 import { can, REASSESSMENT_WINDOW, venueReassessmentGate } from '../../lib/rules';
 import { venueChangeSinceAssessment } from '../../lib/queries';
 import { writeRequirementSnapshot } from '../../lib/record-facts';
@@ -36,7 +36,9 @@ export async function reopenVenueSectionAction(id:string,section:'details'|'asse
  refresh(id);redirect(`/venues/${id}/${section}`);
 }
 export async function submitVenuePackageAction(id:string,form:FormData) {
- const {a}=await owned(id); const db=getDb();db.exec('BEGIN IMMEDIATE');let blocked=false;
+ const {a,w:current}=await owned(id);
+ // Hosting venue registration is replaced by Facility/Site registration: nothing is filed on a venue.
+ if(!current.editable)redirect(`/venues/${id}`); const db=getDb();db.exec('BEGIN IMMEDIATE');let blocked=false;
  try{const w=ensureVenuePackage(a.id,id)!;
  // The same checks the record page's final review shows (lib/rules venueSubmissionChecks), plus the declaration on the form.
  if(!venueSubmissionChecks(venuePackageFacts(w)).canSubmit||form.get('confirm')!=='yes'||!w.record)blocked=true;
@@ -53,7 +55,9 @@ export async function submitVenuePackageAction(id:string,form:FormData) {
  refresh(id);redirect(`/venues/${id}?${blocked?'error=incomplete':'submitted=yes'}#final-review`);
 }
 export async function reviewVenuePackageAction(id:string,form:FormData) {
- const a=await currentAccount();if(!a||!can(a.role,'recordOutcome'))notFound();const db=getDb();const v=db.prepare('SELECT account_id,is_demo,archived_at FROM venues WHERE id=?').get(id) as {account_id:number;is_demo:number;archived_at:string|null}|undefined;
+ const a=await currentAccount();if(!a||!can(a.role,'recordOutcome'))notFound();
+ // The venue file is history (owner, 9 October 2026): no outcome is recorded on it.
+ if(VENUE_SERVICE_RETIRED)redirect(`/ministry/venues/${encodeURIComponent(id)}`);const db=getDb();const v=db.prepare('SELECT account_id,is_demo,archived_at FROM venues WHERE id=?').get(id) as {account_id:number;is_demo:number;archived_at:string|null}|undefined;
  if(!v||v.is_demo!==+a.isDemo||v.archived_at)notFound();const decision=String(form.get('decision'));const note=String(form.get('note')??'').trim();const revision=Number(form.get('revision'));
  if(!['satisfied','revision','incomplete'].includes(decision)||(decision!=='satisfied'&&!note))redirect(`/ministry/venues/${id}?error=note`);
  db.exec('BEGIN IMMEDIATE');let stale=false;
@@ -70,7 +74,9 @@ export async function reviewVenuePackageAction(id:string,form:FormData) {
  }db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}refresh(id);redirect(`/ministry/venues/${id}${stale?'?error=stale':'?recorded=1'}`);
 }
 export async function renewVenuePackageAction(id:string) {
- const {a,w}=await owned(id);const gate=venueReassessmentGate({validUntil:w.venue.validUntil,today:beirutToday(),changeReportedSinceAssessment:venueChangeSinceAssessment(a.id,id)});
+ const {a,w}=await owned(id);
+ // No annual venue certificate is renewed (owner, 9 October 2026).
+ if(VENUE_SERVICE_RETIRED)redirect(`/venues/${id}`);const gate=venueReassessmentGate({validUntil:w.venue.validUntil,today:beirutToday(),changeReportedSinceAssessment:venueChangeSinceAssessment(a.id,id)});
  if(w.venue.archivedAt||w.status!=='accepted'||gate.behaviour!=='enabled')redirect(`/venues/${id}`);
  const db=getDb();db.exec('BEGIN IMMEDIATE');try{
  // A venue certified before packages existed has no package row yet; renewal starts its first one.

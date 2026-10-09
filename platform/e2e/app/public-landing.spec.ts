@@ -1,7 +1,7 @@
 /**
  * SLICE 0 — the public surface, signed out.
  *
- * The overview, three service detail screens, the branching applicability check, the
+ * The overview, two service detail screens, the branching applicability check, the
  * search screen and the lookup. None of it touches an account, and none of it stores
  * anything: every answer is in the URL, so it can be shared and re-read, and nothing a
  * person tries here is recorded against them.
@@ -106,7 +106,6 @@ for (const lang of LANGUAGES) {
     test('every service detail screen is reachable and states the fee', async ({ page }) => {
       for (const route of [
         '/services/certify-an-event',
-        '/services/register-a-venue',
         '/services/register-a-facility',
       ]) {
         await gotoRidingRestarts(page, route);
@@ -115,12 +114,28 @@ for (const lang of LANGUAGES) {
       }
     });
 
-    test('all three services end with the same flow, and their own end state', async ({ page }) => {
-      // They had drifted into three different shapes, which made two of the three read
-      // as less considered than the first. Same table, different end state.
+    test('two services: the landing offers an event and a facility/site, and the old venue page leads there', async ({ page }) => {
+      // Owner, 9 October 2026: "Two services: Register an event; Register a facility/site."
+      await gotoRidingRestarts(page, '/');
+      const services = page.locator('[data-region="services"] > a');
+      await expect(services).toHaveCount(2);
+      await expect(services.nth(0)).toHaveAttribute('href', '/services/certify-an-event');
+      await expect(services.nth(1)).toHaveAttribute('href', '/services/register-a-facility');
+      await expect(services.nth(1)).toContainText(lang === 'ar' ? 'تسجيل منشأة/موقع' : 'Register a facility/site');
+      await expectAbsent(page, { anchor: services.first(), absent: 'a[href="/services/register-a-venue"]', because: 'hosting venue registration is replaced by facility/site registration' });
+      await gotoRidingRestarts(page, '/services/register-a-venue');
+      await expect(page).toHaveURL(/\/services\/register-a-facility$/);
+      // The event-hosting venue is a covered category, its threshold rendered from the configured value.
+      await expect(page.locator('[data-region="facility-categories"]')).toContainText(
+        lang === 'ar' ? 'مواقع استضافة الفعاليات التي تبلغ سعتها المعتمدة أو المرخّصة 1,000 شخص أو أكثر' : 'Event-hosting venues with an approved or licensed capacity of 1,000 persons or more',
+      );
+      await expect(page.locator('[data-region="facility-categories"]')).not.toContainText('{capacity}');
+    });
+
+    test('both services end with the same flow, and their own end state', async ({ page }) => {
+      // Same table, different end state.
       const ends: [string, string, string][] = [
         ['/services/certify-an-event', 'How it works', 'خطوات الخدمة'],
-        ['/services/register-a-venue', 'How it works', 'خطوات الخدمة'],
         ['/services/register-a-facility', 'How it works', 'خطوات الخدمة'],
       ];
       for (const [route, en, ar] of ends) {
@@ -132,15 +147,10 @@ for (const lang of LANGUAGES) {
         expect(await flow.locator('> div').count()).toBeGreaterThanOrEqual(5);
       }
 
-      // The venue reuses the SAME nine domains the event assessment uses, answered for
-      // a routine operating session. That section did not exist and made the annual
-      // classification look like a formality.
-      await gotoRidingRestarts(page, '/services/register-a-venue');
-      await expect(page.locator('[data-region="domains"] > div')).toHaveCount(9);
-
-      // The facility names the rule beside each category, not the category alone.
+      // The facility/site names the rule beside each category, not the category alone; the
+      // event-hosting venue is the seventh category (owner, 9 October 2026).
       await gotoRidingRestarts(page, '/services/register-a-facility');
-      await expect(page.locator('[data-region="facility-categories"] > div')).toHaveCount(6);
+      await expect(page.locator('[data-region="facility-categories"] > div')).toHaveCount(7);
       await expect(page.locator('[data-region="facility-obligations"] > div')).toHaveCount(7);
     });
 

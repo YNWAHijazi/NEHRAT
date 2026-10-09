@@ -19,7 +19,7 @@ import {
 } from "../../../../lib/rules";
 import { AssessmentForm } from "../../new/AssessmentForm";
 import { PreviousIncidentNotice } from "./PreviousIncidentNotice";
-import { hostingVenueOptions } from "../../../../lib/hosting-venues";
+import { siteOptions } from "../../../../lib/event-site";
 export default async function Prepare({
   params,
 }: {
@@ -35,7 +35,7 @@ export default async function Prepare({
   if (!assessment) redirect(`/events/${id}/edit`);
   const row = getDb()
     .prepare(
-      "SELECT event_type, venue_route, municipalities, opening_time, closing_time, expected_participants, expected_spectators, expected_staff, previous_edition, recurring_fixed_venue, hosting_venue_id FROM events WHERE id = ? AND account_id = ?",
+      "SELECT event_type, venue_route, municipalities, opening_time, closing_time, expected_participants, expected_spectators, expected_staff, previous_edition, recurring_fixed_venue, site_id FROM events WHERE id = ? AND account_id = ?",
     )
     .get(id, account.id)!;
   const source = event.copiedFrom
@@ -85,7 +85,7 @@ export default async function Prepare({
           conditions={[...MINIMUM_CONDITIONS]}
           bands={[...BANDS]}
           maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN}
-          hostingVenues={hostingVenueOptions(account.isDemo)}
+          sites={siteOptions(account.isDemo)}
           draft={{
             eventId: id,
             nameEn: event.nameEn,
@@ -107,7 +107,7 @@ export default async function Prepare({
               expectedStaff: row.expected_staff as number | null,
               previousEdition: Boolean(row.previous_edition),
               recurringFixedVenue: Boolean(row.recurring_fixed_venue),
-              hostingVenueId: (row.hosting_venue_id as string | null) ?? null,
+              siteId: (row.site_id as string | null) ?? null,
             },
           }}
         />

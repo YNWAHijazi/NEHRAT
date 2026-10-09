@@ -10,6 +10,7 @@ import { levelWhy } from '../lib/rules';
 import { venuePackageFor } from '../lib/venue/workspace';
 import { venueStatusLabel } from '../lib/rules/venue-workflow';
 import { siteIdForVenue } from '../lib/sites';
+import { VenueRetiredNotice } from './venue/VenueRetiredNotice';
 
 export type VenueTab = 'overview' | 'details' | 'assessment' | 'team';
 export type VenueWorkspaceData = NonNullable<ReturnType<typeof venuePackageFor>>;
@@ -33,7 +34,7 @@ export function VenueWorkspace({ account, w, active, children }: { account: Acco
       </InfoNote> : null,
       value: w.level ?? '—',
       valueStyle: { color: w.level ? `var(--l${w.level})` : 'var(--muted)' },
-      below: w.level === null ? <Link href={`/venues/${v.id}/assessment`} style={{ fontSize: 13 }}><L en="Complete the assessment" ar="إكمال التقييم" /></Link> : null,
+      below: null,
     },
     ...(v.validUntil ? [
       { en: 'Certificate valid until', ar: 'الشهادة صالحة حتى', value: v.validUntil, valueStyle: { fontVariantNumeric: 'tabular-nums' } },
@@ -72,14 +73,9 @@ export function VenueWorkspace({ account, w, active, children }: { account: Acco
           ) : <div style={{ marginBlockEnd: 20 }} />}
         </div>
 
-        {!w.editable ? (
-          <div role="status" data-region="read-only-band" style={{ padding: '20px 26px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, color: 'var(--muted)' }}>
-            <L
-              en={v.archivedAt ? 'Archived record · Read-only' : w.status === 'accepted' ? 'Certificate issued · Read-only' : 'Submitted package · Read-only'}
-              ar={v.archivedAt ? 'سجل مؤرشف · للقراءة فقط' : w.status === 'accepted' ? 'صدرت الشهادة · للقراءة فقط' : 'ملف مقدّم · للقراءة فقط'}
-            />
-          </div>
-        ) : null}
+        {/* Hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026):
+            every venue page says so, read-only, with the route onward. */}
+        <VenueRetiredNotice venueId={v.id} accountId={account.id} />
 
         {/* The Ministry's recorded outcome and its note, the way an event shows its determination. */}
         {w.note && (returned || w.status === 'accepted') ? (

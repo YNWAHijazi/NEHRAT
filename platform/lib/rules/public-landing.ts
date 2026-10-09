@@ -19,13 +19,24 @@
  */
 
 import landingJson from './data/public-landing.json';
+import { RECURRING_VENUE_MIN_CAPACITY } from './load';
 
 export const PUBLIC_LANDING = landingJson;
+
+/**
+ * A facility/site category's wording with its configured threshold in place. The event-hosting
+ * venue category names a capacity; the number is the configured value (venue.json, the
+ * Protocol's recurring-venue threshold), never a figure written into the copy (rule 3).
+ */
+export function facilityCategoryText(c: { en: string; ar: string }): { en: string; ar: string } {
+  const n = RECURRING_VENUE_MIN_CAPACITY.toLocaleString('en-US');
+  return { en: c.en.replace('{capacity}', n), ar: c.ar.replace('{capacity}', n) };
+}
 
 /** The four state chips, used identically wherever a facility rule is reported. */
 export type FacilityRuleState = 'inforce' | 'part' | 'unset' | 'review';
 
-export type ApplicabilitySubject = 'event' | 'venue' | 'facility';
+export type ApplicabilitySubject = 'event' | 'facility';
 
 export interface ApplicabilityAnswer {
   /** The heading a person reads first. */
@@ -58,26 +69,32 @@ export function eventApplicability(selected: readonly number[]): ApplicabilityAn
   };
 }
 
-export function venueApplicability(hosts: boolean, capacity: boolean): ApplicabilityAnswer {
-  const required = hosts && capacity;
-  return {
-    en: required ? 'Hosting venue registration required' : 'Hosting venue registration not required',
-    ar: required ? 'تسجيل الموقع المستضيف مطلوب' : 'تسجيل الموقع المستضيف غير مطلوب',
-    bodyEn: '', bodyAr: '',
-    route: required ? '/services/register-a-venue' : null,
-    routeEn: 'Next', routeAr: 'التالي', state: required ? 'inforce' : 'review',
-  };
-}
-
 export interface FacilityAnswer extends ApplicabilityAnswer {
   missingEn: string | null;
   missingAr: string | null;
 }
 
+/**
+ * THE FACILITY/SITE BRANCH (owner, 9 October 2026). An objective category -- sports and
+ * fitness, educational, transport and public access, an event-hosting venue at or above the
+ * capacity threshold -- answers that registration is required. A category that rests on a
+ * Ministry designation (remote or difficult access, a confirmed prior cardiac arrest, any other
+ * designation) is not the applicant's to declare: the answer says registration follows the
+ * Ministry's designation, and offers no route to register on the applicant's own reading.
+ */
 export function facilityApplicability(categoryIndex: number): FacilityAnswer | null {
-  if (!landingJson.facilityCategories[categoryIndex]) return null;
+  const c = landingJson.facilityCategories[categoryIndex] as { designation?: boolean } | undefined;
+  if (!c) return null;
+  if (c.designation === true) {
+    return {
+      en: 'Registration follows a Ministry designation', ar: 'يتبع التسجيل تحديداً من الوزارة',
+      bodyEn: 'The Ministry of Public Health designates facilities and sites in this category and tells the operator. You do not designate it yourself.',
+      bodyAr: 'تحدّد وزارة الصحة العامة المنشآت والمواقع في هذه الفئة وتُبلغ الجهة المشغّلة. لا تحدّدونها بأنفسكم.',
+      route: null, routeEn: 'Next', routeAr: 'التالي', state: 'review', missingEn: null, missingAr: null,
+    };
+  }
   return {
-    en: 'Facility registration required', ar: 'تسجيل المنشأة مطلوب',
+    en: 'Facility/site registration required', ar: 'تسجيل المنشأة/الموقع مطلوب',
     bodyEn: '', bodyAr: '', route: '/services/register-a-facility',
     routeEn: 'Next', routeAr: 'التالي', state: 'inforce', missingEn: null, missingAr: null,
   };
@@ -111,7 +128,6 @@ export interface SearchHit {
 const ROUTE_OF: Record<string, string> = {
   applic: '/applicability',
   service: '/services/certify-an-event',
-  venue: '/services/register-a-venue',
   facility: '/services/register-a-facility',
   home: '/',
 };
@@ -142,12 +158,7 @@ export function searchServices(query: string): SearchHit[] {
       ar: s.ar,
       kindEn: 'Service',
       kindAr: 'خدمة',
-      route:
-        s.k === 'certify'
-          ? '/services/certify-an-event'
-          : s.k === 'venue'
-            ? '/services/register-a-venue'
-            : '/services/register-a-facility',
+      route: s.k === 'certify' ? '/services/certify-an-event' : '/services/register-a-facility',
     }));
 }
 

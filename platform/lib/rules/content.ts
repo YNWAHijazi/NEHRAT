@@ -90,7 +90,6 @@ export interface VenueChangeAspect {
 }
 
 export const VENUE_CAPACITY_FIELD: BilingualField = venueJson.capacityField;
-export const VENUE_REGISTRATION_FIELDS: readonly BilingualField[] = venueJson.registrationFields;
 export const VENUE_REASSESSMENT_TRIGGERS: readonly { en: string; ar: string }[] = venueJson.reassessmentTriggers;
 export const VENUE_CHANGE_ASPECTS: readonly VenueChangeAspect[] = venueJson.changeAspects;
 export const VENUE_ELIGIBILITY_QUESTIONS: { regularlyHosts: EligibilityQuestion; nightclub: EligibilityQuestion } =

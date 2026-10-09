@@ -38,7 +38,7 @@ export interface RecordRequirementsProps {
   initialStep?: string | null;
   /** Just invited (?invited=ems|director): the dialog says which steps that party fills. */
   handoff?: 'ems' | 'director' | null;
-  /** Content a page adds above a row's form, by catalogue key (a venue's linked PAD facility on V7). */
+  /** Content a page adds above a row's form, by catalogue key (an event's site AEDs on B8; a venue's linked PAD facility on V7). */
   extras?: Readonly<Record<string, ReactNode>>;
 }
 
@@ -85,7 +85,9 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     const o = names(inst.authors);
     return { en: `Completed by the ${o.en}`, ar: `${inst.authors[0] === 'ems' ? 'تستكملها' : 'يستكملها'} ${o.ar}` };
   };
-  const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
+  // The CPR and AED row reads the site's AEDs once the organizer answers the site question in
+  // the same card (latest revision, section 17): the form opens again on what the row now reads.
+  const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm key={inst.key === 'B8' ? `B8:${inst.detailEn ?? ''}` : inst.key} kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
 
   const body = (inst: RequirementInstance) => {
     const canEdit = canEditInst(inst);
@@ -163,8 +165,11 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
         );
       }
       default:
+        // A page's own content above the row's form: the event's site AEDs on the CPR and AED
+        // step, the site's answer beside emergency access, patient access and the site map.
         return (
           <>
+            {extras[inst.key] ?? null}
             {inst.fields.length > 0 ? form(inst, canEdit) : null}
             {inst.file ? <FileControl kind={service} id={id} inst={inst} canEdit={canEdit} filed={record.filed} contentType={contentTypes[inst.key] ?? null} refusal={refusal?.key === inst.key ? refusal.reason : null} /> : null}
           </>

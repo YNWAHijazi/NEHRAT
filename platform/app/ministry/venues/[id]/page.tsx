@@ -16,6 +16,7 @@ import { VENUE_STATUS, venueStatusForDecision } from '../../../../lib/rules/venu
 import { venuePackageFor } from '../../../../lib/venue/workspace';
 import { requirementSnapshotFor } from '../../../../lib/record-facts';
 import { reviewVenuePackageAction } from '../../../venues/actions';
+import { VenueRetiredMinistryNotice } from '../../../../components/venue/VenueRetiredNotice';
 
 type Decision = 'satisfied' | 'revision' | 'incomplete';
 const stamp = (s: string | null | undefined) => (s ? s.slice(0, 16) : '—');
@@ -55,7 +56,10 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
     return { labelEn: `Readiness declaration — ${inv?.name ?? 'EMS agency'}`, labelAr: `إقرار الجاهزية — ${inv?.name ?? 'جهة الإسعاف'}`, href: `/api/venue-documents/${id}/${f.doc_key}?revision=${record.revision}`, fileName: f.file_name };
   });
   const outcome = record.decision ? VENUE_STATUS[venueStatusForDecision(record.decision)] : null;
-  const canDecide = w.status === 'submitted' && record.revision === w.revision && can(account.role, 'recordOutcome');
+  // Hosting venue registration is replaced by Facility/Site registration (owner, 9 October 2026):
+  // the file is history, and no outcome is recorded on it -- the action refuses as well.
+  const canDecide = false as boolean;
+  void can;
   const type = venueTypeLabel(s.venue.category);
   const glance: { en: string; ar: string; value: React.ReactNode }[] = [
     { en: 'Venue type', ar: 'نوع الموقع', value: <L en={type.en} ar={type.ar} /> },
@@ -69,7 +73,8 @@ export default async function MinistryVenueFile({ params, searchParams }: { para
 
   return (
     <MinistryShell account={account}>
-      <Link href="/ministry/venues" style={{ fontSize: 14 }}><L en="Hosting venues" ar="مواقع الاستضافة" /></Link>
+      <Link href="/ministry/venues" style={{ fontSize: 14 }}><L en="Hosting venues (historical)" ar="المواقع المستضيفة (سجل سابق)" /></Link>
+      <div style={{ marginBlockStart: 14 }}><VenueRetiredMinistryNotice /></div>
       <div style={{ marginBlockStart: 18 }}>
         <RecordHeader
           facts={[

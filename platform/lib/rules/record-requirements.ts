@@ -95,6 +95,15 @@ export interface RecordFacts {
    * site and never copied (Hosting Venue Registration, 8 October 2026). Null when none.
    */
   padFacility?: { id: string; nameEn: string; nameAr: string; devices: number } | null;
+  /**
+   * An event held at a registered Facility/Site (latest revision, sections 16 and 17). What the
+   * site offers is used only on the organizer's word: `confirmed` once they confirm the site
+   * information applies to this event (the patient access answer then prefills the event's own
+   * row); `aedReuse` once they answer that the site's AEDs remain accessible and operational
+   * throughout the event (the AED part of the CPR and AED step is then the site's). The event
+   * still answers every row itself; a prefilled value is a value the organizer can change.
+   */
+  site?: { confirmed: boolean; patientAccess: string; aedReuse: boolean; aedLocations: string } | null;
 }
 
 export interface RequirementInstance {
@@ -214,17 +223,32 @@ export const CATALOGUE_REVISION: string = catalogue.revision;
 const TEXT_FIELD: FieldDef = { key: 'text', type: 'textarea', labelEn: 'Text', labelAr: 'النص' };
 
 /**
- * The facility reference (SPEC 2e): where the event's venue is itself a registered
- * covered facility, the plan references its devices rather than copying them. The
- * organizer's confirmation and the two event facts the shortfalls derive from are one
- * stored answer under this key, written by the organizer, never inherited.
+ * The facility reference (SPEC 2e), now the event's link to its Site's AEDs (latest revision,
+ * section 17): where the event is held at a registered Facility/Site with registered AEDs, the
+ * CPR and AED step asks whether those AEDs will remain accessible and operational throughout
+ * the event. Yes reuses them for the AED part of the step; No leaves the event to document its
+ * own AED arrangement. The answer and the two event facts the shortfalls derive from are one
+ * stored answer under this key, written by the organizer at every level, never inherited.
+ * An answer stored before the question was asked this way ('confirmed') reads as Yes.
  */
 export const FACILITY_REFERENCE_KEY = 'REF';
 const REFERENCE_FIELDS: readonly FieldDef[] = [
-  { key: 'confirmed', type: 'checkbox', labelEn: 'I confirm the referenced arrangements will remain accessible and operational throughout the event.', labelAr: 'أؤكد أن الترتيبات المُحال إليها ستبقى متاحة وصالحة للتشغيل طوال مدة الفعالية.' },
-  { key: 'admitsChildren', type: 'checkbox', optional: true, labelEn: 'The event admits children.', labelAr: 'تستقبل الفعالية أطفالاً.' },
-  { key: 'temporaryAreas', type: 'checkbox', optional: true, labelEn: 'The event uses temporary areas outside the facility’s registered footprint.', labelAr: 'تستخدم الفعالية مناطق مؤقتة خارج النطاق المسجَّل للمنشأة.' },
+  {
+    key: 'reuse', type: 'choice',
+    labelEn: 'Will these AEDs remain accessible and operational throughout this event?',
+    labelAr: 'هل ستبقى أجهزة AED هذه متاحة وصالحة للتشغيل طوال مدة هذه الفعالية؟',
+    options: [{ value: 'yes', en: 'Yes', ar: 'نعم' }, { value: 'no', en: 'No', ar: 'لا' }],
+  },
+  { key: 'admitsChildren', type: 'checkbox', optional: true, showWhen: { field: 'reuse', equals: 'yes' }, labelEn: 'The event admits children.', labelAr: 'تستقبل الفعالية أطفالاً.' },
+  { key: 'temporaryAreas', type: 'checkbox', optional: true, showWhen: { field: 'reuse', equals: 'yes' }, labelEn: 'The event uses temporary areas outside the facility’s registered footprint.', labelAr: 'تستخدم الفعالية مناطق مؤقتة خارج النطاق المسجَّل للمنشأة.' },
 ];
+
+/** The stored AED answer, reading an answer given under the earlier confirmation wording as Yes. */
+export function siteAedAnswer(values: Readonly<Record<string, AnswerValue>> | null | undefined): 'yes' | 'no' | null {
+  if (!values) return null;
+  if (values['reuse'] === 'yes' || values['reuse'] === 'no') return values['reuse'];
+  return values['confirmed'] === true ? 'yes' : null;
+}
 
 /** The catalogue row for a key, or null when the key is not a requirement. */
 export function catalogueRow(key: string): CatalogueRow | null {
@@ -246,7 +270,7 @@ export function planTextKeys(): string[] {
  */
 export function fieldsFor(key: string, level: Level, service: RecordService): FieldDef[] | null {
   if (planTextKeys().includes(key)) return [TEXT_FIELD];
-  if (key === FACILITY_REFERENCE_KEY) return service === 'event' && level >= 2 ? [...REFERENCE_FIELDS] : null;
+  if (key === FACILITY_REFERENCE_KEY) return service === 'event' && level >= 1 ? [...REFERENCE_FIELDS] : null;
   const row = catalogueRow(key);
   if (!row) return null;
   const cell = row.levels[String(level) as '1' | '2' | '3'];
@@ -260,7 +284,7 @@ export function authorsFor(key: string, level: Level, service: RecordService): A
   // The plan is the medical team's: the EMS agency at Level 2, with the Director at Level 3
   // (decision D1: no Director below Level 3). No plan at Level 1.
   if (planTextKeys().includes(key)) return level === 3 ? ['ems', 'director'] : level === 2 ? ['ems'] : [];
-  if (key === FACILITY_REFERENCE_KEY) return service === 'event' && level >= 2 ? ['organizer'] : [];
+  if (key === FACILITY_REFERENCE_KEY) return service === 'event' && level >= 1 ? ['organizer'] : [];
   const row = catalogueRow(key);
   const cell = row?.levels[String(level) as '1' | '2' | '3'];
   if (!row || !cell || !appliesAt(row, cell, service, [])) return [];
@@ -306,6 +330,29 @@ function visible(field: FieldDef, values: Readonly<Record<string, AnswerValue>>)
 
 function missingFields(fields: readonly FieldDef[], values: Readonly<Record<string, AnswerValue>>): string[] {
   return fields.filter((f) => !f.optional && visible(f, values) && !filled(f, values[f.key])).map((f) => f.key);
+}
+
+/**
+ * What a confirmed site supplies to a row: `fill` stands until the organizer saves their own
+ * value; `fixed` is the site's by the organizer's answer (the AED itself, once they answer that
+ * the site's AEDs remain accessible and operational throughout the event).
+ */
+function siteValues(
+  key: string,
+  fields: readonly FieldDef[],
+  site: RecordFacts['site'] | null,
+): { fill: Record<string, AnswerValue>; fixed: Record<string, AnswerValue> } {
+  const fill: Record<string, AnswerValue> = {};
+  const fixed: Record<string, AnswerValue> = {};
+  if (!site) return { fill, fixed };
+  const has = (k: string) => fields.find((f) => f.key === k) ?? null;
+  if (key === 'B8' && site.aedReuse) {
+    const aed = has('aed');
+    if (aed) fixed['aed'] = aed.type === 'checkbox' ? true : 'yes';
+    if (has('location') && site.aedLocations.trim() !== '') fill['location'] = site.aedLocations;
+  }
+  if (key === 'B11' && site.confirmed && site.patientAccess.trim() !== '' && has('route')) fill['route'] = site.patientAccess;
+  return { fill, fixed };
 }
 
 function fill(t: string, vars: Record<string, string | number>): string {
@@ -367,7 +414,8 @@ function instance(
     cell.completion === 'organizerContact' && facts.organizerContact
       ? { name: facts.organizerContact.name, phone: facts.organizerContact.phone }
       : {};
-  const values = stored?.values ?? prefill;
+  const reused = siteValues(row.key, fields, facts.site ?? null);
+  const values: Readonly<Record<string, AnswerValue>> = { ...reused.fill, ...(stored?.values ?? prefill), ...reused.fixed };
   const matrixRow = row.n ? matrix.find((m) => m.n === row.n) ?? null : null;
   const file = row.file ? { ...row.file, present: facts.files[row.key] ?? null } : null;
   const group: RequirementGroup =
@@ -496,6 +544,7 @@ function instance(
         else state = group === 'recommended' && !stored ? 'notAdded' : 'pending';
     }
   }
+  if (Object.keys(reused.fixed).length > 0 && detailEn === null) { detailEn = copy.siteAedsEn; detailAr = copy.siteAedsAr; }
   if (requested) { detailEn = detailEn ? `${copy.requestedEn} · ${detailEn}` : copy.requestedEn; detailAr = detailAr ? `${copy.requestedAr} · ${detailAr}` : copy.requestedAr; }
   const waived = state !== 'complete' && group === 'required' && (facts.waived ?? []).includes(row.key);
   if (waived) { detailEn = copy.waivedEn; detailAr = copy.waivedAr; }

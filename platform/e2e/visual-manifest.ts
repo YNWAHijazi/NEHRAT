@@ -307,32 +307,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     ],
   },
 
-  // --- Slice 3: the venue service ---
-  {
-    id: 'venue-registration',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Register a venue',
-    builtRoute: '/venues/new',
-    signInAs: 'test_organizer',
-    regions: [
-      // The required-note region entry was deleted with its region: the
-      // every-field-is-required banner left /venues/new in the partner's second
-      // sweep (the one optional field says so on its own label), so there is no
-      // longer anything to compare.
-      {
-        name: 'exempt-footnote',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="exempt-footnote"]',
-        note: 'The September 13 quiet-help change, requested by the owner, moved this explanation into an information control. The prototype still shows a permanent paragraph. This intentional change cannot be pixel-compared to that paragraph; quiet-help.spec.ts verifies the full explanation remains accessible in English and Arabic, including on mobile.',
-      },
-      {
-        name: 'registration-form',
-        mode: 'expectedDivergent',
-        builtSelector: '[data-region="registration-form"]',
-        note: 'Expected divergent, non-negotiable #8 over pixel parity: the prototype form arrives prefilled with showcase values and the regularly-hosts toggle on (so its eligible panel shows); a new registration starts empty, its two questions UNANSWERED, and shows no verdict until the determining facts are answered -- an unset input is not a determination. At reviewer instruction (Slice 5 review) each question is a separate Yes button and No button, not one control flipping between the answers. The build also adds a nightclub/dance-venue question the prototype lacks (the English-issue club condition cannot derive without it, non-negotiable #0; tagged en-only in the data) and splits the venue name and address/municipality into bilingual input pairs. Second sweep (2026-09-02, partner ruling): the issue tags ("English issue only") left the question labels -- English governs and the ruling is made; the tags remain in the data.',
-      },
-    ],
-  },
+  // --- Slice 3: the venue service (retired 9 October 2026: hosting venue registration is replaced by
+  // Facility/Site registration; /venues/new and /venues/[id]/change redirect, so their entries left) ---
   {
     id: 'venue-assessment',
     referenceFile: 'Organizer Journey.dc.html',
@@ -398,30 +374,6 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
     ],
   },
-  {
-    id: 'venue-change',
-    referenceFile: 'Organizer Journey.dc.html',
-    referenceTab: 'Report a venue change',
-    builtRoute: '/venues/VN-0032/change',
-    signInAs: 'test_organizer',
-    regions: [
-      {
-        name: 'change-form',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'What changed', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="change-form"]',
-        note: "The five aspect chips, description and effective date. Held at 2%. Known residuals inside the budget: the reference prefills the date (2026-09-01) and sets a placeholder on the description; a new report starts empty, as the event-side change form does.",
-      },
-      {
-        name: 'revision-footnote',
-        mode: 'compare',
-        reference: { strategy: 'containerOfText', text: 'The Ministry may require a revised', container: 'border-radius: 12px' },
-        builtSelector: '[data-region="revision-footnote"]',
-        note: 'The Ministry may require revised documents. Held at 2%.',
-      },
-    ],
-  },
-  // --- Slice 4: the facility service ---
   {
     id: 'facility-registration',
     referenceFile: 'Organizer Journey.dc.html',

@@ -23,7 +23,6 @@ export default async function OverviewPage() {
   const P = PUBLIC_LANDING;
   const routeOf: Record<string, string> = {
     certify: '/services/certify-an-event',
-    venue: '/services/register-a-venue',
     facility: '/services/register-a-facility',
   };
 
@@ -82,7 +81,7 @@ export default async function OverviewPage() {
         </>
       }
     >
-      {/* SERVICES — the three regulated processes, as the primary route in. */}
+      {/* SERVICES — the two regulated processes, as the primary route in. */}
       <h2 style={{ margin: '0 0 8px', fontSize: 26, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en="Services" ar="الخدمات" />
       </h2>
@@ -118,8 +117,8 @@ export default async function OverviewPage() {
           </div>
           <div style={{ fontSize: '13.5px', color: 'var(--muted)', marginBlockStart: 5, lineHeight: 1.55 }}>
             <L
-              en="Check whether an event, a venue or a place you operate is covered."
-              ar="تحققوا مما إذا كانت فعالية أو موقع أو مكان تديرونه مشمولاً."
+              en="Check whether an event, or a facility or site you operate, is covered."
+              ar="تحققوا مما إذا كانت فعالية، أو منشأة أو موقع تديرونه، مشمولاً."
             />
           </div>
         </Link>

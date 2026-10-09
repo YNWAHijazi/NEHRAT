@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { L } from '../../../components/L';
 import { PublicShell } from '../../../components/PublicShell';
 import { currentAccount } from '../../../lib/auth';
@@ -10,15 +10,18 @@ import {
   DOMAINS,
   PUBLIC_LANDING,
   effectiveFlag,
+  facilityCategoryText,
   serviceFeeLines,
   type FeeService,
 } from '../../../lib/rules';
 
 /**
- * THE THREE SERVICE DETAIL SCREENS — Slice 0, screens 2, 4 and 5.
+ * THE TWO SERVICE DETAIL SCREENS (owner, 9 October 2026: two services -- register an event;
+ * register a facility/site). Hosting venue registration is replaced by Facility/Site
+ * registration: the old venue page's address leads to the facility/site page.
  *
- * One route with three subjects rather than three routes, because they answer the same
- * question about three instruments: what is this, what does it ask of you, and what
+ * One route with two subjects rather than two routes, because they answer the same
+ * question about two instruments: what is this, what does it ask of you, and what
  * happens between registering and being done.
  *
  * THE FACTS ARE DERIVED, NOT DESCRIBED. The document counts come from the attachments
@@ -29,7 +32,7 @@ import {
  * person reads here is what the platform will actually ask them for.
  */
 
-const SERVICES = ['certify-an-event', 'register-a-venue', 'register-a-facility'] as const;
+const SERVICES = ['certify-an-event', 'register-a-facility'] as const;
 type Service = (typeof SERVICES)[number];
 
 /**
@@ -46,15 +49,15 @@ export const dynamic = 'force-dynamic';
 export default async function ServiceDetailPage({ params }: { params: Promise<{ service: string }> }) {
   const account = await currentAccount();
   const { service } = await params;
+  // Hosting venue registration is replaced by Facility/Site registration: an old link lands there.
+  if (service === 'register-a-venue') redirect('/services/register-a-facility');
   if (!(SERVICES as readonly string[]).includes(service)) notFound();
   const key = service as Service;
-  const destination = key === 'certify-an-event' ? '/events/new' : key === 'register-a-venue' ? '/venues/new' : '/facilities/new';
+  const destination = key === 'certify-an-event' ? '/events/new' : '/facilities/new';
   const P = PUBLIC_LANDING;
 
   const def = P.services.find(
-    (s) => (s.k === 'certify' && key === 'certify-an-event') ||
-      (s.k === 'venue' && key === 'register-a-venue') ||
-      (s.k === 'facility' && key === 'register-a-facility'),
+    (s) => (s.k === 'certify' && key === 'certify-an-event') || (s.k === 'facility' && key === 'register-a-facility'),
   )!;
 
   const h2: React.CSSProperties = { margin: '36px 0 10px', fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' };
@@ -64,7 +67,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   const row: React.CSSProperties = { background: 'var(--bg)', padding: '14px 18px', fontSize: '14.5px', lineHeight: 1.55 };
 
   // One flow per service, from the data. The end state differs; the shape does not.
-  const flowKey = key === 'certify-an-event' ? 'certify' : key === 'register-a-venue' ? 'venue' : 'facility';
+  const flowKey = key === 'certify-an-event' ? 'certify' : 'facility';
   const flow = (P.flows as Record<string, { n: number; en: string; ar: string }[]>)[flowKey] ?? [];
   const flowTitle = (P.flowTitles as Record<string, { en: string; ar: string }>)[flowKey]!;
 
@@ -86,7 +89,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           and again on the submission package as an amount due. */}
       <div data-region="fee-lines" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {serviceFeeLines(
-          (key === 'certify-an-event' ? 'certifyEvent' : key === 'register-a-venue' ? 'registerVenue' : 'registerFacility') as FeeService,
+          (key === 'certify-an-event' ? 'certifyEvent' : 'registerFacility') as FeeService,
           effectiveFlag('applicationFees', new Map([...ministryConfig()].map(([k, v]) => [k, v.value]))),
           capabilityConfigFor('applicationFees'),
         ).map((line) => (
@@ -106,11 +109,9 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/* WHAT THE SERVICE COVERS. Each screen answers the same question in its own
-          terms -- the event by its nine domains and its documents, the venue by the
-          same nine answered for a routine session, the facility by category. All three
-          then end with the same thing: a numbered flow from registration to the state
-          the service produces. They had drifted into three different shapes, which
-          made two of the three read as less considered than the first. */}
+          terms -- the event by its nine domains and its documents, the facility/site by
+          category. Both then end with the same thing: a numbered flow from registration
+          to the state the service produces. */}
       {key === 'certify-an-event' ? (
         <>
           {/* The scoring-model paragraph left (partner ruling, second sweep): the
@@ -153,38 +154,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         </>
       ) : null}
 
-      {key === 'register-a-venue' ? (
-        <>
-          <h2 style={h2}>
-            <L en="Both conditions have to be met" ar="يجب استيفاء الشرطين معاً" />
-          </h2>
-          <div data-region="venue-conditions" style={listBox}>
-            {P.venueConditions.slice(0, 2).map((c) => (
-              <div key={c.k} style={row}>
-                <L en={c.en} ar={c.ar} />
-              </div>
-            ))}
-          </div>
-
-          {/* The instrument-comparison paragraph left (partner ruling, second sweep):
-              the nine subjects speak for themselves. */}
-          <h2 style={h2}>
-            <L en="What the assessment covers" ar="ما يشمله التقييم" />
-          </h2>
-          <div data-region="domains" style={listBox}>
-            {DOMAINS.map((d) => (
-              <div key={d.number} style={row}>
-                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 12 }}>{d.number}</span>
-                <L en={d.en} ar={d.ar} />
-              </div>
-            ))}
-          </div>
-          <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.65, maxWidth: '80ch' }}>
-            <L en={P.venueFloorEn} ar={P.venueFloorAr} />
-          </p>
-        </>
-      ) : null}
-
       {key === 'register-a-facility' ? (
         <>
           {/* CPR and AED defined once, at first use, behind an information control
@@ -209,7 +178,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             {P.facilityCategories.map((c, i) => (
               <div key={i} style={row}>
                 <div style={{ fontWeight: 500 }}>
-                  <L en={c.en} ar={c.ar} />
+                  <L en={facilityCategoryText(c).en} ar={facilityCategoryText(c).ar} />
                 </div>
                 <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.6 }}>
                   <L en={c.ruleEn} ar={c.ruleAr} />

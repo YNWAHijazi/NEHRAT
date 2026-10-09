@@ -1,7 +1,7 @@
 import { OptionText } from '../../../../components/OptionText';
 import {eventPlanApproval} from '../../../../lib/plan-approval';
 import { EXTRA_DISCIPLINES } from '../../../../lib/rules/event-labels';
-import { ReviewFileSummary, ReviewMedicalAnswers } from '../../../../components/ReviewEvidence';
+import { ReviewFileSummary, ReviewMedicalAnswers, ReviewSiteSnapshot } from '../../../../components/ReviewEvidence';
 import { RequirementReview } from '../../../../components/record/RequirementReview';
 import { catalogueKeyForDocument, eventRecordRequirements, requirementSnapshotFor } from '../../../../lib/record-facts';
 import { reviewEvidenceFor } from '../../../../lib/review-evidence';
@@ -255,6 +255,7 @@ export default async function SubmissionReviewPage({
         <a href="#review-decision"><L en="Review and decision" ar="المراجعة والقرار" /></a>
       </nav>
       {evidence && <ReviewFileSummary evidence={evidence} />}
+      {evidence && <ReviewSiteSnapshot evidence={evidence} />}
       <RequirementReview id={id} kind="event" snapshot={requirementSnapshot} live={liveRecord} contentTypes={requirementContentTypes} />
 
       {/* Non-negotiable 1: the reviewer sees BOTH results and which governed --

@@ -15,8 +15,10 @@ import { registerAutosave } from './autosave';
  * control each (brief item 14), one Save, and the version the answer was read at. A
  * stale save comes back as a conflict and says so; it never overwrites.
  */
-export function RequirementForm({ kind, id, instance, canEdit, awaiting = null }: {
+export function RequirementForm({ kind, id, instance, canEdit, awaiting = null, region = 'requirement-form' }: {
   kind: RecordService; id: string; instance: RequirementInstance; canEdit: boolean;
+  /** The form's region name: a second form inside a row's card (the site AED question on B8) takes its own. */
+  region?: string;
   /** Another party fills this row: the answers read as text, or this line in italics while none is given. */
   awaiting?: { en: string; ar: string } | null;
 }) {
@@ -58,7 +60,7 @@ export function RequirementForm({ kind, id, instance, canEdit, awaiting = null }
   if (!canEdit && awaiting) {
     const shown = instance.fields.filter((f) => visible(f) && values[f.key] !== undefined && values[f.key] !== '' && values[f.key] !== false);
     return (
-      <div data-region="requirement-form" data-key={instance.key} data-readonly="">
+      <div data-region={region} data-key={instance.key} data-readonly="">
         {shown.length === 0 ? (
           <>
             <p data-region="awaiting-input" style={{ margin: '0 0 10px', fontSize: '13.5px', fontStyle: 'italic', color: 'var(--muted)' }}><L en={awaiting.en} ar={awaiting.ar} /></p>
@@ -94,7 +96,7 @@ export function RequirementForm({ kind, id, instance, canEdit, awaiting = null }
   }
 
   return (
-    <div data-region="requirement-form" data-key={instance.key} ref={root}>
+    <div data-region={region} data-key={instance.key} ref={root}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: '14px 20px' }}>
         {instance.fields.filter(visible).map((f) => {
           const invalid = (!canEdit ? false : missing.has(f.key) && status !== 'idle') || refused.includes(f.key);

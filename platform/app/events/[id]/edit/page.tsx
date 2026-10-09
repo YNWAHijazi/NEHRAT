@@ -6,7 +6,7 @@ import { deleteDraftEventAction, editEventDetailsAction } from '../../../actions
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { eventFor, unreadCountFor, venueRouteFor, municipalitiesFor } from '../../../../lib/queries';
 import { getDb } from '../../../../lib/db';
-import { hostingVenueOptions } from '../../../../lib/hosting-venues';
+import { siteOptions } from '../../../../lib/event-site';
 import { EventPlaceFields } from './EventPlaceFields';
 
 /**
@@ -32,13 +32,11 @@ export default async function EditEventPage({
   // server action refuses too; this keeps the screen from offering what it will refuse.
   if (event.filed) redirect(`/events/${id}`);
   const { error } = await searchParams;
-  // The registered venue the event is linked to is edited from the location field on every
-  // event; the fixed-venue selector shows only for an event at a fixed venue that hosts
-  // events repeatedly, and whether it is one changes through the assessment form.
-  const fixedVenue = getDb()
-    .prepare(`SELECT recurring_fixed_venue, hosting_venue_id FROM events WHERE id = ? AND account_id = ?`)
-    .get(id, account.id) as { recurring_fixed_venue: number; hosting_venue_id: string | null };
-  const hostingVenues = hostingVenueOptions(account.isDemo);
+  // The registered Facility/Site the event is linked to is edited from the location field.
+  const linked = getDb()
+    .prepare(`SELECT site_id FROM events WHERE id = ? AND account_id = ?`)
+    .get(id, account.id) as { site_id: string | null };
+  const sites = siteOptions(account.isDemo);
 
   const label: React.CSSProperties = { fontSize: '12.5px', color: 'var(--muted)', display: 'block', marginBlockEnd: 6 };
   const input: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 14 };
@@ -60,9 +58,9 @@ export default async function EditEventPage({
               <L en="Both names and both dates are required." ar="الاسمان والتاريخان مطلوبة جميعاً." />
             </div>
           ) : null}
-          {error === 'hosting-venue' ? (
+          {error === 'site' ? (
             <div role="alert" style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
-              <L en="The chosen venue is not a registered hosting venue. Choose a venue from the list." ar="الموقع المختار ليس موقعاً مستضيفاً مسجّلاً. اختاروا موقعاً من القائمة." />
+              <L en="The chosen site is not a registered facility/site. Choose a site from the list." ar="الموقع المختار ليس منشأة/موقعاً مسجّلاً. اختاروا موقعاً من القائمة." />
             </div>
           ) : null}
           <div className="secondary-help"><InfoNote>{/* Second sweep: the sentence explaining where classification figures
@@ -82,11 +80,10 @@ export default async function EditEventPage({
             <label><span style={label}><L en="End date" ar="تاريخ الانتهاء" /></span>
               <input name="endDate" type="date" required defaultValue={event.endDate ?? ''} style={{ ...input, fontVariantNumeric: 'tabular-nums' }} /></label>
             <EventPlaceFields
-              options={hostingVenues}
+              options={sites}
               initialText={venueRouteFor(account.id, id)}
-              initialLinkedId={fixedVenue.hosting_venue_id ?? ''}
+              initialLinkedId={linked.site_id ?? ''}
               initialMunicipalities={municipalitiesFor(account.id, id)}
-              fixedVenue={fixedVenue.recurring_fixed_venue === 1}
               labelStyle={label}
               inputStyle={input}
             />

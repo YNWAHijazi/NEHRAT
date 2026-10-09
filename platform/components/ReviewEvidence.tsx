@@ -2,6 +2,7 @@ import { L } from './L';
 import { InfoNote } from './InfoNote';
 import { DECLARATION_ITEMS, ROLES_CONTENT, type Level } from '../lib/rules';
 import type { reviewEvidenceFor } from '../lib/review-evidence';
+import { SiteSnapshotView } from './record/SiteReuse';
 
 type Evidence = NonNullable<ReturnType<typeof reviewEvidenceFor>>;
 const panel: React.CSSProperties = { border: '1px solid var(--line)', borderRadius: 12, padding: 20, marginBlockEnd: 24, scrollMarginBlockStart: 24 };
@@ -33,7 +34,7 @@ export function ReviewFileSummary({ evidence }: { evidence: Evidence }) {
   return <section id="review-file" data-region="review-file-summary" style={panel}>
     <h2 style={{ fontSize: 20, marginBlockStart: 0 }}><L en="Application at a glance" ar="ملخص الطلب" /></h2>
     <dl style={grid}>{facts.map(([en, ar, value]) => <div key={en}><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en={en} ar={ar} /></dt><dd style={answer}><Value value={value} /></dd></div>)}
-      {evidence.hostingVenue ? <div data-region="review-hosting-venue"><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Hosting venue" ar="الموقع المستضيف" /></dt><dd style={answer}><L en={`${evidence.hostingVenue.nameEn} · ${evidence.hostingVenue.id}`} ar={`${evidence.hostingVenue.nameAr} · ⁦${evidence.hostingVenue.id}⁩`} /></dd></div> : null}</dl>
+      {evidence.site ? <div data-region="review-site"><dt style={{ color: 'var(--muted)', fontSize: 13 }}><L en="Site" ar="الموقع" /></dt><dd style={answer}><L en={`${evidence.site.nameEn} · ${evidence.site.siteId}`} ar={`${evidence.site.nameAr} · ⁦${evidence.site.siteId}⁩`} />{evidence.siteSnapshot ? <> · <a href="#review-site"><L en="Site information relied on" ar="معلومات الموقع المعتمد عليها" /></a></> : <span style={{ display: 'block', fontSize: 13, color: 'var(--muted)' }}><L en="Filed before site information was recorded with submissions." ar="قُدّم قبل تسجيل معلومات الموقع مع الطلبات." /></span>}</dd></div> : null}</dl>
     <details data-region="review-document-checklist">
       <summary><L en="Required and optional documents" ar="المستندات المطلوبة والاختيارية" /></summary>
       <div style={{ marginBlockStart: 12 }}>
@@ -51,6 +52,11 @@ export function ReviewFileSummary({ evidence }: { evidence: Evidence }) {
       {evidence.compliance.declarations.map((d, index) => <div key={index} style={{ paddingBlock: 10, borderBlockStart: '1px solid var(--line)' }}><L en={d.en} ar={d.ar} /> — <L en={d.declared ? 'Confirmed by organizer' : 'Not confirmed'} ar={d.declared ? 'أكّده المنظّم' : 'غير مؤكّد'} /></div>)}
     </details>}
   </section>;
+}
+
+/** The Site information the event relied on when it was filed: the frozen snapshot, never the live site record. */
+export function ReviewSiteSnapshot({ evidence }: { evidence: Evidence }) {
+  return evidence.siteSnapshot ? <SiteSnapshotView snapshot={evidence.siteSnapshot} /> : null;
 }
 
 export function ReviewMedicalAnswers({ evidence, level }: { evidence: Evidence; level: Level | null }) {

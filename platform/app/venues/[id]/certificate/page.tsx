@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { VenueRetiredNotice } from '../../../../components/venue/VenueRetiredNotice';
 import Link from "next/link";
 import { currentAccount } from "../../../../lib/auth";
 import { getDb } from "../../../../lib/db";
@@ -62,6 +63,7 @@ export default async function Certificate({
     <main data-region="certificate" style={{ maxWidth: 820, margin: '40px auto', padding: 32 }}>
       <nav data-no-print="" style={{ marginBlockEnd: 24 }}>
         <Link href={owner.account_id === account.id ? `/venues/${id}` : '/ministry/venues'}><L en="Back" ar="رجوع" /></Link>
+        {owner.account_id === account.id ? <div style={{ marginBlockStart: 16 }}><VenueRetiredNotice venueId={id} accountId={account.id} /></div> : null}
       </nav>
       <div style={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
         <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />

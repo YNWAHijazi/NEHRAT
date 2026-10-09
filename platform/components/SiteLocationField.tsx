@@ -3,12 +3,12 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { L } from './L';
 import { LangInput, useDocumentLang } from './OptionText';
-import type { HostingVenueOption } from '../lib/hosting-venues';
-import { matchHostingVenues, textNamesVenue } from '../lib/hosting-venue-match';
+import type { SiteOption } from '../lib/event-site';
+import { matchSites, textNamesSite } from '../lib/site-match';
 
-/** The venue name to write into the location field, in the language the screen is read in. */
-export function venueNameIn(venue: HostingVenueOption, lang: 'en' | 'ar'): string {
-  return lang === 'ar' ? venue.nameAr : venue.nameEn;
+/** The site name to write into the location field, in the language the screen is read in. */
+export function siteNameIn(site: SiteOption, lang: 'en' | 'ar'): string {
+  return lang === 'ar' ? site.nameAr : site.nameEn;
 }
 
 const showAllStyle: React.CSSProperties = {
@@ -36,15 +36,15 @@ const optionRow: React.CSSProperties = {
   textAlign: 'start',
 };
 
-function VenueLine({ venue }: { venue: HostingVenueOption }) {
+function SiteLine({ site }: { site: SiteOption }) {
   const detail = (lang: 'en' | 'ar') =>
-    [lang === 'en' ? venue.districtEn : venue.districtAr, lang === 'en' ? venue.id : `⁦${venue.id}⁩`]
+    [lang === 'en' ? site.municipalityEn : site.municipalityAr, lang === 'en' ? site.id : `⁦${site.id}⁩`]
       .filter(Boolean)
       .join(' · ');
   return (
     <>
       <span style={{ fontSize: '15px', color: 'var(--ink)' }}>
-        <L en={venue.nameEn} ar={venue.nameAr} />
+        <L en={site.nameEn} ar={site.nameAr} />
       </span>
       <span style={{ fontSize: '13px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
         <L en={detail('en')} ar={detail('ar')} />
@@ -54,23 +54,22 @@ function VenueLine({ venue }: { venue: HostingVenueOption }) {
 }
 
 /**
- * "Venue, route, or location", with the registered venues behind it (platform owner,
- * 8 October 2026).
+ * "Venue, route, or location", with the registered Facility/Sites behind it (owner,
+ * 9 October 2026: the event links to the site, no longer to a hosting venue).
  *
- * Typing shows matching registered venues under the field -- an ARIA combobox: arrow
- * keys move, Enter chooses, Escape closes, a click chooses. "Show all registered
- * venues" opens the whole list in a modal dialog with its own search. Choosing a venue
- * in either place writes its name into the field and links the event to it by record
- * id; the link is never made by matching a typed name. Typed text stays typed text: a
- * route or an unregistered place links nothing, and editing the text away from the
- * chosen name removes the link. The link, when there is one, is stated in one line
- * with a Remove control.
+ * Typing shows matching registered sites under the field -- an ARIA combobox: arrow keys
+ * move, Enter chooses, Escape closes, a click chooses. "Show all registered sites" opens the
+ * whole list in a modal dialog with its own search. Choosing a site in either place writes
+ * its name into the field and links the event to it by Site ID; the link is never made by
+ * matching a typed name. Typed text stays typed text: a route or an unregistered place links
+ * nothing, and editing the text away from the chosen name removes the link. The link, when
+ * there is one, is stated in one line with a Remove control. The list shows the name, the
+ * municipality and the Site ID -- never a contact.
  *
- * The component is controlled: the screen holds the text and the link, so the fixed-
- * venue selector further down the form reads and sets the same link -- one source of
- * truth. Inside a plain form, `textName` and `linkName` make both submit with it.
+ * The component is controlled: the screen holds the text and the link. Inside a plain form,
+ * `textName` and `linkName` make both submit with it.
  */
-export function VenueLocationField({
+export function SiteLocationField({
   options,
   text,
   onTextChange,
@@ -83,12 +82,12 @@ export function VenueLocationField({
   textName,
   linkName,
 }: {
-  options: HostingVenueOption[];
+  options: SiteOption[];
   text: string;
   onTextChange: (text: string) => void;
-  /** The linked venue's record id; '' when the event is linked to none. */
+  /** The linked Site ID; '' when the event is linked to none. */
   linkedId: string;
-  onLinkedChange: (venueId: string) => void;
+  onLinkedChange: (siteId: string) => void;
   labelEn: string;
   labelAr: string;
   labelStyle: React.CSSProperties;
@@ -107,16 +106,16 @@ export function VenueLocationField({
   const restoreOverflow = useRef<string | null>(null);
 
   const linked = options.find((o) => o.id === linkedId) ?? null;
-  const suggestions = useMemo(() => (text.trim() === '' ? [] : matchHostingVenues(options, text)), [options, text]);
+  const suggestions = useMemo(() => (text.trim() === '' ? [] : matchSites(options, text)), [options, text]);
   const shown = open && suggestions.length > 0;
   const dialogList = useMemo(
-    () => matchHostingVenues(options, dialogQuery, { includeDistrict: true }),
+    () => matchSites(options, dialogQuery, { includeMunicipality: true }),
     [options, dialogQuery],
   );
 
-  const choose = (venue: HostingVenueOption) => {
-    onTextChange(venueNameIn(venue, lang));
-    onLinkedChange(venue.id);
+  const choose = (site: SiteOption) => {
+    onTextChange(siteNameIn(site, lang));
+    onLinkedChange(site.id);
     setOpen(false);
     setActive(-1);
   };
@@ -124,7 +123,7 @@ export function VenueLocationField({
   const type = (value: string) => {
     onTextChange(value);
     // Editing the text away from the chosen name unlinks; nothing ever links by name.
-    if (linked && !textNamesVenue(value, linked)) onLinkedChange('');
+    if (linked && !textNamesSite(value, linked)) onLinkedChange('');
     setOpen(true);
     setActive(-1);
   };
@@ -167,10 +166,10 @@ export function VenueLocationField({
       e.preventDefault();
       setActive((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
     } else if (e.key === 'Enter') {
-      const venue = shown && active >= 0 ? suggestions[active] : undefined;
-      if (venue) {
+      const site = shown && active >= 0 ? suggestions[active] : undefined;
+      if (site) {
         e.preventDefault();
-        choose(venue);
+        choose(site);
       }
     } else if (e.key === 'Escape') {
       if (shown) {
@@ -204,7 +203,7 @@ export function VenueLocationField({
   );
 
   return (
-    <div data-region="venue-location" style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
+    <div data-region="site-location" style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'end', gap: '8px' }}>
         <div style={{ position: 'relative', flex: '1 1 180px', minWidth: 0 }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -217,8 +216,8 @@ export function VenueLocationField({
             <ul
               id={listboxId}
               role="listbox"
-              data-region="venue-suggestions"
-              aria-label={lang === 'ar' ? 'المواقع المسجّلة المطابقة' : 'Matching registered venues'}
+              data-region="site-suggestions"
+              aria-label={lang === 'ar' ? 'المواقع المسجّلة المطابقة' : 'Matching registered sites'}
               style={{
                 position: 'absolute',
                 insetBlockStart: '100%',
@@ -237,28 +236,28 @@ export function VenueLocationField({
                 boxShadow: '0 8px 24px rgba(0,0,0,.12)',
               }}
             >
-              {suggestions.map((venue, i) => (
+              {suggestions.map((site, i) => (
                 <li
-                  key={venue.id}
+                  key={site.id}
                   id={`${optionPrefix}-${i}`}
                   role="option"
                   aria-selected={i === active}
-                  data-venue-id={venue.id}
+                  data-site-id={site.id}
                   // Keep focus in the field, so choosing does not first blur and close the list.
                   onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => choose(venue)}
+                  onClick={() => choose(site)}
                   onMouseMove={() => setActive(i)}
                   style={{ ...optionRow, background: i === active ? 'var(--surface2)' : 'var(--bg)' }}
                 >
-                  <VenueLine venue={venue} />
+                  <SiteLine site={site} />
                 </li>
               ))}
             </ul>
           ) : null}
         </div>
         {options.length > 0 ? (
-          <button type="button" aria-haspopup="dialog" data-action="show-all-venues" onClick={openDialog} style={showAllStyle}>
-            <L en="Show all registered venues" ar="عرض جميع المواقع المسجّلة" />
+          <button type="button" aria-haspopup="dialog" data-action="show-all-sites" onClick={openDialog} style={showAllStyle}>
+            <L en="Show all registered sites" ar="عرض جميع المواقع المسجّلة" />
           </button>
         ) : null}
       </div>
@@ -267,18 +266,18 @@ export function VenueLocationField({
 
       {linked ? (
         <p
-          data-region="linked-venue"
+          data-region="linked-site"
           style={{ margin: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0 10px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.5 }}
         >
           <span>
             <L
-              en={`Registered venue: ${linked.nameEn} · ${linked.id}`}
+              en={`Registered site: ${linked.nameEn} · ${linked.id}`}
               ar={`الموقع المسجّل: ${linked.nameAr} · ⁦${linked.id}⁩`}
             />
           </span>
           <button
             type="button"
-            data-action="unlink-venue"
+            data-action="unlink-site"
             onClick={() => onLinkedChange('')}
             style={{ minBlockSize: '44px', paddingInline: '8px', border: 0, background: 'transparent', color: 'var(--brand)', fontSize: '13.5px', textDecoration: 'underline', cursor: 'pointer' }}
           >
@@ -290,7 +289,7 @@ export function VenueLocationField({
       <dialog
         ref={dialogRef}
         aria-labelledby={dialogTitleId}
-        data-region="all-venues-dialog"
+        data-region="all-sites-dialog"
         onClose={unlockPage}
         style={{
           inlineSize: 'min(560px, calc(100vw - 32px))',
@@ -305,7 +304,7 @@ export function VenueLocationField({
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <h2 id={dialogTitleId} style={{ margin: 0, fontSize: '20px', fontWeight: 600, letterSpacing: '-.015em' }}>
-            <L en="Registered venues" ar="المواقع المسجّلة" />
+            <L en="Registered sites" ar="المواقع المسجّلة" />
           </h2>
           <LangInput
             type="search"
@@ -316,41 +315,41 @@ export function VenueLocationField({
             onKeyDown={(e) => {
               if (e.key === 'Enter') e.preventDefault();
             }}
-            placeholderEn="Search by name, district or record ID"
-            placeholderAr="ابحثوا بالاسم أو القضاء أو معرّف السجل"
-            labelEn="Search the registered venues"
+            placeholderEn="Search by name, municipality or Site ID"
+            placeholderAr="ابحثوا بالاسم أو البلدية أو معرّف الموقع"
+            labelEn="Search the registered sites"
             labelAr="البحث في المواقع المسجّلة"
-            data-field="allVenuesSearch"
+            data-field="allSitesSearch"
             style={{ ...inputStyle, inlineSize: '100%', boxSizing: 'border-box' }}
           />
           <ul
-            data-region="all-venues-list"
+            data-region="all-sites-list"
             style={{ margin: 0, padding: 0, listStyle: 'none', maxBlockSize: '50vh', overflowY: 'auto', overscrollBehavior: 'contain', border: '1px solid var(--line)', borderRadius: '10px' }}
           >
-            {dialogList.map((venue) => (
-              <li key={venue.id} style={{ borderBlockEnd: '1px solid var(--line)' }}>
+            {dialogList.map((site) => (
+              <li key={site.id} style={{ borderBlockEnd: '1px solid var(--line)' }}>
                 <button
                   type="button"
-                  data-venue-id={venue.id}
-                  aria-pressed={venue.id === linkedId}
+                  data-site-id={site.id}
+                  aria-pressed={site.id === linkedId}
                   onClick={() => {
-                    choose(venue);
+                    choose(site);
                     closeDialog();
                   }}
-                  style={{ ...optionRow, inlineSize: '100%', border: 0, background: venue.id === linkedId ? 'var(--brand-soft)' : 'var(--bg)' }}
+                  style={{ ...optionRow, inlineSize: '100%', border: 0, background: site.id === linkedId ? 'var(--brand-soft)' : 'var(--bg)' }}
                 >
-                  <VenueLine venue={venue} />
+                  <SiteLine site={site} />
                 </button>
               </li>
             ))}
           </ul>
           {dialogList.length === 0 ? (
             <p role="status" style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)' }}>
-              <L en="No registered venue matches the search." ar="لا يوجد موقع مسجّل يطابق البحث." />
+              <L en="No registered site matches the search." ar="لا يوجد موقع مسجّل يطابق البحث." />
             </p>
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'end' }}>
-            <button type="button" data-action="close-all-venues" onClick={closeDialog} style={showAllStyle}>
+            <button type="button" data-action="close-all-sites" onClick={closeDialog} style={showAllStyle}>
               <L en="Close" ar="إغلاق" />
             </button>
           </div>

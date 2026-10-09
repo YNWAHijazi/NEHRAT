@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useEffect, useId, useRef, useState } from 'react';
 import { L } from './L';
 
+/** Two services (owner, 9 October 2026): an event, and a facility/site -- hosting venues register as one. */
 const SERVICES = [
   { href: '/events/new', en: 'Start an event', ar: 'بدء فعالية' },
-  { href: '/venues/new', en: 'Register a hosting venue', ar: 'تسجيل موقع مستضيف للفعاليات' },
-  { href: '/facilities/new', en: 'Register a facility', ar: 'تسجيل منشأة' },
+  { href: '/facilities/new', en: 'Register a facility/site', ar: 'تسجيل منشأة/موقع' },
 ];
 
-/** Three direct choices; requirements are presented in the selected service. */
+/** Two direct choices; requirements are presented in the selected service. */
 export function StartServiceMenu() {
   const [open, setOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);

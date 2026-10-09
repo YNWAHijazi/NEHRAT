@@ -247,7 +247,10 @@ describe('every manifest region names something that exists', () => {
       const m = /^\[([a-z-]+)="([^"]*)"\]$/.exec(sel);
       return m !== null && ALL.includes(`${m[1] as string}="${m[2] as string}"`);
     });
-    expect(withSelector.length).toBeGreaterThanOrEqual(70);
+    // 66, not 70, since 9 October 2026: hosting venue registration is replaced by Facility/Site
+    // registration, and the two retired venue screens (/venues/new, /venues/[id]/change -- both now
+    // redirects) took their four regions with them. Nothing else left the manifest.
+    expect(withSelector.length).toBeGreaterThanOrEqual(66);
     expect(
       literal.length,
       `only ${literal.length} of ${withSelector.length} manifest selectors resolve literally`,
