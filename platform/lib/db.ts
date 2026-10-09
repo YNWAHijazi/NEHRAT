@@ -1379,6 +1379,30 @@ function migrateSites(d: DatabaseSync, addColumn: (table: string, column: string
   addColumn('events', 'site_id', 'site_id TEXT REFERENCES sites(id)');
   // The annual venue baseline an event relied on: the venue's assessment version at the time.
   addColumn('events', 'hosting_venue_version', 'hosting_venue_version INTEGER');
+  // FACILITY/SITE (Latest revision, 9 October 2026): the Site is the one place record. Its basic
+  // infrastructure -- reusable by events held there, never a regulatory blocker -- is one answer
+  // set per facility registration; its documents (the layout map, optional supporting evidence)
+  // are rows with their own metadata. A third-party document is supporting evidence only.
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_infrastructure (
+    facility_id TEXT PRIMARY KEY REFERENCES facilities(id),
+    answers TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT '',
+    updated_by INTEGER REFERENCES accounts(id)
+  ); CREATE TABLE IF NOT EXISTS facility_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    purpose TEXT NOT NULL CHECK (purpose IN ('layoutMap','evidence')),
+    doc_type TEXT NOT NULL DEFAULT '',
+    issuer TEXT NOT NULL DEFAULT '',
+    issue_date TEXT NOT NULL DEFAULT '',
+    review_date TEXT NOT NULL DEFAULT '',
+    file_name TEXT NOT NULL,
+    content_type TEXT NOT NULL DEFAULT '',
+    bytes BLOB,
+    uploaded_by INTEGER REFERENCES accounts(id),
+    uploaded_at TEXT NOT NULL DEFAULT '',
+    removed_at TEXT
+  ); CREATE INDEX IF NOT EXISTS facility_documents_facility ON facility_documents(facility_id, purpose);`);
   // An event linked to a registered venue stands on that venue's site and records the venue
   // baseline it relied on -- the venue's latest certified annual assessment, or none yet. One
   // trigger for every path that sets the link (create, edit, reapply, the location field).
