@@ -7,7 +7,7 @@ import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { eventFor, unreadCountFor, venueRouteFor, municipalitiesFor } from '../../../../lib/queries';
 import { getDb } from '../../../../lib/db';
 import { hostingVenueOptions } from '../../../../lib/hosting-venues';
-import { HostingVenuePicker } from '../../../../components/HostingVenuePicker';
+import { EventPlaceFields } from './EventPlaceFields';
 
 /**
  * Edit the descriptive details. Figures the classification depends on are NOT
@@ -32,12 +32,13 @@ export default async function EditEventPage({
   // server action refuses too; this keeps the screen from offering what it will refuse.
   if (event.filed) redirect(`/events/${id}`);
   const { error } = await searchParams;
-  // The hosting venue is edited here only for an event at a fixed venue that hosts events
-  // repeatedly; whether it is one changes through the assessment form, not this screen.
+  // The registered venue the event is linked to is edited from the location field on every
+  // event; the fixed-venue selector shows only for an event at a fixed venue that hosts
+  // events repeatedly, and whether it is one changes through the assessment form.
   const fixedVenue = getDb()
     .prepare(`SELECT recurring_fixed_venue, hosting_venue_id FROM events WHERE id = ? AND account_id = ?`)
     .get(id, account.id) as { recurring_fixed_venue: number; hosting_venue_id: string | null };
-  const hostingVenues = fixedVenue.recurring_fixed_venue === 1 ? hostingVenueOptions(account.isDemo) : [];
+  const hostingVenues = hostingVenueOptions(account.isDemo);
 
   const label: React.CSSProperties = { fontSize: '12.5px', color: 'var(--muted)', display: 'block', marginBlockEnd: 6 };
   const input: React.CSSProperties = { width: '100%', padding: '10px 12px', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 14 };
@@ -80,19 +81,15 @@ export default async function EditEventPage({
               <input name="startDate" type="date" required defaultValue={event.startDate ?? ''} style={{ ...input, fontVariantNumeric: 'tabular-nums' }} /></label>
             <label><span style={label}><L en="End date" ar="تاريخ الانتهاء" /></span>
               <input name="endDate" type="date" required defaultValue={event.endDate ?? ''} style={{ ...input, fontVariantNumeric: 'tabular-nums' }} /></label>
-            <label style={{ gridColumn: '1 / -1' }}><span style={label}><L en="Venue, route, or location" ar="الموقع أو المسار أو المكان" /></span>
-              <input name="venueRoute" defaultValue={venueRouteFor(account.id, id)} style={input} /></label>
-            <label style={{ gridColumn: '1 / -1' }}><span style={label}><L en="Municipality or municipalities" ar="البلدية أو البلديات" /></span>
-              <input name="municipalities" defaultValue={municipalitiesFor(account.id, id)} style={input} /></label>
-            {fixedVenue.recurring_fixed_venue === 1 ? (
-              <div style={{ gridColumn: '1 / -1' }}>
-                <HostingVenuePicker
-                  options={hostingVenues}
-                  name="hostingVenueId"
-                  defaultValue={hostingVenues.some((v) => v.id === fixedVenue.hosting_venue_id) ? (fixedVenue.hosting_venue_id ?? '') : ''}
-                />
-              </div>
-            ) : null}
+            <EventPlaceFields
+              options={hostingVenues}
+              initialText={venueRouteFor(account.id, id)}
+              initialLinkedId={fixedVenue.hosting_venue_id ?? ''}
+              initialMunicipalities={municipalitiesFor(account.id, id)}
+              fixedVenue={fixedVenue.recurring_fixed_venue === 1}
+              labelStyle={label}
+              inputStyle={input}
+            />
             <div style={{ gridColumn: '1 / -1' }}>
               <button type="submit" style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}>
                 <L en="Save the details" ar="حفظ التفاصيل" />

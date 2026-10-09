@@ -1,9 +1,10 @@
 'use client';
 
-import { OptionText } from '../../../components/OptionText';
+import { OptionText, useDocumentLang } from '../../../components/OptionText';
 import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
 import { HostingVenuePicker } from '../../../components/HostingVenuePicker';
+import { VenueLocationField, venueNameIn } from '../../../components/VenueLocationField';
 import type { HostingVenueOption } from '../../../lib/hosting-venues';
 
 
@@ -125,12 +126,22 @@ export function AssessmentForm({
     expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
     previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
-  // A stored choice that is no longer listable (the venue was archived) opens unset.
+  // THE ONE LINK to a registered venue: set from the suggestions under the location field,
+  // from "Show all registered venues", or from the fixed-venue selector, and read by all
+  // three. A stored link that is no longer listable (the venue was archived) opens unset.
   const [hostingVenueId, setHostingVenueId] = useState(
     hostingVenues.some((v) => v.id === draft?.partA.hostingVenueId) ? (draft?.partA.hostingVenueId ?? '') : '',
   );
+  const lang = useDocumentLang();
   const setA = (k: keyof typeof partA, v: string | boolean) =>
     setPartA((prev) => ({ ...prev, [k]: v }));
+  // Choosing in the fixed-venue selector writes the venue's name into the location field
+  // too, so both places read the same venue.
+  const pickFromSelector = (venueId: string) => {
+    setHostingVenueId(venueId);
+    const venue = hostingVenues.find((v) => v.id === venueId);
+    if (venue) setA('venueRoute', venueNameIn(venue, lang));
+  };
 
   const initialType = EVENT_TYPES.find((type) => [type.key, type.en, type.ar].includes(draft?.partA.eventType ?? ''))?.key
     ?? (stored ? typeFromInputs(stored.inputs) : '');
@@ -245,7 +256,8 @@ export function AssessmentForm({
           expectedStaff: partA.expectedStaff === '' ? null : Number(partA.expectedStaff),
           previousEdition: partA.previousEdition,
           recurringFixedVenue: partA.recurringFixedVenue,
-          hostingVenueId: partA.recurringFixedVenue && hostingVenueId !== '' ? hostingVenueId : null,
+          // The link stands on its own: the fixed-venue box describes the event, not the link.
+          hostingVenueId: hostingVenueId !== '' ? hostingVenueId : null,
         },
         answers: answers as DomainAnswers,
         inputs,
@@ -300,9 +312,17 @@ export function AssessmentForm({
             <Field labelEn="Closing time" labelAr="وقت الإغلاق">
               <input type="time" step={300} value={partA.closingTime} onChange={(e) => { closingTimeEdited.current = Boolean(e.target.value); setA('closingTime', e.target.value || partA.openingTime); }} style={inputStyle} />
             </Field>
-            <Field labelEn="Venue, route, or location" labelAr="الموقع أو المسار أو مكان الانعقاد">
-              <input value={partA.venueRoute} onChange={(e) => setA('venueRoute', e.target.value)} style={inputStyle} />
-            </Field>
+            <VenueLocationField
+              options={hostingVenues}
+              text={partA.venueRoute}
+              onTextChange={(text) => setA('venueRoute', text)}
+              linkedId={hostingVenueId}
+              onLinkedChange={setHostingVenueId}
+              labelEn="Venue, route, or location"
+              labelAr="الموقع أو المسار أو مكان الانعقاد"
+              labelStyle={fieldLabel}
+              inputStyle={inputStyle}
+            />
             <Field labelEn="Municipality or municipalities" labelAr="البلدية أو البلديات">
               <input value={partA.municipalities} onChange={(e) => setA('municipalities', e.target.value)} style={inputStyle} />
             </Field>
@@ -405,7 +425,7 @@ export function AssessmentForm({
                 </button>
                 {/* The registered venue, right under the box that says the event is at one. */}
                 {key === 'recurringFixedVenue' && on ? (
-                  <HostingVenuePicker options={hostingVenues} value={hostingVenueId} onChange={setHostingVenueId} />
+                  <HostingVenuePicker options={hostingVenues} value={hostingVenueId} onChange={pickFromSelector} />
                 ) : null}
                 </div>
               );
