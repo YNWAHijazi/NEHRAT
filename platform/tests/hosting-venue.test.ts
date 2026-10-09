@@ -15,7 +15,8 @@ vi.mock('../lib/auth', () => ({ currentAccount: async () => session.account }));
 vi.mock('next/navigation', () => ({ redirect: (url: string) => { throw new Error(`redirect:${url}`); } }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 import { getDb } from '../lib/db';
-import { hostingVenueForEvent, hostingVenueOptions, isListableHostingVenue, resolveHostingVenue } from '../lib/hosting-venues';
+import { eventsAtVenuesOf, hostingVenueForEvent, hostingVenueOptions, isListableHostingVenue, resolveHostingVenue } from '../lib/hosting-venues';
+import { matchHostingVenues, textNamesVenue } from '../lib/hosting-venue-match';
 import { createEventAction, editEventDetailsAction, updateDraftEventAction, type AssessmentSubmission } from '../app/actions';
 
 const folder = mkdtempSync(join(tmpdir(), 'moph-hosting-venue-'));
@@ -83,10 +84,36 @@ describe('which venues are listable', () => {
     expect(isListableHostingVenue('VN-0900', false)).toBe(true);
   });
 
-  it('stores nothing when the event is not at a fixed venue, or no venue is chosen', () => {
-    expect(resolveHostingVenue(false, 'VN-9999', true)).toEqual({ ok: true, venueId: null });
-    expect(resolveHostingVenue(true, '', true)).toEqual({ ok: true, venueId: null });
-    expect(resolveHostingVenue(true, null, false)).toEqual({ ok: true, venueId: null });
+  it('stores nothing when no venue is chosen, and refuses an unlistable id whatever the tick says', () => {
+    expect(resolveHostingVenue('', true)).toEqual({ ok: true, venueId: null });
+    expect(resolveHostingVenue('  ', true)).toEqual({ ok: true, venueId: null });
+    expect(resolveHostingVenue(null, false)).toEqual({ ok: true, venueId: null });
+    expect(resolveHostingVenue(undefined, false)).toEqual({ ok: true, venueId: null });
+    // The link no longer rides on the fixed-venue tick, so an unlistable id is refused on its own.
+    expect(resolveHostingVenue('VN-9999', true)).toEqual({ ok: false });
+    expect(resolveHostingVenue('VN-0032', false)).toEqual({ ok: false });
+    expect(resolveHostingVenue('VN-0032', true)).toEqual({ ok: true, venueId: 'VN-0032' });
+  });
+});
+
+describe('matching a typed query against the registered venues', () => {
+  const venues = [
+    { id: 'VN-0032', nameEn: 'Forum de Beyrouth', nameAr: 'فوروم دو بيروت', districtEn: 'Beirut', districtAr: 'بيروت' },
+    { id: 'VN-0028', nameEn: 'Casino Hall', nameAr: 'قاعة الكازينو', districtEn: 'Keserwan', districtAr: 'كسروان' },
+  ];
+  it('matches the name in either language and the record id, not the district', () => {
+    expect(matchHostingVenues(venues, 'forum').map((v) => v.id)).toEqual(['VN-0032']);
+    expect(matchHostingVenues(venues, 'الكازينو').map((v) => v.id)).toEqual(['VN-0028']);
+    expect(matchHostingVenues(venues, 'vn-0028').map((v) => v.id)).toEqual(['VN-0028']);
+    expect(matchHostingVenues(venues, 'Keserwan')).toEqual([]);
+    expect(matchHostingVenues(venues, 'Keserwan', { includeDistrict: true }).map((v) => v.id)).toEqual(['VN-0028']);
+    expect(matchHostingVenues(venues, 'Jounieh old harbour')).toEqual([]);
+  });
+  it('keeps a link only while the text still reads as the linked venue’s name', () => {
+    expect(textNamesVenue('Forum de Beyrouth', venues[0]!)).toBe(true);
+    expect(textNamesVenue(' فوروم دو بيروت ', venues[0]!)).toBe(true);
+    expect(textNamesVenue('Forum de Beyrouth, hall B', venues[0]!)).toBe(false);
+    expect(textNamesVenue('', venues[0]!)).toBe(false);
   });
 });
 
@@ -107,10 +134,24 @@ describe('the event actions validate the choice on the server', () => {
     // Editing the draft carries the same refusal and keeps the stored choice.
     expect(await updateDraftEventAction(eventId, payload('VN-0900'))).toEqual({ error: 'hosting-venue' });
     expect(stored(eventId)).toBe('VN-0032');
-    // Unticking the box clears the venue.
+    // Unticking the box does not remove the link: the tick describes the event, not the link.
     expect(await updateDraftEventAction(eventId, payload('VN-0032', false))).toEqual({ eventId });
+    expect(stored(eventId)).toBe('VN-0032');
+    expect(hostingVenueForEvent(eventId)).toEqual({ id: 'VN-0032', nameEn: 'Forum de Beyrouth', nameAr: 'فوروم دو بيروت' });
+    // Removing the link clears it.
+    expect(await updateDraftEventAction(eventId, payload(null, false))).toEqual({ eventId });
     expect(stored(eventId)).toBeNull();
     expect(hostingVenueForEvent(eventId)).toBeNull();
+  });
+
+  it('a venue chosen from the location field links an event that is not ticked as at a fixed venue', async () => {
+    asDemoOrganizer();
+    const created = await createEventAction(payload('VN-0032', false));
+    const eventId = (created as { eventId: string }).eventId;
+    expect(stored(eventId)).toBe('VN-0032');
+    expect(hostingVenueForEvent(eventId)?.id).toBe('VN-0032');
+    // The server refusal does not depend on the tick either.
+    expect(await createEventAction(payload('VN-0900', false))).toEqual({ error: 'hosting-venue' });
   });
 
   it('a real organizer stores a real venue and is refused a demonstration one', async () => {
@@ -130,5 +171,126 @@ describe('the event actions validate the choice on the server', () => {
     form.set('hostingVenueId', '');
     await expect(editEventDetailsAction(eventId, form)).rejects.toThrow('notice=details-saved');
     expect(stored(eventId)).toBeNull();
+  });
+});
+
+describe('events at your venues: the venue owner’s dashboard list', () => {
+  const EVENT_FIELDS = ['id', 'nameEn', 'nameAr', 'startDate', 'endDate', 'level', 'statusEn', 'statusAr'];
+  let otherDemo = 0;
+  let otherReal = 0;
+  let demoOwner = 0;
+  beforeAll(() => {
+    const db = getDb();
+    demoOwner = (db.prepare(`SELECT id FROM accounts WHERE login = 'test_organizer'`).get() as { id: number }).id;
+    otherDemo = (db.prepare(`SELECT id FROM accounts WHERE login = 'test_organizer_pending'`).get() as { id: number }).id;
+    otherReal = Number(
+      db.prepare(`INSERT INTO accounts (login, display_name, role, is_demo) VALUES ('real_org_two', 'Second real organizer', 'organizer', 0)`).run().lastInsertRowid,
+    );
+    db.prepare(
+      `INSERT INTO venues (id, account_id, name_en, name_ar, category, is_demo) VALUES ('VN-0950', ?, 'Other Hall', 'قاعة أخرى', 'hall', 1)`,
+    ).run(otherDemo);
+    const insert = db.prepare(
+      `INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date, venue_route, municipalities,
+         hosting_venue_id, lifecycle, archived_at, filed, is_demo)
+       VALUES (?, ?, ?, ?, ?, ?, 'Private route note', 'Private municipality note', ?, ?, ?, ?, ?)`,
+    );
+    // Shown: another demonstration organizer's events at the owner's venue, filed and not.
+    insert.run('EV-9001', otherDemo, 'Linked concert', 'حفل مرتبط', '2026-12-05', '2026-12-06', 'VN-0032', 'active', null, 1, 1);
+    insert.run('EV-9002', otherDemo, 'Linked fair', 'معرض مرتبط', '2026-11-01', '2026-11-01', 'VN-0032', 'postponed', null, 0, 1);
+    // Not shown: the owner's own event, a cancelled one, a shelved one, a concluded one,
+    // an event at someone else's venue, and an event across the demonstration line.
+    insert.run('EV-9003', demoOwner, 'Own event', 'فعالية خاصة', '2026-12-05', '2026-12-05', 'VN-0032', 'active', null, 0, 1);
+    insert.run('EV-9004', otherDemo, 'Cancelled', 'ملغاة', '2026-12-05', '2026-12-05', 'VN-0032', 'cancelled', null, 0, 1);
+    insert.run('EV-9005', otherDemo, 'Shelved', 'مؤرشفة', '2026-12-05', '2026-12-05', 'VN-0032', 'active', '2026-08-01', 0, 1);
+    insert.run('EV-9006', otherDemo, 'Concluded', 'منتهية', '2025-01-01', '2025-01-01', 'VN-0032', 'active', null, 1, 1);
+    insert.run('EV-9007', demoOwner, 'Elsewhere', 'في مكان آخر', '2026-12-05', '2026-12-05', 'VN-0950', 'active', null, 0, 1);
+    insert.run('EV-9008', otherReal, 'Real event at demo venue', 'فعالية حقيقية', '2026-12-05', '2026-12-05', 'VN-0032', 'active', null, 0, 0);
+    // The real side: a real organizer's event at the real venue.
+    insert.run('EV-9009', otherReal, 'Real linked', 'فعالية حقيقية مرتبطة', '2026-12-10', '2026-12-10', 'VN-0900', 'active', null, 0, 0);
+    db.prepare(
+      `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version, representative, position)
+       VALUES ('EV-9001', 1, ?, ?, '{}', 'test', 'Private Representative', 'Director')`,
+    ).run(
+      JSON.stringify([2, 2, 1, 0, 1, 1, 1, 1, 0]),
+      JSON.stringify({ expectedMaxSimultaneousAttendance: 3000, eventDisciplines: [], courseDistanceKm: null, venueLicensedCapacity: null, venueIsNightclubOrDanceVenue: false }),
+    );
+  });
+
+  it('lists only other organizers’ live events at the owner’s venues, grouped by venue', () => {
+    const groups = eventsAtVenuesOf(demoOwner, true);
+    expect(groups.map((g) => g.venueId)).toEqual(['VN-0032']);
+    expect(groups[0]!.events.map((e) => e.id).sort()).toEqual(['EV-9001', 'EV-9002']);
+    // VN-0950 belongs to the other organizer, who sees the owner's event there and nothing at VN-0032.
+    expect(eventsAtVenuesOf(otherDemo, true)).toEqual([
+      { venueId: 'VN-0950', venueNameEn: 'Other Hall', venueNameAr: 'قاعة أخرى', events: [expect.objectContaining({ id: 'EV-9007' })] },
+    ]);
+    // The real owner sees the real event at the real venue; the demonstration world is not there.
+    const real = eventsAtVenuesOf(realAccountId, false);
+    expect(real.map((g) => g.venueId)).toEqual(['VN-0900']);
+    expect(real[0]!.events.map((e) => e.id)).toEqual(['EV-9009']);
+    // An account with no venue sees nothing.
+    expect(eventsAtVenuesOf(otherReal, false)).toEqual([]);
+  });
+
+  it('returns only the name, dates, record id, derived level and plain status', () => {
+    const groups = eventsAtVenuesOf(demoOwner, true);
+    for (const g of groups) {
+      expect(Object.keys(g).sort()).toEqual(['events', 'venueId', 'venueNameAr', 'venueNameEn']);
+      for (const e of g.events) expect(Object.keys(e).sort()).toEqual([...EVENT_FIELDS].sort());
+    }
+    const concert = groups[0]!.events.find((e) => e.id === 'EV-9001')!;
+    expect(concert).toEqual({
+      id: 'EV-9001', nameEn: 'Linked concert', nameAr: 'حفل مرتبط', startDate: '2026-12-05', endDate: '2026-12-06',
+      level: concert.level, statusEn: 'In process', statusAr: 'قيد المعالجة',
+    });
+    expect([1, 2, 3]).toContain(concert.level);
+    const fair = groups[0]!.events.find((e) => e.id === 'EV-9002')!;
+    expect(fair.level).toBeNull();
+    expect(fair.statusEn).toBe('Postponed');
+    // Nothing about the organizer, the place text, the answers or the certification.
+    expect(JSON.stringify(groups)).not.toMatch(/Private|test_organizer_pending|S\. Khoury|R\. Haddad|3000/);
+  });
+
+  it('selects only those columns in SQL, not a wide row trimmed at render', () => {
+    const db = getDb();
+    const seen: string[] = [];
+    const prepare = db.prepare.bind(db);
+    const spy = vi.spyOn(db, 'prepare').mockImplementation((sql: string) => {
+      seen.push(sql);
+      return prepare(sql);
+    });
+    try {
+      eventsAtVenuesOf(demoOwner, true);
+    } finally {
+      spy.mockRestore();
+    }
+    const listSql = seen.find((s) => /JOIN venues v ON v\.id = e\.hosting_venue_id/.test(s) && /v\.account_id = \?/.test(s));
+    expect(listSql).toBeDefined();
+    const selected = listSql!
+      .slice(listSql!.indexOf('SELECT') + 'SELECT'.length, listSql!.indexOf('FROM'))
+      .split(',')
+      .map((c) => c.trim().split(/\s+AS\s+/i).pop()!.replace(/^[ev]\./, ''));
+    expect(selected.sort()).toEqual(
+      ['archived_at', 'end_date', 'filed', 'id', 'lifecycle', 'name_ar', 'name_en', 'start_date', 'venue_id', 'venue_name_ar', 'venue_name_en'].sort(),
+    );
+  });
+});
+
+describe('the site an event stands on (Hosting Venue Registration, 8 October 2026)', () => {
+  it('a linked event takes the venue site and its certified baseline; unlinking clears both', () => {
+    const db = getDb();
+    const venue = db.prepare(`SELECT site_id FROM venues WHERE id = 'VN-0032'`).get() as { site_id: string };
+    expect(venue.site_id).toMatch(/^SITE-\d{6}$/);
+    const certified = (db.prepare(`SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = 'VN-0032' AND certificate_issued = 1`).get() as { v: number }).v;
+    const id = (db.prepare(`SELECT id FROM events WHERE is_demo = 1 AND hosting_venue_id IS NULL LIMIT 1`).get() as { id: string }).id;
+    const row = () => db.prepare('SELECT site_id, hosting_venue_version FROM events WHERE id = ?').get(id) as { site_id: string | null; hosting_venue_version: number | null };
+    try {
+      db.prepare(`UPDATE events SET hosting_venue_id = 'VN-0032' WHERE id = ?`).run(id);
+      expect(row()).toEqual({ site_id: venue.site_id, hosting_venue_version: certified });
+      db.prepare('UPDATE events SET hosting_venue_id = NULL WHERE id = ?').run(id);
+      expect(row()).toEqual({ site_id: null, hosting_venue_version: null });
+    } finally {
+      db.prepare('UPDATE events SET hosting_venue_id = NULL WHERE id = ?').run(id);
+    }
   });
 });

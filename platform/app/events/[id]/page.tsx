@@ -1,4 +1,5 @@
 import { EventWorkspaceHeader } from '../../../components/EventWorkspaceHeader';
+import { accountContact } from '../../../lib/account-contact';
 import { InfoNote } from '../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -394,6 +395,7 @@ export default async function EventRecordPage({
                   {level === 1 ? <MedicalArrangementsSummary instances={record.instances} /> : null}
                 <FinalReview
                   eventId={id}
+                  me={accountContact(account.id)}
                   level={level}
                   remaining={record.blockers.map(review)}
                   optional={record.instances.filter((i) => i.group === 'recommended' && i.state !== 'complete').map(review)}

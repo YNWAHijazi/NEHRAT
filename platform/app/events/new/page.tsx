@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { accountContact } from '../../../lib/account-contact';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { unreadCountFor } from '../../../lib/queries';
@@ -17,7 +18,7 @@ export default async function NewEventPage() {
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" data-region="assessment" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
-        <AssessmentForm domains={[...DOMAINS]} conditions={[...MINIMUM_CONDITIONS]} bands={[...BANDS]} maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} organizerName={organization ? { en: organization.nameEn, ar: organization.nameAr } : null} hostingVenues={hostingVenueOptions(account.isDemo)} />
+        <AssessmentForm domains={[...DOMAINS]} conditions={[...MINIMUM_CONDITIONS]} bands={[...BANDS]} maxScore={DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN} organizerName={organization ? { en: organization.nameEn, ar: organization.nameAr } : null} hostingVenues={hostingVenueOptions(account.isDemo)} representativeDefault={accountContact(account.id).name} />
       </main>
     </>
   );

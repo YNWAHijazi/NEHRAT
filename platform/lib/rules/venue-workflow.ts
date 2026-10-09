@@ -43,7 +43,21 @@ export function venueStatusForDecision(decision: 'satisfied' | 'revision' | 'inc
 
 /* ---------------- the venue workspace: checks, next step, progress ---------------- */
 
-export type VenueCheckTarget = 'details' | 'assessment' | 'team' | 'requirements' | 'fee';
+/**
+ * Hosting Venue Registration, revised logic (8 October 2026): venue profile -> annual
+ * assessment -> venue infrastructure and access -> linked PAD and AED information ->
+ * review and submit -> annual venue certificate. The operator fills every step; no EMS
+ * agency, Medical Director or medical plan is part of a venue registration.
+ */
+export const VENUE_PAD_KEY = 'V7';
+
+/** The operator's declaration, as signed on Submit and shown read-only once filed. */
+export const VENUE_DECLARATION = {
+  en: 'I confirm these details and documents are accurate and cover the venue’s routine operations.',
+  ar: 'أؤكّد أن هذه البيانات والمستندات صحيحة وتشمل التشغيل الاعتيادي للموقع.',
+};
+
+export type VenueCheckTarget = 'details' | 'assessment' | 'requirements' | 'fee';
 export interface VenueCheck { key: string; en: string; ar: string; done: boolean; target: VenueCheckTarget }
 
 export interface VenuePackageFacts {
@@ -53,15 +67,8 @@ export interface VenuePackageFacts {
   assessmentDone: boolean;
   level: Level | null;
   assessmentVersion: number | null;
-  pendingInvitations: readonly { name: string; token: string }[];
-  /** Whether any EMS agency or Director has been invited (nominated or confirmed). */
-  medicalTeamLinked?: boolean;
-  /**
-   * The resolver's pre-event rows for this venue, by catalogue key. clinical: nobody on
-   * the organizer's side can enter it. awaitingInvitation: the row completes from an
-   * invitation reply, so there is nothing on it for the organizer to do but wait.
-   */
-  requirements: readonly { key: string; en: string; ar: string; optional: boolean; done: boolean; clinical: boolean; awaitingInvitation?: boolean }[];
+  /** The resolver's rows for this venue, by catalogue key. */
+  requirements: readonly { key: string; en: string; ar: string; optional: boolean; done: boolean }[];
   fee: { amount: string; currency: string; paid: boolean } | null;
   submittedAt: string | null;
   validUntil: string | null;
@@ -74,116 +81,93 @@ export interface VenuePackageFacts {
  */
 export function venueSubmissionChecks(f: VenuePackageFacts): { required: VenueCheck[]; optional: VenueCheck[]; remaining: number; requirementsRemaining: number; canSubmit: boolean } {
   const required: VenueCheck[] = [
-    { key: 'details', en: 'Venue details and map pin', ar: 'تفاصيل الموقع وعلامة الخريطة', done: f.detailsDone, target: 'details' },
+    { key: 'details', en: 'Venue profile and map pin', ar: 'ملف الموقع وعلامة الخريطة', done: f.detailsDone, target: 'details' },
     { key: 'assessment', en: 'Annual assessment', ar: 'التقييم السنوي', done: f.assessmentDone, target: 'assessment' },
-    ...f.pendingInvitations.map((i) => ({ key: i.token, en: `Response from ${i.name}`, ar: `ردّ ${i.name}`, done: false, target: 'team' as const })),
     ...f.requirements.filter((r) => !r.optional).map((r) => ({ key: r.key, en: r.en, ar: r.ar, done: r.done, target: 'requirements' as const })),
     ...(f.fee ? [{ key: 'fee', en: `Fee: ${f.fee.amount} ${f.fee.currency}`, ar: `الرسم: ${f.fee.amount} ${f.fee.currency}`, done: f.fee.paid, target: 'fee' as const }] : []),
   ];
   const optional: VenueCheck[] = f.requirements.filter((r) => r.optional).map((r) => ({ key: r.key, en: r.en, ar: r.ar, done: r.done, target: 'requirements' as const }));
   const remaining = required.filter((c) => !c.done).length;
-  // The requirements stage's own count: the rows and the replies they wait on, not details or the fee.
-  // A package the Ministry holds or has accepted owes nothing more in this cycle.
-  const requirementsRemaining = f.editable ? required.filter((c) => (c.target === 'requirements' || c.target === 'team') && !c.done).length : 0;
+  // The requirement steps' own count, not details or the fee. A package the Ministry holds or has accepted owes nothing more in this cycle.
+  const requirementsRemaining = f.editable ? required.filter((c) => c.target === 'requirements' && !c.done).length : 0;
   return { required, optional, remaining, requirementsRemaining, canSubmit: f.editable && remaining === 0 };
 }
 
 /**
  * The one task the venue record leads with; null once the package is with the Ministry
  * or done. href is an edit screen under the venue ('details', 'assessment') or an
- * anchor on the record page itself ('#req-B4', '#final-review').
+ * anchor on the record page itself ('#req-V2', '#final-review').
  */
 export function venueNextAction(f: VenuePackageFacts): NextStep | null {
   if (!f.editable) return null;
   const returned = f.status === 'revision' || f.status === 'incomplete';
   if (!f.detailsDone) {
     return { kind: 'details', href: 'details', tone: 'accent',
-      titleEn: 'Complete the venue details', titleAr: 'إكمال تفاصيل الموقع',
+      titleEn: 'Complete the venue profile', titleAr: 'إكمال ملف الموقع',
       bodyEn: 'Add the responsible person, the district and the map pin.', bodyAr: 'أضيفوا الشخص المسؤول والقضاء وعلامة الخريطة.',
-      buttonEn: 'Open details', buttonAr: 'فتح التفاصيل' };
+      buttonEn: 'Open the profile', buttonAr: 'فتح الملف' };
   }
   if (!f.assessmentDone) {
     return { kind: 'assessment', href: 'assessment', tone: 'accent',
-      titleEn: 'Complete the assessment', titleAr: 'إكمال التقييم',
-      bodyEn: 'Assess one routine operating session. The level sets the requirements.', bodyAr: 'قيّموا جلسة تشغيل اعتيادية واحدة. يحدّد المستوى المتطلبات.',
+      titleEn: 'Complete the annual assessment', titleAr: 'إكمال التقييم السنوي',
+      bodyEn: 'Assess one routine operating session. The level is the venue’s routine baseline.', bodyAr: 'قيّموا جلسة تشغيل اعتيادية واحدة. المستوى هو خط الأساس الاعتيادي للموقع.',
       buttonEn: 'Open the assessment', buttonAr: 'فتح التقييم' };
   }
   const { remaining } = venueSubmissionChecks(f);
-  const mine = f.requirements.filter((r) => !r.optional && !r.done && !r.clinical && !r.awaitingInvitation);
-  const yours = mine.length;
-  const medical = f.requirements.filter((r) => !r.optional && !r.done && r.clinical).length;
-  // The medical items cannot start until someone is invited to do them, so that comes first.
-  if (medical > 0 && !f.medicalTeamLinked) {
-    return { kind: 'team', href: '#req-B7', tone: 'accent',
-      titleEn: 'Invite your EMS agency', titleAr: 'ادعوا جهة الإسعاف',
-      bodyEn: `The medical team completes ${medical} of the ${medical + yours} remaining requirements. Invite the agency on the EMS and ambulance row.`,
-      bodyAr: `يستكمل الفريق الطبي ${medical} من أصل ${medical + yours} من المتطلبات المتبقية. ادعوا الجهة من صف ترتيبات الإسعاف.`,
-      buttonEn: 'Open EMS and ambulance arrangements', buttonAr: 'فتح ترتيبات الإسعاف' };
-  }
-  if (yours > 0) {
-    return { kind: 'requirements', href: `#req-${mine[0]!.key}`, tone: 'accent',
-      titleEn: returned ? 'Update the requirements and resubmit' : yours === 1 ? 'Complete your 1 requirement' : `Complete your ${yours} requirements`,
-      titleAr: returned ? 'حدّثوا المتطلبات وأعيدوا التقديم' : `أكملوا ${arabicCount(yours, { one: 'متطلبكم الوحيد', two: 'متطلبَيكم', few: 'من متطلباتكم', many: 'من متطلباتكم' })}`,
-      bodyEn: medical > 0 ? `Your medical team completes the other ${medical}.` : 'Then review and submit at the foot of this page.',
-      bodyAr: medical > 0 ? `يستكمل فريقكم الطبي المتطلبات الأخرى (${medical}).` : 'ثم راجعوا وقدّموا في أسفل هذه الصفحة.',
-      buttonEn: `Open ${mine[0]!.en}`, buttonAr: `فتح ${mine[0]!.ar}` };
-  }
-  if (f.pendingInvitations.length > 0) {
-    return { kind: 'waitingOnOthers', href: '#req-B7', tone: 'accent',
-      titleEn: 'Waiting for your medical team to reply', titleAr: 'بانتظار ردّ فريقكم الطبي',
-      bodyEn: 'Invitations with no reply hold up the submission. Withdraw one to invite someone else.', bodyAr: 'الدعوات التي لم يُرد عليها تؤخّر التقديم. اسحبوا الدعوة لدعوة طرف آخر.',
-      buttonEn: 'View the invitations', buttonAr: 'عرض الدعوات' };
-  }
-  if (medical > 0) {
-    const first = f.requirements.find((r) => !r.optional && !r.done && r.clinical)!;
-    return { kind: 'waitingOnOthers', href: `#req-${first.key}`, tone: 'accent',
-      titleEn: 'Medical items pending', titleAr: 'البنود الطبية قيد الإنجاز',
-      bodyEn: 'Your Medical Director or EMS agency completes the remaining items on this page.', bodyAr: 'يستكمل المدير الطبي أو جهة الإسعاف البنود المتبقية في هذه الصفحة.',
-      buttonEn: 'View the items', buttonAr: 'عرض البنود' };
+  const open = f.requirements.filter((r) => !r.optional && !r.done);
+  if (open.length > 0) {
+    const n = open.length;
+    return { kind: 'requirements', href: `#req-${open[0]!.key}`, tone: 'accent',
+      titleEn: returned ? 'Update the venue information and resubmit' : n === 1 ? 'Complete 1 step' : `Complete ${n} steps`,
+      titleAr: returned ? 'حدّثوا معلومات الموقع وأعيدوا التقديم' : `أكملوا ${arabicCount(n, { one: 'خطوة واحدة', two: 'خطوتين', few: 'خطوات', many: 'خطوة' })}`,
+      bodyEn: 'Then review and submit at the foot of this page.', bodyAr: 'ثم راجعوا وقدّموا في أسفل هذه الصفحة.',
+      buttonEn: `Open ${open[0]!.en}`, buttonAr: `فتح ${open[0]!.ar}` };
   }
   if (remaining > 0) {
     return { kind: 'awaitingPayment', href: '#final-review', tone: 'accent',
       titleEn: 'Awaiting payment', titleAr: 'بانتظار الدفع',
-      bodyEn: 'Everything the level requires is in place. Payment must be recorded before you can submit.', bodyAr: 'كل ما يتطلبه المستوى مستوفى. يجب تسجيل الدفع قبل التقديم.',
+      bodyEn: 'Payment must be recorded before you can submit.', bodyAr: 'يجب تسجيل الدفع قبل التقديم.',
       buttonEn: 'Review submission', buttonAr: 'مراجعة ملف التقديم' };
   }
   return { kind: 'submit', href: '#final-review', tone: 'brand',
     titleEn: returned ? 'Ready to resubmit' : 'Ready to submit', titleAr: returned ? 'جاهز لإعادة التقديم' : 'جاهز للتقديم',
-    bodyEn: 'Everything the level requires is in place.', bodyAr: 'كل ما يتطلبه المستوى مستوفى.',
+    bodyEn: 'Review the venue information and submit it to the Ministry.', bodyAr: 'راجعوا معلومات الموقع وقدّموها إلى الوزارة.',
     buttonEn: 'Review and submit', buttonAr: 'المراجعة والتقديم' };
 }
 
-/** The five-stage venue rail, drawn by the same component as the event rail. */
+/** The six-stage venue rail, drawn by the same component as the event rail. */
 export function venueRailStages(f: VenuePackageFacts): { stage: number; stages: RailStage[] } {
-  const requirementsLeft = f.editable ? venueSubmissionChecks(f).requirementsRemaining : 0;
   const returned = f.status === 'revision' || f.status === 'incomplete';
   const withMinistry = f.status === 'submitted' || f.status === 'accepted';
-  const requirementsDone = f.assessmentDone && requirementsLeft === 0 && f.requirements.length > 0;
+  const infrastructure = f.requirements.filter((r) => r.key !== VENUE_PAD_KEY && !r.optional);
+  const infrastructureLeft = infrastructure.filter((r) => !r.done).length;
+  const pad = f.requirements.find((r) => r.key === VENUE_PAD_KEY);
   // Once the Ministry has the package, everything before it is complete by definition -- a certified
   // venue never reads "Stage 1" because a field added after its certificate is empty.
   const done = withMinistry
-    ? [true, true, true, true, f.status === 'accepted']
-    : [f.detailsDone, f.assessmentDone, requirementsDone, false, false];
+    ? [true, true, true, true, true, f.status === 'accepted']
+    : [f.detailsDone, f.assessmentDone, f.assessmentDone && infrastructure.length > 0 && infrastructureLeft === 0, Boolean(pad?.done), false, false];
   const first = done.findIndex((d) => !d);
   const stage = first < 0 ? done.length : first + 1;
-  const k = (i: number): RailStage['k'] => (done[i] ? 'done' : i === first ? (returned && i === 2 ? 'returned' : 'current') : 'todo');
+  const k = (i: number): RailStage['k'] => (done[i] ? 'done' : i === first ? (returned && (i === 2 || i === 3) ? 'returned' : 'current') : 'todo');
   const status = VENUE_STATUS[f.status];
   const stages: RailStage[] = [
-    { k: k(0), en: 'Venue details', ar: 'تفاصيل الموقع', metaEn: done[0] ? '' : 'Contact and map pin', metaAr: done[0] ? '' : 'بيانات الاتصال وعلامة الخريطة' },
-    { k: k(1), en: 'Assessment', ar: 'التقييم',
+    { k: k(0), en: 'Venue profile', ar: 'ملف الموقع', metaEn: done[0] ? '' : 'Contact and map pin', metaAr: done[0] ? '' : 'بيانات الاتصال وعلامة الخريطة' },
+    { k: k(1), en: 'Annual assessment', ar: 'التقييم السنوي',
       metaEn: f.assessmentDone && f.level ? `Level ${f.level} · Version ${f.assessmentVersion}` : 'Not yet complete',
       metaAr: f.assessmentDone && f.level ? `المستوى ${f.level} · النسخة ${f.assessmentVersion}` : 'لم يكتمل بعد' },
-    { k: k(2), en: 'Requirements', ar: 'المتطلبات',
-      metaEn: done[2] ? '' : f.assessmentDone ? `${requirementsLeft} remaining` : '',
-      metaAr: done[2] ? '' : f.assessmentDone ? `${requirementsLeft} متبقٍ` : '' },
-    { k: k(3), en: 'Submitted', ar: 'التقديم',
+    { k: k(2), en: 'Infrastructure and access', ar: 'البنية والوصول',
+      metaEn: done[2] ? '' : f.assessmentDone ? `${infrastructureLeft} remaining` : '',
+      metaAr: done[2] ? '' : f.assessmentDone ? `${infrastructureLeft} متبقٍ` : '' },
+    { k: k(3), en: 'AEDs', ar: 'أجهزة إزالة الرجفان', metaEn: '', metaAr: '' },
+    { k: k(4), en: 'Review and submit', ar: 'المراجعة والتقديم',
       metaEn: withMinistry && f.submittedAt ? f.submittedAt.slice(0, 10) : returned ? 'Submit the updated package' : '',
       metaAr: withMinistry && f.submittedAt ? `⁦${f.submittedAt.slice(0, 10)}⁩` : returned ? 'قدّموا الملف المحدَّث' : '' },
     f.status === 'accepted'
-      ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: f.validUntil ? `${status.en} · valid until ${f.validUntil}` : status.en, metaAr: f.validUntil ? `${status.ar} · صالحة حتى ⁦${f.validUntil}⁩` : status.ar }
+      ? { k: 'done', en: 'Annual certificate', ar: 'الشهادة السنوية', metaEn: f.validUntil ? `Valid until ${f.validUntil}` : status.en, metaAr: f.validUntil ? `صالحة حتى ⁦${f.validUntil}⁩` : status.ar }
       : returned
-        ? { k: 'done', en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: status.en, metaAr: status.ar }
-        : { k: k(4), en: 'Ministry outcome', ar: 'نتيجة الوزارة', metaEn: 'Waiting for the Ministry', metaAr: 'بانتظار الوزارة' },
+        ? { k: 'done', en: 'Annual certificate', ar: 'الشهادة السنوية', metaEn: status.en, metaAr: status.ar }
+        : { k: k(5), en: 'Annual certificate', ar: 'الشهادة السنوية', metaEn: 'Waiting for the Ministry', metaAr: 'بانتظار الوزارة' },
   ];
   return { stage, stages };
 }

@@ -1,4 +1,5 @@
 import {reopenVenueSectionAction} from '../../actions';
+import { accountContact } from '../../../../lib/account-contact';
 import { VenueWorkspace } from '../../../../components/VenueWorkspace';
 import { venuePackageFor } from '../../../../lib/venue/workspace';
 import { L } from '../../../../components/L';
@@ -89,6 +90,7 @@ export default async function VenueAssessmentPage({
       </section>
     ) :
         <VenueAssessmentForm
+          defaultRepresentative={accountContact(account.id).name}
           venueId={venue.id}
           venueNameEn={venue.nameEn}
           venueNameAr={venue.nameAr}

@@ -1,23 +1,23 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
-import { venueAccess, invalidateVenueMedicalWork } from '../../lib/venue/collaboration';
+import { invalidateVenueMedicalWork } from '../../lib/venue/collaboration';
 import { currentAccount } from '../../lib/auth';
 import { getDb } from '../../lib/db';
 import { ensureVenuePackage, parseVenueDetails, venuePackageFor, venuePackageFacts } from '../../lib/venue/workspace';
 import type { VenueFormState } from '../actions';
 import { venueSubmissionChecks, venueStatusForDecision, VENUE_STATUS } from '../../lib/rules/venue-workflow';
-import { maxUploadBytes, refuseUpload } from '../../lib/rules/uploads';
 import { can, REASSESSMENT_WINDOW, venueReassessmentGate } from '../../lib/rules';
 import { venueChangeSinceAssessment } from '../../lib/queries';
 import { writeRequirementSnapshot } from '../../lib/record-facts';
 import { beirutToday } from '../../lib/clock';
-import { notifyVenue as notify, notifyVenueMedicalProgress } from '../../lib/venue/notify';
+import { linkFacilityToVenue, unlinkFacilityFromVenue } from '../../lib/sites';
+import { notifyVenue as notify } from '../../lib/venue/notify';
 
 async function owned(id:string) {
  const a=await currentAccount();if(!a)redirect('/signin');const w=venuePackageFor(a.id,id);if(!w)notFound();return {a,w};
 }
-function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath(`/venue-team/${id}`);revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
+function refresh(id:string) { revalidatePath(`/venues/${id}`,'layout');revalidatePath('/dashboard');revalidatePath('/ministry/venues'); }
 export async function saveVenueDetailsAction(id:string,_prev:VenueFormState,form:FormData):Promise<VenueFormState> {
  const {a,w}=await owned(id);if(!w.editable||!w.detailsEditing)redirect(`/venues/${id}`);const parsed=parseVenueDetails(form);if('refused' in parsed)return {refused:parsed.refused};const v=parsed.value;
  ensureVenuePackage(a.id,id);
@@ -34,29 +34,6 @@ export async function reopenVenueSectionAction(id:string,section:'details'|'asse
  if(section==='details')getDb().prepare('UPDATE venue_packages SET details_editing=1 WHERE venue_id=?').run(id);
  else if(section==='assessment')getDb().prepare('UPDATE venue_packages SET assessment_editing=1 WHERE venue_id=?').run(id);
  refresh(id);redirect(`/venues/${id}/${section}`);
-}
-/**
- * A participating EMS agency signs its own readiness declaration for the venue (Level 3,
- * catalogue row B20): the signed document and the agency's confirmation, recorded against
- * its invitation. The organizer, another agency and the plan approval cannot sign it.
- */
-export async function signVenueDeclarationAction(id:string,form:FormData) {
- const a=await currentAccount();if(!a)redirect('/signin');const access=venueAccess(a,id);if(!access?.invitation||access.role!=='ems')notFound();
- const w=venuePackageFor(access.ownerId,id)!;const back=`/venue-team/${id}`;
- if(!w.editable||w.level!==3)redirect(`${back}?error=forbidden#req-B20`);
- const file=form.get('file');
- if(!(file instanceof File)||!file.size||form.get('confirm')!=='yes')redirect(`${back}?error=incomplete#req-B20`);
- if(refuseUpload({type:file.type,size:file.size}))redirect(`${back}?upload=wrongType&doc=B20#req-B20`);
- const bytes=Buffer.from(await file.arrayBuffer());if(bytes.length>maxUploadBytes())redirect(`${back}?upload=tooLarge&doc=B20#req-B20`);
- const fileKey=`20-${access.invitation.token}`;const db=getDb();db.exec('BEGIN IMMEDIATE');
- try{
- const current=venuePackageFor(access.ownerId,id)!;if(!current.editable||current.level!==3)throw new Error('STALE_VENUE_FORM');
- db.prepare(`INSERT INTO venue_attachments(venue_id,doc_key,file_name,content_type,byte_size,bytes) VALUES(?,?,?,?,?,?) ON CONFLICT(venue_id,doc_key) DO UPDATE SET file_name=excluded.file_name,content_type=excluded.content_type,byte_size=excluded.byte_size,bytes=excluded.bytes,attached_at=now_stamp()`).run(id,fileKey,file.name.trim(),file.type,bytes.length,bytes);
- db.prepare(`INSERT INTO venue_contributions(venue_id,requirement_key,invitation_token,answers,assessment_version) VALUES(?,'20',?,?,?) ON CONFLICT(venue_id,requirement_key,invitation_token) DO UPDATE SET answers=excluded.answers,assessment_version=excluded.assessment_version,completed_at=now_stamp()`).run(id,access.invitation.token,JSON.stringify({fileKey,agency:access.invitation.name}),current.assessmentVersion??0);
- db.prepare('UPDATE venue_packages SET work_revision=work_revision+1 WHERE venue_id=?').run(id);
- db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');if(e instanceof Error&&e.message==='STALE_VENUE_FORM')redirect(`${back}?error=stale#req-B20`);throw e;}
- notifyVenueMedicalProgress(access.ownerId,a.isDemo,id);
- refresh(id);redirect(`${back}?saved=B20#req-B20`);
 }
 export async function submitVenuePackageAction(id:string,form:FormData) {
  const {a}=await owned(id); const db=getDb();db.exec('BEGIN IMMEDIATE');let blocked=false;
@@ -106,4 +83,20 @@ export async function renewVenuePackageAction(id:string) {
  db.prepare('DELETE FROM venue_attachments WHERE venue_id=?').run(id);
  invalidateVenueMedicalWork(id);db.prepare("UPDATE venue_invitations SET status='withdrawn' WHERE venue_id=? AND status IN ('nominated','confirmed')").run(id);
  db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}refresh(id);redirect(`/venues/${id}/details`);
+}
+/**
+ * The venue's AED step (catalogue V7): the operator records that one of its PAD facility
+ * registrations is at this venue's physical place. The facility moves onto the venue's
+ * site; the two registrations keep their own ids, status and history. Unlinking gives the
+ * facility a site of its own again.
+ */
+export async function linkVenueFacilityAction(id:string,form:FormData) {
+ const {a,w}=await owned(id);if(!w.editable)redirect(`/venues/${id}?step=V7#req-V7`);
+ const ok=linkFacilityToVenue(a.id,id,String(form.get('facility')??''));
+ refresh(id);redirect(`/venues/${id}?step=V7${ok?'':'&pad=refused'}#req-V7`);
+}
+export async function unlinkVenueFacilityAction(id:string,facilityId:string) {
+ const {a,w}=await owned(id);if(!w.editable)redirect(`/venues/${id}?step=V7#req-V7`);
+ unlinkFacilityFromVenue(a.id,id,facilityId);
+ refresh(id);redirect(`/venues/${id}?step=V7#req-V7`);
 }

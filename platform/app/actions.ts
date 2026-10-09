@@ -25,7 +25,7 @@ import { beirutToday, nowStamp } from '../lib/clock';
 
 import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'node:crypto';
-import { getDb, nextRecordId } from '../lib/db';
+import { getDb, insertSite, nextRecordId } from '../lib/db';
 import { isListableHostingVenue, resolveHostingVenue } from '../lib/hosting-venues';
 import { archiveWindowDays } from '../lib/queries';
 import { maxUploadBytes, refuseImageUpload, refuseUpload } from '../lib/rules/uploads';
@@ -239,7 +239,7 @@ export interface PartAFields {
   expectedStaff: number | null;
   previousEdition: boolean;
   recurringFixedVenue: boolean;
-  /** The registered hosting venue, when the event is at a fixed venue that hosts events repeatedly. */
+  /** The registered venue the event is linked to, by record id; independent of recurringFixedVenue. */
   hostingVenueId?: string | null;
 }
 
@@ -316,8 +316,9 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
     .get(sourceEventId) as { answers: string; inputs: string } | undefined;
 
   // The hosting venue carries over only while it is still a venue this account may
-  // choose; an archived venue drops to unset and the organizer chooses again.
-  const hostingVenueId = src.recurring_fixed_venue === 1 && src.hosting_venue_id && isListableHostingVenue(src.hosting_venue_id, account.isDemo)
+  // choose; an archived venue drops to unset and the organizer chooses again. The link
+  // does not depend on the fixed-venue tick (lib/hosting-venues resolveHostingVenue).
+  const hostingVenueId = src.hosting_venue_id && isListableHostingVenue(src.hosting_venue_id, account.isDemo)
     ? src.hosting_venue_id
     : null;
   const newId = nextRecordId('EV');
@@ -406,7 +407,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.recurringFixedVenue, payload.partA.hostingVenueId, account.isDemo);
+  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
   if (!hosting.ok) return { error: 'hosting-venue' };
 
   const db = getDb();
@@ -471,7 +472,7 @@ export async function updateDraftEventAction(eventId: string, payload: Assessmen
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.recurringFixedVenue, payload.partA.hostingVenueId, account.isDemo);
+  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
   if (!hosting.ok) return { error: 'hosting-venue' };
 
   const db = getDb();
@@ -857,6 +858,9 @@ export async function registerVenueAction(_prev: VenueFormState, formData: FormD
   db.prepare(`INSERT INTO venue_assessments(venue_id,version,answers,inputs,derivation,nehrat_tool_version,effective,valid_until,representative,position,certificate_issued) VALUES(?,1,?,?,?,?,'','',?,?,0)`).run(venueId,JSON.stringify(answers),JSON.stringify(inputs),JSON.stringify(derivation),NEHRAT_TOOL_VERSION,representative,position);
   db.prepare('INSERT INTO venue_packages(venue_id,assessment_version) VALUES(?,1)').run(venueId);
   db.prepare('UPDATE venues SET level=? WHERE id=?').run(derivation.finalLevel,venueId);
+  // The physical place gets its site at registration: the anchor its PAD facility and its events share.
+  const siteId=insertSite(db,{nameEn:v.nameEn,nameAr:v.nameAr,municipalityEn:v.address,municipalityAr:v.addressAr,district:v.district,latitude:v.point.lat,longitude:v.point.lng,createdBy:account.id,isDemo:account.isDemo});
+  db.prepare('UPDATE venues SET site_id=? WHERE id=?').run(siteId,venueId);
   db.exec('COMMIT');}catch(error){db.exec('ROLLBACK');throw error;}
   revalidatePath('/dashboard');redirect(`/venues/${venueId}`);
 }
@@ -944,6 +948,9 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   const capacityNum = Number(s('capacity'));
   if ((s('capacity') && (!Number.isSafeInteger(capacityNum) || capacityNum < 0)) || (categoryKey==='transport' && !TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType')))) redirect('/facilities/new?error=details');
   const facilityId = nextRecordId('FC');
+  // Started from a venue ("Register this venue's AEDs"): the facility stands on the venue's site.
+  const { venueSiteForNewFacility } = await import('../lib/sites');
+  const venueSite = s('fromVenue') ? venueSiteForNewFacility(account.id, s('fromVenue')) : null;
   const db = getDb();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -967,6 +974,7 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
      VALUES (?, 'coordinator', ?, ?, ?)`,
   ).run(facilityId, s('coordinatorName'), s('coordinatorPhone'), s('coordinatorEmail'));
   db.prepare('UPDATE facilities SET latitude=?,longitude=?,facility_type=?,map_confirmed_at=now_stamp() WHERE id=?').run(point.lat,point.lng,s('facilityType'),facilityId);
+  db.prepare('UPDATE facilities SET site_id=? WHERE id=?').run(venueSite ?? insertSite(db,{nameEn:s('name'),nameAr:s('nameAr')||s('name'),municipalityEn:s('municipality'),municipalityAr:s('municipalityAr')||s('municipality'),district:'',latitude:point.lat,longitude:point.lng,createdBy:account.id,isDemo:account.isDemo}),facilityId);
   db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }
@@ -1757,12 +1765,11 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const venueRoute = String(formData.get('venueRoute') ?? '').trim();
   const municipalities = String(formData.get('municipalities') ?? '').trim();
   if (!nameEn || !nameAr || !startDate || !endDate) redirect(`/events/${eventId}/edit?error=required`);
-  // The hosting venue is on this screen only for an event at a fixed venue; the field's
-  // absence from the form leaves the stored choice as it is.
-  const fixed = (getDb().prepare(`SELECT recurring_fixed_venue FROM events WHERE id = ?`).get(eventId) as { recurring_fixed_venue: number }).recurring_fixed_venue === 1;
+  // The registered venue the event is linked to, set from the location field or the
+  // fixed-venue selector; the field's absence from the form leaves the stored link as it is.
   let hostingVenueId: string | null | undefined;
   if (formData.has('hostingVenueId')) {
-    const hosting = resolveHostingVenue(fixed, String(formData.get('hostingVenueId') ?? ''), account.isDemo);
+    const hosting = resolveHostingVenue(String(formData.get('hostingVenueId') ?? ''), account.isDemo);
     if (!hosting.ok) redirect(`/events/${eventId}/edit?error=hosting-venue`);
     hostingVenueId = hosting.venueId;
   }

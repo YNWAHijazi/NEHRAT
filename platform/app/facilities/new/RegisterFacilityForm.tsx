@@ -1,5 +1,6 @@
 'use client';
 
+import { PhoneInput } from '../../../components/PhoneInput';
 import { OptionText } from '../../../components/OptionText';
 import { InfoNote } from '../../../components/InfoNote';
 
@@ -56,7 +57,13 @@ const STEPS = [
 
 export function RegisterFacilityForm({
   published,
+  fromVenue = null,
+  me = null,
 }: {
+  /** The person registering: the responsible contact starts as them. */
+  me?: { name: string; phone: string; email: string } | null;
+  /** Started from a hosting venue's PAD and AED step: the facility stands on the venue's site, and its name and address start filled. */
+  fromVenue?: { id: string; nameEn: string; nameAr: string; addressEn: string; addressAr: string } | null;
   /** What the Ministry has published (powers one and two); governs the category states. */
   published: { phasedSchedule: { value: string; effective: string | null } | null; capacityThreshold: { value: string; effective: string | null } | null };
 }) {
@@ -64,7 +71,7 @@ export function RegisterFacilityForm({
   const [profileError, setProfileError] = useState(false);
   const [step, setStep] = useState(1);
   const [catKey, setCatKey] = useState<string | null>(null);
-  const [profile, setProfile] = useState<Record<string, string>>({});
+  const [profile, setProfile] = useState<Record<string, string>>({ ...(fromVenue ? { name: fromVenue.nameEn, nameAr: fromVenue.nameAr, municipality: fromVenue.addressEn, municipalityAr: fromVenue.addressAr } : {}), ...(me?.phone ? { phone: me.phone } : {}), ...(me?.email ? { email: me.email } : {}) });
   const content = FACILITY_CONTENT;
   const governed = (key: string): FacilityCategory | null => categoryWithPublished(key, published);
   const picked: FacilityCategory | null = catKey === null ? null : governed(catKey);
@@ -84,7 +91,9 @@ export function RegisterFacilityForm({
       <span style={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.45 }}>
         <L en={en} ar={ar} />
       </span>
-      {options ? (
+      {key === 'phone' ? (
+        <PhoneInput inputName={key} value={profile[key] ?? ''} onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))} />
+      ) : options ? (
         <select
           name={key}
           value={profile[key] ?? ''}
@@ -257,6 +266,7 @@ export function RegisterFacilityForm({
             <input key={k} type="hidden" name={k} value={v} />
           ))}
           <input type="hidden" name="category" value={catKey ?? ''} />
+          {fromVenue ? <input type="hidden" name="fromVenue" value={fromVenue.id} /> : null}
           <input type="hidden" name="mapLat" value={point?.lat ?? ''}/><input type="hidden" name="mapLng" value={point?.lng ?? ''}/><input type="hidden" name="mapConfirmed" value={point?'yes':'no'}/>
           <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
             <L en="Responsible contact" ar="جهة الاتصال المسؤولة" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
@@ -275,11 +285,17 @@ export function RegisterFacilityForm({
                       <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                         <L en={f.en} ar={f.ar} />
                       </span>
-                      <input
-                        name={`${p.key}${f.key === 'nameOrPosition' ? 'Name' : f.key === 'phone' ? 'Phone' : 'Email'}`}
-                        required={p.key === 'coordinator'}
-                        style={inputStyle}
-                      />
+                      {f.key === 'phone' ? (
+                        <PhoneInput name={`${p.key}Phone`} required={p.key === 'coordinator'} defaultValue={p.key === 'coordinator' ? me?.phone ?? '' : ''} />
+                      ) : (
+                        <input
+                          name={`${p.key}${f.key === 'nameOrPosition' ? 'Name' : 'Email'}`}
+                          required={p.key === 'coordinator'}
+                          // The responsible contact starts as the person registering (owner, 9 October 2026).
+                          defaultValue={p.key === 'coordinator' ? (f.key === 'nameOrPosition' ? me?.name : me?.email) ?? '' : ''}
+                          style={inputStyle}
+                        />
+                      )}
                     </label>
                   ))}
                 </div>

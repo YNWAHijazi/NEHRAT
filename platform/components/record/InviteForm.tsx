@@ -9,6 +9,7 @@ import { L } from '../L';
 import { inviteParticipantAction } from '../../app/actions';
 import { inviteVenuePartnerAction } from '../../app/venues/team-actions';
 import { fieldInput } from '../workspace-styles';
+import { KeepScrollOnSubmit } from './KeepScroll';
 
 export function InviteForm({ eventId, kind, service = 'event' }: { eventId: string; kind: 'ems' | 'director'; service?: 'event' | 'venue' }) {
   return (
@@ -18,6 +19,7 @@ export function InviteForm({ eventId, kind, service = 'event' }: { eventId: stri
       style={{ padding: '16px 18px', border: '1px dashed var(--line)', borderRadius: 12, display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'end' }}
     >
       <input type="hidden" name="kind" value={kind} />
+      <KeepScrollOnSubmit />
       <label style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1, minWidth: 200 }}>
         <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
           {kind === 'ems' ? <L en="Agency name" ar="اسم الجهة" /> : <L en="Physician name" ar="اسم الطبيب" />}

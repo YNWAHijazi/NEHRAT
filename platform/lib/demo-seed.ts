@@ -24,6 +24,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import { beirutToday } from './clock';
 import { demonstrationPdf } from './demo-pdf';
+import { backfillSites } from './db';
 import { seedRecordAnswers } from './demo-requirement-answers';
 import { migrateLegacyRequirementAnswers } from './requirement-migration';
 import { NEHRAT_TOOL_VERSION } from './rules';
@@ -376,6 +377,24 @@ export function seedDemonstration(db: DatabaseSync): void {
   // VN-0011's certificate has expired and its operator has started the renewal: the register
   // still reads "Certificate expired" until a new one is issued, and the assessment is open.
   db.prepare(`INSERT OR REPLACE INTO venue_packages (venue_id, status, answers, assessment_version) VALUES ('VN-0011', 'draft', '{}', NULL)`).run();
+
+  // Forum's venue information (Hosting Venue Registration, 8 October 2026): the reusable
+  // infrastructure an event held there starts from. Certified, so read-only on its page.
+  const venueAnswer = db.prepare(
+    `INSERT OR IGNORE INTO requirement_answers (record_kind, record_id, key, answers, author_role, author_name, version, saved_at)
+     VALUES ('venue', 'VN-0032', ?, ?, 'organizer', 'R. Haddad', 1, ?)`,
+  );
+  for (const [key, values] of [
+    ['V1', { configuration: 'indoor', zones: 'Main hall (ground floor), two mezzanine galleries, the foyer and the outdoor forecourt' }],
+    ['V2', { entry: 'From Avenue Charles Helou through the service gate on the east side; vehicles stop at the loading bay beside the main hall', staging: 'The loading bay, kept clear during every operating session' }],
+    ['V3', { routes: 'Responders enter by the loading bay and reach the main hall floor directly; the galleries are reached by the two stairways at either end; patients leave by the same route to the loading bay', lifts: 'The goods lift beside the loading bay takes a stretcher' }],
+    ['V4', { exists: 'yes', location: 'Ground floor, beside the east entrance', equipment: 'Couch, first-aid cabinet, oxygen cylinder' }],
+    ['V5', { systems: 'Public address in every hall, a control room overlooking the main hall, radio repeaters on both levels' }],
+    ['V7', { none: true }],
+  ] as const) venueAnswer.run(key, JSON.stringify(values), d('2026-03-01'));
+  db.prepare(
+    `INSERT OR IGNORE INTO venue_attachments (venue_id, doc_key, file_name, content_type, byte_size, bytes, attached_at) VALUES ('VN-0032', 'V1', 'forum-layout-map.pdf', 'application/pdf', ?, ?, ?)`,
+  ).run(...(() => { const pdf = demonstrationPdf('Forum de Beyrouth', 'Layout map: entrances, exits and emergency access'); return [pdf.length, pdf, d('2026-03-01')] as const; })());
 
   // ---- Slice 4: the covered facility, in full ----
   // Device dates are chosen to reproduce the reference VALIDITY LEDGER exactly
@@ -944,4 +963,6 @@ export function seedDemonstration(db: DatabaseSync): void {
   seedRecordAnswers(db, 'event', 'EV-0455', 2, `${d('2026-08-01')} 10:00:00`, names);
   // In preparation: the organizer's rows are in; the agency's and the map are the walkthrough's.
   seedRecordAnswers(db, 'event', 'EV-0418', 2, `${d('2026-08-10')} 10:00:00`, names, ['organizer']);
+  // Every seeded venue and facility stands on its own site; the seeder does not invent shared places.
+  backfillSites(db);
 }

@@ -1,4 +1,6 @@
 'use client';
+import { PhoneInput } from '../../../components/PhoneInput';
+import { UseMyDetails } from '../../../components/UseMyDetails';
 import { OptionText } from '../../../components/OptionText';
 import { VENUE_CAPACITY_FIELD, VENUE_ELIGIBILITY_QUESTIONS } from '../../../lib/rules';
 import { useEffect, useState, useTransition } from 'react';
@@ -27,7 +29,7 @@ const REASONS:Record<string,{en:string;ar:string}>={
  district:{en:'Choose the district.',ar:'اختاروا القضاء.'},
  address:{en:'Enter the town and street address.',ar:'أدخلوا البلدة وعنوان الشارع.'},
  contactName:{en:'Enter the name of the responsible person.',ar:'أدخلوا اسم الشخص المسؤول.'},
- contactPhone:{en:'Enter a telephone number in digits, for example +961 3 123 456.',ar:'أدخلوا رقم هاتف بالأرقام، مثلاً +961 3 123 456.'},
+ contactPhone:{en:'Choose the country code and enter the number in digits, for example 3 123 456.',ar:'اختاروا رمز البلد وأدخلوا الرقم بالأرقام، مثلاً 3 123 456.'},
  capacity:{en:'Enter the licensed capacity as a whole number.',ar:'أدخلوا السعة المرخّصة رقماً صحيحاً.'},
  regularlyHosts:{en:'Answer Yes or No to the question about hosting events.',ar:'أجيبوا بنعم أو لا عن سؤال استضافة الفعاليات.'},
  isNightclub:{en:'Answer Yes or No to the question about the nightclub or dance venue.',ar:'أجيبوا بنعم أو لا عن سؤال الملهى الليلي أو مكان الرقص.'},
@@ -41,12 +43,14 @@ const REASONS:Record<string,{en:string;ar:string}>={
  * stays on the screen when the server refuses the form: the refusal names the field, the
  * message sits beside it and it takes focus.
  */
-export function RegisterVenueForm({fields:unused,initial,point=null,district='',locked=false,assessment=null}:{fields?:unknown[];initial?:VenueDetail;point?:MapPoint|null;district?:string;locked?:boolean;assessment?:RegistrationAssessment|null}){
+export function RegisterVenueForm({fields:unused,initial,point=null,district='',locked=false,assessment=null,me=null}:{fields?:unknown[];initial?:VenueDetail;point?:MapPoint|null;district?:string;locked?:boolean;assessment?:RegistrationAssessment|null;
+ /** The signed-in person: a new registration starts with them as the responsible person (owner, 9 October 2026). */
+ me?:{name:string;phone:string}|null}){
  const [assessmentMissing,setAssessmentMissing]=useState<{key:string;en:string;ar:string}[]>([]);const [checked,setChecked]=useState(false);
  const [pin,setPin]=useState(point);const [regular,setRegular]=useState<boolean|null>(initial?.regularlyHosts??null);const [nightclub,setNightclub]=useState<boolean|null>(initial?.isNightclub??null);
  const known=VENUE_TYPES.some(t=>t.key===initial?.category);const [category,setCategory]=useState(initial?known?initial.category:'other':'');
  const [districtValue,setDistrict]=useState(district);
- const [values,setValues]=useState<Record<string,string>>({name:initial?.nameEn??'',nameAr:initial?.nameAr??'',categoryOther:known?'':initial?.category??'',address:initial?.addressMunicipalityEn??'',addressAr:initial?.addressMunicipalityAr??'',contactName:initial?.responsibleName||initial?.responsibleContact||'',contactPhone:initial?.responsiblePhone??'',capacity:initial?.licensedCapacity?String(initial.licensedCapacity):''});
+ const [values,setValues]=useState<Record<string,string>>({name:initial?.nameEn??'',nameAr:initial?.nameAr??'',categoryOther:known?'':initial?.category??'',address:initial?.addressMunicipalityEn??'',addressAr:initial?.addressMunicipalityAr??'',contactName:initial?initial.responsibleName||initial.responsibleContact||'':me?.name??'',contactPhone:initial?initial.responsiblePhone??'':me?.phone??'',capacity:initial?.licensedCapacity?String(initial.licensedCapacity):''});
  const action=initial?saveVenueDetailsAction.bind(null,initial.id):registerVenueAction;
  // Submitted by hand rather than through the form's action: React resets a form after an
  // action completes, and a controlled select loses its choice in that reset.
@@ -62,10 +66,10 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
   ...(Number(values['capacity'])>0?[]:['capacity']),...(regular===null?['regularlyHosts']:[]),...(nightclub===null?['isNightclub']:[]),...(pin?[]:['map']),
  ].map(k=>({key:k,...LABELS[k]!}));
  const missing=[...detailsMissing,...(!initial&&assessment?assessmentMissing:[])];
- const submit=(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();if(missing.length){setChecked(true);setState(null);requestAnimationFrame(()=>{const k=missing[0]!.key;const el=document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${k}"], [data-refused-anchor="${k}"], [data-missing-anchor="${k}"]`);el?.focus({preventScroll:true});document.querySelector('[data-region="please-fill"]')?.scrollIntoView({block:'center'});});return;}setChecked(false);const data=new FormData(e.currentTarget);start(async()=>{setState(await action(null,data));});};
+ const submit=(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();if(missing.length){setChecked(true);setState(null);requestAnimationFrame(()=>{const k=missing[0]!.key;const el=(document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${k}Number"]`)??document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${k}"], [data-refused-anchor="${k}"], [data-missing-anchor="${k}"]`));el?.focus({preventScroll:true});document.querySelector('[data-region="please-fill"]')?.scrollIntoView({block:'center'});});return;}setChecked(false);const data=new FormData(e.currentTarget);start(async()=>{setState(await action(null,data));});};
  const refused=state?.refused??null;
  const flagged=(k:string)=>refused===k||(checked&&missing.some(m=>m.key===k));
- useEffect(()=>{if(!refused||pending)return;const el=document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${refused}"], [data-refused-anchor="${refused}"]`);el?.focus();el?.scrollIntoView({block:'center'});},[refused,state,pending]);
+ useEffect(()=>{if(!refused||pending)return;const el=(document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${refused}Number"]`)??document.querySelector<HTMLElement>(`[data-region="registration-form"] [name="${refused}"], [data-refused-anchor="${refused}"]`));el?.focus();el?.scrollIntoView({block:'center'});},[refused,state,pending]);
  const reason=(name:string)=>refused===name?<span data-region="field-reason" role="alert" style={{fontSize:'13.5px',color:'var(--bad)'}}><L en={REASONS[name]!.en} ar={REASONS[name]!.ar}/></span>:null;
  const text=(name:string,en:string,ar:string,required=true,type='text')=><label style={{display:'grid',gap:6}} key={name}><L en={en} ar={ar}/><input name={name} type={type} inputMode={type==='tel'?'tel':undefined} value={values[name]??''} onChange={e=>setValues(v=>({...v,[name]:e.target.value}))} required={required} aria-invalid={flagged(name)||undefined} style={flagged(name)?refusedInput:input} dir={name.endsWith('Ar')?'rtl':undefined}/>{reason(name)}</label>;
  return <form onSubmit={submit} noValidate>
@@ -77,7 +81,9 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  {category==='other'?text('categoryOther','Specify venue type','حدّد نوع الموقع'):null}
  <label style={{display:'grid',gap:6}}><L en="District" ar="القضاء"/><select name="district" value={districtValue} onChange={e=>setDistrict(e.target.value)} required aria-invalid={flagged('district')||undefined} style={flagged('district')?refusedInput:input}><option value=""></option>{VENUE_DISTRICTS.map(d=><option key={d.en} value={d.en}><OptionText en={d.en} ar={d.ar} /></option>)}</select>{reason('district')}</label>
  {text('address','Town and street address','البلدة وعنوان الشارع')}{text('addressAr','Address (Arabic, optional)','العنوان (بالعربية، اختياري)',false)}
- {text('contactName','Responsible person','الشخص المسؤول')}{text('contactPhone','Phone number','رقم الهاتف',true,'tel')}
+ {text('contactName','Responsible person','الشخص المسؤول')}
+ <label data-refused-anchor="contactPhone" tabIndex={-1} style={{display:'grid',gap:6}}><L en="Phone number" ar="رقم الهاتف"/><PhoneInput name="contactPhone" value={values['contactPhone']??''} onChange={p=>setValues(v=>({...v,contactPhone:p}))} required invalid={flagged('contactPhone')}/>{reason('contactPhone')}</label>
+ {me&&(me.name||me.phone)&&!locked&&(values['contactName']!==me.name||values['contactPhone']!==me.phone)?<div style={{gridColumn:'1 / -1',marginBlockStart:-12}}><UseMyDetails onUse={()=>setValues(v=>({...v,contactName:me.name||v['contactName']||'',contactPhone:me.phone||v['contactPhone']||''}))}/></div>:null}
  <label style={{display:'grid',gap:6}}><L en={VENUE_CAPACITY_FIELD.en} ar={VENUE_CAPACITY_FIELD.ar}/><input style={flagged('capacity')?refusedInput:input} name="capacity" type="number" min="1" step="1" required inputMode="numeric" value={values['capacity']??''} onChange={e=>setValues(v=>({...v,capacity:e.target.value}))} aria-invalid={flagged('capacity')||undefined}/>{reason('capacity')}</label>
  </div>
  <div data-refused-anchor="regularlyHosts" tabIndex={-1} aria-invalid={flagged('regularlyHosts')||undefined} style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center',marginBlock:24,...(flagged('regularlyHosts')?{outline:'1px solid var(--bad)',outlineOffset:'6px',borderRadius:'8px'}:{})}}><L en={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts.en} ar={VENUE_ELIGIBILITY_QUESTIONS.regularlyHosts.ar}/><YesNoPair value={regular} onPick={setRegular}/><input type="hidden" name="regularlyHosts" value={regular===null?'':regular?'yes':'no'}/>{reason('regularlyHosts')}</div>
@@ -86,7 +92,7 @@ export function RegisterVenueForm({fields:unused,initial,point=null,district='',
  {!locked?<LocationPicker initial={point} onChange={setPin}/>:point?<p><L en="Confirmed map location" ar="الموقع المؤكّد على الخريطة"/>: <a href={`https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lng}#map=17/${point.lat}/${point.lng}`} target="_blank" rel="noreferrer"><L en="View map" ar="عرض الخريطة"/></a></p>:null}
  {reason('map')}
  </div>
- {!initial&&assessment&&!locked?<VenueAssessmentForm embedded onMissing={setAssessmentMissing} showMissing={checked} venueId="" venueNameEn={values['name']||''} venueNameAr={values['nameAr']||''} domains={assessment.domains} conditions={assessment.conditions} bands={assessment.bands} maxScore={assessment.maxScore}
+ {!initial&&assessment&&!locked?<VenueAssessmentForm embedded defaultRepresentative={me?.name??''} onMissing={setAssessmentMissing} showMissing={checked} venueId="" venueNameEn={values['name']||''} venueNameAr={values['nameAr']||''} domains={assessment.domains} conditions={assessment.conditions} bands={assessment.bands} maxScore={assessment.maxScore}
    venueFacts={{licensedCapacity:Number.isSafeInteger(Number(values['capacity']))&&Number(values['capacity'])>0?Number(values['capacity']):null,regularlyHosts:regular===true,isNightclub:nightclub===true||category==='nightclub'}}
    initialAnswers={null} initialAttendance={null} feeDue={null} effectivePreview="" validPreview="" triggers={assessment.triggers}/>:null}
  {reason('assessment')}

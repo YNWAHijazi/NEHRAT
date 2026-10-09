@@ -5,6 +5,7 @@ import type { RecordView } from '../../lib/record-view';
 import { REQUIREMENT_AUTHORS, REQUIREMENT_COPY, REQUIREMENT_GROUPS, handledBy, mayAuthor, type AuthorRole, type RequirementInstance } from '../../lib/rules';
 import { FileControl } from './FileControl';
 import { JumpTo } from './JumpTo';
+import { RestoreScroll } from './KeepScroll';
 import { PartyBlock } from './PartyBlock';
 import { LinkedAnswers, PlanSections, textInstance } from './PlanSections';
 import { HandoffDialog } from './HandoffDialog';
@@ -12,7 +13,6 @@ import { RecordStepper, type StepperStep } from './RecordStepper';
 import { RequirementCard } from './RequirementCard';
 import { RequirementForm } from './RequirementForm';
 import { RequirementSummaries } from './RequirementSummaries';
-import { VenueDeclarationForm } from './VenueDeclarationForm';
 
 export interface RecordRequirementsProps {
   record: RecordData;
@@ -38,6 +38,8 @@ export interface RecordRequirementsProps {
   initialStep?: string | null;
   /** Just invited (?invited=ems|director): the dialog says which steps that party fills. */
   handoff?: 'ems' | 'director' | null;
+  /** Content a page adds above a row's form, by catalogue key (a venue's linked PAD facility on V7). */
+  extras?: Readonly<Record<string, ReactNode>>;
 }
 
 /**
@@ -47,7 +49,7 @@ export interface RecordRequirementsProps {
  * and venues, organizer and medical parties, all read the same instances; only who may
  * write differs.
  */
-export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null, handoff = null }: RecordRequirementsProps) {
+export function RecordRequirements({ record, viewerRole, viewerConfirmed, contentTypes, refusal, derived, governance = {}, facility = null, viewerParty = null, final = null, listHref = null, directorVerification = null, initialStep = null, handoff = null, extras = {} }: RecordRequirementsProps) {
   const { instances, service, id } = record;
   const canEditInst = (inst: RequirementInstance) => record.editable && viewerConfirmed && mayAuthor(inst, viewerRole);
   const canInvite = record.editable && viewerRole === 'organizer';
@@ -55,6 +57,11 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   const later = instances.filter((i) => i.group === 'later');
 
   // Who fills a row, in words, for the card's ownership line and the italic placeholder (owner, 8 October 2026).
+  const hasParty = (kind: 'ems' | 'director') => record.parties.some((p) => p.kind === kind && (p.status === 'nominated' || p.status === 'confirmed'));
+  // The EMS row the agency fills, before any agency is invited (owner, 9 October 2026): the first
+  // act on it is the organizer's invitation, so it reads as the organizer's step -- amber -- until
+  // the invitation is sent; then it turns grey, labelled with who fills it.
+  const inviteFirst = (inst: RequirementInstance) => inst.key === 'B7' && viewerRole === 'organizer' && record.editable && record.level !== 1 && !mayAuthor(inst, 'organizer') && !hasParty('ems');
   const names = (roles: readonly AuthorRole[]) => ({ en: roles.map((r) => REQUIREMENT_AUTHORS[r].en).join(' or the '), ar: roles.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' أو ') });
   const awaitingFor = (inst: RequirementInstance): { en: string; ar: string } | null => {
     if (canEditInst(inst)) return null;
@@ -65,6 +72,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     return { en: 'Not answered', ar: 'لم تُقدَّم إجابة' };
   };
   const ownerLine = (inst: RequirementInstance): { en: string; ar: string } | null => {
+    if (inviteFirst(inst)) return { en: 'You invite the EMS agency first; it then fills this step', ar: 'تدعون جهة الإسعاف أولاً، ثم تملأ هذه الخطوة' };
     if (inst.authors.length === 0) return null;
     const others = inst.authors.filter((r) => r !== viewerRole);
     if (mayAuthor(inst, viewerRole)) {
@@ -75,7 +83,6 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     const o = names(inst.authors);
     return { en: `Filled by the ${o.en}`, ar: `تملؤها ${o.ar}` };
   };
-  const hasParty = (kind: 'ems' | 'director') => record.parties.some((p) => p.kind === kind && (p.status === 'nominated' || p.status === 'confirmed'));
   const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
 
   const body = (inst: RequirementInstance) => {
@@ -99,9 +106,15 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
             {viewerRole === 'ems' && service === 'event' ? (
               <a href={`/events/${id}/declaration`} style={{ fontSize: '14.5px' }}><L en="Open your agency's readiness declaration" ar="فتح إقرار جاهزية جهتكم" /></a>
             ) : null}
-            {viewerRole === 'ems' && service === 'venue' && viewerParty && record.editable ? (
-              <VenueDeclarationForm id={id} signed={Boolean(viewerParty.declarationSigned)} fileHref={viewerParty.declarationSigned ? `/api/venue-documents/${id}/20-${viewerParty.token}` : null} />
-            ) : null}
+          </>
+        );
+      case 'V7':
+        // A hosting venue's AEDs: the PAD facility registration on the same site, shown and never
+        // re-entered. With none linked, the operator links one, registers one, or records that there is none.
+        return (
+          <>
+            {extras['V7'] ?? null}
+            {record.facts?.padFacility ? null : form(inst, canEdit)}
           </>
         );
       case 'B2':
@@ -165,7 +178,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
 
   // The steps: every required row, then the recommended rows, then the final review when the page has one.
   // A step is the viewer's when the catalogue names their role on it (the organizer's invitation rows included).
-  const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3');
+  const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3') || inviteFirst(inst);
   // A row the viewer would write but cannot says why, on the card itself: a filed record
   // waits on the Ministry; a closed one is read-only. Silence here read as a defect.
   const readOnlyNote = record.editable ? null : record.filed
@@ -190,9 +203,10 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   const guide = parties.length > 1 ? (() => {
     const others = parties.filter((r) => r !== viewerRole);
     const o = { en: others.map((r) => `the ${REQUIREMENT_AUTHORS[r].en}`).join(' and '), ar: others.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' و') };
+    // Plain and short (owner, 8 October 2026): who fills what, when answers save, when anything is sent.
     return {
-      en: `${parties.length === 3 ? 'Three' : 'Two'} parties complete this record: you and ${o.en}. Each step says who fills it: amber steps are yours; grey steps are filled by ${o.en} once invited and accepted, and you see their answers there. Your answers save when you move to another step; the record stays a draft until every required step is complete and you submit it.`,
-      ar: `${parties.length === 3 ? 'ثلاثة أطراف' : 'طرفان'} ${parties.length === 3 ? 'يستكملون' : 'يستكملان'} هذا السجل: أنتم و${o.ar}. تذكر كل خطوة من يملؤها: الخطوات الكهرمانية لكم؛ والخطوات الرمادية يملؤها ${o.ar} بعد الدعوة والقبول، وترون إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى؛ ويبقى السجل مسودة حتى تكتمل كل الخطوات المطلوبة وتقدّموه.`,
+      en: `${parties.length === 3 ? 'Three' : 'Two'} parties fill in this record: you${parties.length === 3 ? ',' : ' and'} ${o.en}. Amber steps are yours. Grey steps are filled in by ${o.en} after they accept your invitation; their answers then appear on those steps. Your answers are saved when you move to another step. Nothing is sent to the Ministry until you submit.`,
+      ar: `${parties.length === 3 ? 'ثلاثة أطراف يملؤون' : 'طرفان يملآن'} هذا السجل: أنتم و${o.ar}. الخطوات الكهرمانية لكم. أما الخطوات الرمادية فيملؤها ${o.ar} بعد قبول دعوتكم، ثم تظهر إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى. لا يُرسل شيء إلى الوزارة قبل أن تقدّموا السجل.`,
     };
   })() : null;
   const handoffParty = handoff && record.editable && viewerRole === 'organizer' ? handoff : null;
@@ -207,6 +221,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   return (
     <div data-region="record-requirements">
       <JumpTo />
+      <RestoreScroll />
       {guide ? (
         <div data-region="record-guide" role="note" style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14px', lineHeight: 1.6 }}>
           <L en={guide.en} ar={guide.ar} />

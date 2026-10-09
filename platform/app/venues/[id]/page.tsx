@@ -4,7 +4,8 @@ import { NextStepCard } from '../../../components/NextStepCard';
 import { StageRail } from '../../../components/StageRail';
 import { RecordRequirements } from '../../../components/record/RecordRequirements';
 import { VenueFinalReview } from '../../../components/record/VenueFinalReview';
-import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
+import { VenuePadPanel } from '../../../components/venue/VenuePadPanel';
+import { linkableFacilitiesFor, padFacilityForVenue } from '../../../lib/sites';
 import { actionGrid, actionCell, actionPill, actionPillDisabled, actionReason, gateReason } from '../../../components/RecordActions';
 import { L } from '../../../components/L';
 import { ownedVenuePage } from '../../../lib/venue/page';
@@ -15,17 +16,17 @@ import { venueReassessmentGate } from '../../../lib/rules';
 import { venueNextAction, venueRailStages, venueStatusLabel } from '../../../lib/rules/venue-workflow';
 import { venueAssessmentsFor, venueChangeSinceAssessment } from '../../../lib/queries';
 import { InfoNote } from '../../../components/InfoNote';
-import { EmailDeliveryNotice } from '../../../components/EmailDeliveryNotice';
 import { levelWhy } from '../../../lib/rules';
 import { renewVenuePackageAction, reopenVenueSectionAction } from '../actions';
 
 /**
- * THE VENUE'S SINGLE RECORD PAGE, laid out as the event's (owner, 8 October 2026): the next
- * step, the certificate, the rail, the compact details-and-assessment card with its two
- * deliberate edit actions, then the SAME step-by-step requirement renderer -- invitations
- * on the rows that need the party, the final review and Submit. No section tabs.
+ * THE VENUE'S SINGLE RECORD PAGE, laid out as the event's (owner, 8 October 2026), in the
+ * order of the Hosting Venue Registration revised logic: venue profile, annual assessment,
+ * venue infrastructure and access, the linked PAD facility's AEDs, review and submit, the
+ * annual venue certificate. A hosting venue names no EMS agency and no Medical Director;
+ * each event held there names its own. No section tabs.
  */
-export default async function VenueRecordPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string; upload?: string; doc?: string; saved?: string; step?: string; invite?: string; invited?: string; mail?: string }> }) {
+export default async function VenueRecordPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; submitted?: string; upload?: string; doc?: string; saved?: string; step?: string; pad?: string }> }) {
   const { id } = await params;
   const { account, w } = await ownedVenuePage(id);
   const q = await searchParams;
@@ -40,14 +41,18 @@ export default async function VenueRecordPage({ params, searchParams }: { params
   const renewalReason = gateReason(renewal);
   const assessed = w.assessmentVersion ? venueAssessmentsFor(account.id, id).find((a) => a.version === w.assessmentVersion) ?? null : null;
   const why = assessed ? levelWhy(assessed.derivation) : null;
+  const pad = padFacilityForVenue(id);
+  const signed = (getDb().prepare('SELECT representative, position FROM venue_assessments WHERE venue_id = ? AND version = ?').get(id, w.assessmentVersion ?? 0) as { representative: string; position: string } | undefined) ?? { representative: '', position: '' };
+  // Once filed, the final review reads as the event's does: the record ID, the receipt, and the declaration as signed.
+  const filed = w.status !== 'draft' && w.submittedAt ? { submittedAt: w.submittedAt, revision: w.revision, ...signed } : null;
   const editLink: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', minHeight: 36, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 18, fontSize: '13.5px', color: 'var(--ink)' };
   const contentTypes: Record<string, string | null> = {};
   for (const f of w.files) contentTypes[f.docKey] = null;
   const derived = {
     scheduleEn: `${v.nameEn} · routine operating session · capacity ${v.licensedCapacity ?? '—'}`,
     scheduleAr: `${v.nameAr} · جلسة تشغيل اعتيادية · السعة ${v.licensedCapacity ?? '—'}`,
-    contactsEn: [v.responsibleName, ...w.invitations.filter((i) => i.status === 'confirmed').map((i) => `${i.name} (${i.kind === 'ems' ? 'EMS agency' : 'Medical Director'})`)].filter(Boolean).join(' · '),
-    contactsAr: [v.responsibleName, ...w.invitations.filter((i) => i.status === 'confirmed').map((i) => `${i.name} (${i.kind === 'ems' ? 'جهة الإسعاف' : 'المدير الطبي'})`)].filter(Boolean).join(' · '),
+    contactsEn: v.responsibleName,
+    contactsAr: v.responsibleName,
     organizerPhoneMissing: !v.responsiblePhone,
   };
 
@@ -72,14 +77,14 @@ export default async function VenueRecordPage({ params, searchParams }: { params
         <div data-region="certificate-card" style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center', justifyContent: 'space-between', paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 12, marginBlockEnd: 32 }}>
           <div style={{ flex: '1 1 240px', minWidth: 0 }}>
             <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--brand)', marginBlockEnd: 6 }}>
-              <L en="Venue certificate" ar="شهادة الموقع" />
+              <L en="Annual venue certificate" ar="الشهادة السنوية للموقع" />
             </div>
             <div style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.45 }}>
               <L en={v.validUntil ? `Valid until ${v.validUntil}` : 'Issued'} ar={v.validUntil ? `صالحة حتى ⁦${v.validUntil}⁩` : 'صادرة'} />
             </div>
           </div>
           <Link href={`/venues/${id}/certificate`} style={{ flex: 'none', height: 44, paddingInline: 22, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
-            <L en="Download venue certificate" ar="تنزيل شهادة الموقع" />
+            <L en="Open the certificate" ar="فتح الشهادة" />
           </Link>
         </div>
       ) : null}
@@ -89,7 +94,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
       {/* The compact details and assessment block, with deliberate edit actions -- as on the event record. */}
       <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>
         <div style={{ fontSize: 14, lineHeight: 1.5, minWidth: 0 }}>
-          <span style={{ fontWeight: 500 }}><L en="Details and assessment" ar="البيانات والتقييم" /></span>
+          <span style={{ fontWeight: 500 }}><L en="Venue profile and annual assessment" ar="ملف الموقع والتقييم السنوي" /></span>
           <span style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
             {assessed && w.level !== null ? (
               <>
@@ -103,7 +108,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px', alignItems: 'center' }}>
             {/* One click straight into the form, as on the event record: each action reopens its section. */}
             <form action={reopenVenueSectionAction.bind(null, id, 'details')}>
-              <button type="submit" data-region="edit-details-link" style={{ ...editLink, background: 'var(--bg)', cursor: 'pointer' }}><L en="Edit venue details" ar="تعديل تفاصيل الموقع" /></button>
+              <button type="submit" data-region="edit-details-link" style={{ ...editLink, background: 'var(--bg)', cursor: 'pointer' }}><L en="Edit the venue profile" ar="تعديل ملف الموقع" /></button>
             </form>
             {assessed ? (
               <form action={reopenVenueSectionAction.bind(null, id, 'assessment')}>
@@ -135,9 +140,6 @@ export default async function VenueRecordPage({ params, searchParams }: { params
             </span>
           ) : null
         ) : null}
-        <span style={actionCell}>
-          <Link href="/dashboard" style={actionPill}><L en="Events and post-event reports" ar="الفعاليات وتقارير ما بعد الفعاليات" /></Link>
-        </span>
       </div>
 
       {w.record && w.level !== null ? (
@@ -147,15 +149,9 @@ export default async function VenueRecordPage({ params, searchParams }: { params
               <L en={`Submitted on ${w.submittedAt?.slice(0, 10) ?? ''} · submission ${w.revision}. The answers below are the record as the Ministry reads it.`} ar={`قُدِّم في ⁦${w.submittedAt?.slice(0, 10) ?? ''}⁩ · الطلب ${w.revision}. الإجابات أدناه هي السجل كما تقرأه الوزارة.`} />
             </div>
           ) : null}
-          {/* How the last invitation was delivered, and why one was refused, after the row's action returns here. */}
-          <EmailDeliveryNotice status={q.invited ? q.mail : undefined} />
-          {q.invite ? (
-            <div role="alert" data-region="invite-refused" style={{ padding: '12px 16px', border: '1px solid var(--bad)', borderRadius: 10, marginBlockEnd: 16, fontSize: '14.5px' }}>
-              <L en={q.invite === 'duplicate' ? 'This invitation already exists. Withdraw it before replacing it.' : 'Enter a name and a valid email address.'} ar={q.invite === 'duplicate' ? 'هذه الدعوة موجودة. اسحبوها قبل استبدالها.' : 'أدخلوا اسماً وبريداً إلكترونياً صالحاً.'} />
-            </div>
-          ) : null}
-          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null} handoff={q.invited === 'ems' || q.invited === 'director' ? q.invited : null}
-            final={<>{w.level === 1 ? <MedicalArrangementsSummary instances={w.record.instances} /> : null}<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} /></>} />
+          <RecordRequirements record={w.record} viewerRole="organizer" viewerConfirmed contentTypes={contentTypes} refusal={q.upload && q.doc ? { key: q.doc, reason: q.upload } : null} derived={derived} listHref={`/venues/${id}/requirements`} initialStep={q.step ?? q.saved ?? q.doc ?? null}
+            extras={{ V7: <VenuePadPanel venueId={id} pad={pad} linkable={w.editable ? linkableFacilitiesFor(account.id, id) : []} editable={w.editable} refused={q.pad === 'refused'} /> }}
+            final={<VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} filed={filed} />} />
         </div>
       ) : (
         <>
@@ -163,7 +159,7 @@ export default async function VenueRecordPage({ params, searchParams }: { params
             <Link href={`/venues/${id}/assessment`}><L en="Complete the assessment to see the requirements. The level is derived from one routine operating session." ar="أكملوا التقييم للاطلاع على المتطلبات. يُستنتج المستوى من جلسة تشغيل اعتيادية واحدة." /></Link>
           </div>
           {/* Without a level the final review still names the details, the assessment and the fee. */}
-          <VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} />
+          <VenueFinalReview id={id} facts={facts} editable={w.editable} submitted={Boolean(q.submitted)} error={q.error ?? null} filed={filed} />
         </>
       )}
 

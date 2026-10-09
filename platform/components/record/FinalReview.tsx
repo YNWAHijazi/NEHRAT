@@ -1,5 +1,7 @@
 'use client';
 
+import { PhoneInput } from '../PhoneInput';
+import { UseMyDetails } from '../UseMyDetails';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../L';
@@ -17,8 +19,10 @@ export interface ReviewRow { key: string; labelEn: string; labelAr: string; stat
  * Submit. The declaration fields autosave; the server re-validates everything on
  * Submit and a refusal opens the exact incomplete card.
  */
-export function FinalReview({ eventId, level, remaining, optional, statements, declarationInst, initial, filed, revisionOpen, expedited, certificationStatement, externalBlockers, fee, headerRows }: {
+export function FinalReview({ eventId, level, remaining, optional, statements, declarationInst, initial, filed, revisionOpen, expedited, certificationStatement, externalBlockers, fee, headerRows, me = null }: {
   eventId: string;
+  /** The signed-in organizer, to prefill an empty declaration and for "Use my details". */
+  me?: { name: string; phone: string } | null;
   level: 1 | 2 | 3;
   /** The compliance form's header fields, filled from the record. */
   headerRows: { en: string; ar: string; valueEn: string; valueAr: string }[];
@@ -40,8 +44,9 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   const [pending, startTransition] = useTransition();
   const [, startAutosave] = useTransition();
   const [ticked, setTicked] = useState<Record<string, boolean>>(initial?.declarations ?? {});
-  const [representative, setRepresentative] = useState(initial?.representative ?? '');
-  const [telephone, setTelephone] = useState(initial?.telephone ?? '');
+  // The signed-in organizer's own name and number until the form holds others (owner, 9 October 2026).
+  const [representative, setRepresentative] = useState(initial?.representative || me?.name || '');
+  const [telephone, setTelephone] = useState(initial?.telephone || me?.phone || '');
   const [position, setPosition] = useState(initial?.position ?? '');
   const [saved, setSaved] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -191,14 +196,21 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
         ) : null}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 16 }}>
           {([['representative', representative, setRepresentative, 'Authorized representative', 'الممثل المفوّض'], ['position', position, setPosition, 'Position', 'الصفة'], ['telephone', telephone, setTelephone, 'Telephone', 'الهاتف']] as const).map(([key, value, set, en, ar]) => (
-            <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }} onBlur={() => { if (!locked) persist(); }}>
               <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}><L en={en} ar={ar} /></span>
-              <input name={key} value={value} disabled={locked} required aria-invalid={!locked && missingCert.has(key) && dirty.current ? true : undefined}
-                onChange={(e) => set(e.target.value)} onBlur={() => { if (!locked) persist(); }}
-                style={{ ...fieldInput, ...(!locked && missingCert.has(key) && dirty.current ? { border: '1px solid var(--bad)' } : {}) }} />
+              {key === 'telephone' ? (
+                <PhoneInput name={key} value={value} disabled={locked} required invalid={!locked && missingCert.has(key) && dirty.current} onChange={set} />
+              ) : (
+                <input name={key} value={value} disabled={locked} required aria-invalid={!locked && missingCert.has(key) && dirty.current ? true : undefined}
+                  onChange={(e) => set(e.target.value)}
+                  style={{ ...fieldInput, ...(!locked && missingCert.has(key) && dirty.current ? { border: '1px solid var(--bad)' } : {}) }} />
+              )}
             </label>
           ))}
         </div>
+        {!locked && me && (me.name || me.phone) && (representative !== me.name || telephone !== me.phone) ? (
+          <div style={{ marginBlockStart: 6 }}><UseMyDetails onUse={() => { if (me.name) setRepresentative(me.name); if (me.phone) setTelephone(me.phone); }} /></div>
+        ) : null}
         {!locked ? (
           <div aria-live="polite" style={{ marginBlockStart: 10, minHeight: 20 }}>
             {saved ? <span data-region="autosaved" style={{ fontSize: '13.5px', color: 'var(--success)' }}><L en="Saved." ar="حُفظ." /></span> : null}

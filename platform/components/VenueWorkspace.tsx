@@ -9,6 +9,7 @@ import { beirutToday } from '../lib/clock';
 import { levelWhy } from '../lib/rules';
 import { venuePackageFor } from '../lib/venue/workspace';
 import { venueStatusLabel } from '../lib/rules/venue-workflow';
+import { siteIdForVenue } from '../lib/sites';
 
 export type VenueTab = 'overview' | 'details' | 'assessment' | 'team';
 export type VenueWorkspaceData = NonNullable<ReturnType<typeof venuePackageFor>>;
@@ -21,10 +22,11 @@ export function VenueWorkspace({ account, w, active, children }: { account: Acco
   const why = assessed ? levelWhy(assessed.derivation) : null;
   const daysLeft = v.validUntil ? daysBetween(beirutToday(), v.validUntil) : null;
   const returned = w.status === 'revision' || w.status === 'incomplete';
+  const siteId = siteIdForVenue(v.id);
 
   const stats: RecordStat[] = [
     {
-      en: 'Level', ar: 'المستوى', region: 'derivation', wrapperStyle: { maxWidth: '100%' },
+      en: 'Annual classification', ar: 'التصنيف السنوي', region: 'derivation', wrapperStyle: { maxWidth: '100%' },
       info: why?.reason || why?.comparison ? <InfoNote labelEn="How the level is calculated" labelAr="كيفية احتساب المستوى">
         {why.reason ? <L en={why.reason.en} ar={why.reason.ar} /> : null}{' '}
         {why.comparison ? <L en={why.comparison.en} ar={why.comparison.ar} /> : null}
@@ -53,6 +55,8 @@ export function VenueWorkspace({ account, w, active, children }: { account: Acco
           <RecordHeader
             facts={[
               { en: 'Record ID', ar: 'معرّف السجل', value: v.id, strong: true },
+              // The physical place this registration belongs to; its PAD facility and its events share it.
+              ...(siteId ? [{ en: 'Site ID', ar: 'معرّف المكان', value: siteId }] : []),
               { en: 'Status', ar: 'الحالة', value: <L en={state.en} ar={state.ar} /> },
             ]}
             nameEn={v.nameEn}

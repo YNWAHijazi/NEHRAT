@@ -1,4 +1,5 @@
 import { OptionText } from '../../../../components/OptionText';
+import { PhoneInput } from '../../../../components/PhoneInput';
 import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
 import { InfoNote } from '../../../../components/InfoNote';
 import { TRANSPORT_FACILITY_TYPES } from '../../../../lib/rules/facility-intake';
@@ -35,7 +36,7 @@ export default async function Profile({params,searchParams}:{params:Promise<{id:
   <form action={saveFacilityPersonsAction.bind(null,id)} style={{display:'grid',gap:16,marginBlockStart:16}}>
    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:16}}>
     {content.personFields.map(pf=>{const name=pf.key==='nameOrPosition'?'coordinatorName':pf.key==='phone'?'coordinatorPhone':'coordinatorEmail';const value=pf.key==='nameOrPosition'?contact?.nameOrPosition:pf.key==='phone'?contact?.phone:contact?.email;
-     return <label key={pf.key} style={{display:'grid',gap:6}}><L en={pf.en} ar={pf.ar}/><input name={name} defaultValue={value??''} required type={pf.key==='email'?'email':pf.key==='phone'?'tel':'text'} dir={pf.key==='nameOrPosition'?undefined:'ltr'} style={inputStyle}/></label>;})}
+     return <label key={pf.key} style={{display:'grid',gap:6}}><L en={pf.en} ar={pf.ar}/>{pf.key==='phone'?<PhoneInput name={name} defaultValue={value??''} required/>:<input name={name} defaultValue={value??''} required type={pf.key==='email'?'email':'text'} dir={pf.key==='nameOrPosition'?undefined:'ltr'} style={inputStyle}/>}</label>;})}
    </div>
    <button type="submit" style={{minHeight:44,padding:'12px 24px',border:0,borderRadius:24,background:'var(--brand)',color:'var(--bg)',cursor:'pointer',justifySelf:'start'}}><L en="Save responsible contact" ar="حفظ جهة الاتصال المسؤولة"/></button>
   </form>

@@ -7,5 +7,5 @@ import { redirect } from 'next/navigation';
  */
 export default async function VenueTeam({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  redirect(`/venues/${id}?step=B7#req-B7`);
+  redirect(`/venues/${id}`);
 }

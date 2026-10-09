@@ -2,20 +2,24 @@ import { L } from '../L';
 import { VenueSubmitControls } from '../VenueSubmitControls';
 import { submitVenuePackageAction } from '../../app/venues/actions';
 import type { VenueCheck, VenuePackageFacts } from '../../lib/rules/venue-workflow';
-import { venueSubmissionChecks } from '../../lib/rules/venue-workflow';
+import { VENUE_DECLARATION, venueSubmissionChecks } from '../../lib/rules/venue-workflow';
+import { fieldInput } from '../workspace-styles';
 
 /**
  * The foot of the venue record page (brief item 16): what remains, with a jump link to
  * each item; the optional choices apart; the operator's declaration; one Submit. The
  * same checks the submit action re-runs.
  */
-export function VenueFinalReview({ id, facts, editable, submitted, error }: { id: string; facts: VenuePackageFacts; editable: boolean; submitted: boolean; error: string | null }) {
+export function VenueFinalReview({ id, facts, editable, submitted, error, filed = null }: {
+  id: string; facts: VenuePackageFacts; editable: boolean; submitted: boolean; error: string | null;
+  /** The package as filed: the receipt band and the declaration as signed, read-only -- as on the event (owner, 8 October 2026). */
+  filed?: { submittedAt: string; revision: number; representative: string; position: string } | null;
+}) {
   const { required, optional, remaining } = venueSubmissionChecks(facts);
   const href = (c: VenueCheck) =>
     c.target === 'details' ? `/venues/${id}/details`
       : c.target === 'assessment' ? `/venues/${id}/assessment`
-        : c.target === 'team' ? '#req-B7'
-          : c.target === 'fee' ? '#amount-due'
+        : c.target === 'fee' ? '#amount-due'
             : `#req-${c.key}`;
   const rowStyle: React.CSSProperties = { display: 'flex', gap: 16, justifyContent: 'space-between', alignItems: 'center', minHeight: 44, padding: '8px 14px', color: 'var(--ink)', borderBlockEnd: '1px solid var(--line)', textDecoration: 'none' };
   const cardStyle: React.CSSProperties = { background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, padding: '18px 20px', marginBlockEnd: 16 };
@@ -23,11 +27,43 @@ export function VenueFinalReview({ id, facts, editable, submitted, error }: { id
   return (
     <section id="final-review" data-region="final-review" tabIndex={-1} style={{ marginBlockStart: 40, scrollMarginBlockStart: 16 }}>
       <h2 style={{ fontSize: 24, margin: '0 0 16px', fontWeight: 600, letterSpacing: '-.025em' }}><L en="Review and submit" ar="المراجعة والتقديم" /></h2>
-      {submitted ? (
+      {submitted || (filed && !editable) ? (
         <div role="status" data-region="submitted-notice" style={{ ...cardStyle, border: '1px solid var(--brand)', background: 'var(--brand-soft)', fontSize: 15, lineHeight: 1.65 }}>
           {/* As on the event: the record ID, and the receipt one click away. A venue's record ID is its id. */}
           <L en={`Submitted. The record ID is ${id}.`} ar={`قُدِّم. معرّف السجل هو ⁦${id}⁩.`} />{' '}
           <a href={`/venues/${id}/acknowledgment`} style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Open the acknowledgment of receipt" ar="فتح إشعار الاستلام" /></a>
+        </div>
+      ) : null}
+      {filed && !editable ? (
+        <div data-region="filed-declaration" style={cardStyle}>
+          <details data-region="submission-details" style={{ marginBlockEnd: 16 }}>
+            <summary style={{ cursor: 'pointer', minHeight: 36, display: 'flex', alignItems: 'center', fontSize: '14.5px', color: 'var(--muted)' }}><L en="Submission details" ar="تفاصيل التقديم" /></summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden', marginBlockStart: 8 }}>
+              {[
+                { en: 'Record ID', ar: 'معرّف السجل', value: id },
+                { en: 'Submitted on', ar: 'تاريخ التقديم', value: filed.submittedAt.slice(0, 10) },
+                { en: 'Submission', ar: 'الطلب', value: String(filed.revision) },
+                { en: 'Annual classification', ar: 'التصنيف السنوي', value: facts.level ? `${facts.level}` : '—' },
+              ].map((h) => (
+                <div key={h.en} style={{ background: 'var(--bg)', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', gap: 16, fontSize: '13.5px', lineHeight: 1.5 }}>
+                  <span style={{ color: 'var(--muted)' }}><L en={h.en} ar={h.ar} /></span>
+                  <span style={{ textAlign: 'end', fontVariantNumeric: 'tabular-nums' }}>{h.value}</span>
+                </div>
+              ))}
+            </div>
+          </details>
+          <h3 style={{ fontSize: 16, margin: '0 0 6px' }}><L en="Operator declaration" ar="إقرار الجهة المشغّلة" /></h3>
+          <div style={{ paddingBlock: 13, paddingInlineStart: 16, paddingInlineEnd: 16, background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, margin: '10px 0 16px', fontSize: '14.5px', lineHeight: 1.65, maxWidth: '78ch' }}>
+            <L en={VENUE_DECLARATION.en} ar={VENUE_DECLARATION.ar} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))', gap: 16 }}>
+            {([[filed.representative, 'Authorized representative', 'الممثل المفوّض'], [filed.position, 'Position', 'الصفة']] as const).map(([value, en, ar]) => (
+              <label key={en} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}><L en={en} ar={ar} /></span>
+                <input value={value} disabled readOnly style={fieldInput} />
+              </label>
+            ))}
+          </div>
         </div>
       ) : null}
       {error === 'incomplete' ? (

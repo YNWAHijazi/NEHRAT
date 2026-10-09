@@ -11,65 +11,51 @@ import ministryJson from '../lib/rules/data/ministry.json';
 function ready(over: Partial<VenuePackageFacts> = {}): VenuePackageFacts {
   return {
     editable: true, status: 'draft', detailsDone: true, assessmentDone: true, level: 2, assessmentVersion: 1,
-    pendingInvitations: [],
     requirements: [
-      { key: 'B1', en: 'Organizer contact', ar: 'جهة اتصال لدى المنظم', optional: false, done: true, clinical: false },
-      { key: 'B5', en: 'BLS response team(s)', ar: 'فرق BLS', optional: false, done: true, clinical: true },
-      { key: 'B6', en: 'Treatment post', ar: 'نقطة علاج', optional: true, done: false, clinical: true },
+      { key: 'V1', en: 'Layout and zones', ar: 'المخطط العام والمناطق', optional: false, done: true },
+      { key: 'V2', en: 'Emergency vehicle access', ar: 'وصول مركبات الطوارئ', optional: false, done: true },
+      { key: 'V6', en: 'Other venue characteristics', ar: 'خصائص أخرى للموقع', optional: true, done: false },
+      { key: 'V7', en: 'AEDs and cardiac-arrest readiness', ar: 'أجهزة إزالة الرجفان والجاهزية لتوقف القلب', optional: false, done: true },
     ],
     fee: null, submittedAt: null, validUntil: null,
     ...over,
   };
 }
+const open = (key: string) => ({ key, en: key, ar: key, optional: false, done: false });
 
 describe('venue submission checks -- one list for the screen and the action', () => {
   it('can submit when every required check is done, whatever the optional rows say', () => {
     const c = venueSubmissionChecks(ready());
     expect(c.canSubmit).toBe(true);
     expect(c.remaining).toBe(0);
-    expect(c.optional.map((o) => o.key)).toEqual(['B6']);
+    expect(c.optional.map((o) => o.key)).toEqual(['V6']);
   });
   it.each([
     ['details not done', { detailsDone: false }],
     ['assessment not done', { assessmentDone: false }],
-    ['a pending invitation', { pendingInvitations: [{ name: 'Agency', token: 'x'.repeat(48) }] }],
-    ['a required row not done', { requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }],
+    ['a required row not done', { requirements: [open('V2')] }],
     ['an unpaid fee', { fee: { amount: '50', currency: 'USD', paid: false } }],
     ['a locked package', { editable: false }],
   ] as const)('blocks on %s', (_name, over) => {
     expect(venueSubmissionChecks(ready(over as Partial<VenuePackageFacts>)).canSubmit).toBe(false);
   });
-  it('counts only rows and replies as the requirements stage, not details or the fee', () => {
-    const c = venueSubmissionChecks(ready({ detailsDone: false, fee: { amount: '50', currency: 'USD', paid: false }, pendingInvitations: [{ name: 'A', token: 't' }] }));
+  it('counts only the venue steps as the requirements stage, not the profile or the fee', () => {
+    const c = venueSubmissionChecks(ready({ detailsDone: false, fee: { amount: '50', currency: 'USD', paid: false }, requirements: [open('V3')] }));
     expect(c.remaining).toBe(3);
     expect(c.requirementsRemaining).toBe(1);
   });
 });
 
 describe('venue next step', () => {
-  it('leads with details, then the assessment, then the organizer\'s own rows', () => {
+  it('leads with the profile, then the assessment, then the first open step', () => {
     expect(venueNextAction(ready({ detailsDone: false }))?.kind).toBe('details');
     expect(venueNextAction(ready({ assessmentDone: false }))?.kind).toBe('assessment');
-    expect(venueNextAction(ready({ requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }))?.kind).toBe('requirements');
+    expect(venueNextAction(ready({ requirements: [open('V3'), open('V7')] }))).toMatchObject({ kind: 'requirements', href: '#req-V3', titleEn: 'Complete 2 steps' });
   });
-  it('waits on the team when the only open rows complete from an invitation reply', () => {
-    const facts = ready({
-      level: 3,
-      pendingInvitations: [{ name: 'Dr A', token: 't' }],
-      requirements: [{ key: 'B3', en: 'Event Medical Director', ar: 'المدير الطبي', optional: false, done: false, clinical: false, awaitingInvitation: true }],
-    });
-    expect(venueNextAction(facts)).toMatchObject({ kind: 'waitingOnOthers', href: '#req-B7' });
+  it('never waits on a medical team: a venue has none', () => {
+    for (const f of [ready(), ready({ requirements: [open('V7')] })]) expect(venueNextAction(f)?.kind).not.toBe('waitingOnOthers');
   });
-  it('asks for the medical team first when medical items wait and nobody is invited', () => {
-    const facts = ready({ requirements: [
-      { key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false },
-      { key: 'B5', en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true },
-    ] });
-    expect(venueNextAction(facts)).toMatchObject({ kind: 'team', href: '#req-B7' });
-    expect(venueNextAction({ ...facts, medicalTeamLinked: true })).toMatchObject({ kind: 'requirements', titleEn: 'Complete your 1 requirement' });
-  });
-  it('waits on the medical team for clinical rows, and says ready only when everything is in place', () => {
-    expect(venueNextAction(ready({ medicalTeamLinked: true, requirements: [{ key: 'B5', en: 'BLS', ar: 'BLS', optional: false, done: false, clinical: true }] }))?.kind).toBe('waitingOnOthers');
+  it('says ready only when everything is in place', () => {
     expect(venueNextAction(ready())).toMatchObject({ kind: 'submit', tone: 'brand' });
     expect(venueNextAction(ready({ fee: { amount: '50', currency: 'USD', paid: false } }))?.kind).toBe('awaitingPayment');
   });
@@ -79,25 +65,29 @@ describe('venue next step', () => {
   });
 });
 
-describe('venue progress rail', () => {
+describe('venue progress rail: profile, assessment, infrastructure, AEDs, review, certificate', () => {
   const cases: [string, Partial<VenuePackageFacts>, number][] = [
     ['a fresh draft', { detailsDone: false, assessmentDone: false, requirements: [] }, 1],
-    ['a draft with rows open', { requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
-    ['a draft ready to submit', {}, 4],
-    ['a submitted package', { status: 'submitted', editable: false, submittedAt: '2026-10-01 10:00:00' }, 5],
-    ['an accepted package', { status: 'accepted', editable: false, submittedAt: '2026-10-01 10:00:00', validUntil: '2027-10-01' }, 5],
-    ['a returned package with rows open', { status: 'incomplete', requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }, 3],
+    ['a draft with infrastructure open', { requirements: [open('V2'), { ...open('V7'), done: true }] }, 3],
+    ['a draft with only the AEDs open', { requirements: [{ ...open('V2'), done: true }, open('V7')] }, 4],
+    ['a draft ready to submit', {}, 5],
+    ['a submitted package', { status: 'submitted', editable: false, submittedAt: '2026-10-01 10:00:00' }, 6],
+    ['an accepted package', { status: 'accepted', editable: false, submittedAt: '2026-10-01 10:00:00', validUntil: '2027-10-01' }, 6],
+    ['a returned package with steps open', { status: 'incomplete', requirements: [open('V2'), { ...open('V7'), done: true }] }, 3],
   ];
   it.each(cases)('%s', (_name, over, stage) => {
     const r = venueRailStages(ready(over));
-    expect(r.stages).toHaveLength(5);
+    expect(r.stages.map((x) => x.en)).toEqual(['Venue profile', 'Annual assessment', 'Infrastructure and access', 'AEDs', 'Review and submit', 'Annual certificate']);
     expect(r.stage).toBe(stage);
-    expect(r.stage).toBeLessThanOrEqual(r.stages.length);
   });
-  it('marks the requirements stage "Returned here" and names the recorded outcome', () => {
-    const r = venueRailStages(ready({ status: 'incomplete', requirements: [{ key: 'B1', en: 'a', ar: 'ا', optional: false, done: false, clinical: false }] }));
+  it('marks the infrastructure stage "Returned here" and names the recorded outcome', () => {
+    const r = venueRailStages(ready({ status: 'incomplete', requirements: [open('V2'), { ...open('V7'), done: true }] }));
     expect(r.stages[2]?.k).toBe('returned');
-    expect(r.stages[4]?.metaEn).toBe(VENUE_STATUS.incomplete.en);
+    expect(r.stages[5]?.metaEn).toBe(VENUE_STATUS.incomplete.en);
+  });
+  it('an accepted venue reads its certificate date on the last stage', () => {
+    const r = venueRailStages(ready({ status: 'accepted', editable: false, submittedAt: '2026-10-01 10:00:00', validUntil: '2027-10-01' }));
+    expect(r.stages[5]).toMatchObject({ k: 'done', metaEn: 'Valid until 2027-10-01' });
   });
 });
 

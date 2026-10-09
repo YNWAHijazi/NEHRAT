@@ -1,4 +1,5 @@
 import { InfoNote } from '../../../components/InfoNote';
+import { accountContact } from '../../../lib/account-contact';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
@@ -32,7 +33,7 @@ export default async function RegisterVenuePage() {
               second sweep): the one optional field says so on its own label. */}
 
 
-          <RegisterVenueForm fields={[...VENUE_REGISTRATION_FIELDS]} assessment={{ domains: [...DOMAINS], conditions: [...MINIMUM_CONDITIONS], bands: [...BANDS], maxScore: DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN, triggers: [...VENUE_REASSESSMENT_TRIGGERS] }} />
+          <RegisterVenueForm me={accountContact(account.id)} fields={[...VENUE_REGISTRATION_FIELDS]} assessment={{ domains: [...DOMAINS], conditions: [...MINIMUM_CONDITIONS], bands: [...BANDS], maxScore: DOMAIN_COUNT * MAX_SCORE_PER_DOMAIN, triggers: [...VENUE_REASSESSMENT_TRIGGERS] }} />
 
           <div data-region="exempt-footnote"><InfoNote>
             <L

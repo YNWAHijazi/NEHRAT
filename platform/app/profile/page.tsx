@@ -1,4 +1,6 @@
 import { InfoNote } from '../../components/InfoNote';
+import { accountContact } from '../../lib/account-contact';
+import { PhoneInput } from '../../components/PhoneInput';
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
@@ -25,6 +27,9 @@ export default async function ProfilePage({
   const profile = roleProfileFor(account.id);
   const isEms = account.role === 'ems';
   const fields = isEms ? ROLES_CONTENT.ems.profileFields : ROLES_CONTENT.director.profileFields;
+  // An empty profile field starts with what the account already holds (owner, 9 October 2026).
+  const me = accountContact(account.id);
+  const mine: Record<string, string> = { email: me.email, ...(isEms ? { representative: me.name } : { fullName: me.name }) };
 
   return (
     <>
@@ -51,7 +56,11 @@ export default async function ProfilePage({
                     <span style={{ fontSize: '13.5px', color: 'var(--muted)' }}>
                       <L en={f.en} ar={f.ar} />
                     </span>
-                    <input name={f.key} defaultValue={profile[f.key] ?? ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
+                    {f.key === 'phone' ? (
+                      <PhoneInput name="phone" defaultValue={profile['phone'] || me.phone} />
+                    ) : (
+                      <input name={f.key} defaultValue={profile[f.key] || mine[f.key] || ''} style={{ height: 44, paddingInline: 14, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 22, fontSize: 15 }} />
+                    )}
                   </label>
                 ))}
               </div>

@@ -6,6 +6,7 @@ import { venueById, venueAssessmentsFor } from "../../../../lib/queries";
 import { can } from "../../../../lib/rules/ministry";
 import { PrintButton } from "../../../../components/PrintButton";
 import { L } from "../../../../components/L";
+import { siteIdForVenue } from "../../../../lib/sites";
 export default async function Certificate({
   params,
   searchParams,
@@ -50,55 +51,52 @@ export default async function Certificate({
   const latestIssued = (getDb().prepare('SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = ? AND certificate_issued = 1').get(id) as { v: number | null }).v;
   const certifiedLevel = (getDb().prepare('SELECT level FROM venues WHERE id = ?').get(id) as { level: number | null } | undefined)?.level ?? null;
   const level: number | null = derivation.finalLevel ?? (row.version === latestIssued ? certifiedLevel : null) ?? venueAssessmentsFor(owner.account_id, id).find((v) => v.version === row.version)?.derivation.finalLevel ?? null;
+  const siteId = siteIdForVenue(id);
+  const row2 = (en: string, ar: string, value: React.ReactNode) => (
+    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '4px 24px', padding: '10px 0', borderBlockEnd: '1px solid var(--line)', fontSize: 15 }}>
+      <span style={{ color: 'var(--muted)' }}><L en={en} ar={ar} /></span>
+      <span style={{ fontVariantNumeric: 'tabular-nums', textAlign: 'end' }}>{value}</span>
+    </div>
+  );
   return (
-    <main
-      data-region="certificate"
-      style={{ maxWidth: 820, margin: "40px auto", padding: 32 }}
-    >
-      <nav data-no-print="">
-        <Link
-          href={
-            owner.account_id === account.id
-              ? `/venues/${id}`
-              : "/ministry/venues"
-          }
-        >
-          <L en="Back" ar="رجوع" />
-        </Link>
+    <main data-region="certificate" style={{ maxWidth: 820, margin: '40px auto', padding: 32 }}>
+      <nav data-no-print="" style={{ marginBlockEnd: 24 }}>
+        <Link href={owner.account_id === account.id ? `/venues/${id}` : '/ministry/venues'}><L en="Back" ar="رجوع" /></Link>
       </nav>
-      <h1>
-        <L
-          en="Hosting venue classification certificate"
-          ar="شهادة تصنيف موقع استضافة الفعاليات"
-        />
+      <div style={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+        <L en="Ministry of Public Health" ar="وزارة الصحة العامة" />
+      </div>
+      {/* The certificate's name and classification line are the partner's wording (Hosting Venue Registration, 8 October 2026). */}
+      <h1 style={{ margin: '0 0 20px', fontSize: 28, lineHeight: 1.3, fontWeight: 600 }}>
+        <L en="Hosting Venue Annual Health & Medical Readiness Certificate" ar="شهادة التأهب الصحي والطبي السنوية لموقع استضافة الفعاليات" />
       </h1>
-      <h2>
-        <L
-          en={snapshot.nameEn ?? venue.nameEn}
-          ar={snapshot.nameAr ?? venue.nameAr}
-        />
+      <h2 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 600 }}>
+        <L en={snapshot.nameEn ?? venue.nameEn} ar={snapshot.nameAr ?? venue.nameAr} />
       </h2>
-      <p>
-        {id}
+      <p style={{ margin: '0 0 20px', color: 'var(--muted)' }}>
+        <L en={snapshot.addressEn ?? venue.addressMunicipalityEn} ar={snapshot.addressAr ?? venue.addressMunicipalityAr} />
       </p>
-      <p>
-        <L
-          en={`Certificate ${row.version} · Level ${level ?? '—'}`}
-          ar={`الشهادة ${row.version} · المستوى ${level ?? '—'}`}
-        />
+      <p data-region="certificate-classification" style={{ margin: '0 0 20px', fontSize: 20, fontWeight: 600 }}>
+        <L en={`Annual NEHRAT Classification: Level ${level ?? '—'}`} ar={`التصنيف السنوي وفق التقييم الوطني للمخاطر الصحية للفعاليات (NEHRAT): المستوى ${level ?? '—'}`} />
       </p>
-      <p>
-        <L
-          en={`Valid from ${row.effective} to ${row.valid_until}`}
-          ar={`صالحة من ${row.effective} إلى ${row.valid_until}`}
-        />
-      </p>
-      <p>
-        <L
-          en={snapshot.addressEn ?? venue.addressMunicipalityEn}
-          ar={snapshot.addressAr ?? venue.addressMunicipalityAr}
-        />
-      </p>
+      <div style={{ marginBlockEnd: 24 }}>
+        {row2('Record ID', 'معرّف السجل', id)}
+        {siteId ? row2('Site ID', 'معرّف المكان', siteId) : null}
+        {row2('Certificate', 'الشهادة', String(row.version))}
+        {row2('Valid', 'الصلاحية', <L en={`${row.effective} to ${row.valid_until}`} ar={`من ⁦${row.effective}⁩ إلى ⁦${row.valid_until}⁩`} />)}
+        {snapshot.capacity ?? venue.licensedCapacity ? row2('Approved or licensed capacity', 'السعة المعتمدة أو المرخّصة', String(snapshot.capacity ?? venue.licensedCapacity)) : null}
+      </div>
+      <div data-region="certificate-scope" style={{ paddingBlock: 14, paddingInlineStart: 18, paddingInlineEnd: 18, background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 10, marginBlockEnd: 24, fontSize: 15, lineHeight: 1.7 }}>
+        <p style={{ margin: '0 0 8px' }}>
+          <L en="This certificate records the venue’s routine readiness baseline for one year. It is not an event registration." ar="تسجّل هذه الشهادة خط الأساس الاعتيادي لتأهب الموقع لمدة سنة واحدة. وهي ليست تسجيلاً لفعالية." />
+        </p>
+        <p style={{ margin: '0 0 8px' }}>
+          <L en="Each event held at the venue remains subject to its own event registration and to the health and medical preparedness requirements that apply to it." ar="تبقى كل فعالية تُقام في الموقع خاضعة لتسجيلها الخاص ولمتطلبات التأهب الصحي والطبي المنطبقة عليها." />
+        </p>
+        <p style={{ margin: 0 }}>
+          <L en="The classification does not mean that EMS or an Event Medical Director is permanently provided at the venue." ar="ولا يعني التصنيف أن خدمات الإسعاف أو مديراً طبياً للفعالية متوفرة بشكل دائم في الموقع." />
+        </p>
+      </div>
       <PrintButton en="Print or save PDF" ar="طباعة أو حفظ PDF" />
     </main>
   );

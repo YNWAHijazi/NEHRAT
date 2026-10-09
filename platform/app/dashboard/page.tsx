@@ -1,5 +1,4 @@
 import { OptionText } from '../../components/OptionText';
-import {venueAssignments} from '../../lib/venue/collaboration';
 import { VENUE_STATUS } from '../../lib/rules/venue-workflow';
 import { submissionGateFor } from '../../lib/submission-facts';
 import { InfoNote } from '../../components/InfoNote';
@@ -12,6 +11,7 @@ import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
 import { archivedEventsFor, archivedVenuesFor, archivedFacilitiesFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
+import { eventsAtVenuesOf, type EventsAtVenue } from '../../lib/hosting-venues';
 import { REASSESSMENT_WINDOW, usesOrganizerSurface } from '../../lib/rules';
 import {
   beirutToday,
@@ -201,6 +201,70 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
   );
 }
 
+/**
+ * EVENTS AT YOUR VENUES (platform owner, 8 October 2026): other organizers' events linked
+ * to this account's venues, grouped by venue. The venue owner is not a party to these
+ * events, so each row is text -- name, dates, record id, level, status -- and links to no
+ * record the owner cannot open. Absent for an account with no venue; an owner with no
+ * linked event reads one line.
+ */
+function EventsAtYourVenues({ groups }: { groups: EventsAtVenue[] }) {
+  const dates = (start: string | null, end: string | null, lang: 'en' | 'ar') => {
+    const span = start && end && end !== start ? `${start} – ${end}` : (start ?? end ?? '—');
+    return lang === 'ar' ? `⁦${span}⁩` : span;
+  };
+  return (
+    <section data-region="events-at-your-venues" style={{ marginBlockStart: 44 }}>
+      <h2 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+        <L en="Events at your venues" ar="الفعاليات في مواقعكم" />
+        <InfoNote labelEn="About events at your venues" labelAr="حول الفعاليات في مواقعكم">
+          <L
+            en="Events other organizers have linked to your venues. You see the name, dates, record ID, level and status only."
+            ar="فعاليات ربطها منظّمون آخرون بمواقعكم. تظهر لكم الاسم والتواريخ ومعرّف السجل والمستوى والحالة فقط."
+          />
+        </InfoNote>
+      </h2>
+      {groups.length === 0 ? (
+        <p data-empty="" style={{ marginBlock: '12px 0', padding: '16px 22px', background: 'var(--surface2)', borderRadius: 12, fontSize: '14.5px' }}>
+          <L en="No other organizer has linked an event to your venues." ar="لم يربط أي منظّم آخر فعالية بمواقعكم." />
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBlockStart: 12 }}>
+          {groups.map((g) => (
+            <div key={g.venueId} data-venue-id={g.venueId}>
+              <h3 style={{ margin: '0 0 8px', fontSize: '11.5px', fontWeight: 500, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                <L en={`${g.venueNameEn} · ${g.venueId}`} ar={`${g.venueNameAr} · ⁦${g.venueId}⁩`} />
+              </h3>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {g.events.map((e) => (
+                  <li key={e.id} data-event-id={e.id} style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px', alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--ink)' }}>
+                    <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
+                      <L en={e.nameEn} ar={e.nameAr} />
+                    </span>
+                    <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>
+                      <L en={`${e.id} · ${dates(e.startDate, e.endDate, 'en')}`} ar={`⁦${e.id}⁩ · ${dates(e.startDate, e.endDate, 'ar')}`} />
+                    </span>
+                    <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                      {e.level !== null ? (
+                        <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
+                      ) : (
+                        <L en="No level derived yet" ar="لم يُستنتج المستوى بعد" />
+                      )}
+                    </span>
+                    <span data-status="" style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                      <L en={e.statusEn} ar={e.statusAr} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -251,7 +315,7 @@ export default async function DashboardPage({
               <L en="You have withdrawn from the event. The organizer has been told." ar="انسحبتم من الفعالية. وأُبلغ المنظّم." />
             </div>
           ) : null}
-          {venueAssignments(account).length?<section style={{marginBlockEnd:32}}><h2><L en="Hosting venues" ar="مواقع الاستضافة"/></h2>{venueAssignments(account).map(i=><p key={i.token}><Link href={i.status==='confirmed'?`/venue-team/${i.venue_id}`:`/venue-invitations/${i.token}`}>{i.venue_id} · <L en={i.name_en} ar={i.name_ar}/></Link> · <L en={i.status==='confirmed'?'View requirements':'Respond to invitation'} ar={i.status==='confirmed'?'عرض المتطلبات':'الرد على الدعوة'}/></p>)}</section>:null}
+          {/* A medical partner's hosting-venue list left with the venue medical team (8 October 2026): venues name no EMS agency or Medical Director. */}
           <RoleDashboard
             rows={rows}
             countEn={`${rows.length} events · ${owed} need a response from you`}
@@ -278,6 +342,9 @@ export default async function DashboardPage({
   const archivedFacilities = archivedFacilitiesFor(account.id);
   const previousCount = archived.length + archivedVenues.length + archivedFacilities.length;
   const venues = venuesFor(account.id);
+  // Other organizers' events linked to this account's venues: name, dates, record id,
+  // level and status only, selected so in lib/hosting-venues (platform owner, 8 October 2026).
+  const eventsAtVenues = venues.length > 0 ? eventsAtVenuesOf(account.id, account.isDemo) : [];
   const facilities = facilitiesFor(account.id);
   const unread = unreadCountFor(account.id);
   const today = beirutToday();
@@ -490,6 +557,7 @@ export default async function DashboardPage({
                     );
                   })}
                 </div>
+                <EventsAtYourVenues groups={eventsAtVenues} />
               </>
             ) : null}
           </>
