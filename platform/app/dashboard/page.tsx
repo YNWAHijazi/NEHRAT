@@ -454,6 +454,8 @@ export default async function DashboardPage({
                         : lapseDays !== null && lapseDays <= window
                           ? 'var(--accent-ink)'
                           : 'var(--brand)';
+                    // The site status (latest revision, 9 October 2026): product-defined, never an event outcome.
+                    const statusColor = f.statusTone === 'brand' ? 'var(--brand)' : f.statusTone === 'bad' ? 'var(--bad)' : f.statusTone === 'accent' ? 'var(--accent-ink)' : 'var(--muted)';
                     return (
                       <Link
                         key={f.id}
@@ -466,7 +468,7 @@ export default async function DashboardPage({
                             <L en={f.nameEn} ar={f.nameAr} />
                           </div>
                           <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-                            <L en={f.categoryEn} ar={f.categoryAr} /> · <span style={{ fontVariantNumeric: 'tabular-nums' }}>{f.id}</span>
+                            <L en={f.categoryEn} ar={f.categoryAr} /> · <span data-region="facility-site-id" style={{ fontVariantNumeric: 'tabular-nums' }}>{f.siteId ?? f.id}</span>
                           </div>
                         </div>
                         <div>
@@ -479,8 +481,8 @@ export default async function DashboardPage({
                           <div style={secLabel}>
                             <L en="Status" ar="الحالة" />
                           </div>
-                          <div style={{ fontSize: '14.5px', lineHeight: 1.45, color }}>
-                            <L en={f.stateEn} ar={f.stateAr} />
+                          <div data-region="facility-site-status" style={{ fontSize: '14.5px', lineHeight: 1.45, color: statusColor }}>
+                            <L en={f.statusEn} ar={f.statusAr} />
                           </div>
                         </div>
                         <div data-due="" style={{ textAlign: 'end', minWidth: 170 }}>
@@ -587,7 +589,7 @@ export default async function DashboardPage({
               {archivedFacilities.length > 0 ? (
                 <div data-region="previous-facilities">
                   <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-                    <L en="Facilities" ar="المنشآت" />
+                    <L en="Facilities/sites" ar="المنشآت/المواقع" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {archivedFacilities.map((f) => (

@@ -3,22 +3,15 @@
 import { InfoNote } from '../../../components/InfoNote';
 
 /**
- * The plan's own form: the facility readiness confirmation (six confirmations and
- * the latest drill date) and, under it, the facility confirmation -- the statement
- * that the plan is current, signed by the facility representative, dated by the
- * platform (Asia/Beirut, never typed). The responsible-persons form left this file
- * (partner audit, 2026-10-08): the one responsible contact is edited on the
- * facility record and shown read-only on the plan.
- *
- * TWO LAYOUTS, ONE FORM, ONE ACTION (owner, 9 October 2026). On a registered facility's
- * page the whole form sits in the response-plan section. While the registration is open
- * the readiness confirmation is the response-plan step and the facility confirmation is
- * the review step that completes the registration: the two halves share their state
- * through ReadinessProvider and post together, the plan step's inputs naming the review
- * step's form through the `form` attribute. saveFacilityPlanAction is unchanged.
+ * The readiness confirmation (latest revision, 9 October 2026, section 6): the six
+ * confirmations and the latest drill date, then the facility confirmation -- the statement
+ * signed by the facility representative and dated by the platform (Asia/Beirut, never
+ * typed). One form, one action (saveFacilityPlanAction): the readiness-confirmation step
+ * while the registration is in preparation, the cardiac-readiness tab once submitted.
+ * Recording it does not submit anything; the review step does.
  */
 
-import { createContext, useContext, useState } from 'react';
+import { useState } from 'react';
 import { L } from '../../../components/L';
 import { saveFacilityPlanAction } from '../../actions';
 import { FACILITY_CONTENT } from '../../../lib/rules';
@@ -33,7 +26,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 15,
 };
 const submitStyle = (ready: boolean): React.CSSProperties => ({ height: '46px', paddingInline: '24px', border: 0, borderRadius: '23px', background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: ready ? 'pointer' : 'default', opacity: ready ? 1 : 0.6 });
-const NOT_READY = { en: 'Available once the facility map, the responsible contact and the required AEDs are complete.', ar: 'يتاح عند اكتمال خريطة المنشأة وجهة الاتصال المسؤولة والأجهزة المطلوبة.' };
+const NOT_READY = { en: 'Available once the site map, the responsible contact and the required AEDs are complete.', ar: 'يتاح عند اكتمال خريطة الموقع وجهة الاتصال المسؤولة والأجهزة المطلوبة.' };
 
 export function PrintButton() {
   return (
@@ -54,17 +47,10 @@ interface Readiness {
   drill: string;
   setDrill: (v: string) => void;
 }
-const ReadinessContext = createContext<Readiness | null>(null);
-
 function useReadinessState(existing: FacilityPlanConfirmation | null): Readiness {
   const [checks, setChecks] = useState<Record<string, boolean>>(existing?.current ? existing.checks : {});
   const [drill, setDrill] = useState(existing?.drillDate ?? '');
   return { checks, toggle: (key) => setChecks((prev) => ({ ...prev, [key]: !prev[key] })), drill, setDrill };
-}
-
-/** Holds the readiness confirmation across the plan step and the review step. */
-export function ReadinessProvider({ existing, children }: { existing: FacilityPlanConfirmation | null; children: React.ReactNode }) {
-  return <ReadinessContext.Provider value={useReadinessState(existing)}>{children}</ReadinessContext.Provider>;
 }
 
 /** The six confirmations and the drill date. `form` names the form they post with when it is elsewhere on the page. */
@@ -193,100 +179,5 @@ export function PlanConfirmation({
         </p>
       ) : null}
     </form>
-  );
-}
-
-/** The registration form's id: the review step's form, which the plan step's fields post with. */
-export const REGISTRATION_FORM_ID = 'confirmation';
-
-/** The response-plan step's half: the readiness confirmation, posted with the review step's form. */
-export function ReadinessChecks({ existing }: { existing: FacilityPlanConfirmation | null }) {
-  const readiness = useContext(ReadinessContext);
-  if (!readiness) return null;
-  return (
-    <div data-region="readiness-checks" style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}>
-      <ReadinessHeading existing={existing} />
-      <ReadinessFields readiness={readiness} form={REGISTRATION_FORM_ID} />
-      <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
-        <L en="The facility representative signs this confirmation in the last step, which completes the registration." ar="يوقّع ممثل المنشأة هذا التأكيد في الخطوة الأخيرة، التي تُكمل التسجيل." />
-      </p>
-    </div>
-  );
-}
-
-/**
- * The review step: what remains, with a link to each, then the facility confirmation that
- * completes the registration. The items the server knows arrive as `remaining`; the
- * readiness confirmations are read from the plan step as they are ticked.
- */
-export function RegistrationReview({ facilityId, representative, today, remaining, refused }: {
-  facilityId: string;
-  representative: string;
-  today: string;
-  remaining: { key: string; en: string; ar: string; href: string }[];
-  /** The server refused the confirmation (?error=readiness). */
-  refused: boolean;
-}) {
-  const readiness = useContext(ReadinessContext);
-  const [checked, setChecked] = useState(false);
-  if (!readiness) return null;
-  const content = FACILITY_CONTENT;
-  const ticked = content.planChecks.filter((c) => readiness.checks[c.key]).length;
-  const total = content.planChecks.length;
-  const inPlan = [
-    ...(ticked < total ? [{ key: 'checks', en: `Readiness confirmations in the response plan (${ticked} of ${total})`, ar: `تأكيدات الجاهزية في خطة الاستجابة (${ticked} من ${total})`, href: '#plan' }] : []),
-    ...(readiness.drill ? [] : [{ key: 'drill', en: content.drillDateField.en, ar: content.drillDateField.ar, href: '#plan' }]),
-  ];
-  const open = [...remaining, ...inPlan];
-  const ready = remaining.length === 0;
-  const rowStyle: React.CSSProperties = { display: 'flex', gap: 16, justifyContent: 'space-between', alignItems: 'center', minHeight: 44, padding: '8px 14px', color: 'var(--ink)', borderBlockEnd: '1px solid var(--line)', borderInlineStart: '3px solid var(--accent)', textDecoration: 'none' };
-  const cardStyle: React.CSSProperties = { background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, padding: '18px 20px', marginBlockEnd: 16 };
-
-  return (
-    <div data-region="registration-review">
-      {refused ? (
-        <div role="alert" style={{ ...cardStyle, border: '1px solid var(--bad)', fontSize: '14.5px', lineHeight: 1.6 }}>
-          <L en="Confirm all readiness items, add a drill date within the last 12 months, and check the facility map and AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من الخريطة وحالة الأجهزة." />
-        </div>
-      ) : null}
-      {/* With nothing left the card goes, as on the venue's review. */}
-      <div data-region="remaining" hidden={open.length === 0} style={cardStyle}>
-        <h3 style={{ fontSize: 16, margin: '0 0 10px' }}>
-          <L en={open.length === 1 ? '1 item remaining' : `${open.length} items remaining`} ar={`${open.length} متبقٍ`} />
-        </h3>
-        <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-          {open.map((c) => (
-            <a key={c.key} href={c.href} data-remaining={c.key} style={rowStyle}>
-              <span style={{ fontSize: '14.5px' }}><L en={c.en} ar={c.ar} /></span>
-              <span style={{ flex: 'none', fontSize: 13, color: 'var(--accent-ink)' }}><L en="Pending" ar="قيد الانتظار" /></span>
-            </a>
-          ))}
-        </div>
-      </div>
-      <form
-        id={REGISTRATION_FORM_ID}
-        action={saveFacilityPlanAction.bind(null, facilityId)}
-        data-region="confirm-and-register"
-        noValidate
-        onSubmit={(e) => { if (inPlan.length > 0) { e.preventDefault(); setChecked(true); } }}
-        style={cardStyle}
-      >
-        <FacilityConfirmationFields representative={representative} today={today} />
-        {checked && inPlan.length > 0 ? (
-          <p data-region="please-fill" role="alert" style={{ margin: '0 0 16px', padding: '12px 16px', border: '1px solid var(--bad)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.55 }}>
-            <L en={`Please complete in the response plan: ${inPlan.map((c) => c.key === 'checks' ? 'the readiness confirmations' : 'the drill date').join(', ')}.`} ar={`يرجى إكمال ما يلي في خطة الاستجابة: ${inPlan.map((c) => c.key === 'checks' ? 'تأكيدات الجاهزية' : 'تاريخ التمرين').join('، ')}.`} />{' '}
-            <a href="#plan" style={{ color: 'var(--ink)', textDecoration: 'underline', textUnderlineOffset: 3 }}><L en="Open the response plan" ar="فتح خطة الاستجابة" /></a>
-          </p>
-        ) : null}
-        <button type="submit" disabled={!ready} style={submitStyle(ready)}>
-          <L en="Complete the registration" ar="إكمال التسجيل" />
-        </button>
-        {!ready ? (
-          <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--muted)' }}>
-            <L en={NOT_READY.en} ar={NOT_READY.ar} />
-          </p>
-        ) : null}
-      </form>
-    </div>
   );
 }

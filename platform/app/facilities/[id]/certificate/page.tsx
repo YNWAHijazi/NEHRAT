@@ -5,7 +5,9 @@ import { currentAccount } from '../../../../lib/auth';
 import { getDb } from '../../../../lib/db';
 import { facilityDetail, facilityDevices, facilityPlanConfirmation } from '../../../../lib/queries';
 import { ensureFacilityCertificateToken } from '../../../../lib/facility-gis';
-import { facilityPreparation, facilityRegistrationComplete } from '../../../../lib/facility-registration';
+import { siteStatusFor } from '../../../../lib/site-registration';
+import { siteCertificateAvailable, siteStatusLabel } from '../../../../lib/rules/site';
+import { siteIdForFacility } from '../../../../lib/sites';
 import { can } from '../../../../lib/rules/ministry';
 import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
 import { PrintButton } from '../../../../components/PrintButton';
@@ -38,11 +40,14 @@ export default async function FacilityCertificate({ params }: { params: Promise<
   if (!facility) notFound();
   const content = FACILITY_CONTENT;
   const category = facilityCategory(facility.categoryKey);
-  const complete = facility.archivedAt === null && facilityRegistrationComplete(id);
+  // Issued only while readiness is current: the Ministry accepted the registration and no
+  // corrective action is open (the revision does not mention the certificate; recorded).
+  const status = siteStatusFor(id);
+  const complete = facility.archivedAt === null && siteCertificateAvailable(status);
   const back = owner.account_id === account.id ? `/facilities/${id}` : '/ministry/facilities';
 
   if (!complete) {
-    const pending = facilityPreparation(id).filter((r) => !r.done);
+    const label = siteStatusLabel(status);
     return (
       <main style={{ maxWidth: 820, margin: '40px auto', padding: 32 }}>
         <nav data-no-print=""><Link href={back}><L en="Back" ar="رجوع" /></Link></nav>
@@ -51,14 +56,12 @@ export default async function FacilityCertificate({ params }: { params: Promise<
         {facility.archivedAt !== null ? (
           <p><L en="This record is no longer covered by the Ministry. No certificate is issued for it." ar="لم يعد هذا السجل مشمولاً لدى الوزارة. ولا تصدر له شهادة." /></p>
         ) : (
-          <>
-            <p><L en="The certificate is issued once every item below is complete." ar="تصدر الشهادة عند اكتمال كل بند أدناه." /></p>
-            <ul data-region="certificate-pending">
-              {pending.map((r) => (
-                <li key={r.key}><Link href={r.href}><L en={r.en} ar={r.ar} /></Link></li>
-              ))}
-            </ul>
-          </>
+          <p data-region="certificate-pending">
+            <L
+              en={`The certificate is available while readiness is current: once the Ministry has accepted the registration, and while no corrective action is open. The site’s status is ${label.en}.`}
+              ar={`تتاح الشهادة ما دامت الجاهزية سارية: بعد قبول الوزارة للتسجيل، وما دام لا إجراء تصحيحياً مفتوحاً. حالة الموقع: ${label.ar}.`}
+            />
+          </p>
         )}
       </main>
     );
@@ -79,14 +82,14 @@ export default async function FacilityCertificate({ params }: { params: Promise<
       <nav data-no-print=""><Link href={back}><L en="Back" ar="رجوع" /></Link></nav>
       <h1><L en={content.certificate.titleEn} ar={content.certificate.titleAr} /></h1>
       <h2><L en={facility.nameEn} ar={facility.nameAr} /></h2>
-      <p>{id}</p>
+      <p><L en={`Site ID ${siteIdForFacility(id) ?? '—'} · registration reference ${id}`} ar={`معرّف الموقع ⁦${siteIdForFacility(id) ?? '—'}⁩ · مرجع التسجيل ⁦${id}⁩`} /></p>
       <p><L en={`Category: ${category?.en ?? ''}`} ar={`الفئة: ${category?.ar ?? ''}`} /></p>
       <p><L en={`${facility.address}, ${facility.municipalityEn}`} ar={`${facility.address}، ${facility.municipalityAr}`} /></p>
       <p><L en={`Registered ${registeredOn}`} ar={`سُجِّلت في ⁦${registeredOn}⁩`} /></p>
       <p>
         <L
-          en={`${content.certificate.statusEn} · ${devices.length} AED${devices.length === 1 ? '' : 's'} registered · readiness confirmation recorded ${confirmation?.createdAt.slice(0, 10) ?? '—'}`}
-          ar={`${content.certificate.statusAr} · ${devices.length} جهاز مسجَّل · سُجِّل تأكيد الجاهزية في ⁦${confirmation?.createdAt.slice(0, 10) ?? '—'}⁩`}
+          en={`${siteStatusLabel(status).en} · ${devices.length} AED${devices.length === 1 ? '' : 's'} registered · readiness confirmation recorded ${confirmation?.createdAt.slice(0, 10) ?? '—'}`}
+          ar={`${siteStatusLabel(status).ar} · ${devices.length} جهاز مسجَّل · سُجِّل تأكيد الجاهزية في ⁦${confirmation?.createdAt.slice(0, 10) ?? '—'}⁩`}
         />
       </p>
       <div data-region="certificate-verification">

@@ -23,7 +23,7 @@ beforeAll(()=>{vi.stubEnv('DATABASE_PATH',join(folder,'test.db'));vi.stubEnv('RE
 afterAll(()=>{getDb().close();vi.unstubAllEnvs();rmSync(folder,{recursive:true,force:true});});
 function as(login:string){const row=getDb().prepare('SELECT id,role,is_demo FROM accounts WHERE login=?').get(login) as {id:number;role:Account['role'];is_demo:number};session.account={...row,login,displayName:login,initials:'T',isDemo:row.is_demo===1};}
 function data(fields:Record<string,string>){const f=new FormData();for(const[k,v]of Object.entries(fields))f.set(k,v);return f;}
-const profile={name:'PAD test sports facility',address:'Main road',municipality:'Beirut',hours:'Daytime',phone:'+9611234567',email:'test@example.com',accessPoint:'North gate',emsNumber:'140',coordinatorName:'Facility manager',coordinatorPhone:'+9611234567',coordinatorEmail:'test@example.com',category:'sports',mapLat:'33.89',mapLng:'35.50',mapConfirmed:'yes'};
+const profile={name:'PAD test sports facility',operatingOrganization:'PAD test operator',address:'Main road',municipality:'Beirut',hours:'Daytime',phone:'+9611234567',email:'test@example.com',accessPoint:'North gate',emsNumber:'140',coordinatorName:'Facility manager',coordinatorPhone:'+9611234567',coordinatorEmail:'test@example.com',category:'sports',mapLat:'33.89',mapLng:'35.50',mapConfirmed:'yes'};
 test('coordinates require a confirmed valid map pin',()=>{expect(readMapPoint(data({mapLat:'91',mapLng:'35',mapConfirmed:'yes'}))).toBeNull();expect(readMapPoint(data({mapLat:'',mapLng:'',mapConfirmed:'yes'}))).toBeNull();expect(readMapPoint(data({...profile,mapConfirmed:'no'}))).toBeNull();});
 test('registration validates and saves the profile, pin and audit together',async()=>{const before=getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n;await expect(registerFacilityAction(data({...profile,mapConfirmed:'no'}))).rejects.toThrow('error=details');expect(getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n).toBe(before);// The one-page intake lands on the facility record (owner, 9 October 2026).
  await expect(registerFacilityAction(data(profile))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);id=String(getDb().prepare('SELECT id FROM facilities WHERE name_en=?').get(profile.name)!.id);expect(facilityPoint(id)).toEqual({lat:33.89,lng:35.5});expect(facilityAedStatus(id)).toBe('required');});
@@ -75,9 +75,10 @@ test('the certificate token is unguessable, minted once, and resolves to the cer
  const facts=facilityByCertificateToken(token);expect(facts?.id).toBe(id);expect(facts?.isDemo).toBe(session.account!.isDemo);expect(Object.keys(facts!).sort()).toEqual(['archivedAt','categoryKey','id','isDemo','nameAr','nameEn','registeredOn']);
  expect(facilityByCertificateToken(id)).toBeNull();expect(facilityByCertificateToken('0'.repeat(48))).toBeNull();});
 
-test('the facility record reads its mode from the facts: registering until the first confirmation, managed after it',()=>{
- // The facility above recorded a confirmation, then relocated an AED: still registered, its certificate withheld.
- const facts=facilityRegistrationFacts(id);expect(facts.confirmationRecorded).toBe(true);expect(facts.confirmationCurrent).toBe(false);expect(facilityRecordMode(facts)).toBe('manage');});
+test('the facility/site record reads its mode from the facts: in preparation until it is submitted, managed after it',()=>{
+ // The facility above recorded a confirmation, then relocated an AED: the confirmation is stale, and recording it never submitted anything.
+ const facts=facilityRegistrationFacts(id);expect(facts.confirmationRecorded).toBe(true);expect(facts.confirmationCurrent).toBe(false);
+ expect(facts.status).toBe('inPreparation');expect(facilityRecordMode(facts)).toBe('register');});
 
 test('a facility registered from a hosting venue stands on its site, and only its owner sees the venue named on the record',async()=>{as('test_organizer');
  await expect(registerFacilityAction(data({...profile,name:'PAD from a venue',fromVenue:'VN-0032'}))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);

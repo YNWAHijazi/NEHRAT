@@ -11,6 +11,8 @@ import { facilityPersons } from '../lib/queries';
  */
 
 import { TRANSPORT_FACILITY_TYPES, facilityIncidentError } from '../lib/rules/facility-intake';
+import { categoryApplicabilityMode, siteApplicability, siteRecordLocked } from '../lib/rules/site';
+import { siteStatusFacts } from '../lib/site-registration';
 import { readMapPoint } from '../lib/rules/geolocation';
 import { facilityPoint, facilitySnapshot, bumpFacilityRevision, facilityAedStatus } from '../lib/facility-gis';
 import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification';
@@ -376,6 +378,15 @@ function refuseIfVenueArchived(venueId: string): void {
     | { archived_at: string | null }
     | undefined;
   if (row?.archived_at) redirect(`/venues/${venueId}?error=archived`);
+}
+
+/**
+ * A facility/site registration with the Ministry is read-only until it is accepted or
+ * returned for information or a correction -- as a filed event is (owner, 9 October 2026).
+ * Incident reports are a separate obligation and are never locked.
+ */
+function refuseIfFacilityLocked(facilityId: string): void {
+  if (siteRecordLocked(siteStatusFacts(facilityId))) redirect(`/facilities/${facilityId}?error=locked`);
 }
 
 /** And the facility lane's: an archived facility record is read-only. */
@@ -949,9 +960,17 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   if (!category || categoryEndsJourney(category)) redirect('/facilities/new');
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
   const point = readMapPoint(formData);
-  if (!point || !['name','address','municipality','hours','phone','email','accessPoint','emsNumber','coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k))) redirect('/facilities/new?error=details');
+  if (!point || !['name','operatingOrganization','address','municipality','hours','phone','email','accessPoint','emsNumber','coordinatorName','coordinatorPhone','coordinatorEmail'].every(k=>s(k))) redirect('/facilities/new?error=details');
   const capacityNum = Number(s('capacity'));
-  if ((s('capacity') && (!Number.isSafeInteger(capacityNum) || capacityNum < 0)) || (categoryKey==='transport' && !TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType')))) redirect('/facilities/new?error=details');
+  if ((s('capacity') && (!Number.isSafeInteger(capacityNum) || capacityNum < 0)) || (categoryKey==='transport' && !TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType')&&!t.legacy))) redirect('/facilities/new?error=details');
+  // An event-hosting venue is covered by capacity (latest revision, 9 October 2026): the
+  // capacity is required, and a site the published threshold does not reach is not
+  // registered under this category -- the screen said so and drew no Continue.
+  if (categoryApplicabilityMode(categoryKey) === 'capacity') {
+    const { siteEventVenueThreshold } = await import('../lib/facility-gis');
+    const reach = siteApplicability({ categoryKey, capacity: s('capacity') ? capacityNum : null, threshold: siteEventVenueThreshold(), designatedOn: null });
+    if (!reach.covered) redirect('/facilities/new?error=capacity');
+  }
   const facilityId = nextRecordId('FC');
   // Started from a venue ("Register this venue's AEDs"): the facility stands on the venue's site.
   const { venueSiteForNewFacility } = await import('../lib/sites');
@@ -962,14 +981,14 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   db.prepare(
     `INSERT INTO facilities (id, account_id, name_en, name_ar, category_key, address,
        municipality_en, municipality_ar, operating_hours, phone, email, access_point,
-       ems_number, licensed_capacity, is_demo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ems_number, licensed_capacity, is_demo, operating_organization)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     facilityId, account.id, s('name'), s('nameAr') || s('name'), categoryKey, s('address'),
     s('municipality'), s('municipalityAr') || s('municipality'), s('hours'), s('phone'),
     s('email'), s('accessPoint'), s('emsNumber'),
     s('capacity') !== '' && Number.isFinite(capacityNum) ? capacityNum : null,
-    account.isDemo ? 1 : 0,
+    account.isDemo ? 1 : 0, s('operatingOrganization'),
   );
   // ONE responsible facility contact (partner audit, 2026-10-08). The alternate
   // contact and the assigned-guide person are no longer collected; rows that
@@ -981,10 +1000,15 @@ export async function registerFacilityAction(formData: FormData): Promise<void> 
   db.prepare('UPDATE facilities SET latitude=?,longitude=?,facility_type=?,map_confirmed_at=now_stamp() WHERE id=?').run(point.lat,point.lng,s('facilityType'),facilityId);
   db.prepare('UPDATE facilities SET site_id=? WHERE id=?').run(venueSite ?? insertSite(db,{nameEn:s('name'),nameAr:s('nameAr')||s('name'),municipalityEn:s('municipality'),municipalityAr:s('municipalityAr')||s('municipality'),district:'',latitude:point.lat,longitude:point.lng,createdBy:account.id,isDemo:account.isDemo}),facilityId);
   db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));
+  // From a venue: the site reuses what the venue recorded -- its infrastructure answers and its layout map.
+  if (venueSite) {
+    const { copyVenueInfrastructure } = await import('../lib/site-registration');
+    copyVenueInfrastructure(s('fromVenue'), facilityId, account.id);
+  }
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath('/dashboard');
-  // The one-page intake lands on the facility record, its step path open at the AEDs (owner, 9 October 2026).
+  // The one-page intake lands on the facility/site record, its step path open at the first step.
   redirect(`/facilities/${facilityId}`);
 }
 
@@ -1009,6 +1033,7 @@ export async function recordFacilityInterestAction(formData: FormData): Promise<
  */
 export async function saveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1025,6 +1050,7 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
  */
 export async function autosaveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: string }> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1129,6 +1155,7 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
  */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1143,7 +1170,7 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!representative
     ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
     ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
-    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(`/facilities/${facilityId}?step=review&error=readiness#confirmation`);
+    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(await facilityPlanReturn(facilityId,'error=readiness'));
 
   const db=getDb();
   db.exec('BEGIN IMMEDIATE');
@@ -1173,7 +1200,22 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   } catch(error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath(`/facilities/${facilityId}/plan`);
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(`/facilities/${facilityId}?notice=confirmed`);
+  redirect(await facilityPlanReturn(facilityId,'notice=confirmed'));
+}
+
+/**
+ * Where the readiness confirmation returns (latest revision, 9 October 2026): while the
+ * registration is in preparation, the confirmation is a step and the next one is the
+ * supporting evidence; on the dashboard it sits on the cardiac-readiness tab.
+ */
+async function facilityPlanReturn(facilityId: string, query: string): Promise<string> {
+  const { facilityRegistrationFacts } = await import('../lib/facility-registration');
+  const { facilityRecordMode } = await import('../lib/rules/facility-workflow');
+  const managing = facilityRecordMode(facilityRegistrationFacts(facilityId)) === 'manage';
+  const ok = query.startsWith('notice');
+  return managing
+    ? `/facilities/${facilityId}?tab=readiness&${query}#confirmation`
+    : `/facilities/${facilityId}?step=${ok ? 'evidence' : 'confirmation'}&${query}#${ok ? 'evidence' : 'confirmation-step'}`;
 }
 
 /**
@@ -1184,23 +1226,12 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
  */
 export async function saveFacilityPersonsAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
   if (!storeFacilityContact(account.id, facilityId, formData)) redirect(`/facilities/${facilityId}/profile?error=contact`);
   redirect(`/facilities/${facilityId}/profile?notice=contact`);
-}
-
-/**
- * The responsible-contact step of the facility record page (owner, 9 October 2026): the
- * same save, answered rather than redirected, so Save and Next keep the person on the record.
- */
-export async function saveFacilityContactStepAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: 'contact' }> {
-  refuseIfFacilityArchived(facilityId);
-  const account = await currentAccount();
-  if (!account) redirect('/signin');
-  if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
-  return storeFacilityContact(account.id, facilityId, formData) ? { ok: true } : { error: 'contact' };
 }
 
 /** Validates and upserts the one responsible contact. False when a field is missing. Ownership is the caller's check. */
@@ -1245,11 +1276,19 @@ export async function submitFacilityIncidentAction(
   for(const k of ['date','time','location','emsContacted','cprStarted','aedAvailable','aedApplied','shock','guided','emsAttended','agencyName','transportedBy','hospital','returned','problem','corrective']) payload[k]=String(formData.get(k)??'').trim();
   const incidentError = facilityIncidentError({...payload,narrative},beirutToday());
   if(incidentError) return {error:incidentError};
-  getDb()
-    .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative, submitted_by) VALUES (?, ?, ?, ?)`)
-    .run(facilityId, JSON.stringify(payload), narrative, account.id);
+  // The incident links itself (latest revision, 9 October 2026, section 15): the site, the AED
+  // where known -- one of this site's -- and the event where it happened during one held here.
+  const db = getDb();
+  const site = db.prepare('SELECT site_id, is_demo FROM facilities WHERE id = ?').get(facilityId) as { site_id: string | null; is_demo: number };
+  const device = String(formData.get('deviceLabel') ?? '').trim();
+  const eventId = String(formData.get('eventId') ?? '').trim();
+  if (device && !db.prepare('SELECT 1 FROM facility_devices WHERE facility_id = ? AND label = ?').get(facilityId, device)) return { error: 'incomplete' };
+  if (eventId && !(site.site_id && db.prepare('SELECT 1 FROM events WHERE id = ? AND site_id = ? AND is_demo = ?').get(eventId, site.site_id, site.is_demo))) return { error: 'incomplete' };
+  db
+    .prepare(`INSERT INTO facility_incidents (facility_id, payload, narrative, submitted_by, site_id, device_label, event_id) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    .run(facilityId, JSON.stringify(payload), narrative, account.id, site.site_id, device || null, eventId || null);
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(`/facilities/${facilityId}?notice=incident#incidents`);
+  redirect(`/facilities/${facilityId}?tab=incidents&notice=incident#incidents`);
 }
 
 
@@ -2030,13 +2069,15 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
 
 /** Facility profile and GIS pin; changing emergency details requires a new plan confirmation. */
 export async function saveFacilityProfileAction(facilityId:string, data:FormData):Promise<void> {
- const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);
+ const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);refuseIfFacilityLocked(facilityId);
  const point=readMapPoint(data),s=(k:string)=>String(data.get(k)??'').trim();
- if(!point||!['name','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
- const db=getDb();const category=db.prepare('SELECT category_key FROM facilities WHERE id=?').get(facilityId)?.category_key;
+ if(!point||!['name','operatingOrganization','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
+ const db=getDb();const category=String(db.prepare('SELECT category_key FROM facilities WHERE id=?').get(facilityId)?.category_key??'');
  if((s('capacity')&&(!Number.isSafeInteger(Number(s('capacity')))||Number(s('capacity'))<0))||(category==='transport'&&!TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType'))))redirect(`/facilities/${facilityId}/profile?error=details`);
+ // The event-hosting category's capacity is required: coverage is decided by it.
+ if(categoryApplicabilityMode(category)==='capacity'&&!s('capacity'))redirect(`/facilities/${facilityId}/profile?error=capacity`);
  db.exec('BEGIN IMMEDIATE');try {
- db.prepare(`UPDATE facilities SET name_en=?,name_ar=?,address=?,municipality_en=?,municipality_ar=?,operating_hours=?,phone=?,email=?,access_point=?,ems_number=?,latitude=?,longitude=?,map_confirmed_at=now_stamp(),details_revision=details_revision+1,facility_type=?,licensed_capacity=? WHERE id=?`).run(s('name'),s('nameAr')||s('name'),s('address'),s('municipality'),s('municipalityAr')||s('municipality'),s('hours'),s('phone'),s('email'),s('accessPoint'),s('emsNumber'),point.lat,point.lng,s('facilityType'),s('capacity')!==''&&Number.isFinite(Number(s('capacity')))?Number(s('capacity')):null,facilityId);
+ db.prepare(`UPDATE facilities SET name_en=?,name_ar=?,address=?,municipality_en=?,municipality_ar=?,operating_hours=?,phone=?,email=?,access_point=?,ems_number=?,latitude=?,longitude=?,map_confirmed_at=now_stamp(),details_revision=details_revision+1,facility_type=?,licensed_capacity=?,operating_organization=? WHERE id=?`).run(s('name'),s('nameAr')||s('name'),s('address'),s('municipality'),s('municipalityAr')||s('municipality'),s('hours'),s('phone'),s('email'),s('accessPoint'),s('emsNumber'),point.lat,point.lng,s('facilityType'),s('capacity')!==''&&Number.isFinite(Number(s('capacity')))?Number(s('capacity')):null,s('operatingOrganization'),facilityId);
  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));db.exec('COMMIT');
  }catch(e){db.exec('ROLLBACK');throw e;}
  revalidatePath(`/facilities/${facilityId}`);revalidatePath(`/facilities/${facilityId}/plan`);redirect(`/facilities/${facilityId}?notice=profile`);

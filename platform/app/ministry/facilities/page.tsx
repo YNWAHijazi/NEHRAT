@@ -41,14 +41,14 @@ export default async function FacilityOversightPage({
         <L en="Facility oversight" ar="الرقابة على المرافق" />
       </h1>
 
-      <nav style={{display:"flex",flexWrap:"wrap",gap:20,marginBlockEnd:24}}><a href="/ministry/facilities/map"><L en="Facility and AED map" ar="خريطة المنشآت والأجهزة"/></a><a href="/ministry/facilities/reports"><L en="Incident reports" ar="تقارير الحوادث"/></a></nav>
+      <nav style={{display:"flex",flexWrap:"wrap",gap:20,marginBlockEnd:24}}><a href="/ministry/facilities/queue" data-region="site-queue-link"><L en="Facility/site review queue" ar="قائمة مراجعة المنشآت/المواقع"/></a><a href="/ministry/facilities/map"><L en="Facility and AED map" ar="خريطة المنشآت والأجهزة"/></a><a href="/ministry/facilities/reports"><L en="Incident reports" ar="تقارير الحوادث"/></a></nav>
       <div data-region="facilities" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 32 }}>
         {facilities.map((f) => (
           <div key={f.id} style={{ paddingBlock: '16px', paddingInlineStart: '20px', paddingInlineEnd: '21px', background: 'var(--surface2)', borderInlineStart: `3px solid ${f.standingKind === 'met' ? 'var(--brand)' : f.standingKind === 'lapsing' ? 'var(--accent)' : 'var(--bad)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span>
-              <span style={{ fontSize: 15, fontWeight: 500 }}>
+              <a href={`/ministry/facilities/${f.id}`} style={{ fontSize: 15, fontWeight: 500 }}>
                 <L en={f.nameEn} ar={f.nameAr} />
-              </span>
+              </a>
               <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3 }}>
                 <L en={`${shortEn(f.categoryKey)} · ${f.municipality} · ${f.devices} devices`} ar={`${shortAr(f.categoryKey)} · ${f.municipality} · ${f.devices} أجهزة`} />
               </span>
@@ -76,7 +76,7 @@ export default async function FacilityOversightPage({
         {corrective.map((c) => (
           <div key={c.id} style={{ paddingBlock: '15px', paddingInlineStart: '18px', paddingInlineEnd: '19px', background: 'var(--surface2)', borderInlineStart: `3px solid ${c.status === 'open' ? 'var(--bad)' : 'var(--brand)'}`, borderRadius: 10, display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '14.5px', lineHeight: 1.5, flex: 1, minWidth: 260 }}>
-              <L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} />
+              <a href={`/ministry/facilities/${c.facilityId}#request-${c.id}`}><L en={`${c.facilityEn} — ${c.bodyEn}`} ar={`${c.facilityAr} — ${c.bodyAr}`} /></a>
               <span style={{ display: 'block', fontSize: '12.5px', color: 'var(--muted)', marginBlockStart: 3, fontVariantNumeric: 'tabular-nums' }}>
                 <L en={`Raised ${c.raisedAt}${c.raisedBy ? ` · ${c.raisedBy}` : ''}`} ar={`أُثير في ⁦${c.raisedAt}⁩${c.raisedBy ? ` · ${c.raisedBy}` : ''}`} />
               </span>

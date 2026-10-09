@@ -1354,6 +1354,65 @@ function migrate(d: DatabaseSync): void {
   }
 
   migrateSites(d, addColumn);
+  migrateSiteRegistration(d, addColumn);
+}
+
+/**
+ * THE FACILITY/SITE REGISTRATION (latest revision, 9 October 2026, sections 2, 8, 9-12 and 15).
+ * Additive only. Every timestamp is written by the caller on the one clock (now_stamp()), so
+ * none of these columns relies on a UTC DEFAULT.
+ *
+ *  - the operating organization on the site profile;
+ *  - facility_submissions: "Submit Facility/Site registration to MOPH", versioned and auditable,
+ *    each version frozen as a snapshot of what the Ministry read;
+ *  - facility_review_acts: the Ministry's acts on a submission -- review started, accepted,
+ *    information or correction requested, an inspection, a designation. Never an event outcome;
+ *  - the corrective action's own fields on facility_requests (the deficiency, the Ministry's
+ *    note), and the operator's answers with evidence in facility_request_responses;
+ *  - the incident report's links: the site, the AED where known, the event where it happened
+ *    during one held at the site.
+ */
+function migrateSiteRegistration(d: DatabaseSync, addColumn: (table: string, column: string, ddl: string) => void): void {
+  addColumn('facilities', 'operating_organization', "operating_organization TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'deficiency', "deficiency TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'note', "note TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_requests', 'submission_id', 'submission_id INTEGER');
+  addColumn('facility_incidents', 'site_id', 'site_id TEXT');
+  addColumn('facility_incidents', 'device_label', 'device_label TEXT');
+  addColumn('facility_incidents', 'event_id', 'event_id TEXT');
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    version INTEGER NOT NULL,
+    snapshot TEXT NOT NULL,
+    submitted_by INTEGER REFERENCES accounts(id),
+    submitted_at TEXT NOT NULL,
+    is_demo INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (facility_id, version)
+  ); CREATE TABLE IF NOT EXISTS facility_review_acts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    submission_id INTEGER REFERENCES facility_submissions(id),
+    kind TEXT NOT NULL CHECK (kind IN ('reviewStarted','accepted','infoRequested','correctionRequested','inspection','designation')),
+    note TEXT NOT NULL DEFAULT '',
+    inspection_date TEXT,
+    actor_id INTEGER REFERENCES accounts(id),
+    actor_name TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    is_demo INTEGER NOT NULL DEFAULT 0
+  ); CREATE INDEX IF NOT EXISTS facility_review_acts_facility ON facility_review_acts(facility_id, id);
+  CREATE TABLE IF NOT EXISTS facility_request_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER NOT NULL REFERENCES facility_requests(id),
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    note TEXT NOT NULL DEFAULT '',
+    document_id INTEGER REFERENCES facility_documents(id),
+    responded_by INTEGER REFERENCES accounts(id),
+    responded_at TEXT NOT NULL
+  );`);
+  // The declaration signed on submission, as on the event's and the venue's.
+  addColumn('facility_submissions', 'representative', "representative TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_submissions', 'position', "position TEXT NOT NULL DEFAULT ''");
 }
 
 /**

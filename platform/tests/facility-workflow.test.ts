@@ -1,129 +1,154 @@
 /**
- * The PAD facility record in the event and venue format (owner, 9 October 2026): the
- * step path while the registration is open, the management page once registered, the
- * rail and the next step. Pure rules over plain facts.
+ * The facility/site record (owner decision, 9 October 2026; latest revision, sections 1-14):
+ * the six-step path while the registration is in preparation, the dashboard from the first
+ * submission, the rail and the next step. Pure rules over plain facts.
  */
 import { describe, expect, it } from 'vitest';
 import {
-  facilityChecksComplete,
+  facilityConfirmationReady,
   facilityDevicesDone,
   facilityInitialStep,
   facilityNextAction,
   facilityRailStages,
+  facilityReadyToSubmit,
   facilityRecordMode,
-  facilityRegistrationChecks,
   facilityRegistrationSteps,
-  facilityRemainingBeforeConfirmation,
   facilityStatusLabel,
   type FacilityRegistrationFacts,
 } from '../lib/rules/facility-workflow';
 
-/** A facility as the one-page intake leaves it: profile, map pin and contact recorded, nothing else. */
+/** A site as the one-page intake leaves it: profile, map pin, contact and EMS access recorded, nothing else. */
 const fresh = (over: Partial<FacilityRegistrationFacts> = {}): FacilityRegistrationFacts => ({
   archived: false, mapConfirmed: true, aedRequirement: 'required', deviceCount: 0, devicesNotReady: 0,
-  contactComplete: true, confirmationRecorded: false, confirmationCurrent: false, ...over,
+  contactComplete: true, confirmationRecorded: false, confirmationCurrent: false,
+  profileComplete: true, emsAccessComplete: true, infrastructureRecorded: false, documentCount: 0, photoCount: 0,
+  outsideCategory: false, submissionCount: 0, status: 'inPreparation', everAccepted: false, locked: false, ...over,
 });
-const registered = (over: Partial<FacilityRegistrationFacts> = {}) =>
-  fresh({ deviceCount: 2, confirmationRecorded: true, confirmationCurrent: true, ...over });
+const ready = (over: Partial<FacilityRegistrationFacts> = {}) => fresh({ deviceCount: 2, confirmationRecorded: true, confirmationCurrent: true, ...over });
+const submitted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'submitted', locked: true, ...over });
+const accepted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'readinessCurrent', everAccepted: true, ...over });
 
-describe('the step path while the registration is open', () => {
-  it('runs AEDs, responsible contact, response plan, then review and register', () => {
+describe('the step path while the registration is in preparation', () => {
+  it('runs infrastructure, AEDs, plan, readiness confirmation, evidence, then review and submit', () => {
     const steps = facilityRegistrationSteps(fresh());
-    expect(steps.map((s) => s.key)).toEqual(['aeds', 'contact', 'plan', 'review']);
-    expect(steps.map((s) => s.anchor)).toEqual(['aeds', 'contact', 'plan', 'final-review']);
-    expect(steps[3]!.state).toBe('final');
+    expect(steps.map((s) => s.key)).toEqual(['infrastructure', 'aeds', 'plan', 'confirmation', 'evidence', 'review']);
+    expect(steps.map((s) => s.anchor)).toEqual(['infrastructure', 'aeds', 'plan', 'confirmation-step', 'evidence', 'final-review']);
+    expect(steps[5]!.state).toBe('final');
   });
 
-  it('colours each step from the same items as the certificate', () => {
+  it('the infrastructure and the evidence are optional and never pending', () => {
+    const steps = facilityRegistrationSteps(fresh());
+    for (const key of ['infrastructure', 'evidence']) {
+      expect(steps.find((s) => s.key === key)).toMatchObject({ optional: true, state: 'notProvided', stateEn: 'Optional' });
+    }
+    const filled = facilityRegistrationSteps(fresh({ infrastructureRecorded: true, photoCount: 1 }));
+    expect(filled.find((s) => s.key === 'infrastructure')!.state).toBe('complete');
+    expect(filled.find((s) => s.key === 'evidence')!.state).toBe('complete');
+  });
+
+  it('colours the required steps from the same facts as the review page', () => {
     const steps = facilityRegistrationSteps(fresh());
     expect(steps.find((s) => s.key === 'aeds')).toMatchObject({ state: 'pending', stateEn: 'No AED registered' });
-    expect(steps.find((s) => s.key === 'contact')).toMatchObject({ state: 'complete', stateEn: 'Complete' });
     expect(steps.find((s) => s.key === 'plan')).toMatchObject({ state: 'pending' });
-    const ready = facilityRegistrationSteps(fresh({ deviceCount: 1 }));
-    expect(ready.find((s) => s.key === 'aeds')!.state).toBe('complete');
+    expect(steps.find((s) => s.key === 'confirmation')).toMatchObject({ state: 'pending' });
+    const done = facilityRegistrationSteps(ready());
+    expect(done.filter((s) => !s.optional && s.state !== 'final').every((s) => s.state === 'complete')).toBe(true);
+    expect(facilityRegistrationSteps(ready({ confirmationCurrent: false })).find((s) => s.key === 'confirmation')).toMatchObject({ state: 'pending', stateEn: 'To be confirmed again' });
   });
 
   it('an AED that is not operational or not accessible keeps the AED step open', () => {
     const f = fresh({ deviceCount: 2, devicesNotReady: 1 });
     expect(facilityDevicesDone(f)).toBe(false);
-    expect(facilityRegistrationSteps(f)[0]).toMatchObject({ state: 'pending', stateEn: 'An AED is not ready' });
+    expect(facilityRegistrationSteps(f)[1]).toMatchObject({ state: 'pending', stateEn: 'An AED is not ready' });
   });
 
-  it('where the category does not require an AED, or awaits a Ministry review, none is owed', () => {
+  it('where no AED is required, none is owed, but a registered AED must still be ready', () => {
     expect(facilityDevicesDone(fresh({ aedRequirement: 'notRequired' }))).toBe(true);
     expect(facilityDevicesDone(fresh({ aedRequirement: 'review' }))).toBe(true);
-    // ...but a registered AED must still be ready.
     expect(facilityDevicesDone(fresh({ aedRequirement: 'notRequired', deviceCount: 1, devicesNotReady: 1 }))).toBe(false);
   });
 
-  it('opens on the step a redirect named, else the first open step, else the review', () => {
-    expect(facilityInitialStep(fresh(), 'contact')).toBe('contact');
-    expect(facilityInitialStep(fresh(), 'nonsense')).toBe('aeds');
-    expect(facilityInitialStep(fresh({ deviceCount: 1, contactComplete: false }), null)).toBe('contact');
-    expect(facilityInitialStep(fresh({ deviceCount: 1, confirmationCurrent: true }), undefined)).toBe('review');
+  it('opens a new record on its first step, else on the step named, else the first open one', () => {
+    expect(facilityInitialStep(fresh(), null)).toBe('infrastructure');
+    expect(facilityInitialStep(fresh(), 'aeds')).toBe('aeds');
+    expect(facilityInitialStep(fresh({ deviceCount: 1 }), 'nonsense')).toBe('confirmation');
+    expect(facilityInitialStep(ready(), undefined)).toBe('review');
   });
 
-  it('the review lists what remains before the confirmation, never the confirmation itself', () => {
-    expect(facilityRemainingBeforeConfirmation(fresh({ mapConfirmed: false })).map((c) => c.key)).toEqual(['details', 'devices']);
-    expect(facilityRemainingBeforeConfirmation(fresh({ deviceCount: 1 }))).toEqual([]);
-  });
-});
-
-describe('registered, the same address is the management page', () => {
-  it('the first readiness confirmation completes the registration', () => {
-    expect(facilityRecordMode(fresh({ deviceCount: 1 }))).toBe('register');
-    expect(facilityRecordMode(registered())).toBe('manage');
-    expect(facilityChecksComplete(registered())).toBe(true);
+  it('the readiness confirmation waits on the map, the contact and the required AEDs', () => {
+    expect(facilityConfirmationReady(fresh())).toBe(false);
+    expect(facilityConfirmationReady(fresh({ deviceCount: 1 }))).toBe(true);
+    expect(facilityConfirmationReady(fresh({ deviceCount: 1, contactComplete: false }))).toBe(false);
   });
 
-  it('a stale confirmation withholds the certificate but does not re-open the registration', () => {
-    const relocated = registered({ confirmationCurrent: false });
-    expect(facilityRecordMode(relocated)).toBe('manage');
-    expect(facilityChecksComplete(relocated)).toBe(false);
-    expect(facilityStatusLabel(relocated).en).toBe('Registered · action needed');
-    expect(facilityNextAction(relocated)).toMatchObject({ kind: 'confirmation', href: '#plan', titleEn: 'Confirm the updated response plan' });
-  });
-
-  it('an archived record is read on the management page and owes nothing', () => {
-    const archived = fresh({ archived: true });
-    expect(facilityRecordMode(archived)).toBe('manage');
-    expect(facilityNextAction(archived)).toBeNull();
-    expect(facilityStatusLabel(archived).en).toBe('No longer covered');
-  });
-
-  it('nothing owed, no next step', () => {
-    expect(facilityNextAction(registered())).toBeNull();
-    expect(facilityStatusLabel(registered())).toEqual({ en: 'Registered', ar: 'مُسجَّلة' });
+  it('the registration can be submitted only when every required line is complete', () => {
+    expect(facilityReadyToSubmit(fresh())).toBe(false);
+    expect(facilityReadyToSubmit(ready())).toBe(true);
+    expect(facilityReadyToSubmit(ready({ emsAccessComplete: false }))).toBe(false);
+    expect(facilityReadyToSubmit(ready({ outsideCategory: true }))).toBe(false);
+    // The optional parts never block.
+    expect(facilityReadyToSubmit(ready({ infrastructureRecorded: false, documentCount: 0, photoCount: 0 }))).toBe(true);
   });
 });
 
-describe('the next step and the rail', () => {
-  it('leads with the first open item, in the step order', () => {
+describe('the event journey for a site: the record page until accepted, then the dashboard', () => {
+  it('a submitted or returned registration stays on the record page; acceptance makes it the dashboard', () => {
+    expect(facilityRecordMode(ready())).toBe('register');
+    expect(facilityRecordMode(submitted())).toBe('register');
+    expect(facilityRecordMode(submitted({ status: 'informationRequired', locked: false }))).toBe('register');
+    expect(facilityRecordMode(accepted())).toBe('manage');
+    expect(facilityRecordMode(fresh({ archived: true }))).toBe('manage');
+  });
+
+  it('with the Ministry, the record leads with nothing to do; returned, it leads to the review', () => {
+    expect(facilityNextAction(submitted())).toBeNull();
+    expect(facilityNextAction(submitted({ status: 'informationRequired', locked: false }))).toMatchObject({ kind: 'information', href: '#final-review' });
+  });
+
+  it('the header reads the site status', () => {
+    expect(facilityStatusLabel(ready())).toEqual({ en: 'In preparation', ar: 'قيد الإعداد' });
+    expect(facilityStatusLabel(accepted()).en).toBe('Readiness current');
+    expect(facilityStatusLabel(fresh({ archived: true, status: 'noLongerCovered' })).en).toBe('No longer covered');
+  });
+
+  it('leads with the Ministry’s request, then a corrective action, then a stale confirmation', () => {
+    expect(facilityNextAction(accepted({ status: 'informationRequired' }))).toMatchObject({ kind: 'information', href: '?tab=overview#resubmit' });
+    expect(facilityNextAction(accepted({ status: 'correctiveActionRequired' }))).toMatchObject({ kind: 'corrective', href: '?tab=history#requests' });
+    expect(facilityNextAction(accepted({ confirmationCurrent: false }))).toMatchObject({ kind: 'confirmation', href: '?tab=readiness#confirmation' });
+    expect(facilityNextAction(accepted())).toBeNull();
+    expect(facilityNextAction(fresh({ archived: true, status: 'noLongerCovered' }))).toBeNull();
+  });
+});
+
+describe('the next step and the rail while in preparation', () => {
+  it('leads with the first open item, in the step order, and ends on the review', () => {
     expect(facilityNextAction(fresh({ mapConfirmed: false }))!.href).toBe('profile');
-    expect(facilityNextAction(fresh())).toMatchObject({ kind: 'aeds', href: '#aeds', titleEn: 'Register the facility’s AEDs' });
+    expect(facilityNextAction(fresh({ profileComplete: false }))!.href).toBe('profile');
+    expect(facilityNextAction(fresh())).toMatchObject({ kind: 'aeds', href: '#aeds' });
     expect(facilityNextAction(fresh({ deviceCount: 1, devicesNotReady: 1 }))!.titleEn).toBe('Update the AED status');
-    expect(facilityNextAction(fresh({ deviceCount: 1, contactComplete: false }))!.href).toBe('#contact');
-    expect(facilityNextAction(fresh({ deviceCount: 1 }))).toMatchObject({ kind: 'confirmation', tone: 'brand' });
+    expect(facilityNextAction(fresh({ deviceCount: 1, contactComplete: false }))!.href).toBe('profile#contact');
+    expect(facilityNextAction(fresh({ deviceCount: 1 }))).toMatchObject({ kind: 'confirmation', href: '#confirmation-step' });
+    expect(facilityNextAction(ready())).toMatchObject({ kind: 'submit', href: '#final-review', tone: 'brand' });
   });
 
-  it('draws five stages and stands on the first open one', () => {
+  it('draws the event rail for a site: details, requirements, submit, Ministry review, ongoing readiness', () => {
     const { stage, stages } = facilityRailStages(fresh());
-    expect(stages.map((s) => s.en)).toEqual(['Facility profile', 'AEDs', 'Responsible contact', 'Response plan', 'Registration certificate']);
+    expect(stages.map((s) => s.en)).toEqual(['Site details', 'Requirements', 'Submit', 'Ministry review', 'Ongoing readiness']);
     expect(stage).toBe(2);
-    expect(stages.map((s) => s.k)).toEqual(['done', 'current', 'done', 'todo', 'todo']);
-    const done = facilityRailStages(registered());
+    expect(stages[1]).toMatchObject({ k: 'current', metaEn: '3 of 6 complete' });
+    const filed = facilityRailStages(submitted());
+    expect(filed.stage).toBe(4);
+    expect(filed.stages.map((s) => s.k)).toEqual(['done', 'done', 'done', 'current', 'todo']);
+    expect(facilityRailStages(submitted({ status: 'informationRequired', locked: false })).stages[1]!.k).toBe('returned');
+    const done = facilityRailStages(accepted());
     expect(done.stage).toBe(5);
-    expect(done.stages.every((s) => s.k === 'done')).toBe(true);
-    expect(done.stages[4]!.metaEn).toBe('Issued');
-  });
-
-  it('the certificate items keep their keys and labels', () => {
-    expect(facilityRegistrationChecks(fresh()).map((c) => c.key)).toEqual(['details', 'devices', 'persons', 'confirmation']);
+    expect(done.stages[3]).toMatchObject({ k: 'done', metaEn: 'Readiness current' });
   });
 
   // The mass-gathering outcome vocabulary is swept from this rules file by tests/facility-vocabulary.test.ts.
   it('every string is in both languages, and none says approved or rejected', () => {
-    const facts = [fresh(), fresh({ mapConfirmed: false }), fresh({ deviceCount: 1, devicesNotReady: 1 }), fresh({ deviceCount: 1, contactComplete: false }), fresh({ deviceCount: 1 }), registered(), registered({ confirmationCurrent: false }), fresh({ archived: true })];
+    const facts = [fresh(), fresh({ mapConfirmed: false }), fresh({ deviceCount: 1, devicesNotReady: 1 }), fresh({ deviceCount: 1, contactComplete: false }), fresh({ deviceCount: 1 }), ready(),
+      submitted(), submitted({ status: 'informationRequired', locked: false }), accepted({ status: 'correctiveActionRequired' }), accepted({ confirmationCurrent: false }), accepted(), fresh({ archived: true, status: 'noLongerCovered' })];
     const strings: string[] = [];
     for (const f of facts) {
       const next = facilityNextAction(f);
