@@ -1,11 +1,13 @@
 'use client';
 
+import { MunicipalityField } from '../../../components/MunicipalityField';
+import { municipalityList, splitMunicipalities } from '../../../lib/rules/municipalities';
+
 import { OptionText, useDocumentLang } from '../../../components/OptionText';
 import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
 import { SiteLocationField, siteNameIn } from '../../../components/SiteLocationField';
 import type { SiteOption } from '../../../lib/event-site';
-
 
 /**
  * Applicability and assessment — one form, rebuilt for simplicity (partner review,
@@ -44,6 +46,10 @@ import { PART_F } from '../../../lib/rules/load';
 import { deriveLevel } from '../../../lib/rules/derive';
 import { levelWhy } from '../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
+
+/** Lebanon's municipalities, once the official list is loaded (owner, 9 October 2026); empty until then. */
+const MUNICIPALITIES = municipalityList();
+const MUNICIPALITY_LABEL: React.CSSProperties = { fontSize: '13.5px', color: 'var(--muted)' };
 
 /**
  * The event-type list: every discipline that carries a level floor, the venue type that
@@ -288,7 +294,6 @@ export function AssessmentForm({
         )}</InfoNote>
 </h1>
 
-
       {reassess ? null : (
         <>
           <h2 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
@@ -324,9 +329,17 @@ export function AssessmentForm({
               labelStyle={fieldLabel}
               inputStyle={inputStyle}
             />
-            <Field labelEn="Municipality or municipalities" labelAr="البلدية أو البلديات">
-              <input value={partA.municipalities} onChange={(e) => setA('municipalities', e.target.value)} style={inputStyle} />
-            </Field>
+            {MUNICIPALITIES.length > 0 ? (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <MunicipalityField options={MUNICIPALITIES} multiple value={splitMunicipalities(partA.municipalities)}
+                  onChange={(chosen) => setA('municipalities', chosen.map((m) => m.en).join(', '))}
+                  labelEn="Municipality or municipalities" labelAr="البلدية أو البلديات" labelStyle={MUNICIPALITY_LABEL} inputStyle={inputStyle} />
+              </div>
+            ) : (
+              <Field labelEn="Municipality or municipalities" labelAr="البلدية أو البلديات">
+                <input value={partA.municipalities} onChange={(e) => setA('municipalities', e.target.value)} style={inputStyle} />
+              </Field>
+            )}
           </div>
         </>
       )}

@@ -385,7 +385,7 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'crew-callout',
         mode: 'expectedDivergent',
         builtSelector: '[data-region="crew-callout"]',
-        note: 'Expected divergent by ruling (partner, 2026-09-05): the yellow block keeps its heading and its two fields, and its explanatory paragraph and the access-point hint were removed -- the fields say what they need. Measured 39% against the reference, all of it that prose. Flips back to a compare when the prototype adopts the ruling.',
+        note: 'Expected divergent BY OWNER REQUEST (9 October 2026): the reference draws the access point and the EMS number in a yellow callout headed "What a responding crew needs"; the owner asked for them to continue the site profile, as the revision lists them there (section 2). Same two fields, no box and no heading. Earlier (partner, 2026-09-05) the callout lost its explanatory paragraph and hint.',
       },
       {
         name: 'profile-form',

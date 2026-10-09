@@ -1,0 +1,5 @@
+{
+  "$comment": "Lebanon's municipalities for the searchable municipality field (owner, 9 October 2026). EMPTY UNTIL THE OFFICIAL LIST ARRIVES: the owner is sending the Ministry of Interior and Municipalities list in English and Arabic. While it is empty, the municipality fields stay typed fields. Each entry: en, ar (the official Arabic name), and optionally districtEn/districtAr. No entry is invented here.",
+  "source": null,
+  "municipalities": []
+}
