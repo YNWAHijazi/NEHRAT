@@ -22,10 +22,11 @@ const fresh = (over: Partial<FacilityRegistrationFacts> = {}): FacilityRegistrat
   archived: false, mapConfirmed: true, aedRequirement: 'required', deviceCount: 0, devicesNotReady: 0,
   contactComplete: true, confirmationRecorded: false, confirmationCurrent: false,
   profileComplete: true, emsAccessComplete: true, infrastructureRecorded: false, documentCount: 0, photoCount: 0,
-  outsideCategory: false, submissionCount: 0, status: 'inPreparation', ...over,
+  outsideCategory: false, submissionCount: 0, status: 'inPreparation', everAccepted: false, locked: false, ...over,
 });
 const ready = (over: Partial<FacilityRegistrationFacts> = {}) => fresh({ deviceCount: 2, confirmationRecorded: true, confirmationCurrent: true, ...over });
-const submitted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'submitted', ...over });
+const submitted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'submitted', locked: true, ...over });
+const accepted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'readinessCurrent', everAccepted: true, ...over });
 
 describe('the step path while the registration is in preparation', () => {
   it('runs infrastructure, AEDs, plan, readiness confirmation, evidence, then review and submit', () => {
@@ -90,24 +91,31 @@ describe('the step path while the registration is in preparation', () => {
   });
 });
 
-describe('from the first submission, the same address is the dashboard', () => {
-  it('the submission, not the confirmation, ends the step path', () => {
+describe('the event journey for a site: the record page until accepted, then the dashboard', () => {
+  it('a submitted or returned registration stays on the record page; acceptance makes it the dashboard', () => {
     expect(facilityRecordMode(ready())).toBe('register');
-    expect(facilityRecordMode(submitted())).toBe('manage');
+    expect(facilityRecordMode(submitted())).toBe('register');
+    expect(facilityRecordMode(submitted({ status: 'informationRequired', locked: false }))).toBe('register');
+    expect(facilityRecordMode(accepted())).toBe('manage');
     expect(facilityRecordMode(fresh({ archived: true }))).toBe('manage');
+  });
+
+  it('with the Ministry, the record leads with nothing to do; returned, it leads to the review', () => {
+    expect(facilityNextAction(submitted())).toBeNull();
+    expect(facilityNextAction(submitted({ status: 'informationRequired', locked: false }))).toMatchObject({ kind: 'information', href: '#final-review' });
   });
 
   it('the header reads the site status', () => {
     expect(facilityStatusLabel(ready())).toEqual({ en: 'In preparation', ar: 'قيد الإعداد' });
-    expect(facilityStatusLabel(submitted({ status: 'readinessCurrent' })).en).toBe('Readiness current');
+    expect(facilityStatusLabel(accepted()).en).toBe('Readiness current');
     expect(facilityStatusLabel(fresh({ archived: true, status: 'noLongerCovered' })).en).toBe('No longer covered');
   });
 
   it('leads with the Ministry’s request, then a corrective action, then a stale confirmation', () => {
-    expect(facilityNextAction(submitted({ status: 'informationRequired' }))).toMatchObject({ kind: 'information', href: '?tab=overview#resubmit' });
-    expect(facilityNextAction(submitted({ status: 'correctiveActionRequired' }))).toMatchObject({ kind: 'corrective', href: '?tab=history#requests' });
-    expect(facilityNextAction(submitted({ status: 'readinessCurrent', confirmationCurrent: false }))).toMatchObject({ kind: 'confirmation', href: '?tab=readiness#confirmation' });
-    expect(facilityNextAction(submitted({ status: 'readinessCurrent' }))).toBeNull();
+    expect(facilityNextAction(accepted({ status: 'informationRequired' }))).toMatchObject({ kind: 'information', href: '?tab=overview#resubmit' });
+    expect(facilityNextAction(accepted({ status: 'correctiveActionRequired' }))).toMatchObject({ kind: 'corrective', href: '?tab=history#requests' });
+    expect(facilityNextAction(accepted({ confirmationCurrent: false }))).toMatchObject({ kind: 'confirmation', href: '?tab=readiness#confirmation' });
+    expect(facilityNextAction(accepted())).toBeNull();
     expect(facilityNextAction(fresh({ archived: true, status: 'noLongerCovered' }))).toBeNull();
   });
 });
@@ -123,19 +131,24 @@ describe('the next step and the rail while in preparation', () => {
     expect(facilityNextAction(ready())).toMatchObject({ kind: 'submit', href: '#final-review', tone: 'brand' });
   });
 
-  it('draws five stages and ends at the submission', () => {
+  it('draws the event rail for a site: details, requirements, submit, Ministry review, ongoing readiness', () => {
     const { stage, stages } = facilityRailStages(fresh());
-    expect(stages.map((s) => s.en)).toEqual(['Site profile', 'AEDs', 'Response plan', 'Readiness confirmation', 'Submitted to the Ministry']);
+    expect(stages.map((s) => s.en)).toEqual(['Site details', 'Requirements', 'Submit', 'Ministry review', 'Ongoing readiness']);
     expect(stage).toBe(2);
-    const done = facilityRailStages(submitted());
+    expect(stages[1]).toMatchObject({ k: 'current', metaEn: '3 of 6 complete' });
+    const filed = facilityRailStages(submitted());
+    expect(filed.stage).toBe(4);
+    expect(filed.stages.map((s) => s.k)).toEqual(['done', 'done', 'done', 'current', 'todo']);
+    expect(facilityRailStages(submitted({ status: 'informationRequired', locked: false })).stages[1]!.k).toBe('returned');
+    const done = facilityRailStages(accepted());
     expect(done.stage).toBe(5);
-    expect(done.stages.every((s) => s.k === 'done')).toBe(true);
+    expect(done.stages[3]).toMatchObject({ k: 'done', metaEn: 'Readiness current' });
   });
 
   // The mass-gathering outcome vocabulary is swept from this rules file by tests/facility-vocabulary.test.ts.
   it('every string is in both languages, and none says approved or rejected', () => {
     const facts = [fresh(), fresh({ mapConfirmed: false }), fresh({ deviceCount: 1, devicesNotReady: 1 }), fresh({ deviceCount: 1, contactComplete: false }), fresh({ deviceCount: 1 }), ready(),
-      submitted(), submitted({ status: 'informationRequired' }), submitted({ status: 'correctiveActionRequired' }), submitted({ status: 'readinessCurrent', confirmationCurrent: false }), fresh({ archived: true, status: 'noLongerCovered' })];
+      submitted(), submitted({ status: 'informationRequired', locked: false }), accepted({ status: 'correctiveActionRequired' }), accepted({ confirmationCurrent: false }), accepted(), fresh({ archived: true, status: 'noLongerCovered' })];
     const strings: string[] = [];
     for (const f of facts) {
       const next = facilityNextAction(f);

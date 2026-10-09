@@ -42,7 +42,7 @@ import { intakeEndsForCapacity, siteApplicability } from '../../../lib/rules/sit
 const input: React.CSSProperties = { width: '100%', minHeight: 44, padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', fontSize: 15 };
 const refusedInput: React.CSSProperties = { ...input, border: '1px solid var(--bad)' };
 const outlined: React.CSSProperties = { outline: '1px solid var(--bad)', outlineOffset: '6px', borderRadius: '12px' };
-const h2: React.CSSProperties = { margin: '36px 0 16px', fontSize: 22, fontWeight: 600, letterSpacing: '-.02em' };
+const h2: React.CSSProperties = { margin: '36px 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' };
 
 const CHIP_BORDER: Record<StateChip, string> = {
   inForceNow: 'var(--brand)',
@@ -287,8 +287,8 @@ export function RegisterFacilityForm({
                 <L en={`Please fill: ${missing.map((m) => m.en).join(', ')}.`} ar={`يرجى تعبئة: ${missing.map((m) => m.ar).join('، ')}.`} />
               </p>
             ) : null}
-            <button type="submit" style={{ minHeight: 48, padding: '12px 26px', border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, marginBlockStart: 24, cursor: 'pointer' }}>
-              <L en="Continue to the registration steps" ar="المتابعة إلى خطوات التسجيل" />
+            <button type="submit" style={{ height: 48, paddingInline: 26, border: 0, borderRadius: 24, background: 'var(--brand)', color: 'var(--bg)', fontSize: '14.5px', fontWeight: 500, marginBlockStart: 24, cursor: 'pointer' }}>
+              <L en="Continue to requirements" ar="المتابعة إلى المتطلبات" />
             </button>
           </>
         ) : null}

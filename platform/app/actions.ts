@@ -11,7 +11,8 @@ import { facilityPersons } from '../lib/queries';
  */
 
 import { TRANSPORT_FACILITY_TYPES, facilityIncidentError } from '../lib/rules/facility-intake';
-import { categoryApplicabilityMode, siteApplicability } from '../lib/rules/site';
+import { categoryApplicabilityMode, siteApplicability, siteRecordLocked } from '../lib/rules/site';
+import { siteStatusFacts } from '../lib/site-registration';
 import { readMapPoint } from '../lib/rules/geolocation';
 import { facilityPoint, facilitySnapshot, bumpFacilityRevision, facilityAedStatus } from '../lib/facility-gis';
 import { verifiedSignIn, safeNext, validPhone } from '../lib/email-verification';
@@ -377,6 +378,15 @@ function refuseIfVenueArchived(venueId: string): void {
     | { archived_at: string | null }
     | undefined;
   if (row?.archived_at) redirect(`/venues/${venueId}?error=archived`);
+}
+
+/**
+ * A facility/site registration with the Ministry is read-only until it is accepted or
+ * returned for information or a correction -- as a filed event is (owner, 9 October 2026).
+ * Incident reports are a separate obligation and are never locked.
+ */
+function refuseIfFacilityLocked(facilityId: string): void {
+  if (siteRecordLocked(siteStatusFacts(facilityId))) redirect(`/facilities/${facilityId}?error=locked`);
 }
 
 /** And the facility lane's: an archived facility record is read-only. */
@@ -1018,6 +1028,7 @@ export async function recordFacilityInterestAction(formData: FormData): Promise<
  */
 export async function saveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1034,6 +1045,7 @@ export async function saveFacilityDeviceAction(facilityId: string, formData: For
  */
 export async function autosaveFacilityDeviceAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: string }> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1138,6 +1150,7 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
  */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1208,6 +1221,7 @@ async function facilityPlanReturn(facilityId: string, query: string): Promise<st
  */
 export async function saveFacilityPersonsAction(facilityId: string, formData: FormData): Promise<void> {
   refuseIfFacilityArchived(facilityId);
+  refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
   if (!account) redirect('/signin');
   if (!ownedFacility(account.id, facilityId)) redirect('/dashboard');
@@ -1995,7 +2009,7 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
 
 /** Facility profile and GIS pin; changing emergency details requires a new plan confirmation. */
 export async function saveFacilityProfileAction(facilityId:string, data:FormData):Promise<void> {
- const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);
+ const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);refuseIfFacilityLocked(facilityId);
  const point=readMapPoint(data),s=(k:string)=>String(data.get(k)??'').trim();
  if(!point||!['name','operatingOrganization','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
  const db=getDb();const category=String(db.prepare('SELECT category_key FROM facilities WHERE id=?').get(facilityId)?.category_key??'');

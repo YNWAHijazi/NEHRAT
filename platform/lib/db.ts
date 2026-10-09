@@ -1410,6 +1410,9 @@ function migrateSiteRegistration(d: DatabaseSync, addColumn: (table: string, col
     responded_by INTEGER REFERENCES accounts(id),
     responded_at TEXT NOT NULL
   );`);
+  // The declaration signed on submission, as on the event's and the venue's.
+  addColumn('facility_submissions', 'representative', "representative TEXT NOT NULL DEFAULT ''");
+  addColumn('facility_submissions', 'position', "position TEXT NOT NULL DEFAULT ''");
 }
 
 /**

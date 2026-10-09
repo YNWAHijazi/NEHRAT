@@ -13,15 +13,16 @@ import type { SiteEventRow, SiteHistoryEntry, SiteRequest, SiteReviewAct, SiteSu
  * the Ministry's review screen, which draws the same history read-only.
  */
 
+/** The platform's own tab look (components/AdminTabs.tsx): soft pills on a rule, the current one in the brand colour -- at the 44px target. */
 const tabLink = (on: boolean): React.CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 16, borderRadius: 22, fontSize: '14.5px',
-  border: `1px solid ${on ? 'var(--ink)' : 'var(--line)'}`, background: on ? 'var(--ink)' : 'var(--bg)', color: on ? 'var(--bg)' : 'var(--ink)', textDecoration: 'none',
+  display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 16, borderRadius: 999, fontSize: '14px',
+  background: on ? 'var(--brand-soft)' : 'transparent', color: on ? 'var(--brand)' : 'var(--muted)', fontWeight: on ? 500 : 400, textDecoration: 'none',
 });
 
-/** Overview | Cardiac readiness | AEDs | Events | Incident reports | Documents | Ministry history. Server-rendered links; no venue tab. */
+/** Overview | Cardiac readiness | AEDs | Events | Incident reports | Documents | Ministry history. Links, not client state, as the admin tabs are; no venue tab. */
 export function SiteTabsNav({ facilityId, active }: { facilityId: string; active: SiteTabKey }) {
   return (
-    <nav aria-label="Site record" data-region="site-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 28 }}>
+    <nav aria-label="Site record" data-tabs="" data-region="site-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 28, borderBlockEnd: '1px solid var(--line)', paddingBlockEnd: 12 }}>
       {SITE_TABS.map((t) => (
         <Link key={t.key} href={`/facilities/${facilityId}?tab=${t.key}`} data-tab={t.key} aria-current={t.key === active ? 'page' : undefined} style={tabLink(t.key === active)} scroll={false}>
           <L en={t.en} ar={t.ar} />

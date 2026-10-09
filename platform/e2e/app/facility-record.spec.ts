@@ -1,111 +1,127 @@
 /**
- * THE FACILITY RECORD IN THE EVENT AND VENUE FORMAT (owner, 9 October 2026): "the same
- * format as the events and venues, with the vertical path, and after they fully register,
- * it'll become a managing page to manage it."
+ * THE FACILITY/SITE RECORD (owner decision, 9 October 2026; latest revision, sections 1-14):
  *
- *  - a one-page intake lands on the record, its step path open at the AEDs;
- *  - the steps are amber while open and green once complete, and Next saves what was typed;
- *  - the review names what remains, with a link to each, and the facility confirmation
- *    completes the registration;
- *  - registered, the same address is the management page: sections with anchors, no tabs;
- *  - the old sub-routes land on the record.
+ *  - a one-page intake lands on the record, its step path open at the basic site infrastructure;
+ *  - the steps run infrastructure, AEDs, the response plan, the readiness confirmation,
+ *    supporting evidence, review and submit -- the optional ones never block;
+ *  - the review lists the revision's lines and keeps "Submit Facility/Site registration to MOPH"
+ *    disabled, with the reason, until every required line is complete;
+ *  - submitted, it is the event's journey: the acknowledgment of receipt, the receipt band,
+ *    the under-review card and a read-only record until the Ministry accepts it or asks for
+ *    more (the dashboard tabs are walked in e2e/app/site-registration.spec.ts).
  */
 import { expect, test } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
-import { registerFacility } from '../helpers/facility-map';
+import { CONTINUE, recordReadiness, registerAed, registerFacility, submitRegistration } from '../helpers/facility-map';
 import { expectAbsent } from '../helpers/absence';
 import { useLanguage } from '../helpers/language';
 
 const stepState = (page: import('@playwright/test').Page, key: string) => page.locator(`[data-step-item=${key}]`);
 
-test('a new facility walks the step path, then is managed from the same page', async ({ page }) => {
+test('a new site walks the step path, submits, and is managed from its dashboard', async ({ page }) => {
   page.setDefaultTimeout(15000);
   await signInAs(page, 'test_organizer');
   const id = await registerFacility(page);
 
-  // THE RECORD WHILE REGISTERING: header, next step, rail, the compact details card, the vertical steps.
+  // THE RECORD WHILE IN PREPARATION: the Site ID leads, the FC number is the registration reference.
   const header = page.locator('[data-region=facility-workspace-header]');
-  await expect(header).toContainText(id);
-  await expect(header).toContainText('Registration in progress');
-  await expectAbsent(page, { anchor: header, absent: '[data-region=facility-workspace-nav]', because: 'the facility record has no section tabs' });
-  await expect(page.locator('[data-region=next-action]')).toHaveAttribute('data-next-action', 'aeds');
-  await expect(page.locator('[data-region=rail]')).toContainText('Registration certificate');
-  await expect(page.locator('[data-region=facility-details] [data-region=edit-details-link]')).toHaveAttribute('href', `/facilities/${id}/profile`);
+  await expect(header.locator('[data-region=site-id]')).toHaveText(/^SITE-\d{6}$/);
+  await expect(header.locator('[data-region=registration-reference]')).toHaveText(id);
+  await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');
+  await expect(page.locator('[data-region=applicability]')).toHaveAttribute('data-applicability', 'covered');
   const nav = page.locator('[data-region=step-nav]');
-  await expect(nav).toContainText('AEDs');
-  await expect(nav).toContainText('Review and register');
+  for (const label of ['Basic site infrastructure', 'AEDs', 'Cardiac emergency response plan', 'Readiness confirmation', 'Supporting evidence — optional', 'Review and submit']) await expect(nav).toContainText(label);
+  await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'current');
+  await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'notProvided');
+  await expect(page.locator('#infrastructure [data-region=site-infrastructure]')).toContainText('Nothing here is required.');
+
+  // INFRASTRUCTURE: optional, saved on Next.
+  await page.locator('#infrastructure textarea[name=zones]').fill('Main hall and two studios');
+  await page.locator('[data-region=step-next]').click();
   await expect(stepState(page, 'aeds')).toHaveAttribute('data-step-state', 'current');
-  await expect(stepState(page, 'contact')).toHaveAttribute('data-step-state', 'complete');
-  await expect(stepState(page, 'plan')).toHaveAttribute('data-step-state', 'pending');
-  await expect(page.locator('#aeds [data-region=registry-empty]')).toContainText('No AED registered yet.');
+  await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'complete');
 
-  // NEXT SAVES WHAT WAS TYPED: a device left unregistered is refused with the reason, and the person stays.
-  const aeds = page.locator('#aeds');
-  await aeds.locator('input[name=identification]').fill('STEP-SERIAL-1');
-  await page.locator('[data-region=step-next]').click();
-  await expect(aeds.locator('[data-region=device-autosave-refused]')).toContainText('The device was not saved.');
-  await expect(stepState(page, 'aeds')).toHaveAttribute('data-step-state', 'current');
-  // Completed, the same Next registers it and moves on; the AED step turns green.
-  await aeds.locator('input[name=location]').fill('Front desk');
-  await aeds.locator('input[name=representative]').fill('Facility manager');
-  await page.locator('[data-region=step-next]').click();
-  await expect(stepState(page, 'contact')).toHaveAttribute('data-step-state', 'current');
-  await expect(stepState(page, 'aeds')).toHaveAttribute('data-step-state', 'complete');
-  await expect(page.locator('[data-region=registry-table]')).toContainText('STEP-SERIAL-1');
-
-  // The contact saves on Next too.
-  await page.locator('#contact input[name=coordinatorName]').fill('Duty manager');
-  await page.locator('[data-region=step-next]').click();
-  await expect(stepState(page, 'plan')).toHaveAttribute('data-step-state', 'current');
-  await expect(page.locator('#plan [data-region=plan-contact]')).toContainText('Duty manager');
-
-  // THE REVIEW NAMES WHAT REMAINS: half the readiness confirmations, no drill date.
-  const checks = page.locator('#plan [data-region=readiness-checks]');
-  for (let i = 0; i < 3; i++) await checks.locator('button[aria-pressed=false]').first().click();
-  await page.locator('[data-region=step-next]').click();
+  // THE REVIEW NAMES WHAT REMAINS, and the submit button says why it waits.
+  await page.locator('[data-step-item=review] a').click();
   const review = page.locator('#final-review');
-  await expect(review.locator('[data-region=remaining]')).toContainText('Readiness confirmations in the response plan (3 of 6)');
-  await expect(review.locator('[data-region=remaining] [data-remaining=checks]')).toHaveAttribute('href', '#plan');
-  await expect(review.locator('input[name=representative]')).toHaveValue('Duty manager');
-  await review.getByRole('button', { name: 'Complete the registration', exact: true }).click();
-  await expect(review.locator('[data-region=please-fill]')).toContainText('the readiness confirmations, the drill date');
-  await expect(page).not.toHaveURL(/notice=confirmed/);
-  // Its link goes back to the plan step, where the ticks are still held.
-  await review.locator('[data-region=please-fill] a').click();
-  await expect(stepState(page, 'plan')).toHaveAttribute('data-step-state', 'current');
-  await expect(checks.locator('button[aria-pressed=true]')).toHaveCount(3);
-  while (await checks.locator('button[aria-pressed=false]').count()) await checks.locator('button[aria-pressed=false]').first().click();
-  await checks.locator('input[name=drillDate]').fill('2026-08-01');
+  await expect(review.locator('[data-summary=aeds]')).toContainText('No AED registered');
+  await expect(review.locator('[data-summary=confirmation]')).toContainText('Not recorded');
+  await expect(review.locator('[data-summary=evidence]')).toContainText('None — optional');
+  await expect(review.locator('[data-region=submit-registration]')).toBeDisabled();
+  await expect(review.locator('[data-region=remaining] [data-remaining=aeds]')).toContainText('AED registration');
+
+  // AEDs, the plan, the readiness confirmation.
+  await registerAed(page, 'STEP-SERIAL-1', 'Front desk');
+  await expect(page.locator('[data-facility-step=aeds]')).toHaveAttribute('data-state', 'complete');
+  await expect(stepState(page, 'plan')).toHaveAttribute('data-step-state', 'complete');
+  await page.locator('[data-step-item=plan] a').click();
+  await expect(page.locator('#plan [data-region=procedure]')).toContainText('Contact EMS immediately');
+  await expect(page.locator('#plan [data-region=derived]')).toContainText('Front desk');
+  await recordReadiness(page);
+  // The confirmation leads on to the evidence step; it submits nothing.
+  await expect(page).toHaveURL(/step=evidence/);
+  await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'current');
+  await expect(page.locator('#evidence [data-region=evidence-statement]')).toContainText('It does not itself establish MOPH acceptance or replace the regulatory Site requirements.');
+  await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');
+
+  // REVIEW AND SUBMIT, laid out like the event's: the summary, what remains, the declaration, Submit and Save as draft.
   await page.locator('[data-region=step-next]').click();
+  await expect(review.locator('[data-summary=aeds]')).toContainText('1 AED registered');
+  await expect(review.locator('[data-summary=infrastructure]')).toContainText('Recorded');
   await expect(review.locator('[data-region=remaining]')).toBeHidden();
-  await review.getByRole('button', { name: 'Complete the registration', exact: true }).click();
-  await expect(page).toHaveURL(/notice=confirmed/);
+  await expect(review.locator('[data-region=save-draft]')).toBeVisible();
+  // The declaration counts as remaining until it is signed.
+  await expect(review.locator('[data-region=submit-registration]')).toBeDisabled();
+  await submitRegistration(page);
 
-  // REGISTERED: the same address is the management page.
-  await expect(header).toContainText('Registered');
-  await expect(page.locator('[data-region=registered-band]')).toContainText(`Registered. The record ID is ${id}.`);
-  await expect(page.locator('[data-region=registered-band] a')).toHaveAttribute('href', `/facilities/${id}/certificate`);
-  for (const section of ['status', 'aeds', 'plan', 'incidents', 'requests', 'details']) await expect(page.locator(`[data-region=section-${section}]`)).toBeVisible();
-  await expectAbsent(page, { anchor: '[data-region=section-status]', absent: '[data-region=record-stepper]', because: 'a registered facility is managed, not registered again' });
-  await expect(page.locator('[data-region=plan-due]')).toContainText('The next readiness confirmation is due by');
-  await expect(page.locator('[data-region=plan-confirmation]')).toBeVisible();
-  await expect(page.locator('[data-region=report-incident]')).toHaveAttribute('href', `/facilities/${id}/incidents/new`);
-  await expect(page.locator('[data-region=no-requests]')).toContainText('No requests from the Ministry.');
-  await expect(page.locator('[data-region=contact-summary]')).toContainText('Duty manager');
-  await expect(page.locator('[data-region=edit-contact-link]')).toHaveAttribute('href', `/facilities/${id}/profile#contact`);
-  // The AEDs are managed here: add, relocate, replace and update status are the registry's purposes.
-  await page.locator('#aeds [data-region=registry-table] button').first().click();
-  for (const purpose of ['Relocation', 'Replacement', 'Operational-status change']) await expect(page.locator('#aeds').getByRole('button', { name: purpose, exact: true })).toBeVisible();
+  // THE ACKNOWLEDGMENT OF RECEIPT, as an event's: the Site ID as the record ID, the grey status chip.
+  await expect(page.locator('[data-region=site-acknowledgment] [data-region=record-id]')).toHaveText(/^SITE-\d{6}$/);
+  await expect(page.locator('[data-region=status-chip]')).toHaveAttribute('data-status', 'submitted');
+  await expect(page.locator('[data-fact=reference]')).toContainText(id);
 
-  // THE OLD SUB-ROUTES LAND ON THE RECORD.
+  // THE RECORD WITH THE MINISTRY: the receipt band, the under-review card, read-only steps -- as a filed event.
+  await page.goto(`/facilities/${id}`);
+  await expect(header.locator('[data-region=site-status]')).toHaveAttribute('data-status', 'submitted');
+  await expect(page.locator('[data-region=next-action]')).toHaveAttribute('data-next-action', 'underReview');
+  await expect(page.locator('[data-region=rail]')).toContainText('Waiting for the Ministry');
+  await page.goto(`/facilities/${id}?step=review`);
+  await expect(page.locator('[data-region=filed-band]')).toContainText(/Submitted\. The record ID is SITE-\d{6}\./);
+  await expect(page.locator('[data-region=filed-band] a')).toHaveAttribute('href', `/facilities/${id}/acknowledgment`);
+  await expectAbsent(page, { anchor: '[data-region=filed-band]', absent: '[data-region=submit-registration]', because: 'a submission with the Ministry is not filed again until it is returned' });
+  await page.goto(`/facilities/${id}?step=infrastructure`);
+  await expectAbsent(page, { anchor: '#infrastructure [data-region=site-infrastructure]', absent: '[data-region=save-infrastructure]', because: 'the record is read-only while the Ministry has it' });
+  // Not before the Ministry accepts: no dashboard, no certificate.
+  await expectAbsent(page, { anchor: '[data-region=record-stepper]', absent: '[data-region=site-tabs]', because: 'the dashboard follows acceptance' });
+  await page.goto(`/facilities/${id}/certificate`);
+  await expect(page.locator('[data-region=certificate-pending]')).toContainText('The site’s status is Submitted.');
+
+  // THE OLD SUB-ROUTES LAND ON THE MATCHING STEP.
   await page.goto(`/facilities/${id}/devices`);
   await expect(page).toHaveURL(new RegExp(`/facilities/${id}\\?step=aeds#aeds$`));
-  await expect(page.locator('[data-region=section-aeds]')).toBeVisible();
-  await page.goto(`/facilities/${id}/submit`);
-  await expect(page).toHaveURL(new RegExp(`/facilities/${id}\\?step=plan#plan$`));
-  await page.goto(`/facilities/${id}/incidents`);
-  await expect(page).toHaveURL(new RegExp(`/facilities/${id}#incidents$`));
-  await expect(page.locator('[data-region=section-incidents]')).toBeVisible();
+  await expect(page.locator('[data-step-item=aeds]')).toHaveAttribute('data-step-state', 'current');
+});
+
+test('the intake names the covered categories and decides what the applicant cannot', async ({ page }) => {
+  page.setDefaultTimeout(15000);
+  await signInAs(page, 'test_organizer');
+  await page.goto('/facilities/new');
+  await expect(page.locator('[data-region=site-intro] [data-l=en]')).toHaveText('Register this Site if it belongs to a covered cardiac-readiness category. Registered Sites can also be reused when submitting Events held at the same location.');
+  await expect(page.locator('[data-region=category-options] button')).toHaveCount(7);
+  await expect(page.locator('[data-category=eventVenue]')).toContainText('Event-hosting venues with approved/licensed capacity ≥1,000');
+  await expect(page.locator('[data-category=education]')).toContainText('according to the phased implementation schedule established by MOPH');
+  // A designated category registers, but the applicant cannot designate itself.
+  await page.locator('[data-category=remote]').click();
+  await expect(page.locator('[data-region=determination]')).toContainText('Only the Ministry designates a site in this category.');
+  await expect(page.getByRole('button', { name: CONTINUE, exact: true })).toBeVisible();
+  // An event-hosting venue below the threshold is not covered: no Continue is drawn.
+  await page.locator('[data-category=eventVenue]').click();
+  await page.locator('input[name=capacity]').fill('400');
+  await expect(page.locator('[data-region=capacity-ends]')).toContainText('The recorded capacity is below 1,000 persons');
+  await expectAbsent(page, { anchor: '[data-region=capacity-ends]', absent: page.getByRole('button', { name: CONTINUE, exact: true }), because: 'a category that does not reach the site is absent, not greyed (rule 10)' });
+  await page.locator('input[name=capacity]').fill('1500');
+  await expect(page.getByRole('button', { name: CONTINUE, exact: true })).toBeVisible();
+  // The operating organization starts as the account's organization record.
+  await expect(page.locator('input[name=operatingOrganization]')).not.toHaveValue('');
 });
 
 test('the step path reads in Arabic and fits a phone', async ({ page, context }) => {
@@ -117,9 +133,9 @@ test('the step path reads in Arabic and fits a phone', async ({ page, context })
   await page.goto(`/facilities/${id}`);
   // The phone shows the current step in a bar that opens the list.
   const toggle = page.locator('.step-nav-toggle');
-  await expect(toggle).toContainText('أجهزة إزالة الرجفان');
+  await expect(toggle).toContainText('البنية الأساسية للموقع');
   await toggle.click();
-  await expect(page.locator('[data-step-item=review]')).toContainText('المراجعة والتسجيل');
+  await expect(page.locator('[data-step-item=review]')).toContainText('المراجعة والتقديم');
   await expect(page.locator('[data-region=step-next]')).toContainText('التالي');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(376);
 });

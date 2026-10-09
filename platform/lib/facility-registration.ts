@@ -3,7 +3,7 @@ import { facilityAedStatus, facilityPoint } from './facility-gis';
 import { getDb } from './db';
 import { facilityInfrastructure } from './site-infrastructure';
 import { aedPhotoCount, evidenceDocumentCount, siteApplicabilityFor, siteStatusFacts } from './site-registration';
-import { categoryApplicabilityMode, siteStatus } from './rules/site';
+import { categoryApplicabilityMode, siteRecordLocked, siteStatus } from './rules/site';
 import { type FacilityRegistrationFacts } from './rules/facility-workflow';
 
 /**
@@ -26,6 +26,7 @@ export function facilityRegistrationFacts(id: string): FacilityRegistrationFacts
   const capacityNeeded = categoryApplicabilityMode(f?.category_key ?? '') === 'capacity';
   const infrastructure = facilityInfrastructure(id);
   const applicability = siteApplicabilityFor(id);
+  const statusFacts = siteStatusFacts(id);
   return {
     archived: Boolean(f?.archived_at),
     mapConfirmed: Boolean(facilityPoint(id)),
@@ -42,8 +43,10 @@ export function facilityRegistrationFacts(id: string): FacilityRegistrationFacts
     documentCount: evidenceDocumentCount(id),
     photoCount: aedPhotoCount(id),
     outsideCategory: applicability.key === 'belowThreshold' || applicability.key === 'thresholdUnset',
-    submissionCount: siteStatusFacts(id).submissionCount,
-    status: siteStatus(siteStatusFacts(id)),
+    submissionCount: statusFacts.submissionCount,
+    status: siteStatus(statusFacts),
+    everAccepted: Boolean(statusFacts.everAccepted),
+    locked: siteRecordLocked(statusFacts),
   };
 }
 

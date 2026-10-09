@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../components/Header';
 import { L } from '../../../components/L';
+import { InfoNote } from '../../../components/InfoNote';
 import { RegisterFacilityForm } from './RegisterFacilityForm';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { publishedFacilityValues, unreadCountFor, venueById } from '../../../lib/queries';
@@ -34,11 +35,10 @@ export default async function RegisterFacilityPage({searchParams}:{searchParams:
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
         <div style={{ maxWidth: 900 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 12 }}>
-          <L en="Cardiac-arrest readiness · new facility/site registration" ar="الجاهزية لتوقف القلب · تسجيل منشأة/موقع جديد" />
-        </div>
-        <h1 data-sec-h1="" style={{ margin: '0 0 16px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
+        {/* The event's intake pattern (owner, 9 October 2026): the heading, the sections, one Continue. */}
+        <h1 data-sec-h1="" style={{ margin: '0 0 12px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Register a facility/site" ar="تسجيل منشأة/موقع" />
+          <InfoNote><L en="Answer these once. The category decides whether the site is covered, and the requirements follow on the record." ar="أجيبوا عن هذه الأسئلة مرة واحدة. تحدد الفئة ما إذا كان الموقع مشمولاً، وتتبع المتطلبات على السجل." /></InfoNote>
         </h1>
         <p data-region="site-intro" style={{ margin: '0 0 32px', fontSize: 16, lineHeight: 1.65, maxWidth: '70ch' }}>
           <L en={site.introEn} ar={site.introAr} />

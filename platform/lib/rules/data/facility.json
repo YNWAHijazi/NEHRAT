@@ -887,6 +887,13 @@
         "ar": "سُجّل التحديد"
       }
     },
+    "declaration": {
+      "$comment": "The operator's declaration on submission, the event's and the venue's pattern for a site. Not a regulatory instrument's wording: the revision prescribes none; recorded for the owner.",
+      "titleEn": "Facility/site declaration",
+      "titleAr": "إقرار المنشأة/الموقع",
+      "en": "I declare that the information in this registration is accurate and current, that the readiness arrangements it describes are in place, and that changes will be recorded on the site record.",
+      "ar": "أُقرّ بأن المعلومات الواردة في هذا التسجيل صحيحة ومحدّثة، وبأن ترتيبات الجاهزية التي يصفها قائمة، وبأن أي تغيير سيُسجَّل في سجل الموقع."
+    },
     "steps": {
       "infrastructure": {
         "en": "Basic site infrastructure",

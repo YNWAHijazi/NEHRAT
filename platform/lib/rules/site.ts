@@ -144,7 +144,29 @@ export interface SiteStatusFacts {
   actsOnLatest: SiteReviewActKind[];
   /** Open corrective actions raised by the Ministry (not information requests, not confirmation requests). */
   openCorrective: number;
+  /** The Ministry has accepted some version: from then on the site is managed from its dashboard. */
+  everAccepted?: boolean;
 }
+
+/**
+ * Whether the record is locked while the Ministry has it, as an event's is once filed: a
+ * submission nobody has accepted yet, not returned for information or a correction. It
+ * reopens exactly as an event's does when the Ministry asks for more. After a first
+ * acceptance the site is maintained (revision section 14) and never locks again.
+ */
+export function siteRecordLocked(f: SiteStatusFacts): boolean {
+  if (f.archived || f.everAccepted) return false;
+  const status = siteStatus(f);
+  return status === 'submitted' || status === 'underReview';
+}
+
+/** The outcomes a reviewer records on a submission (revision section 11), each with the status it leads to. */
+export type SiteOutcomeKey = 'accept' | 'information' | 'correction';
+export const SITE_OUTCOMES: readonly { key: SiteOutcomeKey; en: string; ar: string; noteRequired: boolean }[] = [
+  { key: 'accept', en: 'Accept the registration and readiness record — readiness current', ar: 'قبول التسجيل وسجل الجاهزية — الجاهزية سارية', noteRequired: false },
+  { key: 'information', en: 'Request additional information — information required', ar: 'طلب معلومات إضافية — مطلوب معلومات', noteRequired: true },
+  { key: 'correction', en: 'Request a correction — information required', ar: 'طلب تصحيح — مطلوب معلومات', noteRequired: true },
+];
 
 /**
  * The site's status (revision section 11): operational labels, not regulatory

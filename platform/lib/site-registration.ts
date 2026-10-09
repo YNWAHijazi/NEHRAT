@@ -35,7 +35,8 @@ export function siteStatusFacts(facilityId: string): SiteStatusFacts {
     ? (d.prepare('SELECT kind FROM facility_review_acts WHERE facility_id = ? AND submission_id = ? ORDER BY id').all(facilityId, latest.id) as unknown as { kind: SiteReviewActKind }[]).map((a) => a.kind)
     : [];
   const open = (d.prepare(`SELECT COUNT(*) AS n FROM facility_requests WHERE facility_id = ? AND status = 'open' AND kind = 'corrective'`).get(facilityId) as { n: number }).n;
-  return { archived: Boolean(f?.archived_at), submissionCount: count, actsOnLatest: acts, openCorrective: open };
+  const everAccepted = Boolean(d.prepare(`SELECT 1 FROM facility_review_acts WHERE facility_id = ? AND kind = 'accepted' LIMIT 1`).get(facilityId));
+  return { archived: Boolean(f?.archived_at), submissionCount: count, actsOnLatest: acts, openCorrective: open, everAccepted };
 }
 
 export function siteStatusFor(facilityId: string): SiteStatusKey {
@@ -143,14 +144,14 @@ export function copyVenueInfrastructure(venueId: string, facilityId: string, acc
 
 /* ---------------- submissions ---------------- */
 
-export interface SiteSubmission { id: number; version: number; submittedAt: string; submittedBy: string }
+export interface SiteSubmission { id: number; version: number; submittedAt: string; submittedBy: string; representative: string; position: string }
 
 export function siteSubmissions(facilityId: string): SiteSubmission[] {
   return (getDb()
-    .prepare(`SELECT s.id, s.version, s.submitted_at, COALESCE(a.display_name, '') AS who FROM facility_submissions s LEFT JOIN accounts a ON a.id = s.submitted_by
+    .prepare(`SELECT s.id, s.version, s.submitted_at, s.representative, s.position, COALESCE(a.display_name, '') AS who FROM facility_submissions s LEFT JOIN accounts a ON a.id = s.submitted_by
               WHERE s.facility_id = ? ORDER BY s.version DESC`)
-    .all(facilityId) as unknown as { id: number; version: number; submitted_at: string; who: string }[])
-    .map((r) => ({ id: r.id, version: r.version, submittedAt: r.submitted_at, submittedBy: r.who }));
+    .all(facilityId) as unknown as { id: number; version: number; submitted_at: string; who: string; representative: string; position: string }[])
+    .map((r) => ({ id: r.id, version: r.version, submittedAt: r.submitted_at, submittedBy: r.who, representative: r.representative, position: r.position }));
 }
 
 /**
@@ -161,7 +162,7 @@ export function siteSubmissions(facilityId: string): SiteSubmission[] {
  * Ministry request for information or a correction is answered by it and closes, naming the
  * version. Returns the version.
  */
-export function submitSiteRegistration(facilityId: string, accountId: number, isDemo: boolean): number {
+export function submitSiteRegistration(facilityId: string, accountId: number, isDemo: boolean, declaration: { representative: string; position: string } = { representative: '', position: '' }): number {
   const d = getDb();
   const version = ((d.prepare('SELECT MAX(version) AS v FROM facility_submissions WHERE facility_id = ?').get(facilityId) as { v: number | null }).v ?? 0) + 1;
   const snapshot = JSON.stringify({
@@ -171,8 +172,8 @@ export function submitSiteRegistration(facilityId: string, accountId: number, is
     confirmation: facilityPlanConfirmation(facilityId),
     applicability: siteApplicabilityFor(facilityId).key,
   });
-  d.prepare(`INSERT INTO facility_submissions (facility_id, version, snapshot, submitted_by, submitted_at, is_demo) VALUES (?, ?, ?, ?, now_stamp(), ?)`)
-    .run(facilityId, version, snapshot, accountId, isDemo ? 1 : 0);
+  d.prepare(`INSERT INTO facility_submissions (facility_id, version, snapshot, submitted_by, submitted_at, is_demo, representative, position) VALUES (?, ?, ?, ?, now_stamp(), ?, ?, ?)`)
+    .run(facilityId, version, snapshot, accountId, isDemo ? 1 : 0, declaration.representative, declaration.position);
   d.prepare(`UPDATE facility_requests SET status = 'corrected', corrected_at = now_stamp(), close_note = ?, closed_by = 'operator'
              WHERE facility_id = ? AND status = 'open' AND kind IN ('information','correction')`)
     .run(`Answered by the updated registration, version ${version}.`, facilityId);
@@ -290,9 +291,13 @@ export interface SiteQueueRow {
   nameEn: string; nameAr: string;
   categoryKey: string;
   municipality: string;
+  /** The operating organization on the site profile. */
+  operator: string;
   version: number;
   submittedAt: string;
   status: SiteStatusKey;
+  /** Who took the latest submission (the review-started act), '' while nobody has. */
+  reviewer: string;
 }
 
 /**
@@ -302,14 +307,15 @@ export interface SiteQueueRow {
  */
 export function siteReviewQueue(viewerIsDemo: boolean): SiteQueueRow[] {
   const flag = demonstrationFilter('reviewerQueue', { isDemonstration: viewerIsDemo }).isDemo ? 1 : 0;
-  const rows = getDb().prepare(`SELECT f.id, f.site_id, f.name_en, f.name_ar, f.category_key, f.municipality_en, s.version, s.submitted_at
+  const rows = getDb().prepare(`SELECT f.id, f.site_id, f.name_en, f.name_ar, f.category_key, f.municipality_en, f.operating_organization, s.version, s.submitted_at,
+                                  (SELECT r.actor_name FROM facility_review_acts r WHERE r.submission_id = s.id AND r.kind = 'reviewStarted' ORDER BY r.id DESC LIMIT 1) AS reviewer
                                 FROM facilities f JOIN facility_submissions s ON s.facility_id = f.id
                                   AND s.version = (SELECT MAX(version) FROM facility_submissions WHERE facility_id = f.id)
                                 WHERE f.is_demo = ? ORDER BY s.submitted_at`)
-    .all(flag) as unknown as { id: string; site_id: string | null; name_en: string; name_ar: string; category_key: string; municipality_en: string; version: number; submitted_at: string }[];
+    .all(flag) as unknown as { id: string; site_id: string | null; name_en: string; name_ar: string; category_key: string; municipality_en: string; operating_organization: string; version: number; submitted_at: string; reviewer: string | null }[];
   const order: SiteStatusKey[] = ['submitted', 'underReview', 'informationRequired', 'correctiveActionRequired', 'readinessCurrent', 'noLongerCovered', 'inPreparation'];
   return rows
-    .map((r) => ({ facilityId: r.id, siteId: r.site_id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, categoryKey: r.category_key, municipality: r.municipality_en, version: r.version, submittedAt: r.submitted_at, status: siteStatusFor(r.id) }))
+    .map((r) => ({ facilityId: r.id, siteId: r.site_id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, categoryKey: r.category_key, municipality: r.municipality_en, operator: r.operating_organization, version: r.version, submittedAt: r.submitted_at, status: siteStatusFor(r.id), reviewer: r.reviewer ?? '' }))
     .sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status) || a.submittedAt.localeCompare(b.submittedAt));
 }
 

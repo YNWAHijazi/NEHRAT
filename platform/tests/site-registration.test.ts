@@ -19,7 +19,7 @@ import { getDb } from '../lib/db';
 import { registerFacilityAction, saveFacilityDeviceAction, saveFacilityPlanAction, submitFacilityIncidentAction } from '../app/actions';
 import { addSiteEvidenceAction, respondToSiteRequestAction, saveSiteInfrastructureAction, submitSiteRegistrationAction } from '../app/site-actions';
 import {
-  acceptSiteRegistrationAction, closeSiteCorrectiveAction, raiseSiteCorrectiveAction, recordSiteDesignationAction,
+  acceptSiteRegistrationAction, closeSiteCorrectiveAction, recordSiteOutcomeAction, raiseSiteCorrectiveAction, recordSiteDesignationAction,
   recordSiteInspectionAction, requestSiteInformationAction, startSiteReviewAction,
 } from '../app/ministry-site-actions';
 import { facilityRegistrationFacts } from '../lib/facility-registration';
@@ -45,6 +45,7 @@ const profile = {
   email: 'arena@example.com', accessPoint: 'North gate', emsNumber: '140', coordinatorName: 'Duty manager', coordinatorPhone: '+9611234567',
   coordinatorEmail: 'duty@example.com', mapLat: '33.89', mapLng: '35.50', mapConfirmed: 'yes',
 };
+const declared = () => data({ confirm: 'yes', representative: 'Duty manager', position: 'Operations manager' });
 const idOf = (name: string) => String((getDb().prepare('SELECT id FROM facilities WHERE name_en = ?').get(name) as { id: string }).id);
 
 describe('the rules (lib/rules/site.ts)', () => {
@@ -140,19 +141,28 @@ describe('registration, submission and the Ministry review', () => {
   });
 
   it('refuses the submission until every required line is complete, then freezes version 1', async () => {
-    await expect(submitSiteRegistrationAction(id)).rejects.toThrow('error=submit');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow('error=submit');
     await expect(saveFacilityDeviceAction(id, data({ purpose: 'initial', identification: 'ARENA-1', location: 'Main entrance', accessibleHours: 'yes', publiclyAccessible: 'yes', pediatric: 'na', operational: 'yes', representative: 'Duty manager', separatePin: 'no' }))).rejects.toThrow('notice=saved');
     await expect(saveFacilityPlanAction(id, data({ check_trained: 'on', check_signage: 'on', check_access: 'on', check_routes: 'on', check_staffKnow: 'on', check_drill: 'on', drillDate: '2026-08-01', representative: 'Duty manager' })))
       .rejects.toThrow(/step=evidence&notice=confirmed/);
     expect(siteStatusFor(id)).toBe('inPreparation');
-    await expect(submitSiteRegistrationAction(id)).rejects.toThrow('notice=submitted&version=1');
+    // The declaration is signed, as on an event: unsigned, nothing is submitted.
+    await expect(submitSiteRegistrationAction(id, data({ representative: 'Duty manager', position: 'Manager' }))).rejects.toThrow('error=submit');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow(`redirect:/facilities/${id}/acknowledgment`);
     expect(siteStatusFor(id)).toBe('submitted');
+    expect(siteSubmissions(id)[0]).toMatchObject({ version: 1, representative: 'Duty manager', position: 'Operations manager' });
+    // The reviewers are notified, as on a venue submission.
+    expect((getDb().prepare(`SELECT COUNT(*) AS n FROM notifications WHERE record_route = ?`).get(`/ministry/facilities/${id}`) as { n: number }).n).toBeGreaterThan(0);
+    // With the Ministry, the record is read-only, as a filed event's is.
+    expect(facilityRegistrationFacts(id).locked).toBe(true);
+    await expect(saveSiteInfrastructureAction(id, data({ zones: 'Changed' }))).rejects.toThrow('error=locked');
+    await expect(saveFacilityDeviceAction(id, data({ purpose: 'statusChange', label: 'AED-001', operational: 'no', accessibleHours: 'yes', representative: 'Duty manager' }))).rejects.toThrow('error=locked');
     const snapshot = siteSubmissionSnapshot(id, 1)!;
     expect(snapshot).toHaveProperty('infrastructure');
     expect((snapshot['documents'] as { purpose: string; docType: string }[]).map((d) => `${d.purpose}:${d.docType}`)).toEqual(['evidence:thirdPartyCertificate', 'layoutMap:']);
     expect(JSON.stringify(snapshot)).not.toContain('%PDF');
     // Submitted and not asked for anything: it cannot be submitted again.
-    await expect(submitSiteRegistrationAction(id)).rejects.toThrow('error=not-open');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow('error=not-open');
   });
 
   it('only a Ministry role acts, inside its own demonstration boundary', async () => {
@@ -166,11 +176,16 @@ describe('registration, submission and the Ministry review', () => {
     await expect(startSiteReviewAction(id)).rejects.toThrow('notice=started');
     expect(siteStatusFor(id)).toBe('underReview');
     await expect(requestSiteInformationAction(id, data({ kind: 'information', body: '' }))).rejects.toThrow('error=request');
-    await expect(requestSiteInformationAction(id, data({ kind: 'information', body: 'Attach the licence showing the capacity.' }))).rejects.toThrow('notice=information');
+    // The outcome form: a request needs its note, which is what the operator reads.
+    await expect(recordSiteOutcomeAction(id, data({ outcome: 'information', note: '' }))).rejects.toThrow('error=note');
+    await expect(recordSiteOutcomeAction(id, data({ outcome: 'information', note: 'Attach the licence showing the capacity.' }))).rejects.toThrow('notice=information');
     expect(siteStatusFor(id)).toBe('informationRequired');
     expect(siteRequests(id).find((r) => r.kind === 'information')).toMatchObject({ status: 'open', bodyEn: 'Attach the licence showing the capacity.' });
     as('test_organizer');
-    await expect(submitSiteRegistrationAction(id)).rejects.toThrow('version=2');
+    // Returned: the record reopens for revision, exactly as an event's does.
+    expect(facilityRegistrationFacts(id).locked).toBe(false);
+    await expect(saveSiteInfrastructureAction(id, data({ zones: 'Main hall, east stand, west stand' }))).rejects.toThrow('notice=infrastructure');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow('/acknowledgment');
     expect(siteSubmissions(id).map((s) => s.version)).toEqual([2, 1]);
     expect(siteRequests(id).find((r) => r.kind === 'information')).toMatchObject({ status: 'corrected', closeNote: 'Answered by the updated registration, version 2.' });
     expect(siteStatusFor(id)).toBe('submitted');
@@ -178,8 +193,10 @@ describe('registration, submission and the Ministry review', () => {
 
   it('accepts: readiness current', async () => {
     as('test_moph');
-    await expect(acceptSiteRegistrationAction(id, data({ note: 'Complete.' }))).rejects.toThrow('notice=accepted');
+    await expect(recordSiteOutcomeAction(id, data({ outcome: 'accept', note: 'Complete.' }))).rejects.toThrow('notice=accepted');
     expect(siteStatusFor(id)).toBe('readinessCurrent');
+    // Accepted: maintained from the dashboard, never locked again.
+    expect(facilityRegistrationFacts(id)).toMatchObject({ everAccepted: true, locked: false });
     await expect(acceptSiteRegistrationAction(id, data({}))).rejects.toThrow('error=act');
   });
 

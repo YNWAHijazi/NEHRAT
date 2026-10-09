@@ -189,3 +189,21 @@ export async function recordSiteDesignationAction(facilityId: string, formData: 
   } catch (error) { db.exec('ROLLBACK'); throw error; }
   done(site.id, 'designated');
 }
+
+/**
+ * The outcome form on the review screen, laid out like the event's (owner, 9 October 2026):
+ * one choice and a note to the operator. Accepting makes readiness current; asking for
+ * information or a correction returns the record for revision, exactly as an event's
+ * revision outcome reopens it, and the note -- required then -- is the request as written.
+ */
+export async function recordSiteOutcomeAction(facilityId: string, formData: FormData): Promise<void> {
+  const outcome = String(formData.get('outcome') ?? '');
+  const note = String(formData.get('note') ?? '').trim();
+  if (outcome === 'accept') return acceptSiteRegistrationAction(facilityId, formData);
+  if (outcome !== 'information' && outcome !== 'correction') redirect(`/ministry/facilities/${facilityId}?error=outcome#review-outcome`);
+  if (!note) redirect(`/ministry/facilities/${facilityId}?error=note#review-outcome`);
+  const request = new FormData();
+  request.set('kind', outcome);
+  request.set('body', note);
+  return requestSiteInformationAction(facilityId, request);
+}

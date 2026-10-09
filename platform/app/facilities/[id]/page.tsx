@@ -15,7 +15,7 @@ import { FacilityPlan } from './FacilityPlan';
 import { PlanConfirmation } from './PlanConfirmation';
 import { InfrastructureForm } from './InfrastructureForm';
 import { EvidenceSection } from './EvidenceSection';
-import { SubmitReview } from './SubmitReview';
+import { SiteFinalReview } from './SiteFinalReview';
 import { EventsTab, HistoryTab, SiteTabsNav, TabSection } from './SiteSections';
 import { currentAccount } from '../../../lib/auth';
 import { beirutToday } from '../../../lib/clock';
@@ -67,7 +67,8 @@ import {
   type FacilityStep,
   type FacilityStepKey,
 } from '../../../lib/rules/facility-workflow';
-import { siteCertificateAvailable, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
+import { reviewActLabel, siteCertificateAvailable, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
+import { accountContact } from '../../../lib/account-contact';
 
 /**
  * THE FACILITY/SITE'S SINGLE RECORD PAGE (owner decision, 9 October 2026; latest revision,
@@ -128,6 +129,28 @@ export default async function FacilityRecordPage({
   const evidence = documents.filter((d) => d.purpose === 'evidence');
   const photos = devices.filter((d) => d.hasPhoto).map((d) => ({ label: d.label, locationEn: d.locationEn, locationAr: d.locationAr || d.locationEn }));
   const summary = siteSubmissionSummary(submissionFacts(facts));
+  // Read-only while the Ministry has it and before a first acceptance, as a filed event is.
+  const editable = !archived && !facts.locked;
+  const submissions = siteSubmissions(id);
+  const latestSubmission = submissions[0] ?? null;
+  const me = { name: accountContact(account.id).name };
+  const finalReview = (managing: boolean) => (
+    <SiteFinalReview
+      facilityId={id} siteId={facility.siteId} lines={summary} managing={managing} refused={q.error === 'submit'}
+      locked={facts.locked} returned={facts.status === 'informationRequired'} version={latestSubmission?.version ?? 0}
+      filed={latestSubmission ? { representative: latestSubmission.representative, position: latestSubmission.position, submittedAt: latestSubmission.submittedAt } : null}
+      me={me.name ? me : null}
+      details={[
+        { en: 'Site ID', ar: 'معرّف الموقع', valueEn: facility.siteId ?? '—', valueAr: facility.siteId ?? '—' },
+        { en: 'Registration reference', ar: 'مرجع التسجيل', valueEn: id, valueAr: id },
+        { en: 'Facility/site', ar: 'المنشأة/الموقع', valueEn: facility.nameEn, valueAr: facility.nameAr },
+        { en: 'Operating organization', ar: 'الجهة المشغّلة', valueEn: facility.operatingOrganization || '—', valueAr: facility.operatingOrganization || '—' },
+        { en: 'Category', ar: 'الفئة', valueEn: facilityCategory(facility.categoryKey)?.en ?? '—', valueAr: facilityCategory(facility.categoryKey)?.ar ?? '—' },
+        { en: 'Submission date', ar: 'تاريخ التقديم', valueEn: latestSubmission?.submittedAt.slice(0, 10) ?? '—', valueAr: latestSubmission?.submittedAt.slice(0, 10) ?? '—' },
+        { en: 'Submission version', ar: 'نسخة التقديم', valueEn: latestSubmission ? String(latestSubmission.version) : '—', valueAr: latestSubmission ? String(latestSubmission.version) : '—' },
+      ]}
+    />
+  );
   const nextHref = (href: string) => href === 'profile' ? `/facilities/${id}/profile` : href.startsWith('profile#') ? `/facilities/${id}/${href}` : href.startsWith('?') ? `/facilities/${id}${href}` : href;
 
   const notices = (
@@ -143,6 +166,7 @@ export default async function FacilityRecordPage({
           <L en={`The registration has been submitted to the Ministry as version ${q.version ?? ''}. Its status is shown above.`} ar={`قُدِّم التسجيل إلى الوزارة بوصفه الإصدار ${q.version ?? ''}. وتظهر حالته أعلاه.`} />
         </div>
       ) : null}
+      {q.error === 'locked' ? <p role="alert"><L en="The registration is with the Ministry and is read-only until the Ministry accepts it or asks for more." ar="التسجيل لدى الوزارة وهو للقراءة فقط إلى أن تقبله الوزارة أو تطلب المزيد." /></p> : null}
       {q.error === 'not-open' ? <p role="alert"><L en="The registration is with the Ministry. It can be submitted again only when the Ministry asks for information or a correction." ar="التسجيل لدى الوزارة. ولا يمكن تقديمه مجدداً إلا عندما تطلب الوزارة معلومات أو تصحيحاً." /></p> : null}
       {q.error?.startsWith('layout-') ? <p role="alert"><L en="The layout map was not saved: attach a PDF or an image within the size limit." ar="لم تُحفظ خريطة المخطط: أرفقوا ملف PDF أو صورة ضمن الحد المسموح." /></p> : null}
     </>
@@ -174,7 +198,7 @@ export default async function FacilityRecordPage({
         devices={devices}
         facilityLocation={point}
         deviceLocations={Object.fromEntries(devices.map((d) => { const location = devicePoint(id, d.label); return [d.label, location.separate ? location.point : null]; }))}
-        editable={!archived}
+        editable={editable}
       />
       <AedWhereToBuy />
       <VendorDirectoryLink />
@@ -187,23 +211,39 @@ export default async function FacilityRecordPage({
     : null;
   const confirmationForm = archived
     ? <p><L en="Archived record · Read-only" ar="سجل مؤرشف · للقراءة فقط" /></p>
+    : facts.locked
+      ? <p data-region="confirmation-filed" style={{ margin: 0, padding: '14px 18px', background: 'var(--surface2)', borderRadius: 10, fontSize: '14.5px' }}><L en={`Readiness confirmation recorded ${confirmation?.createdAt.slice(0, 10) ?? '—'} by ${confirmation?.coordinator ?? '—'}; latest drill ${confirmation?.drillDate ?? '—'}. Read-only while the Ministry reviews the registration.`} ar={`سُجّل تأكيد الجاهزية في ⁦${confirmation?.createdAt.slice(0, 10) ?? '—'}⁩ من ${confirmation?.coordinator ?? '—'}؛ آخر تمرين ⁦${confirmation?.drillDate ?? '—'}⁩. للقراءة فقط أثناء مراجعة الوزارة للتسجيل.`} /></p>
     : <PlanConfirmation facilityId={id} representative={contact?.nameOrPosition ?? ''} today={today} existing={confirmation} ready={facilityConfirmationReady(facts)} />;
   const infrastructureForm = (
-    <InfrastructureForm facilityId={id} initial={infrastructure?.answers as Record<string, string> ?? {}} layoutMap={infrastructure?.layoutMap ?? null} editable={!archived} />
+    <InfrastructureForm facilityId={id} initial={infrastructure?.answers as Record<string, string> ?? {}} layoutMap={infrastructure?.layoutMap ?? null} editable={editable} />
   );
-  const evidenceSection = <EvidenceSection facilityId={id} documents={evidence} photos={photos} editable={!archived} error={q.error?.startsWith('evidence-') ? q.error : undefined} />;
+  const evidenceSection = <EvidenceSection facilityId={id} documents={evidence} photos={photos} editable={editable} error={q.error?.startsWith('evidence-') ? q.error : undefined} />;
 
   if (mode === 'register') {
     const rail = facilityRailStages(facts);
     return (
       <FacilityWorkspace account={account} facility={facility} active="record">
         {notices}
+        <SiteDetermination id={id} siteId={facility.siteId} />
         {next ? <NextStepCard step={next} to={nextHref(next.href)} /> : null}
+        {/* With the Ministry and not yet decided: what happens next, and the receipt one click away -- the event's card. */}
+        {facts.locked ? (
+          <NextStepCard
+            step={{
+              kind: 'underReview', href: 'acknowledgment', tone: 'brand',
+              titleEn: siteStatusLabel(facts.status).en, titleAr: siteStatusLabel(facts.status).ar,
+              bodyEn: 'The Ministry reviews the registration and records its outcome: readiness current, or a request for information or a correction. You are notified on this platform when it does.',
+              bodyAr: 'تراجع الوزارة التسجيل وتسجّل نتيجتها: الجاهزية سارية، أو طلب معلومات أو تصحيح. يصلكم إشعار على هذه المنصة عند تسجيلها.',
+              buttonEn: 'View acknowledgment of receipt', buttonAr: 'عرض إشعار الاستلام',
+            }}
+            to={`/facilities/${id}/acknowledgment`}
+          />
+        ) : null}
         <JumpTo />
-        <StageRail titleEn="Registration progress" titleAr="تقدّم التسجيل" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
+        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         <FeeDue facility={facility} />
         <CategoryRequirements />
-        <DetailsCard facility={facility} point={point} editable />
+        <DetailsCard facility={facility} point={point} editable={editable} />
         <Applicability id={id} />
         <RecordStepper
           steps={stepperSteps(facilityRegistrationSteps(facts), {
@@ -212,8 +252,8 @@ export default async function FacilityRecordPage({
             plan,
             confirmation: <>{readinessError}{confirmationForm}</>,
             evidence: evidenceSection,
-            review: <SubmitReview facilityId={id} lines={summary} managing={false} refused={q.error === 'submit'} />,
-          })}
+            review: null,
+          }, finalReview(false))}
           initialKey={facilityInitialStep(facts, q.step)}
           groups={{ required: { en: 'Required', ar: 'مطلوب' }, recommended: { en: 'Recommended', ar: 'موصى به' } }}
           finalNext={{ en: 'Next: review and submit', ar: 'التالي: المراجعة والتقديم' }}
@@ -233,11 +273,12 @@ export default async function FacilityRecordPage({
         {tab === 'overview' ? (
           <>
             {archived ? <ArchivedBand facility={facility} /> : null}
+            <SiteDetermination id={id} siteId={siteId} />
             <Overview id={id} facility={facility} siteId={siteId} today={today} />
             {facts.status === 'informationRequired' ? (
               <TabSection id="resubmit" titleEn="Answer the Ministry’s request" titleAr="الرد على طلب الوزارة">
                 <OpenRequests id={id} />
-                <SubmitReview facilityId={id} lines={summary} managing refused={q.error === 'submit'} />
+                {finalReview(true)}
               </TabSection>
             ) : null}
             {!archived ? <Maintenance id={id} /> : null}
@@ -294,7 +335,7 @@ export default async function FacilityRecordPage({
         ) : null}
         {tab === 'history' ? (
           <TabSection id="history" titleEn="Ministry history" titleAr="سجل الوزارة">
-            <HistoryTab facilityId={id} submissions={siteSubmissions(id)} acts={siteReviewActs(id)} requests={siteRequests(id)} incidentCount={facilityIncidentCount(id)} changes={siteChanges(id)} respond={!archived} />
+            <HistoryTab facilityId={id} submissions={submissions} acts={siteReviewActs(id)} requests={siteRequests(id)} incidentCount={facilityIncidentCount(id)} changes={siteChanges(id)} respond={!archived} />
           </TabSection>
         ) : null}
       </div>
@@ -302,13 +343,51 @@ export default async function FacilityRecordPage({
   );
 }
 
-/** The resolved steps, each in its card, for the shared stepper. Every step is the operator's own. */
-function stepperSteps(defs: FacilityStep[], bodies: Record<FacilityStepKey, ReactNode>): StepperStep[] {
+/**
+ * The resolved steps for the shared stepper, each in its card; the last is the final review
+ * itself, as the event's is (it carries its own section and heading). Every step is the
+ * operator's own.
+ */
+function stepperSteps(defs: FacilityStep[], bodies: Record<FacilityStepKey, ReactNode>, final: ReactNode): StepperStep[] {
   return defs.map((s) => ({
     key: s.key, anchor: s.anchor, labelEn: s.en, labelAr: s.ar, stateEn: s.stateEn, stateAr: s.stateAr, state: s.state,
     kind: s.state === 'final' ? 'final' : s.optional ? 'recommended' : 'required', yours: true, whoEn: '', whoAr: '',
-    body: <StepCard step={s}>{bodies[s.key]}</StepCard>,
+    body: s.state === 'final' ? final : <StepCard step={s}>{bodies[s.key]}</StepCard>,
   }));
+}
+
+/**
+ * THE MINISTRY'S OUTCOME ON THE OPERATOR'S RECORD, the event's determination card: the latest
+ * outcome the Ministry recorded, who and when, its note, and where to act on it. Site
+ * statuses, never the event outcomes; absent until an outcome is recorded.
+ */
+function SiteDetermination({ id, siteId }: { id: string; siteId: string | null }) {
+  const act = siteReviewActs(id).find((a) => a.kind === 'accepted' || a.kind === 'infoRequested' || a.kind === 'correctionRequested');
+  if (!act) return null;
+  const label = reviewActLabel(act.kind);
+  const accepted = act.kind === 'accepted';
+  const facts = facilityRegistrationFacts(id);
+  return (
+    <div data-region="determination-card" data-outcome={act.kind} style={{ paddingBlock: '23px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: `3px solid ${accepted ? 'var(--brand)' : 'var(--accent)'}`, borderRadius: 12, marginBlockEnd: 32 }}>
+      <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
+        <L en="Ministry review outcome" ar="نتيجة مراجعة الوزارة" />
+      </div>
+      <div style={{ fontSize: '17px', fontWeight: 500, lineHeight: 1.5, marginBlockEnd: 6 }}><L en={label.en} ar={label.ar} /></div>
+      <div style={{ fontSize: '12.5px', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockEnd: act.note ? 8 : 14 }}>
+        <L en={`${siteId ?? id} · recorded by ${act.actor} · ${act.at.slice(0, 10)}${act.version ? ` · version ${act.version}` : ''}`} ar={`${siteId ?? id} · سجّله ${act.actor} · ⁦${act.at.slice(0, 10)}⁩${act.version ? ` · النسخة ${act.version}` : ''}`} />
+      </div>
+      {act.note ? <p data-region="determination-note" style={{ margin: '0 0 14px', fontSize: '14.5px', lineHeight: 1.6, maxWidth: '78ch' }}>{act.note}</p> : null}
+      {accepted && siteCertificateAvailable(facts.status) ? (
+        <a href={`/facilities/${id}/certificate`} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          <L en="View / print the registration certificate" ar="عرض / طباعة شهادة التسجيل" />
+        </a>
+      ) : (
+        <a href={facts.everAccepted ? `/facilities/${id}?tab=history` : '#final-review'} style={{ height: 38, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 19, fontSize: '13.5px', display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
+          {facts.everAccepted ? <L en="Open the Ministry history" ar="فتح سجل الوزارة" /> : <L en="Open the review and submit" ar="فتح المراجعة والتقديم" />}
+        </a>
+      )}
+    </div>
+  );
 }
 
 /** One step's card: its title and its state in words and colour, amber while open, green when complete, grey while optional. */

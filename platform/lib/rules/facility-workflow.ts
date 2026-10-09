@@ -2,7 +2,7 @@ import type { NextStep, RailStage } from './rail';
 import facilityJson from './data/facility.json';
 import {
   siteAedsDone,
-  siteMaySubmit,
+  siteSubmissionSummary,
   sitePlanComplete,
   siteStatusLabel,
   siteSubmitBlockers,
@@ -55,6 +55,10 @@ export interface FacilityRegistrationFacts {
   submissionCount: number;
   /** The site status (lib/rules/site.ts siteStatus). */
   status: SiteStatusKey;
+  /** The Ministry has accepted some version: the record is the site's dashboard from then on. */
+  everAccepted: boolean;
+  /** With the Ministry and not yet accepted: read-only, as a filed event is (lib/rules/site.ts siteRecordLocked). */
+  locked: boolean;
 }
 
 /** The facts the review page and its blockers read. */
@@ -85,13 +89,14 @@ export function facilityReadyToSubmit(f: FacilityRegistrationFacts): boolean {
 }
 
 /**
- * Which page the record address shows. The site is in preparation until it is first
- * submitted to the Ministry; from then on it is managed from its dashboard -- and stays
- * there: a later change is maintenance, not a new registration (revision section 14). An
- * archived record is read on the dashboard, read-only.
+ * Which page the record address shows -- the event's journey, screen for screen (owner,
+ * 9 October 2026): the record page with its step path while the registration is prepared,
+ * submitted, under review or returned for information; the site's dashboard once the
+ * Ministry has accepted it -- and it stays there: a later change is maintenance, not a new
+ * registration (revision section 14). An archived record is read on the dashboard.
  */
 export function facilityRecordMode(f: FacilityRegistrationFacts): 'register' | 'manage' {
-  return f.archived || f.submissionCount > 0 ? 'manage' : 'register';
+  return f.archived || f.everAccepted ? 'manage' : 'register';
 }
 
 /** The record's status, in the header: the site status, product-defined (revision section 11). */
@@ -169,6 +174,15 @@ export function facilityInitialStep(f: FacilityRegistrationFacts, requested: str
 export function facilityNextAction(f: FacilityRegistrationFacts): NextStep | null {
   if (f.archived) return null;
   if (facilityRecordMode(f) === 'register') {
+    // With the Ministry: the record page shows the under-review card instead (as the event's does).
+    if (f.locked) return null;
+    if (f.status === 'informationRequired') {
+      return { kind: 'information', href: '#final-review', tone: 'accent',
+        titleEn: 'Answer the Ministry’s request', titleAr: 'الرد على طلب الوزارة',
+        bodyEn: 'The Ministry asked for more information or a correction. The record is open again: update it, then submit the revised registration.',
+        bodyAr: 'طلبت الوزارة معلومات إضافية أو تصحيحاً. السجل مفتوح مجدداً: حدّثوه ثم قدّموا التسجيل المعدَّل.',
+        buttonEn: 'Open the review', buttonAr: 'فتح المراجعة' };
+    }
     if (!f.mapConfirmed || !f.profileComplete || f.outsideCategory) {
       return { kind: 'details', href: 'profile', tone: 'accent',
         titleEn: 'Complete the site profile', titleAr: 'إكمال ملف الموقع',
@@ -231,26 +245,39 @@ function aedsStep(f: FacilityRegistrationFacts, href: string): NextStep {
     buttonEn: 'Open the AEDs', buttonAr: 'فتح الأجهزة' };
 }
 
-/** The registration rail, drawn by the same component as the event rail. */
+/**
+ * The registration rail, the event's stages for a site (PAD rules: no assessment and no
+ * level; the post-event report is an event's, and the site's annual item is the drill):
+ * site details, requirements, submit, Ministry review, ongoing readiness.
+ */
 export function facilityRailStages(f: FacilityRegistrationFacts): { stage: number; stages: RailStage[] } {
-  const facts = submissionFacts(f);
-  const done = [f.profileComplete && f.mapConfirmed && f.contactComplete && f.emsAccessComplete, facilityDevicesDone(f), sitePlanComplete(facts), f.confirmationCurrent, f.submissionCount > 0];
-  const first = done.findIndex((d) => !d);
-  const stage = first < 0 ? done.length : first + 1;
-  const k = (i: number): RailStage['k'] => (done[i] ? 'done' : i === first ? 'current' : 'todo');
-  const aedsMeta = f.deviceCount > 0
-    ? { metaEn: `${f.deviceCount} registered`, metaAr: `${f.deviceCount} مسجّل` }
-    : f.aedRequirement === 'required' ? { metaEn: 'An AED is required', metaAr: 'يلزم توفير جهاز' }
-      : f.aedRequirement === 'review' ? { metaEn: 'Ministry review', metaAr: 'مراجعة الوزارة' } : { metaEn: '', metaAr: '' };
-  const submittable = siteMaySubmit(f.status);
+  const lines = siteSubmitBlockers(submissionFacts(f));
+  const required = siteSubmissionSummaryCount(f);
+  const complete = required.total - lines.length;
+  const submitted = f.submissionCount > 0;
+  const returned = f.status === 'informationRequired';
+  const accepted = f.everAccepted;
+  const stage = !submitted || returned ? 2 : !accepted ? 4 : 5;
+  const status = siteStatusLabel(f.status);
   return {
     stage,
     stages: [
-      { k: k(0), en: 'Site profile', ar: 'ملف الموقع', metaEn: '', metaAr: '' },
-      { k: k(1), en: 'AEDs', ar: 'أجهزة إزالة الرجفان', ...aedsMeta },
-      { k: k(2), en: 'Response plan', ar: 'خطة الاستجابة', metaEn: '', metaAr: '' },
-      { k: k(3), en: 'Readiness confirmation', ar: 'تأكيد الجاهزية', metaEn: '', metaAr: '' },
-      { k: k(4), en: 'Submitted to the Ministry', ar: 'مقدَّم إلى الوزارة', metaEn: submittable ? 'Reviewed by the Ministry once submitted' : '', metaAr: submittable ? 'تراجعه الوزارة بعد تقديمه' : '' },
+      { k: 'done', en: 'Site details', ar: 'بيانات الموقع', metaEn: '', metaAr: '' },
+      stage === 2
+        ? { k: returned ? 'returned' : 'current', en: 'Requirements', ar: 'المتطلبات', metaEn: `${complete} of ${required.total} complete`, metaAr: `اكتمل ${complete} من ${required.total}` }
+        : { k: 'done', en: 'Requirements', ar: 'المتطلبات', metaEn: '', metaAr: '' },
+      submitted && !returned
+        ? { k: 'done', en: 'Submitted', ar: 'التقديم', metaEn: `Version ${f.submissionCount}`, metaAr: `النسخة ${f.submissionCount}` }
+        : { k: 'todo', en: 'Submit', ar: 'التقديم', metaEn: '', metaAr: '' },
+      accepted
+        ? { k: 'done', en: 'Ministry review', ar: 'مراجعة الوزارة', metaEn: status.en, metaAr: status.ar }
+        : { k: submitted && !returned ? 'current' : 'todo', en: 'Ministry review', ar: 'مراجعة الوزارة', metaEn: submitted && !returned ? 'Waiting for the Ministry' : 'After submission', metaAr: submitted && !returned ? 'بانتظار الوزارة' : 'بعد التقديم' },
+      { k: accepted ? 'current' : 'todo', en: 'Ongoing readiness', ar: 'الجاهزية المستمرة', metaEn: 'The annual drill; no annual re-registration', metaAr: 'التمرين السنوي؛ دون إعادة تسجيل سنوية' },
     ],
   };
+}
+
+/** The required lines on the review page, for the rail's "n of m complete". */
+function siteSubmissionSummaryCount(f: FacilityRegistrationFacts): { total: number } {
+  return { total: siteSubmissionSummary(submissionFacts(f)).filter((l) => !l.optional).length };
 }
