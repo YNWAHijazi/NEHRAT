@@ -1,5 +1,8 @@
 'use client';
 
+import { MunicipalityField } from '../../../components/MunicipalityField';
+import { municipalityList } from '../../../lib/rules/municipalities';
+
 /**
  * The facility/site's one-page intake (latest revision, 9 October 2026, sections 1 and 2):
  * the covered category first, then the persistent identity collected once -- the name, the
@@ -38,6 +41,9 @@ import {
 } from '../../../lib/rules';
 import type { StateChip } from '../../../lib/rules';
 import { intakeEndsForCapacity, siteApplicability } from '../../../lib/rules/site';
+
+/** Lebanon's municipalities, once the official list is loaded (owner, 9 October 2026); empty until then. */
+const MUNICIPALITIES = municipalityList();
 
 const input: React.CSSProperties = { width: '100%', minHeight: 44, padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', fontSize: 15 };
 const refusedInput: React.CSSProperties = { ...input, border: '1px solid var(--bad)' };
@@ -171,6 +177,18 @@ export function RegisterFacilityForm({
         </label>
       );
     }
+    // Once the official list is loaded, the municipality is chosen from it -- one field, the
+    // option in the page's language, both names stored (owner, 9 October 2026).
+    if (f.key === 'municipality' && MUNICIPALITIES.length > 0) {
+      return (
+        <div key={f.key} data-missing-anchor="municipality">
+          <MunicipalityField options={MUNICIPALITIES} value={values['municipality'] ? [values['municipality']] : []}
+            onChange={(chosen) => setValues((v) => ({ ...v, municipality: chosen[0]?.en ?? '', municipalityAr: chosen[0]?.ar ?? '' }))}
+            labelEn={f.en} labelAr={f.ar} labelStyle={{ fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.45 }}
+            inputStyle={flagged('municipality') ? refusedInput : input} nameEn="municipality" nameAr="municipalityAr" invalid={flagged('municipality')} />
+        </div>
+      );
+    }
     // The capacity is required where the category is decided by it (an event-hosting venue).
     const capacityLabel = f.key === 'capacity' && capacityNeeded
       ? { en: 'Approved or licensed capacity (persons) — required for this category', ar: 'السعة المعتمدة أو المرخّصة (أشخاص) — مطلوبة لهذه الفئة' }
@@ -249,25 +267,21 @@ export function RegisterFacilityForm({
           <LocationPicker initial={point} onChange={setPoint} />
         </div>
 
-        <div data-region="crew-callout" style={{ padding: '24px 26px', border: '1px solid var(--accent)', background: 'var(--accent-soft)', borderRadius: 16, marginBlockStart: 12 }}>
-          <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--accent-ink)', marginBlockEnd: 10 }}>
-            <L en={content.crewCallout.labelEn} ar={content.crewCallout.labelAr} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: 18 }}>
-            {content.accessFields.map((f) => text(f.key, f.en, f.ar))}
-          </div>
+        {/* The two fields a responding crew needs are part of the site profile (revision section 2),
+            so they continue the profile's grid -- no separate box (owner, 9 October 2026). */}
+        <div data-region="crew-callout" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,230px),1fr))', gap: 18, marginBlockStart: 18 }}>
+          {content.accessFields.map((f) => text(f.key, f.en, f.ar))}
         </div>
 
         {goesOn ? (
           <>
             <h2 style={h2}>
-              <L en="Responsible contact" ar="جهة الاتصال المسؤولة" /> <InfoNote><L en={content.coordinatorOneRecord.en} ar={content.coordinatorOneRecord.ar} /></InfoNote>
+              <L en="Responsible contact" ar="جهة الاتصال المسؤولة" />{' '}
+              <InfoNote><L en={`${content.persons[0]!.noteEn} ${content.coordinatorOneRecord.en}`} ar={`${content.persons[0]!.noteAr} ${content.coordinatorOneRecord.ar}`} /></InfoNote>
             </h2>
-            <div data-region="persons" style={{ paddingBlock: '24px', paddingInlineStart: '26px', paddingInlineEnd: '26px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--brand)', borderRadius: 16 }}>
-              <div style={{ fontSize: 16, fontWeight: 600, marginBlockEnd: 12 }}>
-                <L en={content.persons[0]!.en} ar={content.persons[0]!.ar} /> <InfoNote><L en={content.persons[0]!.noteEn} ar={content.persons[0]!.noteAr} /></InfoNote>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,200px),1fr))', gap: 16 }}>
+            {/* Plain fields, as the profile above: one person or position (owner, 9 October 2026). */}
+            <div data-region="persons">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,230px),1fr))', gap: 18 }}>
                 {content.personFields.map((f) => f.key === 'phone' ? (
                   <label key={f.key} data-missing-anchor="coordinatorPhone" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {label(f.en, f.ar)}
