@@ -13,19 +13,31 @@ DISTRICT_AR = {
 GOVERNORATE_AR = {'North': 'الشمال', 'Akkar': 'عكار', 'Baalbek-Hermel': 'بعلبك - الهرمل', 'Bekaa': 'البقاع', 'Mount Lebanon': 'جبل لبنان',
                   'South': 'الجنوب', 'Nabatieh': 'النبطية', 'Beirut': 'بيروت'}
 drafts = {'Beirut': {'ar': 'بيروت', 'sure': True}}
+# Names a correction introduced after the drafts were made.
+EXTRA = {'Tannoura': {'ar': 'تنورة', 'sure': False}}
 for f in glob.glob(sys.argv[1] + '/out-*.json'):
     drafts.update(json.load(open(f)))
 path = sys.argv[2]
 data = json.load(open(path))
 missing = []
+def bare_of(m):
+    return m['en'][: -len(f" ({m['districtEn']})")] if m['en'].endswith(f" ({m['districtEn']})") else m['en']
+# A bracket that tells two same-named places apart, not a name that happens to end in its district ('Byblos (Jbeil)').
+import collections
+shared = collections.Counter(bare_of(m) for m in data['municipalities'])
 for m in data['municipalities']:
-    d = drafts.get(m['en'])
+    # A name drafted with or without its district bracket, or under the name it had before a correction.
+    bare = m['en'][: -len(f" ({m['districtEn']})")] if m['en'].endswith(f" ({m['districtEn']})") else m['en']
+    d = drafts.get(m['en']) or drafts.get(bare) or drafts.get(f"{bare} ({m['districtEn']})") or EXTRA.get(bare)
     if not d or not d.get('ar', '').strip():
         missing.append(m['en']); continue
     m['ar'] = d['ar'].strip()
     if not d.get('sure', True): m['arUnsure'] = True
     else: m.pop('arUnsure', None)
     m['districtAr'] = DISTRICT_AR[m['districtEn']]
+    # Two places of the same name carry their district in brackets, in Arabic as in English.
+    if m['en'].endswith(f" ({m['districtEn']})") and shared[bare] > 1: m['ar'] = f"{m['ar']} ({m['districtAr']})"
+
     m['governorateAr'] = GOVERNORATE_AR[m['governorateEn'] or 'Beirut']
     if not m['governorateEn']: m['governorateEn'] = 'Beirut'
 assert not missing, missing

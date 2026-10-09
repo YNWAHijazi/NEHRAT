@@ -1,6 +1,6 @@
 /**
- * THE MUNICIPALITY LIST (owner, 9 October 2026): the owner's seven governorate files, English
- * only, word order restored. The fixture below exists only for these tests -- it is not the list
+ * THE MUNICIPALITY LIST (owner, 9 October 2026): the owner's seven governorate files, word order
+ * restored, corrected, with drafted Arabic names. The fixture below exists only for these tests -- it is not the list
  * and nothing reads it.
  */
 import { describe, expect, it } from 'vitest';
@@ -14,7 +14,7 @@ const FIXTURE: Municipality[] = [
 ];
 
 describe('the municipality list', () => {
-  it("carries the owner's lists with the word order restored, and invents no Arabic", () => {
+  it("carries the owner's lists with the word order restored, every entry in both languages", () => {
     const list = municipalityList();
     expect(list.length).toBeGreaterThan(700);
     // The files reversed every multi-word name ("Aakrine Ain"); no name may end on a leading particle.
@@ -24,7 +24,13 @@ describe('the municipality list', () => {
     expect(list.some((m) => m.districtEn === 'Chouf')).toBe(true);
     expect(list.some((m) => m.en === 'Beirut')).toBe(true);
     expect(list.some((m) => /Welcome|located in/.test(m.en))).toBe(false);
-    expect(list.every((m) => !m.ar)).toBe(true);
+    // The Arabic names are drafted (owner: "Can't you just translate them"), every entry carries one,
+    // and doubtful drafts are marked for the Ministry's check.
+    expect(list.every((m) => /[\u0600-\u06FF]/.test(m.ar ?? '') && /[\u0600-\u06FF]/.test(m.districtAr ?? ''))).toBe(true);
+    expect(list.find((m) => m.en === 'Jounieh')?.ar).toBe('جونية');
+    expect(list.find((m) => m.en === 'Byblos (Jbeil)')?.ar).toBe('جبيل');
+    expect(list.find((m) => m.en === 'Aaba (Koura)')?.ar).toBe('عابا (الكورة)');
+    expect(searchMunicipalities(list, 'زحلة')[0]?.en).toBe('Zahle');
     expect(new Set(list.map((m) => m.en)).size).toBe(list.length);
   });
 
@@ -43,7 +49,7 @@ describe('the municipality list', () => {
     }
   });
 
-  it('shows the English name on the Arabic page while the Arabic names are pending', () => {
+  it('falls back to the English name for a typed entry that has no Arabic', () => {
     expect(municipalityLabel({ en: 'Jounieh' }, 'ar')).toBe('Jounieh');
     expect(municipalityLabel({ en: 'Jounieh', ar: 'جونيه' }, 'ar')).toBe('جونيه');
   });

@@ -30,7 +30,7 @@ RENAME = {
     ('Burj al-Barajneh', 'Baabda'): ('Bourj el Barajneh', ['Burj al-Barajneh']),
     ('Broumana', 'Matn'): ('Broummana', ['Broumana']),
     ('Beit Meri', 'Matn'): ('Beit Mery', ['Beit Meri']),
-    ('Qubayyat', 'Akkar'): ('Qobayat', ['Qubayyat', 'Kobayat']),
+    ('Qubayyat', 'Akkar'): ('Qobayat', ['Qubayyat', 'Kobayat', 'Al Qobeiyat']),
     ('Al-Laboue', 'Baalbek'): ('Labweh', ['Al-Laboue']),
     ('Kamid Al-Lawz', 'West Bekaa'): ('Kamed el Loz', ['Kamid Al-Lawz']),
     ('Mashgharah', 'West Bekaa'): ('Machghara', ['Mashgharah']),
@@ -38,7 +38,21 @@ RENAME = {
     ('Rashaya', 'Rashaya'): ('Rashaya', ['Rachaya']),
     ('Zgharta-Ehden', 'Zgharta'): ('Zgharta-Ehden', ['Zgharta', 'Ehden']),
     ('Jezzine - Ain Majdeline', 'Jezzine'): ('Jezzine - Ain Majdeline', ['Jezzine']),
+    ('Mghdousheh', 'Saida'): ('Maghdouche', ['Mghdousheh']),
+    ('Chatura', 'Zahle'): ('Chtaura', ['Chatura', 'Shtaura']),
+    ('Jaba Jenin', 'West Bekaa'): ('Joub Jannine', ['Jaba Jenin']),
+    ('Sahmara', 'West Bekaa'): ('Sohmor', ['Sahmara']),
+    ('Tannourine', 'Rashaya'): ('Tannoura', []),
+    ('Chehim', 'Chouf'): ('Chhim', ['Chehim']),
+    ('Roumiyeh', 'Matn'): ('Roumieh', ['Roumiyeh']),
+    ('Al Jadeeda - Al Boushriyeh - Al Sadd', 'Matn'): ('Jdeideh-Bouchrieh-Sed', ['Jdeideh', 'Bouchrieh', 'Al Jadeeda - Al Boushriyeh - Al Sadd']),
+    ('DoukMakayl', 'Keserwan'): ('Zouk Mikael', ['DoukMakayl']),
 }
+# The same town listed twice under two spellings: kept once, the other spelling an alias.
+SAME = {('Al Qobeiyat', 'Akkar'): 'Qobayat'}
+for k, keep in SAME.items():
+    out[:] = [m for m in out if (m['en'], m['districtEn']) != k]
+    log.append({'from': f'{k[0]} ({k[1]})', 'to': f'the same town as {keep}; kept once'})
 done = set()
 for m in out:
     k = (m['en'], m['districtEn'])
@@ -55,14 +69,12 @@ GOVERNORATE = {'Aley': 'Mount Lebanon', 'Baabda': 'Mount Lebanon', 'Chouf': 'Mou
 ADD = [
     ('Aley', 'Aley', []), ('Choueifat', 'Aley', ['Shwayfat', 'Khaldeh']), ('Kahaleh', 'Aley', []), ('Bchamoun', 'Aley', []),
     ('Baabda', 'Baabda', []), ('Hadath', 'Baabda', []), ('Kfarchima', 'Baabda', []),
-    ('Deir el Qamar', 'Chouf', []), ('Beiteddine', 'Chouf', []), ('Damour', 'Chouf', []), ('Chhim', 'Chouf', []), ('Kfarhim', 'Chouf', []),
-    ('Jdeideh-Bouchrieh-Sed', 'Matn', ['Jdeideh', 'Bouchrieh']), ('Roumieh', 'Matn', []), ('Mtein', 'Matn', []), ('Dhour Choueir', 'Matn', []),
-    ('Zouk Mikael', 'Keserwan', []), ('Harissa-Daraoun', 'Keserwan', ['Harissa']),
-    ('Chtaura', 'Zahle', ['Shtaura']), ('Rayak', 'Zahle', ['Riyaq']), ('Anjar', 'Zahle', ['Aanjar']),
-    ('Joub Jannine', 'West Bekaa', []), ('Sohmor', 'West Bekaa', []),
+    ('Deir el Qamar', 'Chouf', []), ('Beiteddine', 'Chouf', []), ('Damour', 'Chouf', []), ('Kfarhim', 'Chouf', []),
+    ('Mtein', 'Matn', []), ('Dhour Choueir', 'Matn', []),
+    ('Harissa-Daraoun', 'Keserwan', ['Harissa']),
+    ('Rayak', 'Zahle', ['Riyaq']), ('Anjar', 'Zahle', ['Aanjar']),
     ('Chekka', 'Batroun', []),
     ('Jdeidet Marjayoun', 'Marjayoun', ['Marjayoun']), ('Khiam', 'Marjayoun', ['Khiyam']), ('Kfar Kila', 'Marjayoun', []),
-    ('Maghdouche', 'Saida', []),
     ('Arsal', 'Baalbek', []), ('Ras Baalbek', 'Baalbek', []), ('Al Qaa', 'Baalbek', ['Qaa']),
 ]
 have = {(m['en'], m['districtEn']) for m in out}

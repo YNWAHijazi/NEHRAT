@@ -1,20 +1,22 @@
 /**
  * THE MUNICIPALITY LIST (owner, 9 October 2026): a searchable list, each option in the page's
  * language, both names stored. The list is data (lib/rules/data/municipalities.json) and stays
- * empty until the official list arrives; while it is empty every municipality field stays a typed field. Arabic names may be pending: the English name then stands in.
+ * empty until the official list arrives; while it is empty every municipality field stays a typed field. A typed name that is not on the list has no Arabic of its own: the English stands in.
  * Plain TypeScript: no React, no next/*.
  */
 import data from './data/municipalities.json';
 
 export interface Municipality {
   en: string;
-  /** The Arabic name; absent while the Arabic list is pending -- the English name stands in. */
+  /** The Arabic name (drafted; see the data file's arabicSource). */
   ar?: string;
   districtEn?: string;
   districtAr?: string;
   governorateEn?: string;
   /** Other spellings the field also finds it by (the source files' own, a common English name). */
   aliases?: string[];
+  /** The Arabic name was drafted with doubt and needs the Ministry's check. */
+  arUnsure?: boolean;
 }
 
 const LIST = (data.municipalities as Municipality[]).filter((m) => m.en.trim());
