@@ -48,7 +48,7 @@ test('a venue in preparation fills its own steps; its AEDs come from a facility 
  await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032');
  // The optional step: the operator's own words, saved on Next like every other step.
  const row=await openDetails(page.locator('[data-requirement="V6"]'));
- await expect(row.locator('[data-region=card-owner]')).toContainText('You fill this step');
+ await expect(row.locator('[data-region=card-owner]')).toContainText('Completed by you');
  await row.locator('textarea[name=notes]').fill('The forecourt is closed to traffic during every operating session.');
  await row.locator('[data-region=save]').click();await expect(row.getByRole('status')).toContainText('Saved.');
  await page.goto('/venues/VN-0032');await expect(page.locator('[data-requirement="V6"]')).toHaveAttribute('data-state','complete');

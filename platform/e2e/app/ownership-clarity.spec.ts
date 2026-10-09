@@ -51,7 +51,7 @@ test('Next saves the step that was typed on; Save as draft keeps the record and 
   await expect(stateChip(page, 'B4')).toHaveAttribute('data-state', 'complete');
   // Every card says who fills it.
   await openDetails(card(page, 'B9'));
-  await expect(card(page, 'B9').locator('[data-region="card-owner"]')).toContainText('You fill this step');
+  await expect(card(page, 'B9').locator('[data-region="card-owner"]')).toContainText('Completed by you');
   // Save as draft from the final review.
   await showStep(page, '#final-review');
   await page.locator('[data-region="save-draft"]').click();
@@ -69,7 +69,7 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     await expect(page.locator('[data-region="record-guide"]')).toContainText('Three parties fill in this record: you, the EMS agency and the Medical Director. Amber steps are yours.');
     // A row the EMS agency or the Director fills: no empty boxes, the owner said plainly.
     const cpr = await openDetails(card(page, 'B8'));
-    await expect(cpr.locator('[data-region="card-owner"]')).toContainText('Filled by the EMS agency or the Medical Director');
+    await expect(cpr.locator('[data-region="card-owner"]')).toContainText('Completed by the EMS agency or the Medical Director');
     await expect(cpr.locator('[data-region="requirement-form"]')).toHaveAttribute('data-readonly', '');
     await expect(cpr.locator('[data-region="requirement-form"] input, [data-region="requirement-form"] textarea')).toHaveCount(0);
     // The eleven major-incident items are on the requirement itself.
@@ -88,6 +88,7 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     await expect(dialog).toBeVisible();
     // The pop-up opens where the organizer was; the page behind it does not jump to the top.
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 80);
+    await expect(dialog.locator('#handoff-title [data-l=en]')).toHaveText('Steps the EMS agency completes');
     await expect(dialog.locator('[data-region="handoff-steps"] li').first()).toBeVisible();
     await expect(dialog).toContainText('Number and type of committed units');
     await dialog.locator('[data-region="handoff-skip"]').click();
@@ -128,7 +129,7 @@ test('Level 3, before any agency is invited: the EMS step is the organizer\'s (a
   await expect(page.locator('[data-step-item="B7"]')).toHaveAttribute('data-step-yours', 'true');
   const ems = await openDetails(card(page, 'B7'));
   await expect(ems.locator('[data-region="card-owner"]')).toHaveAttribute('data-yours', 'true');
-  await expect(ems.locator('[data-region="card-owner"]')).toContainText('You invite the EMS agency first; it then fills this step');
+  await expect(ems.locator('[data-region="card-owner"]')).toContainText('Invite the EMS agency to complete this step');
   // The agency's other rows stay grey, labelled with who fills them.
   await expect(page.locator('[data-step-item="B8"]')).not.toHaveAttribute('data-step-yours', 'true');
   const invite = ems.locator('form[data-region="invite"]');
@@ -139,5 +140,5 @@ test('Level 3, before any agency is invited: the EMS step is the organizer\'s (a
   await page.locator('[data-region="handoff-close"]').click();
   // Invited: the step is the agency's now -- grey, with the label.
   await expect(page.locator('[data-step-item="B7"]')).not.toHaveAttribute('data-step-yours', 'true');
-  await expect((await openDetails(card(page, 'B7'))).locator('[data-region="card-owner"]')).toContainText('Filled by the EMS agency or the Medical Director');
+  await expect((await openDetails(card(page, 'B7'))).locator('[data-region="card-owner"]')).toContainText('Completed by the EMS agency or the Medical Director');
 });
