@@ -101,3 +101,43 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     d.close();
   }
 });
+
+test('Level 3, before any agency is invited: the EMS step is the organizer\'s (amber, "invite first"); once invited it is the agency\'s (grey)', async ({ page }) => {
+  test.setTimeout(240_000);
+  await signInAs(page, 'test_organizer');
+  await gotoRidingRestarts(page, '/events/new');
+  const stamp = Date.now().toString(36);
+  await fillLabelled(page, 'Event name (English)', `Invite first ${stamp}`);
+  await fillLabelled(page, 'Event name (Arabic)', `الدعوة أولاً ${stamp}`);
+  await fillLabelled(page, 'Start date', '2026-12-12');
+  await fillLabelled(page, 'End date', '2026-12-12');
+  await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
+  await fillLabelled(page, 'Venue, route, or location', 'Waterfront, Beirut');
+  await fillLabelled(page, 'Municipality or municipalities', 'Beirut');
+  await fillLabelled(page, 'Expected participants', '600');
+  await fillLabelled(page, 'Expected spectators', '300');
+  await fillLabelled(page, 'Expected staff and volunteers', '40');
+  const twos = page.locator('button[aria-pressed]:has(span:text-is("2"))');
+  for (let i = 0, n = await twos.count(); i < n; i += 1) await twos.nth(i).click();
+  await fillLabelled(page, 'Authorized representative', 'R. Haddad');
+  await fillLabelled(page, 'Position', 'Events director');
+  await page.locator('button:has-text("Continue to requirements")').first().click();
+  await page.waitForURL(/\/events\/EV-\d+/);
+  await expect(page.locator('[data-region="details-assessment"]')).toContainText('Level 3');
+  // No agency yet: the invitation is the organizer's to send, so the step is theirs.
+  await expect(page.locator('[data-step-item="B7"]')).toHaveAttribute('data-step-yours', 'true');
+  const ems = await openDetails(card(page, 'B7'));
+  await expect(ems.locator('[data-region="card-owner"]')).toHaveAttribute('data-yours', 'true');
+  await expect(ems.locator('[data-region="card-owner"]')).toContainText('You invite the EMS agency first; it then fills this step');
+  // The agency's other rows stay grey, labelled with who fills them.
+  await expect(page.locator('[data-step-item="B8"]')).not.toHaveAttribute('data-step-yours', 'true');
+  const invite = ems.locator('form[data-region="invite"]');
+  await invite.locator('input[name="name"]').fill(`Invite-first agency ${stamp}`);
+  await invite.locator('input[name="email"]').fill('invite-first@example.test');
+  await invite.locator('button[type="submit"]').click();
+  await page.waitForURL(/invited=ems/);
+  await page.locator('[data-region="handoff-close"]').click();
+  // Invited: the step is the agency's now -- grey, with the label.
+  await expect(page.locator('[data-step-item="B7"]')).not.toHaveAttribute('data-step-yours', 'true');
+  await expect((await openDetails(card(page, 'B7'))).locator('[data-region="card-owner"]')).toContainText('Filled by the EMS agency or the Medical Director');
+});

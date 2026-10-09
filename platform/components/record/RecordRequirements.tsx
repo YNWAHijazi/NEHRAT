@@ -57,6 +57,11 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
   const later = instances.filter((i) => i.group === 'later');
 
   // Who fills a row, in words, for the card's ownership line and the italic placeholder (owner, 8 October 2026).
+  const hasParty = (kind: 'ems' | 'director') => record.parties.some((p) => p.kind === kind && (p.status === 'nominated' || p.status === 'confirmed'));
+  // The EMS row the agency fills, before any agency is invited (owner, 9 October 2026): the first
+  // act on it is the organizer's invitation, so it reads as the organizer's step -- amber -- until
+  // the invitation is sent; then it turns grey, labelled with who fills it.
+  const inviteFirst = (inst: RequirementInstance) => inst.key === 'B7' && viewerRole === 'organizer' && record.editable && record.level !== 1 && !mayAuthor(inst, 'organizer') && !hasParty('ems');
   const names = (roles: readonly AuthorRole[]) => ({ en: roles.map((r) => REQUIREMENT_AUTHORS[r].en).join(' or the '), ar: roles.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' أو ') });
   const awaitingFor = (inst: RequirementInstance): { en: string; ar: string } | null => {
     if (canEditInst(inst)) return null;
@@ -67,6 +72,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     return { en: 'Not answered', ar: 'لم تُقدَّم إجابة' };
   };
   const ownerLine = (inst: RequirementInstance): { en: string; ar: string } | null => {
+    if (inviteFirst(inst)) return { en: 'You invite the EMS agency first; it then fills this step', ar: 'تدعون جهة الإسعاف أولاً، ثم تملأ هذه الخطوة' };
     if (inst.authors.length === 0) return null;
     const others = inst.authors.filter((r) => r !== viewerRole);
     if (mayAuthor(inst, viewerRole)) {
@@ -77,7 +83,6 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     const o = names(inst.authors);
     return { en: `Filled by the ${o.en}`, ar: `تملؤها ${o.ar}` };
   };
-  const hasParty = (kind: 'ems' | 'director') => record.parties.some((p) => p.kind === kind && (p.status === 'nominated' || p.status === 'confirmed'));
   const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
 
   const body = (inst: RequirementInstance) => {
@@ -173,7 +178,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
 
   // The steps: every required row, then the recommended rows, then the final review when the page has one.
   // A step is the viewer's when the catalogue names their role on it (the organizer's invitation rows included).
-  const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3');
+  const yours = (inst: RequirementInstance) => mayAuthor(inst, viewerRole) || (viewerRole === 'organizer' && inst.key === 'B3') || inviteFirst(inst);
   // A row the viewer would write but cannot says why, on the card itself: a filed record
   // waits on the Ministry; a closed one is read-only. Silence here read as a defect.
   const readOnlyNote = record.editable ? null : record.filed
