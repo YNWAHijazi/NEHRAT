@@ -48,7 +48,8 @@ import { forgetSignInFields, rememberSignInFields,
 import {
   RECURRING_VENUE_MIN_CAPACITY, NEHRAT_TOOL_VERSION, deriveLevel,
   facilityCategory, categoryWithPublished, categoryEndsJourney, detectPersonalName,
-  declarationGate, isArchivedRecord, landingRouteFor, requirementApplies } from '../lib/rules';
+  declarationGate, isArchivedRecord, landingRouteFor, requirementApplies, carriedAnswer } from '../lib/rules';
+import type { AnswerValue } from '../lib/rules/record-requirements';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 
 const DEMO_LOGINS = new Set([
@@ -279,7 +280,8 @@ function refuseIfArchived(eventId: string): void {
 /**
  * REAPPLY (partner ruling, 2026-09-02): a new event prefilled from a concluded one —
  * the event information, the assessment answers, the disciplines, the named
- * providers. Everything except the dates, which the organizer must enter.
+ * providers, the organizer's own requirement answers. Everything except the dates, which
+ * the organizer must enter, and the confirmations, which are given again.
  *
  * NOTHING CARRIES OVER AS APPROVED. This is a new record with its own identifier:
  * the level re-derives from whatever the answers now say, every requirement is met
@@ -349,6 +351,21 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
       `INSERT INTO assessments (event_id, version, answers, inputs, derivation, nehrat_tool_version)
        VALUES (?, 1, ?, ?, ?, ?)`,
     ).run(newId, assessment.answers, assessment.inputs, JSON.stringify(derivation), NEHRAT_TOOL_VERSION);
+  }
+
+  // The organizer's own requirement answers carry (owner, 9 October 2026): text and choices,
+  // never a confirmation, never another party's answer and never a file -- each is given again
+  // for the new dates. Saved at version 1 under the organizer's name, as if typed today.
+  const answerRows = db
+    .prepare(`SELECT key, answers, author_role FROM requirement_answers WHERE record_kind = 'event' AND record_id = ?`)
+    .all(sourceEventId) as unknown as { key: string; answers: string; author_role: string }[];
+  const insertAnswer = db.prepare(
+    `INSERT INTO requirement_answers (record_kind, record_id, key, answers, author_id, author_role, author_name, version, saved_at)
+     VALUES ('event', ?, ?, ?, ?, 'organizer', ?, 1, now_stamp())`,
+  );
+  for (const row of answerRows) {
+    const carried = carriedAnswer(row.key, row.author_role, JSON.parse(row.answers) as Record<string, AnswerValue>);
+    if (carried) insertAnswer.run(newId, row.key, JSON.stringify(carried), account.id, account.displayName);
   }
 
   // The named parties return as FRESH nominations: unanswered, on new unguessable

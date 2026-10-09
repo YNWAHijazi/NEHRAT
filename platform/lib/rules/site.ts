@@ -131,7 +131,7 @@ export function intakeEndsForCapacity(a: Applicability): boolean {
 
 export type SiteStatusKey =
   | 'inPreparation' | 'submitted' | 'underReview' | 'informationRequired'
-  | 'readinessCurrent' | 'correctiveActionRequired' | 'noLongerCovered';
+  | 'readinessCurrent' | 'expiringSoon' | 'expired' | 'correctiveActionRequired' | 'noLongerCovered';
 
 /** The Ministry acts that move the status, as recorded against the latest submission. */
 export type SiteReviewActKind = 'reviewStarted' | 'accepted' | 'infoRequested' | 'correctionRequested' | 'inspection' | 'designation';
@@ -146,6 +146,8 @@ export interface SiteStatusFacts {
   openCorrective: number;
   /** The Ministry has accepted some version: from then on the site is managed from its dashboard. */
   everAccepted?: boolean;
+  /** Where the annual readiness confirmation and drill stand (siteRenewal below); absent reads as current. */
+  renewal?: SiteRenewalKey;
 }
 
 /**
@@ -172,7 +174,8 @@ export const SITE_OUTCOMES: readonly { key: SiteOutcomeKey; en: string; ar: stri
  * The site's status (revision section 11): operational labels, not regulatory
  * classifications. Precedence: coverage ended; never submitted; the Ministry asked for
  * information or a correction on the latest submission; an open corrective action; the
- * latest submission accepted; the review started; submitted.
+ * latest submission accepted -- current, expiring soon or expired by the annual renewal; the
+ * review started; submitted.
  */
 export function siteStatus(f: SiteStatusFacts): SiteStatusKey {
   if (f.archived) return 'noLongerCovered';
@@ -181,7 +184,7 @@ export function siteStatus(f: SiteStatusFacts): SiteStatusKey {
   const last = moving[moving.length - 1] ?? null;
   if (last === 'infoRequested' || last === 'correctionRequested') return 'informationRequired';
   if (f.openCorrective > 0) return 'correctiveActionRequired';
-  if (last === 'accepted') return 'readinessCurrent';
+  if (last === 'accepted') return f.renewal === 'expired' ? 'expired' : f.renewal === 'expiringSoon' ? 'expiringSoon' : 'readinessCurrent';
   if (last === 'reviewStarted') return 'underReview';
   return 'submitted';
 }
@@ -194,8 +197,8 @@ export function siteStatusLabel(key: SiteStatusKey): Bilingual {
 /** The colour family a status is drawn in. Internal states are grey; nothing here is a determination. */
 export function siteStatusTone(key: SiteStatusKey): 'grey' | 'accent' | 'bad' | 'brand' {
   if (key === 'readinessCurrent') return 'brand';
-  if (key === 'correctiveActionRequired') return 'bad';
-  if (key === 'informationRequired') return 'accent';
+  if (key === 'correctiveActionRequired' || key === 'expired') return 'bad';
+  if (key === 'informationRequired' || key === 'expiringSoon') return 'accent';
   return 'grey';
 }
 
@@ -204,9 +207,124 @@ export function siteMaySubmit(key: SiteStatusKey): boolean {
   return key === 'inPreparation' || key === 'informationRequired';
 }
 
-/** The certificate is issued only while readiness is current (not in the revision; recorded). */
+/**
+ * The certificate is issued only while readiness is current (not in the revision; recorded).
+ * Expiring soon is still current; expired is not.
+ */
 export function siteCertificateAvailable(key: SiteStatusKey): boolean {
-  return key === 'readinessCurrent';
+  return key === 'readinessCurrent' || key === 'expiringSoon';
+}
+
+/* ---------------- the annual renewal ---------------- */
+
+/**
+ * WHEN A SITE'S READINESS EXPIRES (owner, 9 October 2026). The policy sets no licence term
+ * for a site; what it sets is annual: the readiness confirmation and the practical drill,
+ * each within the previous 12 months. A site is EXPIRED once either is past that date,
+ * and EXPIRING SOON from the Ministry-set number of days before it (lapseWindowDays, 60 by
+ * default). The dates come from the facility ledger (lib/rules/facility.ts), so the ledger,
+ * the status and the event alert cannot disagree. An obligation never recorded has no date
+ * and is the ledger's to name, not this rule's to guess.
+ */
+export type SiteRenewalKey = 'current' | 'expiringSoon' | 'expired' | 'notRecorded';
+export type RenewalObligation = 'annualConfirmation' | 'drill';
+export const RENEWAL_OBLIGATIONS: readonly RenewalObligation[] = ['annualConfirmation', 'drill'];
+
+export interface SiteRenewal {
+  key: SiteRenewalKey;
+  /** The earliest date an annual obligation stops counting; null while neither is recorded. */
+  dueDate: string | null;
+  /** The obligations that fall due on that date. */
+  obligations: RenewalObligation[];
+}
+
+export function siteRenewal(rows: readonly { key: string; until: string | null; status: string }[]): SiteRenewal {
+  const dated = rows.filter((r): r is { key: RenewalObligation; until: string; status: string } =>
+    (RENEWAL_OBLIGATIONS as readonly string[]).includes(r.key) && r.until !== null);
+  if (dated.length === 0) return { key: 'notRecorded', dueDate: null, obligations: [] };
+  const due = dated.reduce((a, r) => (r.until < a ? r.until : a), dated[0]!.until);
+  const key: SiteRenewalKey = dated.some((r) => r.status === 'lapsed') ? 'expired' : dated.some((r) => r.status === 'lapsing') ? 'expiringSoon' : 'current';
+  return { key, dueDate: due, obligations: RENEWAL_OBLIGATIONS.filter((o) => dated.some((r) => r.key === o && r.until === due)) };
+}
+
+function obligationNames(list: readonly RenewalObligation[]): Bilingual {
+  const label = (o: RenewalObligation) => {
+    const row = facilityJson.ledger.obligations.find((x) => x.key === o)!;
+    return { en: row.en.toLowerCase(), ar: row.ar };
+  };
+  const names = list.map(label);
+  return {
+    en: `The ${names.map((n) => n.en).join(' and the ')}`,
+    ar: names.map((n) => n.ar).join(' و'),
+  };
+}
+
+/** The line the site's own dashboard shows while it is expiring soon or expired; null otherwise. */
+export function siteRenewalNotice(r: SiteRenewal): Bilingual | null {
+  if ((r.key !== 'expiringSoon' && r.key !== 'expired') || !r.dueDate) return null;
+  const n = obligationNames(r.obligations);
+  const plural = r.obligations.length > 1;
+  const date = `⁦${r.dueDate}⁩`;
+  return r.key === 'expiringSoon'
+    ? {
+        en: `${n.en} ${plural ? 'are' : 'is'} due by ${r.dueDate}. Record ${plural ? 'them' : 'it'} before then to keep the site’s readiness current.`,
+        ar: `يحين موعد ${n.ar} في ${date}. سجّلوا ذلك قبل هذا التاريخ لتبقى جاهزية الموقع سارية.`,
+      }
+    : {
+        en: `${n.en} ${plural ? 'were' : 'was'} due by ${r.dueDate}. The site’s readiness is not current until ${plural ? 'they are' : 'it is'} recorded.`,
+        ar: `انقضى موعد ${n.ar} في ${date}. لا تكون جاهزية الموقع سارية حتى يُسجَّل ذلك.`,
+      };
+}
+
+export type EventSiteAlertKey = 'expired' | 'dueBeforeEventEnds' | 'expiringSoon';
+
+/** The same alert, short, for the event's card on the dashboard. */
+export const EVENT_SITE_ALERT_SHORT: Record<EventSiteAlertKey, Bilingual> = {
+  expired: { en: 'Site expired', ar: 'انتهت جاهزية الموقع' },
+  dueBeforeEventEnds: { en: 'Site renewal due before the event ends', ar: 'يحين تجديد الموقع قبل انتهاء الفعالية' },
+  expiringSoon: { en: 'Site expiring soon', ar: 'تنتهي جاهزية الموقع قريباً' },
+};
+
+/**
+ * The alert an event held at a site carries (owner, 9 October 2026): the site has expired; or
+ * its annual confirmation or drill falls due before the event ends -- before or during it, so
+ * readiness would not be current for the whole event unless the site renews; or the site is
+ * expiring soon. Null when none applies, or the site's readiness was never accepted (that
+ * state is the site's status, not a renewal).
+ */
+export function eventSiteAlert(
+  r: SiteRenewal,
+  event: { startDate: string | null; endDate: string | null },
+  site: { nameEn: string; nameAr: string; siteId: string },
+): (Bilingual & { key: EventSiteAlertKey }) | null {
+  if (!r.dueDate || r.key === 'notRecorded') return null;
+  const n = obligationNames(r.obligations);
+  const lower = { en: n.en.replace(/^The /, 'the '), ar: n.ar };
+  const date = `⁦${r.dueDate}⁩`;
+  const who = { en: `${site.nameEn} (${site.siteId})`, ar: `${site.nameAr} (⁦${site.siteId}⁩)` };
+  const end = event.endDate ?? event.startDate;
+  if (r.key === 'expired') {
+    return {
+      key: 'expired',
+      en: `The site this event is held at, ${who.en}, has expired: ${lower.en} ${r.obligations.length > 1 ? 'were' : 'was'} due by ${r.dueDate}. Its readiness is not current until the site records ${r.obligations.length > 1 ? 'them' : 'it'}.`,
+      ar: `انتهت جاهزية الموقع الذي تُقام فيه هذه الفعالية، ${who.ar}: انقضى موعد ${lower.ar} في ${date}. لا تكون جاهزيته سارية حتى يسجّل الموقع ذلك.`,
+    };
+  }
+  if (end && r.dueDate <= end) {
+    return {
+      key: 'dueBeforeEventEnds',
+      en: `For the site this event is held at, ${who.en}, ${lower.en} ${r.obligations.length > 1 ? 'are' : 'is'} due by ${r.dueDate}, before this event ends. Unless the site records ${r.obligations.length > 1 ? 'them' : 'it'} by then, its readiness will not be current for the event.`,
+      ar: `يحين موعد ${lower.ar} للموقع الذي تُقام فيه هذه الفعالية، ${who.ar}، في ${date}، قبل انتهاء الفعالية. ما لم يسجّل الموقع ذلك قبل هذا التاريخ، لن تكون جاهزيته سارية خلال الفعالية.`,
+    };
+  }
+  if (r.key === 'expiringSoon') {
+    return {
+      key: 'expiringSoon',
+      en: `The site this event is held at, ${who.en}, is expiring soon: ${lower.en} ${r.obligations.length > 1 ? 'are' : 'is'} due by ${r.dueDate}.`,
+      ar: `تنتهي قريباً جاهزية الموقع الذي تُقام فيه هذه الفعالية، ${who.ar}: يحين موعد ${lower.ar} في ${date}.`,
+    };
+  }
+  return null;
 }
 
 /**

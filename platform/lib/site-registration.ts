@@ -1,15 +1,17 @@
 import { getDb } from './db';
-import { nowStamp } from './clock';
+import { beirutToday, nowStamp } from './clock';
 import { facilityDesignation, facilitySnapshot, siteEventVenueThreshold } from './facility-gis';
-import { derivedLevelFor, facilityPlanConfirmation } from './queries';
+import { derivedLevelFor, facilityLedgerFor, facilityPlanConfirmation } from './queries';
 import { facilityInfrastructure, saveFacilityInfrastructure, type SiteInfrastructureAnswers } from './site-infrastructure';
 import { demonstrationFilter } from './rules/scope';
 import type { Level } from './rules/types';
 import {
   siteApplicability,
   siteEventStatus,
+  siteRenewal,
   siteStatus,
   type Applicability,
+  type SiteRenewal,
   type SiteReviewActKind,
   type SiteStatusFacts,
   type SiteStatusKey,
@@ -36,7 +38,12 @@ export function siteStatusFacts(facilityId: string): SiteStatusFacts {
     : [];
   const open = (d.prepare(`SELECT COUNT(*) AS n FROM facility_requests WHERE facility_id = ? AND status = 'open' AND kind = 'corrective'`).get(facilityId) as { n: number }).n;
   const everAccepted = Boolean(d.prepare(`SELECT 1 FROM facility_review_acts WHERE facility_id = ? AND kind = 'accepted' LIMIT 1`).get(facilityId));
-  return { archived: Boolean(f?.archived_at), submissionCount: count, actsOnLatest: acts, openCorrective: open, everAccepted };
+  return { archived: Boolean(f?.archived_at), submissionCount: count, actsOnLatest: acts, openCorrective: open, everAccepted, renewal: siteRenewalFor(facilityId).key };
+}
+
+/** Where the site's annual readiness confirmation and drill stand today, Asia/Beirut (lib/rules/site.ts siteRenewal). */
+export function siteRenewalFor(facilityId: string, today: string = beirutToday()): SiteRenewal {
+  return siteRenewal(facilityLedgerFor(facilityId, today));
 }
 
 export function siteStatusFor(facilityId: string): SiteStatusKey {
@@ -313,7 +320,7 @@ export function siteReviewQueue(viewerIsDemo: boolean): SiteQueueRow[] {
                                   AND s.version = (SELECT MAX(version) FROM facility_submissions WHERE facility_id = f.id)
                                 WHERE f.is_demo = ? ORDER BY s.submitted_at`)
     .all(flag) as unknown as { id: string; site_id: string | null; name_en: string; name_ar: string; category_key: string; municipality_en: string; operating_organization: string; version: number; submitted_at: string; reviewer: string | null }[];
-  const order: SiteStatusKey[] = ['submitted', 'underReview', 'informationRequired', 'correctiveActionRequired', 'readinessCurrent', 'noLongerCovered', 'inPreparation'];
+  const order: SiteStatusKey[] = ['submitted', 'underReview', 'informationRequired', 'correctiveActionRequired', 'expired', 'expiringSoon', 'readinessCurrent', 'noLongerCovered', 'inPreparation'];
   return rows
     .map((r) => ({ facilityId: r.id, siteId: r.site_id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, categoryKey: r.category_key, municipality: r.municipality_en, operator: r.operating_organization, version: r.version, submittedAt: r.submitted_at, status: siteStatusFor(r.id), reviewer: r.reviewer ?? '' }))
     .sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status) || a.submittedAt.localeCompare(b.submittedAt));

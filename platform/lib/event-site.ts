@@ -4,6 +4,8 @@ import { archiveWindowDays, derivedLevelFor, facilityDevices, latestOutcomeFor }
 import { padFacilityOnSite, type SiteAed } from './sites';
 import { siteInfrastructure, type SiteInfrastructureAnswers } from './site-infrastructure';
 import { isArchivedRecord, LIFECYCLE_CONTENT, organizerEventState, type Level } from './rules';
+import { eventSiteAlert, type EventSiteAlertKey } from './rules/site';
+import { siteRenewalFor } from './site-registration';
 
 /**
  * THE EVENT'S SITE (owner, 9 October 2026: "Link between event and facility, no longer
@@ -103,6 +105,24 @@ export function siteForEvent(eventId: string): { siteId: string; nameEn: string;
   if (!row) return null;
   const nameEn = row.name_en ?? row.site_en;
   return { siteId: row.site_id, nameEn, nameAr: row.name_ar || row.site_ar || nameEn, facilityId: row.facility_id };
+}
+
+/**
+ * The alert an event carries while the site it is held at is expiring soon or expired, or its
+ * annual confirmation or drill falls due before the event ends (owner, 9 October 2026; the rule
+ * is lib/rules/site.ts eventSiteAlert). None for an event that has ended or was cancelled.
+ */
+export function eventSiteAlertFor(eventId: string, today: string = beirutToday()): { key: EventSiteAlertKey; en: string; ar: string; siteId: string } | null {
+  const site = siteForEvent(eventId);
+  if (!site?.facilityId) return null;
+  const ev = getDb().prepare(`SELECT start_date, end_date, lifecycle FROM events WHERE id = ?`).get(eventId) as
+    | { start_date: string | null; end_date: string | null; lifecycle: string | null }
+    | undefined;
+  if (!ev || ev.lifecycle === 'cancelled') return null;
+  const end = ev.end_date ?? ev.start_date;
+  if (end && end < today) return null;
+  const alert = eventSiteAlert(siteRenewalFor(site.facilityId, today), { startDate: ev.start_date, endDate: ev.end_date }, site);
+  return alert ? { ...alert, siteId: site.siteId } : null;
 }
 
 /* ---------------- what the site offers an event (section 16) ---------------- */
