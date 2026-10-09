@@ -71,17 +71,19 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     }
     return { en: 'Not answered', ar: 'لم تُقدَّم إجابة' };
   };
+  // Who completes a step, in one plain form (owner, 9 October 2026): "Completed by …". The Arabic
+  // verb agrees with the first party named -- the agency (جهة) is feminine, the others masculine.
   const ownerLine = (inst: RequirementInstance): { en: string; ar: string } | null => {
-    if (inviteFirst(inst)) return { en: 'You invite the EMS agency first; it then fills this step', ar: 'تدعون جهة الإسعاف أولاً، ثم تملأ هذه الخطوة' };
+    if (inviteFirst(inst)) return { en: 'Invite the EMS agency to complete this step', ar: 'ادعوا جهة الإسعاف لاستكمال هذه الخطوة' };
     if (inst.authors.length === 0) return null;
     const others = inst.authors.filter((r) => r !== viewerRole);
     if (mayAuthor(inst, viewerRole)) {
-      if (others.length === 0) return { en: 'You fill this step', ar: 'تملؤون هذه الخطوة' };
+      if (others.length === 0) return { en: 'Completed by you', ar: 'تستكملونها أنتم' };
       const o = names(others);
-      return { en: `You or the ${o.en} fill this step`, ar: `تملؤون هذه الخطوة أنتم أو ${o.ar}` };
+      return { en: `Completed by you or the ${o.en}`, ar: `تستكملونها أنتم أو ${o.ar}` };
     }
     const o = names(inst.authors);
-    return { en: `Filled by the ${o.en}`, ar: `تملؤها ${o.ar}` };
+    return { en: `Completed by the ${o.en}`, ar: `${inst.authors[0] === 'ems' ? 'تستكملها' : 'يستكملها'} ${o.ar}` };
   };
   const form = (inst: RequirementInstance, canEdit: boolean) => <RequirementForm kind={service} id={id} instance={inst} canEdit={canEdit} awaiting={awaitingFor(inst)} />;
 
@@ -229,7 +231,7 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
       ) : null}
       {handoffParty && handoffSteps.length > 0 ? (
         <HandoffDialog
-          party={REQUIREMENT_AUTHORS[handoffParty]}
+          party={{ ...REQUIREMENT_AUTHORS[handoffParty], feminine: handoffParty === 'ems' }}
           steps={handoffSteps.map(({ s, n }) => ({ n, anchor: s.anchor, labelEn: s.labelEn, labelAr: s.labelAr }))}
           questions={(handoffRow?.fields ?? []).map((f) => ({ en: f.labelEn, ar: f.labelAr }))}
           skipTo={skipStep?.anchor ?? null}
