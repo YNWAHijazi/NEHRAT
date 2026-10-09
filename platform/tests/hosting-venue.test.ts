@@ -275,3 +275,22 @@ describe('events at your venues: the venue owner’s dashboard list', () => {
     );
   });
 });
+
+describe('the site an event stands on (Hosting Venue Registration, 8 October 2026)', () => {
+  it('a linked event takes the venue site and its certified baseline; unlinking clears both', () => {
+    const db = getDb();
+    const venue = db.prepare(`SELECT site_id FROM venues WHERE id = 'VN-0032'`).get() as { site_id: string };
+    expect(venue.site_id).toMatch(/^SITE-\d{6}$/);
+    const certified = (db.prepare(`SELECT MAX(version) AS v FROM venue_assessments WHERE venue_id = 'VN-0032' AND certificate_issued = 1`).get() as { v: number }).v;
+    const id = (db.prepare(`SELECT id FROM events WHERE is_demo = 1 AND hosting_venue_id IS NULL LIMIT 1`).get() as { id: string }).id;
+    const row = () => db.prepare('SELECT site_id, hosting_venue_version FROM events WHERE id = ?').get(id) as { site_id: string | null; hosting_venue_version: number | null };
+    try {
+      db.prepare(`UPDATE events SET hosting_venue_id = 'VN-0032' WHERE id = ?`).run(id);
+      expect(row()).toEqual({ site_id: venue.site_id, hosting_venue_version: certified });
+      db.prepare('UPDATE events SET hosting_venue_id = NULL WHERE id = ?').run(id);
+      expect(row()).toEqual({ site_id: null, hosting_venue_version: null });
+    } finally {
+      db.prepare('UPDATE events SET hosting_venue_id = NULL WHERE id = ?').run(id);
+    }
+  });
+});

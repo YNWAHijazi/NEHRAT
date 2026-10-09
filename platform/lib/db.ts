@@ -1379,6 +1379,18 @@ function migrateSites(d: DatabaseSync, addColumn: (table: string, column: string
   addColumn('events', 'site_id', 'site_id TEXT REFERENCES sites(id)');
   // The annual venue baseline an event relied on: the venue's assessment version at the time.
   addColumn('events', 'hosting_venue_version', 'hosting_venue_version INTEGER');
+  // An event linked to a registered venue stands on that venue's site and records the venue
+  // baseline it relied on -- the venue's latest certified annual assessment, or none yet. One
+  // trigger for every path that sets the link (create, edit, reapply, the location field).
+  // Unlinked, the event names no site: a route or a temporary location is not a site.
+  for (const [name, when] of [['insert', 'AFTER INSERT ON events WHEN NEW.hosting_venue_id IS NOT NULL'], ['update', 'AFTER UPDATE OF hosting_venue_id ON events WHEN NEW.hosting_venue_id IS NOT OLD.hosting_venue_id']] as const) {
+    d.exec(`CREATE TRIGGER IF NOT EXISTS event_site_link_${name} ${when} BEGIN
+      UPDATE events SET
+        site_id = (SELECT v.site_id FROM venues v WHERE v.id = NEW.hosting_venue_id),
+        hosting_venue_version = (SELECT MAX(a.version) FROM venue_assessments a WHERE a.venue_id = NEW.hosting_venue_id AND a.certificate_issued = 1)
+      WHERE id = NEW.id;
+    END;`);
+  }
   backfillSites(d);
 }
 
@@ -1398,7 +1410,8 @@ export function backfillSites(d: DatabaseSync): void {
     const site = insertSite(d, { nameEn: f.name_en, nameAr: f.name_ar, municipalityEn: f.municipality_en, municipalityAr: f.municipality_ar, district: '', latitude: null, longitude: null, createdBy: f.account_id, isDemo: f.is_demo === 1, createdAt: f.created_at });
     d.prepare('UPDATE facilities SET site_id = ? WHERE id = ?').run(site, f.id);
   }
-  d.exec(`UPDATE events SET site_id = (SELECT v.site_id FROM venues v WHERE v.id = events.hosting_venue_id)
+  d.exec(`UPDATE events SET site_id = (SELECT v.site_id FROM venues v WHERE v.id = events.hosting_venue_id),
+            hosting_venue_version = COALESCE(hosting_venue_version, (SELECT MAX(a.version) FROM venue_assessments a WHERE a.venue_id = events.hosting_venue_id AND a.certificate_issued = 1))
           WHERE site_id IS NULL AND hosting_venue_id IS NOT NULL`);
 }
 
