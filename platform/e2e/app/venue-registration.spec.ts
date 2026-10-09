@@ -16,7 +16,10 @@ test('a refused venue registration keeps what was typed and names the field; the
   await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
   await expect(page.locator('[data-region="please-fill"]')).toContainText('Please fill: the venue name (English)');
   await expect(page.locator('[data-region="please-fill"]')).toContainText('the map pin');
-  await expect(page.locator('[data-region="please-fill"]')).toContainText('the authorized representative');
+  await expect(page.locator('[data-region="please-fill"]')).toContainText('the position');
+  // The signed-in person starts as the representative and the responsible person (owner, 9 October 2026).
+  await expect(page.locator('[data-region="please-fill"]')).not.toContainText('the authorized representative');
+  await expect(page.getByLabel(/Authorized representative/)).not.toHaveValue('');
   await expect(page.locator('input[name=name]')).toHaveAttribute('aria-invalid', 'true');
   await expect(page).toHaveURL(/\/venues\/new$/);
   for (const [k, v] of Object.entries({ name: 'Registration refusal test', nameAr: 'اختبار رفض التسجيل', address: 'Tripoli corniche', contactName: 'Venue operator', contactPhoneNumber: '12', capacity: '2500' })) await page.locator(`input[name=${k}]`).fill(v);
