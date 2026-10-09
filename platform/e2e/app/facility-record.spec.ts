@@ -30,15 +30,20 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');
   await expect(page.locator('[data-region=applicability]')).toHaveAttribute('data-applicability', 'covered');
   const nav = page.locator('[data-region=step-nav]');
-  for (const label of ['Basic site infrastructure', 'AEDs', 'Cardiac emergency response plan', 'Readiness confirmation', 'Supporting evidence — optional', 'Review and submit']) await expect(nav).toContainText(label);
-  await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'current');
+  for (const label of ['AEDs', 'Cardiac emergency response plan', 'Readiness confirmation', 'Basic site infrastructure', 'Supporting evidence — optional', 'Review and submit']) await expect(nav).toContainText(label);
+  // The required steps come first; the optional ones follow under their own heading (owner, 9 October 2026).
+  await expect(page.locator('[data-region=step-nav] [data-step-item]')).toHaveCount(6);
+  expect(await page.locator('[data-region=step-nav] [data-step-item]').evaluateAll((els) => els.map((e) => e.getAttribute('data-step-item')))).toEqual(['aeds', 'plan', 'confirmation', 'infrastructure', 'evidence', 'review']);
+  await expect(page.locator('[data-step-item=infrastructure] .step-group')).toBeVisible();
+  await expect(stepState(page, 'aeds')).toHaveAttribute('data-step-state', 'current');
   await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'notProvided');
-  await expect(page.locator('#infrastructure [data-region=site-infrastructure]')).toContainText('Nothing here is required.');
 
   // INFRASTRUCTURE: optional, saved on Next.
+  await page.locator('[data-step-item=infrastructure] a').click();
+  await expect(page.locator('#infrastructure [data-region=site-infrastructure]')).toContainText('Nothing here is required.');
   await page.locator('#infrastructure textarea[name=zones]').fill('Main hall and two studios');
   await page.locator('[data-region=step-next]').click();
-  await expect(stepState(page, 'aeds')).toHaveAttribute('data-step-state', 'current');
+  await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'current');
   await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'complete');
 
   // THE REVIEW NAMES WHAT REMAINS, and the submit button says why it waits.

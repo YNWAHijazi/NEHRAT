@@ -131,15 +131,20 @@ function aedPending(f: FacilityRegistrationFacts): { stateEn: string; stateAr: s
   return PENDING;
 }
 
-/** The six steps, in the revision's order: infrastructure, AEDs, plan, readiness confirmation, evidence, review and submit. */
+/**
+ * The six steps: the required ones first (AEDs, plan, readiness confirmation), then the two the
+ * revision makes optional (section 3: infrastructure "should not create new regulatory
+ * blockers"; section 7: "Supporting evidence -- optional"), then review and submit. The
+ * revision numbers infrastructure before the AEDs; its own end-to-end flow (section 15) runs
+ * AEDs, plan, confirmation, then the optional uploads -- and an event's record lists its
+ * recommended steps last, so an optional step never sits above a required one (owner, 9 October 2026).
+ */
 export function facilityRegistrationSteps(f: FacilityRegistrationFacts): FacilityStep[] {
   const s = facilityJson.site.steps;
   const devices = facilityDevicesDone(f);
   const plan = sitePlanComplete(submissionFacts(f));
   const evidence = f.documentCount + f.photoCount > 0;
   return [
-    { key: 'infrastructure', anchor: 'infrastructure', en: s.infrastructure.en, ar: s.infrastructure.ar, optional: true,
-      ...(f.infrastructureRecorded ? { state: 'complete' as const, ...COMPLETE } : { state: 'notProvided' as const, ...OPTIONAL }) },
     { key: 'aeds', anchor: 'aeds', en: s.aeds.en, ar: s.aeds.ar, optional: false,
       ...(devices ? { state: 'complete' as const, ...COMPLETE } : { state: 'pending' as const, ...aedPending(f) }) },
     { key: 'plan', anchor: 'plan', en: facilityJson.planTitle.en, ar: facilityJson.planTitle.ar, optional: false,
@@ -148,6 +153,8 @@ export function facilityRegistrationSteps(f: FacilityRegistrationFacts): Facilit
       ...(f.confirmationCurrent ? { state: 'complete' as const, ...COMPLETE }
         : f.confirmationRecorded ? { state: 'pending' as const, stateEn: 'To be confirmed again', stateAr: 'يلزم تأكيدها مجدداً' }
           : { state: 'pending' as const, ...PENDING }) },
+    { key: 'infrastructure', anchor: 'infrastructure', en: s.infrastructure.en, ar: s.infrastructure.ar, optional: true,
+      ...(f.infrastructureRecorded ? { state: 'complete' as const, ...COMPLETE } : { state: 'notProvided' as const, ...OPTIONAL }) },
     { key: 'evidence', anchor: 'evidence', en: s.evidence.en, ar: s.evidence.ar, optional: true,
       ...(evidence ? { state: 'complete' as const, ...COMPLETE } : { state: 'notProvided' as const, ...OPTIONAL }) },
     { key: 'review', anchor: 'final-review', en: s.review.en, ar: s.review.ar, optional: false, state: 'final', stateEn: '', stateAr: '' },
@@ -155,14 +162,13 @@ export function facilityRegistrationSteps(f: FacilityRegistrationFacts): Facilit
 }
 
 /**
- * The step the page opens on: the one a redirect named; a new record on its first step;
- * otherwise the first required step still open, else the review.
+ * The step the page opens on: the one a redirect named; otherwise the first required step
+ * still open, else the review.
  */
 export function facilityInitialStep(f: FacilityRegistrationFacts, requested: string | null | undefined): FacilityStepKey {
   const steps = facilityRegistrationSteps(f);
   const named = steps.find((s) => s.key === requested);
   if (named) return named.key;
-  if (!f.infrastructureRecorded && f.deviceCount === 0 && !f.confirmationRecorded) return 'infrastructure';
   return (steps.find((s) => s.state === 'pending') ?? steps[steps.length - 1]!).key;
 }
 

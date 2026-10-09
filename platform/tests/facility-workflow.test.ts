@@ -29,10 +29,13 @@ const submitted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ sub
 const accepted = (over: Partial<FacilityRegistrationFacts> = {}) => ready({ submissionCount: 1, status: 'readinessCurrent', everAccepted: true, ...over });
 
 describe('the step path while the registration is in preparation', () => {
-  it('runs infrastructure, AEDs, plan, readiness confirmation, evidence, then review and submit', () => {
+  it('runs the required steps first (AEDs, plan, readiness confirmation), then the optional ones, then review and submit', () => {
     const steps = facilityRegistrationSteps(fresh());
-    expect(steps.map((s) => s.key)).toEqual(['infrastructure', 'aeds', 'plan', 'confirmation', 'evidence', 'review']);
-    expect(steps.map((s) => s.anchor)).toEqual(['infrastructure', 'aeds', 'plan', 'confirmation-step', 'evidence', 'final-review']);
+    expect(steps.map((s) => s.key)).toEqual(['aeds', 'plan', 'confirmation', 'infrastructure', 'evidence', 'review']);
+    expect(steps.map((s) => s.anchor)).toEqual(['aeds', 'plan', 'confirmation-step', 'infrastructure', 'evidence', 'final-review']);
+    // An optional step never sits above a required one.
+    const lastRequired = steps.map((s) => !s.optional && s.state !== 'final').lastIndexOf(true);
+    expect(steps.findIndex((s) => s.optional)).toBeGreaterThan(lastRequired);
     expect(steps[5]!.state).toBe('final');
   });
 
@@ -59,7 +62,7 @@ describe('the step path while the registration is in preparation', () => {
   it('an AED that is not operational or not accessible keeps the AED step open', () => {
     const f = fresh({ deviceCount: 2, devicesNotReady: 1 });
     expect(facilityDevicesDone(f)).toBe(false);
-    expect(facilityRegistrationSteps(f)[1]).toMatchObject({ state: 'pending', stateEn: 'An AED is not ready' });
+    expect(facilityRegistrationSteps(f).find((s) => s.key === 'aeds')).toMatchObject({ state: 'pending', stateEn: 'An AED is not ready' });
   });
 
   it('where no AED is required, none is owed, but a registered AED must still be ready', () => {
@@ -68,8 +71,8 @@ describe('the step path while the registration is in preparation', () => {
     expect(facilityDevicesDone(fresh({ aedRequirement: 'notRequired', deviceCount: 1, devicesNotReady: 1 }))).toBe(false);
   });
 
-  it('opens a new record on its first step, else on the step named, else the first open one', () => {
-    expect(facilityInitialStep(fresh(), null)).toBe('infrastructure');
+  it('opens on the step named, else the first required step still open, else the review', () => {
+    expect(facilityInitialStep(fresh(), null)).toBe('aeds');
     expect(facilityInitialStep(fresh(), 'aeds')).toBe('aeds');
     expect(facilityInitialStep(fresh({ deviceCount: 1 }), 'nonsense')).toBe('confirmation');
     expect(facilityInitialStep(ready(), undefined)).toBe('review');
