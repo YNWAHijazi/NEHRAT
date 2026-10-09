@@ -81,6 +81,8 @@ test.describe('reapply from a concluded event', () => {
     // Duplicate. The copy is given dates long past the archive window to put it there.
     {
       const db = new DatabaseSync(process.env['E2E_DATABASE_PATH']!);
+      // The schema's triggers stamp on the platform's clock; this connection lends them one.
+      db.function('now_stamp', () => '2026-08-13 12:00:00');
       try {
         db.prepare(`UPDATE events SET start_date = '2026-05-02', end_date = '2026-05-02' WHERE id = ?`).run(newId);
       } finally {

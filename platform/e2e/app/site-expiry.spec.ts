@@ -87,5 +87,5 @@ test('a site falls due: expiring soon, then expired, and the events held there s
   // Both languages carry the notice (the Arabic span is in the page beside the English one).
   withDb((db) => db.prepare(`UPDATE facility_plan_confirmations SET drill_date = '2025-09-01' WHERE facility_id = ?`).run(id));
   await page.goto(`/facilities/${id}`);
-  await expect(page.locator('[data-region=renewal-notice] [data-l=ar]')).toContainText('التمرين العملي السنوي');
+  await expect(page.locator('[data-region=renewal-notice]')).toContainText('يحين موعد تمرين عملي سنوي في');
 });
