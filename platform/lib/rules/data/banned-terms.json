@@ -82,6 +82,10 @@
       "why": "The same phrase with the pair reversed, as the facility profile field writes it."
     },
     {
+      "phrase": "approved/licensed capacity",
+      "why": "The event-hosting facility/site category, verbatim from the owner's latest revision (9 October 2026, section 1): the capacity a venue is approved or licensed for. Not a determination."
+    },
+    {
       "phrase": "approved basic ventilation equipment",
       "why": "PAD readiness list: equipment of an approved type. Not a determination."
     },

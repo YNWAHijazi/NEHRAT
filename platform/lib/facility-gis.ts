@@ -3,6 +3,7 @@ import { facilityAedRequirement } from './rules/facility-intake';
 import { beirutToday } from './clock';
 import { getDb } from './db';
 import { validMapPoint, type MapPoint } from './rules/geolocation';
+import { EVENT_VENUE_CAPACITY_KEY, eventVenueThreshold } from './rules/site';
 export function facilityPoint(id: string): MapPoint | null {
   const row=getDb().prepare('SELECT latitude AS lat, longitude AS lng FROM facilities WHERE id=?').get(id);
   return validMapPoint(row)?{lat:row.lat,lng:row.lng}:null;
@@ -28,7 +29,25 @@ export function facilityAedStatus(id:string):'required'|'notRequired'|'review' {
  const decision=db.prepare('SELECT requirement FROM facility_aed_decisions WHERE facility_id=? ORDER BY id DESC LIMIT 1').get(id) as {requirement:string}|undefined;
  const threshold=db.prepare("SELECT value,effective FROM ministry_config WHERE key='capacityThreshold'").get() as {value:string;effective:string|null}|undefined;
  const number=threshold && (!threshold.effective||threshold.effective<=beirutToday())?Number(threshold.value):NaN;
- return facilityAedRequirement({category:f.category_key,type:f.facility_type,capacity:f.licensed_capacity,threshold:Number.isFinite(number)?number:null,decision:decision?.requirement});
+ return facilityAedRequirement({category:f.category_key,type:f.facility_type,capacity:f.licensed_capacity,threshold:Number.isFinite(number)?number:null,decision:decision?.requirement,
+  eventVenueThreshold:siteEventVenueThreshold(),designated:facilityDesignation(id)!==null});
+}
+
+/** The event-hosting capacity threshold in force: a published Ministry value, else the instrument's figure (lib/rules/site.ts). */
+export function siteEventVenueThreshold():number|null {
+ const row=getDb().prepare('SELECT value,effective FROM ministry_config WHERE key=?').get(EVENT_VENUE_CAPACITY_KEY) as {value:string;effective:string|null}|undefined;
+ return eventVenueThreshold(row?{value:row.value,effective:row.effective}:null,beirutToday());
+}
+
+/**
+ * The Ministry designation naming this facility/site (revision section 10), the latest one:
+ * the existing designations model, a row in facility_designations carrying the facility id.
+ * Within the facility's own demonstration boundary. Null while none names it.
+ */
+export function facilityDesignation(id:string):{designatedAt:string;designatedBy:string;category:string}|null {
+ const row=getDb().prepare(`SELECT d.designated_at,d.designated_by,d.category FROM facility_designations d JOIN facilities f ON f.id=d.facility_id AND f.is_demo=d.is_demo
+   WHERE d.facility_id=? ORDER BY d.designated_at DESC, d.id DESC LIMIT 1`).get(id) as {designated_at:string;designated_by:string;category:string}|undefined;
+ return row?{designatedAt:row.designated_at.slice(0,10),designatedBy:row.designated_by,category:row.category}:null;
 }
 
 /** The current photo of an installed AED: its metadata, never the bytes (the serving route reads those). */

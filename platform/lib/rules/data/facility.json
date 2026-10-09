@@ -3,78 +3,113 @@
   "categories": [
     {
       "key": "sports",
-      "en": "Gyms, fitness centres, sports clubs, stadiums, athletic and aquatic facilities",
-      "ar": "الصالات الرياضية ومراكز اللياقة البدنية والأندية الرياضية والملاعب والمنشآت الرياضية والمائية",
-      "arNote": "Part 1 of the Arabic issue adds أحواض السباحة (swimming pools) to this category; part 2's table omits it. The table wording is used; the divergence is recorded for the Ministry.",
+      "en": "Sports and fitness facilities",
+      "ar": "المنشآت الرياضية ومنشآت اللياقة البدنية",
+      "detailEn": "Gyms, fitness centers, sports clubs, stadiums, athletic facilities, swimming pools and aquatic facilities.",
+      "detailAr": "الصالات الرياضية ومراكز اللياقة البدنية والأندية الرياضية والملاعب والمنشآت الرياضية وأحواض السباحة والمنشآت المائية.",
+      "arNote": "The revision (9 October 2026) now names swimming pools in English too, matching part 1 of the Arabic issue; the earlier divergence with part 2's table is closed in the revision's favour.",
+      "applicability": "objective",
       "state": "inForceNow",
       "alsoRecurringVenue": true,
-      "shortEn": "Sports and aquatic facility",
-      "shortAr": "منشأة رياضية ومائية",
+      "shortEn": "Sports and fitness facility",
+      "shortAr": "منشأة رياضية ومنشأة لياقة بدنية",
       "ruleEn": "An AED is required.",
       "ruleAr": "يلزم توفير جهاز إزالة رجفان.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     },
     {
       "key": "education",
-      "shortEn": "Educational campus",
-      "shortAr": "حرم تعليمي",
-      "en": "Schools, universities and campuses",
-      "ar": "المدارس والجامعات والمجمعات التعليمية",
+      "en": "Educational facilities",
+      "ar": "المنشآت التعليمية",
+      "detailEn": "Schools, universities and educational campuses, according to the phased implementation schedule established by MOPH.",
+      "detailAr": "المدارس والجامعات والحرم التعليمية، وفق الجدول المرحلي للتنفيذ الذي تضعه وزارة الصحة العامة.",
+      "applicability": "objective",
+      "shortEn": "Educational facility",
+      "shortAr": "منشأة تعليمية",
       "state": "inForceNow",
-      "ruleEn": "AEDs follow the Ministry’s school and university rollout schedule.",
-      "ruleAr": "تخضع الأجهزة لجدول التنفيذ الوزاري للمدارس والجامعات.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "ruleEn": "AEDs follow the Ministry’s phased implementation schedule for schools, universities and educational campuses.",
+      "ruleAr": "تخضع الأجهزة للجدول المرحلي للتنفيذ الذي تضعه الوزارة للمدارس والجامعات والحرم التعليمية.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     },
     {
       "key": "transport",
-      "shortEn": "Transport hub or large public venue",
-      "shortAr": "محطة نقل أو مكان عام كبير",
-      "en": "Airports, passenger ports, central transport terminals, shopping malls, and public venues above the MOPH capacity threshold",
-      "ar": "المطارات ومرافئ الركاب ومحطات النقل المركزية ومراكز التسوق والأماكن العامة التي تتجاوز عتبة السعة التي تحددها وزارة الصحة العامة",
+      "en": "Transport and major public-access facilities",
+      "ar": "منشآت النقل والمنشآت الكبرى المفتوحة للعموم",
+      "detailEn": "Airports, passenger ports, central transport terminals and shopping malls.",
+      "detailAr": "المطارات ومرافئ الركاب ومحطات النقل المركزية ومراكز التسوّق.",
+      "applicability": "objective",
+      "shortEn": "Transport or major public-access facility",
+      "shortAr": "منشأة نقل أو منشأة كبرى مفتوحة للعموم",
       "state": "inForceNow",
-      "ruleEn": "Transport hubs and malls need AEDs. Public venues follow the Ministry’s capacity threshold.",
-      "ruleAr": "تلزم الأجهزة في محطات النقل ومراكز التسوق. وتخضع الأماكن العامة لعتبة السعة الوزارية.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "ruleEn": "An AED is required.",
+      "ruleAr": "يلزم توفير جهاز إزالة رجفان.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
+    },
+    {
+      "key": "eventVenue",
+      "en": "Event-hosting venues with approved/licensed capacity ≥{capacity}",
+      "ar": "مواقع استضافة الفعاليات ذات السعة المعتمدة أو المرخّصة ≥{capacity}",
+      "unsetEn": "Event-hosting venues with approved/licensed capacity at or above the Ministry threshold",
+      "unsetAr": "مواقع استضافة الفعاليات ذات السعة المعتمدة أو المرخّصة التي تبلغ عتبة الوزارة أو تتجاوزها",
+      "detailEn": "Venues that host organized events and have an approved or licensed capacity of {capacity} persons or more.",
+      "detailAr": "المواقع التي تستضيف فعاليات منظّمة وتبلغ سعتها المعتمدة أو المرخّصة {capacity} شخص أو أكثر.",
+      "applicability": "capacity",
+      "shortEn": "Event-hosting venue",
+      "shortAr": "موقع استضافة فعاليات",
+      "state": "inForceNow",
+      "ruleEn": "An AED is required where the approved or licensed capacity is {capacity} persons or more.",
+      "ruleAr": "يلزم توفير جهاز إزالة رجفان حيث تبلغ السعة المعتمدة أو المرخّصة {capacity} شخص أو أكثر.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     },
     {
       "key": "remote",
-      "shortEn": "Remote facility",
-      "shortAr": "منشأة نائية",
-      "en": "Remote or hard-to-reach facilities",
-      "ar": "المنشآت النائية أو التي يصعب الوصول إليها",
+      "en": "Remote/difficult-access facilities designated by MOPH",
+      "ar": "المنشآت النائية أو صعبة الوصول التي تحدّدها وزارة الصحة العامة",
+      "detailEn": "Facilities where access by an AED-equipped EMS unit may be delayed, when designated by MOPH.",
+      "detailAr": "المنشآت التي قد يتأخر فيها وصول وحدة خدمات طوارئ طبية مجهّزة بجهاز إزالة الرجفان، عندما تحدّدها وزارة الصحة العامة.",
+      "applicability": "designation",
+      "shortEn": "Remote or difficult-access facility",
+      "shortAr": "منشأة نائية أو صعبة الوصول",
       "state": "inForceNow",
-      "ruleEn": "An AED is required when the Ministry designates the facility.",
-      "ruleAr": "يلزم الجهاز عندما تحدّد الوزارة المنشأة.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "ruleEn": "Only the Ministry designates a site in this category. You can register the site now; the category applies once the Ministry records the designation.",
+      "ruleAr": "وحدها الوزارة تحدّد موقعاً ضمن هذه الفئة. يمكنكم تسجيل الموقع الآن، وتنطبق الفئة عندما تسجّل الوزارة التحديد.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     },
     {
       "key": "priorArrest",
-      "shortEn": "Facility under Ministry review",
-      "shortAr": "مرفق قيد مراجعة الوزارة",
-      "en": "Facilities with a confirmed previous cardiac arrest",
-      "ar": "منشآت شهدت توقف قلب مؤكداً",
+      "en": "Facilities with a confirmed prior cardiac arrest",
+      "ar": "المنشآت التي شهدت توقف قلب سابقاً مؤكداً",
+      "detailEn": "Any fixed public, educational, occupational, sporting or commercial facility where a cardiac arrest has been reported by an EMS or designated first-response agency and confirmed by MOPH.",
+      "detailAr": "أي منشأة ثابتة عامة أو تعليمية أو مهنية أو رياضية أو تجارية أبلغت فيها خدمات الطوارئ الطبية أو جهة استجابة أولى محدّدة عن توقف قلب وأكّدته وزارة الصحة العامة.",
       "arNote": "The Arabic issue's part 1 is broader: it names who reports (EMS or an approved first-response agency) and who confirms (the Ministry). Recorded for the Ministry; the requirements-table wording is used.",
+      "applicability": "designation",
+      "shortEn": "Facility with a confirmed prior cardiac arrest",
+      "shortAr": "منشأة شهدت توقف قلب سابقاً مؤكداً",
       "state": "inForceNow",
-      "ruleEn": "The Ministry reviews the facility and sets its readiness requirements.",
-      "ruleAr": "تراجع الوزارة المنشأة وتحدّد متطلبات جاهزيتها.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "ruleEn": "Only the Ministry designates a site in this category. You can register the site now; the category applies once the Ministry records the designation.",
+      "ruleAr": "وحدها الوزارة تحدّد موقعاً ضمن هذه الفئة. يمكنكم تسجيل الموقع الآن، وتنطبق الفئة عندما تسجّل الوزارة التحديد.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     },
     {
       "key": "designated",
+      "en": "Other MOPH-designated facilities",
+      "ar": "منشآت أخرى تحدّدها وزارة الصحة العامة",
+      "detailEn": "Any other facility designated by MOPH based on activity, occupancy, population served, accessibility or emergency-response conditions.",
+      "detailAr": "أي منشأة أخرى تحدّدها وزارة الصحة العامة بناءً على النشاط أو الإشغال أو عدد السكان المخدومين أو إمكانية الوصول أو ظروف الاستجابة للطوارئ.",
+      "applicability": "designation",
       "shortEn": "Ministry-designated facility",
-      "shortAr": "مرفق حددته الوزارة",
-      "en": "Other facilities named by the Ministry",
-      "ar": "منشآت أخرى تحددها الوزارة",
+      "shortAr": "منشأة حدّدتها الوزارة",
       "state": "inForceNow",
-      "ruleEn": "Follow the readiness requirements set by the Ministry for this facility.",
-      "ruleAr": "اتّبعوا متطلبات الجاهزية التي تحدّدها الوزارة لهذه المنشأة.",
-      "basisEn": "Register the facility, keep an emergency plan and record any AEDs.",
-      "basisAr": "سجّلوا المنشأة واحتفظوا بخطة طوارئ وسجّلوا أجهزة إزالة الرجفان المتوفرة."
+      "ruleEn": "Only the Ministry designates a site in this category. You can register the site now; the category applies once the Ministry records the designation.",
+      "ruleAr": "وحدها الوزارة تحدّد موقعاً ضمن هذه الفئة. يمكنكم تسجيل الموقع الآن، وتنطبق الفئة عندما تسجّل الوزارة التحديد.",
+      "basisEn": "Register the site, keep the cardiac emergency response plan current and register each AED.",
+      "basisAr": "سجّلوا الموقع وحافظوا على تحديث خطة الاستجابة لطوارئ توقف القلب وسجّلوا كل جهاز."
     }
   ],
   "categoryUnset": {
@@ -86,9 +121,14 @@
   "profileFields": [
     {
       "key": "name",
-      "en": "Facility name",
-      "ar": "اسم المرفق",
+      "en": "Facility/site name",
+      "ar": "اسم المنشأة/الموقع",
       "bilingual": true
+    },
+    {
+      "key": "operatingOrganization",
+      "en": "Operating organization",
+      "ar": "الجهة المشغّلة"
     },
     {
       "key": "address",
@@ -753,5 +793,272 @@
     "pendingEn": "Registration not yet complete",
     "pendingAr": "التسجيل غير مكتمل بعد"
   },
-  "$commentAudit20261008": "Partner UI audit (2026-10-08): step 3 is one responsible contact; the AED record is lean (identifier, location, optional separate pin, accessibility, operational, pediatric, purpose, optional photo, facility confirmation); annual readiness confirmation and maintenance dates left the AED form; the plan shows the contact read-only and carries the facility confirmation. Existing alternate/emsGuide rows and device dates stay readable but are no longer collected or rendered."
+  "$commentAudit20261008": "Partner UI audit (2026-10-08): step 3 is one responsible contact; the AED record is lean (identifier, location, optional separate pin, accessibility, operational, pediatric, purpose, optional photo, facility confirmation); annual readiness confirmation and maintenance dates left the AED form; the plan shows the contact read-only and carries the facility confirmation. Existing alternate/emsGuide rows and device dates stay readable but are no longer collected or rendered.",
+  "site": {
+    "$comment": "FACILITY/SITE (owner decision, 9 October 2026, and the latest revision sections 1-15): Hosting Venue is removed as a regulatory entity and the Facility/Site is the single persistent place record. The Site ID is the anchor; the FC-nnnn record id stays as the registration reference. Statuses are PRODUCT-DEFINED operational labels (revision section 11), never the mass-gathering outcomes.",
+    "nameEn": "facility/site",
+    "nameAr": "المنشأة/الموقع",
+    "introEn": "Register this Site if it belongs to a covered cardiac-readiness category. Registered Sites can also be reused when submitting Events held at the same location.",
+    "introAr": "سجّلوا هذا الموقع إذا كان ينتمي إلى فئة مشمولة بالجاهزية لتوقف القلب. ويمكن أيضاً إعادة استخدام المواقع المسجّلة عند تقديم الفعاليات التي تُقام في المكان نفسه.",
+    "eventVenueCapacity": {
+      "$comment": "The event-hosting category's capacity threshold. The figure is the revision's own (section 1: 'an approved or licensed capacity of 1,000 persons or more'), held here as data like every other instrument threshold, and governed by a published Ministry value under configKey where one is in force. Removing minCapacity makes the threshold UNSET: the category then says so and covers nothing until the Ministry publishes one.",
+      "minCapacity": 1000,
+      "configKey": "eventVenueCapacity"
+    },
+    "applicability": {
+      "covered": {
+        "en": "Covered by its category. The rule applies automatically.",
+        "ar": "مشمول بفئته. وتنطبق القاعدة تلقائياً."
+      },
+      "awaitingDesignation": {
+        "en": "No Ministry designation names this site. The category applies only once the Ministry records the designation.",
+        "ar": "لا يسمّي أي تحديد وزاري هذا الموقع. ولا تنطبق الفئة إلا عندما تسجّل الوزارة التحديد."
+      },
+      "designated": {
+        "en": "Designated by the Ministry on {date}.",
+        "ar": "حدّدته الوزارة في ⁦{date}⁩."
+      },
+      "belowThreshold": {
+        "en": "The recorded capacity is below {capacity} persons, so this category does not cover the site.",
+        "ar": "السعة المسجّلة أقل من {capacity} شخص، لذا لا تشمل هذه الفئة الموقع."
+      },
+      "capacityMissing": {
+        "en": "Record the approved or licensed capacity: this category covers venues of {capacity} persons or more.",
+        "ar": "سجّلوا السعة المعتمدة أو المرخّصة: تشمل هذه الفئة المواقع التي تبلغ سعتها {capacity} شخص أو أكثر."
+      },
+      "thresholdUnset": {
+        "en": "The Ministry has not published the capacity threshold for this category. Nothing is in force until it does; operators are notified when it is published.",
+        "ar": "لم تنشر الوزارة عتبة السعة لهذه الفئة. ولا يسري شيء قبل نشرها؛ ويُبلَّغ المشغّلون عند نشرها."
+      }
+    },
+    "statuses": {
+      "inPreparation": {
+        "en": "In preparation",
+        "ar": "قيد الإعداد"
+      },
+      "submitted": {
+        "en": "Submitted",
+        "ar": "مقدَّم"
+      },
+      "underReview": {
+        "en": "Under review",
+        "ar": "قيد المراجعة"
+      },
+      "informationRequired": {
+        "en": "Information required",
+        "ar": "مطلوب معلومات"
+      },
+      "readinessCurrent": {
+        "en": "Readiness current",
+        "ar": "الجاهزية سارية"
+      },
+      "correctiveActionRequired": {
+        "en": "Corrective action required",
+        "ar": "مطلوب إجراء تصحيحي"
+      },
+      "noLongerCovered": {
+        "en": "No longer covered",
+        "ar": "لم يعد مشمولاً"
+      }
+    },
+    "reviewActs": {
+      "reviewStarted": {
+        "en": "Review started",
+        "ar": "بدأت المراجعة"
+      },
+      "accepted": {
+        "en": "Registration accepted — readiness current",
+        "ar": "قُبل التسجيل — الجاهزية سارية"
+      },
+      "infoRequested": {
+        "en": "Additional information requested",
+        "ar": "طُلبت معلومات إضافية"
+      },
+      "correctionRequested": {
+        "en": "Correction requested",
+        "ar": "طُلب تصحيح"
+      },
+      "inspection": {
+        "en": "Inspection recorded",
+        "ar": "سُجّل تفتيش"
+      },
+      "designation": {
+        "en": "Designation recorded",
+        "ar": "سُجّل التحديد"
+      }
+    },
+    "steps": {
+      "infrastructure": {
+        "en": "Basic site infrastructure",
+        "ar": "البنية الأساسية للموقع"
+      },
+      "aeds": {
+        "en": "AEDs",
+        "ar": "أجهزة إزالة الرجفان"
+      },
+      "confirmation": {
+        "en": "Readiness confirmation",
+        "ar": "تأكيد الجاهزية"
+      },
+      "evidence": {
+        "en": "Supporting evidence — optional",
+        "ar": "الأدلة الداعمة — اختيارية"
+      },
+      "review": {
+        "en": "Review and submit",
+        "ar": "المراجعة والتقديم"
+      }
+    },
+    "infrastructure": {
+      "introEn": "Kept simple and reusable. Events held at this site can reuse it once their organizer confirms it applies. Nothing here is required.",
+      "introAr": "تبقى بسيطة وقابلة لإعادة الاستخدام. ويمكن للفعاليات التي تُقام في هذا الموقع إعادة استخدامها بعد أن يؤكد منظّمها انطباقها. لا شيء هنا إلزامي.",
+      "layoutMap": {
+        "en": "Site or layout map, if available",
+        "ar": "خريطة الموقع أو مخططه، إن توفرت"
+      },
+      "fields": [
+        {
+          "key": "configuration",
+          "kind": "choice",
+          "en": "Is the site indoor, outdoor or both?",
+          "ar": "هل الموقع داخلي أم خارجي أم الاثنان معاً؟",
+          "options": [
+            {
+              "value": "indoor",
+              "en": "Indoor",
+              "ar": "داخلي"
+            },
+            {
+              "value": "outdoor",
+              "en": "Outdoor",
+              "ar": "خارجي"
+            },
+            {
+              "value": "both",
+              "en": "Both",
+              "ar": "الاثنان معاً"
+            }
+          ]
+        },
+        {
+          "key": "zones",
+          "kind": "textarea",
+          "en": "Main halls, floors and zones, where useful",
+          "ar": "القاعات والطوابق والمناطق الرئيسية، حيث يفيد ذلك"
+        },
+        {
+          "key": "emergencyAccess",
+          "kind": "textarea",
+          "en": "Emergency vehicle access: where vehicles enter and where they stop",
+          "ar": "وصول مركبات الطوارئ: من أين تدخل المركبات وأين تتوقف"
+        },
+        {
+          "key": "ambulanceWaiting",
+          "kind": "text",
+          "en": "Where an ambulance can wait",
+          "ar": "أين يمكن لسيارة إسعاف أن تنتظر"
+        },
+        {
+          "key": "patientAccess",
+          "kind": "textarea",
+          "en": "Patient access and extraction route or arrangements",
+          "ar": "مسار الوصول إلى المريض وإخراجه أو الترتيبات المعتمدة لذلك"
+        },
+        {
+          "key": "stretcherRoutes",
+          "kind": "text",
+          "en": "Lifts or stairs that take a stretcher",
+          "ar": "المصاعد أو الأدراج التي تتّسع لنقّالة"
+        },
+        {
+          "key": "firstAidRoom",
+          "kind": "choice",
+          "en": "Permanent first-aid or treatment room",
+          "ar": "غرفة دائمة للإسعافات الأولية أو العلاج",
+          "options": [
+            {
+              "value": "yes",
+              "en": "Yes",
+              "ar": "نعم"
+            },
+            {
+              "value": "no",
+              "en": "No",
+              "ar": "لا"
+            }
+          ]
+        },
+        {
+          "key": "firstAidLocation",
+          "kind": "text",
+          "en": "Where is it?",
+          "ar": "أين تقع؟",
+          "showWhen": "firstAidRoom"
+        },
+        {
+          "key": "firstAidEquipment",
+          "kind": "textarea",
+          "en": "What is kept there permanently?",
+          "ar": "ما الذي يُحفظ فيها بشكل دائم؟",
+          "showWhen": "firstAidRoom"
+        },
+        {
+          "key": "communications",
+          "kind": "textarea",
+          "en": "Fixed communications usable in an emergency",
+          "ar": "وسائل الاتصال الثابتة التي يمكن استخدامها في حالة طوارئ"
+        },
+        {
+          "key": "other",
+          "kind": "textarea",
+          "en": "Other infrastructure information",
+          "ar": "معلومات أخرى عن البنية الأساسية"
+        }
+      ]
+    },
+    "evidence": {
+      "titleEn": "Readiness documentation",
+      "titleAr": "مستندات الجاهزية",
+      "statementEn": "A third-party document is supporting evidence only. It does not itself establish MOPH acceptance or replace the regulatory Site requirements.",
+      "statementAr": "المستند الصادر عن جهة ثالثة دليل داعم فقط. ولا يُثبت بحد ذاته قبول وزارة الصحة العامة ولا يحلّ محل المتطلبات التنظيمية للموقع.",
+      "$commentWording": "Revision section 7 reads 'does not itself establish MOPH ap-proval'. That word is not platform vocabulary (CLAUDE.md non-negotiable 2), so the sentence reads 'MOPH acceptance' -- acceptance being the Ministry's own act on a site registration (revision section 11). Recorded for the owner.",
+      "types": [
+        {
+          "key": "assessmentLetter",
+          "en": "AED/CPR readiness assessment letter",
+          "ar": "خطاب تقييم الجاهزية للإنعاش القلبي الرئوي واستخدام جهاز إزالة الرجفان"
+        },
+        {
+          "key": "thirdPartyCertificate",
+          "en": "Third-party readiness certificate",
+          "ar": "شهادة جاهزية صادرة عن جهة ثالثة"
+        },
+        {
+          "key": "inspectionReport",
+          "en": "Inspection or report",
+          "ar": "تفتيش أو تقرير"
+        },
+        {
+          "key": "programDocumentation",
+          "en": "External readiness program documentation",
+          "ar": "مستندات برنامج جاهزية خارجي"
+        },
+        {
+          "key": "other",
+          "en": "Other supporting evidence",
+          "ar": "أدلة داعمة أخرى"
+        }
+      ],
+      "$commentTypes": "Revision section 7 lists one named program's documentation 'or equivalent'. Naming one program in a government picker is not vendor-neutral (revision section 18; CLAUDE.md 12), so the type reads 'External readiness program documentation'. Recorded for the owner.",
+      "responseType": {
+        "key": "correctiveResponse",
+        "en": "Response to a corrective action",
+        "ar": "ردّ على إجراء تصحيحي"
+      },
+      "photosTitleEn": "AED photographs",
+      "photosTitleAr": "صور أجهزة إزالة الرجفان",
+      "photosNoteEn": "From the AED records. A photo is added or replaced on its AED record.",
+      "photosNoteAr": "مأخوذة من سجلات الأجهزة. تُضاف الصورة أو تُستبدل في سجل الجهاز."
+    }
+  }
 }

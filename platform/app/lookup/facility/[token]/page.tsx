@@ -3,7 +3,8 @@ import { L } from '../../../../components/L';
 import { PublicShell } from '../../../../components/PublicShell';
 import { currentAccount } from '../../../../lib/auth';
 import { facilityByCertificateToken } from '../../../../lib/facility-gis';
-import { facilityRegistrationComplete } from '../../../../lib/facility-registration';
+import { siteStatusFor } from '../../../../lib/site-registration';
+import { siteCertificateAvailable, siteStatusLabel } from '../../../../lib/rules/site';
 import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
 
 /**
@@ -25,8 +26,8 @@ export default async function VerifyFacilityCertificate({ params }: { params: Pr
     ? null
     : found.archivedAt !== null
       ? { en: 'No longer covered by the Ministry', ar: 'لم تعد مشمولة لدى الوزارة' }
-      : facilityRegistrationComplete(found.id)
-        ? { en: content.certificate.statusEn, ar: content.certificate.statusAr }
+      : siteCertificateAvailable(siteStatusFor(found.id))
+        ? siteStatusLabel('readinessCurrent')
         : { en: content.certificate.pendingEn, ar: content.certificate.pendingAr };
 
   return (

@@ -453,7 +453,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
     id: 'facility-readiness',
     referenceFile: 'Organizer Journey.dc.html',
     referenceTab: 'Facility readiness',
-    builtRoute: '/facilities/FC-0014',
+    // The site dashboard's cardiac-readiness tab (latest revision, 9 October 2026, section 13).
+    builtRoute: '/facilities/FC-0014?tab=readiness',
     signInAs: 'test_organizer',
     regions: [
       {
@@ -480,15 +481,15 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
         name: 'devices',
         mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'AED-001', container: 'repeat(auto-fit, minmax(280px, 1fr))' },
-        builtSelector: '[data-region="registry-table"]',
-        note: "Expected divergent BY OWNER REQUEST (9 October 2026): the readiness screen and the device registry are one management page with sections, so the device cards that linked to the registry are the registry itself, in the AEDs section. Was a compare held at 2% (residual: AED-003's note derives from the record where the reference hand-writes 'Cabinet reported locked outside class hours'). UNVERIFIED as to pixels since the merge.",
+        builtSelector: '[data-region="derived"]',
+        note: "Expected divergent BY OWNER REQUEST (latest revision, 9 October 2026, section 13): the site is a dashboard in tabs, and the AED registry is its own AEDs tab (the facility-devices mapping below compares it). The cardiac-readiness tab carries the plan's AED information derived from the registry in place of the reference's device cards. Was a compare held at 2%. UNVERIFIED as to pixels since the tabs.",
       },
       {
         name: 'ministry-request',
         mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'Requested by the Ministry', container: 'border-radius: 14px' },
-        builtSelector: '[data-region="ministry-request"]',
-        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27): the request now carries its status chip, its due date or the named reason none is computed, the Ministry's close note where closed, and a link to the control that answers it. The reference shows body text and a link to /notifications, where nothing could be done. UNVERIFIED as to pixels since the flip.",
+        builtSelector: '[data-region="next-action"]',
+        note: "DIVERGENT BY THE DEAD-END DIRECTIVE (2026-08-27) and BY OWNER REQUEST (latest revision, 9 October 2026, sections 12-13): an open corrective action leads every tab of the site dashboard as its next step, linking to the Ministry history tab where the request carries its deficiency, its due date or the named reason none is computed, the operator's answer with evidence and the Ministry's verification when closed. The reference shows body text and a link to /notifications, where nothing could be done. UNVERIFIED as to pixels since the flip.",
       },
     ],
   },
