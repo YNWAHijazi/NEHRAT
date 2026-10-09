@@ -33,7 +33,7 @@ export default async function SiteAcknowledgmentPage({ params }: { params: Promi
   const statusKey = siteStatusFor(id);
   const status = siteStatusLabel(statusKey);
   const tone = siteStatusTone(statusKey);
-  const determined = statusKey === 'readinessCurrent' || statusKey === 'informationRequired' || statusKey === 'correctiveActionRequired';
+  const determined = statusKey === 'readinessCurrent' || statusKey === 'expiringSoon' || statusKey === 'expired' || statusKey === 'informationRequired' || statusKey === 'correctiveActionRequired';
   const submittedAt = latest?.submittedAt.slice(0, 16) ?? '';
   const category = facilityCategory(facility.categoryKey);
 

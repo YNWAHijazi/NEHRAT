@@ -291,6 +291,34 @@ export function authorsFor(key: string, level: Level, service: RecordService): A
   return [...(cell.authors ?? [])];
 }
 
+/**
+ * What a duplicated event carries of one stored answer (owner, 9 October 2026: a finished
+ * event is duplicated "keeping the similar info except for the date"): the organizer's own
+ * text and choices. A confirmation (a checkbox) attests to the event it was given for and is
+ * asked again; so is the site AED answer, which is about this event's dates. Another party's
+ * answer is never the organizer's to carry -- the party answers again once it accepts the new
+ * invitation. Null when nothing carries.
+ */
+export function carriedAnswer(
+  key: string,
+  authorRole: string,
+  values: Readonly<Record<string, AnswerValue>>,
+): Record<string, AnswerValue> | null {
+  if (authorRole !== 'organizer' || key === FACILITY_REFERENCE_KEY || planTextKeys().includes(key)) return null;
+  const row = catalogueRow(key);
+  if (!row) return null;
+  const checkboxes = new Set(
+    [...(row.fields ?? []), ...Object.values(row.levels).flatMap((c) => c?.fields ?? [])]
+      .filter((f) => f.type === 'checkbox')
+      .map((f) => f.key),
+  );
+  const out: Record<string, AnswerValue> = {};
+  for (const [k, v] of Object.entries(values)) {
+    if (!checkboxes.has(k) && v !== '' && v !== false) out[k] = v;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 /** Whether a row exists at a level and service at all -- an absent row is never shown and never invited for. */
 export function requirementApplies(key: string, level: Level, service: RecordService): boolean {
   const row = catalogueRow(key);

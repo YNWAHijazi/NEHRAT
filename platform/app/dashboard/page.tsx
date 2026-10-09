@@ -6,11 +6,13 @@ import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../components/Header';
 import { L } from '../../components/L';
 import { StartServiceMenu } from '../../components/StartServiceMenu';
+import { reapplyEventAction } from '../actions';
 import { currentAccount, organizationFor } from '../../lib/auth';
 import { RoleDashboard, emsRows, directorRows } from './RoleDashboards';
 import { archivedEventsFor, archivedVenuesFor, archivedFacilitiesFor, invitationsForAccount, postEventReportFor, governanceFor } from '../../lib/queries';
 import { DASHBOARD_URGENCY } from '../../lib/presentation';
-import { eventsAtSitesOf, holdsSites, type EventsAtSite } from '../../lib/event-site';
+import { eventSiteAlertFor, eventsAtSitesOf, holdsSites, type EventsAtSite } from '../../lib/event-site';
+import { EVENT_SITE_ALERT_SHORT } from '../../lib/rules/site';
 import { REASSESSMENT_WINDOW, usesOrganizerSurface } from '../../lib/rules';
 import {
   beirutToday,
@@ -77,6 +79,8 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
   const pct =
     days === null ? 4 : Math.max(4, Math.min(100, Math.round((1 - days / event.span) * 100)));
   const level = event.level;
+  // The site it is held at is expiring soon or expired, or falls due before it ends (owner, 9 October 2026).
+  const siteAlert = eventSiteAlertFor(event.id, today);
   const stageIcon =
     event.stages[5] === 'current'
       ? ['M12 5l8.5 14.5h-17z', 'M12 10.5v4M12 17h.01']
@@ -118,6 +122,11 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
             </span>
           ) : null}
         </div>
+        {siteAlert ? (
+          <div data-region="site-alert" data-alert={siteAlert.key} style={{ display: 'inline-flex', marginBlockStart: 9, padding: '2px 10px', borderRadius: 999, fontSize: '12.5px', fontWeight: 500, ...(siteAlert.key === 'expired' ? { background: 'var(--bad-soft)', color: 'var(--bad)' } : { background: 'var(--accent-soft)', color: 'var(--accent-ink)' }) }}>
+            <L en={EVENT_SITE_ALERT_SHORT[siteAlert.key].en} ar={EVENT_SITE_ALERT_SHORT[siteAlert.key].ar} />
+          </div>
+        ) : null}
         {event.stages.length > 0 ? (
           <>
             <div style={{ display: 'flex', gap: 3, marginBlockStart: 11 }}>
@@ -546,23 +555,33 @@ export default async function DashboardPage({
               {archived.length > 0 ? (
                 <div data-region="previous-events">
                   <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}>
-                    <L en="Events" ar="الفعاليات" />
+                    <L en="Past events" ar="الفعاليات السابقة" />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {archived.map((e) => (
-                      <Link key={e.id} href={`/events/${e.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10, color: 'var(--muted)' }}>
-                        <span style={{ fontSize: '14.5px', fontWeight: 500 }}>
-                          <L en={e.nameEn} ar={e.nameAr} />
-                        </span>
-                        <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums' }}>
-                          {e.id} · {e.endDate ?? '—'}
-                        </span>
-                        {e.level !== null ? (
-                          <span style={{ fontSize: '12.5px' }}>
-                            <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
+                      <div key={e.id} data-past-event={e.id} style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', paddingBlock: 8, paddingInlineStart: 16, paddingInlineEnd: 8, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 10 }}>
+                        <Link href={`/events/${e.id}`} style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'baseline', minHeight: 44, color: 'var(--muted)', flex: '1 1 260px' }}>
+                          <span style={{ fontSize: '14.5px', fontWeight: 500, alignSelf: 'center' }}>
+                            <L en={e.nameEn} ar={e.nameAr} />
                           </span>
+                          <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums', alignSelf: 'center' }}>
+                            {e.id} · {e.endDate ?? '—'}
+                          </span>
+                          {e.level !== null ? (
+                            <span style={{ fontSize: '12.5px', alignSelf: 'center' }}>
+                              <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
+                            </span>
+                          ) : null}
+                        </Link>
+                        {/* A cancelled event was never held; it is not duplicated from here. */}
+                        {e.lifecycle !== 'cancelled' && e.endDate !== null && e.endDate < today ? (
+                          <form action={reapplyEventAction.bind(null, e.id)}>
+                            <button type="submit" data-action="duplicate-event" style={{ height: 44, paddingInline: 18, border: '1px solid var(--brand)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, color: 'var(--brand)', cursor: 'pointer' }}>
+                              <L en="Duplicate event" ar="نسخ الفعالية" />
+                            </button>
+                          </form>
                         ) : null}
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 </div>

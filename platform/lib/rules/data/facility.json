@@ -621,7 +621,7 @@
       }
     ],
     "cycles": {
-      "$comment": "annualMonths is the policy's own cadence (annual drill, annual confirmation). checkCycleDays and lapseWindowDays are PROVISIONAL -- no timeframe is in force until the Ministry sets one; these mirror the reference prototype for review.",
+      "$comment": "annualMonths is the policy's own cadence (annual drill, annual confirmation): a site's readiness EXPIRES when either falls 12 months past its last record (owner, 9 October 2026). lapseWindowDays is how many days before that date the site shows Expiring soon: Ministry-set (power five), 60 by default (owner, 9 October 2026). checkCycleDays is PROVISIONAL -- no timeframe is in force until the Ministry sets one; it mirrors the reference prototype for review.",
       "annualMonths": 12,
       "checkCycleDays": 90,
       "lapseWindowDays": 60
@@ -851,6 +851,14 @@
       "readinessCurrent": {
         "en": "Readiness current",
         "ar": "الجاهزية سارية"
+      },
+      "expiringSoon": {
+        "en": "Expiring soon",
+        "ar": "تنتهي قريباً"
+      },
+      "expired": {
+        "en": "Expired",
+        "ar": "منتهية"
       },
       "correctiveActionRequired": {
         "en": "Corrective action required",

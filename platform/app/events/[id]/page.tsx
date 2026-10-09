@@ -23,6 +23,7 @@ import { clockNow } from '../../../lib/clock';
 import { reapplyEventAction } from '../../actions';
 import { MedicalArrangementsSummary } from '../../../components/record/MedicalArrangementsSummary';
 import { EventSiteBlock, SiteAedQuestion, SiteRowHint } from '../../../components/record/SiteReuse';
+import { eventSiteAlertFor } from '../../../lib/event-site';
 import {
   archiveWindowDays,
   assessmentsFor,
@@ -98,6 +99,8 @@ export default async function EventRecordPage({
   const latest = versions[0] ?? null;
   const derivation = latest?.derivation ?? null;
   const today = beirutToday();
+  // The site the event is held at is expiring soon or expired, or falls due before it ends (owner, 9 October 2026).
+  const siteAlert = eventSiteAlertFor(event.id, today);
 
   // Shelved by the Ministry or the owner, or concluded past the archive window on
   // its own -- one rule, the same one the mutating actions refuse on.
@@ -236,6 +239,11 @@ export default async function EventRecordPage({
             ) : (
               <L en={`Archived · Read-only.`} ar={`مؤرشفة · للقراءة فقط.`} />
             )}
+          </div>
+        ) : null}
+        {siteAlert ? (
+          <div data-region="site-renewal-alert" data-alert={siteAlert.key} role={siteAlert.key === 'expired' ? 'alert' : 'status'} style={{ padding: '18px 24px', borderRadius: 14, marginBlockEnd: 20, fontSize: '14.5px', lineHeight: 1.7, ...(siteAlert.key === 'expired' ? { border: '1px solid var(--bad)', background: 'var(--bg)' } : { background: 'var(--accent-soft)', color: 'var(--accent-ink)' }) }}>
+            <L en={siteAlert.en} ar={siteAlert.ar} />
           </div>
         ) : null}
         {notice === 'reapplied' ? (

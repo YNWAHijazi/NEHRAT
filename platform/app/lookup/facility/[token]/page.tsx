@@ -27,7 +27,7 @@ export default async function VerifyFacilityCertificate({ params }: { params: Pr
     : found.archivedAt !== null
       ? { en: 'No longer covered by the Ministry', ar: 'لم تعد مشمولة لدى الوزارة' }
       : siteCertificateAvailable(siteStatusFor(found.id))
-        ? siteStatusLabel('readinessCurrent')
+        ? siteStatusLabel(siteStatusFor(found.id))
         : { en: content.certificate.pendingEn, ar: content.certificate.pendingAr };
 
   return (

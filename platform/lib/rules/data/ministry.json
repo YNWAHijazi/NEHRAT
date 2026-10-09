@@ -288,8 +288,8 @@
           "ar": "وتيرة فحص الأجهزة (أيام)"
         },
         "lapseWindowDays": {
-          "en": "Lapse window (days)",
-          "ar": "نافذة الانتهاء (أيام)"
+          "en": "Expiring-soon notice (days before an annual confirmation or drill falls due)",
+          "ar": "مهلة التنبيه بقرب الانتهاء (أيام قبل موعد التأكيد أو التمرين السنوي)"
         }
       },
       "outsideTheTen": [
