@@ -186,7 +186,7 @@ export function DeviceRegistry({
           onClick={() => { setSelected(null); setPurpose('initial'); }}
           style={{ height: 44, paddingInline: 18, border: `1px solid ${isInitial ? 'var(--brand)' : 'var(--line)'}`, background: isInitial ? 'var(--brand-soft)' : 'var(--bg)', color: isInitial ? 'var(--brand)' : 'var(--ink)', borderRadius: 22, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
         >
-          <L en="+ Register another device" ar="+ تسجيل جهاز آخر" />
+          {devices.length > 0 ? <L en="+ Register another device" ar="+ تسجيل جهاز آخر" /> : <L en="+ Register a device" ar="+ تسجيل جهاز" />}
         </button>
         {devices.length > 0 ? (
           <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
@@ -360,11 +360,14 @@ function DeviceMap({ initial, facilityLocation }: { initial: MapPoint | null; fa
   return (
     <div style={{ marginBlock: 20 }}>
       <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}><L en="AED map location" ar="موقع الجهاز على الخريطة" /></h3>
-      <label style={{ display: 'flex', gap: 10, minHeight: 44, alignItems: 'center' }}>
-        <input type="checkbox" checked={separate} onChange={(e) => setSeparate(e.target.checked)} />
-        <L en={pin.en} ar={pin.ar} />
+      {/* The help sits beside the label, never inside it: a click on it must not tick the box. */}
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ display: 'flex', gap: 10, minHeight: 44, alignItems: 'center' }}>
+          <input type="checkbox" checked={separate} onChange={(e) => setSeparate(e.target.checked)} />
+          <L en={pin.en} ar={pin.ar} />
+        </label>
         <InfoNote><L en={pin.noteEn} ar={pin.noteAr} /></InfoNote>
-      </label>
+      </div>
       <input type="hidden" name="separatePin" value={separate ? 'yes' : 'no'} />
       {separate ? <LocationPicker prefix="aedMap" initial={initial} center={facilityLocation} /> : <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: 'var(--muted)' }}><L en={pin.usesFacilityEn} ar={pin.usesFacilityAr} /></p>}
     </div>
