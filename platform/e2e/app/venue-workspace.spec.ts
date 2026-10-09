@@ -18,15 +18,16 @@ for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue
   const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
  await page.goto('/venues/VN-0032/team');await expect(page).toHaveURL(/\/venues\/VN-0032$/);
  await page.screenshot({path:info.outputPath(`venue-${lang}-${width}.png`),fullPage:true});}
- // THE FACILITY IS ONE RECORD PAGE TOO (owner, 9 October 2026): no section tabs; the details edit
- // screen keeps the record's identity and leads back to it; the old tab routes land on the record.
+ // THE FACILITY/SITE (owner, 9 October 2026; event journey, same day): the seeded site is accepted, so
+ // its record is the site dashboard -- its own tabs, not the old workspace nav; the details edit
+ // screen keeps the record's identity and leads back to it; the old routes land on the matching tab.
  {let identity:string|undefined;
  for(const path of ['','/profile']){await page.goto(`/facilities/FC-0014${path}`);const h=page.locator('[data-region=facility-workspace-header]');await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);
-  await expectAbsent(page,{anchor:h,absent:'[data-region=facility-workspace-nav]',because:'the facility record has no section tabs'});
+  await expectAbsent(page,{anchor:h,absent:'[data-region=facility-workspace-nav]',because:'the facility record has no workspace section nav'});
   if(path)await expect(page.locator('[data-region=back-to-record]')).toHaveAttribute('href','/facilities/FC-0014');
-  else{for(const section of ['status','aeds','plan','incidents','requests','details'])await expect(page.locator(`[data-region=section-${section}]`)).toBeVisible();}
+  else{await expect(page.locator('[data-region=site-tabs]')).toBeVisible();for(const region of ['site-overview','maintenance','section-details','section-infrastructure'])await expect(page.locator(`[data-region=${region}]`)).toBeVisible();}
   const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
- for(const [path,landing] of [['/devices',/\/facilities\/FC-0014\?step=aeds#aeds$/],['/plan',/\/facilities\/FC-0014\?step=plan#plan$/],['/submit',/\/facilities\/FC-0014\?step=plan#plan$/],['/incidents',/\/facilities\/FC-0014#incidents$/]] as const){await page.goto(`/facilities/FC-0014${path}`);await expect(page).toHaveURL(landing);await expect(page.locator('[data-region=facility-workspace-header]')).toBeVisible();}
+ for(const [path,landing] of [['/devices',/\/facilities\/FC-0014\?step=aeds#aeds$/],['/plan',/\/facilities\/FC-0014\?step=plan#plan$/],['/submit',/\/facilities\/FC-0014\?step=plan#plan$/],['/incidents',/\/facilities\/FC-0014\?tab=incidents#incidents$/]] as const){await page.goto(`/facilities/FC-0014${path}`);await expect(page).toHaveURL(landing);await expect(page.locator('[data-region=facility-workspace-header]')).toBeVisible();}
  await page.goto('/facilities/FC-0014');await page.screenshot({path:info.outputPath(`facility-${lang}-${width}.png`),fullPage:true});}
  await page.goto('/venues/VN-0032/requirements');await expect(page.locator('[data-region=requirement-list]')).toBeVisible();
  await page.goto('/venues/VN-0032/submit');await expect(page).toHaveURL(/\/venues\/VN-0032#final-review$/);

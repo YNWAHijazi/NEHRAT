@@ -11,7 +11,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
-import { fillFacilityProfile } from '../helpers/facility-map';
+import { CONTINUE, fillFacilityProfile } from '../helpers/facility-map';
 import { seededDate } from '../helpers/seeded-date';
 import { signInAs } from '../helpers/signin';
 
@@ -20,10 +20,10 @@ test.describe('the category determination', () => {
   test('a school leaves having done everything available to it', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await fillFacilityProfile(page);
-    await page.getByRole('button', { name: /Schools, universities/ }).click();
+    await page.getByRole('button', { name: /Educational facilities/ }).click();
 
-    // The education category is open under the published schedule: the one page goes on to the contact and Continue.
-    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
+    // The education category is covered under the published schedule: the one page goes on to the contact and Continue.
+    await expect(page.getByRole('button', { name: CONTINUE, exact: true })).toBeVisible();
     await expect(page.locator('[data-region="journey-ends"]')).toHaveCount(0);
     await expect(page.locator('[data-region="persons"]')).toBeVisible();
   });
@@ -31,25 +31,25 @@ test.describe('the category determination', () => {
   test('a sports facility proceeds, and the recurring-venue cross-sell is gone', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await fillFacilityProfile(page);
-    await page.getByRole('button', { name: /Gyms, fitness centres/ }).click();
+    await page.getByRole('button', { name: /Sports and fitness facilities/ }).click();
 
     await expect(page.locator('[data-region="determination"]')).toContainText('An AED is required.');
     // REMOVED BY RULING (partner, 2026-09-05): registering a facility does not
     // advertise the venue instrument. The determination and the way on are the
     // screen; the anchor proves the page rendered before asserting the absence.
     await expect(page.locator('[data-region="venue-cross"]')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: CONTINUE, exact: true })).toBeVisible();
   });
 
-  test('a review category proceeds -- the review states what is required', async ({ page }) => {
+  test('a MOPH-designated category proceeds -- the applicant cannot designate itself', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await fillFacilityProfile(page);
-    await page.getByRole('button', { name: /Facilities with a confirmed previous cardiac arrest/ }).click();
+    await page.getByRole('button', { name: /Facilities with a confirmed prior cardiac arrest/ }).click();
 
     await expect(page.locator('[data-region="determination"]')).toContainText(
-      'The Ministry reviews the facility and sets its readiness requirements.',
+      'Only the Ministry designates a site in this category.',
     );
-    await expect(page.getByRole('button', { name: 'Continue to the AEDs', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: CONTINUE, exact: true })).toBeVisible();
   });
 });
 
@@ -57,14 +57,14 @@ test.describe('the one-page registration', () => {
   test('Continue stays active and names everything unfilled, as on the venue form', async ({ page }) => {
     await signInAs(page, 'test_organizer');
     await gotoRidingRestarts(page, '/facilities/new');
-    const continueButton = page.getByRole('button', { name: 'Continue to the AEDs', exact: true });
+    const continueButton = page.getByRole('button', { name: CONTINUE, exact: true });
     await expect(continueButton).toBeEnabled();
     await continueButton.click();
     const fill = page.locator('[data-region="please-fill"]');
     await expect(fill).toContainText('Please fill:');
-    await expect(fill).toContainText('the facility name');
+    await expect(fill).toContainText('the facility/site name');
     await expect(fill).toContainText('the map pin, confirmed');
-    await expect(fill).toContainText('the type of facility');
+    await expect(fill).toContainText('the covered category');
     // Nothing was created: the page stays the intake.
     await expect(page).toHaveURL(/\/facilities\/new$/);
     await expect(page.locator('input[name="name"]')).toHaveAttribute('aria-invalid', 'true');
@@ -94,7 +94,7 @@ test.describe('the incident narrative name check', () => {
 test.describe("an organizer never sees another organizer's facilities", () => {
   test('a foreign facility id refuses like a missing one, on every facility route', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    for (const suffix of ['', '/devices', '/plan', '/submit', '/profile', '/incidents', '/incidents/new', '/certificate']) {
+    for (const suffix of ['', '/devices', '/plan', '/submit', '/profile', '/incidents', '/incidents/new', '/certificate', '/acknowledgment']) {
       const foreign = await gotoRidingRestarts(page, `/facilities/FC-0001${suffix}`);
       const foreignStatus = foreign?.status() ?? 0;
       const missing = await gotoRidingRestarts(page, `/facilities/FC-9999${suffix}`);
@@ -108,7 +108,8 @@ test.describe("an organizer never sees another organizer's facilities", () => {
 test.describe('the validity ledger derives', () => {
   test('the ledger shows the reference dates at the review clock, statuses included', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/facilities/FC-0014');
+    // An accepted site: the ledger is on its dashboard's cardiac-readiness tab.
+    await gotoRidingRestarts(page, '/facilities/FC-0014?tab=readiness');
     const ledger = page.locator('[data-region="ledger"]');
     // Seed dates move with the review date; production builds use the real Beirut date.
     await expect(ledger).toContainText(seededDate('2026-10-02')); // earliest pad expiry
@@ -127,7 +128,7 @@ test.describe('the validity ledger derives', () => {
 
   test('the as-of pills preview the same derivation at a future date', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    await gotoRidingRestarts(page, '/facilities/FC-0014?asof=60');
+    await gotoRidingRestarts(page, '/facilities/FC-0014?tab=readiness&asof=60');
     // 60 days past the review clock, the annual confirmation (2026-09-12) has lapsed.
     await expect(page.locator('[data-region="standing"]')).toContainText(
       'Obligations are not being met',
