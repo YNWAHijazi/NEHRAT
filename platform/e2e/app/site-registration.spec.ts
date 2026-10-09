@@ -144,12 +144,15 @@ test('the site dashboard: overview, events at the site, documents, history and a
   // The schema's triggers stamp on the platform's clock; this connection lends them one.
   db.function('now_stamp', () => '2026-08-13 12:00:00');
   let site = '';
+  let upcoming = 0;
   try {
     site = (db.prepare(`SELECT site_id FROM facilities WHERE id = 'FC-0014'`).get() as { site_id: string }).site_id;
     const own = (db.prepare(`SELECT id FROM accounts WHERE login = 'test_organizer'`).get() as { id: number }).id;
     const other = (db.prepare(`SELECT id FROM accounts WHERE login = 'test_organizer_pending'`).get() as { id: number }).id;
     db.prepare(`INSERT OR IGNORE INTO events (id, account_id, name_en, name_ar, start_date, end_date, is_demo, site_id) VALUES ('EV-9801', ?, 'Another organizer’s gala', 'حفل منظّم آخر', '2026-09-20', '2026-09-20', 1, ?)`).run(other, site);
     db.prepare(`INSERT OR IGNORE INTO events (id, account_id, name_en, name_ar, start_date, end_date, is_demo, site_id) VALUES ('EV-9802', ?, 'Our open day', 'يومنا المفتوح', '2026-09-27', '2026-09-27', 1, ?)`).run(own, site);
+    // Other specs may link events to this shared site too; the overview's count is the database's, on the review clock.
+    upcoming = (db.prepare(`SELECT COUNT(*) AS n FROM events WHERE site_id = ? AND is_demo = 1 AND archived_at IS NULL AND lifecycle <> 'cancelled' AND COALESCE(end_date, start_date) >= '2026-08-13'`).get(site) as { n: number }).n;
   } finally { db.close(); }
 
   await signInAs(page, 'test_organizer');
@@ -160,7 +163,8 @@ test('the site dashboard: overview, events at the site, documents, history and a
   await expect(page.locator('[data-overview=readiness]')).toContainText('Corrective action required');
   await expect(page.locator('[data-overview=aeds]')).toContainText('2 operational');
   await expect(page.locator('[data-overview=corrective]')).toContainText('1');
-  await expect(page.locator('[data-overview=events]')).toContainText('2');
+  expect(upcoming).toBeGreaterThanOrEqual(2);
+  await expect(page.locator('[data-overview=events] dd')).toHaveText(String(upcoming));
   await expect(page.locator('[data-region=maintenance]')).toBeVisible();
 
   // EVENTS: the owner's own event links to its record; another organizer's shows five facts and no link.
