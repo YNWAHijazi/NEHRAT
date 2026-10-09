@@ -239,7 +239,7 @@ export interface PartAFields {
   expectedStaff: number | null;
   previousEdition: boolean;
   recurringFixedVenue: boolean;
-  /** The registered hosting venue, when the event is at a fixed venue that hosts events repeatedly. */
+  /** The registered venue the event is linked to, by record id; independent of recurringFixedVenue. */
   hostingVenueId?: string | null;
 }
 
@@ -316,8 +316,9 @@ export async function reapplyEventAction(sourceEventId: string): Promise<void> {
     .get(sourceEventId) as { answers: string; inputs: string } | undefined;
 
   // The hosting venue carries over only while it is still a venue this account may
-  // choose; an archived venue drops to unset and the organizer chooses again.
-  const hostingVenueId = src.recurring_fixed_venue === 1 && src.hosting_venue_id && isListableHostingVenue(src.hosting_venue_id, account.isDemo)
+  // choose; an archived venue drops to unset and the organizer chooses again. The link
+  // does not depend on the fixed-venue tick (lib/hosting-venues resolveHostingVenue).
+  const hostingVenueId = src.hosting_venue_id && isListableHostingVenue(src.hosting_venue_id, account.isDemo)
     ? src.hosting_venue_id
     : null;
   const newId = nextRecordId('EV');
@@ -406,7 +407,7 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.recurringFixedVenue, payload.partA.hostingVenueId, account.isDemo);
+  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
   if (!hosting.ok) return { error: 'hosting-venue' };
 
   const db = getDb();
@@ -471,7 +472,7 @@ export async function updateDraftEventAction(eventId: string, payload: Assessmen
   if (!payload.representative.trim() || !payload.position.trim()) {
     return { error: 'certification-required' };
   }
-  const hosting = resolveHostingVenue(payload.partA.recurringFixedVenue, payload.partA.hostingVenueId, account.isDemo);
+  const hosting = resolveHostingVenue(payload.partA.hostingVenueId, account.isDemo);
   if (!hosting.ok) return { error: 'hosting-venue' };
 
   const db = getDb();
@@ -1764,12 +1765,11 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const venueRoute = String(formData.get('venueRoute') ?? '').trim();
   const municipalities = String(formData.get('municipalities') ?? '').trim();
   if (!nameEn || !nameAr || !startDate || !endDate) redirect(`/events/${eventId}/edit?error=required`);
-  // The hosting venue is on this screen only for an event at a fixed venue; the field's
-  // absence from the form leaves the stored choice as it is.
-  const fixed = (getDb().prepare(`SELECT recurring_fixed_venue FROM events WHERE id = ?`).get(eventId) as { recurring_fixed_venue: number }).recurring_fixed_venue === 1;
+  // The registered venue the event is linked to, set from the location field or the
+  // fixed-venue selector; the field's absence from the form leaves the stored link as it is.
   let hostingVenueId: string | null | undefined;
   if (formData.has('hostingVenueId')) {
-    const hosting = resolveHostingVenue(fixed, String(formData.get('hostingVenueId') ?? ''), account.isDemo);
+    const hosting = resolveHostingVenue(String(formData.get('hostingVenueId') ?? ''), account.isDemo);
     if (!hosting.ok) redirect(`/events/${eventId}/edit?error=hosting-venue`);
     hostingVenueId = hosting.venueId;
   }
