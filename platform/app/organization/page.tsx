@@ -1,4 +1,5 @@
 import { getDb } from "../../lib/db";
+import { PhoneInput } from "../../components/PhoneInput";
 import { redirect } from "next/navigation";
 import { GovernmentBand, Header } from "../../components/Header";
 import { L } from "../../components/L";
@@ -44,12 +45,12 @@ export default async function OrganizationPage({
             <L
               en={
                 error === "phone"
-                  ? "Enter a phone number with a country code, starting with +."
+                  ? "Enter a valid phone number."
                   : "Enter the organization name in both languages."
               }
               ar={
                 error === "phone"
-                  ? "أدخلوا رقم الهاتف مع رمز البلد، بدءاً بعلامة +."
+                  ? "أدخلوا رقم هاتف صالحاً."
                   : "أدخلوا اسم المؤسسة باللغتين."
               }
             />
@@ -87,16 +88,8 @@ export default async function OrganizationPage({
             />
           </label>
           <label>
-            <L
-              en="Phone number (with country code)"
-              ar="رقم الهاتف مع رمز البلد"
-            />
-            <input
-              name="phone"
-              type="tel"
-              defaultValue={phone}
-              style={{ display: "block", width: "100%", padding: 12 }}
-            />
+            <L en="Phone number" ar="رقم الهاتف" />
+            <PhoneInput name="phone" defaultValue={phone} />
           </label>
           <button type="submit">
             <L en="Save details" ar="حفظ البيانات" />

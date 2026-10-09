@@ -1,5 +1,6 @@
 'use client';
 
+import { PhoneInput } from '../PhoneInput';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../L';
@@ -137,6 +138,8 @@ export function RequirementForm({ kind, id, instance, canEdit, awaiting = null }
                 <textarea {...common} rows={3} value={String(values[f.key] ?? '')} onChange={(e) => set(f.key, e.target.value)} style={{ ...common.style, minHeight: 88, resize: 'vertical' }} />
               ) : f.type === 'number' ? (
                 <input {...common} type="number" min={0} inputMode="numeric" value={values[f.key] === undefined ? '' : String(values[f.key])} onChange={(e) => set(f.key, e.target.value === '' ? '' : Number(e.target.value))} />
+              ) : f.key === 'phone' ? (
+                <PhoneInput inputName={f.key} value={String(values[f.key] ?? '')} disabled={!canEdit} invalid={invalid} onChange={(v) => set(f.key, v)} />
               ) : f.type === 'date' ? (
                 <input {...common} type="date" value={String(values[f.key] ?? '')} onChange={(e) => set(f.key, e.target.value)} />
               ) : (

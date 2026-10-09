@@ -12,7 +12,7 @@ test('facility registers a map, one contact, a lean AED with a photo, the plan a
  // ONE responsible contact (partner audit, 2026-10-08): no alternate, no assigned guide.
  await expect(page.getByRole('heading',{name:/Responsible contact/})).toBeVisible();
  await expect(page.locator('input[name=alternateName]')).toHaveCount(0);await expect(page.locator('input[name=emsGuideName]')).toHaveCount(0);
- await page.locator('input[name=coordinatorName]').fill('Facility manager');await page.locator('input[name=coordinatorPhone]').fill('+9611234567');await page.locator('input[name=coordinatorEmail]').fill('facility@example.com');await page.getByRole('button',{name:/Continue to the device records/}).click();await expect(page).toHaveURL(/\/facilities\/FC-\d+\/devices/);
+ await page.locator('input[name=coordinatorName]').fill('Facility manager');await page.locator('input[name=coordinatorPhoneNumber]').fill('+9611234567');await page.locator('input[name=coordinatorEmail]').fill('facility@example.com');await page.getByRole('button',{name:/Continue to the device records/}).click();await expect(page).toHaveURL(/\/facilities\/FC-\d+\/devices/);
  const id=page.url().match(/FC-\d+/)![0];
  // The lean AED record: no maintenance dates, no annual confirmation, no coordinator on the card.
  await expect(page.locator('input[name=padExpiry]')).toHaveCount(0);await expect(page.getByRole('button',{name:'Annual readiness confirmation'})).toHaveCount(0);await expect(page.locator('[data-region=device-card]')).not.toContainText('Coordinator');

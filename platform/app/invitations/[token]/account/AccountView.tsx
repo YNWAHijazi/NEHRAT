@@ -1,4 +1,5 @@
 import { InfoNote } from '../../../../components/InfoNote';
+import { PhoneInput } from '../../../../components/PhoneInput';
 import { PasswordHint } from '../../../../components/PasswordHint';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -154,7 +155,7 @@ export function AccountView({
                 style={{ padding: 33, background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 24 }}
               >
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16, marginBlockEnd: 22 }}>
-                  <Label en="Phone number (with country code)" ar="رقم الهاتف مع رمز البلد"><input name="phone" type="tel" autoComplete="tel" placeholder="+961..." style={field}/></Label>
+                  <Label en="Phone number" ar="رقم الهاتف"><PhoneInput name="phone" /></Label>
                   <Label en="Full name" ar="الاسم الكامل">
                     <input name="fullName" required style={field} />
                   </Label>

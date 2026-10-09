@@ -19,7 +19,7 @@ test('a refused venue registration keeps what was typed and names the field; the
   await expect(page.locator('[data-region="please-fill"]')).toContainText('the authorized representative');
   await expect(page.locator('input[name=name]')).toHaveAttribute('aria-invalid', 'true');
   await expect(page).toHaveURL(/\/venues\/new$/);
-  for (const [k, v] of Object.entries({ name: 'Registration refusal test', nameAr: 'اختبار رفض التسجيل', address: 'Tripoli corniche', contactName: 'Venue operator', contactPhone: 'call me', capacity: '2500' })) await page.locator(`input[name=${k}]`).fill(v);
+  for (const [k, v] of Object.entries({ name: 'Registration refusal test', nameAr: 'اختبار رفض التسجيل', address: 'Tripoli corniche', contactName: 'Venue operator', contactPhoneNumber: '12', capacity: '2500' })) await page.locator(`input[name=${k}]`).fill(v);
   await page.locator('select[name=category]').selectOption('hall');
   await page.locator('select[name=district]').selectOption('Tripoli');
   await page.getByRole('button', { name: 'Yes', exact: true }).first().click();
@@ -32,9 +32,9 @@ test('a refused venue registration keeps what was typed and names the field; the
   await page.getByLabel(/Position/).fill('Manager');
   await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
   // Refused: the telephone number is named, the rest of the form is untouched, and focus is on the field.
-  await expect(page.locator('[data-region="registration-refused"]')).toContainText('telephone number');
-  await expect(page.locator('input[name=contactPhone]')).toHaveAttribute('aria-invalid', 'true');
-  await expect(page.locator('input[name=contactPhone]')).toBeFocused();
+  await expect(page.locator('[data-region="registration-refused"]')).toContainText('Choose the country code and enter the number in digits');
+  await expect(page.locator('input[name=contactPhoneNumber]')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('input[name=contactPhoneNumber]')).toBeFocused();
   await expect(page.locator('input[name=name]')).toHaveValue('Registration refusal test');
   await expect(page.locator('input[name=nameAr]')).toHaveValue('اختبار رفض التسجيل');
   await expect(page.locator('select[name=district]')).toHaveValue('Tripoli');
@@ -43,7 +43,7 @@ test('a refused venue registration keeps what was typed and names the field; the
   await expect(page.locator('[data-map-picker=map] input[type=checkbox]')).toBeChecked();
   await expect(page.getByLabel(/Authorized representative/)).toHaveValue('Operator');
   // Corrected with Arabic-Indic digits: accepted, stored as Western digits, and the assessment opens.
-  await page.locator('input[name=contactPhone]').fill('+٩٦١ ٣ ١٢٣ ٤٥٦');
+  await page.locator('input[name=contactPhoneNumber]').fill('+٩٦١ ٣ ١٢٣ ٤٥٦');
   await page.getByRole('button', { name: 'Continue to requirements', exact: true }).click();
   await expect(page).toHaveURL(/\/venues\/VN-\d+$/);
   const id = new URL(page.url()).pathname.split('/')[2]!;

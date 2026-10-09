@@ -1,4 +1,5 @@
 import { InfoNote } from '../../components/InfoNote';
+import { PhoneInput } from '../../components/PhoneInput';
 import { PasswordHint } from '../../components/PasswordHint';
 import Link from 'next/link';
 import { rememberedSignInFields } from '../../lib/auth';
@@ -217,10 +218,10 @@ export default async function SignInPage({
             ) : null}
 
             {params.error?.startsWith('otp-') ? <p role="alert"><L en={params.error==='otp-limited'?'Please wait before requesting another code.':'Verification email is unavailable. Please try again later.'} ar={params.error==='otp-limited'?'انتظروا قبل طلب رمز آخر.':'بريد التحقق غير متاح. حاولوا لاحقاً.'}/></p>:null}
-            {params.error==='phone'?<p role="alert"><L en="Use a phone number with a country code, starting with +." ar="أدخلوا رقم الهاتف مع رمز البلد، بدءاً بعلامة +."/></p>:null}
+            {params.error==='phone'?<p role="alert"><L en="Enter a valid phone number." ar="أدخلوا رقم هاتف صالحاً."/></p>:null}
             <form action={action}>
               <input type="hidden" name="next" value={params.next ?? ''} />
-              {mode === 'signup' ? <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 16 }}><span style={fieldLabel}><L en="Phone number (with country code)" ar="رقم الهاتف مع رمز البلد"/></span><input name="phone" type="tel" autoComplete="tel" placeholder="+961..." style={inputStyle}/></label>:null}
+              {mode === 'signup' ? <label style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlockEnd: 16 }}><span style={fieldLabel}><L en="Phone number" ar="رقم الهاتف"/></span><PhoneInput name="phone" /></label>:null}
               {mode === 'signup' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBlockEnd: 16 }}>
                   <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

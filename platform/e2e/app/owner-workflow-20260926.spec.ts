@@ -29,7 +29,7 @@ test("public check is concise and preserves the chosen service through signup", 
     .first()
     .click();
   await expect(page.locator("input[name=next]")).toHaveValue("/events/new");
-  await expect(page.locator("input[name=phone]")).toBeVisible();
+  await expect(page.locator("input[name=phoneNumber]")).toBeVisible();
   await page.goto("/applicability?subject=event&checked=1");
   await expect(
     page.getByRole("heading", {

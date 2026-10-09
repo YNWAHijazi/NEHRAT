@@ -93,6 +93,7 @@ export function AssessmentForm({
   draft,
   organizerName,
   hostingVenues = [],
+  representativeDefault = '',
 }: {
   draft?: AssessmentSubmission & { eventId: string };
   domains: Domain[];
@@ -102,6 +103,8 @@ export function AssessmentForm({
   reassess?: { eventId: string; answers: (0 | 1 | 2 | null)[]; inputs: MinimumConditionInputs };
   /** The organization's name for Part F's Organizer line, when one is recorded. */
   organizerName?: { en: string; ar: string } | null;
+  /** The signed-in organizer's name: the declaration's representative until changed (owner, 9 October 2026). */
+  representativeDefault?: string;
   /** The registered hosting venues this account may choose (lib/hosting-venues). */
   hostingVenues?: HostingVenueOption[];
 }) {
@@ -110,7 +113,7 @@ export function AssessmentForm({
   void bands;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [representative, setRepresentative] = useState('');
+  const [representative, setRepresentative] = useState(representativeDefault);
   const [position, setPosition] = useState('');
   const certificationComplete = representative.trim() !== '' && position.trim() !== '';
   const [nameEn, setNameEn] = useState(draft?.nameEn ?? '');

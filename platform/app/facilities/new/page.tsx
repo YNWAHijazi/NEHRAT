@@ -5,6 +5,7 @@ import { RegisterFacilityForm } from './RegisterFacilityForm';
 import { currentAccount, organizationFor } from '../../../lib/auth';
 import { publishedFacilityValues, unreadCountFor, venueById } from '../../../lib/queries';
 import { venueSiteForNewFacility } from '../../../lib/sites';
+import { accountContact } from '../../../lib/account-contact';
 
 /**
  * Register a facility: steps 1-3 of the six. Step 2 is a determination, not a form,
@@ -40,7 +41,7 @@ export default async function RegisterFacilityPage({searchParams}:{searchParams:
             <L en={`This facility registration is for the same place as the hosting venue ${venue.nameEn} (${venue.id}). The two registrations stay separate; the venue shows this facility's AEDs.`} ar={`تسجيل المنشأة هذا للمكان نفسه الذي يشغله موقع الاستضافة ${venue.nameAr} (⁦${venue.id}⁩). يبقى التسجيلان منفصلين؛ ويعرض الموقع أجهزة إزالة الرجفان المسجّلة لهذه المنشأة.`} />
           </p>
         ) : null}
-        <RegisterFacilityForm published={publishedFacilityValues()} fromVenue={venue ? { id: venue.id, nameEn: venue.nameEn, nameAr: venue.nameAr, addressEn: venue.addressMunicipalityEn, addressAr: venue.addressMunicipalityAr } : null} />
+        <RegisterFacilityForm published={publishedFacilityValues()} me={accountContact(account.id)} fromVenue={venue ? { id: venue.id, nameEn: venue.nameEn, nameAr: venue.nameAr, addressEn: venue.addressMunicipalityEn, addressAr: venue.addressMunicipalityAr } : null} />
       </main>
     </>
   );

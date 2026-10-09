@@ -47,7 +47,10 @@ export function VenueAssessmentForm({
   embedded = false,
   onMissing,
   showMissing = false,
+  defaultRepresentative = '',
 }: {
+  /** The signed-in person's name, as the representative until changed (owner, 9 October 2026). */
+  defaultRepresentative?: string;
   /** Inside the registration form (owner, 8 October 2026): fields and hidden inputs only; the form's own submit records it. */
   embedded?: boolean;
   /** What is still unanswered, named, for the registration form's "Please fill" line. */
@@ -74,7 +77,7 @@ export function VenueAssessmentForm({
   const [pending, startTransition] = useTransition();
   const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(initialAnswers ?? Array(9).fill(null));
   const [attendance, setAttendance] = useState(initialAttendance === null ? '' : String(initialAttendance));
-  const [representative, setRepresentative] = useState('');
+  const [representative, setRepresentative] = useState(defaultRepresentative);
   const [position, setPosition] = useState('');
   const [error, setError] = useState(false);
   const declarationComplete = representative.trim() !== '' && position.trim() !== '';

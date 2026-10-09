@@ -82,7 +82,7 @@ export async function certify(page: Page, who: { representative: string; telepho
   while (await statements.count()) await statements.first().check();
   await review.locator('input[name="representative"]').fill(who.representative);
   await review.locator('input[name="position"]').fill(who.position);
-  await review.locator('input[name="telephone"]').fill(who.telephone);
+  await review.locator('input[name="telephoneNumber"]').fill(who.telephone);
   await page.keyboard.press('Tab');
   await expect(review.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
   const submit = review.locator('[data-region="submit-button"]');

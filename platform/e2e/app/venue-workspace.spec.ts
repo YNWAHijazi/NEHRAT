@@ -35,8 +35,8 @@ test('legacy venue details open read-only even when a new contact field is missi
  const db=new DatabaseSync(process.env['E2E_DATABASE_PATH']!);const v=db.prepare("SELECT responsible_phone FROM venues WHERE id='VN-0032'").get() as {responsible_phone:string};
  asDraft(db);db.prepare("UPDATE venues SET responsible_phone='' WHERE id='VN-0032'").run();
  try{await signInAs(page,'test_organizer');await page.goto('/venues/VN-0032/details');
- await expect(page.locator('[data-region=venue-details-read-only]')).toContainText('Missing');await expectAbsent(page,{anchor:'[data-region=venue-details-read-only]',absent:'input[name=contactName], input[name=contactPhone]',because:'saved details read as text until the organizer chooses Edit details'});await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
- await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhone]')).toBeEnabled();
+ await expect(page.locator('[data-region=venue-details-read-only]')).toContainText('Missing');await expectAbsent(page,{anchor:'[data-region=venue-details-read-only]',absent:'input[name=contactName], input[name=contactPhoneNumber]',because:'saved details read as text until the organizer chooses Edit details'});await expect(page.getByText('Some details are missing. Choose Edit details to complete them.')).toBeVisible();
+ await page.getByRole('button',{name:'Edit details',exact:true}).click();await expect(page.locator('input[name=contactPhoneNumber]')).toBeEnabled();
  }finally{db.prepare("UPDATE venues SET responsible_phone=? WHERE id='VN-0032'").run(v.responsible_phone);db.prepare("DELETE FROM venue_packages WHERE venue_id='VN-0032'").run();db.close();}
 });
 

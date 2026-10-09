@@ -1,4 +1,5 @@
 import { InfoNote } from '../../../../components/InfoNote';
+import { accountContact } from '../../../../lib/account-contact';
 import { RecordRequirements } from '../../../../components/record/RecordRequirements';
 import { eventRecordView } from '../../../../lib/record-view';
 import { notFound, redirect } from 'next/navigation';
@@ -175,7 +176,9 @@ export default async function DeclarationPage({
             fileBy={fileBy}
             profileDefaults={{
               provider: profile['agencyName'] ?? invitation.nameEn,
-              representative: profile['representative'] ?? '',
+              // The agency's own details until changed (owner, 9 October 2026): the profile, else the account.
+              representative: profile['representative'] || accountContact(account.id).name,
+              phone: profile['phone'] || accountContact(account.id).phone,
             }}
           />
           </>

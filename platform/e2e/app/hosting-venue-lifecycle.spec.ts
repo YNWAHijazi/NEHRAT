@@ -22,7 +22,7 @@ async function fillRow(page:Page,key:string,choice?:string){
 test('a Level 3 hosting venue: infrastructure and AEDs by the operator, submitted, determined and certified',async({page,browser,baseURL},info)=>{
  test.setTimeout(420_000);
  await mockMapTiles(page);await signInAs(page,'test_organizer');await page.goto('/venues/new');
- for(const[k,v]of Object.entries({name:'Venue baseline browser test',nameAr:'موقع اختبار خط الأساس',address:'Beirut main road',contactName:'Venue operator',contactPhone:'+9613111111',capacity:'5000'}))await page.locator(`input[name=${k}]`).fill(v);
+ for(const[k,v]of Object.entries({name:'Venue baseline browser test',nameAr:'موقع اختبار خط الأساس',address:'Beirut main road',contactName:'Venue operator',contactPhoneNumber:'+9613111111',capacity:'5000'}))await page.locator(`input[name=${k}]`).fill(v);
  await page.locator('select[name=category]').selectOption('hall');await page.locator('select[name=district]').selectOption('Beirut');await page.getByRole('button',{name:'Yes',exact:true}).first().click();await page.getByRole('button',{name:'No',exact:true}).nth(1).click();await chooseMapPoint(page);
  await page.getByLabel(/Most people at the same time during a routine operating session/).fill('5000');for(const d of await page.locator('[data-domain]').all())await d.locator('button').last().click();await page.getByLabel(/Authorized representative/).fill('Operator');await page.getByLabel(/Position/).fill('Manager');
  await page.getByRole('button',{name:'Continue to requirements',exact:true}).click();await expect(page).toHaveURL(/\/venues\/VN-\d+$/);const id=page.url().match(/VN-\d+/)![0];

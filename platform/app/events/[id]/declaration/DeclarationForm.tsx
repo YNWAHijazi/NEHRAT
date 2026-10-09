@@ -6,6 +6,7 @@
  * server enforces the same gate. A draft is visible to the agency only.
  */
 
+import { PhoneInput } from '../../../../components/PhoneInput';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../../components/L';
@@ -40,7 +41,7 @@ export function DeclarationForm({
   signed: boolean;
   signedAt: string | null;
   fileBy: string | null;
-  profileDefaults: { provider: string; representative: string };
+  profileDefaults: { provider: string; representative: string; phone?: string };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -52,7 +53,7 @@ export function DeclarationForm({
     provider: initialCertification['provider'] ?? profileDefaults.provider,
     representative: initialCertification['representative'] ?? profileDefaults.representative,
     position: initialCertification['position'] ?? '',
-    phone: initialCertification['phone'] ?? '',
+    phone: initialCertification['phone'] ?? profileDefaults.phone ?? '',
     date: initialCertification['date'] ?? '',
   });
   const [saved, setSaved] = useState(false);
@@ -112,6 +113,9 @@ export function DeclarationForm({
                 <L en={f.en} ar={f.ar} />
 
               </span>
+              {f.key === 'phone' ? (
+                <PhoneInput value={cert['phone'] ?? ''} disabled={signed} required invalid={!signed && (cert['phone'] ?? '').trim() === ''} onChange={(v) => setCert((c) => ({ ...c, phone: v }))} />
+              ) : (
               <input
                 type={f.key === 'date' ? 'date' : 'text'}
                 value={cert[f.key] ?? ''}
@@ -126,6 +130,7 @@ export function DeclarationForm({
                     : {}),
                 }}
               />
+              )}
             </label>
           ))}
         </div>

@@ -113,7 +113,7 @@ for (const lang of LANGUAGES) {
       await expect(review.locator('[data-region="compliance-statements"]')).toHaveCount(0);
       await review.locator('input[name="representative"]').fill('R. Haddad');
       await review.locator('input[name="position"]').fill('Events director');
-      await review.locator('input[name="telephone"]').fill('+961 3 123456');
+      await review.locator('input[name="telephoneNumber"]').fill('+961 3 123456');
       await page.keyboard.press('Tab');
       await expect(submit).toBeEnabled({ timeout: 40_000 });
       await submit.click();

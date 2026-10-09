@@ -58,7 +58,7 @@ test('new account sees the tour once and preference survives a fresh browser con
   const password='Test-Tour-Long-Password9!';
   await page.goto('/signin?mode=signup');
   await page.locator('input[name=name]').fill('Tour Test');
-  await page.locator('input[name=phone]').fill('+9613111222');
+  await page.locator('input[name=phoneNumber]').fill('+9613111222');
   await page.locator('input[name=email]').fill(email);
   await page.locator('input[name=password]').fill(password);
   await page.getByRole('button',{name:'Create the account',exact:true}).click();
