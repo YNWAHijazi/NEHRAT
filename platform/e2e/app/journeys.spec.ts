@@ -152,11 +152,12 @@ for (const lang of LANGUAGES) {
      * first thing the platform said to a member of the public was "prove who you are".
      * There was no applicability screen and no lookup screen; only an endpoint.
      */
-    test('the public reads the overview, checks all three branches, and verifies a reference', async ({ page }) => {
+    test('the public reads the overview, checks both branches, and verifies a reference', async ({ page }) => {
       // THE OVERVIEW, signed out, without being asked to sign in.
       await gotoRidingRestarts(page, '/');
       await expect(page.locator('[data-region="hero"]')).toBeVisible();
-      await expect(page.locator('[data-region="services"] a')).toHaveCount(3);
+      // Two services (owner, 9 October 2026): an event, and a facility/site.
+      await expect(page.locator('[data-region="services"] a')).toHaveCount(2);
       await expect(page.locator('[data-region="public-tools"] a')).toHaveCount(2);
       // What the platform does NOT do, on the page itself.
       await expect(page.locator('[data-region="jurisdiction"]')).toContainText(

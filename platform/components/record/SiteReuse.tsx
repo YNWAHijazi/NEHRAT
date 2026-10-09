@@ -27,7 +27,7 @@ const dd: React.CSSProperties = { margin: '4px 0 0', fontSize: '14.5px', lineHei
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '14px 20px', margin: 0 };
 
 function Unrecorded() {
-  return <span style={{ color: 'var(--muted)' }}><L en="Not recorded on the site record" ar="غير مسجّل في سجل الموقع" /></span>;
+  return <span style={{ color: 'var(--muted)' }}><L en="None on the site record" ar="لا شيء في سجل الموقع" /></span>;
 }
 
 function Text({ value }: { value: string }) {
