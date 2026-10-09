@@ -1,7 +1,7 @@
 /**
  * THE MUNICIPALITY FIELD (owner, 9 October 2026): a searchable list, the option in the page's
- * language, both names stored. The list received is English only and incomplete, so the field
- * suggests and does not restrict: a name that is not on it is kept as typed.
+ * language, both names stored. The list is incomplete, so the field suggests and does not
+ * restrict: a name that is not on it is kept as typed.
  */
 import { expect, test } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
@@ -24,8 +24,8 @@ test('the site form chooses one municipality from the list, or keeps one that is
   await field.locator('[data-municipality="Jounieh"]').click();
   await expect(box).toHaveValue('Jounieh');
   await expect(page.locator('input[type=hidden][name=municipality]')).toHaveValue('Jounieh');
-  // The Arabic names are pending: the English name stands in, never an empty field.
-  await expect(page.locator('input[type=hidden][name=municipalityAr]')).toHaveValue('Jounieh');
+  // Both names are stored.
+  await expect(page.locator('input[type=hidden][name=municipalityAr]')).toHaveValue('جونية');
 
   // A name the list does not carry is offered as typed, and kept.
   await box.fill('Kfar Nowhere');
@@ -49,6 +49,9 @@ test('the site form chooses one municipality from the list, or keeps one that is
   await page.goto('/facilities/new');
   const arBox = page.locator('[data-region=facility-registration] [data-region=municipality-field] input[role=combobox]');
   await expect(arBox).toHaveAttribute('placeholder', 'ابحثوا أو اختاروا من القائمة');
+  // Searched and shown in Arabic.
+  await arBox.fill('زحل');
+  await expect(page.locator('[data-region=facility-registration] [data-municipality="Zahle"]')).toContainText('زحلة');
   await arBox.fill('Zzz');
   await expect(page.locator('[data-municipality-typed] [data-l=ar]')).toContainText('غير مدرجة في القائمة');
 });

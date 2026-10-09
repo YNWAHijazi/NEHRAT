@@ -1,7 +1,6 @@
 {
- "$comment": "Lebanon's municipalities for the searchable municipality field (owner, 9 October 2026). Built from the seven governorate files the owner sent (North, Akkar, Baalbek-Hermel, Bekaa, Mount Lebanon, South, Nabatieh; English only), then corrected on the owner's instruction 'Fix them according to google, and as long as the main ones are there, go ahead': the files' reversed word order restored; district names in their common spellings; main towns under their common names, the files' spellings kept as search aliases; clear errors fixed (Zahl, ta Zahl, the Jezzine Sidon); Beirut and 31 main municipalities the files lack added ('added': true). Every change is in 'corrections'. The list is not exhaustive (the files carry about 800 of Lebanon's 1,000+), so the field suggests and never restricts. ARABIC NAMES ARE PENDING: none is invented here -- the Arabic page shows the English name until they arrive. Two places of the same name carry their district in brackets.",
+ "$comment": "Lebanon's municipalities for the searchable municipality field (owner, 9 October 2026). Built from the seven governorate files the owner sent (North, Akkar, Baalbek-Hermel, Bekaa, Mount Lebanon, South, Nabatieh; English only), then corrected on the owner's instruction 'Fix them according to google, and as long as the main ones are there, go ahead': the files' reversed word order restored; district names in their common spellings; main towns under their common names, the files' spellings kept as search aliases; clear errors fixed (Zahl, ta Zahl, the Jezzine Sidon); Beirut and 23 main municipalities the files lack added ('added': true). Every change is in 'corrections'. The list is not exhaustive (the files carry about 800 of Lebanon's 1,000+), so the field suggests and never restricts. THE ARABIC NAMES ARE DRAFTED, NOT OFFICIAL: see arabicSource; entries drafted with doubt carry arUnsure. Two places of the same name carry their district in brackets.",
  "source": "Owner, 9 October 2026: seven governorate PDFs (English only), corrected as recorded below.",
- "arabicPending": true,
  "corrections": [
   {
    "from": "Nahr El Tahwitet - Remmaneh El Ain - Chebbak El + Furn",
@@ -24,12 +23,20 @@
    "to": "their common spellings (Akkar, Aley, Keserwan, Nabatieh, Hasbaya, Rashaya, Tyre, Jbeil, Chouf, West Bekaa, Minieh-Danniyeh)"
   },
   {
+   "from": "Al Qobeiyat (Akkar)",
+   "to": "the same town as Qobayat; kept once"
+  },
+  {
    "from": "Al Batroun (Batroun)",
    "to": "Batroun"
   },
   {
    "from": "Al Hermel (Hermel)",
    "to": "Hermel"
+  },
+  {
+   "from": "Al Jadeeda - Al Boushriyeh - Al Sadd (Matn)",
+   "to": "Jdeideh-Bouchrieh-Sed"
   },
   {
    "from": "Al-Laboue (Baalbek)",
@@ -68,6 +75,22 @@
    "to": "Bourj el Barajneh"
   },
   {
+   "from": "Chatura (Zahle)",
+   "to": "Chtaura"
+  },
+  {
+   "from": "Chehim (Chouf)",
+   "to": "Chhim"
+  },
+  {
+   "from": "DoukMakayl (Keserwan)",
+   "to": "Zouk Mikael"
+  },
+  {
+   "from": "Jaba Jenin (West Bekaa)",
+   "to": "Joub Jannine"
+  },
+  {
    "from": "Jbeil (Jbeil)",
    "to": "Byblos (Jbeil)"
   },
@@ -80,12 +103,24 @@
    "to": "Machghara"
   },
   {
+   "from": "Mghdousheh (Saida)",
+   "to": "Maghdouche"
+  },
+  {
    "from": "Qob Elias - Wadi El-Dleim (Zahle)",
    "to": "Qab Elias - Wadi El Delm"
   },
   {
    "from": "Qubayyat (Akkar)",
    "to": "Qobayat"
+  },
+  {
+   "from": "Roumiyeh (Matn)",
+   "to": "Roumieh"
+  },
+  {
+   "from": "Sahmara (West Bekaa)",
+   "to": "Sohmor"
   },
   {
    "from": "Sidon (Jezzine)",
@@ -102,6 +137,10 @@
   {
    "from": "ta Zahl (Jezzine)",
    "to": "Zahlta"
+  },
+  {
+   "from": "Tannourine (Rashaya)",
+   "to": "Tannoura"
   },
   {
    "from": "Zahl (Zahle)",
@@ -149,19 +188,7 @@
   },
   {
    "from": "(none)",
-   "to": "Chhim (Chouf) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
    "to": "Kfarhim (Chouf) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
-   "to": "Jdeideh-Bouchrieh-Sed (Matn) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
-   "to": "Roumieh (Matn) -- added; a main municipality the files lack"
   },
   {
    "from": "(none)",
@@ -173,15 +200,7 @@
   },
   {
    "from": "(none)",
-   "to": "Zouk Mikael (Keserwan) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
    "to": "Harissa-Daraoun (Keserwan) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
-   "to": "Chtaura (Zahle) -- added; a main municipality the files lack"
   },
   {
    "from": "(none)",
@@ -190,14 +209,6 @@
   {
    "from": "(none)",
    "to": "Anjar (Zahle) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
-   "to": "Joub Jannine (West Bekaa) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
-   "to": "Sohmor (West Bekaa) -- added; a main municipality the files lack"
   },
   {
    "from": "(none)",
@@ -217,10 +228,6 @@
   },
   {
    "from": "(none)",
-   "to": "Maghdouche (Saida) -- added; a main municipality the files lack"
-  },
-  {
-   "from": "(none)",
    "to": "Arsal (Baalbek) -- added; a main municipality the files lack"
   },
   {
@@ -236,567 +243,911 @@
   {
    "en": "Aaba (Koura)",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عابا (الكورة)",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Aaba (Nabatieh)",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عبا (النبطية)",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Aabra",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عبرا",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Aabrin",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عبرين",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Aalman and Mzaira at Al-Barghoutiyya",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "علمان ومزيرعة البرغوتية",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aana",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عانا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Aaqbiyeh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "العقيبة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aarai",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عاراي",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Abdeen",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عبدين",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Abilh",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "أبلح",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ad Daghlah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الدغلة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Adah",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عده",
+   "arUnsure": true,
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Adchit",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عدشيت",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Adloun",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عدلون",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Adma and Al-Dafnah",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "أدما والدفنة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Adousiyeh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "العدوسية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Aeroun",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عيرون",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Afusdiq",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "أفصديق",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ahmouch",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "أحموش",
+   "arUnsure": true,
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aidmoon-Shekhlar",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عيدمون - شيخلار",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Aimar",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عيمار",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ain Aakrine",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عين عكرين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ain Al Gowayba",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عين الغويبة",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ain al-Dhahab",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عين الذهب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ain al-Rehanah",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عين الريحانة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ain Al-Tineh",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عين التينة",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ain al-Zayt",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عين الزيت",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ain Arab",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين عرب",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ain Ata",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين عطا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ain Baal",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عين بعال",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ain Eddelb",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عين الدلب",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ain El Tinah",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين التينة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ain Harsha",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين حرشا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ain Kafarzabad",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين كفرزبد",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ain Ouzain",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عين وزين",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ain Qana",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عين قانا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ain Qenya (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عين قنيا (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ain Qenya (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عين قنيا (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ain Qenye",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عين قني",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ain Saadeh",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عين سعادة",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ain Tourine",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عين طورين",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ain Yaaqub",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عين يعقوب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ain Zabda",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عين زبدة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ainab (Aley)",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عيناب (عاليه)",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ainab (Chouf)",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عيناب (الشوف)",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ainata (Baalbek)",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "عيناتا (بعلبك)",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Ainata (Bint Jbeil)",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عيناثا (بنت جبيل)",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ainout",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عانوت",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aintoura",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عينطورة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aita Al-Jabal",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عيتا الجبل",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Aito",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "إيطو",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Aitroun",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عيترون",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Aitryoun",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عترين",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ajaltoun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عجلتون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ajdabra",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "اجدبرا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ajdabrin",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "اجدبرين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Akkar el-Atiqa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عكار العتيقة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Akroum",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "أكروم",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Aamair w Rajm Issa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "العماير ورجم عيسى",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Abbasiyah",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "العباسية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Aboudiyeh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "العبودية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Ansar",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الأنصار",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Aqoura",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "العاقورة",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Awainat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "العوينات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Bayyad",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البياض",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Bazuriyah",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البازورية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Bireh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "البيرة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Bisariyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البيسارية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Bneyeh",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "البنيه",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Bsatin",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "البساتين",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Burghliye",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البرغلية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Burj",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "البرج",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Bustan",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البستان",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Bware",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "البوار",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Farid",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الفريد",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Ghabbah",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الغابة",
+   "arUnsure": true,
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Hakour",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الحاكور",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Hamiri",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الحميري",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Hasin",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الحصين",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Heri",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "الهري",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al Hilaliyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الهلالية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Hishah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الحيشة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Hissa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الحيصة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Hlousiyeh",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الحلوسية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Hmayra",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
-  },
-  {
-   "en": "Al Jadeeda - Al Boushriyeh - Al Sadd",
-   "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Akkar",
+   "ar": "الحميرة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Jibbin",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الجبين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Kalaa",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "القلعة",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Karya",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "القرية",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Kawakh",
    "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الكواخ",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Kfour",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الكفور",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al Kholouniyeh",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الخلونية",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Khreibeh (Baalbek)",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الخريبة (بعلبك)",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Khreibeh (Chouf)",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الخريبة (الشوف)",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Khudr",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الخضر",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Kweikhat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الكويخات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Lubiyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "اللوبية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Majdal",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "المجدل",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Maknouneh",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "المكنونة",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Manara",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المنارة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al Mansaf",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المنصف",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Mansoura",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المنصورة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al Mansouri",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "المنصوري",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Mansouriya Ain al Marj",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المنصورية وعين المرج",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Mansouriyah - Al Maklas - Ad Daisheh",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المنصورية - المكلس - الديشونية",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Maqybleh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "المقيبلة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Marwaniyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "المروانية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Mashrefah",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المشرفة",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Matallah",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المطلة",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Mayy Wal Mayy",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "المية ومية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Midan",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الميدان",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Mukhtara",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المختارة",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Oyoun",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "العيون",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Qaa",
@@ -805,343 +1156,549 @@
    "added": true,
    "aliases": [
     "Qaa"
-   ]
+   ],
+   "ar": "القاع",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Qariyat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "القريات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Qasr",
    "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
-  },
-  {
-   "en": "Al Qobeiyat",
-   "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "القصر",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Qsaybeh",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "القصيبة",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al Qulayat",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "القليعات",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Qulaylah",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "القليلة",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Qurnah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "القرنة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Quryah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "القرية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Ram and Al Jubayniyah",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الرام والجبينية",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Rawda",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الروضة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al Sahylih",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "السهيلة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al Shaatiye and Malikiyat Al Sahel",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الشعيتية ومالكية الساحل",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al Shawagir Al Fawqa wa Al Thta",
    "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الشواغير الفوقا والتحتا",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Talil",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "التليل",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al Tawfiqiyah",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "التوفيقية",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al Tireh",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الطيري",
+   "arUnsure": true,
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al Zarazir",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "الزرازير",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al-Ain",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "العين",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al-Aqaba",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "العقبة",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Ayoun",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "العيون",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Azra",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "العذرا",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al-Badawi",
    "districtEn": "Tripoli",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "البداوي",
+   "districtAr": "طرابلس",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al-Bireh",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "البيرة",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Dabbabiya",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الدبابية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Eishiyeh",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "العيشية",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al-Fardis",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الفرديس",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Ghayneh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الغينة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al-Habariyah",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الهبارية",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Hamssiyeh",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الحمصية",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al-Hazmiyeh",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "الحازمية",
+   "arUnsure": true,
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al-Kafr (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الكفير (حاصبيا)",
+   "arUnsure": true,
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Kafr (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الكفير (مرجعيون)",
+   "arUnsure": true,
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Khalwat (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الخلوات (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Khalwat (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الخلوات (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Khiyara",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الخيارة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Kosiba",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "القصيبة",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al-Kwashra",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الكواشرة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Louwayzeh",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "اللويزة",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al-Mahmara",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "المحمرة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Majdal",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "المجدل",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al-Maqeeta",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "المقيتة",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Mounasseh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "المونسة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Muheithrah",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المحيثرة",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Muraijeh-Tahweta Al-Ghadeer-Al-Lailka",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المريجة - تحويطة الغدير - الليلكي",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Al-Muruj",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المروج",
+   "arUnsure": true,
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Nabi Othman",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "النبي عثمان",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al-Nabi Sheet",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "النبي شيت",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al-Qalamoun",
    "districtEn": "Tripoli",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "القلمون",
+   "districtAr": "طرابلس",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al-Qantara",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "القنطرة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Qarqaf",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "القرقف",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Rafid",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الرفيد",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Rayhan",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الريحان",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Al-Rihaneya",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الريحانية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Saeeda",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "السعيدة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Al-Safira",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "السفيرة",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Al-Sawiri",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الصويري",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Al-Sharkiya",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الشرقية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Al-Sheikh Ayyash",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الشيخ عياش",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Al-Urbaniyah-Al-Dalibah",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "العربانية - الدليبة",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aley",
    "districtEn": "Aley",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "عاليه",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Alhinya",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الحنية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ali Al-Nahri",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "علي النهري",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Alkanisa",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الكنيسة",
+   "arUnsure": true,
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Alma Ash Shaaab",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "علما الشعب",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Alzahira",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الضهيرة",
+   "arUnsure": true,
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Amatour",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عماطور",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ameq",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عميق",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Amioun",
@@ -1149,47 +1706,74 @@
    "governorateEn": "North",
    "aliases": [
     "Amyoun"
-   ]
+   ],
+   "ar": "أميون",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ammar Al-Beykat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عمار البيكات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Amshit",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عمشيت",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "An Nafiseh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "النفيسة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "An Naheriyah and Bestan Al Harsh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "النهرية وبستان الحرش",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "An Najariyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "النجارية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "An Naqoura",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الناقورة",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Andqet",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عندقت",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Anfeh",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "أنفه",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Anjar",
@@ -1198,324 +1782,521 @@
    "added": true,
    "aliases": [
     "Aanjar"
-   ]
+   ],
+   "ar": "عنجر",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Anqoun",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عنقون",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ansar",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "أنصار",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ansariyah",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الأنصارية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Antelias - Al Naqash",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "أنطلياس - النقاش",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Arabsalim",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عربصاليم",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Aramoun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عرمون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Aramta",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عرمتى",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Arayya",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عاريا",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Arbaat Qazhya",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عربة قزحيا",
+   "arUnsure": true,
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ardah",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "أرده",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Arjish",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عرجس",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Arnoun",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "أرنون",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Arqa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عرقا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Arsal",
    "districtEn": "Baalbek",
    "governorateEn": "Baalbek-Hermel",
-   "added": true
+   "added": true,
+   "ar": "عرسال",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Arsoun",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عرصون",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Arzoun",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "أرزون",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "As Sulah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الصولة",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ash Shuqduf",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الشقدوف",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ashash",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عشاش",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ashqout",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "عشقوت",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Asia",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "آسيا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Asoun",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عاصون",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ayal",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عيال",
+   "arUnsure": true,
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Aytanit",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عيتنيت",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Aytit",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عيتيت",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ayun al-Ghazlan",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عيون الغزلان",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ayyat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "عيات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Az-Zuweiriyah",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الزعرورية",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Azour",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "عازور",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ba'loul",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بعلول",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Baabda",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "بعبدا",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Baabdat",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بعبدات",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Baadaran",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بعذران",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Baakline",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بعقلين",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Baalbek",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بعلبك",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Baan",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بان",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Baassir",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بعاصير",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bab Mare'",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "باب مارع",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Babliyeh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البابلية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Bahneen Al-Rihanah-Artoosa Farm",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بحنين الريحانية - مزرعة عرطوسة",
+   "arUnsure": true,
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bakhoun",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بخعون",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Baksata",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "بقسطا",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Bani Sakhr",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بني صخر",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Banshie",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بنشعي",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bar Elias",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بر الياس",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Baraachit",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "برعشيت",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Baramiyeh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "البرامية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Barbarah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بربارة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bariqaa",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "بريقع",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Barja",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "برجا",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Barkaayl",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "برقايل",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Barqa",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "برقا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Basliqit",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بسلوقيت",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bassaba",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بسابا",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bassirma",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بصرما",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Batarmaz",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بطرماز",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Batater",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بتاتر",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bater",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "باتر",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Batgrine",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بتغرين",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Batha",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بطحا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Batoulieh",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "باتوليه",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Batram",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بطرام",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Batroumine",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بطرومين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Batroun",
@@ -1523,58 +2304,91 @@
    "governorateEn": "North",
    "aliases": [
     "Al Batroun"
-   ]
+   ],
+   "ar": "البترون",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bawarj",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بوارج",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Bayno - Qaboula",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بينو - قبولا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Baysour",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بيصور",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bayt Ayyub",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بيت أيوب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bayt Mlat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بيت ملات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bazal",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بزال",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bazbina",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بزبينا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bazoun",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بزعون",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bchamoun",
    "districtEn": "Aley",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "بشامون",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bchamzin",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بشمزين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bcharre",
@@ -1583,77 +2397,122 @@
    "aliases": [
     "Bsharri",
     "Becharre"
-   ]
+   ],
+   "ar": "بشري",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bdebba",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بدبا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bdeghan",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بدغان",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bdenaile",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بدنايل",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bdenayel",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بدنايل",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Bebnine - Al Abdeh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "ببنين - العبدة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bedeas",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "بدياس",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Beirut",
    "districtEn": "Beirut",
-   "governorateEn": "Beirut"
+   "governorateEn": "Beirut",
+   "ar": "بيروت",
+   "districtAr": "بيروت",
+   "governorateAr": "بيروت"
   },
   {
    "en": "Beit Al-Faqas",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بيت الفقس",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Beit Chabab",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بيت شباب",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Beit Chlala",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بيت شلالا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Beit El Chaar - Mazraat El Houdaira",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بيت الشعار - مزرعة الحديرة",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Beit El Hajj",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بيت الحاج",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Beit Lahia",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بيت لهيا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Beit Leif",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "بيت ليف",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Beit Mery",
@@ -1661,133 +2520,216 @@
    "governorateEn": "Mount Lebanon",
    "aliases": [
     "Beit Meri"
-   ]
+   ],
+   "ar": "بيت مري",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Beit Shama",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بيت شاما",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Beit Younes",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بيت يونس",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Beiteddine",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "بيت الدين",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bennihraan",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بنهران",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Beqaa Kafra",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بقاعكفرا",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Beqaa Safreen",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بقاعصفرين",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bhamdoun Al Dayaa",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بحمدون الضيعة",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bhoueita, Afka, and Bshnata",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بحويتا وعفقا وبشناتا",
+   "arUnsure": true,
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bikfaya - Al Muhaidatha",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بكفيا - المحيدثة",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bint Jbeil",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "بنت جبيل",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Biqrazla",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "بقرزلا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Bir Al Ayoan",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بير العيون",
+   "arUnsure": true,
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bishwat",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بشوات",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Bkaa",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بكا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Bkaatouta Achqout",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بقعتوتة عشقوت",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bkaatouta Kenane",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بقعتوتة كنعان",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bkaftine",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بكفتين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bkassine",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "بكاسين",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Bkifa",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "بكيفا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Bkrkasha",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بقرقاشا",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Blouneh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بلونة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bmariam",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بمريم",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bnouhate",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "بنواتي",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Boudai and Al Alaqa",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بوداي والعلاق",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Bourj Al Shamali",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "برج الشمالي",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Bourj el Barajneh",
@@ -1795,42 +2737,68 @@
    "governorateEn": "Mount Lebanon",
    "aliases": [
     "Burj al-Barajneh"
-   ]
+   ],
+   "ar": "برج البراجنة",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bourj Hammoud",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "برج حمود",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bourj Rahhal and Ain Abou Abdallah",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "برج رحال وعين أبو عبدالله",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Bourjein & Mrayjet",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "برجين والمريجات",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bqaatouta",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بقعتوتة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bqarsouna",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بقرصونا",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bqosta",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بقسطا",
+   "arUnsure": true,
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Brital",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بريتال",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Broummana",
@@ -1838,67 +2806,107 @@
    "governorateEn": "Mount Lebanon",
    "aliases": [
     "Broumana"
-   ]
+   ],
+   "ar": "برمانا",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bsallim - Mazraa - Al Majdoub",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بصاليم - المزرعة - المجذوب",
+   "arUnsure": true,
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bshaleh",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بشعله",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Btaaboura",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بتعبورة",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Btedai",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "بتدعي",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Bteddine Al-Laqch",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "بتدين اللقش",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Btekhniyeh",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بتخنيه",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Btouma",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بطمة",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Btouratije",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بتوراتيج",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Burj Al Arab",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "برج العرب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Burj Al-Yahudiyya",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "برج اليهودية",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bursa",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "برسا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Byakout",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بياقوت",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Byblos (Jbeil)",
@@ -1907,69 +2915,94 @@
    "aliases": [
     "Jbeil",
     "Byblos"
-   ]
+   ],
+   "ar": "جبيل",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bzebdine",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بزبدين",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Bziza",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "بزيزا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Bzommar",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "بزمار",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Chanehye",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "شانيه",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Charoun",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "شارون",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Chatine",
    "districtEn": "Batroun",
-   "governorateEn": "North"
-  },
-  {
-   "en": "Chatura",
-   "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "North",
+   "ar": "شاتين",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Chehatoal W Jouret El Mhaid",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
-  },
-  {
-   "en": "Chehim",
-   "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "شحتول وجورة المهد",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Chekka",
    "districtEn": "Batroun",
    "governorateEn": "North",
-   "added": true
+   "added": true,
+   "ar": "شكا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Chhim",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "aliases": [
+    "Chehim"
+   ],
+   "ar": "شحيم",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Chiyah",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الشياح",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Choueifat",
@@ -1979,254 +3012,395 @@
    "aliases": [
     "Shwayfat",
     "Khaldeh"
-   ]
+   ],
+   "ar": "الشويفات",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Choukeen",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "شوكين",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Chtaura",
    "districtEn": "Zahle",
    "governorateEn": "Bekaa",
-   "added": true,
    "aliases": [
+    "Chatura",
     "Shtaura"
-   ]
+   ],
+   "ar": "شتورة",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Dahr al Qanbar",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "ضهر القنبر",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Dahr El Sawan",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ضهر الصوان",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dahr El-Mghara",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ضهر المغارة",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dahr Laysina",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "ضهر ليسينا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Dalbatta",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "دلبتا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dalhoun",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "دلهون",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Damour",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "الدامور",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dar Bechtar",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دار بعشتار",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Dar Chmizzine",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دار شمزين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Daraya",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "داريا",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Daroun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "درعون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Darya",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "داريا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Darya-Bishnin",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "داريا - بشنين",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Dawwar",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الدوار",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dbayeh-Zouk El Khrab-Haret Blat-Aoukar",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ضبية - زوق الخراب - حارة البلانة - عوكر",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dede",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دده",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Deir Al Ahmar",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "دير الأحمر",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Deir Al-Ashayer",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "دير العشاير",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Deir Al-Ghazal",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "دير الغزال",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Deir Al-Zahrani",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "دير الزهراني",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Deir Amess",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "دير عامص",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Deir Ammar",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دير عمار",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Deir Antar",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "دير انطار",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Deir Bela",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دير بلا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Deir Dalloum and Zouk al-Maqasarin",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "دير دلوم وزوق المقشرين",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Deir El Harf",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "دير الحرف",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Deir el Qamar",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "دير القمر",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Deir Janine",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "دير جنين",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Deir Keifa",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "دير كيفا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Deir Nbuhe",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دير نبوح",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Deir Qanoun En Nahr",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "دير قانون النهر",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Deir Qanoun Ras Al Ain",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "دير قانون رأس العين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Dekwaneh",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الدكوانة",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Derb Essim",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "درب السيم",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Dfoun",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "دفون",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dhour Choueir",
    "districtEn": "Matn",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "ضهور الشوير",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Dirdghayya",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "دردغيا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Doueir",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
-  },
-  {
-   "en": "DoukMakayl",
-   "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Nabatieh",
+   "ar": "الدوير",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Douma",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "دوما",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Douris",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "دورس",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Dura",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "دورة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Dusa and Baghdad",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "دوسة وبغداد",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Dweir Adwiya",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "دوير عدوية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Eilat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "إيلات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Eita Al-Fakhar",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عيتا الفخار",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "El Mina",
@@ -2235,228 +3409,368 @@
    "aliases": [
     "Al-Mina",
     "Mina"
-   ]
+   ],
+   "ar": "الميناء",
+   "districtAr": "طرابلس",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Eyha",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "عيحا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ezaki",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "عزقي",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ezza",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "عزة",
+   "arUnsure": true,
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Faitroun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "فيطرون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Fanar",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الفنار",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Faraya",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "فاريا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Fassikin, Ain Ashma and Ain Tenta",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "فسيقين وعين أشما وعين تنتا",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Fatqa",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "فتقا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Fatri",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "فتري",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ferzol",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الفرزل",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Fissan",
    "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "فيسان",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Fiyeh",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "فيع",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Flawi",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "فلاوى",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Fnaideq",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "فنيدق",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Furn El Chebbak - Ain El Remmaneh - Tahwitet El Nahr",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "فرن الشباك - عين الرمانة - تحويطة النهر",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Gaza",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "غزة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ghabaleh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "غبالة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Gharife",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الغريفة",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ghassaniyeh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الغسانية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ghazieh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الغازية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ghazilah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "غزيلة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ghazir",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "غزير",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ghobeiry",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الغبيري",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ghodras",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "غدراس",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ghousta",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "غوسطا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Habbouch",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حبوش",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Hadath",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "الحدت",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Hadath Baalbek",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حدث بعلبك",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hadath El Jebbeh",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حدث الجبة",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Halabat",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حلبتا",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Halat",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حالات",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Halawa",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حلوى",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Halba",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "حلبا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Hamat",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حامات",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Hammana",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حمانا",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Harajel",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حراجل",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Harat Al Fawar",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حارة الفوار",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Harat Jandal",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حارة جندل",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Harbata",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حربتا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hardine - Bayt Kassab",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حردين - بيت كساب",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Haret Hreik",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حارة حريك",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Haret Saida",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "حارة صيدا",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Harf Al-Siyad",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حرف السياد",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Haris",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حاريص",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Harissa-Daraoun",
@@ -2465,102 +3779,163 @@
    "added": true,
    "aliases": [
     "Harissa"
-   ]
+   ],
+   "ar": "حريصا - درعون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Harouf",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حاروف",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Harrar",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "حرار",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Hasbaya (Baabda)",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حاصبيا (بعبدا)",
+   "arUnsure": true,
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Hasbaya (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حاصبيا (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Hasbaya (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حاصبيا (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Hasrout",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "حصروت",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Hassroun",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حصرون",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Hawsh Al Nabi",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حوش النبي",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hawsh Al Rafiqah",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حوش الرافقة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hawsh Saneed",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حوش سنيد",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hay Al-Fikani",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حي الفيكاني",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Haytah",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "هيتا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Haytla",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "حيتلا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Haytoura",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "حيطورة",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Hayzouq",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "حيزوق",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Hazerta",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حزرتا",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Hazin",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حزين",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hazmieh",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الحازمية",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Hdad Shaayt",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "حدشيت",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Hermel",
@@ -2568,162 +3943,248 @@
    "governorateEn": "Baalbek-Hermel",
    "aliases": [
     "Al Hermel"
-   ]
+   ],
+   "ar": "الهرمل",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Hilalia",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الهلالية",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Hinawiye",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الحناوية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Hosh Al-Harimeh",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حوش الحريمة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Hosh Al-Qanaba",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حوش القنعبة",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Hosh Moussa",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "حوش موسى",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Houch Berda",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حوش بردى",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Houch Tel Safiye",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حوش تل صفية",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Houmine Al-Fawqa",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حومين الفوقا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Houmine Al-Tahta",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "حومين التحتا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Hurit Alaa",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "حورتعلا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Iaat",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "إيعات",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Izal",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
-  },
-  {
-   "en": "Jaba Jenin",
-   "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "North",
+   "ar": "إيزال",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Jaba'a",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "جبعا",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Jabal Albutm",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "جبال البطم",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Jabule",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "جبولة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Jaj",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جاج",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jal El Dib - Biknaya",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جل الديب - بقنايا",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jammijmeh",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "جميجمة",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Jannata",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "جناتا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Jargea",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "جرجوع",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Jarmnaya and Ar Rama",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "جرمنايا والرامة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Jawar Al Hashish",
    "districtEn": "Hermel",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "جوار الحشيش",
+   "districtAr": "الهرمل",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Jbaa (Chouf)",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جباع (الشوف)",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jbaa (Nabatieh)",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "جباع (النبطية)",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Jdeideh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الجديدة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jdeideh Al Juma",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "جديدة الجومة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Jdeideh Al Qaytaa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "جديدة القيطع",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Jdeideh El Chouf",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جديدة الشوف",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jdeideh-Bouchrieh-Sed",
    "districtEn": "Matn",
    "governorateEn": "Mount Lebanon",
-   "added": true,
    "aliases": [
     "Jdeideh",
-    "Bouchrieh"
-   ]
+    "Bouchrieh",
+    "Al Jadeeda - Al Boushriyeh - Al Sadd"
+   ],
+   "ar": "الجديدة - البوشرية - السد",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jdeidet Marjayoun",
@@ -2732,22 +4193,34 @@
    "added": true,
    "aliases": [
     "Marjayoun"
-   ]
+   ],
+   "ar": "جديدة مرجعيون",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Jebrayel",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "جبرايل",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Jedra",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جدرا",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jewar Al Haouz",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جوار الحوز",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jezzine - Ain Majdeline",
@@ -2755,144 +4228,231 @@
    "governorateEn": "South",
    "aliases": [
     "Jezzine"
-   ]
+   ],
+   "ar": "جزين - عين مجدلين",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Jibchit",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "جبشيت",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Jinta",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "جنتا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Jiyeh",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الجية",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Joub Jannine",
    "districtEn": "West Bekaa",
    "governorateEn": "Bekaa",
-   "added": true
+   "aliases": [
+    "Jaba Jenin"
+   ],
+   "ar": "جب جنين",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Joueita",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جعيتا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Joun",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جون",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jounieh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جونية",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jourat Al Terms",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جورة الترمس",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jourat Badran",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جورة بدران",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jouret Arsoun",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "جورة أرصون",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Jran",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "جران",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Jrania",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "جرنايا",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Kaakaiye Bridge",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "قعقعية الجسر",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Danis",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كفردنيس",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kafr Dounin",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفردونين",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Fila",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرفيلا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Hammam",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرحمام",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Mashki - Mazraat Salsata",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كفرمشكي - مزرعة سلسة",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kafr Qouq",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كفرقوق",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kafr Ruman",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفررمان",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Shuba",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرشوبا",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Sir",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرصير",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafr Tibnit",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرتبنيت",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kafraya",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كفريا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kaftoun",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفتون",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kahaleh",
    "districtEn": "Aley",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "الكحالة",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kaifun",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كيفون",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kamed el Loz",
@@ -2900,225 +4460,359 @@
    "governorateEn": "Bekaa",
    "aliases": [
     "Kamid Al-Lawz"
-   ]
+   ],
+   "ar": "كامد اللوز",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Karkha",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "كرخا",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Karm Aassfour, Beit Ghattas, Mazraat Al Naheriyeh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "كرم عصفور وبيت غطاس ومزرعة النهرية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Karm Sadeh",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كرم سدة",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kawkaba (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كوكبا (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kawkaba (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كوكبا (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kawkaba (Rashaya)",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كوكبا (راشيا)",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kawthariyat al-Siyad",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "كوثرية السياد",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ketermaya",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كترمايا",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfar Jirra",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "كفرجرة",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Kfar Kila",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "added": true
+   "added": true,
+   "ar": "كفركلا",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kfar Sghab",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرصغاب",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfar Zina",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرزينا",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfaraarabi",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفور العربي",
+   "arUnsure": true,
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarabida",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرعبيدا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarahezir",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحزير",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfaraka",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرعقا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarbanin",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفربنين",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarchi",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحي",
+   "arUnsure": true,
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarchima",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "كفرشيما",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfardan",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "كفردان",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Kfardbian",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كفردبيان",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfardfou",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفردفو",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfardlakos",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفردلاقوس",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarfalous",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "كفرفالوس",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Kfarhabu",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحبو",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarhata",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحاتا",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarhatta",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحاتا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarhelda",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرحلدا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarhim",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "كفرحيم",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfarmatta",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كفرمتى",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfarsaroun",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرصارون",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarselwan",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كفرسلوان",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfarshloun",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرشلان",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarton",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "كفرتون",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Kfaryachit-Bassbaal",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفرياشيت - بسبعل",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kfarzabad",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "كفرزبد",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Kfertay",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "كفرتيه",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfouar",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الكفور",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Kfraya",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كفريا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kharba Shar",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "خربة شار",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Kharbit Dawud",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "خربة داود",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Khartoum",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الخرطوم",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Khat al Petrol",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "خط البترول",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Khiam",
@@ -3127,67 +4821,106 @@
    "added": true,
    "aliases": [
     "Khiyam"
-   ]
+   ],
+   "ar": "الخيام",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Khirbet Qanafar",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "خربة قنافار",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Khirbet Rouha",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "خربة روحا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Khuraibeh (Akkar)",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الخريبة (عكار)",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Khuraibeh (Baabda)",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الخريبة (بعبدا)",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Koubba",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كبا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kounine",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كونين",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Kour",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كور",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kousba",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "كوسبا",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Kousha",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "كوشا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Kroom Arab",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "كروم عرب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Kufra",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "كفرا",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Labaa",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "لبعا",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Labweh",
@@ -3195,42 +4928,67 @@
    "governorateEn": "Baalbek-Hermel",
    "aliases": [
     "Al-Laboue"
-   ]
+   ],
+   "ar": "اللبوة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Lala",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "لالا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Lassa",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "لاسا",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Lubya",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "لبايا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Ma'arabun",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "معربون",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Maaloula and Taanayel",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المعلقة وتعنايل",
+   "arUnsure": true,
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Maaroub",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "معروب",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Maasser El Chouf",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "معاصر الشوف",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Machghara",
@@ -3238,233 +4996,368 @@
    "governorateEn": "Bekaa",
    "aliases": [
     "Mashgharah"
-   ]
+   ],
+   "ar": "مشغرة",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Maghdouche",
    "districtEn": "Saida",
    "governorateEn": "South",
-   "added": true
+   "aliases": [
+    "Mghdousheh"
+   ],
+   "ar": "مغدوشة",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Maissara",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ميسرة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Majadel",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مجادل",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Majdal",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "المجيدل",
+   "arUnsure": true,
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Majdal Anjar",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "مجدل عنجر",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Majdal Bani Fadel",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "مجدل بني فاضل",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Majdala",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مجدلا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Majdalia",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "مجدليا",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Majdaloun",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "مجدلون",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Majdalyoun",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مجدليون",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Majdalzoun",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مجدل زون",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Majdlaya",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مجدليا",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Makse",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "مكسة",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Mamna",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "ممنع",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Mar Chaaya - Al Mazkah",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مار شعيا - المزكة",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mar Musa - Al Dawwar",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مار موسى - الدوار",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mar Touma",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مار توما",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Marah Al-Safira",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "مراح السفيرة",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Marah Al-Saraj",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "مراح السراج",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Marieh wa Majideyah",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "الماري والمجيدية",
+   "arUnsure": true,
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Marj al-Zuhur (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "مرج الزهور (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Marj al-Zuhur (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "مرج الزهور (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Markabta",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "مركبتا",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Maroun El Ras",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "مارون الراس",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Marwahine",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مروحين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Mashha",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مشحا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Massa",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "ماسا",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Mayfadoun",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "ميفدون",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Mazboud",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مزبود",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mazraat Ad-Dahr",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مزرعة الضهر",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mazraat Al Tuffah",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "مزرعة التفاح",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Mazraat Ash-Shouf",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مزرعة الشوف",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mazraat Bleda",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مزرعة بلدة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Mazraat Moshref",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مزرعة مشرف",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Mazraat Yashouh",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مزرعة يشوع",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mchmoush",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مشموشة",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Mearka",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "معركة",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Merouba",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ميروبا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Metrith",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "متريت",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Mghayriyeh",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
-  },
-  {
-   "en": "Mghdousheh",
-   "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "Mount Lebanon",
+   "ar": "المغيرية",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Midoun and Lussia",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "ميدون ولوسيا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Mifouk Al Qattara",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ميفوق - القطارة",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mimas (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "ميماس (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Mimas (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "ميماس (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Minieh",
@@ -3473,133 +5366,215 @@
    "aliases": [
     "Al-Minya",
     "Miniyeh"
-   ]
+   ],
+   "ar": "المنية",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Minyara",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "منيارة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Mishmish",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مشمش",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Mleih",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "مليخ",
+   "arUnsure": true,
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Mqneh",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "مقنة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Mrayjet",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المريجات",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Mristi",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "مرستي",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mtein",
    "districtEn": "Matn",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "added": true,
+   "ar": "المتين",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Mudawwara",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "المدورة",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Munjaz",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "منجز",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Mushta Hamoud",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "مشتى حمود",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Nabatieh",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "النبطية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Nabatieh Al-Fawqa",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "النبطية الفوقا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Nabha Al Dumdum",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "نبحا الدمدوم",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Nabha Al Mahfara",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "نبحا المحفارة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Nabha Al Qadam",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "نبحا القدام",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Nabiheet",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "نابيه",
+   "arUnsure": true,
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Nahle",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "نحلة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Nahr Ibrahim",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "نهر إبراهيم",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Namreen and Bkoza",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "نمرين وبقوزا",
+   "arUnsure": true,
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Nasiriya",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "الناصرية",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Nemoura & Kfar Jarif",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "نمورة وكفرجريف",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Nemriye",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "النميرية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Niha (Chouf)",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "نيحا (الشوف)",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Niha (Zahle)",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "نيحا (زحلة)",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Nurah Al-Fawqa and Al-Tahata",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "نورا الفوقا والتحتا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Qab Elias - Wadi El Delm",
@@ -3608,87 +5583,141 @@
    "aliases": [
     "Qob Elias",
     "Qab Elias"
-   ]
+   ],
+   "ar": "قب الياس - وادي الدلم",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Qabi`",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "القبيع",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qaitouli",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "قيتولي",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Qalawayh",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "قلاويه",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Qaleela and Harfoush",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "قليلة وحرفوش",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Qaliyat",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "القليعات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Qana",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "قانا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Qanabah Baramana",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "قنابة برمانا",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qannat",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "قنات",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Qaqaiyyat al-Sanawbar",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "قعقعية الصنوبر",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Qarah",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "قرحا",
+   "arUnsure": true,
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Qarah Bash",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "قره باش",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Qarawat Bani Hassan",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "قرعون بني حسن",
+   "arUnsure": true,
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Qartaba",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "قرطبا",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qasr Naba",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "قصرنبا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Qattin and Haidab",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "قطين وحيداب",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Qilya",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "قليا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Qobayat",
@@ -3696,104 +5725,169 @@
    "governorateEn": "Akkar",
    "aliases": [
     "Qubayyat",
-    "Kobayat"
-   ]
+    "Kobayat",
+    "Al Qobeiyat"
+   ],
+   "ar": "القبيات",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Qolehate",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "قلحات",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Qornayel",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "قرنايل",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qornet Chehwan-Ain Aar-Beit El Kako",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "قرنة شهوان - عين عار - بيت الككو",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qorsayta",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "قرصيتا",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Qortada",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "قرطاضة",
+   "arUnsure": true,
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Qoubbet Chamra - Semqley",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "قبة شمرا - سمقلي",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Qousaya",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "قوسايا",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Quneya",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "قنية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Rabieh",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الرابية",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Rachadbin",
    "districtEn": "Koura",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "راشدبين",
+   "districtAr": "الكورة",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Rachiine",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "رشعين",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Rachin",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "رشين",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Rahba",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "رحبة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Ramadiyeh",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الرمادية",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Ras Al Harf",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "رأس الحرف",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ras al-Matn",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "رأس المتن",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Ras Baalbek",
    "districtEn": "Baalbek",
    "governorateEn": "Baalbek-Hermel",
-   "added": true
+   "added": true,
+   "ar": "رأس بعلبك",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Ras Kifa",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "راسكيفا",
+   "arUnsure": true,
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Ras Nahash",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "راس نحاش",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Rashaya",
@@ -3801,17 +5895,26 @@
    "governorateEn": "Bekaa",
    "aliases": [
     "Rachaya"
-   ]
+   ],
+   "ar": "راشيا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Rashaya al-Fukhar",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "راشيا الفخار",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Rashkananiye",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "رشكنانيه",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Rayak",
@@ -3820,113 +5923,167 @@
    "added": true,
    "aliases": [
     "Riyaq"
-   ]
+   ],
+   "ar": "رياق",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Raymat and Shqadif",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "ريمات وشقاديف",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Reefoun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ريفون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Remhala",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "رمحالا",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Riak - Housh Hala",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "رياق - حوش حالا",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Rimah",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الرماح",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Riyat",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "رعيت",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Rmeileh",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الرميلة",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Roum",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "روم",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Roumieh",
    "districtEn": "Matn",
    "governorateEn": "Mount Lebanon",
-   "added": true
-  },
-  {
-   "en": "Roumiyeh",
-   "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "aliases": [
+    "Roumiyeh"
+   ],
+   "ar": "رومية",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Rumine",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "رومين",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Ruwayset El Ballout",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "رويسة البلوط",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Saadnayel",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "سعدنايل",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Sabah",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "صباح",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Safad El Batikh",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "صفد البطيخ",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Safarayya",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "صفاريه",
+   "arUnsure": true,
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Safinat Al-Qetaa",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "سفينة القيطع",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Safinet al-Dreib",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "سفينة الدريب",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Safra",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الصفرا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Saghbin",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
-  },
-  {
-   "en": "Sahmara",
-   "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "صغبين",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Saida",
@@ -3934,358 +6091,581 @@
    "governorateEn": "South",
    "aliases": [
     "Sidon"
-   ]
+   ],
+   "ar": "صيدا",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Sair Al-Gharbiya",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "صير الغربية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Saksakiye",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الصكسكية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Salata",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "سلعاتا",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Salehieh",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الصالحية",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "salima",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "صليما",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Sandiyaneh Raydan",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "سنديانة زيدان",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Saniyyeh",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "سنيا",
+   "arUnsure": true,
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Saqiyat Al-Misk-Bahr Safa",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ساقية المسك - بحرصاف",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Saraal",
    "districtEn": "Zgharta",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "سرعل",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Sarafand",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "الصرفند",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Sarbah",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "صربا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Sareen Al-Fawqa",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "سرعين الفوقا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Saydoun",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "صيدون",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Seen",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "سيناي",
+   "arUnsure": true,
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Seer",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "سير",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Serain Al Tahta",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "سرعين التحتا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Shaath",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "شعت",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Shabaniya",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الشبانية",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Shahour",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "شحور",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Shamstaar - West - Baalbek",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "شمسطار - غربي بعلبك",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Shan",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "شان",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Sharbila",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "شربيلا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Shaykhain",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "شيحين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Shbatin",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "شبطين",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Shebaa",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "شبعا",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Sheikh Mohammad - Aadbal",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الشيخ محمد - عدبل",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Sheikh Taba",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الشيخ طابا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Shennaya",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "شننعير",
+   "arUnsure": true,
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Shiddreh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "شدرا",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Shmaa",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "شمع",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Shuwit",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "شويت",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Shwaya (Hasbaya)",
    "districtEn": "Hasbaya",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "شويا (حاصبيا)",
+   "districtAr": "حاصبيا",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Shwaya (Marjayoun)",
    "districtEn": "Marjayoun",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "شويا (مرجعيون)",
+   "districtAr": "مرجعيون",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Sibline",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "سبلين",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Sijd",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "سجد",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Sin el Fil",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "سن الفيل",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Sissouk",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "سيسوق",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Smakiah",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "السمقانية",
+   "arUnsure": true,
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Sofar",
    "districtEn": "Aley",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "صوفر",
+   "districtAr": "عاليه",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Sohmor",
    "districtEn": "West Bekaa",
    "governorateEn": "Bekaa",
-   "added": true
+   "aliases": [
+    "Sahmara"
+   ],
+   "ar": "سحمر",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Srifa",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "صريفا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Sultan Ya'qub almuahada",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "السلطان يعقوب الموحدة",
+   "arUnsure": true,
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Swayseh",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "السويسة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Tabarja",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "طبرجا",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Taffahita",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "طفاحتا",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Takrit",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "تكريت",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Tal Abbas Al Gharbi",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "تل عباس الغربي",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Talabayya",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "تعلبايا",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Tall Dzanoub",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "تل ذنوب",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Talla Washataha",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "تلا والشطاحة",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Talmaayan",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "تلمعيان",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Talya",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "طليا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Tanbourit",
    "districtEn": "Saida",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "طنبوريت",
+   "districtAr": "صيدا",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Tannin Al Foqa",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "طنين الفوقا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Tannin Al Tahta",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "طنين التحتا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
-   "en": "Tannourine (Batroun)",
-   "districtEn": "Batroun",
-   "governorateEn": "North"
-  },
-  {
-   "en": "Tannourine (Rashaya)",
+   "en": "Tannoura",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "تنورة",
+   "arUnsure": true,
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
+  },
+  {
+   "en": "Tannourine",
+   "districtEn": "Batroun",
+   "governorateEn": "North",
+   "ar": "تنورين",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Taran",
    "districtEn": "Minieh-Danniyeh",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "طاران",
+   "districtAr": "المنية - الضنية",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Tariya",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "طاريا",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Tarshish",
    "districtEn": "Baabda",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ترشيش",
+   "districtAr": "بعبدا",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Tartij",
    "districtEn": "Jbeil",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "ترتج",
+   "districtAr": "جبيل",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Tasha",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "تاشع",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Tebnine",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "تبنين",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Tehoum",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "تحوم",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Tir Dibba",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "طير دبا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Tourza",
    "districtEn": "Bcharre",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "طورزا",
+   "districtAr": "بشري",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Trebil",
    "districtEn": "Zahle",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "تربل",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Tripoli",
    "districtEn": "Tripoli",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "طرابلس",
+   "districtAr": "طرابلس",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Tura",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "طورا",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Tyr Felsay",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "طير فلسيه",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Tyre",
@@ -4293,97 +6673,154 @@
    "governorateEn": "South",
    "aliases": [
     "Sour"
-   ]
+   ],
+   "ar": "صور",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Wadi Al-Hawr",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "وادي الحور",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Wadi al-Jamus",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "وادي الجاموس",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Wadi Fa'rah",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "وادي فعرة",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Wadi Jezzine",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "وادي جزين",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Wadi Khalid",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "وادي خالد",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Wardanieh",
    "districtEn": "Chouf",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الوردانية",
+   "districtAr": "الشوف",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Wata Al Joz",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "وطى الجوز",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Yahchouch",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "يحشوش",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Yahmar",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "يحمر",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Yanouh",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "يانوح",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Yanta",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "ينطا",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Yarine",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "يارين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Yater",
    "districtEn": "Bint Jbeil",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "ياطر",
+   "districtAr": "بنت جبيل",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Yohmor",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "يحمر",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Yunin",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "يونين",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Zaaitra",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الزعيترة",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Zabkin",
    "districtEn": "Tyre",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "زبقين",
+   "districtAr": "صور",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Zabud",
    "districtEn": "Baalbek",
-   "governorateEn": "Baalbek-Hermel"
+   "governorateEn": "Baalbek-Hermel",
+   "ar": "زبود",
+   "districtAr": "بعلبك",
+   "governorateAr": "بعلبك - الهرمل"
   },
   {
    "en": "Zahle",
@@ -4392,57 +6829,91 @@
    "aliases": [
     "Zahleh",
     "Zahl"
-   ]
+   ],
+   "ar": "زحلة",
+   "districtAr": "زحلة",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Zahlta",
    "districtEn": "Jezzine",
-   "governorateEn": "South"
+   "governorateEn": "South",
+   "ar": "زحلتا",
+   "districtAr": "جزين",
+   "governorateAr": "الجنوب"
   },
   {
    "en": "Zahr Al-Ahmar",
    "districtEn": "Rashaya",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "ضهر الأحمر",
+   "districtAr": "راشيا",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Zalaya",
    "districtEn": "West Bekaa",
-   "governorateEn": "Bekaa"
+   "governorateEn": "Bekaa",
+   "ar": "زلايا",
+   "districtAr": "البقاع الغربي",
+   "governorateAr": "البقاع"
   },
   {
    "en": "Zalka-Ammar Chalhoub",
    "districtEn": "Matn",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "الزلقا - عمارة شلهوب",
+   "districtAr": "المتن",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Zan",
    "districtEn": "Batroun",
-   "governorateEn": "North"
+   "governorateEn": "North",
+   "ar": "زان",
+   "districtAr": "البترون",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Zawarib",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "الزواريب",
+   "arUnsure": true,
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Zawtar Al-Gharbiya",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "زوطر الغربية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Zawtar Al-Sharkiya",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "زوطر الشرقية",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Zaytoun",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "زيتون",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Zefta",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "زفتا",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Zgharta-Ehden",
@@ -4451,33 +6922,54 @@
    "aliases": [
     "Zgharta",
     "Ehden"
-   ]
+   ],
+   "ar": "زغرتا - إهدن",
+   "districtAr": "زغرتا",
+   "governorateAr": "الشمال"
   },
   {
    "en": "Zibdeen",
    "districtEn": "Nabatieh",
-   "governorateEn": "Nabatieh"
+   "governorateEn": "Nabatieh",
+   "ar": "زبدين",
+   "districtAr": "النبطية",
+   "governorateAr": "النبطية"
   },
   {
    "en": "Zouk al-Hssayne",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "زوق الحصنية",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Zouk Hadara",
    "districtEn": "Akkar",
-   "governorateEn": "Akkar"
+   "governorateEn": "Akkar",
+   "ar": "زوق حدارة",
+   "districtAr": "عكار",
+   "governorateAr": "عكار"
   },
   {
    "en": "Zouk Mikael",
    "districtEn": "Keserwan",
    "governorateEn": "Mount Lebanon",
-   "added": true
+   "aliases": [
+    "DoukMakayl"
+   ],
+   "ar": "زوق مكايل",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   },
   {
    "en": "Zouk Mosbeh",
    "districtEn": "Keserwan",
-   "governorateEn": "Mount Lebanon"
+   "governorateEn": "Mount Lebanon",
+   "ar": "زوق مصبح",
+   "districtAr": "كسروان",
+   "governorateAr": "جبل لبنان"
   }
- ]
+ ],
+ "arabicSource": "Drafted on 9 October 2026 from the English names, at the owner's request (\"Can't you just translate them\"): municipality names by their standard Lebanese spelling, district and governorate names as officially written. NOT the Ministry of Interior's list: entries marked arUnsure were drafted with doubt; all should be checked against the official list when it is available."
 }
