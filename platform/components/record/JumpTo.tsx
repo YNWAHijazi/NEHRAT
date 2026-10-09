@@ -12,10 +12,11 @@ import { usePathname, useSearchParams } from 'next/navigation';
  * to show: it is told, and shows the step before revealing the target.
  */
 function reveal(hash: string): void {
-  if (!hash.startsWith('#req-') && !hash.startsWith('#plan-') && hash !== '#final-review' && hash !== '#assessment') return;
-  const target = document.getElementById(hash.slice(1));
+  const target = hash.length > 1 ? document.getElementById(hash.slice(1)) : null;
   if (!target) return;
+  // Anything inside a step is the stepper's to show, whatever its id (the facility's steps carry #aeds, #contact).
   if (target.closest('[data-step]')) { window.dispatchEvent(new CustomEvent('record:jump', { detail: hash })); return; }
+  if (!hash.startsWith('#req-') && !hash.startsWith('#plan-') && hash !== '#final-review' && hash !== '#assessment') return;
   let node: HTMLElement | null = target;
   while (node) {
     if (node instanceof HTMLDetailsElement) node.open = true;

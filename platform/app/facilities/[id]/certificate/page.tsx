@@ -5,7 +5,7 @@ import { currentAccount } from '../../../../lib/auth';
 import { getDb } from '../../../../lib/db';
 import { facilityDetail, facilityDevices, facilityPlanConfirmation } from '../../../../lib/queries';
 import { ensureFacilityCertificateToken } from '../../../../lib/facility-gis';
-import { facilityPreparation, facilityRegistrationComplete } from '../../../../components/FacilityWorkspaceHeader';
+import { facilityPreparation, facilityRegistrationComplete } from '../../../../lib/facility-registration';
 import { can } from '../../../../lib/rules/ministry';
 import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
 import { PrintButton } from '../../../../components/PrintButton';

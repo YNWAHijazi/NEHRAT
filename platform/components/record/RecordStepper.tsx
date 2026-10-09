@@ -37,11 +37,13 @@ function stepFor(hash: string): string | null {
  * blocker link, a deep link or a redirect's anchor names a step and this shows it.
  * Nothing here decides state: the steps arrive resolved.
  */
-export function RecordStepper({ steps, initialKey, listHref, groups }: {
+export function RecordStepper({ steps, initialKey, listHref, groups, finalNext = { en: 'Next: review and submit', ar: 'التالي: المراجعة والتقديم' } }: {
   steps: StepperStep[];
   initialKey: string;
   listHref?: string | null;
   groups: { required: { en: string; ar: string }; recommended: { en: string; ar: string } };
+  /** The Next button into the final step; a facility registers rather than submits. */
+  finalNext?: { en: string; ar: string };
 }) {
   const [current, setCurrent] = useState(initialKey);
   const [navOpen, setNavOpen] = useState(false);
@@ -169,7 +171,7 @@ export function RecordStepper({ steps, initialKey, listHref, groups }: {
           ) : <span />}
           {index < total - 1 ? (
             <button type="button" data-region="step-next" disabled={saving} onClick={() => { void go(steps[index + 1]!.key); }} style={{ minHeight: 44, paddingInline: 22, border: 0, background: 'var(--brand)', color: 'var(--bg)', borderRadius: 22, fontSize: 14.5, fontWeight: 500, cursor: 'pointer' }}>
-              {saving ? <L en="Saving…" ar="جارٍ الحفظ…" /> : <L en={steps[index + 1]!.kind === 'final' ? 'Next: review and submit' : 'Next'} ar={steps[index + 1]!.kind === 'final' ? 'التالي: المراجعة والتقديم' : 'التالي'} />}
+              {saving ? <L en="Saving…" ar="جارٍ الحفظ…" /> : <L en={steps[index + 1]!.kind === 'final' ? finalNext.en : 'Next'} ar={steps[index + 1]!.kind === 'final' ? finalNext.ar : 'التالي'} />}
             </button>
           ) : null}
         </div>

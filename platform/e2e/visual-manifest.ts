@@ -444,8 +444,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       {
         name: 'journey-ends',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="step-rail"]',
-        note: "Interaction states -- the category determination, the end-of-journey panel for an awaiting category (no Continue renders), the venue cross-reference -- are exercised by e2e/app/facility.spec.ts rather than pixel-compared: the reference opens on step 1 and the states exist only after clicks on both sides.",
+        builtSelector: '[data-region="category-options"]',
+        note: "Expected divergent BY OWNER REQUEST (9 October 2026): the facility registers on ONE page like the hosting venue -- profile, map pin, category and responsible contact with one Continue -- where the reference walks a six-step rail. The step rail is gone; the category options sit on the same page. Interaction states -- the category determination, the end-of-journey panel for an awaiting category (no Continue renders) -- are exercised by e2e/app/facility.spec.ts rather than pixel-compared: the states exist only after clicks on both sides.",
       },
     ],
   },
@@ -478,10 +478,10 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       },
       {
         name: 'devices',
-        mode: 'compare',
+        mode: 'expectedDivergent',
         reference: { strategy: 'containerOfText', text: 'AED-001', container: 'repeat(auto-fit, minmax(280px, 1fr))' },
-        builtSelector: '[data-region="devices"]',
-        note: "The device cards. Held at 2%. Known residual inside the budget: AED-003's note derives from the record ('Reported not accessible during operating hours') where the reference hand-writes 'Cabinet reported locked outside class hours'.",
+        builtSelector: '[data-region="registry-table"]',
+        note: "Expected divergent BY OWNER REQUEST (9 October 2026): the readiness screen and the device registry are one management page with sections, so the device cards that linked to the registry are the registry itself, in the AEDs section. Was a compare held at 2% (residual: AED-003's note derives from the record where the reference hand-writes 'Cabinet reported locked outside class hours'). UNVERIFIED as to pixels since the merge.",
       },
       {
         name: 'ministry-request',
@@ -543,8 +543,8 @@ export const VISUAL_MANIFEST: readonly VisualMapping[] = [
       {
         name: 'plan-confirmation',
         mode: 'expectedDivergent',
-        builtSelector: '[data-region="facility-workspace-nav"]',
-        note: "User request, 2026-09-30: the confirmation has moved to the Submit tab in the shared facility navigation. Previous layout: the plan form's section five is a recordable confirmation -- checkboxes, the drill date, and the coordinator's signature -- which restarts the annual clock. The reference renders the same items as read-only showcase rows with no way to record them.",
+        builtSelector: '[data-region="plan-confirmation"]',
+        note: "Owner request, 9 October 2026: no section tabs -- the plan is a section of the facility record and the confirmation sits under it again (the Submit tab of 2026-09-30 is gone; while the registration is open the confirmation is split between the plan step and the review step that completes the registration). The plan form's section five is a recordable confirmation -- checkboxes, the drill date, and the representative's signature -- which restarts the annual clock. The reference renders the same items as read-only showcase rows with no way to record them.",
       },
     ],
   },
