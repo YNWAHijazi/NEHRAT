@@ -88,6 +88,9 @@ export function DeviceRegistry({
   // A new facility has no AED yet: the form opens on a first registration (owner, 9 October 2026).
   const [selected, setSelected] = useState<string | null>(devices[0]?.label ?? null);
   const [purpose, setPurpose] = useState('initial');
+  // A managed registry opens its card on demand (owner, 9 October 2026): the add button or a row
+  // opens it; a facility with no AED yet shows it open, since registering one is the task.
+  const [cardOpen, setCardOpen] = useState(devices.length === 0);
   const device = devices.find((d) => d.label === selected) ?? null;
 
   // Next on the record page registers a device typed and not yet saved (components/record/autosave.ts);
@@ -152,7 +155,7 @@ export function DeviceRegistry({
         {devices.map((d) => {
           const st = statusChip(d);
           return [
-            <button key={`${d.label}-a`} type="button" disabled={!editable} onClick={() => { setSelected(d.label); setPurpose('statusChange'); }} style={{ textAlign: 'start', border: 0, cursor: 'pointer', background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
+            <button key={`${d.label}-a`} type="button" disabled={!editable} onClick={() => { setSelected(d.label); setPurpose('statusChange'); setCardOpen(true); }} style={{ textAlign: 'start', border: 0, cursor: 'pointer', background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>
               {d.label} · {d.identification}
             </button>,
             <div key={`${d.label}-b`} style={{ background: 'var(--bg)', padding: '16px 18px', fontSize: '14.5px' }}>
@@ -183,8 +186,8 @@ export function DeviceRegistry({
         <button
           type="button"
           data-region="add-device"
-          onClick={() => { setSelected(null); setPurpose('initial'); }}
-          style={{ height: 44, paddingInline: 18, border: `1px solid ${isInitial ? 'var(--brand)' : 'var(--line)'}`, background: isInitial ? 'var(--brand-soft)' : 'var(--bg)', color: isInitial ? 'var(--brand)' : 'var(--ink)', borderRadius: 22, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
+          onClick={() => { setSelected(null); setPurpose('initial'); setCardOpen(true); }}
+          style={{ height: 44, paddingInline: 18, border: `1px solid ${cardOpen && isInitial ? 'var(--brand)' : 'var(--line)'}`, background: cardOpen && isInitial ? 'var(--brand-soft)' : 'var(--bg)', color: cardOpen && isInitial ? 'var(--brand)' : 'var(--ink)', borderRadius: 22, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
         >
           {devices.length > 0 ? <L en="+ Register another device" ar="+ تسجيل جهاز آخر" /> : <L en="+ Register a device" ar="+ تسجيل جهاز" />}
         </button>
@@ -195,7 +198,7 @@ export function DeviceRegistry({
         ) : null}
       </div>
 
-      <form ref={form} key={`${selected}-${purpose}-${saves}`} action={saveFacilityDeviceAction.bind(null, facilityId)}>
+      <form ref={form} key={`${selected}-${purpose}-${saves}`} action={saveFacilityDeviceAction.bind(null, facilityId)} hidden={!cardOpen}>
         <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
