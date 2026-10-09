@@ -52,6 +52,7 @@ test('a site falls due: expiring soon, then expired, and the events held there s
   await expect(page.locator('[data-overview=readiness]')).toContainText('Expiring soon');
   const notice = page.locator('[data-region=renewal-notice]');
   await expect(notice).toHaveAttribute('data-renewal', 'expiringSoon');
+  await expect(notice.locator('strong')).toContainText('Expiring soon.');
   await expect(notice).toContainText('The annual practical drill is due by 2026-09-01.');
   await expect(page.locator('[data-region=registered-band]')).toBeVisible();
 

@@ -115,7 +115,7 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockStart: 12, marginBlockEnd: 18 }}>
           {derived.map((d) => (
-            <div key={d.en} style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', fontSize: '14.5px' }}>
+            <div key={d.en} data-kv="" style={{ background: 'var(--bg)', padding: '14px 18px', display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'space-between', alignItems: 'baseline', fontSize: '14.5px' }}>
               <span style={{ color: 'var(--muted)' }}>
                 <L en={d.en} ar={d.ar} />
               </span>
@@ -137,7 +137,7 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
           </h3>
           <div style={tableStyle}>
             {profileRows.map((r) => (
-              <div key={r.en} style={rowStyle}>
+              <div key={r.en} data-kv="" style={rowStyle}>
                 <span style={{ color: 'var(--muted)' }}>
                   <L en={r.en} ar={r.ar} />
                 </span>
@@ -167,7 +167,7 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
           </div>
           <div style={tableStyle}>
             {contactRows.map((r) => (
-              <div key={r.en} style={rowStyle}>
+              <div key={r.en} data-kv="" style={rowStyle}>
                 <span style={{ color: 'var(--muted)' }}>
                   <L en={r.en} ar={r.ar} />
                 </span>

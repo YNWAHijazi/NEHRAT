@@ -54,6 +54,21 @@ export function RecordStepper({ steps, initialKey, listHref, groups, finalNext =
 
   const [saving, setSaving] = useState(false);
   const body = useRef<HTMLDivElement>(null);
+  const nav = useRef<HTMLElement>(null);
+  // On a phone the list is a bar pinned under the header. Opened while pinned it covered the
+  // step's fields (owner, 9 October 2026): opened, it leaves the pin and sits in the page above
+  // the step, and the page scrolls to it -- the step is pushed down, never covered.
+  const openNav = () => {
+    const next = !navOpen;
+    setNavOpen(next);
+    if (!next || !window.matchMedia('(max-width: 900px)').matches) return;
+    requestAnimationFrame(() => {
+      const el = nav.current;
+      if (!el) return;
+      const header = document.querySelector('header')?.getBoundingClientRect().height ?? 56;
+      window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - header) });
+    });
+  };
   const show = (key: string) => {
     const target = steps.find((s) => s.key === key);
     if (!target) return;
@@ -121,8 +136,8 @@ export function RecordStepper({ steps, initialKey, listHref, groups, finalNext =
 
   return (
     <div data-region="record-stepper" className="record-stepper">
-      <nav aria-label="Requirement steps" data-region="step-nav" data-open={navOpen || undefined} className="step-nav">
-        <button type="button" className="step-nav-toggle" aria-expanded={navOpen} onClick={() => setNavOpen((o) => !o)}>
+      <nav ref={nav} aria-label="Requirement steps" data-region="step-nav" data-open={navOpen || undefined} className="step-nav">
+        <button type="button" className="step-nav-toggle" aria-expanded={navOpen} onClick={openNav}>
           <span style={numberStyle(step!, index)}>{index + 1}</span>
           <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'start' }}>
             <span style={{ fontSize: 16, fontWeight: 600, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><L en={step!.labelEn} ar={step!.labelAr} /></span>

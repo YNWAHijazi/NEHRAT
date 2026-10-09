@@ -143,6 +143,15 @@ test('the step path reads in Arabic and fits a phone', async ({ page, context })
   await toggle.click();
   await expect(page.locator('[data-step-item=infrastructure]')).toContainText('البنية الأساسية للموقع');
   await expect(page.locator('[data-step-item=review]')).toContainText('المراجعة والتقديم');
+  // OPENED DEEP IN A STEP, THE LIST SITS ABOVE THE STEP AND NEVER COVERS ITS FIELDS (owner, 9 October 2026).
+  await toggle.click();
+  await page.locator('[data-region=step-next]').scrollIntoViewIfNeeded();
+  await toggle.click();
+  await expect(page.locator('[data-region=step-nav]')).toHaveAttribute('data-open', 'true');
+  const navBox = (await page.locator('[data-region=step-nav]').boundingBox())!;
+  const stepBox = (await page.locator('[data-facility-step=aeds]').boundingBox())!;
+  expect(navBox.y + navBox.height).toBeLessThanOrEqual(stepBox.y + 1);
+  expect(navBox.y).toBeGreaterThanOrEqual(0);
   await expect(page.locator('[data-region=step-next]')).toContainText('التالي');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(376);
 });
