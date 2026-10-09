@@ -138,8 +138,10 @@ test('the step path reads in Arabic and fits a phone', async ({ page, context })
   await page.goto(`/facilities/${id}`);
   // The phone shows the current step in a bar that opens the list.
   const toggle = page.locator('.step-nav-toggle');
-  await expect(toggle).toContainText('البنية الأساسية للموقع');
+  // A new site opens on its first required step, the AEDs.
+  await expect(toggle).toContainText('أجهزة إزالة الرجفان');
   await toggle.click();
+  await expect(page.locator('[data-step-item=infrastructure]')).toContainText('البنية الأساسية للموقع');
   await expect(page.locator('[data-step-item=review]')).toContainText('المراجعة والتقديم');
   await expect(page.locator('[data-region=step-next]')).toContainText('التالي');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(376);
