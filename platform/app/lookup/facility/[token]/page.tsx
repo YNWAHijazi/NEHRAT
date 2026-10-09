@@ -3,7 +3,7 @@ import { L } from '../../../../components/L';
 import { PublicShell } from '../../../../components/PublicShell';
 import { currentAccount } from '../../../../lib/auth';
 import { facilityByCertificateToken } from '../../../../lib/facility-gis';
-import { facilityRegistrationComplete } from '../../../../components/FacilityWorkspaceHeader';
+import { facilityRegistrationComplete } from '../../../../lib/facility-registration';
 import { FACILITY_CONTENT, facilityCategory } from '../../../../lib/rules';
 
 /**

@@ -6,7 +6,7 @@ import {useLanguage} from '../helpers/language';
 import {expectAbsent} from '../helpers/absence';
 import {openDetails, openAllRequirements} from '../helpers/record';
 
-for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue record has no tabs; facility tabs stay aligned (${lang}, ${width})`,async({page,context},info)=>{
+for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue and facility records have no tabs; their edit screens keep the record's identity (${lang}, ${width})`,async({page,context},info)=>{
  await useLanguage(context,lang);await page.setViewportSize({width,height:900});await mockMapTiles(page);await signInAs(page,'test_organizer');
  // THE VENUE IS ONE RECORD PAGE, like the event's (owner, 8 October 2026): no section tabs; the two edit
  // screens keep the record's identity and lead back to it; the old team route lands on the record.
@@ -18,11 +18,16 @@ for(const lang of ['en','ar'] as const)for(const width of [1280,375])test(`venue
   const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
  await page.goto('/venues/VN-0032/team');await expect(page).toHaveURL(/\/venues\/VN-0032$/);
  await page.screenshot({path:info.outputPath(`venue-${lang}-${width}.png`),fullPage:true});}
- for(const [service,id,paths] of [['facility','FC-0014',['','/profile','/devices','/plan','/submit','/incidents']]] as const){
-  let y:number|undefined;let identity:string|undefined;
-  for(const path of paths){await page.goto(`/facilities/${id}${path}`);const h=page.locator(`[data-region=${service}-workspace-header]`);await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);const nav=h.locator('nav');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);const top=(await nav.boundingBox())!.y;if(y===undefined)y=top;expect(Math.abs(top-y)).toBeLessThanOrEqual(1);const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
-  await page.screenshot({path:info.outputPath(`${service}-${lang}-${width}.png`),fullPage:true});
- }
+ // THE FACILITY IS ONE RECORD PAGE TOO (owner, 9 October 2026): no section tabs; the details edit
+ // screen keeps the record's identity and leads back to it; the old tab routes land on the record.
+ {let identity:string|undefined;
+ for(const path of ['','/profile']){await page.goto(`/facilities/FC-0014${path}`);const h=page.locator('[data-region=facility-workspace-header]');await expect(h).toBeVisible();await page.evaluate(()=>document.fonts.ready);
+  await expectAbsent(page,{anchor:h,absent:'[data-region=facility-workspace-nav]',because:'the facility record has no section tabs'});
+  if(path)await expect(page.locator('[data-region=back-to-record]')).toHaveAttribute('href','/facilities/FC-0014');
+  else{for(const section of ['status','aeds','plan','incidents','requests','details'])await expect(page.locator(`[data-region=section-${section}]`)).toBeVisible();}
+  const t=await h.locator('[data-region=record-header]').innerText();if(identity===undefined)identity=t;expect(t).toBe(identity);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);}
+ for(const [path,landing] of [['/devices',/\/facilities\/FC-0014\?step=aeds#aeds$/],['/plan',/\/facilities\/FC-0014\?step=plan#plan$/],['/submit',/\/facilities\/FC-0014\?step=plan#plan$/],['/incidents',/\/facilities\/FC-0014#incidents$/]] as const){await page.goto(`/facilities/FC-0014${path}`);await expect(page).toHaveURL(landing);await expect(page.locator('[data-region=facility-workspace-header]')).toBeVisible();}
+ await page.goto('/facilities/FC-0014');await page.screenshot({path:info.outputPath(`facility-${lang}-${width}.png`),fullPage:true});}
  await page.goto('/venues/VN-0032/requirements');await expect(page.locator('[data-region=requirement-list]')).toBeVisible();
  await page.goto('/venues/VN-0032/submit');await expect(page).toHaveURL(/\/venues\/VN-0032#final-review$/);
 });

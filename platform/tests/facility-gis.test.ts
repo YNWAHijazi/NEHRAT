@@ -15,6 +15,9 @@ import {readMapPoint} from '../lib/rules/geolocation';
 import {facilityIncidentError,facilityAedRequirement} from '../lib/rules/facility-intake';
 import {setFacilityAedRequirementAction} from '../app/ministry-actions';
 import {GET} from '../app/api/facilities/geojson/route';
+import {hostingVenueForFacility} from '../lib/sites';
+import {facilityRegistrationFacts} from '../lib/facility-registration';
+import {facilityRecordMode} from '../lib/rules/facility-workflow';
 const folder=mkdtempSync(join(tmpdir(),'moph-pad-'));let id='';
 beforeAll(()=>{vi.stubEnv('DATABASE_PATH',join(folder,'test.db'));vi.stubEnv('REVIEW_CLOCK','2026-08-13');getDb();as('test_organizer');});
 afterAll(()=>{getDb().close();vi.unstubAllEnvs();rmSync(folder,{recursive:true,force:true});});
@@ -22,7 +25,8 @@ function as(login:string){const row=getDb().prepare('SELECT id,role,is_demo FROM
 function data(fields:Record<string,string>){const f=new FormData();for(const[k,v]of Object.entries(fields))f.set(k,v);return f;}
 const profile={name:'PAD test sports facility',address:'Main road',municipality:'Beirut',hours:'Daytime',phone:'+9611234567',email:'test@example.com',accessPoint:'North gate',emsNumber:'140',coordinatorName:'Facility manager',coordinatorPhone:'+9611234567',coordinatorEmail:'test@example.com',category:'sports',mapLat:'33.89',mapLng:'35.50',mapConfirmed:'yes'};
 test('coordinates require a confirmed valid map pin',()=>{expect(readMapPoint(data({mapLat:'91',mapLng:'35',mapConfirmed:'yes'}))).toBeNull();expect(readMapPoint(data({mapLat:'',mapLng:'',mapConfirmed:'yes'}))).toBeNull();expect(readMapPoint(data({...profile,mapConfirmed:'no'}))).toBeNull();});
-test('registration validates and saves the profile, pin and audit together',async()=>{const before=getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n;await expect(registerFacilityAction(data({...profile,mapConfirmed:'no'}))).rejects.toThrow('error=details');expect(getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n).toBe(before);await expect(registerFacilityAction(data(profile))).rejects.toThrow('/devices');id=String(getDb().prepare('SELECT id FROM facilities WHERE name_en=?').get(profile.name)!.id);expect(facilityPoint(id)).toEqual({lat:33.89,lng:35.5});expect(facilityAedStatus(id)).toBe('required');});
+test('registration validates and saves the profile, pin and audit together',async()=>{const before=getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n;await expect(registerFacilityAction(data({...profile,mapConfirmed:'no'}))).rejects.toThrow('error=details');expect(getDb().prepare('SELECT COUNT(*) n FROM facilities').get()!.n).toBe(before);// The one-page intake lands on the facility record (owner, 9 October 2026).
+ await expect(registerFacilityAction(data(profile))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);id=String(getDb().prepare('SELECT id FROM facilities WHERE name_en=?').get(profile.name)!.id);expect(facilityPoint(id)).toEqual({lat:33.89,lng:35.5});expect(facilityAedStatus(id)).toBe('required');});
 test('AED record inherits the facility pin and stores its operational answer',async()=>{await expect(saveFacilityDeviceAction(id,data({purpose:'initial',identification:'SER-1',location:'Reception',accessibleHours:'yes',publiclyAccessible:'no',pediatric:'na',operational:'no',representative:'Facility manager',separatePin:'no'}))).rejects.toThrow('notice=saved');expect(devicePoint(id,'AED-001')).toEqual({point:facilityPoint(id),separate:false});expect(getDb().prepare('SELECT operational FROM facility_devices WHERE facility_id=?').get(id)!.operational).toBe(0);});
 test('status changes cannot be forged against another facility or unknown purpose',async()=>{const other='FC-9999';await expect(saveFacilityDeviceAction(other,data({purpose:'statusChange',label:'AED-001',operational:'yes',representative:'x'}))).rejects.toThrow('/dashboard');await expect(saveFacilityDeviceAction(id,data({purpose:'fake',label:'AED-001',representative:'x'}))).rejects.toThrow('error=details');});
 const plan={check_trained:'on',check_signage:'on',check_access:'on',check_routes:'on',check_staffKnow:'on',check_drill:'on',drillDate:'2026-08-01',representative:'Facility manager'};
@@ -70,3 +74,15 @@ test('the certificate token is unguessable, minted once, and resolves to the cer
  const token=ensureFacilityCertificateToken(id);expect(token).toMatch(/^[a-f0-9]{48}$/);expect(ensureFacilityCertificateToken(id)).toBe(token);
  const facts=facilityByCertificateToken(token);expect(facts?.id).toBe(id);expect(facts?.isDemo).toBe(session.account!.isDemo);expect(Object.keys(facts!).sort()).toEqual(['archivedAt','categoryKey','id','isDemo','nameAr','nameEn','registeredOn']);
  expect(facilityByCertificateToken(id)).toBeNull();expect(facilityByCertificateToken('0'.repeat(48))).toBeNull();});
+
+test('the facility record reads its mode from the facts: registering until the first confirmation, managed after it',()=>{
+ // The facility above recorded a confirmation, then relocated an AED: still registered, its certificate withheld.
+ const facts=facilityRegistrationFacts(id);expect(facts.confirmationRecorded).toBe(true);expect(facts.confirmationCurrent).toBe(false);expect(facilityRecordMode(facts)).toBe('manage');});
+
+test('a facility registered from a hosting venue stands on its site, and only its owner sees the venue named on the record',async()=>{as('test_organizer');
+ await expect(registerFacilityAction(data({...profile,name:'PAD from a venue',fromVenue:'VN-0032'}))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);
+ const fromVenue=String(getDb().prepare('SELECT id FROM facilities WHERE name_en=?').get('PAD from a venue')!.id);
+ expect(facilityRecordMode(facilityRegistrationFacts(fromVenue))).toBe('register');
+ expect(hostingVenueForFacility(session.account!.id,fromVenue)?.id).toBe('VN-0032');
+ expect(hostingVenueForFacility(session.account!.id,id)).toBeNull();
+ as('test_moph');expect(hostingVenueForFacility(session.account!.id,fromVenue)).toBeNull();as('test_organizer');});

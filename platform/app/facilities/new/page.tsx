@@ -8,9 +8,11 @@ import { venueSiteForNewFacility } from '../../../lib/sites';
 import { accountContact } from '../../../lib/account-contact';
 
 /**
- * Register a facility: steps 1-3 of the six. Step 2 is a determination, not a form,
- * and for the categories awaiting a Ministry value it ends the journey -- no Continue
- * button exists there (ROADMAP 2d; rule 10's absent behaviour).
+ * Register a facility: one page, like the hosting venue's (owner, 9 October 2026) -- the
+ * profile and map pin, the category determination and the responsible contact, then one
+ * Continue onto the facility record. The category is a determination, not a form, and for
+ * the categories awaiting a Ministry value it ends the journey -- no Continue button exists
+ * there (ROADMAP 2d; rule 10's absent behaviour).
  */
 export default async function RegisterFacilityPage({searchParams}:{searchParams:Promise<{error?:string;fromVenue?:string}>}) {
   const {error,fromVenue}=await searchParams;
@@ -26,15 +28,13 @@ export default async function RegisterFacilityPage({searchParams}:{searchParams:
       <GovernmentBand />
       <Header account={account} organization={organization} unreadCount={unread} showBack={true} />
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '44px 32px 120px' }}>
+        <div style={{ maxWidth: 900 }}>
         <div style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 12 }}>
           <L en="Cardiac-arrest readiness · new facility registration" ar="الجاهزية لتوقف القلب · تسجيل منشأة جديدة" />
         </div>
         <h1 data-sec-h1="" style={{ margin: '0 0 32px', fontSize: 38, fontWeight: 600, letterSpacing: '-.035em' }}>
           <L en="Register a facility" ar="تسجيل منشأة" />
         </h1>
-        {/* The six-steps overview sentence left this screen (partner ruling, second
-            sweep): the step rail below already shows the steps, and the category
-            step explains itself when reached. */}
         {error?<p role="alert"><L en="Complete the required contact details and confirm the facility map pin." ar="أكملوا بيانات الاتصال المطلوبة وأكّدوا موقع المنشأة على الخريطة."/></p>:null}
         {venue ? (
           <p data-region="from-venue" style={{ margin: '0 0 24px', padding: '12px 16px', background: 'var(--surface2)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.6 }}>
@@ -42,6 +42,7 @@ export default async function RegisterFacilityPage({searchParams}:{searchParams:
           </p>
         ) : null}
         <RegisterFacilityForm published={publishedFacilityValues()} me={accountContact(account.id)} fromVenue={venue ? { id: venue.id, nameEn: venue.nameEn, nameAr: venue.nameAr, addressEn: venue.addressMunicipalityEn, addressAr: venue.addressMunicipalityAr } : null} />
+        </div>
       </main>
     </>
   );

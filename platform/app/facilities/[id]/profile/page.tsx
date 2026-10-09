@@ -1,21 +1,21 @@
 import { OptionText } from '../../../../components/OptionText';
 import { PhoneInput } from '../../../../components/PhoneInput';
-import { FacilityWorkspaceHeader } from '../../../../components/FacilityWorkspaceHeader';
+import { FacilityWorkspace } from '../../../../components/FacilityWorkspace';
 import { InfoNote } from '../../../../components/InfoNote';
 import { TRANSPORT_FACILITY_TYPES } from '../../../../lib/rules/facility-intake';
 import { notFound, redirect } from 'next/navigation';
-import { currentAccount, organizationFor } from '../../../../lib/auth';
-import { facilityDetail, facilityPersons, unreadCountFor } from '../../../../lib/queries';
+import { currentAccount } from '../../../../lib/auth';
+import { facilityDetail, facilityPersons } from '../../../../lib/queries';
 import { facilityPoint } from '../../../../lib/facility-gis';
 import { FACILITY_CONTENT } from '../../../../lib/rules';
-import { Header, GovernmentBand } from '../../../../components/Header';
 import { L } from '../../../../components/L';
 import { LocationPicker } from '../../../../components/maps/LocationPicker';
 import { saveFacilityPersonsAction, saveFacilityProfileAction } from '../../../actions';
 
 /**
  * The facility details, and under them the ONE responsible facility contact
- * (partner audit, 2026-10-08): edited here, shown read-only on the response plan.
+ * (partner audit, 2026-10-08): edited here, shown read-only on the response plan. The
+ * record page's details card and contact lead here with Edit (owner, 9 October 2026).
  * Two forms, because the two records are stamped and audited separately.
  */
 export default async function Profile({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{error?:string;notice?:string}>}) {
@@ -23,7 +23,7 @@ export default async function Profile({params,searchParams}:{params:Promise<{id:
  const contact=facilityPersons(id).find(p=>p.role==='coordinator')??null;const content=FACILITY_CONTENT;
  const fields=[['name','Facility name','اسم المنشأة',f.nameEn],['nameAr','Facility name (Arabic)','اسم المنشأة بالعربية',f.nameAr],['address','Address','العنوان',f.address],['municipality','Municipality','البلدية',f.municipalityEn],['municipalityAr','Municipality (Arabic)','البلدية بالعربية',f.municipalityAr],['hours','Operating hours','ساعات العمل',f.operatingHours],['phone','Facility telephone','هاتف المنشأة',f.phone],['email','Facility email','البريد الإلكتروني للمنشأة',f.email],['accessPoint','Main EMS entrance','المدخل الرئيسي للإسعاف',f.accessPoint],['emsNumber',content.accessFields[1]!.en,content.accessFields[1]!.ar,f.emsNumber]];
  const inputStyle:React.CSSProperties={minHeight:44,padding:10,border:'1px solid var(--line)',borderRadius:8,width:'100%'};
- return <><GovernmentBand/><Header account={account} organization={organizationFor(account.id)} unreadCount={unreadCountFor(account.id)} showBack back={{href:`/facilities/${id}`,en:'Facility record',ar:'سجل المنشأة'}}/><main data-pad="" style={{maxWidth:1160,marginInline:'auto',padding:'44px 32px 120px'}}><FacilityWorkspaceHeader facility={f} active="profile"/><h2><L en="Facility details" ar="تفاصيل المنشأة"/></h2>{q.error==='details'?<p role="alert"><L en="Complete the required details and confirm the map pin." ar="أكملوا البيانات المطلوبة وأكّدوا الموقع على الخريطة."/></p>:null}<form action={saveFacilityProfileAction.bind(null,id)}>
+ return <FacilityWorkspace account={account} facility={f} active="details"><h2><L en="Facility details" ar="تفاصيل المنشأة"/></h2>{q.error==='details'?<p role="alert"><L en="Complete the required details and confirm the map pin." ar="أكملوا البيانات المطلوبة وأكّدوا الموقع على الخريطة."/></p>:null}<form action={saveFacilityProfileAction.bind(null,id)}>
  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))',gap:16}}>{fields.map(([key,en,ar,value])=><label key={key} style={{display:'grid',gap:6}}><L en={en!} ar={ar!}/><input name={key} defaultValue={value} required={!key!.endsWith('Ar')} type={key==='email'?'email':key==='phone'||key==='emsNumber'?'tel':'text'} dir={['phone','email','emsNumber','hours'].includes(key!)?'ltr':undefined} style={inputStyle}/></label>)}</div>
  <label style={{display:'grid',gap:8,marginBlock:16}}><L en="Licensed capacity, if applicable" ar="السعة المرخّصة إن انطبقت"/><input type="number" min="0" name="capacity" style={{minHeight:44,padding:10,border:'1px solid var(--line)',borderRadius:8}} defaultValue={f.licensedCapacity??''}/></label>
  {f.categoryKey==='transport'?<label style={{display:'grid',gap:8,marginBlock:16}}><L en="Facility type" ar="نوع المنشأة"/><select name="facilityType" required defaultValue={f.facilityType}><option value=""></option>{TRANSPORT_FACILITY_TYPES.map(t=><option key={t.key} value={t.key}><OptionText en={t.en} ar={t.ar} /></option>)}</select></label>:null}
@@ -41,5 +41,5 @@ export default async function Profile({params,searchParams}:{params:Promise<{id:
    <button type="submit" style={{minHeight:44,padding:'12px 24px',border:0,borderRadius:24,background:'var(--brand)',color:'var(--bg)',cursor:'pointer',justifySelf:'start'}}><L en="Save responsible contact" ar="حفظ جهة الاتصال المسؤولة"/></button>
   </form>
  </section>
- </main></>;
+ </FacilityWorkspace>;
 }
