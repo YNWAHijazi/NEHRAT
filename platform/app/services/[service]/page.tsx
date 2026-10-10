@@ -66,8 +66,13 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
   const h2: React.CSSProperties = { margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' };
   const section: React.CSSProperties = { paddingBlock: '28px', borderBlockStart: '1px solid var(--line)' };
-  const dotRow: React.CSSProperties = { display: 'flex', gap: 16, alignItems: 'baseline', paddingBlock: 16, borderBlockEnd: '1px solid var(--line)', fontSize: 17, lineHeight: 1.5 };
-  const dot = <span aria-hidden="true" style={{ flex: 'none', inlineSize: 10, blockSize: 10, borderRadius: 999, background: 'var(--accent)', transform: 'translateY(-1px)' }} />;
+  // A plain bullet: a small teal check, no dividers -- what everyone provides (owner, 10 October 2026:
+  // "make it bullet points, but visually pleasing").
+  const bullet = (
+    <span aria-hidden="true" style={{ flex: 'none', inlineSize: 22, blockSize: 22, borderRadius: 999, background: 'var(--brand-soft)', color: 'var(--brand)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transform: 'translateY(3px)' }}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+    </span>
+  );
 
   // One flow per service, from the data. The end state differs; the shape does not.
   const flowKey = key === 'certify-an-event' ? 'certify' : 'facility';
@@ -81,17 +86,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
   // WHAT YOU WILL NEED (TAMM's "Required documents"): the service's own list, and for an event
   // what each level adds -- the level is set by the assessment, so the list says so.
-  const needs = [
-    ...def.needs.map((n) => <span key={n.en} style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>{dot}<L en={n.en} ar={n.ar} /></span>),
-    ...(key === 'certify-an-event'
-      ? P.levelPackages.map((p) => (
-        <span key={p.level} style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
-          {dot}
-          <span><strong style={{ fontWeight: 600 }}><L en={`Level ${p.level}: `} ar={`المستوى ${p.level}: `} /></strong><L en={p.en} ar={p.ar} /></span>
-        </span>
-      ))
-      : []),
-  ];
+  const needs = def.needs.map((n) => (
+    <span key={n.en} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', paddingBlock: 8, fontSize: 17, lineHeight: 1.55 }}>
+      {bullet}<span><L en={n.en} ar={n.ar} /></span>
+    </span>
+  ));
 
   // THE TIME LINE OF THE SUMMARY, from the configuration: the filing lead times by level for an
   // event, the drill cycle for a site. Never a fixed number in copy (non-negotiable 3).
@@ -161,9 +160,24 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               ? <L en="The following are asked for during the application. What else is needed depends on the event’s level, which the assessment sets." ar="يُطلب ما يلي أثناء الطلب. ويتوقف ما يُطلب إضافةً إلى ذلك على مستوى الفعالية الذي يحدّده التقييم." />
               : <L en="The following are asked for during the application." ar="يُطلب ما يلي أثناء الطلب." />}
           </p>
-          <ShowMoreList region={key === 'certify-an-event' ? 'documents-by-level' : 'service-needs'} items={needs.map((n, i) => <div key={i} style={dotRow}>{n}</div>)} />
+          <ShowMoreList region="service-needs" style={{ marginBlockStart: 8 }} items={needs} />
           {key === 'certify-an-event' ? (
-            <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--muted)' }}><L en={P.levelPackagesNoteEn} ar={P.levelPackagesNoteAr} /></p>
+            <>
+              {/* WHAT EACH LEVEL ADDS, in the level's own colour -- teal, amber, rust, the colours the
+                  level carries everywhere on the platform -- so the step up reads at a glance. */}
+              <h3 style={{ margin: '24px 0 12px', fontSize: 18, fontWeight: 600 }}><L en="What each level adds" ar="ما يضيفه كل مستوى" /></h3>
+              <div data-region="documents-by-level" style={{ display: 'grid', gap: 10 }}>
+                {P.levelPackages.map((p) => (
+                  <div key={p.level} data-level={p.level} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', borderRadius: 12, background: `var(--l${p.level}s)`, borderInlineStart: `4px solid var(--l${p.level})` }}>
+                    <span style={{ flex: 'none', padding: '3px 10px', borderRadius: 999, background: `var(--l${p.level})`, color: p.level === 2 ? 'var(--ink)' : '#fff', fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <L en={`Level ${p.level}`} ar={`المستوى ${p.level}`} />
+                    </span>
+                    <span style={{ fontSize: 16, lineHeight: 1.55 }}><L en={p.en} ar={p.ar} /></span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--muted)' }}><L en={P.levelPackagesNoteEn} ar={P.levelPackagesNoteAr} /></p>
+            </>
           ) : null}
         </section>
 
