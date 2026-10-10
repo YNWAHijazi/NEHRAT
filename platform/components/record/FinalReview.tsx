@@ -22,7 +22,7 @@ export interface ReviewRow { key: string; labelEn: string; labelAr: string; stat
 export function FinalReview({ eventId, level, remaining, optional, statements, declarationInst, initial, filed, revisionOpen, expedited, certificationStatement, externalBlockers, fee, headerRows, me = null }: {
   eventId: string;
   /** The signed-in organizer, to prefill an empty declaration and for "Use my details". */
-  me?: { name: string; phone: string; position?: string } | null;
+  me?: { name: string; phone: string } | null;
   level: 1 | 2 | 3;
   /** The compliance form's header fields, filled from the record. */
   headerRows: { en: string; ar: string; valueEn: string; valueAr: string }[];
@@ -47,7 +47,8 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   // The signed-in organizer's own name and number until the form holds others (owner, 9 October 2026).
   const [representative, setRepresentative] = useState(initial?.representative || me?.name || '');
   const [telephone, setTelephone] = useState(initial?.telephone || me?.phone || '');
-  const [position, setPosition] = useState(initial?.position || me?.position || '');
+  // The position is typed by the person signing: with it, the declaration is their act (name and number are prefilled).
+  const [position, setPosition] = useState(initial?.position ?? '');
   const [saved, setSaved] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const locked = filed && !revisionOpen;
