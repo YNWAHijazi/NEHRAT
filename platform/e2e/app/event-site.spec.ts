@@ -145,7 +145,8 @@ test('the location field links a registered site; the record reuses it on the or
   await expect(row).toContainText(name);
   await expect(row).toContainText(eventId);
   await expect(row).toContainText('2026-12-12 – 2026-12-13');
-  await expect(row).toContainText('Level 1');
+  await expect(row).toContainText('Planned at your site');
+  await expectAbsent(page, { anchor: row, absent: row.getByText('Level 1'), because: 'the site owner reads where the event stands for the site, not its level (owner, 10 October 2026)' });
   await expect(section.locator(`[data-site-id="${beirut}"] h3`)).toContainText(`Beirut Sports Complex · ${beirut}`);
   await expectAbsent(page, { anchor: row, absent: row.locator('a'), because: 'the site operator has no access to the event record' });
   await expectAbsent(page, { anchor: row, absent: row.getByText('S. Khoury'), because: 'the organizer’s details are not the operator’s to read' });

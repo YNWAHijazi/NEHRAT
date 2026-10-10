@@ -306,6 +306,8 @@ export default async function EventRecordPage({
           </div>
         ) : null}
 
+        {/* Where the record stands first, then what to do next (owner, 10 October 2026). */}
+        <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
         {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
         {action && event.lifecycle === 'active' && !recordArchived ? (
           <NextStepCard step={action} to={action.href.startsWith('#') ? action.href : action.href === '/organization' ? '/organization' : `/events/${event.id}/${action.href}`} />
@@ -324,8 +326,6 @@ export default async function EventRecordPage({
             to={`/events/${event.id}/acknowledgment`}
           />
         ) : null}
-
-        <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
 
         {/* The compact details and assessment block, with deliberate edit actions. */}
         <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>

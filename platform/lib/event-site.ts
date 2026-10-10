@@ -4,7 +4,7 @@ import { archiveWindowDays, derivedLevelFor, facilityDevices, latestOutcomeFor }
 import { padFacilityOnSite, type SiteAed } from './sites';
 import { siteInfrastructure, type SiteInfrastructureAnswers } from './site-infrastructure';
 import { isArchivedRecord, LIFECYCLE_CONTENT, organizerEventState, type Level } from './rules';
-import { eventSiteAlert, type EventSiteAlertKey } from './rules/site';
+import { eventSiteAlert, siteEventStage, type EventSiteAlertKey, type SiteEventStageKey } from './rules/site';
 import { siteRenewalFor } from './site-registration';
 
 /**
@@ -305,13 +305,16 @@ export interface EventAtSite {
   nameAr: string;
   startDate: string | null;
   endDate: string | null;
-  level: Level | null;
+  /** Planned, scheduled, or postponed -- the site's view, never the organizer's steps (owner, 10 October 2026). */
+  stage: SiteEventStageKey;
   statusEn: string;
   statusAr: string;
 }
 
 export interface EventsAtSite {
   siteId: string;
+  /** The facility/site registration the events are read on, for the receipt link. */
+  facilityId: string;
   siteNameEn: string;
   siteNameAr: string;
   events: EventAtSite[];
@@ -330,7 +333,7 @@ export function eventsAtSitesOf(accountId: number, isDemo: boolean): EventsAtSit
   const rows = getDb()
     .prepare(
       `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.end_date, e.filed, e.lifecycle, e.archived_at,
-              f.site_id, f.name_en AS site_name_en, f.name_ar AS site_name_ar
+              f.site_id, f.id AS facility_id, f.name_en AS site_name_en, f.name_ar AS site_name_ar
        FROM events e JOIN facilities f ON f.site_id = e.site_id
        WHERE f.account_id = ? AND f.archived_at IS NULL AND f.is_demo = ?
          AND e.account_id <> ? AND e.is_demo = ?
@@ -341,24 +344,20 @@ export function eventsAtSitesOf(accountId: number, isDemo: boolean): EventsAtSit
     .all(accountId, demo, accountId, demo) as unknown as {
     id: string; name_en: string; name_ar: string; start_date: string | null; end_date: string | null;
     filed: number; lifecycle: string | null; archived_at: string | null;
-    site_id: string; site_name_en: string; site_name_ar: string;
+    site_id: string; facility_id: string; site_name_en: string; site_name_ar: string;
   }[];
   const today = beirutToday();
   const window = archiveWindowDays();
   const bySite = new Map<string, EventsAtSite>();
   for (const r of rows) {
     if (isArchivedRecord({ archivedAt: r.archived_at, endDate: r.end_date }, today, window)) continue;
-    const level = derivedLevelFor(r.id);
-    const status =
-      (r.lifecycle ?? 'active') === 'postponed'
-        ? LIFECYCLE_CONTENT.states.postponed
-        : organizerEventState({ outcome: latestOutcomeFor(r.id), filed: r.filed === 1, assessed: level !== null });
+    const status = siteEventStage({ lifecycle: r.lifecycle ?? 'active', outcome: latestOutcomeFor(r.id) });
     let group = bySite.get(r.site_id);
     if (!group) {
-      group = { siteId: r.site_id, siteNameEn: r.site_name_en, siteNameAr: r.site_name_ar || r.site_name_en, events: [] };
+      group = { siteId: r.site_id, facilityId: r.facility_id, siteNameEn: r.site_name_en, siteNameAr: r.site_name_ar || r.site_name_en, events: [] };
       bySite.set(r.site_id, group);
     }
-    group.events.push({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, startDate: r.start_date, endDate: r.end_date, level, statusEn: status.en, statusAr: status.ar });
+    group.events.push({ id: r.id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, startDate: r.start_date, endDate: r.end_date, stage: status.key, statusEn: status.en, statusAr: status.ar });
   }
   return [...bySite.values()];
 }

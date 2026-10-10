@@ -226,6 +226,8 @@ export default async function FacilityRecordPage({
       <FacilityWorkspace account={account} facility={facility} active="record">
         {notices}
         <SiteDetermination id={id} siteId={facility.siteId} />
+        {/* Where the record stands first, then what to do next (owner, 10 October 2026). */}
+        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         {next ? <NextStepCard step={next} to={nextHref(next.href)} /> : null}
         {/* With the Ministry and not yet decided: what happens next, and the receipt one click away -- the event's card. */}
         {facts.locked ? (
@@ -241,7 +243,6 @@ export default async function FacilityRecordPage({
           />
         ) : null}
         <JumpTo />
-        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         <FeeDue facility={facility} />
         <CategoryRequirements />
         <DetailsCard facility={facility} point={point} editable={editable} />
@@ -310,7 +311,7 @@ export default async function FacilityRecordPage({
         {tab === 'aeds' ? <TabSection id="aeds" titleEn="AEDs" titleAr="أجهزة إزالة الرجفان">{aeds}</TabSection> : null}
         {tab === 'events' ? (
           <TabSection id="events" titleEn="Events at this site" titleAr="الفعاليات في هذا الموقع">
-            <EventsTab siteId={siteId} events={siteId ? siteEventsFor(account.id, siteId, facility.isDemo) : []} archived={archived} />
+            <EventsTab facilityId={id} siteId={siteId} events={siteId ? siteEventsFor(account.id, siteId, facility.isDemo) : []} archived={archived} />
           </TabSection>
         ) : null}
         {tab === 'incidents' ? (

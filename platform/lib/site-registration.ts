@@ -7,10 +7,11 @@ import { demonstrationFilter } from './rules/scope';
 import type { Level } from './rules/types';
 import {
   siteApplicability,
-  siteEventStatus,
+  siteEventStage,
   siteRenewal,
   siteStatus,
   type Applicability,
+  type SiteEventStageKey,
   type SiteRenewal,
   type SiteReviewActKind,
   type SiteStatusFacts,
@@ -246,7 +247,8 @@ export interface SiteEventRow {
   id: string;
   nameEn: string; nameAr: string;
   startDate: string | null; endDate: string | null;
-  level: Level | null;
+  /** Planned, scheduled, cancelled or postponed -- never the organizer's steps (lib/rules/site.ts siteEventStage). */
+  stage: SiteEventStageKey;
   statusEn: string; statusAr: string;
   /** The viewer's own event: it links to its record. */
   own: boolean;
@@ -270,14 +272,41 @@ export function siteEventsFor(viewerAccountId: number, siteId: string, isDemo: b
                             FROM events e WHERE e.site_id = ? AND e.is_demo = ? AND e.account_id <> ? AND e.archived_at IS NULL ORDER BY e.start_date, e.id`)
     .all(siteId, flag, viewerAccountId) as unknown as { id: string; name_en: string; name_ar: string; start_date: string | null; end_date: string | null; filed: number; lifecycle: string; outcome: string | null }[];
   const row = (r: (typeof own)[number], mine: boolean): SiteEventRow => {
-    const st = siteEventStatus(r);
-    return { id: r.id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, startDate: r.start_date, endDate: r.end_date, level: derivedLevelFor(r.id), statusEn: st.en, statusAr: st.ar, own: mine };
+    const st = siteEventStage(r);
+    return { id: r.id, nameEn: r.name_en, nameAr: r.name_ar || r.name_en, startDate: r.start_date, endDate: r.end_date, stage: st.key, statusEn: st.en, statusAr: st.ar, own: mine };
   };
   return [...own.map((r) => row(r, true)), ...others.map((r) => row(r, false))]
     .sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? '') || a.id.localeCompare(b.id));
 }
 
 /** Events at the site that have not yet ended (Asia/Beirut), for the overview's count. Cancelled ones do not count. */
+/**
+ * THE SITE OWNER'S RECEIPT for an event scheduled at the site (owner, 10 October 2026): the event's
+ * name, dates, record id and Ministry reference, and the date the Ministry completed its review.
+ * Only for an event linked to this facility's site, on the same side of the demonstration line,
+ * once the Ministry has recorded its requirements satisfied. Never the organizer's contacts,
+ * documents or answers.
+ */
+export interface SiteEventReceipt {
+  id: string; nameEn: string; nameAr: string;
+  startDate: string | null; endDate: string | null;
+  reference: string | null;
+  reviewedOn: string;
+}
+export function siteEventReceipt(facilityId: string, eventId: string): SiteEventReceipt | null {
+  const row = getDb().prepare(
+    `SELECT e.id, e.name_en, e.name_ar, e.start_date, e.end_date, e.moph_reference, e.lifecycle,
+            (SELECT dt.outcome FROM determinations dt WHERE dt.event_id = e.id ORDER BY dt.recorded_at DESC, dt.id DESC LIMIT 1) AS outcome,
+            (SELECT dt.recorded_at FROM determinations dt WHERE dt.event_id = e.id ORDER BY dt.recorded_at DESC, dt.id DESC LIMIT 1) AS recorded_at
+     FROM events e JOIN facilities f ON f.site_id = e.site_id AND f.is_demo = e.is_demo
+     WHERE e.id = ? AND f.id = ? AND e.archived_at IS NULL`,
+  ).get(eventId, facilityId) as
+    | { id: string; name_en: string; name_ar: string; start_date: string | null; end_date: string | null; moph_reference: string | null; lifecycle: string; outcome: string | null; recorded_at: string | null }
+    | undefined;
+  if (!row || siteEventStage(row).key !== 'scheduled') return null;
+  return { id: row.id, nameEn: row.name_en, nameAr: row.name_ar || row.name_en, startDate: row.start_date, endDate: row.end_date, reference: row.moph_reference, reviewedOn: (row.recorded_at ?? '').slice(0, 10) };
+}
+
 export function upcomingSiteEventCount(siteId: string, isDemo: boolean, today: string): number {
   return (getDb().prepare(`SELECT COUNT(*) AS n FROM events WHERE site_id = ? AND is_demo = ? AND archived_at IS NULL AND lifecycle <> 'cancelled'
                            AND COALESCE(end_date, start_date) >= ?`).get(siteId, isDemo ? 1 : 0, today) as { n: number }).n;
