@@ -135,8 +135,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           <L en={def.en} ar={def.ar} />
         </h1>
 
-        {/* THE SERVICE IN PLAIN WORDS (owner, 10 October 2026: "see how theirs is very
-            straightforward"): what the service does for the person, in one paragraph. */}
         {/* THE SERVICE AT A GLANCE (owner, 10 October 2026: the description at the top read as
             narrative): a lead line and what the service lets you do, point by point. */}
         <div data-region="service-intro">
@@ -156,21 +154,11 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           <Link href="/applicability" style={{ color: 'var(--brand)' }}><L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" /></Link>
         </p>
 
-        {/* WHO ISSUES IT. */}
-        <div data-region="service-authority" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBlock: '28px 0', paddingBlock: 20, borderBlockStart: '1px solid var(--line)' }}>
-          <span aria-hidden="true" style={{ flex: 'none', inlineSize: 52, blockSize: 52, borderRadius: 999, background: 'var(--surface2)', color: 'var(--brand)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 300 }}>+</span>
-          <span style={{ fontSize: 18 }}><L en="Ministry of Public Health" ar="وزارة الصحة العامة" /></span>
-        </div>
-
-        {/* WHAT YOU WILL NEED. */}
-        <section style={section}>
-          <h2 style={h2}><L en="What you will need" ar="ما ستحتاجون إليه" /></h2>
-          <p style={{ margin: '0 0 4px', fontSize: 17, lineHeight: 1.55 }}>
-            {key === 'certify-an-event'
-              ? <L en="The following are asked for during the application. What else is needed depends on the event’s level, which the assessment sets." ar="يُطلب ما يلي أثناء الطلب. ويتوقف ما يُطلب إضافةً إلى ذلك على مستوى الفعالية الذي يحدّده التقييم." />
-              : <L en="The following are asked for during the application." ar="يُطلب ما يلي أثناء الطلب." />}
-          </p>
-          <ShowMoreList region="service-needs" style={{ marginBlockStart: 8 }} items={needs} />
+        {/* WHAT WILL YOU NEED (owner, 10 October 2026): the list straight under the heading -- the
+            Ministry row and the lead-in sentence above it were removed. */}
+        <section style={{ ...section, marginBlockStart: 28 }}>
+          <h2 style={h2}><L en="What will you need" ar="ما الذي ستحتاجون إليه" /></h2>
+          <ShowMoreList region="service-needs" items={needs} />
           {key === 'certify-an-event' ? (
             <>
               {/* WHAT EACH LEVEL ADDS, in the level's own colour -- teal, amber, rust, the colours the
