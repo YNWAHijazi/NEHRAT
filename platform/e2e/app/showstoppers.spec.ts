@@ -65,7 +65,8 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
 
     // The organizer's own rows, one card at a time; the summary counts them.
     await answerLevel1Rows(page);
-    await expect(page.locator('[data-region="required-count"]')).toContainText('8 of 8');
+    // The declaration is counted with the rows (live review, 10 October 2026): it is what remains.
+    await expect(page.locator('[data-region="required-count"]')).toContainText('9 of 10');
     // THE CERTIFICATION. This walk used to tick six boxes and file, and it PASSED --
     // which is how a submission could be filed with no authorized representative
     // named. Answering the rows is not making the certification; Level 1 asks the

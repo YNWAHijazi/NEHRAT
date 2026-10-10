@@ -73,9 +73,10 @@ const secLabel: React.CSSProperties = {
   marginBlockEnd: 4,
 };
 
-function EventCard({ event, today, pending }: { event: EventRow; today: string; pending: number }) {
+function EventCard({ event, today, pending, waiting }: { event: EventRow; today: string; pending: number; waiting: number }) {
   const days = event.due ? daysBetween(today, event.due) : null;
-  const color = days === null ? 'var(--line)' : urgencyColor(days);
+  const isDeadline = event.dueLabelEn !== 'Event date';
+  const color = days === null ? 'var(--line)' : days < 0 && !isDeadline ? 'var(--muted)' : urgencyColor(days);
   const pct =
     days === null ? 4 : Math.max(4, Math.min(100, Math.round((1 - days / event.span) * 100)));
   const level = event.level;
@@ -112,7 +113,7 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
           <L en={event.nameEn} ar={event.nameAr} />
         </div>
         <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث \u2066${(event.updatedAt || event.createdAt).slice(0, 10)}\u2069`} /></span>{!event.filed ? <span><L en={`${pending} pending requirements`} ar={`${pending} متطلبات متبقية`}/></span> : null}
+          <span>{event.id}</span><span><L en={`Updated ${(event.updatedAt || event.createdAt).slice(0, 10)}`} ar={`آخر تحديث \u2066${(event.updatedAt || event.createdAt).slice(0, 10)}\u2069`} /></span>{!event.filed && pending > 0 ? <span data-pending={pending}><L en={`${pending} ${pending === 1 ? 'item' : 'items'} remaining${waiting > 0 ? ` · ${waiting} waiting for others` : ''}`} ar={`${pending} متبقٍ${waiting > 0 ? ` · ${waiting} بانتظار الآخرين` : ''}`}/></span> : null}
           {/* A second running reads as one at a glance: the previous edition's
               date beside the new record's identity. The records stay separate --
               one per authorisation, each with its own reference. */}
@@ -189,8 +190,10 @@ function EventCard({ event, today, pending }: { event: EventRow; today: string; 
           <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', justifyContent: 'end' }}>
             {/* A passed deadline reads as days overdue, never as a negative count (owner, 2026-10-07). */}
             <span style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-.03em', color, fontVariantNumeric: 'tabular-nums' }}>{Math.abs(days)}</span>
-            <span style={{ fontSize: 13, color: days < 0 ? color : 'var(--muted)' }}>
-              <L en={days < 0 ? 'days overdue' : 'days'} ar={days < 0 ? 'يوماً من التأخير' : 'يوماً'} />
+            {/* An event date in the past is a fact, not an overdue task (live review, 10 October 2026): it
+                reads "days ago". Only a deadline -- File by, Report due -- can be overdue. */}
+            <span style={{ fontSize: 13, color: days < 0 && isDeadline ? color : 'var(--muted)' }}>
+              <L en={days < 0 ? (isDeadline ? 'days overdue' : 'days ago') : 'days'} ar={days < 0 ? (isDeadline ? 'يوماً من التأخير' : 'يوماً مضت') : 'يوماً'} />
             </span>
           </div>
         ) : null}
@@ -275,7 +278,7 @@ function EventsAtYourSites({ groups }: { groups: EventsAtSite[] }) {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ notice?: string; sort?: string; q?: string }>;
+  searchParams?: Promise<{ notice?: string; sort?: string; q?: string; service?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -300,7 +303,7 @@ export default async function DashboardPage({
       const reportState = new Map(
         invitations.map((i) => {
           const r = postEventReportFor(i.organizerAccountId, i.eventId);
-          return [i.eventId, { organizerSigned: Boolean(r?.organizerSignedAt), directorSigned: Boolean(r?.directorSignedAt) }] as const;
+          return [i.eventId, { prepared: Boolean(r), returned: Boolean(r?.directorReturnedAt) && !r?.directorSignedAt, organizerSigned: Boolean(r?.organizerSignedAt), directorSigned: Boolean(r?.directorSignedAt) }] as const;
         }),
       );
       const governanceState = new Map(
@@ -311,7 +314,8 @@ export default async function DashboardPage({
       );
       rows = directorRows(invitations, reportState, governanceState, todayRole);
     }
-    const owed = rows.filter((r) => !r.done).length;
+    // Only what the signed-in person can do now is owed; rows waiting on the organizer are listed apart.
+    const owed = rows.filter((r) => !r.done && !r.waiting).length;
     return (
       <>
         <GovernmentBand />
@@ -334,7 +338,10 @@ export default async function DashboardPage({
   }
   const organization = organizationFor(account.id);
   const allEvents = eventsFor(account.id);
-  const pendingById = new Map(allEvents.map(e => [e.id, e.filed || !e.level ? 0 : submissionGateFor(account.id, e.id).blockers.length]));
+  // The same blockers the record page lists and the gate refuses on, split by who can clear them.
+  const gateById = new Map(allEvents.map(e => [e.id, e.filed || !e.level ? null : submissionGateFor(account.id, e.id)]));
+  const pendingById = new Map(allEvents.map(e => [e.id, gateById.get(e.id)?.blockers.length ?? 0]));
+  const othersById = new Map(allEvents.map(e => [e.id, gateById.get(e.id)?.record?.summary.required.others ?? 0]));
   // A cancelled event leaves the live list for its own collapsed section at the foot (owner, 2026-10-07).
   const cancelled = allEvents.filter((e) => e.lifecycle === 'cancelled');
   const events = allEvents.filter(e => e.lifecycle !== 'cancelled' && `${e.id} ${e.nameEn} ${e.nameAr} ${e.mophReference ?? ''}`.toLowerCase().includes(query)).sort((a,b) => {
@@ -361,6 +368,13 @@ export default async function DashboardPage({
   const today = beirutToday();
 
   const empty = allEvents.length === 0 && facilities.length === 0;
+  // ONE SERVICE AT A TIME, when the account holds both (live review, 10 October 2026: sixteen
+  // event cards stood between a facility operator and their sites). "All" stays the default.
+  const view: 'all' | 'events' | 'facilities' = filters?.service === 'events' ? 'events' : filters?.service === 'facilities' ? 'facilities' : 'all';
+  const showEvents = view !== 'facilities';
+  const showFacilities = view !== 'events';
+  const shownFacilities = view === 'facilities' && query ? facilities.filter((f) => `${f.id} ${f.siteId ?? ''} ${f.nameEn} ${f.nameAr}`.toLowerCase().includes(query)) : facilities;
+  const liveEventCount = allEvents.length - cancelled.length;
 
   return (
     <>
@@ -430,29 +444,53 @@ export default async function DashboardPage({
           </div>
         ) : (
           <>
+            {allEvents.length > 0 && facilities.length > 0 ? (
+              <nav data-region="service-tabs" aria-label="Services" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBlockEnd: 22 }}>
+                {([
+                  ['all', 'All', 'الكل', null],
+                  ['events', 'Events', 'الفعاليات', liveEventCount],
+                  ['facilities', 'Facilities and sites', 'المنشآت والمواقع', facilities.length],
+                ] as const).map(([key, en, ar, n]) => (
+                  <Link key={key} href={key === 'all' ? '/dashboard' : `/dashboard?service=${key}`} data-service-tab={key} aria-current={view === key ? 'page' : undefined}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, paddingInline: 16, borderRadius: 20, fontSize: 14, border: `1px solid ${view === key ? 'var(--brand)' : 'var(--line)'}`, background: view === key ? 'var(--brand-soft)' : 'var(--bg)', color: view === key ? 'var(--brand)' : 'var(--ink)', fontWeight: view === key ? 600 : 400 }}>
+                    <L en={en} ar={ar} />{n !== null ? <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--muted)', fontWeight: 400 }}>{n}</span> : null}
+                  </Link>
+                ))}
+              </nav>
+            ) : null}
+            {showEvents ? (<>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
                 <L en="Events" ar="الفعاليات" />
               </h2>
             </div>
             {/* Search and sort only once there is something to search; an empty account gets a start, not a failed search. */}
-            {allEvents.length > 0 ? <form style={{display:'flex',gap:12,flexWrap:'wrap',marginBlock:'12px 20px'}}><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Search events" ar="البحث عن فعاليات"/><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14,minWidth:0,maxWidth:'100%'}}/></label><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Sort by" ar="ترتيب حسب"/><select name="sort" defaultValue={sort} style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14}}>{[['updated','Last updated','آخر تحديث'],['pending','Pending requirements','المتطلبات المتبقية'],['due','Submit by','موعد التقديم'],['status','Status','الحالة'],['date','Event date','تاريخ الفعالية']].map(([value,en,ar])=><option key={value} value={value}><OptionText en={String(en)} ar={String(ar)} /></option>)}</select></label><button type="submit" style={{height:40,paddingInline:18,border:'1px solid var(--line)',borderRadius:20,background:'var(--bg)',color:'var(--ink)',cursor:'pointer'}}><L en="Apply" ar="تطبيق"/></button></form> : null}
+            {allEvents.length > 0 ? <form style={{display:'flex',gap:12,flexWrap:'wrap',marginBlock:'12px 20px'}}>{view !== 'all' ? <input type="hidden" name="service" value={view} /> : null}<label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Search events" ar="البحث عن فعاليات"/><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14,minWidth:0,maxWidth:'100%'}}/></label><label style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}><L en="Sort by" ar="ترتيب حسب"/><select name="sort" defaultValue={sort} style={{height:40,paddingInline:12,borderRadius:8,border:'1px solid var(--line)',background:'var(--bg)',color:'var(--ink)',fontSize:14}}>{[['updated','Last updated','آخر تحديث'],['pending','Pending requirements','المتطلبات المتبقية'],['due','Submit by','موعد التقديم'],['status','Status','الحالة'],['date','Event date','تاريخ الفعالية']].map(([value,en,ar])=><option key={value} value={value}><OptionText en={String(en)} ar={String(ar)} /></option>)}</select></label><button type="submit" style={{height:40,paddingInline:18,border:'1px solid var(--line)',borderRadius:20,background:'var(--bg)',color:'var(--ink)',cursor:'pointer'}}><L en="Apply" ar="تطبيق"/></button></form> : null}
             {allEvents.length===0 ? <p style={{padding:'16px 22px',background:'var(--surface2)',borderRadius:12}}><L en="No events yet." ar="لا فعاليات بعد."/> <Link href="/events/new"><L en="Create an event" ar="إنشاء فعالية"/></Link></p> : events.length===0 ? <p><L en="No matching events." ar="لا توجد فعاليات مطابقة."/></p> : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
               {events.map((event) => (
-                <EventCard key={event.id} event={event} today={today} pending={pendingById.get(event.id) ?? 0} />
+                <EventCard key={event.id} event={event} today={today} pending={pendingById.get(event.id) ?? 0} waiting={othersById.get(event.id) ?? 0} />
               ))}
             </div>
+            </>) : null}
 
-            {facilities.length > 0 ? (
+            {showFacilities && facilities.length > 0 ? (
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 6 }}>
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
                     <L en="Facilities and sites" ar="المنشآت والمواقع" />
                   </h2>
                 </div>
+                {view === 'facilities' ? (
+                  <form style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBlock: '12px 20px' }}>
+                    <input type="hidden" name="service" value="facilities" />
+                    <label style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}><L en="Search facilities and sites" ar="البحث عن منشآت ومواقع" /><input name="q" defaultValue={filters?.q ?? ''} type="search" style={{ height: 40, paddingInline: 12, borderRadius: 8, border: '1px solid var(--line)', background: 'var(--bg)', color: 'var(--ink)', fontSize: 14, minWidth: 0, maxWidth: '100%' }} /></label>
+                    <button type="submit" style={{ height: 40, paddingInline: 18, border: '1px solid var(--line)', borderRadius: 20, background: 'var(--bg)', color: 'var(--ink)', cursor: 'pointer' }}><L en="Apply" ar="تطبيق" /></button>
+                  </form>
+                ) : null}
+                {shownFacilities.length === 0 ? <p><L en="No matching facilities or sites." ar="لا توجد منشآت أو مواقع مطابقة." /></p> : null}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 44 }}>
-                  {facilities.map((f) => {
+                  {shownFacilities.map((f) => {
                     const lapseDays = f.nextLapse ? daysBetween(today, f.nextLapse) : null;
                     const window = REASSESSMENT_WINDOW.facilityReadinessOpensDaysBeforeLapse;
                     const color =
@@ -494,9 +532,10 @@ export default async function DashboardPage({
                         </div>
                         <div data-due="" style={{ textAlign: 'end', minWidth: 170 }}>
                           <div style={secLabel}>
-                            <L en="Next lapse" ar="أقرب انتهاء" />
+                            <L en="Next due" ar="الاستحقاق التالي" />
                           </div>
                           <div style={{ fontSize: 18, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color }}>{f.nextLapse ?? '—'}</div>
+                          {f.nextLapse && f.nextLapseEn && f.nextLapseAr ? <div data-region="next-due-what" style={{ fontSize: 12.5, color: 'var(--muted)' }}><L en={f.nextLapseEn} ar={f.nextLapseAr} /></div> : null}
                         </div>
                       </Link>
                     );
@@ -505,12 +544,12 @@ export default async function DashboardPage({
               </>
             ) : null}
 
-            {eventsAtSites !== null ? <EventsAtYourSites groups={eventsAtSites} /> : null}
+            {eventsAtSites !== null && showFacilities ? <EventsAtYourSites groups={eventsAtSites} /> : null}
           </>
         )}
 
 
-        {cancelled.length > 0 ? (
+        {cancelled.length > 0 && showEvents ? (
           <details data-region="cancelled-events" style={{ marginBlockStart: 48, borderBlockStart: '1px solid var(--line)', paddingBlockStart: 20 }}>
             <summary style={{ cursor: 'pointer', fontSize: 16, fontWeight: 600, letterSpacing: '-.015em' }}>
               <L en={`Cancelled (${cancelled.length})`} ar={`الملغاة (${cancelled.length})`} />

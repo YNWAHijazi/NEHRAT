@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { L } from '../L';
 import { PrintButton } from '../PrintButton';
 import type { RecordRequirements } from '../../lib/record-facts';
-import { REQUIREMENT_DECISIONS, REQUIREMENT_GROUPS, handledBy, type RequirementInstance } from '../../lib/rules';
+import { CATALOGUE_REVISION, REQUIREMENT_GROUPS, handledBy, type RequirementInstance } from '../../lib/rules';
 
 /**
  * The whole requirement list on one printable page -- the "download" the record page
@@ -47,10 +47,11 @@ export function RequirementList({ record, nameEn, nameAr, backHref }: { record: 
           </ol>
         </section>
       ))}
+      {/* A public document title and version, never the project's own decision IDs or who argued them (live review, 10 October 2026). */}
       <p data-region="decision-note" style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--muted)', lineHeight: 1.6, maxWidth: '80ch' }}>
         <L
-          en={`Rows and completion tests follow the revised requirements matrix and the decisions confirmed by the owner and the partner (${Object.keys(REQUIREMENT_DECISIONS).join(', ')}, 7 October 2026).`}
-          ar={`تتبع البنود واختبارات الاكتمال مصفوفة المتطلبات المنقّحة والقرارات التي أكّدها المالك والشريك (${Object.keys(REQUIREMENT_DECISIONS).join('، ')}، 7 تشرين الأول 2026).`}
+          en={`Health and medical preparedness requirements for events · revision ${CATALOGUE_REVISION}`}
+          ar={`متطلبات التأهب الصحي والطبي للفعاليات · المراجعة ⁦${CATALOGUE_REVISION}⁩`}
         />
       </p>
     </div>

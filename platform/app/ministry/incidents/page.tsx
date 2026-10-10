@@ -3,7 +3,7 @@ import { MinistryShell } from '../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../lib/ministry-auth';
 import { getDb } from '../../../lib/db';
 import { seriousIncidentsForMinistry } from '../../../lib/queries';
-import { SERIOUS_INCIDENT_NOTIFICATION } from '../../../lib/rules';
+import { SERIOUS_INCIDENT_NOTIFICATION, beirutStamp, seriousIncidentTimeliness } from '../../../lib/rules';
 
 /**
  * Incidents and reports, across both instruments -- listed side by side but
@@ -35,11 +35,8 @@ export default async function IncidentsPage() {
     (SERIOUS_INCIDENT_NOTIFICATION.types as { key: string; en: string; ar: string }[]).map((x) => [x.key, x]),
   );
   const windowHours = SERIOUS_INCIDENT_NOTIFICATION.windowHours as number;
-  const withinWindow = (occurred: string, notified: string): boolean => {
-    const o = new Date(occurred.replace(' ', 'T'));
-    const n = new Date(notified.replace(' ', 'T'));
-    return n.getTime() - o.getTime() <= windowHours * 3_600_000;
-  };
+  // Occurrence is Beirut wall-clock, the notice a UTC stamp: one rule reads both (D6).
+  const withinWindow = (occurred: string, notified: string): boolean => !seriousIncidentTimeliness(occurred, notified, windowHours).late;
 
   return (
     <MinistryShell account={account} back={{ href: '/ministry', en: 'Operational dashboard', ar: 'اللوحة التشغيلية' }}>
@@ -74,10 +71,10 @@ export default async function IncidentsPage() {
                     <L en={`occurred ${r.occurredAt.replace('T', ' ')}`} ar={`وقعت في ⁦${r.occurredAt.replace('T', ' ')}⁩`} />
                   </span>
                   <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    <L en={`notified ${r.notifiedAt.slice(0, 16)}`} ar={`أُبلغ في ⁦${r.notifiedAt.slice(0, 16)}⁩`} />
+                    <L en={`notified ${beirutStamp(r.notifiedAt)}`} ar={`أُبلغ في ⁦${beirutStamp(r.notifiedAt)}⁩`} />
                   </span>
                   <span style={{ flex: 'none', padding: '2px 9px', borderRadius: 999, fontSize: 12, background: inWindow ? 'var(--brand-soft)' : 'var(--bad-soft)', color: inWindow ? 'var(--brand)' : 'var(--bad)' }}>
-                    {inWindow ? <L en={`Within ${windowHours} hours`} ar={`ضمن ${windowHours} ساعة`} /> : <L en={`Outside ${windowHours} hours`} ar={`خارج ${windowHours} ساعة`} />}
+                    {inWindow ? <L en={`Within ${windowHours} hours`} ar={`ضمن ${windowHours} ساعة`} /> : <L en={`Late — after ${windowHours} hours`} ar={`متأخر — بعد ${windowHours} ساعة`} />}
                   </span>
                 </a>
               );

@@ -2,7 +2,7 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-10.1",
+  "revision": "2026-10-10.2",
   "decisions": {
     "D1": {
       "state": "confirmed",
@@ -28,6 +28,11 @@
       "state": "confirmed",
       "en": "Level 1 first-aid supplies are a confirmation with a location and a responsible person. No kit inventory is invented and oxygen is not required at Level 1.",
       "ar": "مستلزمات الإسعافات الأولية في المستوى 1 تأكيدٌ مع موقع وشخص مسؤول. لا تُخترع قائمة عدّة ولا يُطلب الأكسجين في المستوى 1."
+    },
+    "D6": {
+      "state": "confirmed",
+      "en": "A serious-incident notice is due within 24 hours of the occurrence. A late notice is accepted and marked late; a submitted notice is not edited (owner, 10 October 2026).",
+      "ar": "يُستحق الإبلاغ عن الحادثة الجسيمة خلال 24 ساعة من وقوعها. يُقبل الإبلاغ المتأخر ويُوسم بأنه متأخر؛ ولا يُعدَّل إبلاغ قُدّم (المالك، 10 تشرين الأول 2026)."
     },
     "D8": {
       "state": "confirmed",
@@ -469,8 +474,8 @@
       "service": "event",
       "labelEn": "First aid",
       "labelAr": "الإسعافات الأولية",
-      "infoEn": "A confirmation only: no names, responder counts, shifts or certificates (partner audit, 8 October 2026).",
-      "infoAr": "تأكيد فقط: لا أسماء ولا أعداد مستجيبين ولا مناوبات ولا شهادات (مراجعة الشريك، 8 تشرين الأول 2026).",
+      "infoEn": "A confirmation only: no names, responder counts, shifts or certificates.",
+      "infoAr": "تأكيد فقط: لا أسماء ولا أعداد مستجيبين ولا مناوبات ولا شهادات.",
       "fields": [
         {
           "key": "available",
@@ -920,8 +925,8 @@
       "service": "event",
       "labelEn": "Medical supplies",
       "labelAr": "المستلزمات الطبية",
-      "infoEn": "A confirmation only. No kit list, quantity, storage place or checker is asked (partner audit, 8 October 2026).",
-      "infoAr": "تأكيد فقط. لا تُطلب قائمة عدّة ولا كميات ولا مكان حفظ ولا من يتفقّدها (مراجعة الشريك، 8 تشرين الأول 2026).",
+      "infoEn": "A confirmation only. No kit list, quantity, storage place or checker is asked.",
+      "infoAr": "تأكيد فقط. لا تُطلب قائمة عدّة ولا كميات ولا مكان حفظ ولا من يتفقّدها.",
       "fields": [
         {
           "key": "ready",
@@ -1442,8 +1447,8 @@
           "linkedPlan": [
             "P12"
           ],
-          "infoEn": "A concise, coordinated escalation procedure (decision D3). The full major-incident plan applies at Level 3.",
-          "infoAr": "إجراء تصعيد موجز ومنسّق (القرار D3). تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3."
+          "infoEn": "A concise, coordinated escalation procedure. The full major-incident plan applies at Level 3.",
+          "infoAr": "إجراء تصعيد موجز ومنسّق. تنطبق خطة الحوادث الجسيمة الكاملة في المستوى 3."
         },
         "3": {
           "obligation": "inPlan",
@@ -1544,8 +1549,8 @@
             "organizer"
           ],
           "completion": "fileUnlessNotApplicable",
-          "infoEn": "Required where applicable (partner review, 7 October 2026): upload the map, or record that no map applies and why. The medical deployment map is a Level 3 document.",
-          "infoAr": "مطلوبة عند الانطباق (مراجعة الشريك، 7 تشرين الأول 2026): ارفعوا الخريطة، أو سجّلوا أن لا خريطة تنطبق مع ذكر السبب. خريطة الانتشار الطبي مستند من المستوى 3.",
+          "infoEn": "Required where applicable: upload the map, or record that no map applies and why. The medical deployment map is a Level 3 document.",
+          "infoAr": "مطلوبة عند الانطباق: ارفعوا الخريطة، أو سجّلوا أن لا خريطة تنطبق مع ذكر السبب. خريطة الانتشار الطبي مستند من المستوى 3.",
           "fields": [
             {
               "key": "applicable",
@@ -1665,8 +1670,8 @@
       "labelAr": "توثيق رعاية المرضى",
       "promptEn": "If medical care is provided, the care provided must be documented by the provider in its own clinical system.",
       "promptAr": "إذا قُدّمت رعاية طبية، فعلى المزوّد توثيق الرعاية المقدّمة في نظامه السريري.",
-      "infoEn": "No patient-identifying data is entered on this platform (decision D10). The provider owns the documentation process.",
-      "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10). المزوّد هو مالك عملية التوثيق.",
+      "infoEn": "No patient-identifying data is entered on this platform. The provider owns the documentation process.",
+      "infoAr": "لا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة. المزوّد هو مالك عملية التوثيق.",
       "fields": [
         {
           "key": "confirmed",
@@ -1681,12 +1686,8 @@
           "authors": []
         },
         "2": {
-          "obligation": "required",
-          "authors": [
-            "organizer",
-            "ems"
-          ],
-          "completion": "fields"
+          "obligation": "whenCare",
+          "authors": []
         },
         "3": {
           "obligation": "required",
@@ -1734,8 +1735,8 @@
               "venueLabelAr": "يمكن الإبلاغ عن المجاميع بدقة من دون كشف معلومات شخصية غير ضرورية."
             }
           ],
-          "infoEn": "Guidance 5.13, for the EMS agency or the Medical Director. Records stay in the provider's clinical system; no patient-identifying data is entered on this platform (decision D10).",
-          "infoAr": "الإرشاد 5.13، لجهة الإسعاف أو المدير الطبي. تبقى السجلات في النظام السريري للمزوّد؛ ولا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة (القرار D10)."
+          "infoEn": "Guidance 5.13, for the EMS agency or the Medical Director. Records stay in the provider's clinical system; no patient-identifying data is entered on this platform.",
+          "infoAr": "الإرشاد 5.13، لجهة الإسعاف أو المدير الطبي. تبقى السجلات في النظام السريري للمزوّد؛ ولا تُدخل أي بيانات تعرّف بالمرضى على هذه المنصة."
         }
       }
     },
@@ -1757,8 +1758,8 @@
             "ems"
           ],
           "completion": "plan",
-          "infoEn": "Optional at Level 2 unless the Ministry requests it (decision D2). A completed plan is readable without Director approval.",
-          "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة (القرار D2). الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي."
+          "infoEn": "Optional at Level 2 unless the Ministry requests it. A completed plan is readable without Director approval.",
+          "infoAr": "اختيارية في المستوى 2 ما لم تطلبها الوزارة. الخطة المكتملة تُقرأ من دون اعتماد المدير الطبي."
         },
         "3": {
           "obligation": "required",
@@ -1768,8 +1769,8 @@
           ],
           "approver": "director",
           "completion": "planApproved",
-          "infoEn": "The EMS agency or the Medical Director prepares it; the named Medical Director approves the current version (decision D4). A later change reopens the approval.",
-          "infoAr": "تُعدّها جهة الإسعاف أو المدير الطبي؛ ويعتمد المدير الطبي المسمّى النسخة الحالية (القرار D4). أي تعديل لاحق يعيد فتح الاعتماد."
+          "infoEn": "The EMS agency or the Medical Director prepares it; the named Medical Director approves the current version. A later change reopens the approval.",
+          "infoAr": "تُعدّها جهة الإسعاف أو المدير الطبي؛ ويعتمد المدير الطبي المسمّى النسخة الحالية. أي تعديل لاحق يعيد فتح الاعتماد."
         }
       }
     },

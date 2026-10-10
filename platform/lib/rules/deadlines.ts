@@ -94,6 +94,15 @@ export function fromBeirut(wall: WallClock): Date {
   return instant;
 }
 
+/** A stored UTC stamp (`YYYY-MM-DD HH:MM[:SS]`, SQLite's datetime('now')) read as Beirut `YYYY-MM-DD HH:MM`. */
+export function beirutStamp(utc: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/.exec(utc);
+  if (!m) return utc.slice(0, 16);
+  const w = toBeirut(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] ?? 0))));
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${w.year}-${p(w.month)}-${p(w.day)} ${p(w.hour)}:${p(w.minute)}`;
+}
+
 /** Calendar arithmetic on the date parts, immune to daylight saving. */
 export function addDays(date: CalendarDate, days: number): CalendarDate {
   const shifted = new Date(Date.UTC(date.year, date.month - 1, date.day + days));

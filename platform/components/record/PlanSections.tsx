@@ -41,6 +41,13 @@ export function LinkedAnswers({ linked }: { linked: readonly RequirementInstance
   );
 }
 
+/** A plan section's state in words: complete, partly complete, or not yet started. */
+export function PlanProgress({ progress }: { progress: PlanSectionInstance['progress'] }) {
+  if (progress === 'complete') return <L en="Addressed" ar="مستوفى" />;
+  if (progress === 'partial') return <L en="Partly complete" ar="مكتمل جزئياً" />;
+  return <L en="Pending" ar="قيد الإنجاز" />;
+}
+
 /**
  * The medical plan, generated from the same instances the cards show (brief item 10):
  * sixteen short collapsible sections, each either filled from the record, read from the
@@ -69,10 +76,14 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
   // plan's AED deployment section reads that answer and never asks it a second time.
   const refValues = record.facts?.answers[FACILITY_REFERENCE_KEY]?.values ?? {};
   const refAnswer = siteAedAnswer(refValues);
+  const directorName = record.parties.find((p) => p.kind === 'director' && p.status === 'confirmed')?.name ?? null;
   return (
     <div data-region="plan-sections">
       {planInst?.state === 'waiting' && record.approval === null ? (
-        <p data-region="plan-approval-state" style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--accent-ink)' }}><L en={REQUIREMENT_COPY.waitingApprovalEn} ar={REQUIREMENT_COPY.waitingApprovalAr} /></p>
+        <p data-region="plan-approval-state" style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--accent-ink)' }}>
+          {/* Names the version awaiting approval and who approves it (live review, 10 October 2026). */}
+          <L en={`${REQUIREMENT_COPY.waitingApprovalEn} · plan version ${record.planVersion}${directorName ? ` · ${directorName}` : ''}`} ar={`${REQUIREMENT_COPY.waitingApprovalAr} · نسخة الخطة ${record.planVersion}${directorName ? ` · ${directorName}` : ''}`} />
+        </p>
       ) : null}
       {record.approval ? (
         <p data-region="plan-approval-state" style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--success)' }}>
@@ -83,9 +94,14 @@ export function PlanSections({ record, viewerRole, canEdit, canApprove, derived,
         <details key={s.key} id={`plan-${s.key}`} data-plan-section={s.key} data-complete={s.complete} style={itemStyle}>
           <summary className="requirement-summary" style={{ padding: '10px 14px', minHeight: 44 }}>
             <span style={{ fontSize: '14.5px', fontWeight: 500 }}><span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 8 }}>{s.n}</span><L en={s.en} ar={s.ar} /></span>
-            <span style={{ flex: 'none', fontSize: 13, color: s.complete ? 'var(--success)' : 'var(--accent-ink)' }}><L en={s.complete ? 'Addressed' : 'Pending'} ar={s.complete ? 'مستوفى' : 'قيد الإنجاز'} /></span>
+            <span data-progress={s.progress} style={{ flex: 'none', fontSize: 13, color: s.complete ? 'var(--success)' : 'var(--accent-ink)' }}><PlanProgress progress={s.progress} /></span>
           </summary>
           <div style={{ padding: '0 14px 14px' }}>
+            {s.lacking.length > 0 && s.progress === 'partial' ? (
+              <p data-region="plan-lacking" style={{ margin: '0 0 8px', fontSize: '13.5px', color: 'var(--accent-ink)', lineHeight: 1.5 }}>
+                <L en={`Still needed: ${s.lacking.map((x) => x.en).join('; ')}.`} ar={`ما زال مطلوباً: ${s.lacking.map((x) => x.ar).join('؛ ')}.`} />
+              </p>
+            ) : null}
             {s.protocolEn && s.protocolEn !== s.en ? (
               <p data-region="protocol-wording" style={{ margin: '0 0 6px', fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.5, fontStyle: 'italic' }}><L en={s.protocolEn} ar={s.protocolAr} /></p>
             ) : null}

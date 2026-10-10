@@ -109,14 +109,19 @@ describe('the catalogue', () => {
     expect(Object.values(d).some((x) => x.state === 'proposal')).toBe(false);
     // D1 is the partner's correction: the Director is a Level 3 role.
     expect(d['D1']!.en).toContain('Level 3 role');
-    // D6 and D7 stay as they work today and are deliberately not in the catalogue.
-    expect(d['D6']).toBeUndefined();
+    // D6 decided by the owner, 10 October 2026: a late serious-incident notice is accepted and marked late.
+    expect(d['D6']!.state).toBe('confirmed');
+    expect(d['D6']!.en).toContain('late notice is accepted');
+    // D7 stays as it works today and is deliberately not in the catalogue.
     expect(d['D7']).toBeUndefined();
   });
 
-  it('counts the readiness rows in the summary; the assessment and declaration have their own blocks', () => {
+  it('counts every required pre-event item -- readiness rows, assessment and declaration -- exactly as the gate blocks (live review, 10 October 2026)', () => {
     const rows = resolveRequirements(facts(1));
-    expect(requirementSummary(rows).required.total).toBe(8);
+    const summary = requirementSummary(rows);
+    expect(summary.required.total).toBe(10);
+    expect(summary.required.total - summary.required.complete).toBe(requirementBlockers(rows).length);
+    expect(summary.required.yours + summary.required.others).toBe(requirementBlockers(rows).length);
     expect(byKey(rows, 'P-A').section).toBe('assessment');
     expect(byKey(rows, 'P-C').section).toBe('declaration');
   });
@@ -208,11 +213,12 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   const rows = resolveRequirements(facts(2));
 
   it('requires the eleven readiness and admin rows plus the map and declaration; treatment point and plan are recommended', () => {
-    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-M', 'B18', 'P-A', 'P-C']);
+    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-M', 'P-A', 'P-C']);
     expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['B6', 'B2']);
-    // Patient-care documentation at Level 2 is one confirmation by the organizer or the provider (partner audit, 8 October 2026).
-    expect(byKey(rows, 'B18').fields.map((f) => f.key)).toEqual(['confirmed']);
-    expect(byKey(rows, 'B18').authors).toEqual(['organizer', 'ems']);
+    // Patient-care documentation at Level 2 applies when care is given and never blocks filing
+    // (D10; live review, 10 October 2026). It is listed with the later phases, as at Level 1.
+    expect(byKey(rows, 'B18').group).toBe('later');
+    expect(byKey(rows, 'B18').blocks).toBe(false);
   });
 
   it('D1: no Director below Level 3 -- the row is absent, nobody may invite one, and no Level 2 row names a Director author', () => {
@@ -268,7 +274,9 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   it('D3: escalation at Level 2 is a short coordinated procedure, not the eleven major-incident items', () => {
     const b16 = byKey(rows, 'B16');
     expect(b16.fields.map((f) => f.key)).toEqual(['how', 'told']);
-    expect(b16.infoEn).toContain('D3');
+    // The note explains the procedure; the internal decision ID is not shown (live review, 10 October 2026).
+    expect(b16.infoEn).toContain('coordinated escalation procedure');
+    expect(b16.infoEn).not.toMatch(/\bD\d+\b/);
     expect(resolvePlan(facts(2), rows).find((s) => s.key === 'P12')!.items).toEqual([]);
   });
 
@@ -305,7 +313,7 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   });
 
   it('shared rows take the first authorized completion from either side (brief item 11)', () => {
-    for (const key of ['B4', 'B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16', 'B18']) {
+    for (const key of ['B4', 'B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16']) {
       expect(authorsFor(key, 2, 'event'), key).toEqual(['organizer', 'ems']);
     }
     expect(authorsFor('B10', 2, 'event')).toEqual(['organizer']);
@@ -427,7 +435,8 @@ describe('later phases never create pre-event blockers (brief item 15, D10)', ()
       expect(later.every((r) => !r.blocks && r.state === 'later')).toBe(true);
       expect(keys(later)).toContain('B19');
       expect(keys(later)).toContain('P-I');
-      if (level === 1) expect(keys(later)).toContain('B18');
+      // D10: no patient-care blocker at Levels 1 and 2; at Level 3 the plan names the procedure.
+      if (level < 3) expect(keys(later)).toContain('B18');
       else expect(byKey(rows, 'B18').group).toBe('required');
     });
   }
@@ -496,5 +505,31 @@ describe('the catalogue decides obligation, not the wording (brief item 6)', () 
     expect(fieldsFor('B5', 2, 'event')!.map((f) => f.key)).toEqual(['bls', 'firstAid']);
     expect(fieldsFor('M04', 3, 'event')!.map((f) => f.key)).toEqual(['text']);
     expect(fieldsFor('nope', 2, 'event')).toBeNull();
+  });
+});
+
+describe('plan section progress (live review, 10 October 2026)', () => {
+  const p02 = (f: RecordFacts) => resolvePlan(f, resolveRequirements(f)).find((s) => s.key === 'P02')!;
+
+  it('Level 3 contacts are partly complete with only the organizer, and name what is missing', () => {
+    const s = p02(facts(3));
+    expect(s.complete).toBe(false);
+    expect(s.progress).toBe('partial');
+    expect(s.lacking.map((x) => x.en)).toEqual(['an EMS agency that has accepted its invitation', 'a Medical Director who has accepted the invitation']);
+  });
+
+  it('an invitation not yet accepted does not complete the contacts', () => {
+    expect(p02(facts(3, { ems: [{ token: 'e', name: 'A', status: 'nominated' }] })).progress).toBe('partial');
+  });
+
+  it('organizer, accepted agency and accepted Director complete the Level 3 contacts; Level 2 needs no Director', () => {
+    const ems = [{ token: 'e', name: 'A', status: 'confirmed' as const }];
+    expect(p02(facts(3, { ems, director: { token: 'd', name: 'D', status: 'confirmed' } })).progress).toBe('complete');
+    expect(p02(facts(2, { ems })).progress).toBe('complete');
+  });
+
+  it('a section nobody has touched is pending, not partial', () => {
+    const plan = resolvePlan(facts(3), resolveRequirements(facts(3)));
+    expect(plan.find((s) => s.key === 'P12')!.progress).toBe('pending');
   });
 });

@@ -197,7 +197,9 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     yours: yours(inst), whoEn: handledBy(inst).en, whoAr: handledBy(inst).ar,
     body: <RequirementCard inst={inst} open extra={planLink(inst)} yours={yours(inst)} owner={ownerLine(inst)} note={yours(inst) ? readOnlyNote : null}>{body(inst)}</RequirementCard>,
   }));
-  if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: 'Review and submit', labelAr: 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
+  // Once filed and not reopened, the last step is the submitted application, not an invitation to submit again.
+  const submitted = record.filed && !record.editable;
+  if (final) steps.push({ key: 'final-review', anchor: 'final-review', labelEn: submitted ? 'Submitted application' : 'Review and submit', labelAr: submitted ? 'الطلب المقدَّم' : 'المراجعة والتقديم', stateEn: '', stateAr: '', state: 'final', kind: 'final', yours: true, whoEn: '', whoAr: '', body: final });
   // The page opens on the step a redirect named; else on the viewer's first required row still open; else any open required row; with nothing open, on the final review.
   const initialKey = (initialStep && steps.find((s) => s.key === initialStep)?.key)
     || steps.find((s) => s.kind === 'required' && s.yours && s.state !== 'complete')?.key
@@ -211,6 +213,17 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
     const others = parties.filter((r) => r !== viewerRole);
     const o = { en: others.map((r) => `the ${REQUIREMENT_AUTHORS[r].en}`).join(' and '), ar: others.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' و') };
     // Plain and short (owner, 8 October 2026): who fills what, when answers save, when anything is sent.
+    // Each role reads its own instructions (live review, 10 October 2026): the provider was told
+    // to submit and to wait for its own invitation, both of which are the organizer's.
+    if (viewerRole !== 'organizer') {
+      const rest = others.filter((r) => r !== 'organizer');
+      const restEn = rest.map((r) => `the ${REQUIREMENT_AUTHORS[r].en}`).join(' and ');
+      const restAr = rest.map((r) => REQUIREMENT_AUTHORS[r].ar).join(' و');
+      return {
+        en: `Amber steps are your team's to complete. Grey steps are completed by the organizer${rest.length ? ` or ${restEn}` : ''}. Your answers are saved when you move to another step, and the organizer can see them. The organizer submits the application to the Ministry.`,
+        ar: `الخطوات الكهرمانية يستكملها فريقكم. أما الخطوات الرمادية فيستكملها المنظّم${rest.length ? ` أو ${restAr}` : ''}. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى ويطّلع عليها المنظّم. المنظّم هو من يقدّم الطلب إلى الوزارة.`,
+      };
+    }
     return {
       en: `${parties.length === 3 ? 'Three' : 'Two'} parties fill in this record: you${parties.length === 3 ? ',' : ' and'} ${o.en}. Amber steps are yours. Grey steps are filled in by ${o.en} after they accept your invitation; their answers then appear on those steps. Your answers are saved when you move to another step. Nothing is sent to the Ministry until you submit.`,
       ar: `${parties.length === 3 ? 'ثلاثة أطراف يملؤون' : 'طرفان يملآن'} هذا السجل: أنتم و${o.ar}. الخطوات الكهرمانية لكم. أما الخطوات الرمادية فيملؤها ${o.ar} بعد قبول دعوتكم، ثم تظهر إجاباتهم عليها. تُحفظ إجاباتكم عند الانتقال إلى خطوة أخرى. لا يُرسل شيء إلى الوزارة قبل أن تقدّموا السجل.`,
@@ -230,9 +243,15 @@ export function RecordRequirements({ record, viewerRole, viewerConfirmed, conten
       <JumpTo />
       <RestoreScroll />
       {guide ? (
-        <div data-region="record-guide" role="note" style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14px', lineHeight: 1.6 }}>
-          <L en={guide.en} ar={guide.ar} />
-        </div>
+        <>
+          <div data-region="record-guide" role="note" style={{ padding: '12px 16px', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 20, fontSize: '14px', lineHeight: 1.6 }}>
+            <L en={guide.en} ar={guide.ar} />
+          </div>
+          <details data-region="record-guide-phone" style={{ display: 'none', marginBlockEnd: 14, fontSize: '14px', lineHeight: 1.6 }}>
+            <summary style={{ cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', color: 'var(--brand)' }}><L en="Who fills in this record" ar="من يملأ هذا السجل" /></summary>
+            <div style={{ padding: '10px 14px', background: 'var(--surface2)', borderRadius: 10 }}><L en={guide.en} ar={guide.ar} /></div>
+          </details>
+        </>
       ) : null}
       {handoffParty && handoffSteps.length > 0 ? (
         <HandoffDialog

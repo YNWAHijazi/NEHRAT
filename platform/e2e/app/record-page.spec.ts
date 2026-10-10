@@ -102,8 +102,9 @@ for (const lang of LANGUAGES) {
       await form(page, 'B8').locator('[data-region="save"]').click();
       await expect(chip(page, 'B8')).toHaveAttribute('data-state', 'notProvided');
 
-      // Everything required is complete; the summary says so.
-      await expect(summaries.locator('[data-region="required-count"]')).toContainText(/8 of 8|8 من 8/);
+      // Every requirement row is complete; the count covers the assessment and the declaration
+      // too (live review, 10 October 2026), so the declaration is the one item left.
+      await expect(summaries.locator('[data-region="required-count"]')).toContainText(/9 of 10|9 من 10/);
 
       // The last step: the declaration is what remains; the certification signs it.
       await openDetails(page.locator('#final-review'));

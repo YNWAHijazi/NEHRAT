@@ -167,6 +167,14 @@ export interface PlanSectionInstance {
   text: string | null;
   ownText: boolean;
   complete: boolean;
+  /**
+   * Complete, partly complete (something is in but not everything), or not started. A section
+   * filled automatically is not complete until every part it needs exists (live review,
+   * 10 October 2026: the contacts section read "Addressed" with only the organizer in it).
+   */
+  progress: 'complete' | 'partial' | 'pending';
+  /** What a partly complete or pending section still lacks, by name. */
+  lacking: readonly { en: string; ar: string }[];
   /** Level 3 section 12 carries the eleven items. */
   items: readonly MajorIncidentInstance[];
 }
@@ -649,12 +657,31 @@ function planSections(facts: RecordFacts, resolved: ReadonlyMap<string, Requirem
       const text = d.ownText ? textOf(facts, d.key) : null;
       const items = d.key === 'P12' && facts.level === 3 ? majorIncident(facts, resolved) : [];
       let complete: boolean;
-      if (d.source === 'derived') complete = d.key === 'P02' ? Boolean(facts.organizerContact) : true;
-      else if (d.source === 'own' || linked.length === 0) complete = text !== null;
-      else complete = linked.every((i) => i.state === 'complete') && (items.length === 0 || items.every((i) => i.complete));
+      let started: boolean;
+      const lacking: { en: string; ar: string }[] = [];
+      if (d.source === 'derived' && d.key === 'P02') {
+        // The contacts section names the organizer, the accepted EMS agency and, at Level 3, the
+        // accepted Medical Director -- each from the record, and each required before it is complete.
+        const parts: { have: boolean; en: string; ar: string }[] = [
+          { have: Boolean(facts.organizerContact), en: 'the organizer contact', ar: 'جهة اتصال المنظّم' },
+          { have: facts.ems.some((e) => e.status === 'confirmed'), en: 'an EMS agency that has accepted its invitation', ar: 'جهة إسعاف قبلت دعوتها' },
+          ...(facts.level === 3 ? [{ have: facts.director?.status === 'confirmed', en: 'a Medical Director who has accepted the invitation', ar: 'مدير طبي قبل الدعوة' }] : []),
+        ];
+        for (const part of parts) if (!part.have) lacking.push({ en: part.en, ar: part.ar });
+        complete = lacking.length === 0;
+        started = parts.some((x) => x.have);
+      } else if (d.source === 'derived') { complete = true; started = true; }
+      else if (d.source === 'own' || linked.length === 0) { complete = text !== null; started = complete; }
+      else {
+        complete = linked.every((i) => i.state === 'complete') && (items.length === 0 || items.every((i) => i.complete));
+        for (const i of linked) if (i.state !== 'complete') lacking.push({ en: i.labelEn, ar: i.labelAr });
+        for (const m of items) if (!m.complete) lacking.push({ en: m.en, ar: m.ar });
+        started = text !== null || linked.some((i) => i.state === 'complete' || i.answeredBy !== null) || items.some((m) => m.complete);
+      }
+      const progress: PlanSectionInstance['progress'] = complete ? 'complete' : started ? 'partial' : 'pending';
       // The record's own name for the section (owner, 8 October 2026); section 12 below Level 3 is the escalation procedure.
       const named = d.key === 'P12' && facts.level < 3 ? { en: 'Emergency escalation', ar: 'التصعيد في حالات الطوارئ' } : d.titleEn && d.titleAr ? { en: d.titleEn, ar: d.titleAr } : null;
-      return { key: d.key, n: d.n, en: named?.en ?? title?.en ?? '', ar: named?.ar ?? title?.ar ?? '', protocolEn: title?.en ?? '', protocolAr: title?.ar ?? '', promptEn: d.promptEn, promptAr: d.promptAr, source: d.source, linked, text, ownText: Boolean(d.ownText), complete, items };
+      return { key: d.key, n: d.n, en: named?.en ?? title?.en ?? '', ar: named?.ar ?? title?.ar ?? '', protocolEn: title?.en ?? '', protocolAr: title?.ar ?? '', promptEn: d.promptEn, promptAr: d.promptAr, source: d.source, linked, text, ownText: Boolean(d.ownText), complete, progress, lacking: complete ? [] : lacking, items };
     });
 }
 
@@ -677,18 +704,43 @@ export function requirementBlockers(instances: readonly RequirementInstance[]): 
 }
 
 export interface RequirementSummary {
-  required: { total: number; complete: number };
+  /**
+   * Every pre-event item that must be complete before filing: the readiness rows, the risk
+   * assessment and the organizer declaration -- the SAME set the submission gate refuses on,
+   * so the dashboard, the progress rail, the summaries and the final review all count alike
+   * (live review, 10 October 2026: "12 of 13 complete", "2 pending" and "3 items remaining"
+   * on one record). `complete` is total minus what still blocks, so a waived or derived row
+   * counts as done exactly as the gate treats it.
+   */
+  required: { total: number; complete: number; yours: number; others: number };
   recommended: { total: number; complete: number };
   later: number;
 }
 
-/** The two summary counts cover the readiness rows; the assessment and the declaration have their own blocks. */
+/**
+ * Who can clear a blocking item now: the organizer ("yours"), or somebody else -- an
+ * invitation not yet accepted, a provider's or the Director's section ("others").
+ */
+export function blockerOwner(instance: RequirementInstance): 'yours' | 'others' {
+  if (instance.state === 'waiting') return 'others';
+  if (instance.authors.length > 0 && !instance.authors.includes('organizer')) return 'others';
+  return 'yours';
+}
+
 export function requirementSummary(instances: readonly RequirementInstance[]): RequirementSummary {
-  const count = (g: RequirementGroup) => {
-    const rows = instances.filter((i) => i.group === g && i.section === 'requirement');
-    return { total: rows.length, complete: rows.filter((i) => i.state === 'complete').length };
+  const required = instances.filter((i) => i.group === 'required');
+  const blocking = required.filter((i) => i.blocks);
+  const recommended = instances.filter((i) => i.group === 'recommended' && i.section === 'requirement');
+  return {
+    required: {
+      total: required.length,
+      complete: required.length - blocking.length,
+      yours: blocking.filter((i) => blockerOwner(i) === 'yours').length,
+      others: blocking.filter((i) => blockerOwner(i) === 'others').length,
+    },
+    recommended: { total: recommended.length, complete: recommended.filter((i) => i.state === 'complete').length },
+    later: instances.filter((i) => i.group === 'later').length,
   };
-  return { required: count('required'), recommended: count('recommended'), later: instances.filter((i) => i.group === 'later').length };
 }
 
 /**
@@ -734,6 +786,17 @@ export function recordNextStep(input: {
       bodyEn: theirs.length > 0 ? `Your medical team completes the other ${theirs.length}.` : 'Then review and submit at the foot of this page.',
       bodyAr: theirs.length > 0 ? `يستكمل فريقكم الطبي المتطلبات الأخرى (${theirs.length}).` : 'ثم راجعوا وقدّموا في أسفل هذه الصفحة.',
       buttonEn: `Open ${first.labelEn}`, buttonAr: `فتح ${first.labelAr}` };
+  }
+  // The declaration is the organizer's own task: it leads once nothing else of theirs is open,
+  // even while others still owe a response -- "Waiting for one response" hid the one thing the
+  // organizer could do now (live review, 10 October 2026).
+  const othersOpen = theirs.length + waiting.length;
+  if (declaration && othersOpen > 0) {
+    return { kind: 'declarations', href: '#final-review', tone: 'accent',
+      titleEn: 'Complete the declaration', titleAr: 'أكملوا الإقرار',
+      bodyEn: othersOpen === 1 ? 'One other item is waiting for someone else. You can submit once it is complete.' : `${othersOpen} other items are waiting for others. You can submit once they are complete.`,
+      bodyAr: othersOpen === 1 ? 'بند واحد آخر بانتظار طرف آخر. يمكنكم التقديم بعد اكتماله.' : `${othersOpen} بنود أخرى بانتظار أطراف أخرى. يمكنكم التقديم بعد اكتمالها.`,
+      buttonEn: 'Open the declaration', buttonAr: 'فتح الإقرار' };
   }
   if (theirs.length > 0) {
     const withDirector = theirs.some((b) => b.authors.includes('director'));
