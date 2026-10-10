@@ -387,9 +387,26 @@ export function siteAedsDone(f: Pick<SiteSubmissionFacts, 'aedRequired' | 'devic
   return (!f.aedRequired || f.deviceCount > 0) && f.devicesNotReady === 0;
 }
 
-/** The plan reuses what is entered: it is complete when the profile, the contact, EMS access and the AEDs are. */
+export type SitePlanInputKey = 'profile' | 'map' | 'emsAccess' | 'contact' | 'aeds';
+
+/**
+ * What the plan is built from (owner, 10 October 2026: "it doesn't need any input? what does
+ * it need to become complete?"). The plan has no fields of its own; each line names one
+ * input and whether it is in, so the step can say what is missing and where to add it.
+ */
+export function sitePlanInputs(f: SiteSubmissionFacts): (Bilingual & { key: SitePlanInputKey; done: boolean })[] {
+  return [
+    { key: 'profile', en: 'Site details: name, address, municipality, hours, telephone and email', ar: 'تفاصيل الموقع: الاسم والعنوان والبلدية وساعات العمل والهاتف والبريد الإلكتروني', done: f.profileComplete },
+    { key: 'map', en: 'The site’s pin on the map', ar: 'موقع الموقع على الخريطة', done: f.mapConfirmed },
+    { key: 'emsAccess', en: 'Main EMS entrance and the EMS contact number used by the facility', ar: 'المدخل الرئيسي للإسعاف ورقم الاتصال بخدمات الطوارئ الطبية المعتمد لدى المنشأة', done: f.emsAccessComplete },
+    { key: 'contact', en: 'Responsible facility contact: name or position, telephone and email', ar: 'جهة الاتصال المسؤولة في المنشأة: الاسم أو المسمى الوظيفي والهاتف والبريد الإلكتروني', done: f.contactComplete },
+    { key: 'aeds', en: f.aedRequired ? 'At least one AED registered, every AED ready' : 'Every registered AED ready', ar: f.aedRequired ? 'جهاز واحد مسجَّل على الأقل، وجميع الأجهزة جاهزة' : 'جميع الأجهزة المسجّلة جاهزة', done: siteAedsDone(f) },
+  ];
+}
+
+/** The plan reuses what is entered: it is complete when every input it is built from is in. */
 export function sitePlanComplete(f: SiteSubmissionFacts): boolean {
-  return f.profileComplete && f.mapConfirmed && f.contactComplete && f.emsAccessComplete && siteAedsDone(f);
+  return sitePlanInputs(f).every((i) => i.done);
 }
 
 /** The single review page's lines, in the revision's order (section 8). */

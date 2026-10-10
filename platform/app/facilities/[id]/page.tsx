@@ -68,7 +68,7 @@ import {
   type FacilityStep,
   type FacilityStepKey,
 } from '../../../lib/rules/facility-workflow';
-import { reviewActLabel, siteCertificateAvailable, siteRenewalNotice, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
+import { reviewActLabel, siteCertificateAvailable, sitePlanInputs, siteRenewalNotice, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
 import { accountContact } from '../../../lib/account-contact';
 
 /**
@@ -206,7 +206,16 @@ export default async function FacilityRecordPage({
     </div>
   );
 
-  const plan = <FacilityPlan facility={facility} devices={devices} contact={contact} point={point} aedsHref={mode === 'register' ? '#aeds' : `/facilities/${id}?tab=aeds`} contactHref={`/facilities/${id}/profile#contact`} />;
+  const aedsHref = mode === 'register' ? '#aeds' : `/facilities/${id}?tab=aeds`;
+  // Each input the plan is built from, with where it is added (owner, 10 October 2026).
+  const planInputs = sitePlanInputs(submissionFacts(facts)).map((i) => ({
+    ...i,
+    href: i.key === 'aeds' ? aedsHref
+      : i.key === 'contact' ? `/facilities/${id}/profile#contact`
+        : i.key === 'map' ? `/facilities/${id}/profile#map`
+          : `/facilities/${id}/profile`,
+  }));
+  const plan = <FacilityPlan facility={facility} devices={devices} contact={contact} point={point} aedsHref={aedsHref} contactHref={`/facilities/${id}/profile#contact`} inputs={archived || facts.locked ? null : planInputs} />;
   const readinessError = q.error === 'readiness'
     ? <p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the site map, the contact and the AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من خريطة الموقع وجهة الاتصال وحالة الأجهزة." /></p>
     : null;
