@@ -64,8 +64,10 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(page.locator('#plan [data-region=procedure]')).toContainText('Contact EMS immediately');
   await expect(page.locator('#plan [data-region=derived]')).toContainText('Front desk');
   await recordReadiness(page);
-  // The confirmation leads on to the evidence step; it submits nothing.
-  await expect(page).toHaveURL(/step=evidence/);
+  // The confirmation leads on to the next step, the infrastructure (already recorded); it submits nothing.
+  await expect(page).toHaveURL(/step=infrastructure/);
+  await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'current');
+  await page.locator('[data-region=step-next]').click();
   await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'current');
   await expect(page.locator('#evidence [data-region=evidence-statement]')).toContainText('It does not itself establish MOPH acceptance or replace the regulatory Site requirements.');
   await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');

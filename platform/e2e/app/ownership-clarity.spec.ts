@@ -18,7 +18,7 @@ async function fillLabelled(page: Page, en: string, value: string): Promise<void
 
 async function createLevel1(page: Page): Promise<string> {
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   await fillLabelled(page, 'Event name (English)', `Autosave ${stamp}`);
   await fillLabelled(page, 'Event name (Arabic)', `حفظ ${stamp}`);
   await fillLabelled(page, 'Start date', '2026-11-20');
@@ -106,7 +106,7 @@ test('Level 3, before any agency is invited: the EMS step is the organizer\'s (a
   test.setTimeout(240_000);
   await signInAs(page, 'test_organizer');
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   await fillLabelled(page, 'Event name (English)', `Invite first ${stamp}`);
   await fillLabelled(page, 'Event name (Arabic)', `الدعوة أولاً ${stamp}`);
   await fillLabelled(page, 'Start date', '2026-12-12');

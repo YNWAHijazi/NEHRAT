@@ -35,7 +35,7 @@ test('the location field links a registered site; the record reuses it on the or
   // The event is organized by an account that does not hold the Beirut Sports Complex registration.
   await signInAs(page, 'test_organizer_pending');
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   const name = `At the complex ${stamp}`;
   await fillLabelled(page, 'Event name (English)', name);
   await fillLabelled(page, 'Event name (Arabic)', `فعالية في المجمّع ${stamp}`);

@@ -22,7 +22,7 @@ async function fillLabelled(page: Page, en: string, value: string): Promise<void
 /** Create a Level 1 event through the intake and land on its record page. */
 async function createLevel1(page: Page, lang: string): Promise<string> {
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   await fillLabelled(page, 'Event name (English)', `Record page ${lang} ${stamp}`);
   await fillLabelled(page, 'Event name (Arabic)', `صفحة السجل ${stamp}`);
   await fillLabelled(page, 'Start date', '2026-11-01');

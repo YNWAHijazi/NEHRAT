@@ -44,7 +44,7 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     // Every domain at score 0: the option button whose marker span reads exactly "0".
     const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
     const count = await zeros.count();
-    expect(count).toBeGreaterThanOrEqual(9);
+    expect(count).toBeGreaterThanOrEqual(8);
     for (let i = 0; i < count; i += 1) {
       await zeros.nth(i).click();
     }

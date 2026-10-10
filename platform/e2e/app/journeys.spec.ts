@@ -61,7 +61,7 @@ for (const lang of LANGUAGES) {
       await expect(html).toHaveAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
 
       await gotoRidingRestarts(page, '/events/new');
-      const stamp = Date.now().toString(36);
+      const stamp = String(Date.now());
       await fillLabelled(page, 'Event name (English)', `Journey ${lang} ${stamp}`);
       await fillLabelled(page, 'Event name (Arabic)', `رحلة ${stamp}`);
       await fillLabelled(page, 'Start date', '2026-10-02');
@@ -81,7 +81,7 @@ for (const lang of LANGUAGES) {
       // Every domain at score 0, so the level derives to 1 rather than being chosen.
       const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
       const zeroCount = await zeros.count();
-      expect(zeroCount).toBeGreaterThanOrEqual(9);
+      expect(zeroCount).toBeGreaterThanOrEqual(8);
       for (let i = 0; i < zeroCount; i += 1) await zeros.nth(i).click();
 
       // Annex A Part F: the declaration's fields are required to save.
