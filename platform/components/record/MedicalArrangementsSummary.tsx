@@ -7,7 +7,7 @@ import { REQUIREMENT_COPY, type RequirementInstance } from '../../lib/rules';
  * organizer reads it on the final step before submitting; a change is made on the
  * row it came from. Rendered on the server from the same instances the cards show.
  */
-export function MedicalArrangementsSummary({ instances }: { instances: readonly RequirementInstance[] }) {
+export function MedicalArrangementsSummary({ instances, submitted = false }: { instances: readonly RequirementInstance[]; /** Filed and read-only: no instruction to review before submitting. */ submitted?: boolean }) {
   const rows = instances.filter((i) => i.section === 'requirement' && i.group !== 'later');
   const line = (inst: RequirementInstance): { en: string; ar: string }[] => {
     const out: { en: string; ar: string }[] = [];
@@ -26,7 +26,7 @@ export function MedicalArrangementsSummary({ instances }: { instances: readonly 
   return (
     <section data-region="medical-arrangements-summary" style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '16px 20px', marginBlockEnd: 20 }}>
       <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 600 }}><L en={REQUIREMENT_COPY.summaryTitleEn} ar={REQUIREMENT_COPY.summaryTitleAr} /></h3>
-      <p style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}><L en={REQUIREMENT_COPY.summaryNoteEn} ar={REQUIREMENT_COPY.summaryNoteAr} /></p>
+      <p style={{ margin: '0 0 12px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}>{submitted ? <L en="Generated from the submitted answers." ar="مُعدّة من الإجابات المقدَّمة." /> : <L en={REQUIREMENT_COPY.summaryNoteEn} ar={REQUIREMENT_COPY.summaryNoteAr} />}</p>
       <dl style={{ margin: 0, display: 'grid', gap: '8px 16px', gridTemplateColumns: 'minmax(140px, 1fr) 2fr', fontSize: '14px', lineHeight: 1.5 }}>
         {rows.map((inst) => {
           const lines = line(inst);
