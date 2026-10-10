@@ -5,35 +5,9 @@
  * TypeScript: the field, the server and the tests read the same list and the same rules.
  */
 
-export interface CountryCode { code: string; iso: string; en: string; ar: string }
+import { COUNTRY_CODES, type CountryCode } from './rules/country-codes';
 
-/** Lebanon first; then the region; then the countries a Lebanese organizer most often deals with. */
-export const COUNTRY_CODES: readonly CountryCode[] = [
-  { code: '+961', iso: 'LB', en: 'Lebanon', ar: 'لبنان' },
-  { code: '+963', iso: 'SY', en: 'Syria', ar: 'سوريا' },
-  { code: '+962', iso: 'JO', en: 'Jordan', ar: 'الأردن' },
-  { code: '+964', iso: 'IQ', en: 'Iraq', ar: 'العراق' },
-  { code: '+357', iso: 'CY', en: 'Cyprus', ar: 'قبرص' },
-  { code: '+20', iso: 'EG', en: 'Egypt', ar: 'مصر' },
-  { code: '+966', iso: 'SA', en: 'Saudi Arabia', ar: 'السعودية' },
-  { code: '+971', iso: 'AE', en: 'United Arab Emirates', ar: 'الإمارات العربية المتحدة' },
-  { code: '+974', iso: 'QA', en: 'Qatar', ar: 'قطر' },
-  { code: '+965', iso: 'KW', en: 'Kuwait', ar: 'الكويت' },
-  { code: '+973', iso: 'BH', en: 'Bahrain', ar: 'البحرين' },
-  { code: '+968', iso: 'OM', en: 'Oman', ar: 'عُمان' },
-  { code: '+90', iso: 'TR', en: 'Türkiye', ar: 'تركيا' },
-  { code: '+33', iso: 'FR', en: 'France', ar: 'فرنسا' },
-  { code: '+44', iso: 'GB', en: 'United Kingdom', ar: 'المملكة المتحدة' },
-  { code: '+49', iso: 'DE', en: 'Germany', ar: 'ألمانيا' },
-  { code: '+39', iso: 'IT', en: 'Italy', ar: 'إيطاليا' },
-  { code: '+34', iso: 'ES', en: 'Spain', ar: 'إسبانيا' },
-  { code: '+41', iso: 'CH', en: 'Switzerland', ar: 'سويسرا' },
-  { code: '+32', iso: 'BE', en: 'Belgium', ar: 'بلجيكا' },
-  { code: '+1', iso: 'US', en: 'United States and Canada', ar: 'الولايات المتحدة وكندا' },
-  { code: '+55', iso: 'BR', en: 'Brazil', ar: 'البرازيل' },
-  { code: '+61', iso: 'AU', en: 'Australia', ar: 'أستراليا' },
-  { code: '+225', iso: 'CI', en: 'Côte d’Ivoire', ar: 'ساحل العاج' },
-];
+export { COUNTRY_CODES, type CountryCode };
 
 export const DEFAULT_COUNTRY_CODE = '+961';
 

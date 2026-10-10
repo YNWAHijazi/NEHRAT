@@ -1,0 +1,1187 @@
+{
+ "$comment": "Every country calling code (owner, 10 October 2026: 'put them all'). Lebanon first, then by English name. One entry per code; a code several countries share carries a combined name.",
+ "countries": [
+  {
+   "iso": "LB",
+   "code": "+961",
+   "en": "Lebanon",
+   "ar": "لبنان"
+  },
+  {
+   "iso": "AF",
+   "code": "+93",
+   "en": "Afghanistan",
+   "ar": "أفغانستان"
+  },
+  {
+   "iso": "AL",
+   "code": "+355",
+   "en": "Albania",
+   "ar": "ألبانيا"
+  },
+  {
+   "iso": "DZ",
+   "code": "+213",
+   "en": "Algeria",
+   "ar": "الجزائر"
+  },
+  {
+   "iso": "AD",
+   "code": "+376",
+   "en": "Andorra",
+   "ar": "أندورا"
+  },
+  {
+   "iso": "AO",
+   "code": "+244",
+   "en": "Angola",
+   "ar": "أنغولا"
+  },
+  {
+   "iso": "AR",
+   "code": "+54",
+   "en": "Argentina",
+   "ar": "الأرجنتين"
+  },
+  {
+   "iso": "AM",
+   "code": "+374",
+   "en": "Armenia",
+   "ar": "أرمينيا"
+  },
+  {
+   "iso": "AW",
+   "code": "+297",
+   "en": "Aruba",
+   "ar": "أروبا"
+  },
+  {
+   "iso": "AU",
+   "code": "+61",
+   "en": "Australia",
+   "ar": "أستراليا"
+  },
+  {
+   "iso": "AT",
+   "code": "+43",
+   "en": "Austria",
+   "ar": "النمسا"
+  },
+  {
+   "iso": "AZ",
+   "code": "+994",
+   "en": "Azerbaijan",
+   "ar": "أذربيجان"
+  },
+  {
+   "iso": "BH",
+   "code": "+973",
+   "en": "Bahrain",
+   "ar": "البحرين"
+  },
+  {
+   "iso": "BD",
+   "code": "+880",
+   "en": "Bangladesh",
+   "ar": "بنغلاديش"
+  },
+  {
+   "iso": "BY",
+   "code": "+375",
+   "en": "Belarus",
+   "ar": "بيلاروسيا"
+  },
+  {
+   "iso": "BE",
+   "code": "+32",
+   "en": "Belgium",
+   "ar": "بلجيكا"
+  },
+  {
+   "iso": "BZ",
+   "code": "+501",
+   "en": "Belize",
+   "ar": "بليز"
+  },
+  {
+   "iso": "BJ",
+   "code": "+229",
+   "en": "Benin",
+   "ar": "بنين"
+  },
+  {
+   "iso": "BT",
+   "code": "+975",
+   "en": "Bhutan",
+   "ar": "بوتان"
+  },
+  {
+   "iso": "BO",
+   "code": "+591",
+   "en": "Bolivia",
+   "ar": "بوليفيا"
+  },
+  {
+   "iso": "BA",
+   "code": "+387",
+   "en": "Bosnia and Herzegovina",
+   "ar": "البوسنة والهرسك"
+  },
+  {
+   "iso": "BW",
+   "code": "+267",
+   "en": "Botswana",
+   "ar": "بوتسوانا"
+  },
+  {
+   "iso": "BR",
+   "code": "+55",
+   "en": "Brazil",
+   "ar": "البرازيل"
+  },
+  {
+   "iso": "BN",
+   "code": "+673",
+   "en": "Brunei",
+   "ar": "بروناي"
+  },
+  {
+   "iso": "BG",
+   "code": "+359",
+   "en": "Bulgaria",
+   "ar": "بلغاريا"
+  },
+  {
+   "iso": "BF",
+   "code": "+226",
+   "en": "Burkina Faso",
+   "ar": "بوركينا فاسو"
+  },
+  {
+   "iso": "BI",
+   "code": "+257",
+   "en": "Burundi",
+   "ar": "بوروندي"
+  },
+  {
+   "iso": "KH",
+   "code": "+855",
+   "en": "Cambodia",
+   "ar": "كمبوديا"
+  },
+  {
+   "iso": "CM",
+   "code": "+237",
+   "en": "Cameroon",
+   "ar": "الكاميرون"
+  },
+  {
+   "iso": "CV",
+   "code": "+238",
+   "en": "Cape Verde",
+   "ar": "الرأس الأخضر"
+  },
+  {
+   "iso": "CF",
+   "code": "+236",
+   "en": "Central African Republic",
+   "ar": "جمهورية أفريقيا الوسطى"
+  },
+  {
+   "iso": "TD",
+   "code": "+235",
+   "en": "Chad",
+   "ar": "تشاد"
+  },
+  {
+   "iso": "CL",
+   "code": "+56",
+   "en": "Chile",
+   "ar": "تشيلي"
+  },
+  {
+   "iso": "CN",
+   "code": "+86",
+   "en": "China",
+   "ar": "الصين"
+  },
+  {
+   "iso": "CO",
+   "code": "+57",
+   "en": "Colombia",
+   "ar": "كولومبيا"
+  },
+  {
+   "iso": "KM",
+   "code": "+269",
+   "en": "Comoros",
+   "ar": "جزر القمر"
+  },
+  {
+   "iso": "CG",
+   "code": "+242",
+   "en": "Congo",
+   "ar": "الكونغو"
+  },
+  {
+   "iso": "CR",
+   "code": "+506",
+   "en": "Costa Rica",
+   "ar": "كوستاريكا"
+  },
+  {
+   "iso": "HR",
+   "code": "+385",
+   "en": "Croatia",
+   "ar": "كرواتيا"
+  },
+  {
+   "iso": "CU",
+   "code": "+53",
+   "en": "Cuba",
+   "ar": "كوبا"
+  },
+  {
+   "iso": "CW",
+   "code": "+599",
+   "en": "Curaçao",
+   "ar": "كوراساو"
+  },
+  {
+   "iso": "CY",
+   "code": "+357",
+   "en": "Cyprus",
+   "ar": "قبرص"
+  },
+  {
+   "iso": "CZ",
+   "code": "+420",
+   "en": "Czechia",
+   "ar": "التشيك"
+  },
+  {
+   "iso": "CI",
+   "code": "+225",
+   "en": "Côte d’Ivoire",
+   "ar": "ساحل العاج"
+  },
+  {
+   "iso": "CD",
+   "code": "+243",
+   "en": "Democratic Republic of the Congo",
+   "ar": "جمهورية الكونغو الديمقراطية"
+  },
+  {
+   "iso": "DK",
+   "code": "+45",
+   "en": "Denmark",
+   "ar": "الدنمارك"
+  },
+  {
+   "iso": "DJ",
+   "code": "+253",
+   "en": "Djibouti",
+   "ar": "جيبوتي"
+  },
+  {
+   "iso": "EC",
+   "code": "+593",
+   "en": "Ecuador",
+   "ar": "الإكوادور"
+  },
+  {
+   "iso": "EG",
+   "code": "+20",
+   "en": "Egypt",
+   "ar": "مصر"
+  },
+  {
+   "iso": "SV",
+   "code": "+503",
+   "en": "El Salvador",
+   "ar": "السلفادور"
+  },
+  {
+   "iso": "GQ",
+   "code": "+240",
+   "en": "Equatorial Guinea",
+   "ar": "غينيا الاستوائية"
+  },
+  {
+   "iso": "ER",
+   "code": "+291",
+   "en": "Eritrea",
+   "ar": "إريتريا"
+  },
+  {
+   "iso": "EE",
+   "code": "+372",
+   "en": "Estonia",
+   "ar": "إستونيا"
+  },
+  {
+   "iso": "SZ",
+   "code": "+268",
+   "en": "Eswatini",
+   "ar": "إسواتيني"
+  },
+  {
+   "iso": "ET",
+   "code": "+251",
+   "en": "Ethiopia",
+   "ar": "إثيوبيا"
+  },
+  {
+   "iso": "FK",
+   "code": "+500",
+   "en": "Falkland Islands",
+   "ar": "جزر فوكلاند"
+  },
+  {
+   "iso": "FO",
+   "code": "+298",
+   "en": "Faroe Islands",
+   "ar": "جزر فارو"
+  },
+  {
+   "iso": "FJ",
+   "code": "+679",
+   "en": "Fiji",
+   "ar": "فيجي"
+  },
+  {
+   "iso": "FI",
+   "code": "+358",
+   "en": "Finland",
+   "ar": "فنلندا"
+  },
+  {
+   "iso": "FR",
+   "code": "+33",
+   "en": "France",
+   "ar": "فرنسا"
+  },
+  {
+   "iso": "GF",
+   "code": "+594",
+   "en": "French Guiana",
+   "ar": "غويانا الفرنسية"
+  },
+  {
+   "iso": "PF",
+   "code": "+689",
+   "en": "French Polynesia",
+   "ar": "بولينيزيا الفرنسية"
+  },
+  {
+   "iso": "GA",
+   "code": "+241",
+   "en": "Gabon",
+   "ar": "الغابون"
+  },
+  {
+   "iso": "GM",
+   "code": "+220",
+   "en": "Gambia",
+   "ar": "غامبيا"
+  },
+  {
+   "iso": "GE",
+   "code": "+995",
+   "en": "Georgia",
+   "ar": "جورجيا"
+  },
+  {
+   "iso": "DE",
+   "code": "+49",
+   "en": "Germany",
+   "ar": "ألمانيا"
+  },
+  {
+   "iso": "GH",
+   "code": "+233",
+   "en": "Ghana",
+   "ar": "غانا"
+  },
+  {
+   "iso": "GI",
+   "code": "+350",
+   "en": "Gibraltar",
+   "ar": "جبل طارق"
+  },
+  {
+   "iso": "GR",
+   "code": "+30",
+   "en": "Greece",
+   "ar": "اليونان"
+  },
+  {
+   "iso": "GL",
+   "code": "+299",
+   "en": "Greenland",
+   "ar": "غرينلاند"
+  },
+  {
+   "iso": "GP",
+   "code": "+590",
+   "en": "Guadeloupe",
+   "ar": "غوادلوب"
+  },
+  {
+   "iso": "GT",
+   "code": "+502",
+   "en": "Guatemala",
+   "ar": "غواتيمالا"
+  },
+  {
+   "iso": "GN",
+   "code": "+224",
+   "en": "Guinea",
+   "ar": "غينيا"
+  },
+  {
+   "iso": "GW",
+   "code": "+245",
+   "en": "Guinea-Bissau",
+   "ar": "غينيا بيساو"
+  },
+  {
+   "iso": "GY",
+   "code": "+592",
+   "en": "Guyana",
+   "ar": "غيانا"
+  },
+  {
+   "iso": "HT",
+   "code": "+509",
+   "en": "Haiti",
+   "ar": "هايتي"
+  },
+  {
+   "iso": "HN",
+   "code": "+504",
+   "en": "Honduras",
+   "ar": "هندوراس"
+  },
+  {
+   "iso": "HK",
+   "code": "+852",
+   "en": "Hong Kong",
+   "ar": "هونغ كونغ"
+  },
+  {
+   "iso": "HU",
+   "code": "+36",
+   "en": "Hungary",
+   "ar": "المجر"
+  },
+  {
+   "iso": "IS",
+   "code": "+354",
+   "en": "Iceland",
+   "ar": "آيسلندا"
+  },
+  {
+   "iso": "IN",
+   "code": "+91",
+   "en": "India",
+   "ar": "الهند"
+  },
+  {
+   "iso": "ID",
+   "code": "+62",
+   "en": "Indonesia",
+   "ar": "إندونيسيا"
+  },
+  {
+   "iso": "IR",
+   "code": "+98",
+   "en": "Iran",
+   "ar": "إيران"
+  },
+  {
+   "iso": "IQ",
+   "code": "+964",
+   "en": "Iraq",
+   "ar": "العراق"
+  },
+  {
+   "iso": "IE",
+   "code": "+353",
+   "en": "Ireland",
+   "ar": "أيرلندا"
+  },
+  {
+   "iso": "IT",
+   "code": "+39",
+   "en": "Italy",
+   "ar": "إيطاليا"
+  },
+  {
+   "iso": "JP",
+   "code": "+81",
+   "en": "Japan",
+   "ar": "اليابان"
+  },
+  {
+   "iso": "JO",
+   "code": "+962",
+   "en": "Jordan",
+   "ar": "الأردن"
+  },
+  {
+   "iso": "KE",
+   "code": "+254",
+   "en": "Kenya",
+   "ar": "كينيا"
+  },
+  {
+   "iso": "KI",
+   "code": "+686",
+   "en": "Kiribati",
+   "ar": "كيريباتي"
+  },
+  {
+   "iso": "XK",
+   "code": "+383",
+   "en": "Kosovo",
+   "ar": "كوسوفو"
+  },
+  {
+   "iso": "KW",
+   "code": "+965",
+   "en": "Kuwait",
+   "ar": "الكويت"
+  },
+  {
+   "iso": "KG",
+   "code": "+996",
+   "en": "Kyrgyzstan",
+   "ar": "قيرغيزستان"
+  },
+  {
+   "iso": "LA",
+   "code": "+856",
+   "en": "Laos",
+   "ar": "لاوس"
+  },
+  {
+   "iso": "LV",
+   "code": "+371",
+   "en": "Latvia",
+   "ar": "لاتفيا"
+  },
+  {
+   "iso": "LS",
+   "code": "+266",
+   "en": "Lesotho",
+   "ar": "ليسوتو"
+  },
+  {
+   "iso": "LR",
+   "code": "+231",
+   "en": "Liberia",
+   "ar": "ليبيريا"
+  },
+  {
+   "iso": "LY",
+   "code": "+218",
+   "en": "Libya",
+   "ar": "ليبيا"
+  },
+  {
+   "iso": "LI",
+   "code": "+423",
+   "en": "Liechtenstein",
+   "ar": "ليختنشتاين"
+  },
+  {
+   "iso": "LT",
+   "code": "+370",
+   "en": "Lithuania",
+   "ar": "ليتوانيا"
+  },
+  {
+   "iso": "LU",
+   "code": "+352",
+   "en": "Luxembourg",
+   "ar": "لوكسمبورغ"
+  },
+  {
+   "iso": "MO",
+   "code": "+853",
+   "en": "Macau",
+   "ar": "ماكاو"
+  },
+  {
+   "iso": "MG",
+   "code": "+261",
+   "en": "Madagascar",
+   "ar": "مدغشقر"
+  },
+  {
+   "iso": "MW",
+   "code": "+265",
+   "en": "Malawi",
+   "ar": "مالاوي"
+  },
+  {
+   "iso": "MY",
+   "code": "+60",
+   "en": "Malaysia",
+   "ar": "ماليزيا"
+  },
+  {
+   "iso": "MV",
+   "code": "+960",
+   "en": "Maldives",
+   "ar": "جزر المالديف"
+  },
+  {
+   "iso": "ML",
+   "code": "+223",
+   "en": "Mali",
+   "ar": "مالي"
+  },
+  {
+   "iso": "MT",
+   "code": "+356",
+   "en": "Malta",
+   "ar": "مالطا"
+  },
+  {
+   "iso": "MH",
+   "code": "+692",
+   "en": "Marshall Islands",
+   "ar": "جزر مارشال"
+  },
+  {
+   "iso": "MQ",
+   "code": "+596",
+   "en": "Martinique",
+   "ar": "مارتينيك"
+  },
+  {
+   "iso": "MR",
+   "code": "+222",
+   "en": "Mauritania",
+   "ar": "موريتانيا"
+  },
+  {
+   "iso": "MU",
+   "code": "+230",
+   "en": "Mauritius",
+   "ar": "موريشيوس"
+  },
+  {
+   "iso": "MX",
+   "code": "+52",
+   "en": "Mexico",
+   "ar": "المكسيك"
+  },
+  {
+   "iso": "FM",
+   "code": "+691",
+   "en": "Micronesia",
+   "ar": "ميكرونيزيا"
+  },
+  {
+   "iso": "MD",
+   "code": "+373",
+   "en": "Moldova",
+   "ar": "مولدوفا"
+  },
+  {
+   "iso": "MC",
+   "code": "+377",
+   "en": "Monaco",
+   "ar": "موناكو"
+  },
+  {
+   "iso": "MN",
+   "code": "+976",
+   "en": "Mongolia",
+   "ar": "منغوليا"
+  },
+  {
+   "iso": "ME",
+   "code": "+382",
+   "en": "Montenegro",
+   "ar": "الجبل الأسود"
+  },
+  {
+   "iso": "MA",
+   "code": "+212",
+   "en": "Morocco",
+   "ar": "المغرب"
+  },
+  {
+   "iso": "MZ",
+   "code": "+258",
+   "en": "Mozambique",
+   "ar": "موزمبيق"
+  },
+  {
+   "iso": "MM",
+   "code": "+95",
+   "en": "Myanmar",
+   "ar": "ميانمار"
+  },
+  {
+   "iso": "NA",
+   "code": "+264",
+   "en": "Namibia",
+   "ar": "ناميبيا"
+  },
+  {
+   "iso": "NR",
+   "code": "+674",
+   "en": "Nauru",
+   "ar": "ناورو"
+  },
+  {
+   "iso": "NP",
+   "code": "+977",
+   "en": "Nepal",
+   "ar": "نيبال"
+  },
+  {
+   "iso": "NL",
+   "code": "+31",
+   "en": "Netherlands",
+   "ar": "هولندا"
+  },
+  {
+   "iso": "NC",
+   "code": "+687",
+   "en": "New Caledonia",
+   "ar": "كاليدونيا الجديدة"
+  },
+  {
+   "iso": "NZ",
+   "code": "+64",
+   "en": "New Zealand",
+   "ar": "نيوزيلندا"
+  },
+  {
+   "iso": "NI",
+   "code": "+505",
+   "en": "Nicaragua",
+   "ar": "نيكاراغوا"
+  },
+  {
+   "iso": "NE",
+   "code": "+227",
+   "en": "Niger",
+   "ar": "النيجر"
+  },
+  {
+   "iso": "NG",
+   "code": "+234",
+   "en": "Nigeria",
+   "ar": "نيجيريا"
+  },
+  {
+   "iso": "KP",
+   "code": "+850",
+   "en": "North Korea",
+   "ar": "كوريا الشمالية"
+  },
+  {
+   "iso": "MK",
+   "code": "+389",
+   "en": "North Macedonia",
+   "ar": "مقدونيا الشمالية"
+  },
+  {
+   "iso": "NO",
+   "code": "+47",
+   "en": "Norway",
+   "ar": "النرويج"
+  },
+  {
+   "iso": "OM",
+   "code": "+968",
+   "en": "Oman",
+   "ar": "عُمان"
+  },
+  {
+   "iso": "PK",
+   "code": "+92",
+   "en": "Pakistan",
+   "ar": "باكستان"
+  },
+  {
+   "iso": "PW",
+   "code": "+680",
+   "en": "Palau",
+   "ar": "بالاو"
+  },
+  {
+   "iso": "PS",
+   "code": "+970",
+   "en": "Palestine",
+   "ar": "فلسطين"
+  },
+  {
+   "iso": "PA",
+   "code": "+507",
+   "en": "Panama",
+   "ar": "بنما"
+  },
+  {
+   "iso": "PG",
+   "code": "+675",
+   "en": "Papua New Guinea",
+   "ar": "بابوا غينيا الجديدة"
+  },
+  {
+   "iso": "PY",
+   "code": "+595",
+   "en": "Paraguay",
+   "ar": "باراغواي"
+  },
+  {
+   "iso": "PE",
+   "code": "+51",
+   "en": "Peru",
+   "ar": "بيرو"
+  },
+  {
+   "iso": "PH",
+   "code": "+63",
+   "en": "Philippines",
+   "ar": "الفلبين"
+  },
+  {
+   "iso": "PL",
+   "code": "+48",
+   "en": "Poland",
+   "ar": "بولندا"
+  },
+  {
+   "iso": "PT",
+   "code": "+351",
+   "en": "Portugal",
+   "ar": "البرتغال"
+  },
+  {
+   "iso": "QA",
+   "code": "+974",
+   "en": "Qatar",
+   "ar": "قطر"
+  },
+  {
+   "iso": "RO",
+   "code": "+40",
+   "en": "Romania",
+   "ar": "رومانيا"
+  },
+  {
+   "iso": "RU",
+   "code": "+7",
+   "en": "Russia and Kazakhstan",
+   "ar": "روسيا وكازاخستان"
+  },
+  {
+   "iso": "RW",
+   "code": "+250",
+   "en": "Rwanda",
+   "ar": "رواندا"
+  },
+  {
+   "iso": "RE",
+   "code": "+262",
+   "en": "Réunion and Mayotte",
+   "ar": "لا ريونيون ومايوت"
+  },
+  {
+   "iso": "WS",
+   "code": "+685",
+   "en": "Samoa",
+   "ar": "ساموا"
+  },
+  {
+   "iso": "SM",
+   "code": "+378",
+   "en": "San Marino",
+   "ar": "سان مارينو"
+  },
+  {
+   "iso": "SA",
+   "code": "+966",
+   "en": "Saudi Arabia",
+   "ar": "السعودية"
+  },
+  {
+   "iso": "SN",
+   "code": "+221",
+   "en": "Senegal",
+   "ar": "السنغال"
+  },
+  {
+   "iso": "RS",
+   "code": "+381",
+   "en": "Serbia",
+   "ar": "صربيا"
+  },
+  {
+   "iso": "SC",
+   "code": "+248",
+   "en": "Seychelles",
+   "ar": "سيشل"
+  },
+  {
+   "iso": "SL",
+   "code": "+232",
+   "en": "Sierra Leone",
+   "ar": "سيراليون"
+  },
+  {
+   "iso": "SG",
+   "code": "+65",
+   "en": "Singapore",
+   "ar": "سنغافورة"
+  },
+  {
+   "iso": "SK",
+   "code": "+421",
+   "en": "Slovakia",
+   "ar": "سلوفاكيا"
+  },
+  {
+   "iso": "SI",
+   "code": "+386",
+   "en": "Slovenia",
+   "ar": "سلوفينيا"
+  },
+  {
+   "iso": "SB",
+   "code": "+677",
+   "en": "Solomon Islands",
+   "ar": "جزر سليمان"
+  },
+  {
+   "iso": "SO",
+   "code": "+252",
+   "en": "Somalia",
+   "ar": "الصومال"
+  },
+  {
+   "iso": "ZA",
+   "code": "+27",
+   "en": "South Africa",
+   "ar": "جنوب أفريقيا"
+  },
+  {
+   "iso": "KR",
+   "code": "+82",
+   "en": "South Korea",
+   "ar": "كوريا الجنوبية"
+  },
+  {
+   "iso": "SS",
+   "code": "+211",
+   "en": "South Sudan",
+   "ar": "جنوب السودان"
+  },
+  {
+   "iso": "ES",
+   "code": "+34",
+   "en": "Spain",
+   "ar": "إسبانيا"
+  },
+  {
+   "iso": "LK",
+   "code": "+94",
+   "en": "Sri Lanka",
+   "ar": "سريلانكا"
+  },
+  {
+   "iso": "SD",
+   "code": "+249",
+   "en": "Sudan",
+   "ar": "السودان"
+  },
+  {
+   "iso": "SR",
+   "code": "+597",
+   "en": "Suriname",
+   "ar": "سورينام"
+  },
+  {
+   "iso": "SE",
+   "code": "+46",
+   "en": "Sweden",
+   "ar": "السويد"
+  },
+  {
+   "iso": "CH",
+   "code": "+41",
+   "en": "Switzerland",
+   "ar": "سويسرا"
+  },
+  {
+   "iso": "SY",
+   "code": "+963",
+   "en": "Syria",
+   "ar": "سوريا"
+  },
+  {
+   "iso": "ST",
+   "code": "+239",
+   "en": "São Tomé and Príncipe",
+   "ar": "ساو تومي وبرينسيب"
+  },
+  {
+   "iso": "TW",
+   "code": "+886",
+   "en": "Taiwan",
+   "ar": "تايوان"
+  },
+  {
+   "iso": "TJ",
+   "code": "+992",
+   "en": "Tajikistan",
+   "ar": "طاجيكستان"
+  },
+  {
+   "iso": "TZ",
+   "code": "+255",
+   "en": "Tanzania",
+   "ar": "تنزانيا"
+  },
+  {
+   "iso": "TH",
+   "code": "+66",
+   "en": "Thailand",
+   "ar": "تايلاند"
+  },
+  {
+   "iso": "TL",
+   "code": "+670",
+   "en": "Timor-Leste",
+   "ar": "تيمور الشرقية"
+  },
+  {
+   "iso": "TG",
+   "code": "+228",
+   "en": "Togo",
+   "ar": "توغو"
+  },
+  {
+   "iso": "TO",
+   "code": "+676",
+   "en": "Tonga",
+   "ar": "تونغا"
+  },
+  {
+   "iso": "TN",
+   "code": "+216",
+   "en": "Tunisia",
+   "ar": "تونس"
+  },
+  {
+   "iso": "TM",
+   "code": "+993",
+   "en": "Turkmenistan",
+   "ar": "تركمانستان"
+  },
+  {
+   "iso": "TV",
+   "code": "+688",
+   "en": "Tuvalu",
+   "ar": "توفالو"
+  },
+  {
+   "iso": "TR",
+   "code": "+90",
+   "en": "Türkiye",
+   "ar": "تركيا"
+  },
+  {
+   "iso": "UG",
+   "code": "+256",
+   "en": "Uganda",
+   "ar": "أوغندا"
+  },
+  {
+   "iso": "UA",
+   "code": "+380",
+   "en": "Ukraine",
+   "ar": "أوكرانيا"
+  },
+  {
+   "iso": "AE",
+   "code": "+971",
+   "en": "United Arab Emirates",
+   "ar": "الإمارات العربية المتحدة"
+  },
+  {
+   "iso": "GB",
+   "code": "+44",
+   "en": "United Kingdom",
+   "ar": "المملكة المتحدة"
+  },
+  {
+   "iso": "US",
+   "code": "+1",
+   "en": "United States, Canada and the Caribbean",
+   "ar": "الولايات المتحدة وكندا والكاريبي"
+  },
+  {
+   "iso": "UY",
+   "code": "+598",
+   "en": "Uruguay",
+   "ar": "الأوروغواي"
+  },
+  {
+   "iso": "UZ",
+   "code": "+998",
+   "en": "Uzbekistan",
+   "ar": "أوزبكستان"
+  },
+  {
+   "iso": "VU",
+   "code": "+678",
+   "en": "Vanuatu",
+   "ar": "فانواتو"
+  },
+  {
+   "iso": "VA",
+   "code": "+379",
+   "en": "Vatican City",
+   "ar": "الفاتيكان"
+  },
+  {
+   "iso": "VE",
+   "code": "+58",
+   "en": "Venezuela",
+   "ar": "فنزويلا"
+  },
+  {
+   "iso": "VN",
+   "code": "+84",
+   "en": "Vietnam",
+   "ar": "فيتنام"
+  },
+  {
+   "iso": "YE",
+   "code": "+967",
+   "en": "Yemen",
+   "ar": "اليمن"
+  },
+  {
+   "iso": "ZM",
+   "code": "+260",
+   "en": "Zambia",
+   "ar": "زامبيا"
+  },
+  {
+   "iso": "ZW",
+   "code": "+263",
+   "en": "Zimbabwe",
+   "ar": "زيمبابوي"
+  }
+ ]
+}

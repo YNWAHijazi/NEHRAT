@@ -1176,6 +1176,24 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
  * `coordinator` column -- the column name predates the audit and stays readable.
  */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
+  const recorded = await recordFacilityConfirmation(facilityId, formData);
+  revalidatePath(`/facilities/${facilityId}/plan`);
+  revalidatePath(`/facilities/${facilityId}`);
+  redirect(await facilityPlanReturn(facilityId, recorded ? 'notice=confirmed' : 'error=readiness'));
+}
+
+/**
+ * The same confirmation, recorded when the person moves to another step (owner, 10 October
+ * 2026: the step said moving on saves, and the confirmation was lost). No redirect: the stepper
+ * moves on itself, or keeps the person on the step when the confirmation is refused.
+ */
+export async function autosaveFacilityConfirmationAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: 'readiness' }> {
+  const recorded = await recordFacilityConfirmation(facilityId, formData);
+  revalidatePath(`/facilities/${facilityId}`);
+  return recorded ? { ok: true } : { error: 'readiness' };
+}
+
+async function recordFacilityConfirmation(facilityId: string, formData: FormData): Promise<boolean> {
   refuseIfFacilityArchived(facilityId);
   refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
@@ -1192,8 +1210,7 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!representative
     ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
     ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
-    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) redirect(await facilityPlanReturn(facilityId,'error=readiness'));
-
+    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) return false;
   const db=getDb();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -1220,15 +1237,13 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
   getDb().prepare('UPDATE facility_plan_confirmations SET details_revision=(SELECT details_revision FROM facilities WHERE id=?), snapshot=? WHERE id=(SELECT MAX(id) FROM facility_plan_confirmations WHERE facility_id=?)').run(facilityId,facilitySnapshot(facilityId),facilityId);
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }
-  revalidatePath(`/facilities/${facilityId}/plan`);
-  revalidatePath(`/facilities/${facilityId}`);
-  redirect(await facilityPlanReturn(facilityId,'notice=confirmed'));
+  return true;
 }
 
 /**
  * Where the readiness confirmation returns (latest revision, 9 October 2026): while the
- * registration is in preparation, the confirmation is a step and the next one is the
- * supporting evidence; on the dashboard it sits on the cardiac-readiness tab.
+ * registration is in preparation, the confirmation is a step and the next one is the basic
+ * site infrastructure (required steps first); on the dashboard it sits on the cardiac-readiness tab.
  */
 async function facilityPlanReturn(facilityId: string, query: string): Promise<string> {
   const { facilityRegistrationFacts } = await import('../lib/facility-registration');
@@ -1237,7 +1252,7 @@ async function facilityPlanReturn(facilityId: string, query: string): Promise<st
   const ok = query.startsWith('notice');
   return managing
     ? `/facilities/${facilityId}?tab=readiness&${query}#confirmation`
-    : `/facilities/${facilityId}?step=${ok ? 'evidence' : 'confirmation'}&${query}#${ok ? 'evidence' : 'confirmation-step'}`;
+    : `/facilities/${facilityId}?step=${ok ? 'infrastructure' : 'confirmation'}&${query}#${ok ? 'infrastructure' : 'confirmation-step'}`;
 }
 
 /**

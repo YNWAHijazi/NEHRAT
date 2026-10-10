@@ -442,6 +442,8 @@ function DetailsCard({ facility, point, editable }: { facility: FacilityDetail; 
 /** Whether the category reaches the site (revision section 10): automatic, by capacity, or by Ministry designation. */
 function Applicability({ id }: { id: string }) {
   const a = siteApplicabilityFor(id);
+  // Covered automatically by its category: nothing to read or do, so nothing is shown (owner, 10 October 2026).
+  if (a.key === 'covered') return null;
   return (
     <p data-region="applicability" data-applicability={a.key} style={{ margin: '0 0 24px', padding: '12px 16px', background: a.covered ? 'var(--surface2)' : 'var(--accent-soft)', border: a.covered ? '0' : '1px solid var(--accent)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.6 }}>
       <L en={a.en} ar={a.ar} />

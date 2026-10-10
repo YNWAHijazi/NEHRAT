@@ -28,7 +28,8 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(header.locator('[data-region=site-id]')).toHaveText(/^SITE-\d{6}$/);
   await expect(header.locator('[data-region=registration-reference]')).toHaveText(id);
   await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');
-  await expect(page.locator('[data-region=applicability]')).toHaveAttribute('data-applicability', 'covered');
+  // Covered automatically by its category: nothing to act on, so no applicability card (owner, 10 October 2026).
+  await expect(page.locator('[data-region=applicability]')).toHaveCount(0);
   const nav = page.locator('[data-region=step-nav]');
   for (const label of ['AEDs', 'Cardiac emergency response plan', 'Readiness confirmation', 'Basic site infrastructure', 'Supporting evidence — optional', 'Review and submit']) await expect(nav).toContainText(label);
   // The required steps come first; the optional ones follow under their own heading (owner, 9 October 2026).
