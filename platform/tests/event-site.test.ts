@@ -17,7 +17,7 @@ import type { Account } from '../lib/auth';
  *   event's own.
  * - Filing freezes the Site information relied on; a later change to the site does not alter it.
  * - The site's operator sees other organizers' events at the site: name, dates, record ID,
- *   level and status only.
+ *   where each stands for the site (planned, scheduled, postponed) only.
  */
 const session = vi.hoisted(() => ({ account: null as Account | null }));
 vi.mock('../lib/auth', async (original) => ({ ...(await original<typeof import('../lib/auth')>()), currentAccount: async () => session.account }));
@@ -254,14 +254,14 @@ describe('reuse on the event: confirmed once, never inherited', () => {
 });
 
 describe('events at your sites', () => {
-  it('lists other organizers’ events at the operator’s sites: name, dates, record ID, level and status only', async () => {
+  it('lists other organizers’ events at the operator’s sites: name, dates, record ID and where each stands for the site', async () => {
     as('demo_byblos');
     const theirs = await createEventAction(payload(site21, 'Byblos at the arena'));
     if (!('eventId' in theirs)) throw new Error('not created');
     const groups = eventsAtSitesOf(organizer, true);
     const group = groups.find((g) => g.siteId === site21)!;
     expect(group.events.map((e) => e.id)).toEqual([theirs.eventId]);
-    expect(Object.keys(group.events[0]!).sort()).toEqual(['endDate', 'id', 'level', 'nameAr', 'nameEn', 'startDate', 'statusAr', 'statusEn']);
+    expect(Object.keys(group.events[0]!).sort()).toEqual(['endDate', 'id', 'nameAr', 'nameEn', 'stage', 'startDate', 'statusAr', 'statusEn']);
     // The organizer's own events at the site are already in their own list.
     expect(groups.flatMap((g) => g.events).every((e) => (getDb().prepare(`SELECT account_id FROM events WHERE id = ?`).get(e.id) as { account_id: number }).account_id !== organizer)).toBe(true);
     // Another account holds no site: nothing to list; the real side sees nothing of the demonstration side.

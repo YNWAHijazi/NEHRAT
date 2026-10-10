@@ -12,6 +12,7 @@ test('one figure answers question 1, the event type answers question 2, the Arab
   page.setDefaultTimeout(15000);
   await signInAs(page, 'test_organizer');
   await page.goto('/events/new');
+  await expect(page.locator('h1')).toContainText('Create event');
 
   // The counts and the two boxes are gone.
   await expect(page.getByText('Expected participants')).toHaveCount(0);

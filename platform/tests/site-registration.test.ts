@@ -144,7 +144,7 @@ describe('registration, submission and the Ministry review', () => {
     await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow('error=submit');
     await expect(saveFacilityDeviceAction(id, data({ purpose: 'initial', identification: 'ARENA-1', location: 'Main entrance', accessibleHours: 'yes', publiclyAccessible: 'yes', pediatric: 'na', operational: 'yes', representative: 'Duty manager', separatePin: 'no' }))).rejects.toThrow('notice=saved');
     await expect(saveFacilityPlanAction(id, data({ check_trained: 'on', check_signage: 'on', check_access: 'on', check_routes: 'on', check_staffKnow: 'on', check_drill: 'on', drillDate: '2026-08-01', representative: 'Duty manager' })))
-      .rejects.toThrow(/step=evidence&notice=confirmed/);
+      .rejects.toThrow(/step=infrastructure&notice=confirmed/);
     expect(siteStatusFor(id)).toBe('inPreparation');
     // The declaration is signed, as on an event: unsigned, nothing is submitted.
     await expect(submitSiteRegistrationAction(id, data({ representative: 'Duty manager', position: 'Manager' }))).rejects.toThrow('error=submit');
@@ -253,7 +253,7 @@ describe('designation, reuse and links', () => {
     expect(infra.siteId).toBe(site);
   });
 
-  it('the events at the site show another organizer only name, dates, record id, level and status', () => {
+  it('the events at the site show only name, dates, record id and where each stands for the site (owner, 10 October 2026)', () => {
     const db = getDb();
     const id = idOf(profile.name);
     const site = (db.prepare('SELECT site_id FROM facilities WHERE id = ?').get(id) as { site_id: string }).site_id;
@@ -263,8 +263,8 @@ describe('designation, reuse and links', () => {
     db.prepare(`INSERT INTO events (id, account_id, name_en, name_ar, start_date, end_date, is_demo, site_id) VALUES ('EV-9903', ?, 'Real event', 'فعالية', '2026-09-25', '2026-09-26', 0, ?)`).run(other, site);
     const rows = siteEventsFor(session.account!.id, site, true);
     expect(rows.map((r) => [r.id, r.own])).toEqual([['EV-9901', false], ['EV-9902', true]]);
-    expect(Object.keys(rows[0]!).sort()).toEqual(['endDate', 'id', 'level', 'nameAr', 'nameEn', 'own', 'startDate', 'statusAr', 'statusEn']);
-    expect(rows[0]).toMatchObject({ statusEn: 'In preparation' });
+    expect(Object.keys(rows[0]!).sort()).toEqual(['endDate', 'id', 'nameAr', 'nameEn', 'own', 'stage', 'startDate', 'statusAr', 'statusEn']);
+    expect(rows[0]).toMatchObject({ stage: 'planned', statusEn: 'Planned at your site' });
   });
 
   it('an incident links the site, the AED where known and an event held at the site', async () => {
