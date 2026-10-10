@@ -52,6 +52,7 @@ import {
   declarationGate, isArchivedRecord, landingRouteFor, requirementApplies, carriedAnswer } from '../lib/rules';
 import type { AnswerValue } from '../lib/rules/record-requirements';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
+import type { DeviceRefusal } from '../lib/rules/device-refusal';
 
 const DEMO_LOGINS = new Set([
   'test_organizer',
@@ -1081,7 +1082,7 @@ export async function autosaveFacilityDeviceAction(facilityId: string, formData:
 }
 
 /** Validates and writes one AED registration or update; the reason when refused. Ownership is the caller's check. */
-async function storeFacilityDevice(facilityId: string, formData: FormData): Promise<'saved' | 'details' | `photo-${string}`> {
+async function storeFacilityDevice(facilityId: string, formData: FormData): Promise<'saved' | DeviceRefusal | `photo-${string}`> {
   const db = getDb();
   const purpose = String(formData.get('purpose') ?? 'initial');
   const s = (k: string): string => String(formData.get(k) ?? '').trim();
@@ -1090,10 +1091,14 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
   const device = db.prepare('SELECT * FROM facility_devices WHERE facility_id=? AND label=?').get(facilityId,label);
   const allowed = ['initial','relocation','replacement','statusChange','accessibility','ministryUpdate'];
   const point = readMapPoint(formData, 'aedMap');
-  if (!allowed.includes(purpose) || !s('representative') || (purpose !== 'initial' && !device)
-    || (['initial','relocation'].includes(purpose) && !facilityPoint(facilityId)) || (s('separatePin') === 'yes' && !point)
-    || (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification'))
-    || (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location'))) return 'details';
+  // Each refusal names the field (owner, 10 October 2026: "it didn't tell me what's wrong").
+  // The site's own pin is not needed to record an AED: one without a separate pin takes the
+  // site's pin, which the registration requires before it can be submitted.
+  if (!allowed.includes(purpose) || (purpose !== 'initial' && !device)) return 'details';
+  if (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification')) return 'details-identification';
+  if (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location')) return 'details-location';
+  if (s('separatePin') === 'yes' && !point) return 'details-pin';
+  if (!s('representative')) return 'details-representative';
   // The photo is checked BEFORE anything is written: a refused file must not leave a
   // half-saved record behind it. The server enforces the same allow-list the picker does.
   // An untouched file input still submits an empty File; only a non-empty one is a photo.
@@ -2109,14 +2114,16 @@ export async function answerDocumentRequestAction(token: string, docId: number, 
 export async function saveFacilityProfileAction(facilityId:string, data:FormData):Promise<void> {
  const account=await currentAccount();if(!account)redirect('/signin');if(!ownedFacility(account.id,facilityId))redirect('/dashboard');refuseIfFacilityArchived(facilityId);refuseIfFacilityLocked(facilityId);
  const point=readMapPoint(data),s=(k:string)=>String(data.get(k)??'').trim();
- if(!point||!['name','operatingOrganization','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
+ // The pin is not needed to SAVE the details (owner, 10 October 2026): saving keeps what was typed and
+ // the page says the pin is still needed; the registration cannot be submitted without it.
+ if(!['name','operatingOrganization','address','municipality','hours','phone','email','accessPoint','emsNumber'].every(k=>s(k)))redirect(`/facilities/${facilityId}/profile?error=details`);
  const db=getDb();const category=String(db.prepare('SELECT category_key FROM facilities WHERE id=?').get(facilityId)?.category_key??'');
  if((s('capacity')&&(!Number.isSafeInteger(Number(s('capacity')))||Number(s('capacity'))<0))||(category==='transport'&&!TRANSPORT_FACILITY_TYPES.some(t=>t.key===s('facilityType'))))redirect(`/facilities/${facilityId}/profile?error=details`);
  // The event-hosting category's capacity is required: coverage is decided by it.
  if(categoryApplicabilityMode(category)==='capacity'&&!s('capacity'))redirect(`/facilities/${facilityId}/profile?error=capacity`);
  db.exec('BEGIN IMMEDIATE');try {
- db.prepare(`UPDATE facilities SET name_en=?,name_ar=?,address=?,municipality_en=?,municipality_ar=?,operating_hours=?,phone=?,email=?,access_point=?,ems_number=?,latitude=?,longitude=?,map_confirmed_at=now_stamp(),details_revision=details_revision+1,facility_type=?,licensed_capacity=?,operating_organization=? WHERE id=?`).run(s('name'),s('nameAr')||s('name'),s('address'),s('municipality'),s('municipalityAr')||s('municipality'),s('hours'),s('phone'),s('email'),s('accessPoint'),s('emsNumber'),point.lat,point.lng,s('facilityType'),s('capacity')!==''&&Number.isFinite(Number(s('capacity')))?Number(s('capacity')):null,s('operatingOrganization'),facilityId);
+ db.prepare(`UPDATE facilities SET name_en=?,name_ar=?,address=?,municipality_en=?,municipality_ar=?,operating_hours=?,phone=?,email=?,access_point=?,ems_number=?,latitude=COALESCE(?,latitude),longitude=COALESCE(?,longitude),map_confirmed_at=CASE WHEN ? IS NULL THEN map_confirmed_at ELSE now_stamp() END,details_revision=details_revision+1,facility_type=?,licensed_capacity=?,operating_organization=? WHERE id=?`).run(s('name'),s('nameAr')||s('name'),s('address'),s('municipality'),s('municipalityAr')||s('municipality'),s('hours'),s('phone'),s('email'),s('accessPoint'),s('emsNumber'),point?.lat??null,point?.lng??null,point?.lat??null,s('facilityType'),s('capacity')!==''&&Number.isFinite(Number(s('capacity')))?Number(s('capacity')):null,s('operatingOrganization'),facilityId);
  db.prepare('INSERT INTO facility_profile_updates (facility_id,actor_id,snapshot) VALUES (?,?,?)').run(facilityId,account.id,facilitySnapshot(facilityId));db.exec('COMMIT');
  }catch(e){db.exec('ROLLBACK');throw e;}
- revalidatePath(`/facilities/${facilityId}`);revalidatePath(`/facilities/${facilityId}/plan`);redirect(`/facilities/${facilityId}?notice=profile`);
+ revalidatePath(`/facilities/${facilityId}`);revalidatePath(`/facilities/${facilityId}/plan`);redirect(`/facilities/${facilityId}?notice=${point||facilityPoint(facilityId)?'profile':'profile-nopin'}`);
 }

@@ -65,6 +65,18 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(inputs.locator('[data-plan-input=map][data-done]')).toBeVisible();
   await expect(inputs.locator('[data-plan-input=aeds]:not([data-done]) a [data-l=en]')).toHaveText('Add it');
 
+  // A REFUSED AED SAVE SAYS WHY AND KEEPS WHAT WAS TYPED (owner, 10 October 2026): its own pin chosen and not placed.
+  await page.locator('[data-step-item=aeds] a').click();
+  const aedStep = page.locator('#aeds');
+  await aedStep.locator('input[name=identification]').fill('STEP-SERIAL-1');
+  await aedStep.locator('input[name=location]').fill('Front desk');
+  await aedStep.locator('input[name=representative]').fill('Facility manager');
+  await aedStep.locator('[data-region=aed-separate-pin] input[type=checkbox]').check();
+  await aedStep.getByRole('button', { name: 'Register device', exact: true }).click();
+  await expect(aedStep.locator('[data-region=device-autosave-refused] [data-l=en]')).toHaveText('Not saved: place the AED’s pin on the map, or choose that it uses the site’s pin.');
+  await expect(aedStep.locator('input[name=identification]')).toHaveValue('STEP-SERIAL-1');
+  await aedStep.locator('[data-region=aed-separate-pin] input[type=checkbox]').uncheck();
+
   // AEDs, the plan, the readiness confirmation.
   await registerAed(page, 'STEP-SERIAL-1', 'Front desk');
   await expect(page.locator('[data-facility-step=aeds]')).toHaveAttribute('data-state', 'complete');
@@ -101,6 +113,8 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   // THE RECORD WITH THE MINISTRY: the receipt band, the under-review card, read-only steps -- as a filed event.
   await page.goto(`/facilities/${id}`);
   await expect(header.locator('[data-region=site-status]')).toHaveAttribute('data-status', 'submitted');
+  // The operator reads the event's words while the Ministry holds the filing.
+  await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In process');
   await expect(page.locator('[data-region=next-action]')).toHaveAttribute('data-next-action', 'underReview');
   await expect(page.locator('[data-region=rail]')).toContainText('Waiting for the Ministry');
   await page.goto(`/facilities/${id}?step=review`);
