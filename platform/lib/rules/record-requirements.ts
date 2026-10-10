@@ -777,3 +777,23 @@ export function handledBy(instance: RequirementInstance): { en: string; ar: stri
   const names = instance.authors.map((a) => REQUIREMENT_AUTHORS[a]);
   return { en: names.map((n) => n.en).join(' / '), ar: names.map((n) => n.ar).join(' / ') };
 }
+
+/**
+ * WHAT EACH LEVEL ASKS FOR, for the public service page (owner, 10 October 2026: "still very
+ * narrative"): the requirement labels a level makes required, each level listing only what it
+ * adds to the one below. Derived from the catalogue, so the page names exactly what the record
+ * will ask for. A requirement the higher level covers inside the medical plan is not new there.
+ */
+export function levelAdditions(service: RecordService): { level: Level; items: { key: string; en: string; ar: string }[] }[] {
+  const needed = (row: CatalogueRow, level: Level) => {
+    const ob = (row.levels as Record<string, { obligation?: string } | undefined>)[String(level)]?.obligation;
+    return ob === 'required' || ob === 'requiredWhereApplicable' || ob === 'perAgency';
+  };
+  const rows = ROWS.filter((r) => r.service === service || (r.service as string) === 'both');
+  return ([1, 2, 3] as const).map((level) => ({
+    level,
+    items: rows
+      .filter((r) => needed(r, level) && (level === 1 || !(([1, 2] as const).filter((l) => l < level).some((l) => needed(r, l)))))
+      .map((r) => ({ key: r.key, en: r.labelEn, ar: r.labelAr })),
+  }));
+}
