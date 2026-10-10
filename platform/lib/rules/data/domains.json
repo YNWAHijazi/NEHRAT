@@ -8,6 +8,8 @@
       "number": 1,
       "en": "Maximum simultaneous attendance",
       "ar": "الحد الأقصى للحضور المتزامن",
+      "leadEn": "How many people, at most, will be there at the same time? Count everyone: participants, audience, staff and volunteers.",
+      "leadAr": "كم شخصاً على الأكثر سيكونون حاضرين في الوقت نفسه؟ احسبوا الجميع: المشاركين والجمهور والعاملين والمتطوعين.",
       "noteEn": "Everyone expected to be present at the same time, including participants, attendees, staff, performers, contractors and volunteers.",
       "noteAr": "كل من يُتوقع حضوره في الوقت نفسه، بمن فيهم المشاركون والحاضرون والموظفون والفنانون والمتعهدون والمتطوعون.",
       "options": [
@@ -32,6 +34,8 @@
       "number": 2,
       "en": "Event activity",
       "ar": "نشاط الفعالية",
+      "leadEn": "What is the main activity at the event?",
+      "leadAr": "ما النشاط الرئيسي في الفعالية؟",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -56,6 +60,8 @@
       "number": 3,
       "en": "Crowd configuration",
       "ar": "تكوين الحشد",
+      "leadEn": "How are people placed during the event?",
+      "leadAr": "كيف يتوزّع الحاضرون خلال الفعالية؟",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -80,6 +86,8 @@
       "number": 4,
       "en": "Event duration",
       "ar": "مدة الفعالية",
+      "leadEn": "How long does the event run, from opening to the last departure?",
+      "leadAr": "كم تستمر الفعالية، من الافتتاح حتى مغادرة آخر الحاضرين؟",
       "noteEn": "From opening until the last scheduled departure.",
       "noteAr": "من الافتتاح حتى آخر مغادرة مقررة.",
       "options": [
@@ -104,6 +112,8 @@
       "number": 5,
       "en": "Venue configuration",
       "ar": "تكوين الموقع",
+      "leadEn": "Where does the event take place: one space, several areas, or a route?",
+      "leadAr": "أين تُقام الفعالية: في مساحة واحدة أم في عدة أقسام أم على مسار؟",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -128,6 +138,8 @@
       "number": 6,
       "en": "Environmental exposure",
       "ar": "التعرض البيئي",
+      "leadEn": "Is the event indoors, outdoors, or under a weather warning?",
+      "leadAr": "هل تُقام الفعالية في مكان مغلق أم في الهواء الطلق أم في ظل تحذير من الطقس؟",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -152,6 +164,8 @@
       "number": 7,
       "en": "Patient access and extraction",
       "ar": "الوصول إلى المريض وإخلاؤه",
+      "leadEn": "In an emergency, how is a patient reached and carried out to an ambulance?",
+      "leadAr": "في حالة طارئة، كيف يُوصَل إلى المريض وكيف يُنقل إلى سيارة الإسعاف؟",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -176,6 +190,8 @@
       "number": 8,
       "en": "Transport time to the receiving emergency department",
       "ar": "زمن النقل إلى قسم الطوارئ المستقبِل",
+      "leadEn": "In an emergency, how long would an ambulance take to reach the nearest emergency department, with event traffic and road closures?",
+      "leadAr": "في حالة طارئة، كم تستغرق سيارة الإسعاف للوصول إلى أقرب قسم طوارئ، مع زحمة الفعالية وإغلاق الطرق؟",
       "noteEn": "Expected travel time during event traffic and road closures.",
       "noteAr": "زمن السفر المتوقع في ظل حركة الفعالية وإقفالات الطرق.",
       "options": [
@@ -200,6 +216,8 @@
       "number": 9,
       "en": "Previous event history",
       "ar": "التاريخ السابق للفعالية",
+      "leadEn": "Has anything medical happened at an earlier edition of this event? If this is the first time, choose the first answer.",
+      "leadAr": "هل وقع أي حدث طبي في نسخة سابقة من هذه الفعالية؟ إذا كانت هذه المرة الأولى، اختاروا الإجابة الأولى.",
       "noteEn": "",
       "noteAr": "",
       "options": [
@@ -254,5 +272,21 @@
       "noteEn": "The Arabic issue's statement adds 'and correct to my knowledge'. Set aside under the English-governs ruling (2026-09-03); recorded here for the Ministry, not rendered.",
       "noteAr": "يضيف الإصدار العربي عبارة «وصحيحة بحسب علمي». وُضعت جانباً بموجب قاعدة اعتماد النص الإنكليزي (2026-09-03)؛ وهي مسجَّلة هنا للوزارة ولا تُعرض."
     }
-  }
+  },
+  "$commentLeads": "leadEn/leadAr (owner, 10 October 2026, after watching a first-time user): one plain line under each question saying what it asks, in everyday words. Product copy, not the instrument's text; the instrument's title and options stay verbatim.",
+  "$commentAttendance": "attendanceBands: the lowest attendance each domain-1 option covers, read from the option text. The organizer enters one number (the most people at the same time) and domain 1's answer follows from it, so the figure the minimum conditions read and the band can never disagree (owner, 10 October 2026: the three separate counts are dropped).",
+  "attendanceBands": [
+    {
+      "score": 0,
+      "min": 0
+    },
+    {
+      "score": 1,
+      "min": 1000
+    },
+    {
+      "score": 2,
+      "min": 10000
+    }
+  ]
 }

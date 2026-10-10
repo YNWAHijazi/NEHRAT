@@ -28,7 +28,8 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(header.locator('[data-region=site-id]')).toHaveText(/^SITE-\d{6}$/);
   await expect(header.locator('[data-region=registration-reference]')).toHaveText(id);
   await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');
-  await expect(page.locator('[data-region=applicability]')).toHaveAttribute('data-applicability', 'covered');
+  // Covered automatically by its category: nothing to act on, so no applicability card (owner, 10 October 2026).
+  await expect(page.locator('[data-region=applicability]')).toHaveCount(0);
   const nav = page.locator('[data-region=step-nav]');
   for (const label of ['AEDs', 'Cardiac emergency response plan', 'Readiness confirmation', 'Basic site infrastructure', 'Supporting evidence — optional', 'Review and submit']) await expect(nav).toContainText(label);
   // The required steps come first; the optional ones follow under their own heading (owner, 9 October 2026).
@@ -63,8 +64,10 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(page.locator('#plan [data-region=procedure]')).toContainText('Contact EMS immediately');
   await expect(page.locator('#plan [data-region=derived]')).toContainText('Front desk');
   await recordReadiness(page);
-  // The confirmation leads on to the evidence step; it submits nothing.
-  await expect(page).toHaveURL(/step=evidence/);
+  // The confirmation leads on to the next step, the infrastructure (already recorded); it submits nothing.
+  await expect(page).toHaveURL(/step=infrastructure/);
+  await expect(stepState(page, 'infrastructure')).toHaveAttribute('data-step-state', 'current');
+  await page.locator('[data-region=step-next]').click();
   await expect(stepState(page, 'evidence')).toHaveAttribute('data-step-state', 'current');
   await expect(page.locator('#evidence [data-region=evidence-statement]')).toContainText('It does not itself establish MOPH acceptance or replace the regulatory Site requirements.');
   await expect(header.locator('[data-region=site-status] [data-l=en]')).toHaveText('In preparation');

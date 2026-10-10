@@ -11,9 +11,11 @@ import { InfoNote } from '../../../components/InfoNote';
  * Recording it does not submit anything; the review step does.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
-import { saveFacilityPlanAction } from '../../actions';
+import { registerAutosave } from '../../../components/record/autosave';
+import { autosaveFacilityConfirmationAction, saveFacilityPlanAction } from '../../actions';
 import { FACILITY_CONTENT } from '../../../lib/rules';
 import type { FacilityPlanConfirmation } from '../../../lib/queries';
 
@@ -160,9 +162,36 @@ export function PlanConfirmation({
   ready?: boolean;
 }) {
   const readiness = useReadinessState(existing);
+  const router = useRouter();
+  const form = useRef<HTMLFormElement>(null);
+  // MOVING ON SAVES IT (owner, 10 October 2026: the step said moving on saves, and the
+  // confirmation was lost). Untouched, nothing is sent. Complete, it is recorded as the button
+  // records it. Started but not complete, the person stays on the step and is told what is missing.
+  const touched = useRef(false);
+  const [unsaved, setUnsaved] = useState(false);
+  const total = FACILITY_CONTENT.planChecks.length;
+  const state = useRef({ readiness, total }); state.current = { readiness, total };
+  useEffect(() => {
+    if (!form.current || !ready) return;
+    return registerAutosave(form.current, async () => {
+      if (!touched.current || !form.current) return true;
+      const { readiness: r, total: n } = state.current;
+      const complete = Object.values(r.checks).filter(Boolean).length === n && r.drill !== '';
+      if (!complete) { setUnsaved(true); return false; }
+      const result = await autosaveFacilityConfirmationAction(facilityId, new FormData(form.current));
+      if ('error' in result) { setUnsaved(true); return false; }
+      touched.current = false;
+      setUnsaved(false);
+      router.refresh();
+      return true;
+    });
+  }, [facilityId, ready, router]);
   return (
     <form
+      ref={form}
       action={saveFacilityPlanAction.bind(null, facilityId)}
+      onChange={() => { touched.current = true; }}
+      onClick={(e) => { if ((e.target as HTMLElement).closest('button[aria-pressed]')) touched.current = true; }}
       data-region="plan-confirmation"
       id="confirmation"
       style={{ padding: '31px 35px', background: 'var(--surface2)', borderRadius: 16, marginBlockEnd: 44 }}
@@ -173,6 +202,12 @@ export function PlanConfirmation({
       <button type="submit" disabled={!ready} style={submitStyle(ready)}>
         <L en="Record the readiness confirmation" ar="تسجيل تأكيد الجاهزية" />
       </button>
+      {unsaved ? (
+        <p role="alert" data-region="confirmation-unsaved" style={{ margin: '12px 0 0', fontSize: '14px', color: 'var(--bad)' }}>
+          <L en={`Not recorded yet. Tick all ${total} confirmations, enter the latest drill date (within the last 12 months) and the representative, then move on or press the button.`}
+            ar={`لم يُسجَّل بعد. أكّدوا البنود الـ${total} كلها، وأدخلوا تاريخ آخر تمرين (خلال آخر 12 شهراً) واسم الممثل، ثم انتقلوا أو اضغطوا الزر.`} />
+        </p>
+      ) : null}
       {!ready ? (
         <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--muted)' }}>
           <L en={NOT_READY.en} ar={NOT_READY.ar} />

@@ -226,6 +226,8 @@ export default async function FacilityRecordPage({
       <FacilityWorkspace account={account} facility={facility} active="record">
         {notices}
         <SiteDetermination id={id} siteId={facility.siteId} />
+        {/* Where the record stands first, then what to do next (owner, 10 October 2026). */}
+        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         {next ? <NextStepCard step={next} to={nextHref(next.href)} /> : null}
         {/* With the Ministry and not yet decided: what happens next, and the receipt one click away -- the event's card. */}
         {facts.locked ? (
@@ -241,7 +243,6 @@ export default async function FacilityRecordPage({
           />
         ) : null}
         <JumpTo />
-        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         <FeeDue facility={facility} />
         <CategoryRequirements />
         <DetailsCard facility={facility} point={point} editable={editable} />
@@ -310,7 +311,7 @@ export default async function FacilityRecordPage({
         {tab === 'aeds' ? <TabSection id="aeds" titleEn="AEDs" titleAr="أجهزة إزالة الرجفان">{aeds}</TabSection> : null}
         {tab === 'events' ? (
           <TabSection id="events" titleEn="Events at this site" titleAr="الفعاليات في هذا الموقع">
-            <EventsTab siteId={siteId} events={siteId ? siteEventsFor(account.id, siteId, facility.isDemo) : []} archived={archived} />
+            <EventsTab facilityId={id} siteId={siteId} events={siteId ? siteEventsFor(account.id, siteId, facility.isDemo) : []} archived={archived} />
           </TabSection>
         ) : null}
         {tab === 'incidents' ? (
@@ -442,6 +443,8 @@ function DetailsCard({ facility, point, editable }: { facility: FacilityDetail; 
 /** Whether the category reaches the site (revision section 10): automatic, by capacity, or by Ministry designation. */
 function Applicability({ id }: { id: string }) {
   const a = siteApplicabilityFor(id);
+  // Covered automatically by its category: nothing to read or do, so nothing is shown (owner, 10 October 2026).
+  if (a.key === 'covered') return null;
   return (
     <p data-region="applicability" data-applicability={a.key} style={{ margin: '0 0 24px', padding: '12px 16px', background: a.covered ? 'var(--surface2)' : 'var(--accent-soft)', border: a.covered ? '0' : '1px solid var(--accent)', borderRadius: 10, fontSize: '14.5px', lineHeight: 1.6 }}>
       <L en={a.en} ar={a.ar} />

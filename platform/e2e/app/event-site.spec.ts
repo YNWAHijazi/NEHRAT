@@ -35,7 +35,7 @@ test('the location field links a registered site; the record reuses it on the or
   // The event is organized by an account that does not hold the Beirut Sports Complex registration.
   await signInAs(page, 'test_organizer_pending');
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   const name = `At the complex ${stamp}`;
   await fillLabelled(page, 'Event name (English)', name);
   await fillLabelled(page, 'Event name (Arabic)', `فعالية في المجمّع ${stamp}`);
@@ -80,17 +80,13 @@ test('the location field links a registered site; the record reuses it on the or
   await expect(dialog).toBeHidden();
   await expect(linkLine).toContainText(beirut);
 
-  // The fixed-venue tick is a description of the event, and opens no venue selector.
-  const tick = page.locator('button[aria-pressed]', { hasText: 'It is at a fixed venue that hosts events repeatedly' });
-  await tick.click();
-  await expectAbsent(page, { anchor: tick, absent: 'select[data-field="hostingVenueId"], [data-region="hosting-venue"]', because: 'the venue selector left with the venue service' });
-  await tick.click();
+  // The fixed-venue tick is gone (owner, 10 October 2026): a fixed venue is the link to its registered site.
+  await expect(page.locator('button[aria-pressed]', { hasText: 'It is at a fixed venue that hosts events repeatedly' })).toHaveCount(0);
 
   await fillLabelled(page, 'Municipality or municipalities', 'Beirut');
-  await fillLabelled(page, 'Expected participants', '30');
-  await fillLabelled(page, 'Expected spectators', '150');
-  await fillLabelled(page, 'Expected staff and volunteers', '10');
-  const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+  // One attendance figure, asked in question 1 (owner, 10 October 2026).
+  await fillLabelled(page, 'Most people at the same time', '190');
+  const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
   const zeroCount = await zeros.count();
   for (let i = 0; i < zeroCount; i += 1) await zeros.nth(i).click();
   await fillLabelled(page, 'Authorized representative', 'S. Khoury');
@@ -145,7 +141,8 @@ test('the location field links a registered site; the record reuses it on the or
   await expect(row).toContainText(name);
   await expect(row).toContainText(eventId);
   await expect(row).toContainText('2026-12-12 – 2026-12-13');
-  await expect(row).toContainText('Level 1');
+  await expect(row).toContainText('Planned at your site');
+  await expectAbsent(page, { anchor: row, absent: row.getByText('Level 1'), because: 'the site owner reads where the event stands for the site, not its level (owner, 10 October 2026)' });
   await expect(section.locator(`[data-site-id="${beirut}"] h3`)).toContainText(`Beirut Sports Complex · ${beirut}`);
   await expectAbsent(page, { anchor: row, absent: row.locator('a'), because: 'the site operator has no access to the event record' });
   await expectAbsent(page, { anchor: row, absent: row.getByText('S. Khoury'), because: 'the organizer’s details are not the operator’s to read' });

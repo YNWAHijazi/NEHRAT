@@ -38,14 +38,13 @@ test.describe('showstopper 1 — a Level 1 event files end to end', () => {
     await fill(page, 'Municipality or municipalities', 'Jounieh');
     await fill(page, 'Opening time', '14:00');
     await fill(page, 'Closing time', '18:00');
-    await fill(page, 'Expected participants', '80');
-    await fill(page, 'Expected spectators', '40');
-    await fill(page, 'Expected staff and volunteers', '10');
+    // One attendance figure, asked in question 1 (owner, 10 October 2026).
+    await fill(page, 'Most people at the same time', '130');
     // The event-type dropdown answered the venue question above.
     // Every domain at score 0: the option button whose marker span reads exactly "0".
-    const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+    const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
     const count = await zeros.count();
-    expect(count).toBeGreaterThanOrEqual(9);
+    expect(count).toBeGreaterThanOrEqual(8);
     for (let i = 0; i < count; i += 1) {
       await zeros.nth(i).click();
     }

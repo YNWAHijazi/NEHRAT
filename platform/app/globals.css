@@ -267,10 +267,11 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
      bar with one line for the current stage; nested cards lose a layer of padding; label and
      value stack instead of squeezing into two columns. Nothing is hidden that is not one tap away. */
   [data-region="rail"] { padding: 12px 16px !important; margin-block-end: 18px !important; border-radius: 12px !important; }
-  [data-rail] { display: flex !important; gap: 4px !important; margin-block-start: 10px !important; }
-  [data-rail] > [data-rail-stage] { flex: 1; padding-block-start: 0 !important; }
-  [data-rail] > [data-rail-stage] > * { display: none !important; }
-  [data-rail-now] { display: flex !important; flex-direction: column; gap: 2px; margin-block-start: 10px; line-height: 1.4; }
+  [data-rail] { display: none !important; }
+  [data-rail-list] { display: flex !important; flex-direction: column; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  [data-rail-list] > li { display: flex; gap: 10px; align-items: flex-start; }
+  [data-region="next-action"] { margin-block-end: 16px !important; }
+  [data-region="next-action"] > div > span:nth-child(2) { font-size: 16px !important; }
   [data-facility-step] { padding: 16px 14px !important; }
   [data-facility-step] > div:first-child { margin-block-end: 12px !important; }
   [data-facility-step] > div:first-child > h2 { font-size: 19px !important; }

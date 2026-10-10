@@ -98,10 +98,9 @@ test.describe('cancellation and postponement', () => {
     await fill('Municipality or municipalities', 'Jounieh');
     await fill('Opening time', '08:00');
     await fill('Closing time', '12:00');
-    await fill('Expected participants', '60');
-    await fill('Expected spectators', '20');
-    await fill('Expected staff and volunteers', '8');
-    const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+    // One attendance figure, asked in question 1 (owner, 10 October 2026).
+    await fill('Most people at the same time', '88');
+    const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
     const count = await zeros.count();
     for (let i = 0; i < count; i += 1) await zeros.nth(i).click();
     // Annex A Part F: the declaration's fields are required to save.
@@ -159,10 +158,9 @@ test.describe('creation to determination, end to end', () => {
     await fill('Municipality or municipalities', 'Batroun');
     await fill('Opening time', '09:00');
     await fill('Closing time', '13:00');
-    await fill('Expected participants', '90');
-    await fill('Expected spectators', '30');
-    await fill('Expected staff and volunteers', '10');
-    const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+    // One attendance figure, asked in question 1 (owner, 10 October 2026).
+    await fill('Most people at the same time', '130');
+    const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
     const count = await zeros.count();
     for (let i = 0; i < count; i += 1) await zeros.nth(i).click();
     // Annex A Part F: the declaration's fields are required to save.

@@ -52,9 +52,19 @@ const dates = (e: { startDate: string | null; endDate: string | null }) =>
  * another organizer's event shows its name, dates, record id, level and status and nothing
  * else -- the projection that read it selected nothing more (lib/site-registration.ts).
  */
-export function EventsTab({ siteId, events, archived }: { siteId: string | null; events: SiteEventRow[]; archived: boolean }) {
-  const cell: React.CSSProperties = { background: 'var(--bg)', padding: '12px 14px', fontSize: '14px', lineHeight: 1.45, minWidth: 0 };
-  const head: React.CSSProperties = { background: 'var(--surface2)', padding: '10px 14px', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' };
+const STAGE_TONE: Record<SiteEventRow['stage'], React.CSSProperties> = {
+  planned: { background: 'var(--surface2)', color: 'var(--muted)' },
+  scheduled: { background: 'var(--brand-soft)', color: 'var(--brand)' },
+  postponed: { background: 'var(--accent-soft)', color: 'var(--accent-ink)' },
+  cancelled: { background: 'var(--bad-soft)', color: 'var(--bad)' },
+};
+
+/**
+ * THE EVENTS HELD AT THE SITE, high level only (owner, 10 October 2026): name, dates, record id and
+ * where it stands for the site -- planned, scheduled once the Ministry has completed its review
+ * (with the receipt), cancelled or postponed. Never the organizer's steps, level or answers.
+ */
+export function EventsTab({ facilityId, siteId, events, archived }: { facilityId: string; siteId: string | null; events: SiteEventRow[]; archived: boolean }) {
   return (
     <div data-region="site-events">
       {siteId && !archived ? (
@@ -67,21 +77,30 @@ export function EventsTab({ siteId, events, archived }: { siteId: string | null;
       {events.length === 0 ? (
         <p data-region="no-site-events" style={{ margin: 0, fontSize: '14.5px', color: 'var(--muted)' }}><L en="No events are linked to this site." ar="لا فعاليات مرتبطة بهذا الموقع." /></p>
       ) : (
-        <div data-stack="" style={{ display: 'grid', gridTemplateColumns: 'minmax(180px,2fr) 1.2fr 1fr .6fr 1.2fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-          {([['Event', 'الفعالية'], ['Dates', 'التواريخ'], ['Record ID', 'معرّف السجل'], ['Level', 'المستوى'], ['Status', 'الحالة']] as const).map(([en, ar]) => (
-            <div key={en} data-th="" style={head}><L en={en} ar={ar} /></div>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: 0, padding: 0, listStyle: 'none' }}>
+          {events.map((e) => (
+            <li key={e.id} data-event-row={e.id} data-own={e.own || undefined} data-stage={e.stage}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', border: '1px solid var(--line)', borderRadius: 12, background: 'var(--bg)' }}>
+              <div style={{ minWidth: 0, flex: '1 1 220px' }}>
+                <div style={{ fontSize: 15.5, fontWeight: 500, lineHeight: 1.4 }}>
+                  {e.own ? <Link href={`/events/${e.id}`}><L en={e.nameEn} ar={e.nameAr} /></Link> : <L en={e.nameEn} ar={e.nameAr} />}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginBlockStart: 2 }}>
+                  {dates(e)} · {e.id}
+                  {!e.own ? <> · <L en="Another organizer’s event" ar="فعالية لمنظّم آخر" /></> : null}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center' }}>
+                <span data-region="site-event-stage" style={{ padding: '3px 10px', borderRadius: 999, fontSize: 13, ...STAGE_TONE[e.stage] }}><L en={e.statusEn} ar={e.statusAr} /></span>
+                {e.stage === 'scheduled' ? (
+                  <Link href={`/facilities/${facilityId}/events/${e.id}`} data-region="site-event-receipt-link" style={{ display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 14, border: '1px solid var(--line)', borderRadius: 22, fontSize: 13.5 }}>
+                    <L en="View receipt" ar="عرض الإيصال" />
+                  </Link>
+                ) : null}
+              </div>
+            </li>
           ))}
-          {events.map((e) => [
-            <div key={`${e.id}-name`} data-event-row={e.id} data-own={e.own || undefined} style={{ ...cell, fontWeight: 500 }}>
-              {e.own ? <Link href={`/events/${e.id}`}><L en={e.nameEn} ar={e.nameAr} /></Link> : <L en={e.nameEn} ar={e.nameAr} />}
-              {!e.own ? <span style={{ display: 'block', fontSize: 12.5, fontWeight: 400, color: 'var(--muted)' }}><L en="Another organizer’s event" ar="فعالية لمنظّم آخر" /></span> : null}
-            </div>,
-            <div key={`${e.id}-dates`} style={{ ...cell, fontVariantNumeric: 'tabular-nums' }}>{dates(e)}</div>,
-            <div key={`${e.id}-id`} style={{ ...cell, fontVariantNumeric: 'tabular-nums' }}>{e.id}</div>,
-            <div key={`${e.id}-level`} style={{ ...cell, fontVariantNumeric: 'tabular-nums' }}>{e.level === null ? '—' : <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />}</div>,
-            <div key={`${e.id}-status`} style={cell}><L en={e.statusEn} ar={e.statusAr} /></div>,
-          ])}
-        </div>
+        </ul>
       )}
     </div>
   );

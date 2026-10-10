@@ -228,8 +228,8 @@ function EventsAtYourSites({ groups }: { groups: EventsAtSite[] }) {
         <L en="Events at your sites" ar="الفعاليات في مواقعكم" />
         <InfoNote labelEn="About events at your sites" labelAr="حول الفعاليات في مواقعكم">
           <L
-            en="Events other organizers have linked to your registered sites. You see the name, dates, record ID, level and status only."
-            ar="فعاليات ربطها منظّمون آخرون بمواقعكم المسجّلة. تظهر لكم الاسم والتواريخ ومعرّف السجل والمستوى والحالة فقط."
+            en="Events other organizers have linked to your registered sites: the name, dates and record ID, and whether each is planned or scheduled. Once the Ministry completes its review of an event, its receipt is here."
+            ar="فعاليات ربطها منظّمون آخرون بمواقعكم المسجّلة: الاسم والتواريخ ومعرّف السجل، وما إذا كانت مُخطَّطاً لها أم مُجدولة. وعندما تُكمل الوزارة مراجعة فعالية، يظهر إيصالها هنا."
           />
         </InfoNote>
       </h2>
@@ -253,16 +253,14 @@ function EventsAtYourSites({ groups }: { groups: EventsAtSite[] }) {
                     <span style={{ fontSize: '12.5px', fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}>
                       <L en={`${e.id} · ${dates(e.startDate, e.endDate, 'en')}`} ar={`⁦${e.id}⁩ · ${dates(e.startDate, e.endDate, 'ar')}`} />
                     </span>
-                    <span style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
-                      {e.level !== null ? (
-                        <L en={`Level ${e.level}`} ar={`المستوى ${e.level}`} />
-                      ) : (
-                        <L en="No level derived yet" ar="لم يُستنتج المستوى بعد" />
-                      )}
-                    </span>
-                    <span data-status="" style={{ fontSize: '12.5px', color: 'var(--muted)' }}>
+                    <span data-status={e.stage} style={{ fontSize: '12.5px', color: e.stage === 'scheduled' ? 'var(--brand)' : 'var(--muted)' }}>
                       <L en={e.statusEn} ar={e.statusAr} />
                     </span>
+                    {e.stage === 'scheduled' ? (
+                      <a href={`/facilities/${g.facilityId}/events/${e.id}`} data-region="site-event-receipt-link" style={{ fontSize: '12.5px' }}>
+                        <L en="View receipt" ar="عرض الإيصال" />
+                      </a>
+                    ) : null}
                   </li>
                 ))}
               </ul>

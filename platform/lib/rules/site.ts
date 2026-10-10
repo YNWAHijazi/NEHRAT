@@ -18,7 +18,6 @@
 
 import facilityJson from './data/facility.json';
 import lifecycleJson from './data/lifecycle.json';
-import { organizerEventState, type OutcomeKey } from './ministry';
 
 const SITE = facilityJson.site;
 
@@ -490,13 +489,18 @@ export function isIsoDate(v: string): boolean {
 
 /* ---------------- the events held at the site ---------------- */
 
+export type SiteEventStageKey = 'planned' | 'scheduled' | 'cancelled' | 'postponed';
+
 /**
- * The status an event at the site shows on the site's Events tab: its lifecycle where it was
- * cancelled or postponed, else the plain record status every surface reads (lib/rules/ministry.ts
- * organizerEventState) -- never one of the three determinations in their own words.
+ * What the site owner reads about an event held at the site (owner, 10 October 2026: "they should
+ * only show high level event details ... and after it is accepted they would see the receipt that
+ * this event has been accepted and is scheduled"). Not the organizer's steps: planned, scheduled
+ * once the Ministry has recorded that the event's requirements are satisfied, or cancelled or
+ * postponed. The event outcomes are never named on the facility side.
  */
-export function siteEventStatus(r: { lifecycle: string; outcome: string | null; filed: number }): Bilingual {
+export function siteEventStage(r: { lifecycle: string; outcome: string | null }): Bilingual & { key: SiteEventStageKey } {
   const states = lifecycleJson.states as Record<string, Bilingual>;
-  if (r.lifecycle === 'cancelled' || r.lifecycle === 'postponed') return states[r.lifecycle]!;
-  return organizerEventState({ outcome: (r.outcome as OutcomeKey | null) ?? null, filed: r.filed === 1, assessed: true });
+  if (r.lifecycle === 'cancelled' || r.lifecycle === 'postponed') return { key: r.lifecycle, ...states[r.lifecycle]! };
+  if (r.outcome === 'satisfied') return { key: 'scheduled', en: 'Scheduled — Ministry review complete', ar: 'مُجدولة — اكتملت مراجعة الوزارة' };
+  return { key: 'planned', en: 'Planned at your site', ar: 'مُخطَّط لها في موقعكم' };
 }

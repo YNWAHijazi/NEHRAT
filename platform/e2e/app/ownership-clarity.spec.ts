@@ -18,7 +18,7 @@ async function fillLabelled(page: Page, en: string, value: string): Promise<void
 
 async function createLevel1(page: Page): Promise<string> {
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   await fillLabelled(page, 'Event name (English)', `Autosave ${stamp}`);
   await fillLabelled(page, 'Event name (Arabic)', `حفظ ${stamp}`);
   await fillLabelled(page, 'Start date', '2026-11-20');
@@ -26,10 +26,9 @@ async function createLevel1(page: Page): Promise<string> {
   await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
   await fillLabelled(page, 'Venue, route, or location', 'Municipal park, Zahle');
   await fillLabelled(page, 'Municipality or municipalities', 'Zahle');
-  await fillLabelled(page, 'Expected participants', '60');
-  await fillLabelled(page, 'Expected spectators', '30');
-  await fillLabelled(page, 'Expected staff and volunteers', '8');
-  const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+  // One attendance figure, asked in question 1 (owner, 10 October 2026).
+  await fillLabelled(page, 'Most people at the same time', '98');
+  const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
   for (let i = 0, n = await zeros.count(); i < n; i += 1) await zeros.nth(i).click();
   await fillLabelled(page, 'Authorized representative', 'R. Haddad');
   await fillLabelled(page, 'Position', 'Events director');
@@ -107,7 +106,7 @@ test('Level 3, before any agency is invited: the EMS step is the organizer\'s (a
   test.setTimeout(240_000);
   await signInAs(page, 'test_organizer');
   await gotoRidingRestarts(page, '/events/new');
-  const stamp = Date.now().toString(36);
+  const stamp = String(Date.now());
   await fillLabelled(page, 'Event name (English)', `Invite first ${stamp}`);
   await fillLabelled(page, 'Event name (Arabic)', `الدعوة أولاً ${stamp}`);
   await fillLabelled(page, 'Start date', '2026-12-12');
@@ -115,10 +114,9 @@ test('Level 3, before any agency is invited: the EMS step is the organizer\'s (a
   await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
   await fillLabelled(page, 'Venue, route, or location', 'Waterfront, Beirut');
   await fillLabelled(page, 'Municipality or municipalities', 'Beirut');
-  await fillLabelled(page, 'Expected participants', '600');
-  await fillLabelled(page, 'Expected spectators', '300');
-  await fillLabelled(page, 'Expected staff and volunteers', '40');
-  const twos = page.locator('button[aria-pressed]:has(span:text-is("2"))');
+  // One attendance figure, asked in question 1 (owner, 10 October 2026).
+  await fillLabelled(page, 'Most people at the same time', '940');
+  const twos = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("2"))');
   for (let i = 0, n = await twos.count(); i < n; i += 1) await twos.nth(i).click();
   await fillLabelled(page, 'Authorized representative', 'R. Haddad');
   await fillLabelled(page, 'Position', 'Events director');

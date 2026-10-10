@@ -47,11 +47,9 @@ test('event type hides unrelated activities and a previous edition reveals the n
   await expect(page.getByLabel('Course distance', { exact: false })).toBeVisible();
   await page.getByLabel('Event type', { exact: false }).first().selectOption('gathering');
   await expect(extra.getByRole('button', { name: 'Running', exact: true })).toHaveAttribute('aria-pressed', 'false');
-  await page.getByRole('button', { name: 'This event has been held before', exact: true }).click();
-  const history = page.locator('[data-region="previous-history"]');
-  await expect(history).toBeVisible();
-  await history.getByRole('button').last().click();
-  await expect(history.getByRole('button').last()).toHaveAttribute('aria-pressed', 'true');
+  // The held-before box is gone (owner, 10 October 2026): question 9 asks the history directly, with a plain line.
+  await expect(page.getByRole('button', { name: 'This event has been held before', exact: true })).toHaveCount(0);
+  await expect(page.getByText('If this is the first time, choose the first answer.')).toBeVisible();
 });
 
 /** The own-text form of one plan section on whichever page the party reads the record. */
