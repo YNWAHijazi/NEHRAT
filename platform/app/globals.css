@@ -19,9 +19,14 @@ html[data-theme="dark"] button:not(:disabled):hover{box-shadow:inset 0 0 0 999px
 button:disabled{cursor:not-allowed;opacity:.75;box-shadow:none;transform:none}
 input:hover:not(:disabled),textarea:hover:not(:disabled){border-color:var(--muted)}
 section#top :focus-visible,footer :focus-visible{outline-color:var(--hero-ink)}
-:root,html[data-palette="petrol"][data-theme="light"]{--bg:#FFFFFF;--surface:#FAFAF9;--surface2:#F1F0EC;--ink:#0B1416;--muted:#4C5B5E;--line:rgba(11,20,22,.14);--brand:#0E6B75;--brand-soft:rgba(14,107,117,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14);--l1:#0E6B75;--l1s:rgba(14,107,117,.14);--l2:#E9B44C;--l2s:rgba(233,180,76,.20);--l3:#A8482A;--l3s:rgba(168,72,42,.16)}
+/* THE PALETTE AFTER TAMM (owner, 10 October 2026: "the background is very white ... it's okay to
+   change the theme and the colors as long as it is nicer"): white ground, cool grey panels in
+   place of the warm stone, a brighter teal kept at 5:1 on white so white text on it stays legible. */
+:root,html[data-palette="petrol"][data-theme="light"]{--bg:#FFFFFF;--surface:#F7F9FA;--surface2:#EEF2F5;--ink:#16202A;--muted:#55616B;--line:rgba(22,32,42,.12);--brand:#287574;--brand-soft:rgba(40,117,116,.09);--accent:#E9B44C;--accent-ink:#8A5C10;--accent-soft:rgba(233,180,76,.20);--bad:#A8482A;--bad-soft:rgba(168,72,42,.14);--l1:#287574;--l1s:rgba(40,117,116,.14);--l2:#E9B44C;--l2s:rgba(233,180,76,.20);--l3:#A8482A;--l3s:rgba(168,72,42,.16)}
 html[data-palette="petrol"][data-theme="dark"]{--bg:#08171B;--surface:#0D2026;--surface2:#12292F;--ink:#E6EDEC;--muted:#9BAFB2;--line:rgba(255,255,255,.13);--brand:#6BA3AE;--brand-soft:rgba(107,163,174,.14);--accent:#E9B44C;--accent-ink:#E9B44C;--accent-soft:rgba(233,180,76,.18);--bad:#D2724B;--bad-soft:rgba(210,114,75,.18);--l1:#6BA3AE;--l1s:rgba(107,163,174,.18);--l2:#E9B44C;--l2s:rgba(233,180,76,.20);--l3:#D2724B;--l3s:rgba(210,114,75,.20)}
-:root,html[data-palette="petrol"]{--hero-bg:#08171B;--hero-ink:#F4F2ED;--hero-muted:#9DB2B6;--hero-line:rgba(244,242,237,.11);--hero-line2:rgba(244,242,237,.055);--hero-glow:rgba(233,180,76,.13);--hero-field:rgba(244,242,237,.07)}
+/* The overview's band: light, a breath of teal on white (owner, 10 October 2026); dark in the dark theme. */
+:root,html[data-palette="petrol"]{--hero-bg:#F1F7F7;--hero-ink:#16202A;--hero-muted:#4E5B66;--hero-line:rgba(22,32,42,.10);--hero-line2:rgba(40,117,116,.05);--hero-glow:rgba(40,117,116,.12);--hero-field:#FFFFFF}
+html[data-palette="petrol"][data-theme="dark"]{--hero-bg:#143440;--hero-ink:#F4F2ED;--hero-muted:#9DB2B6;--hero-line:rgba(244,242,237,.11);--hero-line2:rgba(244,242,237,.055);--hero-glow:rgba(233,180,76,.13);--hero-field:rgba(244,242,237,.07)}
 html[data-palette="cedar"][data-theme="light"]{--bg:#F1F1EC;--surface:#FAFAF6;--surface2:#E7E8E0;--ink:#12160F;--muted:#525A4C;--line:rgba(18,22,15,.14);--brand:#2E4A34;--brand-soft:rgba(46,74,52,.09);--accent:#C2452C;--accent-ink:#A3341E;--accent-soft:rgba(194,69,44,.14);--bad:#7E1F12;--bad-soft:rgba(126,31,18,.14);--l1:#2E4A34;--l1s:rgba(46,74,52,.13);--l2:#C2452C;--l2s:rgba(194,69,44,.16);--l3:#7E1F12;--l3s:rgba(126,31,18,.16)}
 html[data-palette="cedar"][data-theme="dark"]{--bg:#0E140F;--surface:#141C15;--surface2:#1B241C;--ink:#E9EDE6;--muted:#9FAC9C;--line:rgba(255,255,255,.13);--brand:#8CB292;--brand-soft:rgba(140,178,146,.14);--accent:#E0674B;--accent-ink:#E0674B;--accent-soft:rgba(224,103,75,.18);--bad:#E8846A;--bad-soft:rgba(232,132,106,.16);--l1:#8CB292;--l1s:rgba(140,178,146,.18);--l2:#E0674B;--l2s:rgba(224,103,75,.20);--l3:#B33A22;--l3s:rgba(179,58,34,.24)}
 html[data-palette="cedar"]{--hero-bg:#0E140F;--hero-ink:#F1F1EC;--hero-muted:#A6B2A3;--hero-line:rgba(241,241,236,.11);--hero-line2:rgba(241,241,236,.055);--hero-glow:rgba(194,69,44,.16);--hero-field:rgba(241,241,236,.07)}
@@ -296,3 +301,7 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   [data-region="site-overview"] > dl dd { font-size: 15px !important; }
 }
 
+
+/* The display-settings button rises above the service summary at the foot of the screen. */
+body:has([data-region="service-summary"]) .display-settings[data-dock]{inset-block-end:150px}
+@media (max-width:700px){body:has([data-region="service-summary"]) .display-settings[data-dock]{inset-block-end:200px}}

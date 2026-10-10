@@ -18,12 +18,12 @@ for (const lang of LANGUAGES) {
       await useLanguage(context, lang);
     });
 
-    test('the hero is a dark band, and it is the page\'s one dark ground', async ({ page }) => {
+    test('the hero is a band of its own ground, light since the TAMM review (owner, 10 October 2026)', async ({ page }) => {
       await gotoRidingRestarts(page, '/');
       const band = page.locator('[data-region="hero-band"]');
       await expect(band).toBeVisible();
-      // The band takes its ground and its text from the hero tokens, not the page's --
-      // its text sits on a dark ground in BOTH themes and cannot take the page ink.
+      // The band takes its ground and its text from the hero tokens, not the page's: a light
+      // teal-white in the light theme, dark in the dark theme -- never the page ground itself.
       const ground = await band.evaluate((el) => window.getComputedStyle(el).backgroundColor);
       const pageGround = await page.locator('body').evaluate((el) => window.getComputedStyle(el).backgroundColor);
       expect(ground, 'the hero band shares the page ground -- there is no band').not.toBe(pageGround);
