@@ -2,7 +2,7 @@
   "$comment": "The requirement catalogue behind the single record page (redesign, 7 October 2026). One row per revised Annex B requirement (B1-B20, keyed by the matrix's stable n; old row 13 is not a row) plus the package items the workbook carries separately (P-A risk assessment, P-M site or route map, P-D medical deployment map, P-C organizer declaration, P-I serious-incident notice). The quoted level rule, the source responsibility and the Arabic of the matrix wording come from requirements-matrix.json by n -- they are not repeated here. What this file adds is the workbook's proposal for HOW each row is recorded: obligation per level, who may enter it, who approves it, the short form, the completion test and the plan sections it feeds. The short questions and completion tests are PROPOSALS awaiting partner sign-off (decision D9); the obligations follow the revised matrix and the owner's confirmed decisions D1, D2 and D4. D3, D5, D8, D9 and D10 are built as the workbook proposes and recorded as proposals in decisions.",
   "$commentObligations": "required: a pre-event blocker. inPlan: required, and its answer is the canonical plan section (Level 3). recommended: never blocks; an unanswered recommended row is 'Not added', a No or Not planned is 'Not provided', neither is Complete. perAgency: each participating EMS agency signs its own. afterEvent / whenCare / ifIncident: later phases, listed for clarity and never a pre-event task. ifRequested: absent unless the Ministry records a request for it. notRequired: absent entirely (non-negotiable 10).",
   "$commentArabic": "Labels and questions are new copy in the regulation's register. Where the Arabic issue of the matrix carries a phrase it is reused; the plan's canonical Arabic is خطة التأهب الصحي والطبي (SPEC 7). Provisional until a Lebanese reader has passed over it.",
-  "revision": "2026-10-10.2",
+  "revision": "2026-10-10.3",
   "decisions": {
     "D1": {
       "state": "confirmed",
@@ -1686,8 +1686,12 @@
           "authors": []
         },
         "2": {
-          "obligation": "whenCare",
-          "authors": []
+          "obligation": "required",
+          "authors": [
+            "organizer",
+            "ems"
+          ],
+          "completion": "fields"
         },
         "3": {
           "obligation": "required",

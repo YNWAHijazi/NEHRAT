@@ -213,12 +213,13 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   const rows = resolveRequirements(facts(2));
 
   it('requires the eleven readiness and admin rows plus the map and declaration; treatment point and plan are recommended', () => {
-    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-M', 'P-A', 'P-C']);
+    expect(keys(rows.filter((r) => r.group === 'required'))).toEqual(['B1', 'B4', 'B5', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B14', 'B16', 'P-M', 'B18', 'P-A', 'P-C']);
     expect(keys(rows.filter((r) => r.group === 'recommended'))).toEqual(['B6', 'B2']);
-    // Patient-care documentation at Level 2 applies when care is given and never blocks filing
-    // (D10; live review, 10 October 2026). It is listed with the later phases, as at Level 1.
-    expect(byKey(rows, 'B18').group).toBe('later');
-    expect(byKey(rows, 'B18').blocks).toBe(false);
+    // Patient-care documentation at Level 2 is one confirmation by the organizer or the provider
+    // (partner audit, 8 October 2026). The live review of 10 October proposed dropping it as a
+    // blocker; the owner ruled that the partner's decision stands.
+    expect(byKey(rows, 'B18').fields.map((f) => f.key)).toEqual(['confirmed']);
+    expect(byKey(rows, 'B18').authors).toEqual(['organizer', 'ems']);
   });
 
   it('D1: no Director below Level 3 -- the row is absent, nobody may invite one, and no Level 2 row names a Director author', () => {
@@ -313,7 +314,7 @@ describe('Level 2: the complete operational checklist (brief item 9, D1, D2, D3)
   });
 
   it('shared rows take the first authorized completion from either side (brief item 11)', () => {
-    for (const key of ['B4', 'B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16']) {
+    for (const key of ['B4', 'B5', 'B8', 'B9', 'B11', 'B12', 'B14', 'B16', 'B18']) {
       expect(authorsFor(key, 2, 'event'), key).toEqual(['organizer', 'ems']);
     }
     expect(authorsFor('B10', 2, 'event')).toEqual(['organizer']);
@@ -435,8 +436,8 @@ describe('later phases never create pre-event blockers (brief item 15, D10)', ()
       expect(later.every((r) => !r.blocks && r.state === 'later')).toBe(true);
       expect(keys(later)).toContain('B19');
       expect(keys(later)).toContain('P-I');
-      // D10: no patient-care blocker at Levels 1 and 2; at Level 3 the plan names the procedure.
-      if (level < 3) expect(keys(later)).toContain('B18');
+      // Level 1: a later-phase statement. Levels 2 and 3 confirm it before filing (partner audit, 8 October 2026).
+      if (level === 1) expect(keys(later)).toContain('B18');
       else expect(byKey(rows, 'B18').group).toBe('required');
     });
   }
