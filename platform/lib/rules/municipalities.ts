@@ -15,6 +15,8 @@ export interface Municipality {
   governorateEn?: string;
   /** Other spellings the field also finds it by (the source files' own, a common English name). */
   aliases?: string[];
+  /** Other Arabic spellings, including the older form that carried the district in brackets. */
+  aliasesAr?: string[];
   /** The Arabic name was drafted with doubt and needs the Ministry's check. */
   arUnsure?: boolean;
 }
@@ -57,7 +59,7 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
   const starts: Municipality[] = [];
   const contains: Municipality[] = [];
   for (const m of list) {
-    const own = [m.en, m.ar ?? '', ...(m.aliases ?? [])].map(foldForSearch);
+    const own = [m.en, m.ar ?? '', ...(m.aliases ?? []), ...(m.aliasesAr ?? [])].map(foldForSearch);
     const names = [...own, foldForSearch(m.districtEn ?? ''), foldForSearch(m.districtAr ?? '')];
     if (own.some((n) => n.startsWith(q))) starts.push(m);
     else if (names.some((n) => n.includes(q))) contains.push(m);
@@ -69,7 +71,14 @@ export function searchMunicipalities(list: readonly Municipality[], query: strin
 export function municipalityNamed(list: readonly Municipality[], name: string): Municipality | null {
   const n = foldForSearch(name);
   if (!n) return null;
-  return list.find((m) => [m.en, m.ar ?? '', ...(m.aliases ?? [])].some((x) => x !== '' && foldForSearch(x) === n)) ?? null;
+  // A name that still carries its district in brackets ("Aaba (Koura)", stored before 10 October 2026)
+  // resolves to that district's entry; a bare name shared by two districts resolves to the first.
+  return list.find((m) => [m.en, m.ar ?? '', ...(m.aliases ?? []), ...(m.aliasesAr ?? [])].some((x) => x !== '' && foldForSearch(x) === n)) ?? null;
+}
+
+/** A key that tells two same-named municipalities apart (Aaba in Koura, Aaba in Nabatieh). */
+export function municipalityKey(m: Municipality): string {
+  return m.districtEn ? `${m.en}|${m.districtEn}` : m.en;
 }
 
 /** Several municipalities are stored as one line, English names joined by commas. */

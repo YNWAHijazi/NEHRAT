@@ -203,7 +203,12 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
           </div>
         </details>
         <h3 style={{ fontSize: 16, margin: '0 0 6px' }}><L en={declarationInst.labelEn} ar={declarationInst.labelAr} /></h3>
-        <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}><L en={declarationInst.promptEn} ar={declarationInst.promptAr} /></p>
+        {/* Read-only once filed: the declaration says who signed it, not what to do (live recheck, 10 October 2026). */}
+        <p style={{ margin: '0 0 14px', fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.55 }}>
+          {locked
+            ? <L en={`Signed on submission by ${initial?.representative || '—'}${initial?.position ? `, ${initial.position}` : ''}${initial?.filedAt ? ` · ${initial.filedAt.slice(0, 10)}` : ''}.`} ar={`وُقّع عند التقديم من ${initial?.representative || '—'}${initial?.position ? `، ${initial.position}` : ''}${initial?.filedAt ? ` · ⁦${initial.filedAt.slice(0, 10)}⁩` : ''}.`} />
+            : <L en={declarationInst.promptEn} ar={declarationInst.promptAr} />}
+        </p>
         {statements.length > 0 ? (
           <div data-region="compliance-statements" style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBlockEnd: 18 }}>
             {statements.map((d, i) => {

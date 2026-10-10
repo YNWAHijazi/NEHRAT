@@ -237,24 +237,40 @@
   {
    "from": "(none)",
    "to": "Al Qaa (Baalbek) -- added; a main municipality the files lack"
+  },
+  {
+   "date": "2026-10-10",
+   "note": "Owner: a name never carries its district in brackets; the district shows once, beside the name. The bracketed forms stay as search aliases so stored names still resolve."
   }
  ],
  "municipalities": [
   {
-   "en": "Aaba (Koura)",
+   "en": "Aaba",
    "districtEn": "Koura",
    "governorateEn": "North",
-   "ar": "عابا (الكورة)",
+   "ar": "عابا",
    "districtAr": "الكورة",
-   "governorateAr": "الشمال"
+   "governorateAr": "الشمال",
+   "aliases": [
+    "Aaba (Koura)"
+   ],
+   "aliasesAr": [
+    "عابا (الكورة)"
+   ]
   },
   {
-   "en": "Aaba (Nabatieh)",
+   "en": "Aaba",
    "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh",
-   "ar": "عبا (النبطية)",
+   "ar": "عبا",
    "districtAr": "النبطية",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Aaba (Nabatieh)"
+   ],
+   "aliasesAr": [
+    "عبا (النبطية)"
+   ]
   },
   {
    "en": "Aabra",
@@ -532,20 +548,32 @@
    "governorateAr": "النبطية"
   },
   {
-   "en": "Ain Qenya (Hasbaya)",
+   "en": "Ain Qenya",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "عين قنيا (حاصبيا)",
+   "ar": "عين قنيا",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Ain Qenya (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "عين قنيا (حاصبيا)"
+   ]
   },
   {
-   "en": "Ain Qenya (Marjayoun)",
+   "en": "Ain Qenya",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "عين قنيا (مرجعيون)",
+   "ar": "عين قنيا",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Ain Qenya (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "عين قنيا (مرجعيون)"
+   ]
   },
   {
    "en": "Ain Qenye",
@@ -588,37 +616,61 @@
    "governorateAr": "البقاع"
   },
   {
-   "en": "Ainab (Aley)",
+   "en": "Ainab",
    "districtEn": "Aley",
    "governorateEn": "Mount Lebanon",
-   "ar": "عيناب (عاليه)",
+   "ar": "عيناب",
    "districtAr": "عاليه",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Ainab (Aley)"
+   ],
+   "aliasesAr": [
+    "عيناب (عاليه)"
+   ]
   },
   {
-   "en": "Ainab (Chouf)",
+   "en": "Ainab",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "ar": "عيناب (الشوف)",
+   "ar": "عيناب",
    "arUnsure": true,
    "districtAr": "الشوف",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Ainab (Chouf)"
+   ],
+   "aliasesAr": [
+    "عيناب (الشوف)"
+   ]
   },
   {
-   "en": "Ainata (Baalbek)",
+   "en": "Ainata",
    "districtEn": "Baalbek",
    "governorateEn": "Baalbek-Hermel",
-   "ar": "عيناتا (بعلبك)",
+   "ar": "عيناتا",
    "districtAr": "بعلبك",
-   "governorateAr": "بعلبك - الهرمل"
+   "governorateAr": "بعلبك - الهرمل",
+   "aliases": [
+    "Ainata (Baalbek)"
+   ],
+   "aliasesAr": [
+    "عيناتا (بعلبك)"
+   ]
   },
   {
-   "en": "Ainata (Bint Jbeil)",
+   "en": "Ainata",
    "districtEn": "Bint Jbeil",
    "governorateEn": "Nabatieh",
-   "ar": "عيناثا (بنت جبيل)",
+   "ar": "عيناثا",
    "districtAr": "بنت جبيل",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Ainata (Bint Jbeil)"
+   ],
+   "aliasesAr": [
+    "عيناثا (بنت جبيل)"
+   ]
   },
   {
    "en": "Ainout",
@@ -981,20 +1033,32 @@
    "governorateAr": "جبل لبنان"
   },
   {
-   "en": "Al Khreibeh (Baalbek)",
+   "en": "Al Khreibeh",
    "districtEn": "Baalbek",
    "governorateEn": "Baalbek-Hermel",
-   "ar": "الخريبة (بعلبك)",
+   "ar": "الخريبة",
    "districtAr": "بعلبك",
-   "governorateAr": "بعلبك - الهرمل"
+   "governorateAr": "بعلبك - الهرمل",
+   "aliases": [
+    "Al Khreibeh (Baalbek)"
+   ],
+   "aliasesAr": [
+    "الخريبة (بعلبك)"
+   ]
   },
   {
-   "en": "Al Khreibeh (Chouf)",
+   "en": "Al Khreibeh",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "ar": "الخريبة (الشوف)",
+   "ar": "الخريبة",
    "districtAr": "الشوف",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Al Khreibeh (Chouf)"
+   ],
+   "aliasesAr": [
+    "الخريبة (الشوف)"
+   ]
   },
   {
    "en": "Al Khudr",
@@ -1398,38 +1462,62 @@
    "governorateAr": "الشمال"
   },
   {
-   "en": "Al-Kafr (Hasbaya)",
+   "en": "Al-Kafr",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "الكفير (حاصبيا)",
+   "ar": "الكفير",
    "arUnsure": true,
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Al-Kafr (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "الكفير (حاصبيا)"
+   ]
   },
   {
-   "en": "Al-Kafr (Marjayoun)",
+   "en": "Al-Kafr",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "الكفير (مرجعيون)",
+   "ar": "الكفير",
    "arUnsure": true,
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Al-Kafr (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "الكفير (مرجعيون)"
+   ]
   },
   {
-   "en": "Al-Khalwat (Hasbaya)",
+   "en": "Al-Khalwat",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "الخلوات (حاصبيا)",
+   "ar": "الخلوات",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Al-Khalwat (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "الخلوات (حاصبيا)"
+   ]
   },
   {
-   "en": "Al-Khalwat (Marjayoun)",
+   "en": "Al-Khalwat",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "الخلوات (مرجعيون)",
+   "ar": "الخلوات",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Al-Khalwat (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "الخلوات (مرجعيون)"
+   ]
   },
   {
    "en": "Al-Khiyara",
@@ -2909,12 +2997,13 @@
    "governorateAr": "جبل لبنان"
   },
   {
-   "en": "Byblos (Jbeil)",
+   "en": "Byblos",
    "districtEn": "Jbeil",
    "governorateEn": "Mount Lebanon",
    "aliases": [
     "Jbeil",
-    "Byblos"
+    "Byblos",
+    "Byblos (Jbeil)"
    ],
    "ar": "جبيل",
    "districtAr": "جبيل",
@@ -3801,29 +3890,47 @@
    "governorateAr": "عكار"
   },
   {
-   "en": "Hasbaya (Baabda)",
+   "en": "Hasbaya",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon",
-   "ar": "حاصبيا (بعبدا)",
+   "ar": "حاصبيا",
    "arUnsure": true,
    "districtAr": "بعبدا",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Hasbaya (Baabda)"
+   ],
+   "aliasesAr": [
+    "حاصبيا (بعبدا)"
+   ]
   },
   {
-   "en": "Hasbaya (Hasbaya)",
+   "en": "Hasbaya",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "حاصبيا (حاصبيا)",
+   "ar": "حاصبيا",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Hasbaya (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "حاصبيا (حاصبيا)"
+   ]
   },
   {
-   "en": "Hasbaya (Marjayoun)",
+   "en": "Hasbaya",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "حاصبيا (مرجعيون)",
+   "ar": "حاصبيا",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Hasbaya (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "حاصبيا (مرجعيون)"
+   ]
   },
   {
    "en": "Hasrout",
@@ -4126,20 +4233,32 @@
    "governorateAr": "بعلبك - الهرمل"
   },
   {
-   "en": "Jbaa (Chouf)",
+   "en": "Jbaa",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "ar": "جباع (الشوف)",
+   "ar": "جباع",
    "districtAr": "الشوف",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Jbaa (Chouf)"
+   ],
+   "aliasesAr": [
+    "جباع (الشوف)"
+   ]
   },
   {
-   "en": "Jbaa (Nabatieh)",
+   "en": "Jbaa",
    "districtEn": "Nabatieh",
    "governorateEn": "Nabatieh",
-   "ar": "جباع (النبطية)",
+   "ar": "جباع",
    "districtAr": "النبطية",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Jbaa (Nabatieh)"
+   ],
+   "aliasesAr": [
+    "جباع (النبطية)"
+   ]
   },
   {
    "en": "Jdeideh",
@@ -4490,28 +4609,46 @@
    "governorateAr": "الشمال"
   },
   {
-   "en": "Kawkaba (Hasbaya)",
+   "en": "Kawkaba",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "كوكبا (حاصبيا)",
+   "ar": "كوكبا",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Kawkaba (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "كوكبا (حاصبيا)"
+   ]
   },
   {
-   "en": "Kawkaba (Marjayoun)",
+   "en": "Kawkaba",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "كوكبا (مرجعيون)",
+   "ar": "كوكبا",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Kawkaba (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "كوكبا (مرجعيون)"
+   ]
   },
   {
-   "en": "Kawkaba (Rashaya)",
+   "en": "Kawkaba",
    "districtEn": "Rashaya",
    "governorateEn": "Bekaa",
-   "ar": "كوكبا (راشيا)",
+   "ar": "كوكبا",
    "districtAr": "راشيا",
-   "governorateAr": "البقاع"
+   "governorateAr": "البقاع",
+   "aliases": [
+    "Kawkaba (Rashaya)"
+   ],
+   "aliasesAr": [
+    "كوكبا (راشيا)"
+   ]
   },
   {
    "en": "Kawthariyat al-Siyad",
@@ -4843,20 +4980,32 @@
    "governorateAr": "البقاع"
   },
   {
-   "en": "Khuraibeh (Akkar)",
+   "en": "Khuraibeh",
    "districtEn": "Akkar",
    "governorateEn": "Akkar",
-   "ar": "الخريبة (عكار)",
+   "ar": "الخريبة",
    "districtAr": "عكار",
-   "governorateAr": "عكار"
+   "governorateAr": "عكار",
+   "aliases": [
+    "Khuraibeh (Akkar)"
+   ],
+   "aliasesAr": [
+    "الخريبة (عكار)"
+   ]
   },
   {
-   "en": "Khuraibeh (Baabda)",
+   "en": "Khuraibeh",
    "districtEn": "Baabda",
    "governorateEn": "Mount Lebanon",
-   "ar": "الخريبة (بعبدا)",
+   "ar": "الخريبة",
    "districtAr": "بعبدا",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Khuraibeh (Baabda)"
+   ],
+   "aliasesAr": [
+    "الخريبة (بعبدا)"
+   ]
   },
   {
    "en": "Koubba",
@@ -5168,20 +5317,32 @@
    "governorateAr": "النبطية"
   },
   {
-   "en": "Marj al-Zuhur (Hasbaya)",
+   "en": "Marj al-Zuhur",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "مرج الزهور (حاصبيا)",
+   "ar": "مرج الزهور",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Marj al-Zuhur (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "مرج الزهور (حاصبيا)"
+   ]
   },
   {
-   "en": "Marj al-Zuhur (Marjayoun)",
+   "en": "Marj al-Zuhur",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "مرج الزهور (مرجعيون)",
+   "ar": "مرج الزهور",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Marj al-Zuhur (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "مرج الزهور (مرجعيون)"
+   ]
   },
   {
    "en": "Markabta",
@@ -5344,20 +5505,32 @@
    "governorateAr": "جبل لبنان"
   },
   {
-   "en": "Mimas (Hasbaya)",
+   "en": "Mimas",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "ميماس (حاصبيا)",
+   "ar": "ميماس",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Mimas (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "ميماس (حاصبيا)"
+   ]
   },
   {
-   "en": "Mimas (Marjayoun)",
+   "en": "Mimas",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "ميماس (مرجعيون)",
+   "ar": "ميماس",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Mimas (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "ميماس (مرجعيون)"
+   ]
   },
   {
    "en": "Minieh",
@@ -5553,20 +5726,32 @@
    "governorateAr": "النبطية"
   },
   {
-   "en": "Niha (Chouf)",
+   "en": "Niha",
    "districtEn": "Chouf",
    "governorateEn": "Mount Lebanon",
-   "ar": "نيحا (الشوف)",
+   "ar": "نيحا",
    "districtAr": "الشوف",
-   "governorateAr": "جبل لبنان"
+   "governorateAr": "جبل لبنان",
+   "aliases": [
+    "Niha (Chouf)"
+   ],
+   "aliasesAr": [
+    "نيحا (الشوف)"
+   ]
   },
   {
-   "en": "Niha (Zahle)",
+   "en": "Niha",
    "districtEn": "Zahle",
    "governorateEn": "Bekaa",
-   "ar": "نيحا (زحلة)",
+   "ar": "نيحا",
    "districtAr": "زحلة",
-   "governorateAr": "البقاع"
+   "governorateAr": "البقاع",
+   "aliases": [
+    "Niha (Zahle)"
+   ],
+   "aliasesAr": [
+    "نيحا (زحلة)"
+   ]
   },
   {
    "en": "Nurah Al-Fawqa and Al-Tahata",
@@ -6349,20 +6534,32 @@
    "governorateAr": "جبل لبنان"
   },
   {
-   "en": "Shwaya (Hasbaya)",
+   "en": "Shwaya",
    "districtEn": "Hasbaya",
    "governorateEn": "Nabatieh",
-   "ar": "شويا (حاصبيا)",
+   "ar": "شويا",
    "districtAr": "حاصبيا",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Shwaya (Hasbaya)"
+   ],
+   "aliasesAr": [
+    "شويا (حاصبيا)"
+   ]
   },
   {
-   "en": "Shwaya (Marjayoun)",
+   "en": "Shwaya",
    "districtEn": "Marjayoun",
    "governorateEn": "Nabatieh",
-   "ar": "شويا (مرجعيون)",
+   "ar": "شويا",
    "districtAr": "مرجعيون",
-   "governorateAr": "النبطية"
+   "governorateAr": "النبطية",
+   "aliases": [
+    "Shwaya (Marjayoun)"
+   ],
+   "aliasesAr": [
+    "شويا (مرجعيون)"
+   ]
   },
   {
    "en": "Sibline",

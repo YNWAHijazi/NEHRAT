@@ -411,7 +411,7 @@ export default async function EventRecordPage({
               final={(
                 <>
                   {/* Level 1: the documented medical arrangements, generated from the answers (partner audit, 8 October 2026). */}
-                  {level === 1 ? <MedicalArrangementsSummary instances={record.instances} /> : null}
+                  {level === 1 ? <MedicalArrangementsSummary instances={record.instances} submitted={event.filed && !returned} /> : null}
                 <FinalReview
                   eventId={id}
                   me={lastSignerFor(account.id, id)}
