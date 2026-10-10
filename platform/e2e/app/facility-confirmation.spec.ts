@@ -19,9 +19,18 @@ test('moving on from the readiness confirmation records it, or says what is miss
   await form.locator('button[aria-pressed=false]').first().click();
   await page.locator('[data-region=step-next]').click();
   await expect(form.locator('[data-region=confirmation-unsaved]')).toBeVisible();
+  // Each reason by name (owner, 10 October 2026: "it just restarts").
+  await expect(form.locator('[data-region=confirmation-unsaved] [data-why=checks]')).toBeVisible();
+  await expect(form.locator('[data-region=confirmation-unsaved] [data-why=drill-missing] [data-l=en]')).toContainText('A date shown in grey is a placeholder');
   await expect(page.locator('[data-step-item=confirmation]')).toHaveAttribute('data-step-state', 'current');
-  // Complete: Next records it.
+  // The button, refused: the page is not reloaded, the ticks stay, and only the drill date is named.
   while (await form.locator('button[aria-pressed=false]').count()) await form.locator('button[aria-pressed=false]').first().click();
+  await form.locator('input[name=drillDate]').evaluate((el) => el.removeAttribute('required'));
+  await form.getByRole('button', { name: 'Record the readiness confirmation' }).click();
+  await expect(form.locator('[data-region=confirmation-unsaved] [data-why]')).toHaveCount(1);
+  await expect(form.locator('[data-region=confirmation-unsaved] [data-why=drill-missing]')).toBeVisible();
+  await expect(form.locator('button[aria-pressed=true]')).toHaveCount(6);
+  // Complete: Next records it.
   await form.locator('input[name=drillDate]').fill('2026-08-01');
   await page.locator('[data-region=step-next]').click();
   await expect(page.locator('[data-step-item=confirmation]')).toHaveAttribute('data-step-state', 'complete', { timeout: 15000 });

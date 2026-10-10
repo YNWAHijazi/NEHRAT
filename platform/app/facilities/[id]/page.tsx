@@ -12,7 +12,7 @@ import { VendorDirectoryLink } from '../../../components/VendorDirectoryLink';
 import { FacilityIncidentReports, type FacilityIncidentReport } from '../../../components/FacilityIncidentReports';
 import { DeviceRegistry } from './DeviceRegistry';
 import { FacilityPlan } from './FacilityPlan';
-import { PlanConfirmation } from './PlanConfirmation';
+import { ConfirmationRefused, PlanConfirmation } from './PlanConfirmation';
 import { InfrastructureForm } from './InfrastructureForm';
 import { EvidenceSection } from './EvidenceSection';
 import { SiteFinalReview } from './SiteFinalReview';
@@ -108,7 +108,7 @@ export default async function FacilityRecordPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ asof?: string; notice?: string; error?: string; step?: string; tab?: string; version?: string }>;
+  searchParams: Promise<{ asof?: string; notice?: string; error?: string; step?: string; tab?: string; version?: string; why?: string }>;
 }) {
   const account = await currentAccount();
   if (!account) redirect('/signin');
@@ -223,9 +223,8 @@ export default async function FacilityRecordPage({
           : `/facilities/${id}/profile`,
   }));
   const plan = <FacilityPlan facility={facility} devices={devices} contact={contact} point={point} aedsHref={aedsHref} contactHref={`/facilities/${id}/profile#contact`} inputs={archived || facts.locked ? null : planInputs} />;
-  const readinessError = q.error === 'readiness'
-    ? <p role="alert"><L en="Confirm all readiness items, add a drill date within the last 12 months, and check the site map, the contact and the AED status." ar="أكّدوا جميع بنود الجاهزية وأضيفوا تاريخ تمرين خلال آخر 12 شهراً وتحقّقوا من خريطة الموقع وجهة الاتصال وحالة الأجهزة." /></p>
-    : null;
+  // Without script the form posts and returns here: the same named reasons (?why=...).
+  const readinessError = q.error === 'readiness' ? <ConfirmationRefused facilityId={id} why={(q.why ?? '').split(',')} /> : null;
   const confirmationForm = archived
     ? <p><L en="Archived record · Read-only" ar="سجل مؤرشف · للقراءة فقط" /></p>
     : facts.locked

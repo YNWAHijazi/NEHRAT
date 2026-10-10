@@ -18,6 +18,7 @@ import { registerAutosave } from '../../../components/record/autosave';
 import { autosaveFacilityConfirmationAction, saveFacilityPlanAction } from '../../actions';
 import { FACILITY_CONTENT } from '../../../lib/rules';
 import type { FacilityPlanConfirmation } from '../../../lib/queries';
+import { confirmationRefusalMessages, type ConfirmationRefusal } from '../../../lib/rules/confirmation-refusal';
 
 const inputStyle: React.CSSProperties = {
   height: 44,
@@ -168,28 +169,42 @@ export function PlanConfirmation({
   // confirmation was lost). Untouched, nothing is sent. Complete, it is recorded as the button
   // records it. Started but not complete, the person stays on the step and is told what is missing.
   const touched = useRef(false);
-  const [unsaved, setUnsaved] = useState(false);
-  const total = FACILITY_CONTENT.planChecks.length;
-  const state = useRef({ readiness, total }); state.current = { readiness, total };
+  // Why the last attempt was not recorded, each reason by name (lib/rules/confirmation-refusal.ts).
+  // The form is never reloaded on a refusal: what was ticked and typed stays (owner, 10 October 2026).
+  const [why, setWhy] = useState<ConfirmationRefusal[]>([]);
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (!form.current || !ready) return;
     return registerAutosave(form.current, async () => {
       if (!touched.current || !form.current) return true;
-      const { readiness: r, total: n } = state.current;
-      const complete = Object.values(r.checks).filter(Boolean).length === n && r.drill !== '';
-      if (!complete) { setUnsaved(true); return false; }
       const result = await autosaveFacilityConfirmationAction(facilityId, new FormData(form.current));
-      if ('error' in result) { setUnsaved(true); return false; }
+      if ('error' in result) { setWhy(result.why); return false; }
       touched.current = false;
-      setUnsaved(false);
+      setWhy([]);
       router.refresh();
       return true;
     });
   }, [facilityId, ready, router]);
+  const record = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (saving || !ready) return;
+    setSaving(true);
+    try {
+      const result = await autosaveFacilityConfirmationAction(facilityId, new FormData(e.currentTarget));
+      if ('error' in result) { setWhy(result.why); return; }
+      touched.current = false;
+      setWhy([]);
+      router.push(result.next);
+      router.refresh();
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <form
       ref={form}
       action={saveFacilityPlanAction.bind(null, facilityId)}
+      onSubmit={record}
       onChange={() => { touched.current = true; }}
       onClick={(e) => { if ((e.target as HTMLElement).closest('button[aria-pressed]')) touched.current = true; }}
       data-region="plan-confirmation"
@@ -199,20 +214,43 @@ export function PlanConfirmation({
       <ReadinessHeading existing={existing} />
       <ReadinessFields readiness={readiness} />
       <FacilityConfirmationFields representative={existing?.current ? existing.coordinator || representative : representative} today={today} />
-      <button type="submit" disabled={!ready} style={submitStyle(ready)}>
+      <button type="submit" disabled={!ready || saving} style={submitStyle(ready)}>
         <L en="Record the readiness confirmation" ar="تسجيل تأكيد الجاهزية" />
       </button>
-      {unsaved ? (
-        <p role="alert" data-region="confirmation-unsaved" style={{ margin: '12px 0 0', fontSize: '14px', color: 'var(--bad)' }}>
-          <L en={`Not recorded yet. Tick all ${total} confirmations, enter the latest drill date (within the last 12 months) and the representative, then move on or press the button.`}
-            ar={`لم يُسجَّل بعد. أكّدوا البنود الـ${total} كلها، وأدخلوا تاريخ آخر تمرين (خلال آخر 12 شهراً) واسم الممثل، ثم انتقلوا أو اضغطوا الزر.`} />
-        </p>
-      ) : null}
+      {why.length ? <ConfirmationRefused facilityId={facilityId} why={why} /> : null}
       {!ready ? (
         <p style={{ margin: '10px 0 0', fontSize: '13.5px', color: 'var(--muted)' }}>
           <L en={NOT_READY.en} ar={NOT_READY.ar} />
         </p>
       ) : null}
     </form>
+  );
+}
+
+/** Not recorded: each reason, with the way to the place it is fixed where that is elsewhere. */
+export function ConfirmationRefused({ facilityId, why }: { facilityId: string; why: readonly string[] }) {
+  const lines = confirmationRefusalMessages(why);
+  if (!lines.length) return null;
+  const elsewhere: Partial<Record<ConfirmationRefusal, { href: string; en: string; ar: string }>> = {
+    map: { href: `/facilities/${facilityId}/profile#map`, en: 'Place the pin', ar: 'ضعوا العلامة' },
+    contact: { href: `/facilities/${facilityId}/profile#contact`, en: 'Edit the contact', ar: 'تعديل جهة الاتصال' },
+    'aeds-none': { href: '#aeds', en: 'Go to the AEDs', ar: 'الانتقال إلى الأجهزة' },
+    'aeds-not-ready': { href: '#aeds', en: 'Go to the AEDs', ar: 'الانتقال إلى الأجهزة' },
+  };
+  return (
+    <div role="alert" data-region="confirmation-unsaved" style={{ margin: '12px 0 0', fontSize: '14px', color: 'var(--bad)', lineHeight: 1.55 }}>
+      <p style={{ margin: '0 0 6px', fontWeight: 600 }}><L en="Not recorded yet:" ar="لم يُسجَّل بعد:" /></p>
+      <ul style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {lines.map((l) => {
+          const go = elsewhere[l.code];
+          return (
+            <li key={l.code} data-why={l.code}>
+              <L en={l.en} ar={l.ar} />
+              {go ? <>{' '}<a href={go.href}><L en={go.en} ar={go.ar} /></a></> : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
