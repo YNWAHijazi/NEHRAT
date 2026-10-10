@@ -56,6 +56,15 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await expect(review.locator('[data-region=submit-registration]')).toBeDisabled();
   await expect(review.locator('[data-region=remaining] [data-remaining=aeds]')).toContainText('AED registration');
 
+  // THE PLAN HAS NOTHING TO TYPE (owner, 10 October 2026): it says what it is built from, and
+  // names what is missing with a way to add it -- here the AED, not yet registered.
+  await page.locator('[data-step-item=plan] a').click();
+  const inputs = page.locator('#plan [data-region=plan-inputs]');
+  await expect(inputs).toContainText('Nothing to fill in here.');
+  await expect(inputs.locator('[data-plan-input]')).toHaveCount(5);
+  await expect(inputs.locator('[data-plan-input=map][data-done]')).toBeVisible();
+  await expect(inputs.locator('[data-plan-input=aeds]:not([data-done]) a [data-l=en]')).toHaveText('Add it');
+
   // AEDs, the plan, the readiness confirmation.
   await registerAed(page, 'STEP-SERIAL-1', 'Front desk');
   await expect(page.locator('[data-facility-step=aeds]')).toHaveAttribute('data-state', 'complete');
@@ -63,6 +72,8 @@ test('a new site walks the step path, submits, and is managed from its dashboard
   await page.locator('[data-step-item=plan] a').click();
   await expect(page.locator('#plan [data-region=procedure]')).toContainText('Contact EMS immediately');
   await expect(page.locator('#plan [data-region=derived]')).toContainText('Front desk');
+  await expect(page.locator('#plan [data-region=plan-inputs][data-complete]')).toContainText('everything it needs is in');
+  await expect(page.locator('#plan [data-plan-input]:not([data-done])')).toHaveCount(0);
   await recordReadiness(page);
   // The confirmation leads on to the next step, the infrastructure (already recorded); it submits nothing.
   await expect(page).toHaveURL(/step=infrastructure/);

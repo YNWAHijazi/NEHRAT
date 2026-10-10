@@ -16,7 +16,9 @@ import type { MapPoint } from '../../../lib/rules/geolocation';
  * Type sizes match the other record pages (partner audit): the wall card's steps read at
  * body size on screen and are enlarged only on paper (globals.css).
  */
-export function FacilityPlan({ facility, devices, contact, point, aedsHref, contactHref }: {
+export interface PlanInput { key: string; en: string; ar: string; done: boolean; href: string }
+
+export function FacilityPlan({ facility, devices, contact, point, aedsHref, contactHref, inputs = null }: {
   facility: FacilityDetail;
   devices: FacilityDevice[];
   contact: FacilityPerson | null;
@@ -25,6 +27,11 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
   aedsHref: string;
   /** Where the contact is edited. */
   contactHref: string;
+  /**
+   * What the plan is built from, each with where it is added (owner, 10 October 2026: "it
+   * doesn't need any input? what does it need to become complete?"). Null once filed.
+   */
+  inputs?: PlanInput[] | null;
 }) {
   const content = FACILITY_CONTENT;
   const category = facilityCategory(facility.categoryKey);
@@ -69,6 +76,7 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
 
   return (
     <div data-region="facility-plan">
+      {inputs ? <PlanInputs inputs={inputs} /> : null}
       <div data-region="procedure" data-wallcard="" style={{ padding: 32, border: '2px solid var(--brand)', borderRadius: 16, background: 'var(--surface)', marginBlockEnd: 24 }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'baseline', marginBlockEnd: 22 }}>
           <h3 style={{ margin: 0, fontSize: 18, fontWeight: 600, letterSpacing: '-.015em' }}>
@@ -182,6 +190,38 @@ export function FacilityPlan({ facility, devices, contact, point, aedsHref, cont
           ) : null}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The plan has nothing to type: it is assembled from the site's own record. This says so, and
+ * lists each input with a tick or a link to where it is added -- the step is complete when
+ * every line is ticked.
+ */
+function PlanInputs({ inputs }: { inputs: PlanInput[] }) {
+  const missing = inputs.filter((i) => !i.done).length;
+  return (
+    <div data-region="plan-inputs" data-complete={missing === 0 || undefined} style={{ padding: '18px 22px', borderRadius: 12, background: 'var(--surface2)', marginBlockEnd: 24 }}>
+      <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.55 }}>
+        {missing === 0
+          ? <L en="Nothing to fill in here. The plan is built from your site’s record, and everything it needs is in. Print the procedure for the AED cabinet and continue." ar="لا شيء لتعبئته هنا. تُبنى الخطة من سجل موقعكم، وكل ما تحتاجه متوفّر. اطبعوا الإجراءات لخزانة الجهاز وتابعوا." />
+          : <L en="Nothing to fill in here. The plan is built from your site’s record, and is complete when each item below is in." ar="لا شيء لتعبئته هنا. تُبنى الخطة من سجل موقعكم، وتكتمل عند توفّر كل بند أدناه." />}
+      </p>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {inputs.map((i) => (
+          <li key={i.key} data-plan-input={i.key} data-done={i.done || undefined} style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px', alignItems: 'baseline', fontSize: 14 }}>
+            <span aria-hidden="true" style={{ inlineSize: 18, color: i.done ? 'var(--success)' : 'var(--accent-ink)', fontWeight: 600 }}>{i.done ? '✓' : '•'}</span>
+            <span style={{ flex: '1 1 220px', color: i.done ? 'var(--muted)' : 'var(--ink)' }}>
+              <L en={i.en} ar={i.ar} />
+              <span className="sr-only"><L en={i.done ? ' — in' : ' — missing'} ar={i.done ? ' — متوفّر' : ' — ناقص'} /></span>
+            </span>
+            {i.done ? null : (
+              <a href={i.href} style={{ fontSize: '13.5px', fontWeight: 500 }}><L en="Add it" ar="أضيفوه" /></a>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
