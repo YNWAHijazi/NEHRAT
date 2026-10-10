@@ -26,6 +26,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { copyFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { getDb } from '../lib/db';
+import { seedAcceptedExamples } from '../lib/demo-accepted';
+import { beirutToday } from '../lib/clock';
 
 if (process.env['NODE_ENV'] === 'production') {
   process.stderr.write('Refusing to run: this rebuilds a database and is disabled in production.\n');
@@ -88,6 +90,9 @@ if (carried.length > 0) {
   }
   process.stdout.write(`Carried ${carried.length} credentialed account(s) across, passwords unchanged.\n`);
 }
+
+// The accepted site and event (owner, 10 October 2026), dated from today.
+for (const line of seedAcceptedExamples(next, beirutToday()).added) process.stdout.write(`Added ${line}\n`);
 
 const events = next.prepare(`SELECT count(*) AS c FROM events`).get() as { c: number };
 process.stdout.write(`Re-seeded: ${events.c} demonstration events.\n`);
