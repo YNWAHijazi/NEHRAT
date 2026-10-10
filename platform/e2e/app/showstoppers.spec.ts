@@ -135,8 +135,8 @@ test.describe('showstopper 3 — the 24-hour notification lives on its own route
     // A concluded event still takes a notice: the 24 hours run from the occurrence, and a
     // deadline does not authorize refusing a late report. The September 26 lock is withdrawn.
     await gotoRidingRestarts(page, '/events/EV-0244/incident');
-    await expect(page.locator('body')).not.toContainText('Closed — more than 24 hours have passed');
     await expect(page.locator('body')).toContainText('a late notice is accepted and marked late');
+    await expect(page.locator('body')).not.toContainText('Closed — more than 24 hours have passed');
     const start = /\d{4}-\d{2}-\d{2}/.exec((await page.locator('main').innerText()))![0];
     await page.locator('input[name="incidentType"][value="major"]').check();
     await page.locator('input[name="occurredAt"]').fill(`${start}T10:00`);
