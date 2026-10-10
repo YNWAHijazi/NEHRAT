@@ -28,6 +28,8 @@
 import { resolve } from 'node:path';
 import { getDb } from '../lib/db';
 import { linkDemonstrationCounterparties, seedDemonstration } from '../lib/demo-seed';
+import { seedAcceptedExamples } from '../lib/demo-accepted';
+import { beirutToday } from '../lib/clock';
 import { hashPassword, checkPasswordPolicy } from '../lib/password';
 
 /**
@@ -109,6 +111,20 @@ function main(): void {
     // nominations, and re-provisioning is exactly what must not happen. Repair the
     // linkage, say which it was, and refuse the reseeding either way.
     const repaired = linkDemonstrationCounterparties(db);
+    // THE ACCEPTED EXAMPLES (owner, 10 October 2026): one site and one event the Ministry has
+    // accepted, added to the demonstration organizer if missing. Each is guarded on its own
+    // name, so this adds them once and never a second set.
+    const examples = seedAcceptedExamples(db, beirutToday());
+    if (examples.added.length > 0) {
+      process.stdout.write(
+        `\nALREADY PROVISIONED — ACCEPTED EXAMPLES ADDED\n\n` +
+          `  database: ${target}\n\n` +
+          examples.added.map((a) => `  ${a}\n`).join('') +
+          `\n  Both are on test_organizer and carry is_demo = 1. Nothing else was added.\n` +
+          (repaired > 0 ? `  ${repaired} demonstration nomination(s) were also linked to their accounts.\n` : ''),
+      );
+      return;
+    }
     if (repaired > 0) {
       process.stdout.write(
         `\nALREADY PROVISIONED — COUNTERPARTY LINKAGE REPAIRED\n\n` +
@@ -133,6 +149,7 @@ function main(): void {
 
   // One clock, one dataset: the same seeder the review build runs, called deliberately.
   seedDemonstration(db);
+  seedAcceptedExamples(db, beirutToday());
 
   const setCredentials = db.prepare(
     `UPDATE accounts SET email = ?, password_hash = ? WHERE login = ? AND is_demo = 1`,
