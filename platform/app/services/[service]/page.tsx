@@ -13,7 +13,6 @@ import {
   DOMAINS,
   PUBLIC_LANDING,
   filingDeadlineRule,
-  levelAdditions,
   effectiveFlag,
   facilityCategoryText,
   serviceFeeLines,
@@ -138,10 +137,22 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
         {/* THE SERVICE IN PLAIN WORDS (owner, 10 October 2026: "see how theirs is very
             straightforward"): what the service does for the person, in one paragraph. */}
-        <p data-region="service-intro" style={{ margin: 0, fontSize: 19, lineHeight: 1.55 }}>
-          <L en={def.introEn} ar={def.introAr} />
-        </p>
-        <p style={{ margin: '4px 0 0', fontSize: 15.5 }}>
+        {/* THE SERVICE AT A GLANCE (owner, 10 October 2026: the description at the top read as
+            narrative): a lead line and what the service lets you do, point by point. */}
+        <div data-region="service-intro">
+          <p style={{ margin: '0 0 10px', fontSize: 19, lineHeight: 1.5 }}>
+            <L en="Through this service, you can:" ar="من خلال هذه الخدمة، يمكنكم:" />
+          </p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 8 }}>
+            {def.introPoints.map((pt) => (
+              <li key={pt.en} style={{ display: 'flex', gap: 12, alignItems: 'baseline', fontSize: 18, lineHeight: 1.45 }}>
+                <span aria-hidden="true" style={{ flex: 'none', inlineSize: 7, blockSize: 7, borderRadius: 999, background: 'var(--brand)', transform: 'translateY(-3px)' }} />
+                <span><L en={pt.en} ar={pt.ar} /></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <p style={{ margin: '16px 0 0', fontSize: 15.5 }}>
           <Link href="/applicability" style={{ color: 'var(--brand)' }}><L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" /></Link>
         </p>
 
@@ -154,34 +165,24 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         {/* WHAT YOU WILL NEED. */}
         <section style={section}>
           <h2 style={h2}><L en="What you will need" ar="ما ستحتاجون إليه" /></h2>
-          <p style={{ margin: '0 0 4px', fontSize: 16, color: 'var(--muted)' }}>
-            <L en="Asked for during the application:" ar="يُطلب أثناء الطلب:" />
+          <p style={{ margin: '0 0 4px', fontSize: 17, lineHeight: 1.55 }}>
+            {key === 'certify-an-event'
+              ? <L en="The following are asked for during the application. What else is needed depends on the event’s level, which the assessment sets." ar="يُطلب ما يلي أثناء الطلب. ويتوقف ما يُطلب إضافةً إلى ذلك على مستوى الفعالية الذي يحدّده التقييم." />
+              : <L en="The following are asked for during the application." ar="يُطلب ما يلي أثناء الطلب." />}
           </p>
           <ShowMoreList region="service-needs" style={{ marginBlockStart: 8 }} items={needs} />
           {key === 'certify-an-event' ? (
             <>
               {/* WHAT EACH LEVEL ADDS, in the level's own colour -- teal, amber, rust, the colours the
                   level carries everywhere on the platform -- so the step up reads at a glance. */}
-              <h3 style={{ margin: '24px 0 4px', fontSize: 18, fontWeight: 600 }}><L en="By level" ar="بحسب المستوى" /></h3>
-              <p style={{ margin: '0 0 12px', fontSize: 15, color: 'var(--muted)' }}><L en="The assessment sets the level. Each level adds to the one before." ar="يحدّد التقييم المستوى. ويضيف كل مستوى إلى ما قبله." /></p>
+              <h3 style={{ margin: '24px 0 12px', fontSize: 18, fontWeight: 600 }}><L en="What each level adds" ar="ما يضيفه كل مستوى" /></h3>
               <div data-region="documents-by-level" style={{ display: 'grid', gap: 10 }}>
-                {levelAdditions('event').map(({ level, items }) => (
-                  <div key={level} data-level={level} style={{ padding: '14px 16px', borderRadius: 12, background: `var(--l${level}s)`, borderInlineStart: `4px solid var(--l${level})` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBlockEnd: 10 }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 999, background: `var(--l${level})`, color: level === 2 ? 'var(--ink)' : '#fff', fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        <L en={`Level ${level}`} ar={`المستوى ${level}`} />
-                      </span>
-                      <span style={{ fontSize: 14, color: 'var(--muted)' }}>
-                        {level === 1 ? <L en="Every event" ar="كل فعالية" /> : <L en="Adds" ar="يضيف" />}
-                      </span>
-                    </div>
-                    <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {items.map((i) => (
-                        <li key={i.key} data-requirement={i.key} style={{ padding: '5px 11px', borderRadius: 999, background: 'var(--bg)', border: '1px solid var(--line)', fontSize: 14, lineHeight: 1.35 }}>
-                          <L en={i.en} ar={i.ar} />
-                        </li>
-                      ))}
-                    </ul>
+                {P.levelPackages.map((p) => (
+                  <div key={p.level} data-level={p.level} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '14px 16px', borderRadius: 12, background: `var(--l${p.level}s)`, borderInlineStart: `4px solid var(--l${p.level})` }}>
+                    <span style={{ flex: 'none', padding: '3px 10px', borderRadius: 999, background: `var(--l${p.level})`, color: p.level === 2 ? 'var(--ink)' : '#fff', fontSize: 13.5, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <L en={`Level ${p.level}`} ar={`المستوى ${p.level}`} />
+                    </span>
+                    <span style={{ fontSize: 16, lineHeight: 1.55 }}><L en={p.en} ar={p.ar} /></span>
                   </div>
                 ))}
               </div>
