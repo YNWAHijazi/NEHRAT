@@ -76,6 +76,7 @@ export function DeviceRegistry({
   facilityLocation,
   deviceLocations,
   editable = true,
+  today = '',
 }: {
   facilityId: string;
   devices: FacilityDevice[];
@@ -83,6 +84,8 @@ export function DeviceRegistry({
   deviceLocations: Record<string, MapPoint | null>;
   /** An archived record shows its registry and offers no form. */
   editable?: boolean;
+  /** Today, Asia/Beirut (ISO): the readiness check's default date and its latest allowed. */
+  today?: string;
 }) {
   const content = FACILITY_CONTENT;
   const router = useRouter();
@@ -126,6 +129,12 @@ export function DeviceRegistry({
       <input name={key} defaultValue={initial} {...(dir ? { dir } : {})} style={inputStyle} />
     </label>
   );
+  const dateField = (key: string, en: string, ar: string, initial: string, max?: string) => (
+    <label key={key} style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 320 }}>
+      <span style={{ fontSize: 14 }}><L en={en} ar={ar} /></span>
+      <input name={key} type="date" defaultValue={initial} max={max} style={{ ...inputStyle, fontVariantNumeric: 'tabular-nums' }} />
+    </label>
+  );
   const yesNoRow = (key: string, en: string, ar: string, initial: boolean) => (
     <div key={key} style={{ display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'center' }}>
       <span style={{ fontSize: 14 }}><L en={en} ar={ar} /></span>
@@ -139,12 +148,13 @@ export function DeviceRegistry({
 
   return (
     <div ref={root} data-region="device-registry">
-      <div data-region="registry-table" data-stack="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 44 }}>
+      <div data-region="registry-table" data-stack="" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr .9fr 1.1fr', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', marginBlockEnd: 44 }}>
         {[
           { en: 'Device', ar: 'الجهاز' },
           { en: 'Location', ar: 'الموقع' },
           { en: 'Accessible', ar: 'متاح للوصول' },
           { en: 'Status', ar: 'الحالة' },
+          { en: 'Last check', ar: 'آخر فحص' },
         ].map((h) => (
           <div key={h.en} data-th="" style={{ background: 'var(--surface2)', padding: '12px 18px', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             <L en={h.en} ar={h.ar} />
@@ -175,6 +185,21 @@ export function DeviceRegistry({
               <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: 999, background: st.chipBg, color: st.color }}>
                 <L en={st.en} ar={st.ar} />
               </span>
+            </div>,
+            // MAINTENANCE (the readiness dates of the PAD policy’s AED dataset; owner, 10 October 2026): the last check and the
+            // pad expiry, and the check itself one press away.
+            <div key={`${d.label}-e`} data-device-check={d.label} style={{ background: 'var(--bg)', padding: '12px 18px', fontSize: '13.5px', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'start' }}>
+              <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                {d.latestCheck
+                  ? <L en={`${d.latestCheck}${d.padExpiry ? ` · pads to ${d.padExpiry}` : ''}`} ar={`⁦${d.latestCheck}⁩${d.padExpiry ? ` · الأقطاب حتى ⁦${d.padExpiry}⁩` : ''}`} />
+                  : <L en="Not recorded" ar="غير مسجَّل" />}
+              </span>
+              {editable ? (
+                <button type="button" data-region="record-check" onClick={() => { setSelected(d.label); setPurpose('readinessCheck'); setCardOpen(true); }}
+                  style={{ minHeight: 36, paddingInline: 12, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 18, fontSize: 13, cursor: 'pointer' }}>
+                  <L en="Record a check" ar="تسجيل فحص" />
+                </button>
+              ) : null}
             </div>,
           ];
         })}
@@ -281,6 +306,20 @@ export function DeviceRegistry({
                   <span style={{ fontSize: 14 }}><L en={field('pediatric').en} ar={field('pediatric').ar} /></span>
                   <PediatricPick />
                 </div>
+              </>
+            ) : null}
+            {purpose === 'readinessCheck' ? (
+              <>
+                <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)', lineHeight: 1.6 }}>
+                  <L en="Record each check of this AED as it is done. An AED that does not work, or whose pads or battery are not in order, is recorded as not ready until a later check says otherwise." ar="سجّلوا كل فحص لهذا الجهاز عند إجرائه. الجهاز الذي لا يعمل، أو أقطابه أو بطاريته ليست سليمة، يُسجَّل غير جاهز إلى أن يثبت فحص لاحق خلاف ذلك." />
+                </p>
+                {dateField('checkDate', 'Date of this check', 'تاريخ هذا الفحص', today, today)}
+                {yesNoRow('operational', field('operational').en, field('operational').ar, device?.operational ?? true)}
+                {yesNoRow('padsOk', 'Pads present and within expiry', 'الأقطاب موجودة وضمن الصلاحية', true)}
+                {yesNoRow('batteryOk', 'Battery functional', 'البطارية تعمل', true)}
+                {yesNoRow('signageOk', 'AED signage visible', 'لافتة الجهاز ظاهرة', true)}
+                {dateField('padExpiry', 'Electrode-pad expiry date', 'تاريخ انتهاء صلاحية الأقطاب', device?.padExpiry ?? '')}
+                {dateField('batteryExpiry', 'Battery replacement or expiry date, if available', 'تاريخ استبدال البطارية أو انتهائها، إن توفّر', device?.batteryExpiry ?? '')}
               </>
             ) : null}
             {purpose === 'relocation' ? (

@@ -277,6 +277,13 @@
       "ctaAr": "تسجيل الجهاز"
     },
     {
+      "key": "readinessCheck",
+      "en": "Readiness check and maintenance",
+      "ar": "فحص الجاهزية والصيانة",
+      "ctaEn": "Record the check",
+      "ctaAr": "تسجيل الفحص"
+    },
+    {
       "key": "relocation",
       "en": "Relocation",
       "ar": "نقل الجهاز إلى موقع آخر",
