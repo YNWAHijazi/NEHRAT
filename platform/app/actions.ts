@@ -53,6 +53,7 @@ import {
 import type { AnswerValue } from '../lib/rules/record-requirements';
 import type { DomainAnswers, MinimumConditionInputs } from '../lib/rules';
 import type { DeviceRefusal } from '../lib/rules/device-refusal';
+import { confirmationFormRefusals, type ConfirmationRefusal } from '../lib/rules/confirmation-refusal';
 
 const DEMO_LOGINS = new Set([
   'test_organizer',
@@ -1181,10 +1182,10 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
  * `coordinator` column -- the column name predates the audit and stays readable.
  */
 export async function saveFacilityPlanAction(facilityId: string, formData: FormData): Promise<void> {
-  const recorded = await recordFacilityConfirmation(facilityId, formData);
+  const refused = await recordFacilityConfirmation(facilityId, formData);
   revalidatePath(`/facilities/${facilityId}/plan`);
   revalidatePath(`/facilities/${facilityId}`);
-  redirect(await facilityPlanReturn(facilityId, recorded ? 'notice=confirmed' : 'error=readiness'));
+  redirect(await facilityPlanReturn(facilityId, refused.length === 0 ? 'notice=confirmed' : `error=readiness&why=${refused.join(',')}`));
 }
 
 /**
@@ -1192,13 +1193,14 @@ export async function saveFacilityPlanAction(facilityId: string, formData: FormD
  * 2026: the step said moving on saves, and the confirmation was lost). No redirect: the stepper
  * moves on itself, or keeps the person on the step when the confirmation is refused.
  */
-export async function autosaveFacilityConfirmationAction(facilityId: string, formData: FormData): Promise<{ ok: true } | { error: 'readiness' }> {
-  const recorded = await recordFacilityConfirmation(facilityId, formData);
+export async function autosaveFacilityConfirmationAction(facilityId: string, formData: FormData): Promise<{ ok: true; next: string } | { error: 'readiness'; why: ConfirmationRefusal[] }> {
+  const refused = await recordFacilityConfirmation(facilityId, formData);
   revalidatePath(`/facilities/${facilityId}`);
-  return recorded ? { ok: true } : { error: 'readiness' };
+  // `next` is where the button goes once recorded; Next on the stepper moves on by itself.
+  return refused.length === 0 ? { ok: true, next: await facilityPlanReturn(facilityId, 'notice=confirmed') } : { error: 'readiness', why: refused };
 }
 
-async function recordFacilityConfirmation(facilityId: string, formData: FormData): Promise<boolean> {
+async function recordFacilityConfirmation(facilityId: string, formData: FormData): Promise<ConfirmationRefusal[]> {
   refuseIfFacilityArchived(facilityId);
   refuseIfFacilityLocked(facilityId);
   const account = await currentAccount();
@@ -1211,11 +1213,14 @@ async function recordFacilityConfirmation(facilityId: string, formData: FormData
   const representative=String(formData.get('representative')??'').trim();
 
   const devices=getDb().prepare('SELECT operational,accessible_hours FROM facility_devices WHERE facility_id=?').all(facilityId) as unknown as {operational:number;accessible_hours:number}[];
-  const priorYear=new Date(`${today}T12:00:00Z`);priorYear.setUTCFullYear(priorYear.getUTCFullYear()-1);
-  if(!Object.values(checks).every(Boolean)||!facilityPoint(facilityId)||!representative
-    ||!/^\d{4}-\d{2}-\d{2}$/.test(drill)||!Number.isFinite(Date.parse(drill))||new Date(drill).toISOString().slice(0,10)!==drill||drill>today||drill<priorYear.toISOString().slice(0,10)
-    ||!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)
-    ||(facilityAedStatus(facilityId)==='required' && !devices.length)||devices.some(d=>d.operational!==1||d.accessible_hours!==1)) return false;
+  // Every reason that applies, by name -- the site's own first, then the form's.
+  const refused: ConfirmationRefusal[] = [];
+  if(!facilityPoint(facilityId)) refused.push('map');
+  if(!facilityPersons(facilityId).some(p=>p.role==='coordinator'&&p.nameOrPosition&&p.phone&&p.email)) refused.push('contact');
+  if(facilityAedStatus(facilityId)==='required' && !devices.length) refused.push('aeds-none');
+  if(devices.some(d=>d.operational!==1||d.accessible_hours!==1)) refused.push('aeds-not-ready');
+  refused.push(...confirmationFormRefusals({ checks, checkKeys, drill, representative, today }));
+  if(refused.length) return refused;
   const db=getDb();
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -1242,7 +1247,7 @@ async function recordFacilityConfirmation(facilityId: string, formData: FormData
   getDb().prepare('UPDATE facility_plan_confirmations SET details_revision=(SELECT details_revision FROM facilities WHERE id=?), snapshot=? WHERE id=(SELECT MAX(id) FROM facility_plan_confirmations WHERE facility_id=?)').run(facilityId,facilitySnapshot(facilityId),facilityId);
   db.exec('COMMIT');
   } catch(error) { db.exec('ROLLBACK'); throw error; }
-  return true;
+  return [];
 }
 
 /**

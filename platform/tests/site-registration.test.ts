@@ -30,6 +30,7 @@ import {
   eventVenueThreshold, siteApplicability, siteOperatorStatusLabel, siteRecordLocked, siteReviewActions, siteStatus, siteSubmissionSummary, siteTabFor, type SiteSubmissionFacts,
 } from '../lib/rules/site';
 import { deviceRefusalMessage } from '../lib/rules/device-refusal';
+import { confirmationFormRefusals, confirmationRefusalMessages } from '../lib/rules/confirmation-refusal';
 import { facilityAedRequirement } from '../lib/rules/facility-intake';
 
 const folder = mkdtempSync(join(tmpdir(), 'moph-site-'));
@@ -318,6 +319,30 @@ describe('saving without the pin, and saying why a save was refused (owner, 10 O
       const m = deviceRefusalMessage(code)!;
       expect(m.en && m.ar).toBeTruthy();
     }
+  });
+
+  it('names every reason a readiness confirmation is not recorded', async () => {
+    // No pin on this site, nothing ticked, no drill date: three reasons, the site's first.
+    await expect(saveFacilityPlanAction(id, data({ representative: 'Duty manager' }))).rejects.toThrow('error=readiness&why=map,checks,drill-missing');
+    const ticks = { check_trained: 'on', check_signage: 'on', check_access: 'on', check_routes: 'on', check_staffKnow: 'on', check_drill: 'on' };
+    await expect(saveFacilityPlanAction(id, data({ ...ticks, drillDate: '2026-08-01', representative: '' }))).rejects.toThrow('why=map,representative');
+    // The pin placed, the same confirmation is recorded.
+    getDb().prepare('UPDATE facilities SET latitude = 33.9, longitude = 35.5, map_confirmed_at = now_stamp() WHERE id = ?').run(id);
+    await expect(saveFacilityPlanAction(id, data({ ...ticks, drillDate: '2026-08-01', representative: 'Duty manager' }))).rejects.toThrow('notice=confirmed');
+  });
+
+  it('checks the form’s own reasons from plain values', () => {
+    const keys = ['a', 'b'];
+    const base = { checks: { a: true, b: true }, checkKeys: keys, drill: '2026-08-01', representative: 'X', today: '2026-10-10' };
+    expect(confirmationFormRefusals(base)).toEqual([]);
+    expect(confirmationFormRefusals({ ...base, checks: { a: true } })).toEqual(['checks']);
+    expect(confirmationFormRefusals({ ...base, drill: '' })).toEqual(['drill-missing']);
+    expect(confirmationFormRefusals({ ...base, drill: '2026-10-11' })).toEqual(['drill-future']);
+    expect(confirmationFormRefusals({ ...base, drill: '2025-10-09' })).toEqual(['drill-old']);
+    expect(confirmationFormRefusals({ ...base, drill: '2025-10-10' })).toEqual([]);
+    expect(confirmationFormRefusals({ ...base, representative: ' ' })).toEqual(['representative']);
+    expect(confirmationRefusalMessages(['map', 'nonsense', 'checks']).map((m) => m.code)).toEqual(['map', 'checks']);
+    expect(confirmationRefusalMessages(['drill-missing', 'drill-future', 'drill-old', 'representative', 'contact', 'aeds-none', 'aeds-not-ready']).every((m) => m.en && m.ar)).toBe(true);
   });
 
   it('reads In process to the operator while the Ministry holds a filing', () => {
