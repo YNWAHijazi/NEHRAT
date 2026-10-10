@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { L } from './L';
 import { useDocumentLang } from './OptionText';
-import { districtLabel, municipalityLabel, municipalityNamed, searchMunicipalities, type Municipality } from '../lib/rules/municipalities';
+import { districtLabel, municipalityKey, municipalityLabel, municipalityNamed, searchMunicipalities, type Municipality } from '../lib/rules/municipalities';
 
 /**
  * THE MUNICIPALITY FIELD (owner, 9 October 2026): a searchable list like the site field on an
@@ -64,7 +64,7 @@ export function MunicipalityField({
 
   const searching = !multiple && chosen[0] && query === label(chosen[0]) ? '' : query;
   const suggestions = useMemo(
-    () => searchMunicipalities(options, searching).filter((m) => !(multiple && chosen.some((c) => c.en === m.en))),
+    () => searchMunicipalities(options, searching).filter((m) => !(multiple && chosen.some((c) => municipalityKey(c) === municipalityKey(m)))),
     [options, searching, multiple, chosen],
   );
   const typed = query.trim();
@@ -88,7 +88,7 @@ export function MunicipalityField({
     }
     setActive(-1);
   };
-  const remove = (m: Municipality) => onChange(chosen.filter((c) => c.en !== m.en));
+  const remove = (m: Municipality) => onChange(chosen.filter((c) => municipalityKey(c) !== municipalityKey(m)));
   /** Keeps what was typed: the listed entry it names, else the text itself. */
   const keepTyped = () => {
     if (!typed || (!multiple && chosen[0] && query === label(chosen[0]))) return;
@@ -128,7 +128,7 @@ export function MunicipalityField({
       {multiple && chosen.length > 0 ? (
         <ul data-region="municipality-tags" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: 0, padding: 0, listStyle: 'none' }}>
           {chosen.map((m) => (
-            <li key={m.en} data-municipality-tag={m.en} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, paddingInlineStart: 12, borderRadius: 999, background: 'var(--surface2)', fontSize: 14 }}>
+            <li key={municipalityKey(m)} data-municipality-tag={m.en} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, paddingInlineStart: 12, borderRadius: 999, background: 'var(--surface2)', fontSize: 14 }}>
               <span>{label(m)}</span>
               <button type="button" onClick={() => remove(m)} aria-label={lang === 'ar' ? `إزالة ${municipalityLabel(m, 'ar')}` : `Remove ${m.en}`}
                 style={{ minBlockSize: 36, minInlineSize: 36, border: 0, background: 'transparent', color: 'var(--muted)', fontSize: 16, cursor: 'pointer', borderRadius: 999 }}>
@@ -176,18 +176,20 @@ export function MunicipalityField({
           >
             {suggestions.map((m, i) => (
               <li
-                key={m.en}
+                key={municipalityKey(m)}
                 id={`${optionPrefix}-${i}`}
                 role="option"
                 aria-selected={i === active}
                 data-municipality={m.en}
+                data-district={m.districtEn || undefined}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => choose(m)}
                 onMouseMove={() => setActive(i)}
                 style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 10px', alignItems: 'baseline', minBlockSize: 44, padding: '10px 14px', cursor: 'pointer', fontSize: 14.5, background: i === active ? 'var(--surface2)' : 'var(--bg)' }}
               >
                 <span>{label(m)}</span>
-                {m.districtEn && !m.en.endsWith(`(${m.districtEn})`) ? <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{districtLabel(m, lang)}</span> : null}
+                {/* The district once, beside the name -- never inside it (owner, 10 October 2026). */}
+                {m.districtEn ? <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>{districtLabel(m, lang)}</span> : null}
               </li>
             ))}
             {offerTyped ? (

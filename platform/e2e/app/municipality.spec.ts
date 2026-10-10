@@ -39,10 +39,12 @@ test('the site form chooses one municipality from the list, or keeps one that is
   await box.fill('sour');
   await expect(field.locator('[data-municipality="Tyre"]')).toBeVisible();
 
-  // Two places of the same name are told apart by their district.
+  // Two places of the same name are told apart by their district, shown once beside the name
+  // and never in brackets inside it (owner, 10 October 2026).
   await box.fill('Aaba');
-  await expect(field.locator('[data-municipality="Aaba (Koura)"]')).toBeVisible();
-  await expect(field.locator('[data-municipality="Aaba (Nabatieh)"]')).toBeVisible();
+  await expect(field.locator('[data-municipality="Aaba"][data-district="Koura"]')).toContainText('Koura');
+  await expect(field.locator('[data-municipality="Aaba"][data-district="Nabatieh"]')).toContainText('Nabatieh');
+  await expect(field.locator('[data-municipality="Aaba"][data-district="Koura"]')).not.toContainText('(');
 
   // The Arabic page: the field and its foot read in Arabic.
   await useLanguage(context, 'ar');

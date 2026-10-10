@@ -4,7 +4,7 @@
  * and nothing reads it.
  */
 import { describe, expect, it } from 'vitest';
-import { foldForSearch, municipalityLabel, municipalityList, municipalityNamed, searchMunicipalities, splitMunicipalities, type Municipality } from '../lib/rules/municipalities';
+import { foldForSearch, municipalityKey, municipalityLabel, municipalityList, municipalityNamed, searchMunicipalities, splitMunicipalities, type Municipality } from '../lib/rules/municipalities';
 
 const FIXTURE: Municipality[] = [
   { en: 'Beirut', ar: 'بيروت' },
@@ -28,22 +28,28 @@ describe('the municipality list', () => {
     // and doubtful drafts are marked for the Ministry's check.
     expect(list.every((m) => /[\u0600-\u06FF]/.test(m.ar ?? '') && /[\u0600-\u06FF]/.test(m.districtAr ?? ''))).toBe(true);
     expect(list.find((m) => m.en === 'Jounieh')?.ar).toBe('جونية');
-    expect(list.find((m) => m.en === 'Byblos (Jbeil)')?.ar).toBe('جبيل');
-    expect(list.find((m) => m.en === 'Aaba (Koura)')?.ar).toBe('عابا (الكورة)');
+    expect(list.find((m) => m.en === 'Byblos')?.ar).toBe('جبيل');
+    // A name never carries its district in brackets; the district shows once, beside it (owner, 10 October 2026).
+    expect(list.filter((m) => /\(|\)/.test(m.en) || /\(|\)/.test(m.ar ?? '')).map((m) => m.en)).toEqual([]);
+    expect(list.find((m) => m.en === 'Aaba' && m.districtEn === 'Koura')?.ar).toBe('عابا');
+    // A name stored with the bracket before the change still resolves to its district's entry.
+    expect(municipalityNamed(list, 'Aaba (Nabatieh)')?.districtEn).toBe('Nabatieh');
+    expect(municipalityNamed(list, 'عابا (الكورة)')?.districtEn).toBe('Koura');
     expect(searchMunicipalities(list, 'زحلة')[0]?.en).toBe('Zahle');
-    expect(new Set(list.map((m) => m.en)).size).toBe(list.length);
+    // Same-named towns in two districts are two entries, told apart by the district.
+    expect(new Set(list.map(municipalityKey)).size).toBe(list.length);
   });
 
   it('carries the main municipalities, by their common names (owner: "as long as the main ones are there")', () => {
     const list = municipalityList();
-    const main = ['Beirut', 'Tripoli', 'Saida', 'Tyre', 'Zahle', 'Jounieh', 'Byblos (Jbeil)', 'Baabda', 'Aley', 'Nabatieh', 'Baalbek', 'Hermel', 'Halba',
-      'Zgharta-Ehden', 'Bcharre', 'Batroun', 'Amioun', 'Minieh', 'Jezzine - Ain Majdeline', 'Bint Jbeil', 'Jdeidet Marjayoun', 'Hasbaya (Hasbaya)', 'Rashaya', 'Joub Jannine',
+    const main = ['Beirut', 'Tripoli', 'Saida', 'Tyre', 'Zahle', 'Jounieh', 'Byblos', 'Baabda', 'Aley', 'Nabatieh', 'Baalbek', 'Hermel', 'Halba',
+      'Zgharta-Ehden', 'Bcharre', 'Batroun', 'Amioun', 'Minieh', 'Jezzine - Ain Majdeline', 'Bint Jbeil', 'Jdeidet Marjayoun', 'Hasbaya', 'Rashaya', 'Joub Jannine',
       'Chtaura', 'Deir el Qamar', 'Damour', 'Choueifat', 'Hadath', 'Jdeideh-Bouchrieh-Sed', 'Bourj Hammoud', 'Sin el Fil'];
     expect(main.filter((n) => !list.some((m) => m.en === n))).toEqual([]);
     // The clear errors in the files are gone.
     expect(list.some((m) => ['Zahl', 'ta Zahl', 'Sidon'].includes(m.en.replace(/ \(.*\)$/, '')))).toBe(false);
     // Found by the spelling people use, or the files' own.
-    for (const [typed, name] of [['Sour', 'Tyre'], ['Byblos', 'Byblos (Jbeil)'], ['Sidon', 'Saida'], ['Bsharri', 'Bcharre'], ['Zahleh', 'Zahle'], ['Qab Elias', 'Qab Elias - Wadi El Delm'], ['Jezzine', 'Jezzine - Ain Majdeline']]) {
+    for (const [typed, name] of [['Sour', 'Tyre'], ['Jbeil', 'Byblos'], ['Sidon', 'Saida'], ['Bsharri', 'Bcharre'], ['Zahleh', 'Zahle'], ['Qab Elias', 'Qab Elias - Wadi El Delm'], ['Jezzine', 'Jezzine - Ain Majdeline']]) {
       expect(municipalityNamed(list, typed!)?.en, typed).toBe(name);
       expect(searchMunicipalities(list, typed!)[0]?.en, typed).toBe(name);
     }
