@@ -71,16 +71,15 @@ for (const lang of LANGUAGES) {
       await fillLabelled(page, 'Municipality or municipalities', 'Jounieh');
       await fillLabelled(page, 'Opening time', '14:00');
       await fillLabelled(page, 'Closing time', '18:00');
-      await fillLabelled(page, 'Expected participants', '80');
-      await fillLabelled(page, 'Expected spectators', '40');
-      await fillLabelled(page, 'Expected staff and volunteers', '10');
+      // One attendance figure, asked in question 1 (owner, 10 October 2026).
+      await fillLabelled(page, 'Most people at the same time', '130');
 
       // The event-type dropdown answers the venue question; no separate venue
       // yes/no controls exist any more (partner review: picking the type IS the
       // floor input).
 
       // Every domain at score 0, so the level derives to 1 rather than being chosen.
-      const zeros = page.locator('button[aria-pressed]:has(span:text-is("0"))');
+      const zeros = page.locator('button[aria-pressed]:not([disabled]):has(span:text-is("0"))');
       const zeroCount = await zeros.count();
       expect(zeroCount).toBeGreaterThanOrEqual(9);
       for (let i = 0; i < zeroCount; i += 1) await zeros.nth(i).click();

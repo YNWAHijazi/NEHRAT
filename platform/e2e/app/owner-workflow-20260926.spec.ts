@@ -145,18 +145,11 @@ test("organizer sorting, duplicate application, and venue certificate history", 
     .getByLabel("Event type", { exact: false })
     .first()
     .selectOption("concert");
+  // One attendance figure, asked in question 1 (owner, 10 October 2026).
   await page
-    .getByLabel("Expected participants", { exact: false })
+    .getByLabel("Most people at the same time", { exact: false })
     .first()
-    .fill("2000");
-  await page
-    .getByLabel("Expected spectators", { exact: false })
-    .first()
-    .fill("100");
-  await page
-    .getByLabel("Expected staff and volunteers", { exact: false })
-    .first()
-    .fill("50");
+    .fill("2150");
   await page
     .getByLabel("Authorized representative", { exact: false })
     .first()
