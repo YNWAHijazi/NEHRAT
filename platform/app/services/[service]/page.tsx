@@ -6,9 +6,12 @@ import { currentAccount } from '../../../lib/auth';
 import { AdFooter } from '../../../components/AdFooter';
 import { InfoNote } from '../../../components/InfoNote';
 import { capabilityConfigFor, ministryConfig } from '../../../lib/queries';
+import { ShowMoreList, ShowMoreText } from '../../../components/ShowMore';
+import { publishedCycles } from '../../../lib/queries';
 import {
   DOMAINS,
   PUBLIC_LANDING,
+  filingDeadlineRule,
   effectiveFlag,
   facilityCategoryText,
   serviceFeeLines,
@@ -60,173 +63,200 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     (s) => (s.k === 'certify' && key === 'certify-an-event') || (s.k === 'facility' && key === 'register-a-facility'),
   )!;
 
-  const h2: React.CSSProperties = { margin: '36px 0 10px', fontSize: 22, fontWeight: 600, letterSpacing: '-.025em' };
-  const listBox: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', borderRadius: 12, overflow: 'hidden',
-  };
-  const row: React.CSSProperties = { background: 'var(--bg)', padding: '14px 18px', fontSize: '14.5px', lineHeight: 1.55 };
+  const h2: React.CSSProperties = { margin: '0 0 16px', fontSize: 24, fontWeight: 600, letterSpacing: '-.02em' };
+  const section: React.CSSProperties = { paddingBlock: '28px', borderBlockStart: '1px solid var(--line)' };
+  const dotRow: React.CSSProperties = { display: 'flex', gap: 16, alignItems: 'baseline', paddingBlock: 16, borderBlockEnd: '1px solid var(--line)', fontSize: 17, lineHeight: 1.5 };
+  const dot = <span aria-hidden="true" style={{ flex: 'none', inlineSize: 10, blockSize: 10, borderRadius: 999, background: 'var(--accent)', transform: 'translateY(-1px)' }} />;
 
   // One flow per service, from the data. The end state differs; the shape does not.
   const flowKey = key === 'certify-an-event' ? 'certify' : 'facility';
   const flow = (P.flows as Record<string, { n: number; en: string; ar: string }[]>)[flowKey] ?? [];
   const flowTitle = (P.flowTitles as Record<string, { en: string; ar: string }>)[flowKey]!;
+  const fees = serviceFeeLines(
+    (key === 'certify-an-event' ? 'certifyEvent' : 'registerFacility') as FeeService,
+    effectiveFlag('applicationFees', new Map([...ministryConfig()].map(([k, v]) => [k, v.value]))),
+    capabilityConfigFor('applicationFees'),
+  );
 
-  return (
-    <PublicShell signedIn={account !== null}>
-      <Link href="/" style={{ fontSize: '13.5px', color: 'var(--brand)' }}>
-        <L en="Overview" ar="نظرة عامة" />
-      </Link>
-      <h1 data-sec-h1="" data-region="service-detail" style={{ margin: '10px 0 12px', fontSize: 34, fontWeight: 600, letterSpacing: '-.03em' }}>
-        <L en={def.en} ar={def.ar} />
-      </h1>
-      <p style={{ margin: '0 0 8px', fontSize: '17px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '70ch' }}>
-        <L en={def.descEn} ar={def.descAr} />
-      </p>
-      {/* THE FEE LINE DERIVES (application-fees capability). While the capability
-          is off -- the shipped state -- the rule returns the one line this page
-          always carried: `Fee: None.`, in exactly those words (non-negotiable 12).
-          With a fee in force the amount renders here, before an organizer starts,
-          and again on the submission package as an amount due. */}
-      <div data-region="fee-lines" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {serviceFeeLines(
-          (key === 'certify-an-event' ? 'certifyEvent' : 'registerFacility') as FeeService,
-          effectiveFlag('applicationFees', new Map([...ministryConfig()].map(([k, v]) => [k, v.value]))),
-          capabilityConfigFor('applicationFees'),
-        ).map((line) => (
-          <p key={line.en} style={{ margin: 0, fontSize: '13.5px', color: 'var(--muted)' }}>
-            <L en={line.en} ar={line.ar} />
-          </p>
-        ))}
-      </div>
+  // WHAT YOU WILL NEED (TAMM's "Required documents"): the service's own list, and for an event
+  // what each level adds -- the level is set by the assessment, so the list says so.
+  const needs = [
+    ...def.needs.map((n) => <span key={n.en} style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>{dot}<L en={n.en} ar={n.ar} /></span>),
+    ...(key === 'certify-an-event'
+      ? P.levelPackages.map((p) => (
+        <span key={p.level} style={{ display: 'flex', gap: 16, alignItems: 'baseline' }}>
+          {dot}
+          <span><strong style={{ fontWeight: 600 }}><L en={`Level ${p.level}: `} ar={`المستوى ${p.level}: `} /></strong><L en={p.en} ar={p.ar} /></span>
+        </span>
+      ))
+      : []),
+  ];
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBlock: '20px 28px' }}>
-        <Link href="/applicability" style={{ height: 44, paddingInline: 20, border: '1px solid var(--line)', borderRadius: 22, fontSize: 14, display: 'inline-flex', alignItems: 'center', color: 'var(--ink)' }}>
-          <L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" />
-        </Link>
-        <Link href={account ? destination : `/signin?next=${encodeURIComponent(destination)}`} style={{ height: 44, paddingInline: 22, border: 0, borderRadius: 22, background: 'var(--brand)', color: 'var(--bg)', fontSize: 14, fontWeight: 500, display: 'inline-flex', alignItems: 'center' }}>
-          <L en={account ? 'Start' : key === 'certify-an-event' ? 'Sign in to certify' : 'Sign in to register'} ar={account ? 'ابدأ' : key === 'certify-an-event' ? 'سجّل الدخول لطلب الشهادة' : 'سجّل الدخول للتسجيل'} />
-        </Link>
-      </div>
+  // THE TIME LINE OF THE SUMMARY, from the configuration: the filing lead times by level for an
+  // event, the drill cycle for a site. Never a fixed number in copy (non-negotiable 3).
+  const leads = ([1, 2, 3] as const).map((l) => filingDeadlineRule(l).leadTimeDays);
+  const months = publishedCycles().annualMonths;
+  const timeLine = key === 'certify-an-event'
+    ? { en: `File ${Math.min(...leads)} to ${Math.max(...leads)} days before the event, by level`, ar: `التقديم قبل الفعالية بـ${Math.min(...leads)} إلى ${Math.max(...leads)} يوماً بحسب المستوى` }
+    : { en: `Kept up to date, with a practical drill every ${months} months`, ar: `يُحدَّث باستمرار، مع تمرين عملي كل ${months} شهراً` };
+  const startHref = account ? destination : `/signin?next=${encodeURIComponent(destination)}`;
 
-      {/* WHAT THE SERVICE COVERS. Each screen answers the same question in its own
-          terms -- the event by its nine domains and its documents, the facility/site by
-          category. Both then end with the same thing: a numbered flow from registration
-          to the state the service produces. */}
-      {key === 'certify-an-event' ? (
-        <>
-          {/* The scoring-model paragraph left (partner ruling, second sweep): the
-              assessment explains itself when taken, and a visitor reading the service
-              needs the nine subjects, not the arithmetic. */}
-          <h2 style={h2}>
-            <L en="What the assessment covers" ar="ما يشمله التقييم" />
-          </h2>
-          <div data-region="domains" style={listBox}>
-            {DOMAINS.map((d) => (
-              <div key={d.number} style={row}>
-                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 12 }}>{d.number}</span>
-                <L en={d.en} ar={d.ar} />
-              </div>
-            ))}
-          </div>
-
-          {/* What each level submits, in words (partner audit, 8 October 2026): a fixed
-              document count read as a promise the catalogue could not keep. The exact
-              list derives on the record once the level is known. */}
-          <h2 style={h2}>
-            <L en={P.levelPackagesTitleEn} ar={P.levelPackagesTitleAr} />
-          </h2>
-          <div data-region="documents-by-level" style={listBox}>
-            {P.levelPackages.map((p) => (
-              <div key={p.level} style={row}>
-                <strong style={{ color: `var(--l${p.level})` }}>
-                  <L en={`Level ${p.level}`} ar={`المستوى ${p.level}`} />
-                </strong>
-                <span style={{ color: 'var(--muted)' }}>
-                  {' — '}
-                  <L en={p.en} ar={p.ar} />
-                </span>
-              </div>
-            ))}
-          </div>
-          <p style={{ margin: '12px 0 0', fontSize: '13.5px', lineHeight: 1.65, maxWidth: '80ch', color: 'var(--muted)' }}>
-            <L en={P.levelPackagesNoteEn} ar={P.levelPackagesNoteAr} />
-          </p>
-        </>
-      ) : null}
-
-      {key === 'register-a-facility' ? (
-        <>
-          {/* CPR and AED defined once, at first use, behind an information control
-              (partner audit, 8 October 2026); the rest of the page uses the initials. */}
-          <p data-region="term-definitions" style={{ margin: '0 0 8px', fontSize: '14.5px', lineHeight: 1.7, display: 'flex', flexWrap: 'wrap', gap: '4px 18px' }}>
-            {P.termDefinitions.map((t) => (
-              <span key={t.term}>
-                <L en={t.en} ar={t.ar} />
-                <InfoNote><L en={t.noteEn} ar={t.noteAr} /></InfoNote>
-              </span>
-            ))}
-          </p>
-          <h2 style={h2}>
-            <L en={P.coveredTitleEn} ar={P.coveredTitleAr} />
-          </h2>
-          {/* The Ministry-configuration intro left (partner ruling, second sweep):
-              each category row already says which Ministry value it turns on. */}
-          {/* CATEGORY AND RULE TOGETHER. A list of categories alone tells an operator
-              which box they are in and not what follows from it -- and for three of the
-              six what follows is that the Ministry has not set a value yet. */}
-          <div data-region="facility-categories" style={listBox}>
-            {P.facilityCategories.map((c, i) => (
-              <div key={i} style={row}>
-                <div style={{ fontWeight: 500 }}>
-                  <L en={facilityCategoryText(c).en} ar={facilityCategoryText(c).ar} />
-                </div>
-                <div style={{ fontSize: '13px', color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.6 }}>
-                  <L en={c.ruleEn} ar={c.ruleAr} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <h2 style={h2}>
-            <L en={P.obligationsTitleEn} ar={P.obligationsTitleAr} />
-          </h2>
-          <div data-region="facility-obligations" style={listBox}>
-            {P.facilityObligations.map((o) => (
-              <div key={o.en} style={row}>
-                <L en={o.en} ar={o.ar} />
-              </div>
-            ))}
-          </div>
-        </>
-      ) : null}
-
-      {/* THE FLOW. Every service ends here, with the same table and a different end
-          state: a reference number, a classification, a maintained record. */}
-      <h2 style={h2}>
-        <L en={flowTitle.en} ar={flowTitle.ar} />
-      </h2>
-      <div data-region="flow" style={listBox}>
-        <div style={{ ...row, display: 'flex', gap: 16, background: 'var(--surface2)', fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)' }}>
-          <span style={{ flex: 'none', minWidth: 40 }}>
-            <L en={P.stepEn} ar={P.stepAr} />
-          </span>
-          <span>
-            <L en={P.whatHappensEn} ar={P.whatHappensAr} />
-          </span>
-        </div>
-        {flow.map((step) => (
-          <div key={step.n} style={{ ...row, display: 'flex', gap: 16, alignItems: 'baseline' }}>
-            <span style={{ flex: 'none', minWidth: 40, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{step.n}</span>
-            <span>
-              <L en={step.en} ar={step.ar} />
+  const summary = (
+    <div data-region="service-summary" data-noprint="" style={{ position: 'sticky', insetBlockEnd: 0, zIndex: 40, background: 'var(--surface2)', borderBlockStart: '1px solid var(--line)', boxShadow: '0 -6px 24px rgba(16,24,40,.06)' }}>
+      <div data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '20px 32px 22px', display: 'flex', flexWrap: 'wrap', gap: '14px 32px', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+          <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 8 }}><L en={def.en} ar={def.ar} /></div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 24px', fontSize: 15.5, color: 'var(--ink)' }}>
+            <span data-summary="time" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+              <L en={timeLine.en} ar={timeLine.ar} />
+            </span>
+            <span data-summary="fee" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>
+              {fees.map((f) => <L key={f.en} en={f.en} ar={f.ar} />)}
             </span>
           </div>
-        ))}
+        </div>
+        <Link href={startHref} data-region="service-start" style={{ flex: '1 1 260px', maxWidth: 520, minHeight: 52, paddingInline: 28, borderRadius: 26, background: 'var(--brand)', color: '#fff', fontSize: 18, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+          <L en={account ? 'Start' : 'Sign in to start'} ar={account ? 'ابدأ' : 'سجّلوا الدخول للبدء'} />
+        </Link>
       </div>
+    </div>
+  );
 
+  return (
+    <PublicShell signedIn={account !== null} bottomBar={summary}>
+      <div style={{ maxWidth: 820 }}>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 16, color: 'var(--brand)' }}>
+          <svg aria-hidden="true" data-flip="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+          <L en="Services" ar="الخدمات" />
+        </Link>
+        <h1 data-sec-h1="" data-region="service-detail" style={{ margin: '18px 0 16px', fontSize: 40, fontWeight: 700, letterSpacing: '-.03em', lineHeight: 1.15 }}>
+          <L en={def.en} ar={def.ar} />
+        </h1>
 
+        {/* THE SERVICE IN PLAIN WORDS (owner, 10 October 2026: "see how theirs is very
+            straightforward"): what the service does for the person, in one paragraph. */}
+        <ShowMoreText region="service-intro" lines={4}>
+          <p style={{ margin: 0, fontSize: 19, lineHeight: 1.55 }}>
+            <strong style={{ fontWeight: 600 }}><L en={`${def.en}: `} ar={`${def.ar}: `} /></strong>
+            <L en={def.introEn} ar={def.introAr} />
+          </p>
+        </ShowMoreText>
+        <p style={{ margin: '4px 0 0', fontSize: 15.5 }}>
+          <Link href="/applicability" style={{ color: 'var(--brand)' }}><L en="Check whether this applies to you" ar="التحقق من انطباق هذا عليكم" /></Link>
+        </p>
+
+        {/* WHO ISSUES IT. */}
+        <div data-region="service-authority" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBlock: '28px 0', paddingBlock: 20, borderBlockStart: '1px solid var(--line)' }}>
+          <span aria-hidden="true" style={{ flex: 'none', inlineSize: 52, blockSize: 52, borderRadius: 999, background: 'var(--surface2)', color: 'var(--brand)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 300 }}>+</span>
+          <span style={{ fontSize: 18 }}><L en="Ministry of Public Health" ar="وزارة الصحة العامة" /></span>
+        </div>
+
+        {/* WHAT YOU WILL NEED. */}
+        <section style={section}>
+          <h2 style={h2}><L en="What you will need" ar="ما ستحتاجون إليه" /></h2>
+          <p style={{ margin: '0 0 4px', fontSize: 17, lineHeight: 1.55 }}>
+            {key === 'certify-an-event'
+              ? <L en="The following are asked for during the application. What else is needed depends on the event’s level, which the assessment sets." ar="يُطلب ما يلي أثناء الطلب. ويتوقف ما يُطلب إضافةً إلى ذلك على مستوى الفعالية الذي يحدّده التقييم." />
+              : <L en="The following are asked for during the application." ar="يُطلب ما يلي أثناء الطلب." />}
+          </p>
+          <ShowMoreList region={key === 'certify-an-event' ? 'documents-by-level' : 'service-needs'} items={needs.map((n, i) => <div key={i} style={dotRow}>{n}</div>)} />
+          {key === 'certify-an-event' ? (
+            <p style={{ margin: '12px 0 0', fontSize: 14.5, lineHeight: 1.6, color: 'var(--muted)' }}><L en={P.levelPackagesNoteEn} ar={P.levelPackagesNoteAr} /></p>
+          ) : null}
+        </section>
+
+        {/* COST. The fee line derives (application-fees capability): while the capability is off
+            -- the shipped state -- it reads `Fee: None.`, in exactly those words (non-negotiable 12). */}
+        <section style={section}>
+          <h2 style={h2}><L en="Cost" ar="التكلفة" /></h2>
+          <div data-region="fee-lines">
+            {fees.map((line) => (
+              <p key={line.en} style={{ margin: 0, paddingBlock: 8, fontSize: 17 }}>
+                <L en={line.en} ar={line.ar} />
+              </p>
+            ))}
+          </div>
+        </section>
+
+        {/* THE STEPS, numbered, the line joining them -- the end state differs by service. */}
+        <section style={section}>
+          <h2 style={h2}><L en={flowTitle.en} ar={flowTitle.ar} /></h2>
+          <ShowMoreList
+            region="flow"
+            items={flow.map((step, i) => (
+              <div key={step.n} style={{ position: 'relative', display: 'flex', gap: 18, paddingBlockEnd: i === flow.length - 1 ? 4 : 26 }}>
+                {i < flow.length - 1 ? <span aria-hidden="true" style={{ position: 'absolute', insetInlineStart: 15, insetBlockStart: 38, insetBlockEnd: 4, inlineSize: 2, background: 'var(--line)' }} /> : null}
+                <span style={{ flex: 'none', inlineSize: 32, blockSize: 32, borderRadius: 999, background: 'var(--ink)', color: 'var(--bg)', fontSize: 15, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontVariantNumeric: 'tabular-nums' }}>{step.n}</span>
+                <span style={{ fontSize: 17, lineHeight: 1.55, paddingBlockStart: 3 }}><L en={step.en} ar={step.ar} /></span>
+              </div>
+            ))}
+          />
+        </section>
+
+        {/* THE DETAIL, folded: the assessment's subjects for an event; for a site, who must
+            register (each category with its rule) and what keeping it ready means. */}
+        {key === 'certify-an-event' ? (
+          <Folded titleEn="What the assessment covers" titleAr="ما يشمله التقييم">
+            <div data-region="domains">
+              {DOMAINS.map((d) => (
+                <div key={d.number} style={{ display: 'flex', gap: 14, paddingBlock: 12, borderBlockEnd: '1px solid var(--line)', fontSize: 16 }}>
+                  <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', minInlineSize: 18 }}>{d.number}</span>
+                  <L en={d.en} ar={d.ar} />
+                </div>
+              ))}
+            </div>
+          </Folded>
+        ) : (
+          <>
+            <Folded titleEn={P.coveredTitleEn} titleAr={P.coveredTitleAr}>
+              {/* CPR and AED defined once, at first use, behind an information control. */}
+              <p data-region="term-definitions" style={{ margin: '0 0 8px', fontSize: '14.5px', lineHeight: 1.7, display: 'flex', flexWrap: 'wrap', gap: '4px 18px' }}>
+                {P.termDefinitions.map((t) => (
+                  <span key={t.term}>
+                    <L en={t.en} ar={t.ar} />
+                    <InfoNote><L en={t.noteEn} ar={t.noteAr} /></InfoNote>
+                  </span>
+                ))}
+              </p>
+              <div data-region="facility-categories">
+                {P.facilityCategories.map((c, i) => (
+                  <div key={i} style={{ paddingBlock: 12, borderBlockEnd: '1px solid var(--line)' }}>
+                    <div style={{ fontSize: 16, fontWeight: 500 }}><L en={facilityCategoryText(c).en} ar={facilityCategoryText(c).ar} /></div>
+                    <div style={{ fontSize: 14, color: 'var(--muted)', marginBlockStart: 4, lineHeight: 1.6 }}><L en={c.ruleEn} ar={c.ruleAr} /></div>
+                  </div>
+                ))}
+              </div>
+            </Folded>
+            <Folded titleEn={P.obligationsTitleEn} titleAr={P.obligationsTitleAr}>
+              <div data-region="facility-obligations">
+                {P.facilityObligations.map((o) => (
+                  <div key={o.en} style={{ paddingBlock: 12, borderBlockEnd: '1px solid var(--line)', fontSize: 16 }}><L en={o.en} ar={o.ar} /></div>
+                ))}
+              </div>
+            </Folded>
+          </>
+        )}
+      </div>
 
       <AdFooter placement="serviceDetail" />
     </PublicShell>
+  );
+}
+
+/** A section folded under its title with "View", as TAMM folds its terms of service. */
+function Folded({ titleEn, titleAr, children }: { titleEn: string; titleAr: string; children: React.ReactNode }) {
+  return (
+    <details data-region="service-folded" style={{ paddingBlock: '28px 8px', borderBlockStart: '1px solid var(--line)' }}>
+      <summary style={{ listStyle: 'none', cursor: 'pointer' }}>
+        <span style={{ display: 'block', fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 10 }}><L en={titleEn} ar={titleAr} /></span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minBlockSize: 44, color: 'var(--brand)', fontSize: 16, fontWeight: 500 }}>
+          <L en="View" ar="عرض" />
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 9l7 7 7-7" /></svg>
+        </span>
+      </summary>
+      <div style={{ paddingBlockEnd: 12 }}>{children}</div>
+    </details>
   );
 }

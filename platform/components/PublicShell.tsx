@@ -18,20 +18,26 @@ export function PublicShell({
   children,
   signedIn,
   hero,
+  bottomBar,
 }: {
   children: React.ReactNode;
   /** Someone already signed in gets a way back to their own work, not a second sign-in. */
   signedIn: boolean;
   /**
-   * THE DARK BAND, on the screens that have one.
+   * THE BAND, on the screens that have one.
    *
-   * It runs full width from under the header to below the suggestion chips, and it is
-   * the page's one dark ground. Without it the overview renders entirely on white and
-   * reads as a document rather than a service: the contrast is the reason the white
-   * below it works at all. It carries its own token block (--hero-*) because its text
-   * sits on a dark ground in BOTH themes and cannot take the page's ink colour.
+   * It runs full width from under the header to below the suggestion chips. Light since
+   * the owner's TAMM review (10 October 2026: "the background is very white ... this is
+   * what we want"): a breath of teal on white in the light theme, dark in the dark theme.
+   * It carries its own token block (--hero-*) so the two themes can differ.
    */
   hero?: React.ReactNode;
+  /**
+   * THE SERVICE SUMMARY AT THE FOOT OF THE SCREEN (owner, 10 October 2026, after TAMM): the
+   * service, its time and fee, and the one action. Sticky to the bottom of the viewport while
+   * the page scrolls, and resting in place above the footer once the page's end is reached.
+   */
+  bottomBar?: React.ReactNode;
 }): React.ReactElement {
   return (
     <>
@@ -101,6 +107,7 @@ export function PublicShell({
       <main data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: hero ? '44px 32px 0' : '44px 32px 0' }}>
         {children}
       </main>
+      {bottomBar ?? null}
 
       {/* THE JURISDICTION NOTICE, on every public screen. What the platform records and
           what it does not do is the first thing a person needs and the easiest thing to
