@@ -284,7 +284,12 @@ describe('the event record names ONE next action, from the resolver\'s own insta
       for (const f of row.fields) if (!f.showWhen) values[f.key] = f.type === 'checkbox' ? true : f.type === 'number' ? 2 : 'x';
       answered[row.key] = { values, savedByRole: 'organizer', savedByName: 'O', savedAt: '', version: 1 };
     }
-    const waiting = step({ ...l2, answers: answered, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } } });
+    // The declaration is the organizer's own task and leads while the agency's acceptance is
+    // outstanding; the panel names what the others still owe (live review, 10 October 2026).
+    const declarationFirst = step({ ...l2, answers: answered, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } } });
+    expect(declarationFirst.kind).toBe('declarations');
+    expect(declarationFirst.bodyEn).toContain('waiting for someone else');
+    const waiting = step({ ...l2, answers: answered, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } }, declaration: { statementsComplete: true, certificationComplete: true } });
     expect(waiting.kind).toBe('waitingOnOthers');
     const confirmed = { ...l2, answers: { ...answered, B7: { values: { whereWhen: 'x', howToCall: 'x', ifLeaves: 'x' }, savedByRole: 'ems' as const, savedByName: 'E', savedAt: '', version: 1 } }, files: { 'P-M': { fileName: 'm.pdf', savedAt: '' } }, ems: [{ token: 'e', name: 'EMS', status: 'confirmed' as const }] };
     expect(step(confirmed).kind).toBe('declarations');

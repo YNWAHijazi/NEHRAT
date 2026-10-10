@@ -62,7 +62,9 @@ export function StageRail({ titleEn, titleAr, stages, noteEn, noteAr }: { titleE
               <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <span style={{ fontSize: 14, fontWeight: isNow ? 600 : 400, color: s.k === 'todo' || s.k === 'na' ? 'var(--muted)' : 'var(--ink)', lineHeight: 1.45 }}>
                   <L en={`${i + 1}. ${s.en}`} ar={`${i + 1}. ${s.ar}`} />
-                  {!isNow ? <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 12.5 }}> · <L en={st.lblEn} ar={st.lblAr} /></span> : null}
+                  {/* A stage still to come says when, not just "Not yet": the bare chip left the reader
+                      with no wait and no owner (no-dead-ends rule). */}
+                  {!isNow ? <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 12.5 }}> · {s.k === 'todo' && s.metaEn ? <L en={s.metaEn} ar={s.metaAr} /> : <L en={st.lblEn} ar={st.lblAr} />}</span> : null}
                 </span>
                 {isNow && s.metaEn ? <span style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.4 }}><L en={s.metaEn} ar={s.metaAr} /></span> : null}
               </span>

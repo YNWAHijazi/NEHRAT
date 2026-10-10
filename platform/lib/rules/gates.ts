@@ -107,18 +107,34 @@ export function seriousIncidentGate(ctx: EventGateContext): Gate {
   // was already correct.
   const [y, m, d] = ctx.eventStartDate.split('-').map(Number) as [number, number, number];
   const start = startOfBeirutDay({ year: y, month: m, day: d });
-  if (ctx.eventEndDate) {
-    const [year, month, day] = ctx.eventEndDate.split('-').map(Number) as [number, number, number];
-    const time = /^(\d{2}):(\d{2})$/.exec(ctx.eventEndTime ?? '');
-    const end = time ? fromBeirut({ year, month, day, hour: Number(time[1]), minute: Number(time[2]), second: 0 }) : startOfBeirutDay(addDays({ year, month, day }, 1));
-    if (ctx.now.getTime() >= end.getTime() + 24 * 60 * 60 * 1000) return { behaviour: 'disabled', reasonKey: 'gate.seriousIncidentClosed' };
-  }
+  // NEVER CLOSES (owner, 10 October 2026, decision D6): the 24 hours run from the
+  // occurrence, not from the event's end, and a deadline does not authorize refusing a
+  // late notice. A notice made after the window is accepted and marked late
+  // (seriousIncidentTimeliness); the earlier "closed 24 hours after the event ended"
+  // lock is withdrawn.
   if (ctx.now.getTime() >= start.getTime()) return ENABLED;
   return {
     behaviour: 'disabled',
     reasonKey: 'gate.seriousIncidentBeforeStart',
     params: { date: ctx.eventStartDate },
   };
+}
+
+/**
+ * Whether a serious-incident notice was made within the window (D6). `occurredAt` is the
+ * Beirut wall-clock time the organizer entered (`YYYY-MM-DDTHH:MM`); `notifiedAt` is the
+ * stored UTC instant (`YYYY-MM-DD HH:MM:SS`). The window is the Ministry's
+ * configured hours, never a literal. Unparseable input is reported as not late: the
+ * notice exists, and lateness is only ever claimed from two real times.
+ */
+export function seriousIncidentTimeliness(occurredAt: string, notifiedAt: string, windowHours: number): { late: boolean; hoursAfter: number | null } {
+  const o = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(occurredAt);
+  const n = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/.exec(notifiedAt);
+  if (!o || !n) return { late: false, hoursAfter: null };
+  const occurred = fromBeirut({ year: Number(o[1]), month: Number(o[2]), day: Number(o[3]), hour: Number(o[4]), minute: Number(o[5]), second: 0 });
+  const notified = new Date(Date.UTC(Number(n[1]), Number(n[2]) - 1, Number(n[3]), Number(n[4]), Number(n[5]), Number(n[6] ?? 0)));
+  const ms = notified.getTime() - occurred.getTime();
+  return { late: ms > windowHours * 3_600_000, hoursAfter: Math.max(0, Math.floor(ms / 3_600_000)) };
 }
 
 /**

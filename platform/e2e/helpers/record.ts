@@ -84,8 +84,19 @@ export async function certify(page: Page, who: { representative: string; telepho
   await review.locator('input[name="position"]').fill(who.position);
   await review.locator('input[name="telephoneNumber"]').fill(who.telephone);
   await page.keyboard.press('Tab');
-  await expect(review.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
+  // The signer may already be prefilled with these very values (live review, 10 October 2026);
+  // then nothing changes and nothing autosaves -- Submit saves before it files.
   const submit = review.locator('[data-region="submit-button"]');
   await expect(submit).toBeEnabled({ timeout: 40_000 });
   return submit;
+}
+
+/**
+ * The EMS invitation form on a row. Once one agency is invited the form for a second sits
+ * behind "Add another EMS agency" (live review, 10 October 2026); this opens it when present.
+ */
+export async function emsInviteForm(row: Locator): Promise<Locator> {
+  const more = row.locator('[data-region="add-another-ems"]');
+  if (await more.count()) await more.evaluate((el) => { (el as HTMLDetailsElement).open = true; });
+  return row.locator('form:has(input[name="kind"][value="ems"])').first();
 }

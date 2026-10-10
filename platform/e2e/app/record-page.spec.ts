@@ -59,7 +59,8 @@ for (const lang of LANGUAGES) {
       const summaries = page.locator('[data-region="requirement-summaries"]');
       await expect(summaries).toBeVisible();
       await expect(page.locator('[data-region="event-workspace-nav"]')).toHaveCount(0);
-      await expect(summaries.locator('[data-summary="required"] [data-summary-row]')).toHaveCount(8);
+      // Eight readiness rows plus the risk assessment and the declaration, all counted (live review, 10 October 2026).
+      await expect(summaries.locator('[data-summary="required"] [data-summary-row]')).toHaveCount(10);
       // Level 1: no Director, no plan, no map, no declaration row among the cards; AED recommended.
       for (const absent of ['B3', 'B2', 'B5', 'B6', 'B12', 'B15', 'B17', 'B20', 'P-M', 'P-D']) await expect(card(page, absent)).toHaveCount(0);
       await expect(card(page, 'B8')).toHaveAttribute('data-group', 'recommended');
@@ -102,8 +103,9 @@ for (const lang of LANGUAGES) {
       await form(page, 'B8').locator('[data-region="save"]').click();
       await expect(chip(page, 'B8')).toHaveAttribute('data-state', 'notProvided');
 
-      // Everything required is complete; the summary says so.
-      await expect(summaries.locator('[data-region="required-count"]')).toContainText(/8 of 8|8 من 8/);
+      // Every requirement row is complete; the count covers the assessment and the declaration
+      // too (live review, 10 October 2026), so the declaration is the one item left.
+      await expect(summaries.locator('[data-region="required-count"]')).toContainText(/9 of 10|9 من 10/);
 
       // The last step: the declaration is what remains; the certification signs it.
       await openDetails(page.locator('#final-review'));

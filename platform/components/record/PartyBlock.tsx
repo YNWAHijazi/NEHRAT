@@ -8,7 +8,8 @@ import type { RecordService } from '../../lib/rules';
 
 const STATES = {
   nominated: ['Invitation sent — waiting for a reply', 'أُرسلت الدعوة — بانتظار الرد'],
-  confirmed: ['Accepted', 'قُبلت'],
+  // "Accepted" alone read as if readiness were complete (live review, 10 October 2026): it is the invitation that was accepted.
+  confirmed: ['Invitation accepted', 'قُبلت الدعوة'],
   declined: ['Declined', 'رُفضت'],
   withdrawn: ['Withdrawn', 'سُحبت'],
   removed: ['Removed', 'أُزيل'],
@@ -70,7 +71,15 @@ export function PartyBlock({ kind, id, parties, invite, canInvite, declarations 
       {past.map((p) => (
         <div key={`${p.kind}-${p.email}-${p.invitedAt}`} style={{ fontSize: 13, color: 'var(--muted)', marginBlockEnd: 6 }}>{p.name} — <L en={STATES[p.status][0]} ar={STATES[p.status][1]} /></div>
       ))}
-      {canInvite && (!single || active.length === 0) ? <InviteForm eventId={id} kind={invite} service={kind} /> : null}
+      {/* One invitation, one card: a second agency is a deliberate act behind its own control,
+          never an empty form under the first (live review, 10 October 2026). */}
+      {canInvite && active.length === 0 ? <InviteForm eventId={id} kind={invite} service={kind} /> : null}
+      {canInvite && !single && active.length > 0 ? (
+        <details data-region="add-another-ems" style={{ fontSize: '14px' }}>
+          <summary style={{ cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', color: 'var(--brand)' }}><L en="Add another EMS agency" ar="إضافة جهة إسعاف أخرى" /></summary>
+          <div style={{ marginBlockStart: 8 }}><InviteForm eventId={id} kind={invite} service={kind} /></div>
+        </details>
+      ) : null}
     </div>
   );
 }

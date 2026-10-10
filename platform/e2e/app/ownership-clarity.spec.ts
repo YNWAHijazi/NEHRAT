@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { signInAs } from '../helpers/signin';
-import { card, cardForm, openDetails, showStep, stateChip } from '../helpers/record';
+import { card, cardForm, emsInviteForm, openDetails, showStep, stateChip } from '../helpers/record';
 
 /**
  * Owner feedback, 8 October 2026: Next saves what was typed; Save as draft keeps the record
@@ -76,7 +76,7 @@ test('Level 3: other parties’ rows read as text, the major-incident items sit 
     await expect(mi.locator('[data-major-incident-item]')).toHaveCount(11);
     // Inviting an agency opens the hand-off dialog; "skip" goes on to a step the organizer fills.
     const ems = await openDetails(card(page, 'B7'));
-    const invite = ems.locator('form[data-region="invite"]');
+    const invite = await emsInviteForm(ems);
     await invite.locator('input[name="name"]').fill(name);
     await invite.locator('input[name="email"]').fill('handoff-agency@example.test');
     await invite.scrollIntoViewIfNeeded();

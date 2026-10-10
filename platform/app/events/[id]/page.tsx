@@ -1,5 +1,5 @@
 import { EventWorkspaceHeader } from '../../../components/EventWorkspaceHeader';
-import { accountContact } from '../../../lib/account-contact';
+import { lastSignerFor } from '../../../lib/account-contact';
 import { InfoNote } from '../../../components/InfoNote';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -40,7 +40,7 @@ import {
   type EventGateContext,
   MINISTRY_CONTENT,
   postEventReportRequired,
-  recordNextStep,
+  recordNextStep, blockerOwner, type RequirementInstance,
   levelWhy,
   COMPLIANCE_DECLARATIONS,
   COMPLIANCE_CERTIFICATION_STATEMENT,
@@ -207,8 +207,8 @@ export default async function EventRecordPage({
   const venueRoute = venueRouteFor(account.id, id);
   const site = view?.site ?? null;
   const dates = event.startDate === event.endDate ? (event.startDate ?? '—') : `${event.startDate} — ${event.endDate}`;
-  const review = (inst: { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; state: string }): ReviewRow =>
-    ({ key: inst.key, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, anchor: inst.anchor, complete: inst.state === 'complete' });
+  const review = (inst: RequirementInstance): ReviewRow =>
+    ({ key: inst.key, labelEn: inst.labelEn, labelAr: inst.labelAr, stateEn: inst.stateEn, stateAr: inst.stateAr, anchor: inst.anchor, complete: inst.state === 'complete', owner: blockerOwner(inst) });
   const declarationInst = record?.instances.find((i) => i.key === 'P-C') ?? null;
   const statementsApply = level !== null && level >= 2;
   // The eight header fields the compliance form defines -- from the data, not hand-written.
@@ -331,7 +331,7 @@ export default async function EventRecordPage({
         <section id="assessment" data-region="details-assessment" tabIndex={-1} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', justifyContent: 'space-between', alignItems: 'center', padding: '12px 18px', border: '1px solid var(--line)', borderRadius: 12, marginBlockEnd: 28, scrollMarginBlockStart: 16 }}>
           <div style={{ fontSize: 14, lineHeight: 1.5, minWidth: 0 }}>
             <span style={{ fontWeight: 500 }}><L en="Details and assessment" ar="البيانات والتقييم" /></span>
-            <span style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
+            <span data-detail-line={assessed ? '' : undefined} style={{ display: 'block', color: 'var(--muted)', fontSize: 13 }}>
               {assessed ? (
                 <>
                   <L en={`Level ${level} · assessment version ${latest?.version ?? '—'} · ${latestDate}`} ar={`المستوى ${level} · نسخة التقييم ${latest?.version ?? '—'} · ⁦${latestDate}⁩`} />
@@ -414,7 +414,7 @@ export default async function EventRecordPage({
                   {level === 1 ? <MedicalArrangementsSummary instances={record.instances} /> : null}
                 <FinalReview
                   eventId={id}
-                  me={accountContact(account.id)}
+                  me={lastSignerFor(account.id, id)}
                   level={level}
                   remaining={record.blockers.map(review)}
                   optional={record.instances.filter((i) => i.group === 'recommended' && i.state !== 'complete').map(review)}

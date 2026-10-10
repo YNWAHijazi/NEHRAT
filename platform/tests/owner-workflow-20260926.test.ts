@@ -25,7 +25,7 @@ import { eventRecordRequirements } from "../lib/record-facts";
 import { canPreparePlan } from "../lib/rules/plan-responsibility";
 import { planIsComplete } from "../lib/rules/submission";
 import { recordNextStep, resolveRequirements } from "../lib/rules/record-requirements";
-import { seriousIncidentGate } from "../lib/rules/gates";
+import { seriousIncidentGate, seriousIncidentTimeliness } from "../lib/rules/gates";
 import {
   eventApplicability,
   facilityApplicability,
@@ -123,7 +123,7 @@ test("only the confirmed medical team uploads the Level 3 deployment map, and it
       .get(),
   ).toHaveProperty("file_name", "map.pdf");
 });
-test("incident window closes exactly 24 hours after the recorded closing time in Beirut", () => {
+test("the incident notice never closes; a notice after the window is accepted and marked late (D6, 10 October 2026)", () => {
   const context = {
     finalLevel: 3 as const,
     eventStartDate: "2026-08-12",
@@ -134,24 +134,19 @@ test("incident window closes exactly 24 hours after the recorded closing time in
     now: new Date("2026-08-13T17:59:59+03:00"),
   };
   expect(seriousIncidentGate(context).behaviour).toBe("enabled");
-  expect(
-    seriousIncidentGate({
-      ...context,
-      now: new Date("2026-08-13T18:00:00+03:00"),
-    }),
-  ).toHaveProperty("reasonKey", "gate.seriousIncidentClosed");
-  const winter = {
-    ...context,
-    eventStartDate: "2026-01-12",
-    eventEndDate: "2026-01-12",
-    now: new Date("2026-01-13T18:00:00+02:00"),
-  };
-  expect(seriousIncidentGate(winter)).toHaveProperty(
-    "reasonKey",
-    "gate.seriousIncidentClosed",
-  );
+  // Days after the event ended, still open.
+  expect(seriousIncidentGate({ ...context, now: new Date("2026-08-20T09:00:00+03:00") }).behaviour).toBe("enabled");
+  // Timeliness runs from the occurrence (Beirut wall-clock) to the stored UTC stamp.
+  // 17:00 Beirut (UTC+3) = 14:00 UTC; 24 hours later is 14:00 UTC the next day.
+  expect(seriousIncidentTimeliness("2026-08-12T17:00", "2026-08-13 14:00:00", 24)).toEqual({ late: false, hoursAfter: 24 });
+  expect(seriousIncidentTimeliness("2026-08-12T17:00", "2026-08-13 14:01:00", 24)).toEqual({ late: true, hoursAfter: 24 });
+  // A multi-day event: an incident on day 1 is late on day 3 though the event has not ended.
+  expect(seriousIncidentTimeliness("2026-08-12T10:00", "2026-08-14 08:00:00", 24).late).toBe(true);
+  // Winter (UTC+2).
+  expect(seriousIncidentTimeliness("2026-01-12T17:00", "2026-01-13 15:00:00", 24).late).toBe(false);
+  expect(seriousIncidentTimeliness("2026-01-12T17:00", "2026-01-13 15:30:00", 24).late).toBe(true);
 });
-test("direct requests cannot report incidents after the window or edit submitted reports", async () => {
+test("a late incident notice is accepted; a submitted post-event report cannot be edited", async () => {
   as("test_organizer");
   const db = getDb();
   db.prepare(
@@ -168,7 +163,7 @@ test("direct requests cannot report incidents after the window or edit submitted
   f.set("incidentType", "major");
   f.set("occurredAt", "2026-08-10T17:00");
   await expect(notifySeriousIncidentAction("EV-0362", f)).rejects.toThrow(
-    "error=closed",
+    "notice=notified",
   );
   expect(
     (
@@ -178,7 +173,7 @@ test("direct requests cannot report incidents after the window or edit submitted
         )
         .get() as { n: number }
     ).n,
-  ).toBe(count);
+  ).toBe(count + 1);
   db.prepare(
     "INSERT INTO post_event_reports(event_id,submitted_at) VALUES ('EV-0362','2026-08-12') ON CONFLICT(event_id) DO UPDATE SET submitted_at='2026-08-12'",
   ).run();

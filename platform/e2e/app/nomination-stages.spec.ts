@@ -16,6 +16,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { expectAbsent } from '../helpers/absence';
 import { signInAs } from '../helpers/signin';
+import { emsInviteForm } from '../helpers/record';
 
 /**
  * THIS SPEC MAKES ITS OWN NOMINATION and does not borrow a seeded one.
@@ -40,7 +41,7 @@ async function makeNomination(page: Page, name: string): Promise<string> {
   await gotoRidingRestarts(page, '/events/EV-0418#req-B7');
   const ems = page.locator('[data-requirement="B7"]');
   if (!(await ems.evaluate((d) => (d as HTMLDetailsElement).open))) await ems.locator('summary').first().click();
-  const invite = ems.locator('form:has(input[name="kind"][value="ems"])').first();
+  const invite = await emsInviteForm(ems);
   await invite.locator('input[name="name"]').fill(name);
   await invite.locator('input[name="email"]').fill('stages@example.lb');
   await invite.locator('button[type="submit"]').first().click();

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { L } from '../../../../components/L';
 import { MinistryShell } from '../../../../components/MinistryShell';
 import { requireMinistryPage } from '../../../../lib/ministry-auth';
-import { BANDS, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, can, filingDeadlineRule, type Level } from '../../../../lib/rules';
+import { BANDS, CATALOGUE_REVISION, NEHRAT_TOOL_VERSION, POST_EVENT_REPORT, REASSESSMENT_WINDOW, REQUIREMENT_DECISIONS, can, filingDeadlineRule, type Level } from '../../../../lib/rules';
 
 /**
  * Configuration and versioning -- the mass-gathering instrument's values, read
@@ -50,6 +50,23 @@ export default async function ConfigurationPage() {
               <L en={r.en} ar={r.ar} />
             </span>
             <span style={{ fontSize: '14.5px', fontVariantNumeric: 'tabular-nums' }}>{r.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* THE REQUIREMENT DECISIONS IN FORCE: the record of how each row is applied, kept with the
+          configuration and out of the organizer's printable list (live review, 10 October 2026). */}
+      <h2 style={{ margin: '32px 0 6px', fontSize: 20, fontWeight: 600, letterSpacing: '-.02em' }}>
+        <L en="Requirement decisions in force" ar="قرارات المتطلبات النافذة" />
+      </h2>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--muted)' }}>
+        <L en={`Requirement catalogue revision ${CATALOGUE_REVISION}`} ar={`مراجعة كتالوج المتطلبات ⁦${CATALOGUE_REVISION}⁩`} />
+      </p>
+      <div data-region="requirement-decisions" style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', maxWidth: 900 }}>
+        {Object.entries(REQUIREMENT_DECISIONS).map(([key, d]) => (
+          <div key={key} data-decision={key} style={{ background: 'var(--bg)', padding: '13px 20px', display: 'flex', gap: 14, alignItems: 'baseline', fontSize: '14px', lineHeight: 1.55 }}>
+            <span style={{ flex: 'none', fontVariantNumeric: 'tabular-nums', color: 'var(--muted)', minWidth: 34 }}>{key}</span>
+            <span><L en={d.en} ar={d.ar} /></span>
           </div>
         ))}
       </div>

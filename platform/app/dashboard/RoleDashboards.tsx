@@ -24,6 +24,8 @@ interface RowShape {
   byEn: string; byAr: string;
   color: string;
   done: boolean;
+  /** Nothing the signed-in person can do yet: another party acts first. Never counted as owed. */
+  waiting?: boolean;
   doneChipEn?: string; doneChipAr?: string;
 }
 
@@ -86,7 +88,7 @@ export function emsRows(invitations: InvitationDetail[]): RowShape[] {
 
 export function directorRows(
   invitations: InvitationDetail[],
-  reportState: Map<string, { organizerSigned: boolean; directorSigned: boolean }>,
+  reportState: Map<string, { prepared: boolean; returned: boolean; organizerSigned: boolean; directorSigned: boolean }>,
   governanceState: Map<string, number>,
   today: string,
 ): RowShape[] {
@@ -99,7 +101,11 @@ export function directorRows(
       const report = reportState.get(inv.eventId);
       const govDone = governanceState.get(inv.eventId) ?? 0;
       const closed = inv.status === 'removed' || inv.status === 'withdrawn';
-      const reportOwed = !closed && held && report !== undefined && !report.directorSigned;
+      // The Director signs a report the organizer has prepared -- not before it exists, and not
+      // while it is back with the organizer (live review, 10 October 2026: a row counted as
+      // needing a response opened a page with nothing to sign).
+      const reportOwed = !closed && held && report !== undefined && report.prepared && !report.returned && !report.directorSigned;
+      const waitingOnOrganizer = !closed && held && !(report?.directorSigned ?? false) && !reportOwed;
       const done = closed || (held ? (report?.directorSigned ?? false) : false);
       const reportDue = inv.eventEnd ? addDaysIso(inv.eventEnd, POST_EVENT_REPORT.windowDays) : '';
       return {
@@ -111,28 +117,34 @@ export function directorRows(
         chips: [PART_CHIP[inv.status] ?? PART_CHIP['nominated']!],
         owedEn: reportOwed
           ? 'Sign the post-event report'
+          : waitingOnOrganizer
+            ? report?.returned ? 'The organizer is revising the post-event report' : 'The organizer prepares the post-event report'
           : govDone >= 3
             ? 'Review the medical plan'
             : 'Complete medical planning',
         owedAr: reportOwed
           ? 'التقرير الطبي لما بعد الفعالية — توقيعكم'
+          : waitingOnOrganizer
+            ? report?.returned ? 'يعمل المنظّم على تنقيح التقرير الطبي لما بعد الفعالية' : 'يُعدّ المنظّم التقرير الطبي لما بعد الفعالية'
           : govDone >= 3
             ? 'مراجعة الخطة الطبية'
             : 'إكمال التخطيط الطبي',
         ...(closed ? { doneChipEn: 'Removed', doneChipAr: 'أُزيلت' } : {}),
-        byLabelEn: reportOwed ? 'Report due' : 'Organizer files by',
-        byLabelAr: reportOwed ? 'التقرير مستحق' : 'يقدّم المنظّم بحلول',
-        byEn: reportOwed ? reportDue : fileBy(inv),
-        byAr: reportOwed ? `⁦${reportDue}⁩` : `⁦${fileBy(inv)}⁩`,
-        color: 'var(--bad)',
+        byLabelEn: reportOwed || waitingOnOrganizer ? 'Report due' : 'Organizer files by',
+        byLabelAr: reportOwed || waitingOnOrganizer ? 'التقرير مستحق' : 'يقدّم المنظّم بحلول',
+        byEn: reportOwed || waitingOnOrganizer ? reportDue : fileBy(inv),
+        byAr: reportOwed || waitingOnOrganizer ? `⁦${reportDue}⁩` : `⁦${fileBy(inv)}⁩`,
+        color: waitingOnOrganizer ? 'var(--muted)' : 'var(--bad)',
         done,
+        waiting: waitingOnOrganizer,
         ...(!closed && done ? { doneChipEn: 'Report complete', doneChipAr: 'اكتمل التقرير' } : {}),
       };
     });
 }
 
 export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; countEn: string; countAr: string }) {
-  const outstanding = rows.filter((r) => !r.done);
+  const outstanding = rows.filter((r) => !r.done && !r.waiting);
+  const waiting = rows.filter((r) => !r.done && r.waiting);
   const complete = rows.filter((r) => r.done);
   return (
     <div>
@@ -211,6 +223,29 @@ export function RoleDashboard({ rows, countEn, countAr }: { rows: RowShape[]; co
           </div>
         ))}
       </div>
+
+      {waiting.length > 0 ? (
+        <>
+          <h2 style={{ margin: '0 0 14px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
+            <L en="Waiting for the organizer" ar="بانتظار المنظّم" />
+          </h2>
+          <div data-region="waiting-on-organizer" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBlockEnd: 52 }}>
+            {waiting.map((e) => (
+              <Link key={e.key} href={e.href} data-stack="" style={{ paddingBlock: '20px', paddingInlineStart: '26px', paddingInlineEnd: '27px', background: 'var(--surface2)', borderInlineStart: '3px solid var(--line)', borderRadius: 16, display: 'grid', gridTemplateColumns: 'minmax(200px,1.6fr) 1.4fr auto', gap: 20, alignItems: 'center', color: 'var(--ink)' }}>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-.015em', marginBlockEnd: 5 }}><L en={e.nameEn} ar={e.nameAr} /></div>
+                  <div style={{ fontSize: 13, color: 'var(--muted)' }}><L en={e.orgEn} ar={e.orgAr} /> · <span style={{ fontVariantNumeric: 'tabular-nums' }}>{e.date}</span></div>
+                </div>
+                <div style={{ fontSize: '14.5px', lineHeight: 1.45, color: 'var(--muted)' }}><L en={e.owedEn} ar={e.owedAr} /></div>
+                <div data-due="" style={{ textAlign: 'end', minWidth: 150 }}>
+                  <div style={{ fontSize: '11.5px', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 4 }}><L en={e.byLabelEn} ar={e.byLabelAr} /></div>
+                  <div style={{ fontSize: 16, fontWeight: 500, fontVariantNumeric: 'tabular-nums', color: 'var(--muted)' }}><L en={e.byEn} ar={e.byAr} /></div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : null}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'baseline', marginBlockEnd: 14 }}>
         <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>

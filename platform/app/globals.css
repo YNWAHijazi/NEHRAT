@@ -274,6 +274,12 @@ html[dir="rtl"] .requirement-file { padding: 0 0 0 12px; }
   [data-region="rail"] { padding: 12px 16px !important; margin-block-end: 18px !important; border-radius: 12px !important; }
   [data-rail] { display: none !important; }
   [data-rail-list] { display: flex !important; flex-direction: column; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+  /* The details box on a phone: its title and actions; the level and assessment version are in the header above. */
+  [data-region="details-assessment"] { padding: 10px 14px !important; margin-block-end: 18px !important; gap: 6px 14px !important; }
+  [data-region="details-assessment"] [data-detail-line] { display: none !important; }
+  /* Who fills what: one tap away on a phone, in full on a wider screen. */
+  [data-region="record-guide"] { display: none !important; }
+  [data-region="record-guide-phone"] { display: block !important; }
   [data-rail-list] > li { display: flex; gap: 10px; align-items: flex-start; }
   [data-region="next-action"] { margin-block-end: 16px !important; }
   [data-region="next-action"] > div > span:nth-child(2) { font-size: 16px !important; }

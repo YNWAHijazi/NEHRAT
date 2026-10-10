@@ -93,7 +93,7 @@ export function eventRecordRequirements(ownerId: number, eventId: string): Recor
     approval: approvalRow ? { by: approvalRow.display_name, at: approvalRow.approved_at, planVersion: approvalRow.plan_version } : null,
   };
   if (level === null) {
-    return { ...base, facts: null, instances: [], plan: [], blockers: [], summary: { required: { total: 0, complete: 0 }, recommended: { total: 0, complete: 0 }, later: 0 } };
+    return { ...base, facts: null, instances: [], plan: [], blockers: [], summary: { required: { total: 0, complete: 0, yours: 0, others: 0 }, recommended: { total: 0, complete: 0 }, later: 0 } };
   }
   const files: Record<string, StoredFile> = {};
   for (const a of attachmentsFor(ownerId, eventId)) {
@@ -170,7 +170,7 @@ export function venueRecordRequirements(ownerId: number, venueId: string): Recor
     approval: null,
   };
   if (level === null) {
-    return { ...base, facts: null, instances: [], plan: [], blockers: [], summary: { required: { total: 0, complete: 0 }, recommended: { total: 0, complete: 0 }, later: 0 } };
+    return { ...base, facts: null, instances: [], plan: [], blockers: [], summary: { required: { total: 0, complete: 0, yours: 0, others: 0 }, recommended: { total: 0, complete: 0 }, later: 0 } };
   }
   const files: Record<string, StoredFile> = {};
   for (const a of venueAttachmentsFor(ownerId, venueId)) if (a.hasFile) files[a.docKey] = { fileName: a.fileName, savedAt: a.attachedAt };
@@ -227,7 +227,9 @@ export function requirementSnapshotFor(kind: RecordService, id: string, version?
     { key: string; file_name: string; content_type: string; has_file: number }[];
   return {
     id: row.id, version: row.version, catalogueRevision: row.catalogue_revision, filedAt: row.filed_at,
-    level: body.level, instances: body.instances, plan: body.plan, parties: body.parties, approval: body.approval,
+    level: body.level, instances: body.instances, parties: body.parties, approval: body.approval,
+    // A snapshot frozen before plan sections carried a progress state reads as complete or pending.
+    plan: body.plan.map((p) => ({ ...p, progress: p.progress ?? (p.complete ? 'complete' : 'pending'), lacking: p.lacking ?? [] })),
     files: files.map((f) => ({ key: f.key, fileName: f.file_name, contentType: f.content_type, hasFile: f.has_file === 1 })),
   };
 }

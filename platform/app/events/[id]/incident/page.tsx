@@ -1,5 +1,6 @@
 import { eventGateContext } from '../../../../lib/event-gate-context';
-import { seriousIncidentGate } from '../../../../lib/rules/gates';
+import { seriousIncidentGate, seriousIncidentTimeliness } from '../../../../lib/rules/gates';
+import { beirutStamp } from '../../../../lib/rules/deadlines';
 import { notFound, redirect } from 'next/navigation';
 import { GovernmentBand, Header } from '../../../../components/Header';
 import { L } from '../../../../components/L';
@@ -79,8 +80,8 @@ export default async function IncidentPage({
           {!started ? (
             <div style={{ padding: '22px 26px', border: '1px solid var(--line)', background: 'var(--surface2)', borderRadius: 12, marginBlockEnd: 28, fontSize: '14.5px', lineHeight: 1.65, color: 'var(--muted)', maxWidth: '80ch' }}>
               <L
-                en={gate.reasonKey === 'gate.seriousIncidentClosed' ? 'Closed — more than 24 hours have passed since the event ended.' : `Available from ${event.startDate ?? 'the event start date'}.`}
-                ar={gate.reasonKey === 'gate.seriousIncidentClosed' ? 'أُغلق الإبلاغ — مرّت أكثر من 24 ساعة على انتهاء الفعالية.' : `متاح من ${event.startDate ?? 'تاريخ بدء الفعالية'}.`}
+                en={`Available from ${event.startDate ?? 'the event start date'}.`}
+                ar={`متاح من ${event.startDate ?? 'تاريخ بدء الفعالية'}.`}
               />
             </div>
           ) : (
@@ -102,6 +103,12 @@ export default async function IncidentPage({
                 </span>
                 <input type="datetime-local" name="occurredAt" required style={{ height: 42, paddingInline: 12, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 21, fontSize: 14 }} />
               </label>
+              <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 8, maxWidth: '80ch' }}>
+                <L
+                  en={`If more than ${hours} hours have passed since it occurred, notify the Ministry now: a late notice is accepted and marked late.`}
+                  ar={`إذا مرّ أكثر من ${hours} ساعة على وقوعها، أبلغوا الوزارة الآن: يُقبل الإبلاغ المتأخر ويُوسم بأنه متأخر.`}
+                />
+              </div>
               <div style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.6, marginBlockEnd: 16, maxWidth: '80ch' }}>
                 <L
                   en="The type and the time are the whole notification. No narrative is collected here: nothing on this form can carry a patient's details."
@@ -132,8 +139,16 @@ export default async function IncidentPage({
                     <L en={`occurred ${r.occurredAt.replace('T', ' ')}`} ar={`وقعت في ⁦${r.occurredAt.replace('T', ' ')}⁩`} />
                   </span>
                   <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
-                    <L en={`notified ${r.notifiedAt.slice(0, 16)}`} ar={`أُبلغ في ⁦${r.notifiedAt.slice(0, 16)}⁩`} />
+                    <L en={`notified ${beirutStamp(r.notifiedAt)}`} ar={`أُبلغ في ⁦${beirutStamp(r.notifiedAt)}⁩`} />
                   </span>
+                  {(() => {
+                    const t = seriousIncidentTimeliness(r.occurredAt, r.notifiedAt, hours);
+                    return t.late ? (
+                      <span data-incident-late="" style={{ paddingInline: 10, paddingBlock: 2, borderRadius: 999, background: 'var(--bad-soft)', color: 'var(--bad)', fontWeight: 600 }}>
+                        <L en={`Late — notified ${t.hoursAfter} hours after it occurred`} ar={`متأخر — أُبلغ بعد ⁦${t.hoursAfter}⁩ ساعة من وقوعها`} />
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
               ))}
             </div>

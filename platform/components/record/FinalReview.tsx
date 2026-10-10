@@ -11,7 +11,7 @@ import type { SubmissionRow } from '../../lib/queries';
 import { fieldInput } from '../workspace-styles';
 import { SaveDraftButton } from './SaveDraftButton';
 
-export interface ReviewRow { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; complete: boolean }
+export interface ReviewRow { key: string; labelEn: string; labelAr: string; stateEn: string; stateAr: string; anchor: string; complete: boolean; owner?: 'yours' | 'others' }
 
 /**
  * The foot of the record page (brief item 16): the remaining required items with jump
@@ -47,6 +47,7 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   // The signed-in organizer's own name and number until the form holds others (owner, 9 October 2026).
   const [representative, setRepresentative] = useState(initial?.representative || me?.name || '');
   const [telephone, setTelephone] = useState(initial?.telephone || me?.phone || '');
+  // The position is typed by the person signing: with it, the declaration is their act (name and number are prefilled).
   const [position, setPosition] = useState(initial?.position ?? '');
   const [saved, setSaved] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -55,7 +56,14 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   const missingCert = new Set(missingCertificationFields('organizer', { representative, telephone, position }).map((f) => f.key));
   const declComplete = statements.every((_, i) => ticked[String(i)] === true);
   const certComplete = missingCert.size === 0;
-  const outstanding = remaining.filter((r) => r.key !== 'P-C').length + externalBlockers.length + (declComplete ? 0 : 1) + (certComplete ? 0 : 1);
+  // The declaration is ONE item however many of its parts are open -- the statements and the
+  // signer are listed as one row, so they are counted as one (live review, 10 October 2026:
+  // "3 items remaining" over a list of two).
+  const declarationOpen = !declComplete || !certComplete;
+  const rows = remaining.filter((r) => r.key !== 'P-C');
+  const others = rows.filter((r) => r.owner === 'others');
+  const yours = rows.filter((r) => r.owner !== 'others');
+  const outstanding = rows.length + externalBlockers.length + (declarationOpen ? 1 : 0);
   const canFile = outstanding === 0 && !locked;
 
   const latest = useRef({ declarations: ticked, insurance: initial?.insurance ?? {}, representative, telephone, position });
@@ -63,6 +71,8 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filing = useRef(false);
+  // A prefilled signer is a suggestion, not a certification: it is saved when the person edits a
+  // field or submits, never merely by passing through the step.
   const lastSaved = useRef(JSON.stringify(latest.current));
   const persist = () => {
     if (locked || filing.current) return;
@@ -101,7 +111,8 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
 
   return (
     <section id="final-review" data-region="final-review" tabIndex={-1} style={{ marginBlockStart: 40, scrollMarginBlockStart: 16 }}>
-      <h2 style={{ fontSize: 24, margin: '0 0 16px', fontWeight: 600, letterSpacing: '-.025em' }}><L en="Review and submit" ar="المراجعة والتقديم" /></h2>
+      {/* Once filed the step is the submitted application, read-only -- it no longer invites a submission (live review, 10 October 2026). */}
+      <h2 style={{ fontSize: 24, margin: '0 0 16px', fontWeight: 600, letterSpacing: '-.025em' }}>{locked ? <L en="Submitted application" ar="الطلب المقدَّم" /> : <L en="Review and submit" ar="المراجعة والتقديم" />}</h2>
 
       {locked ? (
         <div data-region="filed-band" style={{ ...cardStyle, border: '1px solid var(--brand)', background: 'var(--brand-soft)', fontSize: 15, lineHeight: 1.65 }}>
@@ -126,25 +137,43 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
             <h3 style={{ fontSize: 16, margin: '0 0 10px' }}>
               <L en={outstanding === 1 ? '1 item remaining' : `${outstanding} items remaining`} ar={`${outstanding} متبقٍ`} />
             </h3>
-            <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
-              {remaining.filter((r) => r.key !== 'P-C').map((r) => (
-                <a key={r.key} href={`#${r.anchor}`} data-remaining={r.key} style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
-                  <span style={{ fontSize: '14.5px' }}><L en={r.labelEn} ar={r.labelAr} /></span>
-                  <span style={{ flex: 'none', fontSize: 13, color: 'var(--accent-ink)' }}><L en={r.stateEn} ar={r.stateAr} /></span>
-                </a>
-              ))}
-              {externalBlockers.map((b) => (
-                <div key={b.kind} data-remaining={b.kind} style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
-                  <span style={{ fontSize: '14.5px' }}><L en={b.en} ar={b.ar} /></span>
+            {yours.length + externalBlockers.length > 0 || declarationOpen ? (
+              <>
+                {others.length > 0 ? <div data-region="remaining-yours-head" style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 6px' }}><L en="Yours to complete" ar="عليكم إكمالها" /></div> : null}
+                <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {yours.map((r) => (
+                    <a key={r.key} href={`#${r.anchor}`} data-remaining={r.key} data-owner="yours" style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
+                      <span style={{ fontSize: '14.5px' }}><L en={r.labelEn} ar={r.labelAr} /></span>
+                      <span style={{ flex: 'none', fontSize: 13, color: 'var(--accent-ink)' }}><L en={r.stateEn} ar={r.stateAr} /></span>
+                    </a>
+                  ))}
+                  {externalBlockers.map((b) => (
+                    <div key={b.kind} data-remaining={b.kind} style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
+                      <span style={{ fontSize: '14.5px' }}><L en={b.en} ar={b.ar} /></span>
+                    </div>
+                  ))}
+                  {declarationOpen ? (
+                    <a href="#organizer-declaration" data-remaining="P-C" data-owner="yours" style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
+                      <span style={{ fontSize: '14.5px' }}><L en={declarationInst.labelEn} ar={declarationInst.labelAr} /></span>
+                      <span style={{ flex: 'none', fontSize: 13, color: 'var(--accent-ink)' }}><L en="Pending" ar="قيد الإنجاز" /></span>
+                    </a>
+                  ) : null}
                 </div>
-              ))}
-              {!declComplete || !certComplete ? (
-                <a href="#organizer-declaration" data-remaining="P-C" style={{ ...rowStyle, borderInlineStart: '3px solid var(--accent)' }}>
-                  <span style={{ fontSize: '14.5px' }}><L en={declarationInst.labelEn} ar={declarationInst.labelAr} /></span>
-                  <span style={{ flex: 'none', fontSize: 13, color: 'var(--accent-ink)' }}><L en="Pending" ar="قيد الإنجاز" /></span>
-                </a>
-              ) : null}
-            </div>
+              </>
+            ) : null}
+            {others.length > 0 ? (
+              <>
+                <div data-region="remaining-others-head" style={{ fontSize: 13, color: 'var(--muted)', margin: '12px 0 6px' }}><L en="Waiting for others" ar="بانتظار الآخرين" /></div>
+                <div style={{ border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+                  {others.map((r) => (
+                    <a key={r.key} href={`#${r.anchor}`} data-remaining={r.key} data-owner="others" style={{ ...rowStyle, borderInlineStart: '3px solid var(--line-strong, var(--line))' }}>
+                      <span style={{ fontSize: '14.5px' }}><L en={r.labelEn} ar={r.labelAr} /></span>
+                      <span style={{ flex: 'none', fontSize: 13, color: 'var(--muted)' }}><L en={r.stateEn} ar={r.stateAr} /></span>
+                    </a>
+                  ))}
+                </div>
+              </>
+            ) : null}
             {optional.length > 0 ? (
               <details style={{ marginBlockStart: 12, fontSize: '13.5px', color: 'var(--muted)' }}>
                 <summary style={{ cursor: 'pointer', minHeight: 32, display: 'flex', alignItems: 'center' }}><L en="Optional choices not added" ar="الخيارات الاختيارية غير المضافة" /></summary>

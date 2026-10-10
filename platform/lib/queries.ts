@@ -395,6 +395,8 @@ export interface FacilityRow {
   id: string; nameEn: string; nameAr: string;
   categoryEn: string; categoryAr: string;
   devices: number; nextLapse: string | null;
+  /** What falls due on nextLapse, by name (live review, 10 October 2026: "Next lapse" did not say what). */
+  nextLapseEn: string | null; nextLapseAr: string | null;
   stateEn: string; stateAr: string; stateKind: string;
   /** The facility/site's anchor (latest revision, 9 October 2026). */
   siteId: string | null;
@@ -498,6 +500,11 @@ export function facilitiesFor(accountId: number): FacilityRow[] {
       categoryAr: short?.shortAr ?? cat?.ar ?? '',
       devices: devices.n,
       nextLapse: untils.length ? untils.reduce((a, b) => (a < b ? a : b)) : null,
+      ...(() => {
+        const soonest = ledger.filter((row) => row.until !== null).sort((a, b) => (a.until! < b.until! ? -1 : 1))[0];
+        const def = soonest ? FACILITY_CONTENT.ledger.obligations.find((o) => o.key === soonest.key) : undefined;
+        return { nextLapseEn: def?.en ?? null, nextLapseAr: def?.ar ?? null };
+      })(),
       stateEn: line.en, stateAr: line.ar,
       stateKind: standing.kind === 'met' ? 'ok' : standing.kind,
       siteId: r.site_id,

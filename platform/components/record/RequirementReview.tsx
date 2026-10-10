@@ -3,6 +3,7 @@ import { DocumentViewer } from '../DocumentViewer';
 import type { RecordParty, RecordRequirements, RequirementSnapshot } from '../../lib/record-facts';
 import { EVENT_FILE_KEYS } from '../../lib/requirement-migration';
 import { REQUIREMENT_GROUPS, type PlanSectionInstance, type RequirementInstance } from '../../lib/rules';
+import { PlanProgress } from './PlanSections';
 
 const panel: React.CSSProperties = { border: '1px solid var(--line)', borderRadius: 12, padding: 20, marginBlockEnd: 24, scrollMarginBlockStart: 24 };
 
@@ -107,7 +108,7 @@ export function RequirementReview({ id, kind, snapshot, live, contentTypes, revi
           <div style={{ marginBlockStart: 8 }}>
             {plan.map((s) => (
               <div key={s.key} data-review-plan-section={s.key} style={{ borderBlockStart: '1px solid var(--line)', paddingBlock: 8, fontSize: 13.5 }}>
-                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 8 }}>{s.n}</span><L en={s.en} ar={s.ar} /> — <span style={{ color: s.complete ? 'var(--brand)' : 'var(--accent-ink)' }}><L en={s.complete ? 'Addressed' : 'Pending'} ar={s.complete ? 'مستوفى' : 'قيد الإنجاز'} /></span>
+                <span style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums', marginInlineEnd: 8 }}>{s.n}</span><L en={s.en} ar={s.ar} /> — <span data-progress={s.progress} style={{ color: s.complete ? 'var(--brand)' : 'var(--accent-ink)' }}><PlanProgress progress={s.progress} /></span>{s.lacking.length > 0 && s.progress === 'partial' ? <span style={{ color: 'var(--muted)' }}> · <L en={`still needed: ${s.lacking.map((x) => x.en).join('; ')}`} ar={`ما زال مطلوباً: ${s.lacking.map((x) => x.ar).join('؛ ')}`} /></span> : null}
                 {s.linked.length > 0 ? <span style={{ color: 'var(--muted)' }}> · <L en={`from ${s.linked.map((l) => l.labelEn).join(', ')}`} ar={`من ${s.linked.map((l) => l.labelAr).join('، ')}`} /></span> : null}
                 {s.text ? <div style={{ marginBlockStart: 4, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{s.text}</div> : null}
                 {s.items.length > 0 ? (
