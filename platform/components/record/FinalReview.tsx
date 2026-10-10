@@ -70,7 +70,9 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filing = useRef(false);
-  const lastSaved = useRef(JSON.stringify(latest.current));
+  // What the server holds, not what the form shows: a prefilled signer is unsaved until it is
+  // saved, so leaving a prefilled field saves it like a typed one.
+  const lastSaved = useRef(JSON.stringify({ declarations: initial?.declarations ?? {}, insurance: initial?.insurance ?? {}, representative: initial?.representative ?? '', telephone: initial?.telephone ?? '', position: initial?.position ?? '' }));
   const persist = () => {
     if (locked || filing.current) return;
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }

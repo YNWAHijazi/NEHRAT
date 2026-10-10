@@ -20,8 +20,9 @@ test("public check is concise and preserves the chosen service through signup", 
     page.getByRole("heading", { name: "Certification required", exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Next", exact: true }).click();
+  // The service page's sticky bar (TAMM review, 10 October 2026): "Sign in to start".
   await page
-    .getByRole("link", { name: "Sign in to certify", exact: true })
+    .locator('[data-region="service-start"]')
     .click();
   await expect(page).toHaveURL(/signin\?next=/);
   await page

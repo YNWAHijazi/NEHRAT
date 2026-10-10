@@ -89,3 +89,13 @@ export async function certify(page: Page, who: { representative: string; telepho
   await expect(submit).toBeEnabled({ timeout: 40_000 });
   return submit;
 }
+
+/**
+ * The EMS invitation form on a row. Once one agency is invited the form for a second sits
+ * behind "Add another EMS agency" (live review, 10 October 2026); this opens it when present.
+ */
+export async function emsInviteForm(row: Locator): Promise<Locator> {
+  const more = row.locator('[data-region="add-another-ems"]');
+  if (await more.count()) await more.evaluate((el) => { (el as HTMLDetailsElement).open = true; });
+  return row.locator('form:has(input[name="kind"][value="ems"])').first();
+}

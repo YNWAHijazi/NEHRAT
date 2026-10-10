@@ -50,46 +50,26 @@ export function StageRail({ titleEn, titleAr, stages, noteEn, noteAr }: { titleE
           );
         })}
       </div>
-      {/* On a phone: the current stage in one line, every stage by name one tap away (owner,
-          10 October 2026: the bar alone did not say what each stage is; live review the same day:
-          the whole list stood between a returning user and the task). */}
-      <details data-rail-phone="" style={{ display: 'none' }}>
-        <summary data-rail-current="" style={{ display: 'flex', gap: 10, alignItems: 'center', minHeight: 44, cursor: 'pointer', listStyle: 'none' }}>
-          {(() => {
-            const i = nowIndex >= 0 ? nowIndex : stages.length - 1;
-            const s = stages[i]!;
-            const st = STAGE_STYLE[s.k];
-            return (
-              <>
-                <span aria-hidden="true" style={{ flex: 'none', inlineSize: 10, blockSize: 10, borderRadius: 3, background: st.color }} />
-                <span style={{ flex: 1, minWidth: 0, fontSize: 14, lineHeight: 1.4 }}>
-                  <span style={{ fontWeight: 600 }}><L en={`${i + 1}. ${s.en}`} ar={`${i + 1}. ${s.ar}`} /></span>
-                  {s.metaEn ? <span style={{ color: 'var(--muted)', fontSize: 13 }}> · <L en={s.metaEn} ar={s.metaAr} /></span> : null}
+      {/* On a phone: every stage by name, one compact line each, the current one with its detail
+          (owner, 10 October 2026: the bar alone did not say what each stage is). */}
+      <ol data-rail-list="" style={{ display: 'none' }}>
+        {stages.map((s, i) => {
+          const st = STAGE_STYLE[s.k];
+          const isNow = i === nowIndex;
+          return (
+            <li key={i} data-rail-item={s.k} aria-current={isNow ? 'step' : undefined}>
+              <span aria-hidden="true" style={{ flex: 'none', inlineSize: 10, blockSize: 10, marginBlockStart: 5, borderRadius: 3, background: s.k === 'todo' || s.k === 'na' ? 'transparent' : st.color, border: s.k === 'todo' || s.k === 'na' ? `1.5px ${st.edge} var(--muted)` : 0 }} />
+              <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span style={{ fontSize: 14, fontWeight: isNow ? 600 : 400, color: s.k === 'todo' || s.k === 'na' ? 'var(--muted)' : 'var(--ink)', lineHeight: 1.45 }}>
+                  <L en={`${i + 1}. ${s.en}`} ar={`${i + 1}. ${s.ar}`} />
+                  {!isNow ? <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 12.5 }}> · <L en={st.lblEn} ar={st.lblAr} /></span> : null}
                 </span>
-                <span style={{ flex: 'none', fontSize: 12.5, color: 'var(--brand)' }}><L en="All stages" ar="كل المراحل" /></span>
-              </>
-            );
-          })()}
-        </summary>
-        <ol data-rail-list="">
-          {stages.map((s, i) => {
-            const st = STAGE_STYLE[s.k];
-            const isNow = i === nowIndex;
-            return (
-              <li key={i} data-rail-item={s.k} aria-current={isNow ? 'step' : undefined}>
-                <span aria-hidden="true" style={{ flex: 'none', inlineSize: 10, blockSize: 10, marginBlockStart: 5, borderRadius: 3, background: s.k === 'todo' || s.k === 'na' ? 'transparent' : st.color, border: s.k === 'todo' || s.k === 'na' ? `1.5px ${st.edge} var(--muted)` : 0 }} />
-                <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                  <span style={{ fontSize: 14, fontWeight: isNow ? 600 : 400, color: s.k === 'todo' || s.k === 'na' ? 'var(--muted)' : 'var(--ink)', lineHeight: 1.45 }}>
-                    <L en={`${i + 1}. ${s.en}`} ar={`${i + 1}. ${s.ar}`} />
-                    {!isNow ? <span style={{ fontWeight: 400, color: 'var(--muted)', fontSize: 12.5 }}> · <L en={st.lblEn} ar={st.lblAr} /></span> : null}
-                  </span>
-                  {isNow && s.metaEn ? <span style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.4 }}><L en={s.metaEn} ar={s.metaAr} /></span> : null}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      </details>
+                {isNow && s.metaEn ? <span style={{ fontSize: '12.5px', color: 'var(--muted)', lineHeight: 1.4 }}><L en={s.metaEn} ar={s.metaAr} /></span> : null}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }

@@ -59,7 +59,8 @@ for (const lang of LANGUAGES) {
       const summaries = page.locator('[data-region="requirement-summaries"]');
       await expect(summaries).toBeVisible();
       await expect(page.locator('[data-region="event-workspace-nav"]')).toHaveCount(0);
-      await expect(summaries.locator('[data-summary="required"] [data-summary-row]')).toHaveCount(8);
+      // Eight readiness rows plus the risk assessment and the declaration, all counted (live review, 10 October 2026).
+      await expect(summaries.locator('[data-summary="required"] [data-summary-row]')).toHaveCount(10);
       // Level 1: no Director, no plan, no map, no declaration row among the cards; AED recommended.
       for (const absent of ['B3', 'B2', 'B5', 'B6', 'B12', 'B15', 'B17', 'B20', 'P-M', 'P-D']) await expect(card(page, absent)).toHaveCount(0);
       await expect(card(page, 'B8')).toHaveAttribute('data-group', 'recommended');

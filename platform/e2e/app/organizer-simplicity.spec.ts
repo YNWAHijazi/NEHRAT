@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { signInAs } from '../helpers/signin';
 import { gotoRidingRestarts } from '../helpers/resilient';
 import { LANGUAGES, useLanguage } from '../helpers/language';
-import { openDetails } from '../helpers/record';
+import { emsInviteForm, openDetails } from '../helpers/record';
 
 for (const lang of LANGUAGES) {
   test(`organizer sees event identity and always sees progress on a phone (${lang})`, async ({ page, context }) => {
@@ -16,8 +16,9 @@ for (const lang of LANGUAGES) {
     await expect(header).toBeVisible();
     await expect(action).toBeVisible();
     expect(await header.evaluate((el) => (el.compareDocumentPosition(document.querySelector('[data-region="next-action"]')!) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0)).toBe(true);
-    await expect(progress.locator('[data-rail]')).toBeVisible();
-    await expect(progress.locator('[data-rail] > div')).toHaveCount(6);
+    // On a phone the rail is a list of every stage by name, never collapsed (owner, 10 October 2026).
+    await expect(progress.locator('[data-rail-list]')).toBeVisible();
+    await expect(progress.locator('[data-rail-list] > li')).toHaveCount(6);
     await expect(progress.locator('summary')).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
     // The next step is a card on this same page, or the organization screen.
@@ -36,7 +37,7 @@ for (const lang of LANGUAGES) {
     // Own the pending invitation: other journeys legitimately withdraw the demo one.
     const name = `Copy check ${lang} ${Date.now()}`;
     const ems = await openDetails(page.locator('[data-requirement="B7"]'));
-    const form = ems.locator('form:has(input[name="kind"][value="ems"])');
+    const form = await emsInviteForm(ems);
     await form.locator('input[name="name"]').fill(name);
     await form.locator('input[name="email"]').fill('copy-check@example.test');
     await form.locator('button[type=submit]').click();
