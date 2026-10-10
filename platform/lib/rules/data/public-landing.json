@@ -17,16 +17,20 @@
       "descEn": "Register your event with the Ministry of Public Health and receive its health and medical readiness certificate.",
       "descAr": "سجّلوا فعاليتكم لدى وزارة الصحة العامة واحصلوا على شهادة التأهب الصحي والطبي للفعالية.",
       "kw": "certify event certification submit submission assessment level deadline file organizer اعتماد فعالية تقديم تقييم مستوى مهلة",
-      "introEn": "Through this service, the organizer of an event registers it with the Ministry of Public Health. A short risk assessment sets the event's level. The organizer then completes the health and medical requirements for that level and submits them for the Ministry's review. When the Ministry finds the requirements satisfied, the organizer downloads the event's health and medical readiness certificate.",
-      "introAr": "من خلال هذه الخدمة، يسجّل منظّم الفعالية فعاليته لدى وزارة الصحة العامة. ويحدّد تقييم قصير للمخاطر مستوى الفعالية. ثم يستكمل المنظّم متطلبات التأهب الصحي والطبي لهذا المستوى ويقدّمها لمراجعة الوزارة. وعندما تجد الوزارة أن المتطلبات مستوفاة، يحمّل المنظّم شهادة التأهب الصحي والطبي للفعالية.",
+      "introEn": "Register your event with the Ministry of Public Health, complete the health and medical requirements for its level, and receive its health and medical readiness certificate.",
+      "introAr": "سجّلوا فعاليتكم لدى وزارة الصحة العامة، واستكملوا متطلبات التأهب الصحي والطبي لمستواها، واحصلوا على شهادة التأهب الصحي والطبي للفعالية.",
       "needs": [
         {
-          "en": "The event's dates, location and type, and the most people expected at the same time.",
-          "ar": "تواريخ الفعالية وموقعها ونوعها، وأكبر عدد متوقّع من الحضور في الوقت نفسه."
+          "en": "Event dates and location",
+          "ar": "تواريخ الفعالية وموقعها"
         },
         {
-          "en": "The organizer's contact and the authorized representative who signs the submission.",
-          "ar": "بيانات الاتصال بالمنظّم والممثّل المفوّض الذي يوقّع التقديم."
+          "en": "Event type and activities",
+          "ar": "نوع الفعالية وأنشطتها"
+        },
+        {
+          "en": "Most people expected at the same time",
+          "ar": "أكبر عدد متوقّع من الحضور في الوقت نفسه"
         }
       ]
     },
@@ -37,28 +41,32 @@
       "descEn": "Register a covered facility or site with its AEDs and cardiac emergency response plan, and keep it ready.",
       "descAr": "سجّلوا المنشأة أو الموقع المشمول مع أجهزة AED فيه وخطة الاستجابة لطوارئ القلب، وحافظوا على جاهزيته.",
       "kw": "facility register gym fitness school university airport port terminal mall aquatic pool cardiac readiness منشأة تسجيل صالة رياضية مدرسة جامعة مطار ميناء مركز تجاري مسبح جاهزية قلب site venue event-hosting stadium hall arena amphitheatre capacity موقع مواقع استضافة ملعب قاعة سعة",
-      "introEn": "Through this service, the operator of a covered facility or site registers it with the Ministry of Public Health: where it is, who is responsible, its AEDs, its cardiac emergency response plan and a readiness confirmation. After the Ministry's review, the site is kept up to date rather than registered again, with a practical drill each year. Events held at the site can reuse its registered information.",
-      "introAr": "من خلال هذه الخدمة، يسجّل مشغّل المنشأة أو الموقع المشمول منشأته لدى وزارة الصحة العامة: موقعها، والجهة المسؤولة عنها، وأجهزة AED فيها، وخطة الاستجابة لطوارئ القلب، وتأكيد الجاهزية. وبعد مراجعة الوزارة، يُحافَظ على تحديث سجل الموقع بدلاً من إعادة تسجيله، مع تمرين عملي كل سنة. ويمكن للفعاليات التي تُقام في الموقع إعادة استخدام معلوماته المسجّلة.",
+      "introEn": "Register a covered facility or site with the Ministry of Public Health, with its AEDs and cardiac emergency response plan, and keep it ready with a practical drill each year.",
+      "introAr": "سجّلوا المنشأة أو الموقع المشمول لدى وزارة الصحة العامة مع أجهزة AED فيه وخطة الاستجابة لطوارئ القلب، وحافظوا على جاهزيته بتمرين عملي كل سنة.",
       "needs": [
         {
-          "en": "The facility's address, operating hours and its pin on the map.",
-          "ar": "عنوان المنشأة وساعات عملها وموقعها على الخريطة."
+          "en": "Address and operating hours",
+          "ar": "العنوان وساعات العمل"
         },
         {
-          "en": "One responsible contact: a name or position, a telephone and an email.",
-          "ar": "جهة اتصال مسؤولة واحدة: اسم أو مسمى وظيفي، ورقم هاتف، وبريد إلكتروني."
+          "en": "Location pin on the map",
+          "ar": "الموقع على الخريطة"
         },
         {
-          "en": "Each AED's serial number and exact location. A photo is optional.",
-          "ar": "الرقم التسلسلي لكل جهاز AED وموقعه الدقيق. والصورة اختيارية."
+          "en": "Responsible contact",
+          "ar": "جهة الاتصال المسؤولة"
         },
         {
-          "en": "The date of the latest practical cardiac-emergency drill.",
-          "ar": "تاريخ آخر تمرين عملي على طوارئ توقف القلب."
+          "en": "AED serial numbers and locations",
+          "ar": "الأرقام التسلسلية لأجهزة AED ومواقعها"
         },
         {
-          "en": "Supporting documents, such as a readiness assessment, if you have them. They are optional.",
-          "ar": "المستندات الداعمة، مثل تقييم للجاهزية، إن وُجدت. وهي اختيارية."
+          "en": "Date of the latest drill",
+          "ar": "تاريخ آخر تمرين"
+        },
+        {
+          "en": "Supporting documents (optional)",
+          "ar": "المستندات الداعمة (اختيارية)"
         }
       ]
     }
@@ -275,75 +283,75 @@
     "certify": [
       {
         "n": 1,
-        "en": "Create your account.",
-        "ar": "أنشئوا حسابكم."
+        "en": "Sign in or create an account.",
+        "ar": "سجّلوا الدخول أو أنشئوا حساباً."
       },
       {
         "n": 2,
-        "en": "Add the event details and complete the risk assessment.",
-        "ar": "أدخلوا تفاصيل الفعالية وأكملوا تقييم المخاطر."
+        "en": "Enter the event details and take the risk assessment.",
+        "ar": "أدخلوا تفاصيل الفعالية وأجروا تقييم المخاطر."
       },
       {
         "n": 3,
-        "en": "Complete each requirement and add the documents.",
-        "ar": "أكملوا كل متطلب وأضيفوا المستندات."
+        "en": "Complete the requirements for your level.",
+        "ar": "أكملوا متطلبات مستواكم."
       },
       {
         "n": 4,
-        "en": "Submit your application and track the Ministry review.",
-        "ar": "قدّموا الطلب وتابعوا مراجعة الوزارة."
+        "en": "Submit to the Ministry.",
+        "ar": "قدّموا الطلب إلى الوزارة."
       },
       {
         "n": 5,
-        "en": "Download your Event Health and Medical Readiness Certificate from the Ministry of Public Health when the requirements are satisfied.",
-        "ar": "حمّلوا شهادة التأهب الصحي والطبي للفعالية من وزارة الصحة العامة عند استيفاء المتطلبات."
+        "en": "Download the certificate once the requirements are satisfied.",
+        "ar": "حمّلوا الشهادة عند استيفاء المتطلبات."
       },
       {
         "n": 6,
-        "en": "Report serious incidents and submit the post-event report when required.",
-        "ar": "أبلغوا عن الحوادث الجسيمة وقدّموا تقرير ما بعد الفعالية عند طلبه."
+        "en": "After the event, report any serious incident and file the post-event report if required.",
+        "ar": "بعد الفعالية، أبلغوا عن أي حادثة جسيمة وقدّموا تقرير ما بعد الفعالية عند طلبه."
       }
     ],
     "facility": [
       {
         "n": 1,
-        "en": "Create your account.",
-        "ar": "أنشئوا حسابكم."
+        "en": "Sign in or create an account.",
+        "ar": "سجّلوا الدخول أو أنشئوا حساباً."
       },
       {
         "n": 2,
-        "en": "Add the facility details and name the responsible contact: the facility cardiac-readiness coordinator.",
-        "ar": "أدخلوا تفاصيل المنشأة وسمّوا جهة الاتصال المسؤولة: منسّق الجاهزية القلبية في المنشأة."
+        "en": "Enter the site details and responsible contact.",
+        "ar": "أدخلوا تفاصيل الموقع وجهة الاتصال المسؤولة."
       },
       {
         "n": 3,
-        "en": "Register each AED where required or present.",
-        "ar": "سجّلوا كل جهاز AED حيث يكون مطلوباً أو موجوداً."
+        "en": "Register each AED.",
+        "ar": "سجّلوا كل جهاز AED."
       },
       {
         "n": 4,
-        "en": "Complete the cardiac emergency response plan and record the yearly drill.",
-        "ar": "أكملوا خطة الاستجابة لطوارئ القلب وسجّلوا التمرين السنوي."
+        "en": "Complete the response plan and confirm readiness.",
+        "ar": "أكملوا خطة الاستجابة وأكّدوا الجاهزية."
       },
       {
         "n": 5,
-        "en": "Update your records when details change and keep the plan current.",
-        "ar": "حدّثوا السجلات عند تغيّر التفاصيل وأبقوا الخطة محدّثة."
+        "en": "Submit to the Ministry.",
+        "ar": "قدّموا التسجيل إلى الوزارة."
       },
       {
         "n": 6,
-        "en": "Report any suspected cardiac arrest, CPR attempt, or AED use.",
-        "ar": "أبلغوا عن أي اشتباه بتوقف القلب أو محاولة إنعاش قلبي رئوي أو استخدام لجهاز AED."
+        "en": "Receive the registration certificate once accepted.",
+        "ar": "تسلّموا شهادة التسجيل عند قبوله."
       },
       {
         "n": 7,
-        "en": "Receive your Facility Registration Certificate from the Ministry of Public Health once the applicable requirements are satisfied.",
-        "ar": "تسلّموا شهادة تسجيل المنشأة من وزارة الصحة العامة عند استيفاء المتطلبات المنطبقة."
+        "en": "Keep the site up to date and record the yearly drill.",
+        "ar": "حافظوا على تحديث الموقع وسجّلوا التمرين السنوي."
       },
       {
         "n": 8,
-        "en": "Events held at the site can link to it and reuse its registered information.",
-        "ar": "يمكن للفعاليات التي تُقام في الموقع الارتباط به وإعادة استخدام معلوماته المسجّلة."
+        "en": "Report any suspected cardiac arrest, CPR attempt or AED use.",
+        "ar": "أبلغوا عن أي اشتباه بتوقف القلب أو محاولة إنعاش أو استخدام لجهاز AED."
       }
     ]
   },
