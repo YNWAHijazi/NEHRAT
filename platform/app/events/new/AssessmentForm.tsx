@@ -4,7 +4,7 @@ import { MunicipalityField } from '../../../components/MunicipalityField';
 import { municipalityList, splitMunicipalities } from '../../../lib/rules/municipalities';
 
 import { OptionText, useDocumentLang } from '../../../components/OptionText';
-import { EVENT_TYPES, EXTRA_DISCIPLINES } from '../../../lib/rules/event-labels';
+import { EVENT_TYPES, EXTRA_DISCIPLINES, activityAnswerForType, isArabicName } from '../../../lib/rules/event-labels';
 import { InfoNote } from '../../../components/InfoNote';
 import { SiteLocationField, siteNameIn } from '../../../components/SiteLocationField';
 import type { SiteOption } from '../../../lib/event-site';
@@ -37,12 +37,12 @@ import type { SiteOption } from '../../../lib/event-site';
  * never a level.
  */
 
-import { useMemo, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { createEventAction, updateDraftEventAction, reassessAction, type AssessmentSubmission } from '../../actions';
 import type { Band, Domain, MinimumCondition } from '../../../lib/rules/load';
-import { PART_F } from '../../../lib/rules/load';
+import { PART_F, attendanceBandScore } from '../../../lib/rules/load';
 import { deriveLevel } from '../../../lib/rules/derive';
 import { levelWhy } from '../../../lib/rules/why';
 import type { DomainAnswers, MinimumConditionInputs } from '../../../lib/rules/types';
@@ -138,8 +138,6 @@ export function AssessmentForm({
     municipalities: draft?.partA.municipalities ?? (startSite ? (lang === 'ar' ? startSite.municipalityAr : startSite.municipalityEn) : ''),
     // A new event opens at 07:00 (owner, 2026-10-07: that is when a marathon starts); a draft keeps its own times.
     openingTime: draft?.partA.openingTime ?? (draft ? '' : '07:00'), closingTime: draft?.partA.closingTime || draft?.partA.openingTime || (draft ? '' : '07:00'),
-    expectedParticipants: draft?.partA.expectedParticipants != null ? String(draft.partA.expectedParticipants) : '', expectedSpectators: draft?.partA.expectedSpectators != null ? String(draft.partA.expectedSpectators) : '', expectedStaff: draft?.partA.expectedStaff != null ? String(draft.partA.expectedStaff) : '',
-    previousEdition: draft?.partA.previousEdition ?? false, recurringFixedVenue: draft?.partA.recurringFixedVenue ?? false,
   });
   // THE ONE LINK to a registered Facility/Site, by Site ID: set from the suggestions under the
   // location field or from "Show all registered sites". A stored link that is no longer
@@ -163,11 +161,16 @@ export function AssessmentForm({
   const [answers, setAnswers] = useState<(0 | 1 | 2 | null)[]>(
     stored ? [...stored.answers] : Array(9).fill(null),
   );
-  // Reassess edits the stored attendance figure directly; creation derives it from the
-  // three expected counts below, so the number is never asked twice.
+  // ONE attendance figure, asked inside question 1 (owner, 10 October 2026: the three separate
+  // counts are dropped). Question 1's answer follows from it; a draft from before keeps the sum of
+  // its old counts as the figure.
+  const draftCounts = [draft?.partA.expectedParticipants, draft?.partA.expectedSpectators, draft?.partA.expectedStaff].filter((v): v is number => typeof v === 'number');
   const [attendanceDirect, setAttendanceDirect] = useState(
-    stored?.inputs.expectedMaxSimultaneousAttendance != null ? String(stored.inputs.expectedMaxSimultaneousAttendance) : '',
+    stored?.inputs.expectedMaxSimultaneousAttendance != null ? String(stored.inputs.expectedMaxSimultaneousAttendance)
+      : draftCounts.length > 0 ? String(draftCounts.reduce((a, b) => a + b, 0)) : '',
   );
+  // Question 2 is filled in from the event type until the organizer changes it themselves.
+  const activityChosen = useRef(Boolean(stored));
   const [courseKm, setCourseKm] = useState(
     stored?.inputs.courseDistanceKm != null ? String(stored.inputs.courseDistanceKm) : '',
   );
@@ -182,14 +185,18 @@ export function AssessmentForm({
     return [...base, ...extraDisciplines.filter((d) => !base.includes(d))];
   }, [chosenType, extraDisciplines]);
 
-  const attendance: number | null = useMemo(() => {
-    if (reassess) return attendanceDirect.trim() === '' ? null : Number(attendanceDirect);
-    const parts = [partA.expectedParticipants, partA.expectedSpectators, partA.expectedStaff]
-      .filter((v) => v.trim() !== '')
-      .map(Number);
-    if (parts.length === 0) return null;
-    return parts.reduce((a, b) => a + b, 0);
-  }, [reassess, attendanceDirect, partA.expectedParticipants, partA.expectedSpectators, partA.expectedStaff]);
+  const attendance: number | null = attendanceDirect.trim() === '' ? null : Number(attendanceDirect);
+  // Question 1 follows the figure; question 2 follows the event type until the organizer answers it.
+  const bandScore = attendanceBandScore(attendance);
+  const activityFromType = activityAnswerForType(typeKey, disciplines);
+  useEffect(() => {
+    setAnswers((prev) => (prev[0] === bandScore ? prev : prev.map((a, i) => (i === 0 ? bandScore : a))));
+  }, [bandScore]);
+  useEffect(() => {
+    if (activityChosen.current || activityFromType === null) return;
+    setAnswers((prev) => (prev[1] === activityFromType ? prev : prev.map((a, i) => (i === 1 ? activityFromType : a))));
+  }, [activityFromType]);
+  const arabicNameRefused = !reassess && nameAr.trim() !== '' && !isArabicName(nameAr);
 
   const inputs: MinimumConditionInputs = useMemo(
     () => ({
@@ -216,9 +223,7 @@ export function AssessmentForm({
   // "Event type" is the thing to fill in, not a field that is not on the screen yet.
   const missingLabels: { en: string; ar: string }[] = derivation.missingInputs.filter((k) => !(k === 'venueLicensedCapacity' && !isNightclub)).map((k) => {
     if (k === 'expectedMaxSimultaneousAttendance')
-      return reassess
-        ? { en: 'Most people at the same time', ar: 'أكبر عدد من الحاضرين في الوقت نفسه' }
-        : { en: 'Expected numbers', ar: 'الأعداد المتوقعة' };
+      return { en: 'Most people at the same time (question 1)', ar: 'أكبر عدد من الحاضرين في الوقت نفسه (السؤال 1)' };
     if (k === 'courseDistanceKm') return { en: 'Course distance', ar: 'مسافة المسار' };
     if (k === 'venueIsNightclubOrDanceVenue') return { en: 'Event type', ar: 'نوع الفعالية' };
     if (k === 'venueLicensedCapacity')
@@ -232,6 +237,10 @@ export function AssessmentForm({
 
   const submit = () => {
     setError(null);
+    if (arabicNameRefused) {
+      setError('arabic-name');
+      return;
+    }
     startTransition(async () => {
       if (reassess) {
         const result = await reassessAction(reassess.eventId, {
@@ -258,12 +267,14 @@ export function AssessmentForm({
           municipalities: partA.municipalities,
           openingTime: partA.openingTime,
           closingTime: partA.closingTime,
-          expectedParticipants: partA.expectedParticipants === '' ? null : Number(partA.expectedParticipants),
-          expectedSpectators: partA.expectedSpectators === '' ? null : Number(partA.expectedSpectators),
-          expectedStaff: partA.expectedStaff === '' ? null : Number(partA.expectedStaff),
-          previousEdition: partA.previousEdition,
-          recurringFixedVenue: partA.recurringFixedVenue,
-          // The link stands on its own: the fixed-venue box describes the event, not the link.
+          // The three counts and the two boxes are no longer asked (owner, 10 October 2026): the
+          // attendance figure travels in `inputs`, the previous edition is question 9, and a fixed
+          // venue is the link to its registered site.
+          expectedParticipants: null,
+          expectedSpectators: null,
+          expectedStaff: null,
+          previousEdition: false,
+          recurringFixedVenue: false,
           siteId: siteId !== '' ? siteId : null,
         },
         answers: answers as DomainAnswers,
@@ -304,7 +315,13 @@ export function AssessmentForm({
               <input value={nameEn} onChange={(e) => setNameEn(e.target.value)} style={inputStyle} />
             </Field>
             <Field labelEn="Event name (Arabic)" labelAr="اسم الفعالية (بالعربية)">
-              <input dir="rtl" value={nameAr} onChange={(e) => setNameAr(e.target.value)} style={inputStyle} />
+              <input dir="rtl" lang="ar" value={nameAr} onChange={(e) => setNameAr(e.target.value)} aria-invalid={arabicNameRefused || undefined}
+                style={arabicNameRefused ? { ...inputStyle, borderColor: 'var(--bad)' } : inputStyle} />
+              {arabicNameRefused ? (
+                <span role="alert" data-region="arabic-name-refused" style={{ display: 'block', marginBlockStart: 6, fontSize: 13, color: 'var(--bad)' }}>
+                  <L en="Arabic letters only." ar="أحرف عربية فقط." />
+                </span>
+              ) : null}
             </Field>
             <Field labelEn="Start date" labelAr="تاريخ البداية">
               <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); if (!endDateEdited.current) setEndDate(e.target.value); }} style={inputStyle} />
@@ -393,72 +410,11 @@ export function AssessmentForm({
         </details>
       ) : null}
 
-      {reassess ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 40 }}>
-          <Field labelEn="Most people at the same time" labelAr="أكبر عدد من الحاضرين في الوقت نفسه">
-            <input type="number" min={0} value={attendanceDirect} onChange={(e) => setAttendanceDirect(e.target.value)} style={inputStyle} />
-          </Field>
-        </div>
-      ) : (
-        <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 16, marginBlockEnd: 8 }}>
-            <Field labelEn="Expected participants" labelAr="العدد المتوقع للمشاركين">
-              <input type="number" min={0} value={partA.expectedParticipants} onChange={(e) => setA('expectedParticipants', e.target.value)} style={inputStyle} />
-            </Field>
-            <Field labelEn="Expected spectators" labelAr="العدد المتوقع للمتفرجين">
-              <input type="number" min={0} value={partA.expectedSpectators} onChange={(e) => setA('expectedSpectators', e.target.value)} style={inputStyle} />
-            </Field>
-            <Field labelEn="Expected staff and volunteers" labelAr="العدد المتوقع للعاملين والمتطوعين">
-              <input type="number" min={0} value={partA.expectedStaff} onChange={(e) => setA('expectedStaff', e.target.value)} style={inputStyle} />
-            </Field>
-          </div>
-          <div className="secondary-help"><InfoNote><L
-              en="Together these count everyone who may be there at the same time."
-              ar="تحسب هذه الأعداد معاً كل من قد يكون حاضراً في الوقت نفسه."
-            /></InfoNote></div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockEnd: 48 }}>
-            {(
-              [
-                ['previousEdition', 'This event has been held before', 'أقيمت هذه الفعالية من قبل'],
-                ['recurringFixedVenue', 'It is at a fixed venue that hosts events repeatedly', 'تقام في موقع ثابت يستضيف فعاليات بصورة متكررة'],
-              ] as const
-            ).map(([key, en, ar]) => {
-              const on = partA[key];
-              return (
-                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => setA(key, !on)}
-                  style={{ textAlign: 'start', display: 'flex', gap: 14, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--surface)', borderRadius: 10, cursor: 'pointer' }}
-                >
-                  <span style={{ flex: 'none', width: 18, height: 18, border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, borderRadius: 3, background: on ? 'var(--brand)' : 'transparent', marginBlockStart: 2 }} />
-                  <span style={{ fontSize: 15, lineHeight: 1.6 }}>
-                    <L en={en} ar={ar} />
-                  </span>
-                </button>
-                </div>
-              );
-            })}
-
-            {partA.previousEdition ? <fieldset data-region="previous-history" style={{ border: '1px solid var(--line)', borderRadius: 10, padding: 16 }}>
-              <legend><L en="Previous event history" ar="التاريخ السابق للفعالية" /></legend>
-              <div className="secondary-help"><InfoNote><L en="Select the most serious history from any previous edition. If it is already in your Archive, you can duplicate that event instead." ar="اختاروا أخطر ما حدث في أي نسخة سابقة. إذا كانت الفعالية في أرشيفكم، يمكنكم نسخها لبدء نسخة جديدة." /></InfoNote></div>
-              {domains[8]?.options.map((option) => <button key={option.score} type="button" aria-pressed={answers[8] === option.score}
-                onClick={() => setAnswers((prev) => prev.map((value, i) => i === 8 ? option.score : value))}
-                style={{ display: 'block', width: '100%', textAlign: 'start', padding: 14, marginBlock: 6, border: `1px solid ${answers[8] === option.score ? 'var(--brand)' : 'var(--line)'}`, borderRadius: 8, background: answers[8] === option.score ? 'var(--brand-soft)' : 'var(--bg)', cursor: 'pointer' }}>
-                <span>{option.score}</span>{' '}<L en={option.en} ar={option.ar} />
-              </button>)}
-            </fieldset> : null}
-          </div>
-        </>
-      )}
-
       <h2 style={{ margin: '0 0 20px', fontSize: 24, fontWeight: 600, letterSpacing: '-.025em' }}>
         <L en="Risk assessment" ar="تقييم المخاطر" />
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBlockEnd: 56 }}>
-        {domains.map((domain, di) => !reassess && partA.previousEdition && di === 8 ? null : (
+        {domains.map((domain, di) => (
           <div key={domain.number} style={{ padding: 27, background: 'var(--surface2)', borderRadius: 16 }}>
             <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', marginBlockEnd: 6 }}>
               <span style={{ fontSize: 13, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{domain.number}</span>
@@ -467,6 +423,21 @@ export function AssessmentForm({
                 {domain.noteEn ? <InfoNote labelEn={`About ${domain.en}`} labelAr={`حول ${domain.ar}`}><L en={domain.noteEn} ar={domain.noteAr} /></InfoNote> : null}
               </h3>
             </div>
+            {/* What the question asks, in everyday words (owner, 10 October 2026). */}
+            <p data-region="domain-lead" style={{ margin: '0 0 4px', fontSize: '14.5px', lineHeight: 1.55, color: 'var(--muted)' }}>
+              <L en={domain.leadEn} ar={domain.leadAr} />
+            </p>
+            {di === 0 ? (
+              <label data-region="attendance" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBlock: '10px 4px', maxWidth: 320 }}>
+                <span style={fieldLabel}><L en="Most people at the same time" ar="أكبر عدد من الحاضرين في الوقت نفسه" /></span>
+                <input type="number" min={0} inputMode="numeric" name="attendance" value={attendanceDirect} onChange={(e) => setAttendanceDirect(e.target.value)} style={inputStyle} />
+              </label>
+            ) : null}
+            {di === 1 && !activityChosen.current && activityFromType !== null && answers[1] === activityFromType ? (
+              <p data-region="activity-from-type" style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--brand)' }}>
+                <L en="Filled in from the event type. Change it if it does not fit." ar="عُبّئ من نوع الفعالية. غيّروه إن لم يكن مناسباً." />
+              </p>
+            ) : null}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBlockStart: 10 }}>
               {domain.options.map((option) => {
                 const on = answers[di] === option.score;
@@ -475,10 +446,13 @@ export function AssessmentForm({
                     key={option.score}
                     type="button"
                     aria-pressed={on}
-                    onClick={() =>
-                      setAnswers((prev) => prev.map((a, i) => (i === di ? option.score : a)))
-                    }
-                    style={{ textAlign: 'start', display: 'flex', gap: 16, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--bg)', borderRadius: 10, cursor: 'pointer' }}
+                    // Question 1 is answered by the figure above it, never by a click.
+                    disabled={di === 0}
+                    onClick={() => {
+                      if (di === 1) activityChosen.current = true;
+                      setAnswers((prev) => prev.map((a, i) => (i === di ? option.score : a)));
+                    }}
+                    style={{ textAlign: 'start', display: 'flex', gap: 16, padding: '14px 18px', border: `1px solid ${on ? 'var(--brand)' : 'var(--line)'}`, background: on ? 'var(--brand-soft)' : 'var(--bg)', borderRadius: 10, cursor: di === 0 ? 'default' : 'pointer', color: 'var(--ink)', opacity: di === 0 && !on ? 0.6 : 1 }}
                   >
                     <span style={{ flex: 'none', width: 26, height: 26, display: 'grid', placeItems: 'center', borderRadius: '50%', border: `1.5px solid ${on ? 'var(--brand)' : 'var(--muted)'}`, background: on ? 'var(--brand)' : 'transparent', color: on ? 'var(--bg)' : 'var(--ink)', fontSize: 14, fontWeight: 600 }}>
                       {option.score}
@@ -575,6 +549,8 @@ export function AssessmentForm({
         <p style={{ margin: '0 0 16px', fontSize: 14, color: 'var(--bad)' }}>
           {error === 'name-required' ? (
             <L en="The event name is required in both languages." ar="اسم الفعالية مطلوب باللغتين." />
+          ) : error === 'arabic-name' ? (
+            <L en="Write the Arabic event name in Arabic letters only." ar="اكتبوا اسم الفعالية بالعربية بأحرف عربية فقط." />
           ) : error === 'site' ? (
             <L en="The chosen site is not a registered facility/site. Choose a site from the list." ar="الموقع المختار ليس منشأة/موقعاً مسجّلاً. اختاروا موقعاً من القائمة." />
           ) : error === 'certification-required' ? (

@@ -28,6 +28,9 @@ export interface Domain {
   readonly number: number;
   readonly en: string;
   readonly ar: string;
+  /** One plain line under the question saying what it asks (product copy, not the instrument's text). */
+  readonly leadEn: string;
+  readonly leadAr: string;
   readonly noteEn: string;
   readonly noteAr: string;
   readonly options: readonly DomainOption[];
@@ -58,6 +61,8 @@ export const DOMAINS: readonly Domain[] = domainsJson.domains.map((d) => ({
   number: d.number,
   en: d.en,
   ar: d.ar,
+  leadEn: d.leadEn,
+  leadAr: d.leadAr,
   noteEn: d.noteEn,
   noteAr: d.noteAr,
   options: d.options.map((o) => ({
@@ -68,6 +73,18 @@ export const DOMAINS: readonly Domain[] = domainsJson.domains.map((d) => ({
 }));
 
 export const DOMAIN_COUNT: number = domainsJson.domainCount;
+
+/**
+ * Domain 1's answer from the one attendance figure (owner, 10 October 2026): the option whose
+ * lowest attendance the figure reaches. The figure the minimum conditions read and the band the
+ * score reads come from the same number, so they cannot disagree. Null while no figure is entered.
+ */
+export function attendanceBandScore(attendance: number | null): 0 | 1 | 2 | null {
+  if (attendance === null || !Number.isFinite(attendance) || attendance < 0) return null;
+  let score: 0 | 1 | 2 | null = null;
+  for (const b of domainsJson.attendanceBands) if (attendance >= b.min) score = b.score as 0 | 1 | 2;
+  return score;
+}
 
 /** Which issue of the instrument scores assessments; stamped onto every assessment row. */
 export const NEHRAT_TOOL_VERSION: string = domainsJson.toolVersion;

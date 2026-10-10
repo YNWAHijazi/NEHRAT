@@ -11,6 +11,7 @@ import { facilityPersons } from '../lib/queries';
  */
 
 import { TRANSPORT_FACILITY_TYPES, facilityIncidentError } from '../lib/rules/facility-intake';
+import { isArabicName } from '../lib/rules/event-labels';
 import { categoryApplicabilityMode, siteApplicability, siteRecordLocked } from '../lib/rules/site';
 import { siteStatusFacts } from '../lib/site-registration';
 import { readMapPoint } from '../lib/rules/geolocation';
@@ -427,6 +428,8 @@ export async function createEventAction(payload: AssessmentSubmission): Promise<
   if (!payload.nameEn.trim() || !payload.nameAr.trim()) {
     return { error: 'name-required' };
   }
+  // The Arabic name holds Arabic letters only (owner, 10 October 2026).
+  if (!isArabicName(payload.nameAr)) return { error: 'arabic-name' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(payload.endDate) || payload.endDate < payload.startDate) {
     return { error: 'dates-required' };
   }
@@ -492,6 +495,8 @@ export async function updateDraftEventAction(eventId: string, payload: Assessmen
   if (!payload.nameEn.trim() || !payload.nameAr.trim()) {
     return { error: 'name-required' };
   }
+  // The Arabic name holds Arabic letters only (owner, 10 October 2026).
+  if (!isArabicName(payload.nameAr)) return { error: 'arabic-name' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(payload.endDate) || payload.endDate < payload.startDate) {
     return { error: 'dates-required' };
   }
@@ -1865,6 +1870,7 @@ export async function editEventDetailsAction(eventId: string, formData: FormData
   const venueRoute = String(formData.get('venueRoute') ?? '').trim();
   const municipalities = String(formData.get('municipalities') ?? '').trim();
   if (!nameEn || !nameAr || !startDate || !endDate) redirect(`/events/${eventId}/edit?error=required`);
+  if (!isArabicName(nameAr)) redirect(`/events/${eventId}/edit?error=arabic-name`);
   // The registered Facility/Site the event is linked to, set from the location field; the
   // field's absence from the form leaves the stored link as it is.
   let siteId: string | null | undefined;

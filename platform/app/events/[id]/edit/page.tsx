@@ -58,6 +58,11 @@ export default async function EditEventPage({
               <L en="Both names and both dates are required." ar="الاسمان والتاريخان مطلوبة جميعاً." />
             </div>
           ) : null}
+          {error === 'arabic-name' ? (
+            <div role="alert" style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
+              <L en="Write the Arabic event name in Arabic letters only." ar="اكتبوا اسم الفعالية بالعربية بأحرف عربية فقط." />
+            </div>
+          ) : null}
           {error === 'site' ? (
             <div role="alert" style={{ padding: '16px 22px', border: '1px solid var(--bad)', background: 'var(--bad-soft)', borderRadius: 12, marginBlockEnd: 24, fontSize: 15 }}>
               <L en="The chosen site is not a registered facility/site. Choose a site from the list." ar="الموقع المختار ليس منشأة/موقعاً مسجّلاً. اختاروا موقعاً من القائمة." />
