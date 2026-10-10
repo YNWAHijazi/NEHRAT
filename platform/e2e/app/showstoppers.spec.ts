@@ -130,13 +130,19 @@ test.describe('showstopper 4 — a revision outcome reopens the submission', () 
 });
 
 test.describe('showstopper 3 — the 24-hour notification lives on its own route', () => {
-  test('notification closes 24 hours after the event ends', async ({ page }) => {
+  test('a late notification is accepted and marked late (owner decision D6, 10 October 2026)', async ({ page }) => {
     await signInAs(page, 'test_organizer');
-    // September 26 owner rule: a concluded event can no longer accept late notifications.
+    // A concluded event still takes a notice: the 24 hours run from the occurrence, and a
+    // deadline does not authorize refusing a late report. The September 26 lock is withdrawn.
     await gotoRidingRestarts(page, '/events/EV-0244/incident');
-    await expect(page.locator('body')).toContainText('Closed — more than 24 hours have passed since the event ended.');
-    await expect(page.locator('input[name="occurredAt"]')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Notify the Ministry', exact: true })).toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('Closed — more than 24 hours have passed');
+    await expect(page.locator('body')).toContainText('a late notice is accepted and marked late');
+    const start = /\d{4}-\d{2}-\d{2}/.exec((await page.locator('main').innerText()))![0];
+    await page.locator('input[name="incidentType"][value="major"]').check();
+    await page.locator('input[name="occurredAt"]').fill(`${start}T10:00`);
+    await page.getByRole('button', { name: 'Notify the Ministry', exact: true }).click();
+    await page.waitForURL(/notice=notified/);
+    await expect(page.locator('[data-incident-late]').first()).toContainText('Late — notified');
   });
 
   test('before the event starts, the control is a reason, not a form', async ({ page }) => {
