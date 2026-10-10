@@ -18,6 +18,7 @@ import { facilityRegistrationFacts } from '../lib/facility-registration';
 import { facilityReadyToSubmit, facilityRecordMode } from '../lib/rules/facility-workflow';
 import { CORRECTIVE_RESPONSE_TYPE, evidenceTypes, isIsoDate, siteMaySubmit, siteRecordLocked } from '../lib/rules/site';
 import { can } from '../lib/rules/ministry';
+import { isSiteChangeAspect, siteChangeMode } from '../lib/rules/site-changes';
 import { refuseUpload } from '../lib/rules/uploads';
 
 type Owner = { accountId: number; isDemo: boolean };
@@ -191,4 +192,43 @@ export async function respondToSiteRequestAction(facilityId: string, requestId: 
   } catch (error) { db.exec('ROLLBACK'); throw error; }
   revalidatePath(`/facilities/${facilityId}`);
   redirect(`/facilities/${facilityId}?tab=history&notice=response#request-${requestId}`);
+}
+
+/**
+ * ASK TO CHANGE A FILED REGISTRATION (owner, 10 October 2026): while the Ministry holds it,
+ * the record is read-only, so the operator says what needs to change and why. The reviewers
+ * are notified; the Ministry reopens the registration for the change, or answers it. Before a
+ * filing and after acceptance there is nothing to ask -- the change is made directly.
+ */
+export async function requestSiteChangeAction(facilityId: string, formData: FormData): Promise<void> {
+  const o = await owner(facilityId);
+  const facts = facilityRegistrationFacts(facilityId);
+  if (siteChangeMode(facts) !== 'request') redirect(`/facilities/${facilityId}/change`);
+  const aspects = [...new Set(formData.getAll('aspect').map(String))].filter(isSiteChangeAspect);
+  const description = String(formData.get('description') ?? '').trim();
+  if (aspects.length === 0 || !description) redirect(`/facilities/${facilityId}/change?error=${aspects.length === 0 ? 'aspect' : 'description'}`);
+  const db = getDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const latest = db.prepare('SELECT id FROM facility_submissions WHERE facility_id = ? ORDER BY version DESC LIMIT 1').get(facilityId) as { id: number } | undefined;
+    db.prepare(`INSERT INTO facility_change_requests (facility_id, submission_id, aspects, description, requested_by, requested_at, is_demo)
+                VALUES (?, ?, ?, ?, ?, now_stamp(), ?)`)
+      .run(facilityId, latest?.id ?? null, JSON.stringify(aspects), description, o.accountId, o.isDemo ? 1 : 0);
+    const site = db.prepare('SELECT site_id, name_en, name_ar FROM facilities WHERE id = ?').get(facilityId) as { site_id: string | null; name_en: string; name_ar: string };
+    const ref = site.site_id ?? facilityId;
+    const reviewers = db.prepare('SELECT id, role FROM accounts WHERE is_demo = ?').all(o.isDemo ? 1 : 0) as unknown as { id: number; role: string }[];
+    for (const r of reviewers) {
+      if (!can(r.role, 'recordCorrective')) continue;
+      db.prepare(`INSERT INTO notifications (account_id, kind, subject_en, subject_ar, body_en, body_ar, record_route, sent_at, is_demo)
+                  VALUES (?, 'needs_action', ?, ?, ?, ?, ?, now_stamp(), ?)`)
+        .run(r.id, `Change requested on a filed site: ${ref}`, `طلب تغيير على موقع مقدَّم: ${ref}`,
+          `${site.name_en} asks to change its filed registration: ${description}`,
+          `تطلب ${site.name_ar || site.name_en} تغيير تسجيلها المقدَّم: ${description}`,
+          `/ministry/facilities/${facilityId}#change-requests`, o.isDemo ? 1 : 0);
+    }
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
+  revalidatePath(`/facilities/${facilityId}`);
+  revalidatePath(`/ministry/facilities/${facilityId}`);
+  redirect(`/facilities/${facilityId}/change?notice=requested`);
 }

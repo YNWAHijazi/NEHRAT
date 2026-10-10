@@ -17,15 +17,16 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
 import { getDb } from '../lib/db';
 import { registerFacilityAction, saveFacilityDeviceAction, saveFacilityProfileAction, saveFacilityPlanAction, submitFacilityIncidentAction } from '../app/actions';
-import { addSiteEvidenceAction, respondToSiteRequestAction, saveSiteInfrastructureAction, submitSiteRegistrationAction } from '../app/site-actions';
+import { addSiteEvidenceAction, requestSiteChangeAction, respondToSiteRequestAction, saveSiteInfrastructureAction, submitSiteRegistrationAction } from '../app/site-actions';
 import {
   acceptSiteRegistrationAction, closeSiteCorrectiveAction, recordSiteOutcomeAction, raiseSiteCorrectiveAction, recordSiteDesignationAction,
-  recordSiteInspectionAction, requestSiteInformationAction, startSiteReviewAction,
+  recordSiteInspectionAction, requestSiteInformationAction, startSiteReviewAction, reopenSiteForChangeAction, answerSiteChangeAction,
 } from '../app/ministry-site-actions';
 import { facilityRegistrationFacts } from '../lib/facility-registration';
 import { facilityAedStatus } from '../lib/facility-gis';
 import { facilityInfrastructure } from '../lib/site-infrastructure';
-import { siteEventsFor, siteRequests, siteReviewQueue, siteStatusFor, siteSubmissionSnapshot, siteSubmissions } from '../lib/site-registration';
+import { siteChangeRequests, siteChanges, siteEventsFor, siteRequests, siteReviewQueue, siteStatusFor, siteSubmissionSnapshot, siteSubmissions } from '../lib/site-registration';
+import { siteChangeHref, siteChangeMode } from '../lib/rules/site-changes';
 import {
   eventVenueThreshold, siteApplicability, siteOperatorStatusLabel, siteRecordLocked, siteReviewActions, siteStatus, siteSubmissionSummary, siteTabFor, type SiteSubmissionFacts,
 } from '../lib/rules/site';
@@ -350,5 +351,102 @@ describe('saving without the pin, and saying why a save was refused (owner, 10 O
     expect(siteOperatorStatusLabel('underReview')).toEqual({ en: 'In process', ar: 'قيد المعالجة' });
     expect(siteOperatorStatusLabel('informationRequired').en).toBe('More information needed');
     expect(siteOperatorStatusLabel('readinessCurrent').en).toBe('Readiness current');
+  });
+});
+
+describe('changing a site after it is filed (owner, 10 October 2026)', () => {
+  const name = 'Change test pool';
+  let id = '';
+  const aed = { purpose: 'initial', identification: 'POOL-1', location: 'Pool deck', accessibleHours: 'yes', publiclyAccessible: 'yes', pediatric: 'na', operational: 'yes', representative: 'Duty manager', separatePin: 'no' };
+  const ticks = { check_trained: 'on', check_signage: 'on', check_access: 'on', check_routes: 'on', check_staffKnow: 'on', check_drill: 'on' };
+
+  it('decides how a change is made from where the registration stands', () => {
+    expect(siteChangeMode({ status: 'inPreparation', everAccepted: false, archived: false })).toBe('direct');
+    expect(siteChangeMode({ status: 'submitted', everAccepted: false, archived: false })).toBe('request');
+    expect(siteChangeMode({ status: 'underReview', everAccepted: false, archived: false })).toBe('request');
+    expect(siteChangeMode({ status: 'informationRequired', everAccepted: false, archived: false })).toBe('direct');
+    expect(siteChangeMode({ status: 'readinessCurrent', everAccepted: true, archived: false })).toBe('direct');
+    expect(siteChangeMode({ status: 'underReview', everAccepted: true, archived: false })).toBe('direct');
+    expect(siteChangeMode({ status: 'noLongerCovered', everAccepted: true, archived: true })).toBe('none');
+    expect(siteChangeHref('aedAdd', 'FC-1', false)).toBe('/facilities/FC-1?step=aeds#aeds');
+    expect(siteChangeHref('aedAdd', 'FC-1', true)).toBe('/facilities/FC-1?tab=aeds#aeds');
+    expect(siteChangeHref('contact', 'FC-1', true)).toBe('/facilities/FC-1/profile#contact');
+  });
+
+  it('while the Ministry holds the filing, the operator asks; the Ministry reopens it for the change', async () => {
+    as('test_organizer');
+    await expect(registerFacilityAction(data({ ...profile, name, category: 'sports' }))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);
+    id = idOf(name);
+    // Before filing, nothing is asked: the change is made directly.
+    await expect(requestSiteChangeAction(id, data({ aspect: 'aedAdd', description: 'x' }))).rejects.toThrow(`redirect:/facilities/${id}/change`);
+    await expect(saveFacilityDeviceAction(id, data(aed))).rejects.toThrow('notice=saved');
+    await expect(saveFacilityPlanAction(id, data({ ...ticks, drillDate: '2026-08-01', representative: 'Duty manager' }))).rejects.toThrow('notice=confirmed');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow(`redirect:/facilities/${id}/acknowledgment`);
+    // Filed and read-only: an AED cannot be added directly...
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, identification: 'POOL-2' }))).rejects.toThrow('error=locked');
+    // ...so it is asked for: what and why, both required.
+    await expect(requestSiteChangeAction(id, data({ description: 'A second AED' }))).rejects.toThrow('error=aspect');
+    await expect(requestSiteChangeAction(id, data({ aspect: 'aedAdd' }))).rejects.toThrow('error=description');
+    const form = data({ description: 'A second AED was installed at the gym entrance.' });
+    form.append('aspect', 'aedAdd'); form.append('aspect', 'nonsense');
+    await expect(requestSiteChangeAction(id, form)).rejects.toThrow(`redirect:/facilities/${id}/change?notice=requested`);
+    expect(siteChangeRequests(id)[0]).toMatchObject({ aspects: ['aedAdd'], status: 'open', description: 'A second AED was installed at the gym entrance.' });
+    // The reviewers are told, with the way to the request.
+    expect((getDb().prepare(`SELECT COUNT(*) AS n FROM notifications WHERE record_route = ?`).get(`/ministry/facilities/${id}#change-requests`) as { n: number }).n).toBeGreaterThan(0);
+
+    // The Ministry reopens it for the change: the registration is open again, as for a correction.
+    as('test_moph');
+    const requestId = siteChangeRequests(id)[0]!.id;
+    await expect(reopenSiteForChangeAction(id, requestId, data({ note: 'Add it and resubmit.' }))).rejects.toThrow('notice=change-reopened');
+    expect(siteStatusFor(id)).toBe('informationRequired');
+    expect(siteChangeRequests(id)[0]).toMatchObject({ status: 'reopened', answer: 'Add it and resubmit.' });
+    expect(siteRequests(id).find((r) => r.status === 'open')!.bodyEn).toContain('A second AED was installed at the gym entrance.');
+    // A request already answered cannot be answered again.
+    await expect(answerSiteChangeAction(id, requestId, data({ answer: 'Again' }))).rejects.toThrow('error=change');
+
+    // The operator adds the AED and submits version 2.
+    as('test_organizer');
+    expect(facilityRegistrationFacts(id).locked).toBe(false);
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, identification: 'POOL-2', location: 'Gym entrance' }))).rejects.toThrow('notice=saved');
+    // A new AED changes the plan, so the readiness confirmation is recorded again before resubmitting.
+    expect(facilityRegistrationFacts(id).confirmationCurrent).toBe(false);
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow('error=submit');
+    await expect(saveFacilityPlanAction(id, data({ ...ticks, drillDate: '2026-08-01', representative: 'Duty manager' }))).rejects.toThrow('notice=confirmed');
+    await expect(submitSiteRegistrationAction(id, declared())).rejects.toThrow(`redirect:/facilities/${id}/acknowledgment`);
+    expect(siteSubmissions(id).map((s) => s.version)).toContain(2);
+    expect(facilityRegistrationFacts(id).deviceCount).toBe(2);
+  });
+
+  it('or the Ministry answers without reopening, and the answer is required', async () => {
+    as('test_organizer');
+    const form = data({ description: 'The contact is changing next month.' });
+    form.append('aspect', 'contact');
+    await expect(requestSiteChangeAction(id, form)).rejects.toThrow('notice=requested');
+    as('test_moph');
+    const requestId = siteChangeRequests(id)[0]!.id;
+    await expect(answerSiteChangeAction(id, requestId, data({ answer: '' }))).rejects.toThrow('error=change-answer');
+    await expect(answerSiteChangeAction(id, requestId, data({ answer: 'Update the contact once the review is complete.' }))).rejects.toThrow('notice=change-answered');
+    expect(siteChangeRequests(id)[0]).toMatchObject({ status: 'answered', answer: 'Update the contact once the review is complete.' });
+    expect(siteStatusFor(id)).toBe('submitted');
+  });
+
+  it('records an AED readiness check with its dates, and an AED not in order is not ready', async () => {
+    as('test_moph');
+    await expect(acceptSiteRegistrationAction(id, data({}))).rejects.toThrow('notice=accepted');
+    as('test_organizer');
+    const check = { purpose: 'readinessCheck', label: 'AED-001', checkDate: '2026-08-10', padExpiry: '2027-03-01', batteryExpiry: '', operational: 'yes', padsOk: 'yes', batteryOk: 'yes', signageOk: 'yes', representative: 'Duty manager' };
+    await expect(saveFacilityDeviceAction(id, data({ ...check, checkDate: '2026-08-20' }))).rejects.toThrow('error=details-check-date');
+    await expect(saveFacilityDeviceAction(id, data({ ...check, padExpiry: '' }))).rejects.toThrow('error=details-pad-expiry');
+    await expect(saveFacilityDeviceAction(id, data({ ...check, batteryExpiry: 'soon' }))).rejects.toThrow('error=details-battery');
+    await expect(saveFacilityDeviceAction(id, data(check))).rejects.toThrow('notice=saved');
+    const row = getDb().prepare('SELECT latest_check, pad_expiry, operational FROM facility_devices WHERE facility_id = ? AND label = ?').get(id, 'AED-001');
+    expect(row).toMatchObject({ latest_check: '2026-08-10', pad_expiry: '2027-03-01', operational: 1 });
+    // Pads missing: recorded as not ready.
+    await expect(saveFacilityDeviceAction(id, data({ ...check, padsOk: 'no' }))).rejects.toThrow('notice=saved');
+    expect(getDb().prepare('SELECT operational FROM facility_devices WHERE facility_id = ? AND label = ?').get(id, 'AED-001')).toMatchObject({ operational: 0 });
+    expect(facilityRegistrationFacts(id).devicesNotReady).toBe(1);
+    // The check is in the site's history.
+    expect(siteChanges(id).some((c) => c.en === 'AED readiness check recorded')).toBe(true);
+    expect(siteChanges(id).some((c) => c.en === 'Change requested from the Ministry')).toBe(true);
   });
 });

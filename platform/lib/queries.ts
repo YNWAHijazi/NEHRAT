@@ -585,7 +585,7 @@ export interface FacilityDevice {
   accessibleHours: boolean; publiclyAccessible: boolean;
   pediatric: 'yes' | 'no' | 'na';
   operational: boolean;
-  /** Historical only: dates recorded before the lean AED form (partner audit, 2026-10-08). Never collected now. */
+  /** The readiness dates (PAD Annex C), recorded by a readiness check after registration -- not on the lean registration form (partner audit, 2026-10-08; owner, 10 October 2026). */
   padExpiry: string | null; batteryExpiry: string | null; latestCheck: string | null;
   /** A photo of the installed AED is stored for this device. */
   hasPhoto: boolean;

@@ -1090,7 +1090,7 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
   const yes = (k: string): number => (formData.get(k) === 'yes' ? 1 : 0);
   let label = s('label');
   const device = db.prepare('SELECT * FROM facility_devices WHERE facility_id=? AND label=?').get(facilityId,label);
-  const allowed = ['initial','relocation','replacement','statusChange','accessibility','ministryUpdate'];
+  const allowed = ['initial','readinessCheck','relocation','replacement','statusChange','accessibility','ministryUpdate'];
   const point = readMapPoint(formData, 'aedMap');
   // Each refusal names the field (owner, 10 October 2026: "it didn't tell me what's wrong").
   // The site's own pin is not needed to record an AED: one without a separate pin takes the
@@ -1099,6 +1099,15 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
   if (['initial','replacement','ministryUpdate'].includes(purpose) && !s('identification')) return 'details-identification';
   if (['initial','relocation','ministryUpdate'].includes(purpose) && !s('location')) return 'details-location';
   if (s('separatePin') === 'yes' && !point) return 'details-pin';
+  // THE READINESS CHECK AND MAINTENANCE (PAD Annex C, "Readiness" and "Readiness dates"; owner,
+  // 10 October 2026): the date of the check, not in the future; the electrode-pad expiry; the
+  // battery date where it is available.
+  const iso = (v: string) => /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v;
+  if (purpose === 'readinessCheck') {
+    if (!iso(s('checkDate')) || s('checkDate') > beirutToday()) return 'details-check-date';
+    if (!iso(s('padExpiry'))) return 'details-pad-expiry';
+    if (s('batteryExpiry') && !iso(s('batteryExpiry'))) return 'details-battery';
+  }
   if (!s('representative')) return 'details-representative';
   // The photo is checked BEFORE anything is written: a refused file must not leave a
   // half-saved record behind it. The server enforces the same allow-list the picker does.
@@ -1142,6 +1151,13 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
     db.prepare('UPDATE facility_devices SET identification=?,location_en=?,location_ar=?,operational=?,accessible_hours=?,publicly_accessible=?,updated_at=now_stamp() WHERE facility_id=? AND label=?').run(s('identification'),s('location'),s('location'),yes('operational'),yes('accessibleHours'),yes('publiclyAccessible'),facilityId,label);
   } else if (purpose === 'accessibility') {
     db.prepare('UPDATE facility_devices SET accessible_hours=?, publicly_accessible=?, updated_at=now_stamp() WHERE facility_id=? AND label=?').run(yes('accessibleHours'),yes('publiclyAccessible'),facilityId,label);
+  } else if (purpose === 'readinessCheck') {
+    // Not ready if it does not work, or its pads or battery are not in order; signage is recorded with the check.
+    const ready = yes('operational') && yes('padsOk') && yes('batteryOk');
+    db.prepare(
+      `UPDATE facility_devices SET latest_check = ?, pad_expiry = ?, battery_expiry = COALESCE(NULLIF(?, ''), battery_expiry), operational = ?, updated_at = now_stamp()
+       WHERE facility_id = ? AND label = ?`,
+    ).run(s('checkDate'), s('padExpiry'), s('batteryExpiry'), ready ? 1 : 0, facilityId, label);
   } else if (purpose === 'statusChange') {
     db.prepare(
       `UPDATE facility_devices SET operational = ?, accessible_hours = ?, updated_at = now_stamp()
@@ -1165,7 +1181,9 @@ async function storeFacilityDevice(facilityId: string, formData: FormData): Prom
   db.prepare(
     `INSERT INTO facility_device_updates (facility_id, device_label, purpose, representative, reason)
      VALUES (?, ?, ?, ?, NULLIF(?, ''))`,
-  ).run(facilityId, label, purpose, s('representative'), s('reason'));
+  ).run(facilityId, label, purpose, s('representative'),
+    // The check's four answers are kept with it (PAD Annex C "Readiness").
+    purpose === 'readinessCheck' ? JSON.stringify({ operational: yes('operational') === 1, padsOk: yes('padsOk') === 1, batteryOk: yes('batteryOk') === 1, signageOk: yes('signageOk') === 1 }) : s('reason'));
   db.prepare('UPDATE facility_device_updates SET snapshot=? WHERE id=last_insert_rowid()').run(facilitySnapshot(facilityId));
   db.exec('COMMIT');
   } catch (error) { db.exec('ROLLBACK'); throw error; }

@@ -5,6 +5,7 @@ import { derivedLevelFor, facilityLedgerFor, facilityPlanConfirmation } from './
 import { facilityInfrastructure, saveFacilityInfrastructure, type SiteInfrastructureAnswers } from './site-infrastructure';
 import { demonstrationFilter } from './rules/scope';
 import type { Level } from './rules/types';
+import { isSiteChangeAspect, type SiteChangeAspectKey, type SiteChangeRequestStatus } from './rules/site-changes';
 import {
   siteApplicability,
   siteEventStage,
@@ -372,10 +373,40 @@ export function siteChanges(facilityId: string): SiteHistoryEntry[] {
   const purposes = new Map<string, { en: string; ar: string }>([
     ['initial', { en: 'AED registered', ar: 'سُجّل جهاز' }], ['relocation', { en: 'AED relocated', ar: 'نُقل جهاز' }],
     ['replacement', { en: 'AED replaced', ar: 'استُبدل جهاز' }], ['statusChange', { en: 'AED operational status changed', ar: 'تغيّرت الحالة التشغيلية لجهاز' }],
+    ['readinessCheck', { en: 'AED readiness check recorded', ar: 'سُجّل فحص جاهزية جهاز' }],
     ['accessibility', { en: 'AED accessibility changed', ar: 'تغيّرت إمكانية الوصول إلى جهاز' }], ['ministryUpdate', { en: 'AED updated at the Ministry’s request', ar: 'حُدّث جهاز بطلب من الوزارة' }],
   ]);
   return [
     ...profile.map((p) => ({ at: p.created_at, en: 'Site details or contact saved', ar: 'حُفظت تفاصيل الموقع أو جهة الاتصال', detail: p.who })),
     ...devices.map((u) => ({ at: u.created_at, ...(purposes.get(u.purpose) ?? { en: 'AED record updated', ar: 'حُدّث سجل جهاز' }), detail: `${u.device_label} · ${u.representative}` })),
+    // Changes asked for while the Ministry held the filing (lib/rules/site-changes.ts).
+    ...(d.prepare('SELECT requested_at, description FROM facility_change_requests WHERE facility_id = ?').all(facilityId) as unknown as { requested_at: string; description: string }[])
+      .map((c) => ({ at: c.requested_at, en: 'Change requested from the Ministry', ar: 'طُلب تغيير من الوزارة', detail: c.description })),
   ].sort((a, b) => b.at.localeCompare(a.at));
+}
+
+export interface SiteChangeRequest {
+  id: number;
+  aspects: SiteChangeAspectKey[];
+  description: string;
+  status: SiteChangeRequestStatus;
+  answer: string;
+  requestedAt: string;
+  answeredBy: string;
+  answeredAt: string | null;
+}
+
+/** The operator's change requests on a site, newest first (lib/rules/site-changes.ts). */
+export function siteChangeRequests(facilityId: string): SiteChangeRequest[] {
+  const rows = getDb().prepare(`SELECT id, aspects, description, status, answer, requested_at, answered_by, answered_at
+                                FROM facility_change_requests WHERE facility_id = ? ORDER BY id DESC`).all(facilityId) as unknown as
+    { id: number; aspects: string; description: string; status: SiteChangeRequestStatus; answer: string; requested_at: string; answered_by: string; answered_at: string | null }[];
+  return rows.map((r) => {
+    let aspects: string[] = [];
+    try { aspects = JSON.parse(r.aspects) as string[]; } catch { aspects = []; }
+    return {
+      id: r.id, aspects: aspects.filter(isSiteChangeAspect), description: r.description, status: r.status, answer: r.answer,
+      requestedAt: r.requested_at.slice(0, 16), answeredBy: r.answered_by, answeredAt: r.answered_at ? r.answered_at.slice(0, 16) : null,
+    };
+  });
 }

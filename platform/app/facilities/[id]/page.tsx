@@ -207,6 +207,7 @@ export default async function FacilityRecordPage({
         facilityLocation={point}
         deviceLocations={Object.fromEntries(devices.map((d) => { const location = devicePoint(id, d.label); return [d.label, location.separate ? location.point : null]; }))}
         editable={editable}
+        today={today}
       />
       <AedWhereToBuy />
       <VendorDirectoryLink />
@@ -257,6 +258,9 @@ export default async function FacilityRecordPage({
             to={`/facilities/${id}/acknowledgment`}
           />
         ) : null}
+        {/* Reopened by the Ministry: what it asked for, in its own words, above the steps. */}
+        {facts.status === 'informationRequired' ? <OpenRequests id={id} /> : null}
+        <RecordActions id={id} locked={facts.locked} archived={archived} />
         <JumpTo />
         <FeeDue facility={facility} />
         <CategoryRequirements />
@@ -298,7 +302,7 @@ export default async function FacilityRecordPage({
                 {finalReview(true)}
               </TabSection>
             ) : null}
-            {!archived ? <Maintenance id={id} /> : null}
+            {!archived ? <Maintenance id={id} today={today} /> : null}
             <TabSection id="details" titleEn="Site profile and responsible contact" titleAr="ملف الموقع وجهة الاتصال المسؤولة">
               <DetailsCard facility={facility} point={point} editable={!archived} />
               <ContactSummary id={id} contact={contact} editable={!archived} />
@@ -565,6 +569,30 @@ function Overview({ id, facility, siteId, today }: { id: string; facility: Facil
   );
 }
 
+/**
+ * WHAT THE OPERATOR CAN DO WHILE THE REGISTRATION IS PREPARED OR WITH THE MINISTRY (owner,
+ * 10 October 2026). A cardiac-arrest incident is reported at any stage. While the Ministry holds
+ * the filing, the record is read-only, so a change is asked for (lib/rules/site-changes.ts).
+ */
+function RecordActions({ id, locked, archived }: { id: string; locked: boolean; archived: boolean }) {
+  if (archived) return null;
+  const pill: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', minHeight: 44, paddingInline: 16, border: '1px solid var(--line)', borderRadius: 22, fontSize: 14, color: 'var(--ink)', background: 'var(--bg)' };
+  return (
+    <div data-region="record-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBlockEnd: 16 }}>
+      {locked ? (
+        <>
+          <span style={{ fontSize: '14px', color: 'var(--muted)', marginInlineEnd: 4 }}>
+            <L en="Need to change something while the Ministry reviews it?" ar="هل تحتاجون إلى تغيير شيء أثناء مراجعة الوزارة؟" />
+          </span>
+          <Link href={`/facilities/${id}/change`} data-region="ask-change" style={pill}><L en="Ask to change the registration" ar="طلب تغيير التسجيل" /></Link>
+        </>
+      ) : null}
+      {/* Not a change: reported at any stage, so it stands apart at the end of the row. */}
+      <Link href={`/facilities/${id}/incidents/new`} data-region="report-incident" style={{ ...pill, marginInlineStart: 'auto', borderColor: 'var(--bad)' }}><L en="Report a cardiac-arrest incident" ar="الإبلاغ عن حادثة توقف قلب" /></Link>
+    </div>
+  );
+}
+
 /** The Ministry's open requests for information or a correction, as the operator reads them above the resubmission. */
 function OpenRequests({ id }: { id: string }) {
   const open = siteRequests(id).filter((r) => r.status === 'open' && (r.kind === 'information' || r.kind === 'correction'));
@@ -581,32 +609,59 @@ function OpenRequests({ id }: { id: string }) {
 }
 
 /**
- * ONGOING RESPONSIBILITIES (revision section 14): the site is maintained, not re-registered.
- * Each change the revision names, with where it is made. The annual element is the drill.
+ * WHAT THE OPERATOR DOES ONCE THE SITE IS ACCEPTED (revision sections 13-15; owner, 10 October
+ * 2026): the site is maintained, not registered again. Renewal is the yearly drill and readiness
+ * confirmation, by its date; every other change is made directly on the record and kept in its
+ * history; each AED is checked and maintained; a cardiac-arrest incident is reported at any time.
  */
-function Maintenance({ id }: { id: string }) {
-  const items: { en: string; ar: string; href: string }[] = [
-    { en: 'Responsible contact changes', ar: 'تغيّر جهة الاتصال المسؤولة', href: `/facilities/${id}/profile#contact` },
-    { en: 'An AED is added, moved, replaced or becomes non-operational', ar: 'إضافة جهاز أو نقله أو استبداله أو توقفه عن العمل', href: `/facilities/${id}?tab=aeds` },
-    { en: 'EMS access changes', ar: 'تغيّر وصول خدمات الطوارئ الطبية', href: `/facilities/${id}/profile` },
-    { en: 'The location or layout materially changes', ar: 'تغيّر جوهري في الموقع أو المخطط', href: `/facilities/${id}?tab=overview#infrastructure` },
-    { en: 'Operating information changes', ar: 'تغيّر معلومات التشغيل', href: `/facilities/${id}/profile` },
-    { en: 'A readiness deficiency is corrected', ar: 'تصحيح نقص في الجاهزية', href: `/facilities/${id}?tab=history#requests` },
+function Maintenance({ id, today }: { id: string; today: string }) {
+  const renewal = siteRenewalFor(id, today);
+  const windowDays = publishedCycles().lapseWindowDays;
+  const groups: { key: string; en: string; ar: string; items: { key: string; en: string; ar: string; href: string }[] }[] = [
+    { key: 'routine', en: 'Routine', ar: 'الأعمال الدورية', items: [
+      { key: 'drill', en: 'Record the annual drill and readiness confirmation', ar: 'تسجيل التمرين السنوي وتأكيد الجاهزية', href: `/facilities/${id}?tab=readiness#confirmation` },
+      { key: 'check', en: 'Record an AED readiness check or maintenance', ar: 'تسجيل فحص جاهزية جهاز أو صيانته', href: `/facilities/${id}?tab=aeds#aeds` },
+    ] },
+    { key: 'changes', en: 'When something changes', ar: 'عند حدوث تغيير', items: [
+      { key: 'aedAdd', en: 'Add an AED', ar: 'إضافة جهاز إزالة رجفان', href: `/facilities/${id}?tab=aeds#aeds` },
+      { key: 'aedChange', en: 'An AED is moved, replaced or out of service', ar: 'نقل جهاز أو استبداله أو توقفه عن العمل', href: `/facilities/${id}?tab=aeds#aeds` },
+      { key: 'contact', en: 'The responsible contact changes', ar: 'تغيّر جهة الاتصال المسؤولة', href: `/facilities/${id}/profile#contact` },
+      { key: 'details', en: 'EMS access or operating information changes', ar: 'تغيّر وصول خدمات الطوارئ الطبية أو معلومات التشغيل', href: `/facilities/${id}/profile` },
+      { key: 'layout', en: 'The location or layout materially changes', ar: 'تغيّر جوهري في الموقع أو المخطط', href: `/facilities/${id}?tab=overview#infrastructure` },
+      { key: 'corrected', en: 'A readiness deficiency is corrected', ar: 'تصحيح نقص في الجاهزية', href: `/facilities/${id}?tab=history#requests` },
+    ] },
+    { key: 'urgent', en: 'At any time', ar: 'في أي وقت', items: [
+      { key: 'incident', en: 'Report a cardiac-arrest incident', ar: 'الإبلاغ عن حادثة توقف قلب', href: `/facilities/${id}/incidents/new` },
+    ] },
   ];
   return (
-    <TabSection id="maintenance" titleEn="Keep the site record current" titleAr="الحفاظ على تحديث سجل الموقع">
-      <p style={{ margin: '0 0 12px', fontSize: '14.5px', lineHeight: 1.6, maxWidth: '76ch' }}>
-        <L en="The site is not registered again each year. Update the record when any of these change; the annual element is the practical cardiac-emergency drill." ar="لا يُعاد تسجيل الموقع كل عام. حدّثوا السجل عند تغيّر أي مما يلي؛ والعنصر السنوي هو التمرين العملي على طوارئ توقف القلب." />
+    <TabSection id="maintenance" titleEn="What you can do on this site" titleAr="ما يمكنكم القيام به في هذا الموقع">
+      <p data-region="renewal-explained" style={{ margin: '0 0 14px', fontSize: '14.5px', lineHeight: 1.6, maxWidth: '76ch' }}>
+        <L en="The site is not registered again each year. Renewal is the practical cardiac-emergency drill and the readiness confirmation, recorded at least once a year." ar="لا يُعاد تسجيل الموقع كل عام. التجديد هو التمرين العملي على طوارئ توقف القلب وتأكيد الجاهزية، ويُسجَّلان مرة واحدة سنوياً على الأقل." />
+        {renewal.dueDate ? (
+          <>{' '}<L
+            en={`Next due by ${renewal.dueDate}. The site reads Expiring soon from ${windowDays} days before that date, and Expired after it until both are recorded.`}
+            ar={`الموعد التالي في موعد أقصاه ⁦${renewal.dueDate}⁩. ويظهر الموقع «تنتهي قريباً» قبل ${windowDays} يوماً من هذا التاريخ، و«منتهية» بعده إلى أن يُسجَّلا.`}
+          /></>
+        ) : null}
+        {' '}<L en="Every other change is made on the record directly and kept in the site’s history, which the Ministry sees." ar="ويُجرى كل تغيير آخر على السجل مباشرة ويُحفظ في سجل الموقع الذي تطّلع عليه الوزارة." />
       </p>
-      <ul data-region="maintenance" style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: 8 }}>
-        {items.map((i) => (
-          <li key={i.href + i.en}>
-            <Link href={i.href} style={{ display: 'flex', alignItems: 'center', minHeight: 44, padding: '8px 14px', border: '1px solid var(--line)', borderRadius: 10, fontSize: '14px', color: 'var(--ink)', background: 'var(--bg)' }}>
-              <L en={i.en} ar={i.ar} />
-            </Link>
-          </li>
+      <div data-region="maintenance" style={{ display: 'grid', gap: 14 }}>
+        {groups.map((g) => (
+          <div key={g.key} data-maintenance-group={g.key}>
+            <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 8 }}><L en={g.en} ar={g.ar} /></div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: 8 }}>
+              {g.items.map((i) => (
+                <li key={i.key}>
+                  <Link href={i.href} data-maintenance={i.key} style={{ display: 'flex', alignItems: 'center', minHeight: 44, padding: '8px 14px', border: `1px solid ${g.key === 'urgent' ? 'var(--bad)' : 'var(--line)'}`, borderRadius: 10, fontSize: '14px', color: 'var(--ink)', background: 'var(--bg)' }}>
+                    <L en={i.en} ar={i.ar} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </ul>
+      </div>
     </TabSection>
   );
 }

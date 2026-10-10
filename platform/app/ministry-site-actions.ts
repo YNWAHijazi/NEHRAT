@@ -207,3 +207,61 @@ export async function recordSiteOutcomeAction(facilityId: string, formData: Form
   request.set('body', note);
   return requestSiteInformationAction(facilityId, request);
 }
+
+/** An open change request on this site, inside the actor's boundary, or a refusal. */
+function openChangeRequest(site: Site, requestId: number): { id: number; description: string } {
+  const r = getDb().prepare(`SELECT id, description FROM facility_change_requests WHERE id = ? AND facility_id = ? AND status = 'open'`).get(requestId, site.id) as
+    { id: number; description: string } | undefined;
+  if (!r) redirect(`/ministry/facilities/${site.id}?error=change#change-requests`);
+  return r;
+}
+
+/**
+ * REOPEN THE REGISTRATION FOR THE OPERATOR'S CHANGE (owner, 10 October 2026). The same act as a
+ * correction request, so the record opens exactly as it does for one: the operator makes the
+ * change and submits the updated registration as a new version.
+ */
+export async function reopenSiteForChangeAction(facilityId: string, requestId: number, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordCorrective');
+  const site = siteFor(actor, facilityId);
+  const request = openChangeRequest(site, requestId);
+  if (!siteReviewActions(siteStatusFacts(site.id)).request) redirect(`/ministry/facilities/${site.id}?error=act#change-requests`);
+  const note = String(formData.get('note') ?? '').trim();
+  const body = `Reopened at your request so you can make this change: ${request.description}${note ? ` — ${note}` : ''}`;
+  const bodyAr = `أُعيد فتحه بناءً على طلبكم لإجراء هذا التغيير: ${request.description}${note ? ` — ${note}` : ''}`;
+  const db = getDb();
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    recordAct(site, actor, 'correctionRequested', body);
+    db.prepare(`INSERT INTO facility_requests (facility_id, body_en, body_ar, status, raised_by, kind, submission_id, created_at, is_demo)
+                VALUES (?, ?, ?, 'open', ?, 'correction', ?, now_stamp(), ?)`)
+      .run(site.id, body, bodyAr, actor.displayName, latestSubmissionId(site.id), site.isDemo);
+    db.prepare(`UPDATE facility_change_requests SET status = 'reopened', answer = ?, answered_by = ?, answered_at = now_stamp() WHERE id = ?`)
+      .run(note, actor.displayName, request.id);
+    notify(site, 'needs_action', `Registration reopened for your change — ${site.nameEn}`, `أُعيد فتح التسجيل لإجراء تغييركم — ${site.nameAr}`,
+      `The Ministry reopened the registration so you can make the change you asked for: ${request.description} Make the change, then submit the updated registration.`,
+      `أعادت الوزارة فتح التسجيل لتتمكنوا من إجراء التغيير الذي طلبتموه: ${request.description} أجروا التغيير ثم قدّموا التسجيل المحدَّث.`,
+      `/facilities/${site.id}`);
+    db.exec('COMMIT');
+  } catch (error) { db.exec('ROLLBACK'); throw error; }
+  done(site.id, 'change-reopened');
+}
+
+/**
+ * Answer the change request without reopening -- for example, the change can be made once the
+ * review is complete. The answer is required: the operator is told why nothing reopened.
+ */
+export async function answerSiteChangeAction(facilityId: string, requestId: number, formData: FormData): Promise<void> {
+  const actor = await requireMinistry('recordCorrective');
+  const site = siteFor(actor, facilityId);
+  const request = openChangeRequest(site, requestId);
+  const answer = String(formData.get('answer') ?? '').trim();
+  if (!answer) redirect(`/ministry/facilities/${site.id}?error=change-answer#change-requests`);
+  getDb().prepare(`UPDATE facility_change_requests SET status = 'answered', answer = ?, answered_by = ?, answered_at = now_stamp() WHERE id = ?`)
+    .run(answer, actor.displayName, request.id);
+  notify(site, 'for_information', `The Ministry answered your change request — ${site.nameEn}`, `أجابت الوزارة عن طلب التغيير — ${site.nameAr}`,
+    `Your request: ${request.description} The Ministry's answer: ${answer}`,
+    `طلبكم: ${request.description} جواب الوزارة: ${answer}`,
+    `/facilities/${site.id}/change`);
+  done(site.id, 'change-answered');
+}

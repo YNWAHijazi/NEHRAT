@@ -1413,6 +1413,22 @@ function migrateSiteRegistration(d: DatabaseSync, addColumn: (table: string, col
   // The declaration signed on submission, as on the event's and the venue's.
   addColumn('facility_submissions', 'representative', "representative TEXT NOT NULL DEFAULT ''");
   addColumn('facility_submissions', 'position', "position TEXT NOT NULL DEFAULT ''");
+  // A change the operator asks to make while the Ministry holds the filing (owner, 10 October
+  // 2026): what and why. The Ministry reopens the registration for it, or answers it.
+  d.exec(`CREATE TABLE IF NOT EXISTS facility_change_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    facility_id TEXT NOT NULL REFERENCES facilities(id),
+    submission_id INTEGER REFERENCES facility_submissions(id),
+    aspects TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','reopened','answered')),
+    answer TEXT NOT NULL DEFAULT '',
+    requested_by INTEGER REFERENCES accounts(id),
+    requested_at TEXT NOT NULL,
+    answered_by TEXT NOT NULL DEFAULT '',
+    answered_at TEXT,
+    is_demo INTEGER NOT NULL DEFAULT 0
+  ); CREATE INDEX IF NOT EXISTS facility_change_requests_facility ON facility_change_requests(facility_id, id);`);
 }
 
 /**

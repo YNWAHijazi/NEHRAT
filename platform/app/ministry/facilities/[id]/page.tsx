@@ -38,9 +38,13 @@ import {
   raiseSiteCorrectiveAction,
   recordSiteDesignationAction,
   recordSiteInspectionAction,
+  answerSiteChangeAction,
   recordSiteOutcomeAction,
+  reopenSiteForChangeAction,
   startSiteReviewAction,
 } from '../../../ministry-site-actions';
+import { siteChangeRequests } from '../../../../lib/site-registration';
+import { SITE_CHANGE_ASPECTS } from '../../../../lib/rules/site-changes';
 
 const input: React.CSSProperties = { width: '100%', minHeight: 44, padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg)', fontSize: 14.5 };
 const button: React.CSSProperties = { minHeight: 44, paddingInline: 18, border: '1px solid var(--line)', background: 'var(--bg)', borderRadius: 22, fontSize: 14, cursor: 'pointer', color: 'var(--ink)' };
@@ -129,9 +133,13 @@ export default async function MinistrySiteReview({ params, searchParams }: { par
     corrective: { en: 'The corrective action has been raised and the operator notified.', ar: 'أُثير الإجراء التصحيحي وأُبلغ المشغّل.' },
     closed: { en: 'The corrective action has been closed with what was verified.', ar: 'أُقفل الإجراء التصحيحي مع ما جرى التحقق منه.' },
     inspection: { en: 'The inspection has been recorded.', ar: 'سُجّل التفتيش.' },
+    'change-reopened': { en: 'The registration has been reopened for the operator’s change. The operator has been notified and submits the updated registration as a new version.', ar: 'أُعيد فتح التسجيل لإجراء تغيير المشغّل. وأُبلغ المشغّل ويقدّم التسجيل المحدَّث بنسخة جديدة.' },
+    'change-answered': { en: 'The change request has been answered; the operator has been notified.', ar: 'أُجيب عن طلب التغيير؛ وأُبلغ المشغّل.' },
     designated: { en: 'The designation has been recorded; the operator has been notified.', ar: 'سُجّل التحديد؛ وأُبلغ المشغّل.' },
   };
   const errors: Record<string, { en: string; ar: string }> = {
+    change: { en: 'That change request is no longer open.', ar: 'طلب التغيير هذا لم يعد مفتوحاً.' },
+    'change-answer': { en: 'Not sent: write the answer to the operator.', ar: 'لم يُرسل: اكتبوا الجواب إلى المشغّل.' },
     act: { en: 'That act is not open for this site now.', ar: 'هذا الإجراء غير متاح لهذا الموقع الآن.' },
     outcome: { en: 'Choose an outcome.', ar: 'اختاروا نتيجة.' },
     note: { en: 'A request for information or a correction needs the note: it is what the operator reads.', ar: 'يحتاج طلب المعلومات أو التصحيح إلى الملاحظة: فهي ما يقرأه المشغّل.' },
@@ -296,6 +304,7 @@ export default async function MinistrySiteReview({ params, searchParams }: { par
         </div>
 
         <div id="review-decision" data-region="review-actions" style={{ scrollMarginBlockStart: 16 }}>
+          <ChangeRequests id={id} mayAct={mayAct} mayReopen={acts.request} />
           {standing ? (
             <div data-region="standing-determination" style={panel}>
               <h2 style={{ ...h2, margin: '0 0 10px' }}><L en="Outcome recorded on this version" ar="النتيجة المسجّلة على هذه النسخة" /></h2>
@@ -405,5 +414,58 @@ export default async function MinistrySiteReview({ params, searchParams }: { par
         </div>
       </div>
     </MinistryShell>
+  );
+}
+
+/**
+ * CHANGES THE OPERATOR ASKED TO MAKE while the registration was with the Ministry (owner,
+ * 10 October 2026). Open ones lead the decision column with the two answers: reopen the
+ * registration for the change -- the same act as a correction request -- or answer without
+ * reopening. Answered ones stay listed with what was decided.
+ */
+function ChangeRequests({ id, mayAct, mayReopen }: { id: string; mayAct: boolean; mayReopen: boolean }) {
+  const requests = siteChangeRequests(id);
+  if (!requests.length) return null;
+  const aspectByKey = Object.fromEntries(SITE_CHANGE_ASPECTS.map((a) => [a.key, a]));
+  return (
+    <div id="change-requests" data-region="ministry-change-requests" style={{ ...panel, border: requests.some((r) => r.status === 'open') ? '1px solid var(--accent-ink)' : undefined, scrollMarginBlockStart: 16 }}>
+      <h2 style={{ ...h2, margin: '0 0 12px' }}><L en="Changes the operator asked to make" ar="التغييرات التي طلب المشغّل إجراءها" /></h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {requests.map((r) => (
+          <div key={r.id} data-change-request={r.id} data-status={r.status} style={{ padding: '14px 16px', background: 'var(--bg)', borderRadius: 10, fontSize: 14, lineHeight: 1.6 }}>
+            <div style={{ fontWeight: 500 }}>{r.aspects.map((k, i) => <span key={k}>{i > 0 ? ' · ' : ''}<L en={aspectByKey[k]!.en} ar={aspectByKey[k]!.ar} /></span>)}</div>
+            <div>{r.description}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{r.requestedAt}</div>
+            {r.status !== 'open' ? (
+              <div style={{ marginBlockStart: 6, fontSize: 13, color: 'var(--muted)' }}>
+                {r.status === 'reopened' ? <L en="Reopened for the change" ar="أُعيد فتحه لإجراء التغيير" /> : <L en="Answered" ar="أُجيب عنه" />}
+                {` · ${r.answeredAt ?? ''} · ${r.answeredBy}`}{r.answer ? ` — ${r.answer}` : ''}
+              </div>
+            ) : mayAct ? (
+              <div style={{ display: 'grid', gap: 10, marginBlockStart: 10 }}>
+                {mayReopen ? (
+                  <form action={reopenSiteForChangeAction.bind(null, id, r.id)} style={{ display: 'grid', gap: 8 }}>
+                    <label style={{ display: 'grid', gap: 4 }}>
+                      <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Note to the operator (optional)" ar="ملاحظة إلى المشغّل (اختيارية)" /></span>
+                      <input name="note" style={input} />
+                    </label>
+                    <button type="submit" data-act="reopen-for-change" style={{ ...button, background: 'var(--brand)', color: 'var(--bg)', border: 0 }}>
+                      <L en="Reopen the registration for this change" ar="إعادة فتح التسجيل لإجراء هذا التغيير" />
+                    </button>
+                  </form>
+                ) : null}
+                <form action={answerSiteChangeAction.bind(null, id, r.id)} style={{ display: 'grid', gap: 8 }}>
+                  <label style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}><L en="Or answer without reopening, for example: make the change once the review is complete" ar="أو أجيبوا من دون إعادة الفتح، مثلاً: أجروا التغيير بعد اكتمال المراجعة" /></span>
+                    <textarea name="answer" rows={2} required style={{ ...input, minHeight: 64, lineHeight: 1.5 }} />
+                  </label>
+                  <button type="submit" data-act="answer-change" style={button}><L en="Answer without reopening" ar="الإجابة من دون إعادة الفتح" /></button>
+                </form>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
