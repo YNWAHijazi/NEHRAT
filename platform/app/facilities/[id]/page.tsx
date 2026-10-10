@@ -57,6 +57,7 @@ import {
   type ObligationStatus,
 } from '../../../lib/rules';
 import { UPLOADS_CONTENT } from '../../../lib/rules/uploads';
+import { deviceRefusalMessage } from '../../../lib/rules/device-refusal';
 import {
   facilityConfirmationReady,
   facilityInitialStep,
@@ -68,7 +69,7 @@ import {
   type FacilityStep,
   type FacilityStepKey,
 } from '../../../lib/rules/facility-workflow';
-import { reviewActLabel, siteCertificateAvailable, sitePlanInputs, siteRenewalNotice, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
+import { reviewActLabel, siteCertificateAvailable, sitePlanInputs, siteOperatorStatusLabel, siteRenewalNotice, siteStatusLabel, siteSubmissionSummary, siteTabFor, type SiteTabKey } from '../../../lib/rules/site';
 import { accountContact } from '../../../lib/account-contact';
 
 /**
@@ -158,6 +159,12 @@ export default async function FacilityRecordPage({
     <>
       {q.notice === 'confirmed' ? <div role="status" style={band}><L en="The readiness confirmation has been recorded." ar="سُجِّل تأكيد الجاهزية." /></div> : null}
       {q.notice === 'profile' ? <div role="status" style={band}><L en="The site details have been saved." ar="حُفظت تفاصيل الموقع." /></div> : null}
+      {q.notice === 'profile-nopin' ? (
+        <div role="status" data-region="saved-without-pin" style={band}>
+          <L en="The site details have been saved. The site’s pin is still needed on the map before the registration can be submitted." ar="حُفظت تفاصيل الموقع. ولا تزال علامة الموقع على الخريطة مطلوبة قبل تقديم التسجيل." />{' '}
+          <a href={`/facilities/${id}/profile#map`}><L en="Place the pin" ar="ضعوا العلامة" /></a>
+        </div>
+      ) : null}
       {q.notice === 'infrastructure' ? <div role="status" style={band}><L en="The site infrastructure has been saved." ar="حُفظت البنية الأساسية للموقع." /></div> : null}
       {q.notice === 'evidence' ? <div role="status" style={band}><L en="The document has been uploaded." ar="رُفع المستند." /></div> : null}
       {q.notice === 'removed' ? <div role="status" style={band}><L en="The document has been removed." ar="أُزيل المستند." /></div> : null}
@@ -191,9 +198,9 @@ export default async function FacilityRecordPage({
             : <L en="The AED requirement waits on the Ministry: its designation or review. Record any AEDs the site has." ar="ينتظر متطلب الجهاز قرار الوزارة: تحديدها أو مراجعتها. سجّلوا أي أجهزة متوفرة لدى الموقع." />}
       </p>
       {q.notice === 'saved' ? <div role="status" style={band}><L en="The device record has been saved." ar="حُفظ سجل الجهاز." /></div> : null}
-      {!point && !archived ? <p role="status"><a href={`/facilities/${id}/profile`}><L en="Add the site map pin before registering an AED." ar="أضيفوا موقع الموقع على الخريطة قبل تسجيل الجهاز." /></a></p> : null}
+      {!point && !archived ? <p role="status" data-region="site-pin-needed"><L en="The site’s pin is not on the map yet. AEDs can be recorded now; each takes the site’s pin unless it has its own." ar="لم توضع علامة الموقع على الخريطة بعد. يمكن تسجيل الأجهزة الآن؛ ويأخذ كل جهاز علامة الموقع ما لم تكن له علامته الخاصة." /> <a href={`/facilities/${id}/profile#map`}><L en="Place the site’s pin" ar="ضعوا علامة الموقع" /></a></p> : null}
       {photoMessage ? <p role="alert"><L en={photoMessage.en} ar={photoMessage.ar} /></p>
-        : q.error === 'details' ? <p role="alert"><L en="Check the device ID, location, representative and map pin, then save again." ar="تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً." /></p> : null}
+        : deviceRefusalMessage(q.error?.startsWith('details') ? q.error : null) ? <p role="alert"><L {...deviceRefusalMessage(q.error)!} /></p> : null}
       <DeviceRegistry
         facilityId={id}
         devices={devices}
@@ -243,7 +250,7 @@ export default async function FacilityRecordPage({
           <NextStepCard
             step={{
               kind: 'underReview', href: 'acknowledgment', tone: 'brand',
-              titleEn: siteStatusLabel(facts.status).en, titleAr: siteStatusLabel(facts.status).ar,
+              titleEn: siteOperatorStatusLabel(facts.status).en, titleAr: siteOperatorStatusLabel(facts.status).ar,
               bodyEn: 'The Ministry reviews the registration and records its outcome: readiness current, or a request for information or a correction. You are notified on this platform when it does.',
               bodyAr: 'تراجع الوزارة التسجيل وتسجّل نتيجتها: الجاهزية سارية، أو طلب معلومات أو تصحيح. يصلكم إشعار على هذه المنصة عند تسجيلها.',
               buttonEn: 'View acknowledgment of receipt', buttonAr: 'عرض إشعار الاستلام',
@@ -509,7 +516,7 @@ function Overview({ id, facility, siteId, today }: { id: string; facility: Facil
   const openCorrective = siteRequests(id).filter((r) => r.kind === 'corrective' && r.status === 'open').length;
   const upcoming = siteId ? upcomingSiteEventCount(siteId, facility.isDemo, today) : 0;
   const category = facilityCategory(facility.categoryKey);
-  const status = siteStatusLabel(facts.status);
+  const status = siteOperatorStatusLabel(facts.status);
   // Expiring soon or expired (owner, 9 October 2026): the annual confirmation and drill, by the Ministry's notice window.
   const renewal = siteRenewalFor(id, today);
   const renewalNotice = siteRenewalNotice(renewal);

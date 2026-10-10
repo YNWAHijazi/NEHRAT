@@ -1,7 +1,7 @@
 import {eventPlanApproval} from './plan-approval';
 import { hasReportableEvent } from './rules/gates';
 import { facilityAedStatus } from './facility-gis';
-import { EVENT_VENUE_CAPACITY_KEY, siteStatusLabel, siteStatusTone } from './rules/site';
+import { EVENT_VENUE_CAPACITY_KEY, siteOperatorStatusLabel, siteStatusTone } from './rules/site';
 import { siteStatusFor } from './site-registration';
 /**
  * Read-side queries for the organizer surfaces. Ownership is enforced here: every query
@@ -501,7 +501,7 @@ export function facilitiesFor(accountId: number): FacilityRow[] {
       stateEn: line.en, stateAr: line.ar,
       stateKind: standing.kind === 'met' ? 'ok' : standing.kind,
       siteId: r.site_id,
-      statusEn: siteStatusLabel(status).en, statusAr: siteStatusLabel(status).ar, statusTone: siteStatusTone(status),
+      statusEn: siteOperatorStatusLabel(status).en, statusAr: siteOperatorStatusLabel(status).ar, statusTone: siteStatusTone(status),
     };
   });
 }

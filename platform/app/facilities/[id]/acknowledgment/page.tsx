@@ -6,7 +6,7 @@ import { MinistryMasthead } from '../../../../components/MinistryMasthead';
 import { currentAccount, organizationFor } from '../../../../lib/auth';
 import { facilityDetail, unreadCountFor } from '../../../../lib/queries';
 import { siteStatusFor, siteSubmissions } from '../../../../lib/site-registration';
-import { siteCertificateAvailable, siteStatusLabel, siteStatusTone } from '../../../../lib/rules/site';
+import { siteCertificateAvailable, siteOperatorStatusLabel, siteStatusTone } from '../../../../lib/rules/site';
 import { facilityCategory } from '../../../../lib/rules';
 import { PrintBar } from '../../../events/[id]/acknowledgment/PrintBar';
 
@@ -31,7 +31,7 @@ export default async function SiteAcknowledgmentPage({ params }: { params: Promi
   const organization = organizationFor(account.id);
   const latest = siteSubmissions(id)[0] ?? null;
   const statusKey = siteStatusFor(id);
-  const status = siteStatusLabel(statusKey);
+  const status = siteOperatorStatusLabel(statusKey);
   const tone = siteStatusTone(statusKey);
   const determined = statusKey === 'readinessCurrent' || statusKey === 'expiringSoon' || statusKey === 'expired' || statusKey === 'informationRequired' || statusKey === 'correctiveActionRequired';
   const submittedAt = latest?.submittedAt.slice(0, 16) ?? '';

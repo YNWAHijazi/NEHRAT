@@ -17,6 +17,7 @@
  */
 
 import facilityJson from './data/facility.json';
+import ministryJson from './data/ministry.json';
 import lifecycleJson from './data/lifecycle.json';
 
 const SITE = facilityJson.site;
@@ -157,8 +158,9 @@ export interface SiteStatusFacts {
  */
 export function siteRecordLocked(f: SiteStatusFacts): boolean {
   if (f.archived || f.everAccepted) return false;
-  const status = siteStatus(f);
-  return status === 'submitted' || status === 'underReview';
+  // Read-only whenever it may not be submitted: only preparation and a Ministry request open it,
+  // so no other status can offer a second filing (owner, 10 October 2026).
+  return !siteMaySubmit(siteStatus(f));
 }
 
 /** The outcomes a reviewer records on a submission (revision section 11), each with the status it leads to. */
@@ -182,7 +184,10 @@ export function siteStatus(f: SiteStatusFacts): SiteStatusKey {
   const moving = f.actsOnLatest.filter((k) => k === 'reviewStarted' || k === 'accepted' || k === 'infoRequested' || k === 'correctionRequested');
   const last = moving[moving.length - 1] ?? null;
   if (last === 'infoRequested' || last === 'correctionRequested') return 'informationRequired';
-  if (f.openCorrective > 0) return 'correctiveActionRequired';
+  // A corrective action is a reviewer act on a site whose registration has been accepted
+  // (revision section 14). An open one on a registration never accepted -- a request that
+  // predates the registration -- does not displace the review: a first filing reads Submitted.
+  if (f.openCorrective > 0 && f.everAccepted) return 'correctiveActionRequired';
   if (last === 'accepted') return f.renewal === 'expired' ? 'expired' : f.renewal === 'expiringSoon' ? 'expiringSoon' : 'readinessCurrent';
   if (last === 'reviewStarted') return 'underReview';
   return 'submitted';
@@ -191,6 +196,19 @@ export function siteStatus(f: SiteStatusFacts): SiteStatusKey {
 export function siteStatusLabel(key: SiteStatusKey): Bilingual {
   const s = SITE.statuses[key];
   return { en: s.en, ar: s.ar };
+}
+
+/**
+ * The status as the site's operator reads it -- the same words an organizer reads for an event
+ * (owner, 10 October 2026: "In process"). While the Ministry holds a filing, Submitted and Under
+ * review are one state to the operator; a request for information reads as the event's. The
+ * Ministry console keeps the product-defined labels (siteStatusLabel).
+ */
+export function siteOperatorStatusLabel(key: SiteStatusKey): Bilingual {
+  const r = ministryJson.recordStatus;
+  if (key === 'submitted' || key === 'underReview') return { en: r.inProcess.en, ar: r.inProcess.ar };
+  if (key === 'informationRequired') return { en: r.moreInformation.en, ar: r.moreInformation.ar };
+  return siteStatusLabel(key);
 }
 
 /** The colour family a status is drawn in. Internal states are grey; nothing here is a determination. */

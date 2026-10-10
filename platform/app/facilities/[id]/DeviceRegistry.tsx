@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { L } from '../../../components/L';
 import { registerAutosave } from '../../../components/record/autosave';
 import { autosaveFacilityDeviceAction, saveFacilityDeviceAction } from '../../actions';
+import { deviceRefusalMessage } from '../../../lib/rules/device-refusal';
 import { FACILITY_CONTENT, deviceStatus } from '../../../lib/rules';
 import { imageAcceptAttribute, refuseImageUpload } from '../../../lib/rules/uploads';
 import type { FacilityDevice } from '../../../lib/queries';
@@ -98,18 +99,20 @@ export function DeviceRegistry({
   const root = useRef<HTMLDivElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const baseline = useRef('');
-  const [autosaveRefused, setAutosaveRefused] = useState(false);
+  // Why the last save was refused, by field (lib/rules/device-refusal.ts); the form keeps its values.
+  const [refusal, setRefusal] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   // A saved form starts again blank, so the same device is never registered twice.
   const [saves, setSaves] = useState(0);
-  useEffect(() => { if (form.current) baseline.current = formSnapshot(form.current); setAutosaveRefused(false); }, [selected, purpose, saves]);
+  useEffect(() => { if (form.current) baseline.current = formSnapshot(form.current); setRefusal(null); }, [selected, purpose, saves]);
   useEffect(() => {
     if (!editable || !root.current) return;
     return registerAutosave(root.current, async () => {
       const f = form.current;
       if (!f || formSnapshot(f) === baseline.current) return true;
       const result = await autosaveFacilityDeviceAction(facilityId, new FormData(f));
-      if ('ok' in result) { setAutosaveRefused(false); setSaves((n) => n + 1); router.refresh(); return true; }
-      setAutosaveRefused(true);
+      if ('ok' in result) { setRefusal(null); setSaves((n) => n + 1); router.refresh(); return true; }
+      setRefusal(result.error);
       return false;
     });
   }, [editable, facilityId, router]);
@@ -198,7 +201,30 @@ export function DeviceRegistry({
         ) : null}
       </div>
 
-      <form ref={form} key={`${selected}-${purpose}-${saves}`} action={saveFacilityDeviceAction.bind(null, facilityId)} hidden={!cardOpen}>
+      <form
+        ref={form}
+        key={`${selected}-${purpose}-${saves}`}
+        action={saveFacilityDeviceAction.bind(null, facilityId)}
+        hidden={!cardOpen}
+        // Saved without reloading the form: a refusal says what is missing and keeps what was
+        // typed (owner, 10 October 2026); a save goes on to the registry as before.
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (saving) return;
+          setSaving(true);
+          try {
+            const result = await autosaveFacilityDeviceAction(facilityId, new FormData(e.currentTarget));
+            if ('ok' in result) {
+              setRefusal(null);
+              setSaves((n) => n + 1);
+              router.push(`/facilities/${facilityId}?step=aeds&notice=saved#aeds`);
+              router.refresh();
+            } else setRefusal(result.error);
+          } finally {
+            setSaving(false);
+          }
+        }}
+      >
         <div data-region="device-card" style={{ maxWidth: 620, padding: 31, background: 'var(--surface2)', borderRadius: 16 }}>
           <div style={{ fontSize: '11.5px', letterSpacing: '.07em', textTransform: 'uppercase', color: 'var(--muted)', marginBlockEnd: 10 }}>
             {isInitial || !device ? (
@@ -316,13 +342,14 @@ export function DeviceRegistry({
 
           <button
             type="submit"
+            disabled={saving}
             style={{ height: 46, paddingInline: 24, border: 0, borderRadius: 23, background: 'var(--brand)', color: 'var(--bg)', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
           >
             <L en={purposeDef.ctaEn} ar={purposeDef.ctaAr} />
           </button>
-          {autosaveRefused ? (
-            <p role="alert" data-region="device-autosave-refused" style={{ margin: '12px 0 0', fontSize: '13.5px', color: 'var(--bad)', lineHeight: 1.55 }}>
-              <L en="The device was not saved. Check the device ID, location, representative and map pin, then save again." ar="لم يُحفظ الجهاز. تحقّقوا من معرّف الجهاز وموقعه والممثل والعلامة على الخريطة ثم احفظوا مجدداً." />
+          {refusal ? (
+            <p role="alert" data-region="device-autosave-refused" data-refusal={refusal} style={{ margin: '12px 0 0', fontSize: '13.5px', color: 'var(--bad)', lineHeight: 1.55 }}>
+              <L {...(deviceRefusalMessage(refusal) ?? deviceRefusalMessage('details')!)} />
             </p>
           ) : null}
         </div>
@@ -364,7 +391,7 @@ function DeviceMap({ initial, facilityLocation }: { initial: MapPoint | null; fa
     <div style={{ marginBlock: 20 }}>
       <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}><L en="AED map location" ar="موقع الجهاز على الخريطة" /></h3>
       {/* The help sits beside the label, never inside it: a click on it must not tick the box. */}
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div data-region="aed-separate-pin" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
         <label style={{ display: 'flex', gap: 10, minHeight: 44, alignItems: 'center' }}>
           <input type="checkbox" checked={separate} onChange={(e) => setSeparate(e.target.checked)} />
           <L en={pin.en} ar={pin.ar} />

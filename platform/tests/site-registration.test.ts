@@ -16,7 +16,7 @@ vi.mock('next/navigation', () => ({ redirect: (url: string) => { throw new Error
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
 import { getDb } from '../lib/db';
-import { registerFacilityAction, saveFacilityDeviceAction, saveFacilityPlanAction, submitFacilityIncidentAction } from '../app/actions';
+import { registerFacilityAction, saveFacilityDeviceAction, saveFacilityProfileAction, saveFacilityPlanAction, submitFacilityIncidentAction } from '../app/actions';
 import { addSiteEvidenceAction, respondToSiteRequestAction, saveSiteInfrastructureAction, submitSiteRegistrationAction } from '../app/site-actions';
 import {
   acceptSiteRegistrationAction, closeSiteCorrectiveAction, recordSiteOutcomeAction, raiseSiteCorrectiveAction, recordSiteDesignationAction,
@@ -27,8 +27,9 @@ import { facilityAedStatus } from '../lib/facility-gis';
 import { facilityInfrastructure } from '../lib/site-infrastructure';
 import { siteEventsFor, siteRequests, siteReviewQueue, siteStatusFor, siteSubmissionSnapshot, siteSubmissions } from '../lib/site-registration';
 import {
-  eventVenueThreshold, siteApplicability, siteReviewActions, siteStatus, siteSubmissionSummary, siteTabFor, type SiteSubmissionFacts,
+  eventVenueThreshold, siteApplicability, siteOperatorStatusLabel, siteRecordLocked, siteReviewActions, siteStatus, siteSubmissionSummary, siteTabFor, type SiteSubmissionFacts,
 } from '../lib/rules/site';
+import { deviceRefusalMessage } from '../lib/rules/device-refusal';
 import { facilityAedRequirement } from '../lib/rules/facility-intake';
 
 const folder = mkdtempSync(join(tmpdir(), 'moph-site-'));
@@ -83,7 +84,13 @@ describe('the rules (lib/rules/site.ts)', () => {
     expect(siteStatus(f)).toBe('submitted');
     expect(siteStatus({ ...f, actsOnLatest: ['reviewStarted'] })).toBe('underReview');
     expect(siteStatus({ ...f, actsOnLatest: ['reviewStarted', 'accepted'] })).toBe('readinessCurrent');
-    expect(siteStatus({ ...f, actsOnLatest: ['accepted'], openCorrective: 1 })).toBe('correctiveActionRequired');
+    expect(siteStatus({ ...f, actsOnLatest: ['accepted'], openCorrective: 1, everAccepted: true })).toBe('correctiveActionRequired');
+    // An open request older than the registration does not displace a first filing (owner, 10 October 2026):
+    // it reads Submitted, and the record is read-only -- no second filing is offered.
+    expect(siteStatus({ ...f, openCorrective: 1 })).toBe('submitted');
+    expect(siteRecordLocked({ ...f, openCorrective: 1 })).toBe(true);
+    expect(siteRecordLocked({ ...f, actsOnLatest: ['infoRequested'] })).toBe(false);
+    expect(siteRecordLocked({ ...f, submissionCount: 0 })).toBe(false);
     expect(siteStatus({ ...f, actsOnLatest: ['accepted', 'correctionRequested'], openCorrective: 1 })).toBe('informationRequired');
     expect(siteStatus({ ...f, actsOnLatest: ['accepted', 'inspection'] })).toBe('readinessCurrent');
     expect(siteStatus({ ...f, archived: true })).toBe('noLongerCovered');
@@ -276,5 +283,47 @@ describe('designation, reuse and links', () => {
     const row = getDb().prepare('SELECT site_id, device_label, event_id FROM facility_incidents WHERE facility_id = ?').get(id) as { site_id: string; device_label: string; event_id: string };
     expect(row).toMatchObject({ device_label: 'AED-001', event_id: 'EV-9901' });
     expect(row.site_id).toMatch(/^SITE-\d+$/);
+  });
+});
+
+describe('saving without the pin, and saying why a save was refused (owner, 10 October 2026)', () => {
+  const name = 'Pinless test hall';
+  let id = '';
+  const details = { ...profile, name, hours: 'Evenings' };
+  const aed = { purpose: 'initial', identification: 'PIN-1', location: 'Lobby', accessibleHours: 'yes', publiclyAccessible: 'yes', pediatric: 'na', operational: 'yes', representative: 'Duty manager', separatePin: 'no' };
+
+  it('saves the site details with no pin, keeps any pin already placed, and says when one is still needed', async () => {
+    await expect(registerFacilityAction(data({ ...details, category: 'sports' }))).rejects.toThrow(/redirect:\/facilities\/FC-\d+$/);
+    id = idOf(name);
+    const { mapLat: _lat, mapLng: _lng, mapConfirmed: _confirmed, ...noPin } = details;
+    // A pin is already placed: saving without one keeps it.
+    await expect(saveFacilityProfileAction(id, data({ ...noPin, hours: 'All day' }))).rejects.toThrow(`redirect:/facilities/${id}?notice=profile`);
+    expect(facilityRegistrationFacts(id).mapConfirmed).toBe(true);
+    // No pin at all: the details are saved, and the notice says the pin is still needed.
+    getDb().prepare('UPDATE facilities SET latitude = NULL, longitude = NULL, map_confirmed_at = NULL WHERE id = ?').run(id);
+    await expect(saveFacilityProfileAction(id, data({ ...noPin, operatingOrganization: 'Hall operator' }))).rejects.toThrow('notice=profile-nopin');
+    expect(getDb().prepare('SELECT operating_organization FROM facilities WHERE id = ?').get(id)).toMatchObject({ operating_organization: 'Hall operator' });
+    expect(facilityRegistrationFacts(id).mapConfirmed).toBe(false);
+  });
+
+  it('records an AED before the site pin is placed, and names the missing field when it refuses one', async () => {
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, separatePin: 'yes' }))).rejects.toThrow('error=details-pin');
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, identification: '' }))).rejects.toThrow('error=details-identification');
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, location: '' }))).rejects.toThrow('error=details-location');
+    await expect(saveFacilityDeviceAction(id, data({ ...aed, representative: '' }))).rejects.toThrow('error=details-representative');
+    await expect(saveFacilityDeviceAction(id, data(aed))).rejects.toThrow('notice=saved');
+    expect(facilityRegistrationFacts(id).deviceCount).toBe(1);
+    // Every refusal has a sentence, in both languages.
+    for (const code of ['details', 'details-pin', 'details-identification', 'details-location', 'details-representative', 'photo-tooLarge', 'photo-empty', 'photo-type']) {
+      const m = deviceRefusalMessage(code)!;
+      expect(m.en && m.ar).toBeTruthy();
+    }
+  });
+
+  it('reads In process to the operator while the Ministry holds a filing', () => {
+    expect(siteOperatorStatusLabel('submitted')).toEqual({ en: 'In process', ar: 'قيد المعالجة' });
+    expect(siteOperatorStatusLabel('underReview')).toEqual({ en: 'In process', ar: 'قيد المعالجة' });
+    expect(siteOperatorStatusLabel('informationRequired').en).toBe('More information needed');
+    expect(siteOperatorStatusLabel('readinessCurrent').en).toBe('Readiness current');
   });
 });

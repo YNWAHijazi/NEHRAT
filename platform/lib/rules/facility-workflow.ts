@@ -4,7 +4,7 @@ import {
   siteAedsDone,
   siteSubmissionSummary,
   sitePlanComplete,
-  siteStatusLabel,
+  siteOperatorStatusLabel,
   siteSubmitBlockers,
   type SiteStatusKey,
   type SiteSubmissionFacts,
@@ -101,7 +101,7 @@ export function facilityRecordMode(f: FacilityRegistrationFacts): 'register' | '
 
 /** The record's status, in the header: the site status, product-defined (revision section 11). */
 export function facilityStatusLabel(f: FacilityRegistrationFacts): { en: string; ar: string } {
-  return siteStatusLabel(f.status);
+  return siteOperatorStatusLabel(f.status);
 }
 
 /* ---------------- the step path while the registration is in preparation ---------------- */
@@ -264,7 +264,7 @@ export function facilityRailStages(f: FacilityRegistrationFacts): { stage: numbe
   const returned = f.status === 'informationRequired';
   const accepted = f.everAccepted;
   const stage = !submitted || returned ? 2 : !accepted ? 4 : 5;
-  const status = siteStatusLabel(f.status);
+  const status = siteOperatorStatusLabel(f.status);
   return {
     stage,
     stages: [
