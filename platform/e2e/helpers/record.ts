@@ -84,7 +84,8 @@ export async function certify(page: Page, who: { representative: string; telepho
   await review.locator('input[name="position"]').fill(who.position);
   await review.locator('input[name="telephoneNumber"]').fill(who.telephone);
   await page.keyboard.press('Tab');
-  await expect(review.locator('[data-region="autosaved"]')).toBeVisible({ timeout: 15_000 });
+  // The signer may already be prefilled with these very values (live review, 10 October 2026);
+  // then nothing changes and nothing autosaves -- Submit saves before it files.
   const submit = review.locator('[data-region="submit-button"]');
   await expect(submit).toBeEnabled({ timeout: 40_000 });
   return submit;

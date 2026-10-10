@@ -70,9 +70,9 @@ export function FinalReview({ eventId, level, remaining, optional, statements, d
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filing = useRef(false);
-  // What the server holds, not what the form shows: a prefilled signer is unsaved until it is
-  // saved, so leaving a prefilled field saves it like a typed one.
-  const lastSaved = useRef(JSON.stringify({ declarations: initial?.declarations ?? {}, insurance: initial?.insurance ?? {}, representative: initial?.representative ?? '', telephone: initial?.telephone ?? '', position: initial?.position ?? '' }));
+  // A prefilled signer is a suggestion, not a certification: it is saved when the person edits a
+  // field or submits, never merely by passing through the step.
+  const lastSaved = useRef(JSON.stringify(latest.current));
   const persist = () => {
     if (locked || filing.current) return;
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
