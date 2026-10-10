@@ -243,7 +243,7 @@ export default async function FacilityRecordPage({
         {notices}
         <SiteDetermination id={id} siteId={facility.siteId} />
         {/* Where the record stands first, then what to do next (owner, 10 October 2026). */}
-        <StageRail titleEn="Site progress" titleAr="مراحل الموقع" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
+        <StageRail titleEn="Registration progress" titleAr="مراحل التسجيل" stages={rail.stages} noteEn={`Stage ${rail.stage} of ${rail.stages.length}`} noteAr={`المرحلة ${rail.stage} من ${rail.stages.length}`} />
         {next ? <NextStepCard step={next} to={nextHref(next.href)} /> : null}
         {/* With the Ministry and not yet decided: what happens next, and the receipt one click away -- the event's card. */}
         {facts.locked ? (

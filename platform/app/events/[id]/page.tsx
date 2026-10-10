@@ -307,7 +307,7 @@ export default async function EventRecordPage({
         ) : null}
 
         {/* Where the record stands first, then what to do next (owner, 10 October 2026). */}
-        <StageRail titleEn="Event progress" titleAr="مراحل الفعالية" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
+        <StageRail titleEn="Certification progress" titleAr="مراحل الاعتماد" stages={stages} noteEn={railNoteEn} noteAr={railNoteAr} />
         {/* Lead with work the organizer can do now; filing gates remain unchanged. */}
         {action && event.lifecycle === 'active' && !recordArchived ? (
           <NextStepCard step={action} to={action.href.startsWith('#') ? action.href : action.href === '/organization' ? '/organization' : `/events/${event.id}/${action.href}`} />
