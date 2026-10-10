@@ -7,6 +7,7 @@ import { AdFooter } from '../../../components/AdFooter';
 import { InfoNote } from '../../../components/InfoNote';
 import { capabilityConfigFor, ministryConfig } from '../../../lib/queries';
 import { ShowMoreList, ShowMoreText } from '../../../components/ShowMore';
+import { SummaryTitle } from '../../../components/SummaryTitle';
 import { publishedCycles } from '../../../lib/queries';
 import {
   DOMAINS,
@@ -105,7 +106,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     <div data-region="service-summary" data-noprint="" style={{ position: 'sticky', insetBlockEnd: 0, zIndex: 40, background: 'var(--surface2)', borderBlockStart: '1px solid var(--line)', boxShadow: '0 -6px 24px rgba(16,24,40,.06)' }}>
       <div data-pad="" style={{ maxWidth: 1160, marginInline: 'auto', padding: '20px 32px 22px', display: 'flex', flexWrap: 'wrap', gap: '14px 32px', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ minWidth: 0, flex: '1 1 320px' }}>
-          <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-.02em', marginBlockEnd: 8 }}><L en={def.en} ar={def.ar} /></div>
+          <SummaryTitle watch='[data-region="service-detail"]'><L en={def.en} ar={def.ar} /></SummaryTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 24px', fontSize: 15.5, color: 'var(--ink)' }}>
             <span data-summary="time" style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
@@ -139,7 +140,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             straightforward"): what the service does for the person, in one paragraph. */}
         <ShowMoreText region="service-intro" lines={4}>
           <p style={{ margin: 0, fontSize: 19, lineHeight: 1.55 }}>
-            <strong style={{ fontWeight: 600 }}><L en={`${def.en}: `} ar={`${def.ar}: `} /></strong>
             <L en={def.introEn} ar={def.introAr} />
           </p>
         </ShowMoreText>
